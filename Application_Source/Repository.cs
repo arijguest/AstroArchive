@@ -72,14 +72,14 @@ namespace AstroArchive {
     if(f==null){
      using(var metadata=metrics.Begin("Metadata",name)){
       f=FileRetry.Run(()=>{
-       FitsHeader header=headers.Get(entry.Path,stamp);FileStamp captured=stamp;bool hit=header!=null;
+       AssetInfo asset=headers.GetAsset(entry.Path,stamp);FitsHeader header=asset==null?null:asset.Header;FileStamp captured=stamp;bool hit=asset!=null;
        if(!hit){using(var availability=(cloudSource||stamp.Cloud)?metrics.Begin("Cloud availability",name):null)using(var read=metrics.Begin("Header open/read",name)){
-        header=Fits.Header(entry.Path,n=>{read.Bytes(n);metadata.Bytes(n);},value=>captured=value,ct);read.Complete();if(availability!=null)availability.Complete();
+        using(var locked=new FileStream(entry.Path,FileMode.Open,FileAccess.Read,FileShare.Read)){captured=FileStamp.Read(entry.Path);asset=Assets.Inspect(entry.Path,n=>{ct.ThrowIfCancellationRequested();read.Bytes(n);metadata.Bytes(n);});header=asset.Header;}read.Complete();if(availability!=null)availability.Complete();
        }}
-       Frame parsed=Classifier.Read(entry.Path,source,telescopeIdentity??telescope,model,stamp.Size,n=>metadata.Bytes(n),shots,header,captured,ct,metrics);
+       Frame parsed=Classifier.Read(entry.Path,source,telescopeIdentity??telescope,model,stamp.Size,n=>metadata.Bytes(n),shots,header,captured,ct,metrics,asset);
        parsed.Telescope=telescope;
        if(!stamp.ContentSame(parsed.SourceStamp)||(hit&&!stamp.ContentSame(FileStamp.Read(entry.Path))))throw new InvalidDataException("Source changed while reading metadata. Scan again.");
-       if(!hit)headers.Put(entry.Path,parsed.SourceStamp,header);item.HeaderHit=hit;return parsed;
+       if(!hit)headers.PutAsset(entry.Path,parsed.SourceStamp,asset);item.HeaderHit=hit;return parsed;
       },ct,message=>{metrics.Current=message;metrics.Pulse(true);});stamp=f.SourceStamp;f.Hash="";f.Status="New";metadata.Complete();
      }
      if(!deferHash||reindex||deleted.Count>0){using(var check=metrics.Begin("Duplicate checking",name)){
@@ -107,7 +107,7 @@ namespace AstroArchive {
      try{var stack=new Stack<DirectoryInfo>();stack.Push(new DirectoryInfo(source));while(stack.Count>0){linked.Token.ThrowIfCancellationRequested();var directory=stack.Pop();try{
       using(var discovery=metrics.Begin("Discovery",directory.FullName)){long files=0;foreach(var info in directory.EnumerateFileSystemInfos()){
        linked.Token.ThrowIfCancellationRequested();if((info.Attributes&FileAttributes.Directory)!=0){if(info.Name!=".astroarchive"&&!(reindex&&info.FullName.Equals(DumpFolder,StringComparison.OrdinalIgnoreCase))){if(FileStamp.CanTraverse((DirectoryInfo)info))stack.Push((DirectoryInfo)info);else lock(plan.Errors)plan.Errors.Add("Skipped linked or unresolvable directory: "+info.FullName);}}
-       else if(Util.IsFits(info.Name)){if(ignoreFailed&&Util.FailedFilename(info.Name)){plan.IgnoredFailed++;continue;}var entry=ScanEntry.From((FileInfo)info);if(!queue.TryAdd(entry))overflow.Add(entry);metrics.Discover(entry.Enumerated.Size);files++;}
+       else if(Util.IsImageAsset(info.Name)){if(ignoreFailed&&Util.FailedFilename(info.Name)){plan.IgnoredFailed++;continue;}var entry=ScanEntry.From((FileInfo)info);if(!queue.TryAdd(entry))overflow.Add(entry);metrics.Discover(entry.Enumerated.Size);files++;}
       }discovery.Complete(files);}
      }catch(OperationCanceledException){throw;}catch(Exception e){lock(plan.Errors)plan.Errors.Add(FileRetry.Detail(directory.FullName,e));}}}
      finally{try{overflow.Seal();}finally{metrics.InventoryComplete();queue.CompleteAdding();}}
@@ -129,13 +129,13 @@ namespace AstroArchive {
    }
   }
   public string Destination(Frame f){
-   bool cal=f.Kind.StartsWith("Master")||new[]{"Dark","Flat","Bias"}.Contains(f.Kind);string settings=Util.Safe(Util.Num(f.Exposure)+"s_gain"+Util.Num(f.Gain)+"_bin"+f.BinX+"x"+f.BinY);
+   bool cal=Assets.IsCalibration(f.Kind);string settings=Util.Safe(Util.Num(f.Exposure)+"s_gain"+Util.Num(f.Gain)+"_bin"+f.BinX+"x"+f.BinY);
    string mount=f.Mount.StartsWith("EQ")?"EQ":f.Mount.StartsWith("Alt/Az")?"AltAz":"Unknown";
    string p=cal?Path.Combine("Calibration",Util.Safe(f.MakeText),Util.Safe(f.Telescope),Util.Safe(f.Camera),Util.Safe(f.Kind),Util.Safe(f.Night),settings):Path.Combine("Targets",Util.Safe(ObservationTargets.CanonicalSolar(f.Target)),Util.Safe(f.Night),Util.Safe(f.MakeText),Util.Safe(f.Telescope),mount,Util.Safe(f.Camera),Util.Safe(f.Kind),settings);
    string filename=f.Hash.Substring(0,12)+"_"+Util.SafeFile(f.OriginalName);return Path.Combine(p,filename);
   }
   public static void CopyVerified(string from,string to,string hash,CancellationToken ct,PipelineMetrics metrics=null,PipelineMetrics.Transfer transfer=null){string copied=FileTransfer.CopyHash(from,to,ct,metrics,FileStamp.Read(from).Cloud,transfer);if(!string.IsNullOrEmpty(hash)&&copied!=hash)throw new IOException("Checksum mismatch; source may have changed during copying: "+from);using(var scope=metrics==null?null:metrics.Begin("Verification",Path.GetFileName(to))){if(transfer!=null)transfer.BeginVerification();if(Util.Hash(to,ct,n=>{if(scope!=null)scope.Bytes(n);if(transfer!=null)transfer.Verified(n);})!=copied)throw new IOException("Destination checksum mismatch: "+to);if(transfer!=null)transfer.EndVerification();if(scope!=null)scope.Complete();}}
   public int Verify(CancellationToken ct,Action<ProgressInfo> progress){var all=All();int bad=0;for(int i=0;i<all.Count;i++){ct.ThrowIfCancellationRequested();var f=all[i];progress(new ProgressInfo{Done=i,Total=all.Count,Text="Verifying "+f.OriginalName});string p=FilePath(f);if(!File.Exists(p)){f.Status="Missing";bad++;}else if(Util.Hash(p,ct)!=f.Hash){f.Status="Changed";bad++;}else f.Status="Verified";Save(f);}return bad;}
-  public void ExportIndex(string path,IEnumerable<Frame> selection=null){var all=selection??All();StringBuilder b=new StringBuilder("Target,ObjectID,CommonName,Make,Model,MakeEvidence,TargetEvidence,Telescope,Camera,Kind,Mount,MountEvidence,Observed,TimeSource,Exposure_s,Gain,Temperature_C,Filter,Calibration,Dimensions,Hash,RelativePath,SourceDisposition,Mosaic,Panel\r\n");foreach(var f in all){string[] a={f.Target,f.ObjectId,f.CommonName,f.MakeText,f.Model,f.MakeEvidence,f.TargetEvidence,f.Telescope,f.Camera,f.Kind,f.Mount,f.MountEvidence,f.Observed,f.TimeSource,Util.Num(f.Exposure),Util.Num(f.Gain),Util.Num(f.Temperature),f.Filter,f.Calibration,f.SizeText,f.Hash,f.RelativePath,f.SourceDisposition,f.MosaicText,f.PanelText};b.AppendLine(string.Join(",",a.Select(s=>"\""+(s??"").Replace("\"","\"\"")+"\"")));}File.WriteAllText(path,b.ToString(),new UTF8Encoding(true));}
+  public void ExportIndex(string path,IEnumerable<Frame> selection=null){var all=selection??All();StringBuilder b=new StringBuilder("Target,ObjectID,CommonName,Make,Model,MakeEvidence,TargetEvidence,Telescope,Camera,Kind,Mount,MountEvidence,Observed,TimeSource,Exposure_s,Gain,Temperature_C,Filter,Calibration,Dimensions,Hash,RelativePath,SourceDisposition,Mosaic,Panel,Format,Capabilities,CameraModel,CameraId,TelescopeModel,Offset,GainUnit,ElectronsPerADU,ReadoutMode,ROI,OpticalConfiguration,ObservedUTC,Timezone,LinearData,ImageKey,ImageIndex\r\n");foreach(var f in all){string[] a={f.Target,f.ObjectId,f.CommonName,f.MakeText,f.Model,f.MakeEvidence,f.TargetEvidence,f.Telescope,f.Camera,f.Kind,f.Mount,f.MountEvidence,f.Observed,f.TimeSource,Util.Num(f.Exposure),Util.Num(f.Gain),Util.Num(f.Temperature),f.Filter,f.Calibration,f.SizeText,f.Hash,f.RelativePath,f.SourceDisposition,f.MosaicText,f.PanelText,f.Format,f.CapabilityText,f.CameraModel,f.CameraId,f.TelescopeModel,Util.Num(f.Offset),f.GainUnit,Util.Num(f.ElectronsPerAdu),f.ReadoutMode,f.Roi,f.OpticalConfiguration,f.ObservedUtc,f.TimeZoneId,f.LinearData.HasValue?f.LinearData.ToString():"",f.ImageKey,f.ImageIndex.HasValue?f.ImageIndex.ToString():""};b.AppendLine(string.Join(",",a.Select(s=>"\""+(s??"").Replace("\"","\"\"")+"\"")));}File.WriteAllText(path,b.ToString(),new UTF8Encoding(true));}
  }
 }

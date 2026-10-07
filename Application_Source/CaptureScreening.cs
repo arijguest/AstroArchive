@@ -45,7 +45,7 @@ namespace AstroArchive {
      path=source?frame.SourcePath:FilePath(frame);
      var before=FileStamp.Read(path);
      if(source&&frame.SourceStamp!=null&&!before.ContentSame(frame.SourceStamp))throw new InvalidDataException("Source changed since scanning. Scan the folder again.");
-     var header=Fits.Validate(path,ct);
+     var inspected=Assets.Inspect(path,n=>ct.ThrowIfCancellationRequested());var header=inspected.Header;if(inspected.Images.Count==1&&inspected.Format=="FITS"&&inspected.Images[0].Count==1&&inspected.Images[0].Compression!="cfitsio")header=Fits.Validate(path,ct);else if(Assets.CanDecode(frame)&&Assets.Selected(frame)!=null)Assets.Read(frame,path,frame.ImageIndex??0,ct);
      if(!source&&Util.Hash(path,ct)!=frame.Hash){frame.Status="Changed";throw new InvalidDataException("Archive checksum differs from the imported file.");}
      var after=FileStamp.Read(path);if(!before.ContentSame(after))throw new InvalidDataException("File changed during screening. Screen again.");
      issue=CaptureScreening.Rejection(header,source?path:frame.OriginalName);

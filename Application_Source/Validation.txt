@@ -1,41 +1,34 @@
-AstroArchive 1.2.0 validation
-Windows 10/11 x64, .NET Framework 4.8, C# 5.
-Executable SHA-256: 8518B38355B58F76B57F5231E40CCF0FF34DA56125EB33C1FD914CCBC5D78617
+AstroArchive 1.8.0 validation
+Package 1.8.0.1; Windows 10/11 x64; .NET Framework 4.8.
 
-Compiled against Microsoft .NET Framework 4.8 reference assemblies.
-Verified assembly version 1.2.0.0, x64 PE32+ Windows GUI format, embedded XAML,
-catalogue/logo hashes, native Explorer selector, complete Windows manifest and
-all six icon resolutions. Checked XAML XML, named control references, Clear
-filter wiring and slider-guard wiring. No System.Windows.Forms dependency.
+The Windows release workflow runs application regressions, a separate five-case
+Windows WIC integration suite, installer/updater regressions, x64 compilation,
+WPF application/installer rendering and disposable install/repair/uninstall checks.
+A successful workflow is required before publishing installers and the SHA-256
+update feed. Its logs are authoritative for Windows results and package hashes.
 
-60 generated-data tests passed under Mono 6.8/system SQLite in Linux, and a
-second fresh run also passed. Tests exercise FITS parsing, target/make detection,
-streamed scan/live events, combined copying/hashing, same-name/size content changes,
-per-file failures, cloud hydration stamps, session metadata caching/changes,
-content-validated solving caches, indexed manifests and portable migration,
-1/2/4/8-worker real-file pilot and retained decision, stage bytes/ETA, repeated
-checkpoint/close/reopen durability, DWARF camera calibration, session exports,
-merged calibration compatibility, scoped reset/cancellation, star matching,
-rotation inference and local ASTAP protocol handling.
+Supplementary validation in Linux compiles the application, installer, launcher,
+engine and raster test executables against official .NET Framework 4.8 references.
+193 engine tests passed under Mono/system SQLite; eight platform/optional-codec
+cases were skipped. CFITSIO tile compression and Zstandard fixtures passed with
+independent system codecs. 47 installer/updater tests passed. WIC tests compile
+here but execute only in the Windows workflow; Linux does not establish WPF or
+Windows-native behavior.
 
-4 Windows-only tests remain included in test.ps1 and were skipped here:
-- Native verified source deletion of newly imported FITS, retaining duplicates/JSON.
-- Refusal to delete a source when its archive copy has changed.
-- Refusal to delete a source hard-linked to its archive copy.
-- Trusted unchanged-file shortcuts on stable Windows file identities/change stamps.
+Compatibility fixtures cover FITS HDUs/cubes/gzip/scaling, numeric XISF attachment
+and base64 layouts, zlib/LZ4/shuffle/Zstandard, CFA metadata, SER byte order/frame
+selection, explicit vendor/software recognition, normalized metadata units,
+gain/electrons-per-ADU separation, timezone uncertainty, retained user and legacy
+edits, reviewed re-detection, calibration conflicts, mixed-exposure dark-flat
+recipes, verified sidecars and derived FITS source/output identities. Existing
+mosaic, USB upload, import review/recovery, progress and processor-handoff tests
+remain in the suite. Windows WIC cases exercise 16-bit TIFF/PNG preservation,
+multi-page selection, RGB order/derived FITS and JPEG scientific-export exclusion.
 
-Native selectors, WPF interaction/slider confirmation, source deletion and a live
-Google Drive installation could not be exercised on Windows in this environment.
-The --ui-test option is included for Windows and checks filters, analysis defaults
-and rendering using synthetic data. No new rendered UI preview is claimed.
-Real telescope files, a real ASTAP star catalogue and authenticated Astrometry.net
-solving were unavailable. The ASTAP test double checks the process protocol only.
-
-The user's exact time-dependent copying failure remains unconfirmed without its
-on-PC error. This build adds transient retries, per-file error isolation, cloud
-hydration handling, a local synchronous rollback-journal index and detailed path/
-error-code reports. It retains committed work on failed or interrupted imports.
-
-The app archives FITS only. DWARF factory PNG calibration needs conversion first.
-Target solving requires separately configured ASTAP/star data or an online account.
-Actual stacking is performed in external software.
+Optional CFITSIO/Zstandard DLLs are not shipped; Windows provisioning of specific
+third-party builds needs independent validation. Live telescope collections,
+undocumented vendor mirrors, provider/storage delays and actual ASTAP catalogues
+or authenticated online solves were unavailable. The ASTAP protocol test uses a
+test double. AVI/camera RAW archive support does not claim a bundled pixel decoder.
+SER recordings are planetary inputs, not automatic deep-sky stacking inputs.
+Stacking, calibration/master generation and stitching use external software.

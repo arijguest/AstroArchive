@@ -12,3 +12,5 @@ Installer/GeneratedVersion.cs
 release-artifacts/
 windows-build.log
 failure-report.json
+
+Application_Source/RasterTests.exe*

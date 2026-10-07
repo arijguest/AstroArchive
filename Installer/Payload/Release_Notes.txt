@@ -1,3 +1,23 @@
+AstroArchive 1.8.0 — image and instrument compatibility
+Package 1.8.0.1
+
+Import XISF, Windows TIFF/PNG/JPEG and SER alongside FITS. Preview selected HDUs,
+pages and sequence frames. Preserve AVI/camera RAW as originals. Compressed FITS
+and XISF Zstandard decoding use optional local codecs; these are not bundled.
+
+Review metadata evidence/conflicts and re-detection before applying changes.
+Camera serial/model, offset, readout, optical configuration, normalized units and
+explicit capture timezones extend the existing Seestar/DWARF classification.
+Explicit-header profiles cover Vaonis/Unistellar and common acquisition software.
+
+Stacking exports can explicitly produce derived Float64 FITS with source/output
+checksums. Confirm raster/XISF linearity first. Scientific eligibility is shown.
+Calibration decisions explain rejected or incomplete matches; dark flats match
+raw-flat exposures in a separate preparation stage. Originals remain unchanged.
+Existing repositories remain readable; user overrides retain priority. Field-level
+review retains legacy edits with unclear provenance until explicitly resolved.
+Optional codecs live in the per-user codecs folder and survive app updates.
+
 AstroArchive 1.7.0 — mosaic collections, import review and offline help
 Package 1.7.0.1
 

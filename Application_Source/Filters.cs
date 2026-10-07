@@ -5,7 +5,7 @@ using System.Linq;
 namespace AstroArchive {
  public sealed class CaptureFilters {
   public readonly Dictionary<string,string> Values=new Dictionary<string,string>();
-  public static readonly string[] Fields={"Target","Mosaic","Panel","Mosaic state","Device","Frame type","Mount","Camera","Night","Session","Optical filter","Calibration","Exposure","Gain","Dimensions","Status","Review","Review type"};
+  public static readonly string[] Fields={"Target","Mosaic","Panel","Mosaic state","Device","Frame type","Format","Capabilities","Mount","Camera","Night","Session","Optical filter","Calibration","Exposure","Gain","Dimensions","Status","Review","Review type"};
   public static string Value(Frame frame,string field){
    string value;
    switch(field){
@@ -14,7 +14,7 @@ namespace AstroArchive {
     case "Panel":value=frame.PanelText;break;
     case "Mosaic state":value=frame.MosaicLabels!=null&&frame.MosaicLabels.Count>0?string.Join("; ",frame.MosaicLabels.Select(m=>m.State).Distinct()):frame.Mosaic==null||frame.MosaicDismissed?"-":frame.Mosaic.Conflict!=null||!frame.Mosaic.Declared||frame.Mosaic.PanelKey==null&&!frame.Mosaic.Output?"Suggested":"Declared";break;
     case "Device":value=frame.Telescope;break;
-    case "Frame type":value=frame.Kind;break;
+    case "Frame type":value=frame.Kind;break;case "Format":value=frame.Format;break;case "Capabilities":value=frame.CapabilityText;break;
     case "Mount":value=(frame.Mount??"").StartsWith("EQ")?"EQ":(frame.Mount??"").StartsWith("Alt/Az")?"Alt/Az":frame.Mount;break;
     case "Camera":value=frame.Camera;break;
     case "Night":value=frame.Night;break;

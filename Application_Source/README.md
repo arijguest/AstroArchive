@@ -100,9 +100,9 @@ The previous user's time-dependent import failure could not be reproduced agains
 
 ## File and classification scope
 
-Supported FITS suffixes: `.fit`, `.fits`, `.fts`, and `.gz` variants. Primary/IMAGE HDUs; integer/floating pixels, mono/CFA and up to four colour planes. Tile-compressed `.fz`, multi-frame cubes and non-FITS data require conversion. DWARF factory PNG calibration is outside this FITS archive; converted files need camera metadata or preserved `cam_0`/`cam_1` structure. Dimensions/binning alone do not identify the camera. Unknown make/model, conflicting channels and uncertain target intent remain for review.
+See [image and telescope compatibility](../docs/COMPATIBILITY.md) for import formats, science eligibility, optional codecs, container selection, metadata review and calibration recipes.
 
-Preview supports FITS RGB and Bayer CFA, and XISF mono/RGB/CFA images with integer or floating samples, planar or interleaved storage, attached or base64 data, zlib/LZ4/LZ4HC compression, and byte shuffle. XISF decoded samples are bounded to 256 MB; zstd and complex samples are unsupported. Standard raster and camera RAW previews use installed Windows codecs. Large previews are sampled to about 1400 pixels per side; zoom scales the display sample. Preview support does not extend FITS-only archive import.
+Preview supports FITS RGB and Bayer CFA, and XISF mono/RGB/CFA images with integer or floating samples, planar or interleaved storage, attached or base64 data, zlib/LZ4/LZ4HC compression, and byte shuffle. External XISF previews retain their 256 MB limit; indexed-image decoding supports optional Zstandard within its 32-million-sample limit. Complex samples remain original-file archives. Standard raster and camera RAW previews use installed Windows codecs. Large previews are sampled to about 1400 pixels per side; zoom scales the display sample. Release 1.8.0 extends verified import to supported raster/XISF/SER files, with explicit derived FITS export and separate capabilities. Existing external preview limits remain in effect.
 
 Metadata corrections may move archived copies without modifying FITS pixels/headers. Exports create new folders and do not overwrite projects. Stacking itself is performed in external software.
 
@@ -135,3 +135,14 @@ OpenNGC by Mattia Verga is licensed CC-BY-SA-4.0. See `Catalogue_Notice.md` and 
 Mosaic collections and panel exports, canonical object IDs/common names, grouped
 library exposure summaries, import review and filtered retries, audited reimport
 permissions, searchable offline help and package notes/progress during updates.
+
+
+## Release 1.8.0 / package 1.8.0.1
+
+- Extends the existing preview/import/processor/mosaic setup with format readers and explicit HDU/page/frame selection.
+- Adds scientific raster/XISF conversion, SER frame previews and optional compressed-image backends, while preserving byte-for-byte original exports.
+- Separates camera identity, gain units, readout/ROI/offset and optical configuration; retains provenance, normalization, reviewed re-detection and overrides.
+- Explains calibration decisions and prepares exposure-specific dark-flat recipes.
+- Preserves adjacent recognized sidecars and existing database records without destructive migration.
+
+Native CFITSIO and Zstandard are optional local components, not bundled in the standard installer. JPEG/processed data and undecoded RAW/video remain original-file exports.

@@ -183,7 +183,7 @@ namespace AstroArchive {
    PreviewTests();
    PerformanceTests();
    WorkflowRegressions();HelpTests();
-   Console.WriteLine(passed+" tests passed; "+skipped+" Windows-only tests skipped.");File.WriteAllText(Path.Combine(root,"test-results.txt"),passed+" tests passed; "+skipped+" Windows-only tests skipped. Exit code "+Environment.ExitCode);return Environment.ExitCode;
+   CompatibilityCases();Console.WriteLine(passed+" tests passed; "+skipped+" platform/optional-codec tests skipped.");File.WriteAllText(Path.Combine(root,"test-results.txt"),passed+" tests passed; "+skipped+" platform/optional-codec tests skipped. Exit code "+Environment.ExitCode);return Environment.ExitCode;
   }
   [System.Runtime.InteropServices.DllImport("kernel32.dll",EntryPoint="CreateHardLinkW",CharSet=System.Runtime.InteropServices.CharSet.Unicode,SetLastError=true)]static extern bool CreateHardLink(string link,string existing,IntPtr security);
   static void NoProgress(ProgressInfo p){}

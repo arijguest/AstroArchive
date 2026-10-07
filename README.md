@@ -61,7 +61,7 @@ uninstaller to Windows Installed Apps.
 Replace the filename below with the installer you downloaded:
 
 ```powershell
-Get-FileHash .\AstroArchive1.7.0.1.exe -Algorithm SHA256
+Get-FileHash .\AstroArchive1.8.0.1.exe -Algorithm SHA256
 ```
 
 Compare the `Hash` value with the corresponding `.sha256` file in the release.
@@ -114,15 +114,15 @@ source copies and shared metadata, and records checksums to prevent reimport.
 
 | Task | Supported files or setup |
 | --- | --- |
-| **Archive import** | `.fit`, `.fits`, `.fts` and their gzip-compressed variants. |
+| **Archive import** | FITS/gzip/.fz, TIFF/PNG/JPEG, XISF and SER; original-only AVI and common camera RAW. |
 | **Image preview** | FITS, XISF, TIFF, PNG, JPEG, BMP and GIF. Camera RAW support depends on installed Windows codecs. |
-| **Convert before use** | Video, tile-compressed `.fz` and multi-frame scientific cubes. |
+| **Scientific conversion** | Explicit derived FITS for supported linear raster/XISF and selected containers; optional CFITSIO for `.fz`. |
 | **Plate solving** | A separately configured ASTAP installation and database, or an Astrometry.net account. |
 | **Cloud folders** | Filesystem-mounted or streamed folders, including Google Drive for desktop. Browser-only folders cannot be used. |
 
 Stacking runs in external software. AstroWizard and Siril handoffs use a separate
 working copy; see [supported processors and handoff requirements](docs/PROCESSOR_HANDOFFS.md).
-Preview support for a format does not make it eligible for archive import.
+See [compatibility details](docs/COMPATIBILITY.md) for format limits, reviewed metadata, optional codecs and dark-flat recipes. Preview and scientific-export eligibility are shown separately.
 
 ## Staying up to date
 
