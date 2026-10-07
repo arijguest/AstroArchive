@@ -18,7 +18,7 @@ namespace AstroArchive {
             return format==PixelFormats.Gray8||format==PixelFormats.Gray16||format==PixelFormats.Gray32Float||format==PixelFormats.BlackWhite;
         }
         static bool Scientific(PixelFormat format) {
-            return Gray(format)||format==PixelFormats.Rgb24||format==PixelFormats.Bgr24||format==PixelFormats.Rgb48||format==PixelFormats.Rgb128Float;
+            return Gray(format)&&format!=PixelFormats.BlackWhite||format==PixelFormats.Rgb24||format==PixelFormats.Bgr24||format==PixelFormats.Rgb48||format==PixelFormats.Rgb128Float;
         }
         public AssetInfo Inspect(string path,Action<int> counted) {
             using(var stream=File.OpenRead(path)) {
