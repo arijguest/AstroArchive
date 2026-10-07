@@ -92,7 +92,7 @@ telescope profiles, cloud folders, calibration matching and optional analysis.
 
 ## Mosaic collections
 
-Release 1.7.0 adds [metadata-first mosaic collections](docs/MOSAICS.md),
+Release 1.7.2 adds [metadata-first mosaic collections](docs/MOSAICS.md),
 reviewable panel assignments and independent stacking inputs per panel.
 
 The library also unifies recognized object IDs and common names, with target/session
@@ -109,6 +109,17 @@ ignored originals stay in place. Rescan after changing it.
 **Repository tools > Delete failed** lists matching captures across the active
 repository for confirmation, regardless of the current filters. Deletion retains
 source copies and shared metadata, and records checksums to prevent reimport.
+
+## Make the tables your own
+
+Use **Columns ▾** to show or hide repository/import headings, then drag headings
+to rearrange them. Right-click a heading for **Move left/right**. Each table saves
+its own layout; **Restore default columns** returns to the original headings.
+
+Caldwell IDs now resolve alongside other catalogue IDs: **C27 → NGC6888 → Crescent
+Nebula**. The catalogue recognises all 109 Caldwell objects and adds more common
+astrophotography names to labels, filenames and search. Tooltips and processing
+windows follow the light/dark theme with readable text.
 
 ## Formats and processing
 

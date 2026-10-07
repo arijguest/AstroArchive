@@ -19,6 +19,7 @@ namespace AstroArchive {
    var grid=G("FramesGrid");
    grid.ContextMenu=ThemedMenu();
    grid.PreviewMouseRightButtonDown+=(s,e)=>{
+    if(e.Handled)return;
     var row=ItemsControl.ContainerFromElement(grid,e.OriginalSource as DependencyObject) as DataGridRow;
     contextOnFile=row!=null;
     if(row==null){grid.ContextMenu.IsOpen=false;e.Handled=true;return;}

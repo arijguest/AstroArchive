@@ -123,6 +123,15 @@ Tile-compressed FITS (.fz), video and multi-frame scientific cubes need conversi
 Archive imports remain FITS-only; previewing other formats does not index them.
 
 IMAGE PREVIEW AND TABLES
+Choose Columns beside the repository tools or import tools to show or hide
+headings. The current headings and their order are the defaults. More headings
+contains device, camera, gain, temperature, dimensions, calibration, mosaic,
+panel, session and other metadata. Drag a heading left/right to rearrange it, or
+right-click a heading and choose Move heading left/right. At least one heading
+stays visible. Each table saves its own choices across restarts. Restore default
+columns resets visibility and order for just that table. Hiding a sorted heading
+removes it from sorting; row selections and filters are retained.
+
 Select one repository file and choose Preview image… from its context menu.
 Pinch, use the wheel/trackpad or the zoom buttons; drag to pan. Fit (or F)
 recenters the image; Escape closes the preview. The gesture viewer uses the same
@@ -133,6 +142,17 @@ another column. Sorting survives filtering and import/progress refreshes.
 Exposure, gain, temperature, dimensions and performance fields sort numerically.
 Missing metadata appears as a dash; unknown targets retain Unknown. Bias and
 Master bias stay visible under Frame type and in the frame-type filter.
+
+COMMON NAMES AND CALDWELL IDS
+Object ID and Common name / label describe the same target. Caldwell numbers
+(C27, C 027 or Caldwell 27) resolve alongside Messier, NGC and IC identifiers.
+For example, C27 resolves to NGC6888 and Crescent Nebula in existing archives,
+filenames and search, without requiring plate solving. All 109 Caldwell objects
+are recognised from the bundled catalogue. Additional astrophotography names
+include Thor's Helmet, Cat's Paw, Seagull, Jellyfish, Horsehead, Seven Sisters and
+common galaxy names. Western and Eastern Veil stay distinct. Conflicting names
+are retained for review; unrecognised labels are not guessed. Existing archive
+pixels, catalogue coordinates and file paths are preserved.
 
 MOSAIC COLLECTIONS AND PANELS
 New imports preserve mosaic/project and panel metadata during their existing
