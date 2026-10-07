@@ -90,11 +90,16 @@ telescope profiles, cloud folders, calibration matching and optional analysis.
 > **Moving or backing up an archive?** Keep `.astroarchive/index.sqlite` with
 > the captures. Use one writer per archive, including archives in cloud folders.
 
-## Mosaic collections (upcoming)
+## Mosaic collections
 
 Release 1.7.0 adds [metadata-first mosaic collections](docs/MOSAICS.md),
-reviewable panel assignments and independent stacking inputs per panel. This
-feature is prepared for a future release; it is not in the current installer.
+reviewable panel assignments and independent stacking inputs per panel.
+
+The library also unifies recognized object IDs and common names, with target/session
+views and exposure summaries. Import review separates rejection, integrity and
+transfer problems, supports filtered retries and retains audited reimport choices.
+The offline Guide offers search, F1 contextual help and control tooltips.
+
 ## Failed captures
 
 Enable **Import options > Ignore failed** to skip FITS filenames containing

@@ -2,8 +2,8 @@
 
 The installed `Start.exe` checks the latest stable release's `update.json` over
 HTTPS. It offers a package only when its four-part version is newer and its
-application version is not older. The startup prompt defaults to Yes; No opens
-the current version.
+application version is not older. The startup dialog shows package notes and defaults to Install release; Later
+opens the current version.
 
 In the application, open **Settings → Check for and install new releases**.
 Choose **Check for new releases**, then **Install release**. Installation follows
@@ -16,7 +16,9 @@ this flow automatically:
    and a process-wait argument, and shut down the application and settings dialogs.
 4. Wait for both the application and launcher to exit, then stage and verify the
    new payload, activate its installation record atomically and update shortcuts.
-5. Restart AstroArchive with the startup update check skipped once.
+5. Record a version-specific update receipt and restart AstroArchive with the
+   startup update check skipped once. A dismissible banner confirms the installed
+   package on the next launch and consumes its matching receipt once.
 
 Downloads sit outside `app-<version>-r<revision>`, so they do not interfere with
 same-package repair or get mistaken for managed application payloads. Verified
@@ -68,3 +70,8 @@ Manual installation and repair work offline. Update-check errors are logged at
 `%TEMP%\AstroArchive-setup-error.txt`. Installer downloads for installed apps are
 stored inside the installation's `updates` folder. Older launcher downloads may
 remain under the per-user updates cache.
+
+Release checks display package-specific notes, with a bounded exact-tag GitHub API
+fallback for older update feeds. A notes error leaves installation available.
+Downloads show byte and percentage progress; downloaded installers remain verified
+before the app hands off to setup.
