@@ -8,5 +8,7 @@ if ($LASTEXITCODE -ne 0) { throw 'Protocol-double compilation failed.' }
 & $compiler /nologo /target:exe /platform:x64 /optimize+ "/out:$PSScriptRoot\AstroArchiveTests.exe" "/win32manifest:$PSScriptRoot\app.manifest" "/resource:$PSScriptRoot\catalog.csv,catalog.csv" /r:System.Web.Extensions.dll /r:System.Security.dll @sources
 if ($LASTEXITCODE -ne 0) { throw 'Test compilation failed.' }
 $runDirectory = Join-Path $TestDirectory ('run-' + [Guid]::NewGuid().ToString('N').Substring(0,12))
-& "$PSScriptRoot\AstroArchiveTests.exe" $runDirectory
-if ($LASTEXITCODE -ne 0) { throw 'Tests failed.' }
+$results = & "$PSScriptRoot\AstroArchiveTests.exe" $runDirectory
+$testExit = $LASTEXITCODE
+$results | Write-Output
+if ($testExit -ne 0) { throw 'Tests failed.' }

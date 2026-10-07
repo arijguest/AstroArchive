@@ -10,8 +10,10 @@ try {
         "$PSScriptRoot\Updates.cs", "$PSScriptRoot\UpdateTests.cs", "$PSScriptRoot\Tests.cs")
     & $Compiler @arguments
     if ($LASTEXITCODE -ne 0) { throw 'Test compilation failed.' }
-    & $executable (Join-Path $testDirectory 'fixtures')
-    if ($LASTEXITCODE -ne 0) { throw 'Installer tests failed.' }
+    $results = & $executable (Join-Path $testDirectory 'fixtures')
+    $testExit = $LASTEXITCODE
+    $results | Write-Output
+    if ($testExit -ne 0) { throw 'Installer tests failed.' }
 } finally {
     # This path is always a newly generated test directory, never an installation.
     Remove-Item $testDirectory -Recurse -Force

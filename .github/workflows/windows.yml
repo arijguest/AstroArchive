@@ -26,9 +26,8 @@ jobs:
       - name: Test application, installer and updater; build Windows package
         shell: powershell
         run: |
-          Start-Transcript -Path windows-build.log
-          try { .\scripts\build-release.ps1 }
-          finally { Stop-Transcript }
+          try { .\scripts\build-release.ps1 *>&1 | Tee-Object -FilePath windows-build.log }
+          catch { $_ | Out-String | Add-Content windows-build.log; throw }
       - name: Report Windows failure details
         if: failure()
         shell: powershell
