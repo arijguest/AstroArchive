@@ -3,4 +3,4 @@ using System.Reflection;
 [assembly: AssemblyDescription("Local smart telescope FITS archive and stacking project organiser")]
 [assembly: AssemblyProduct("AstroArchive")]
 [assembly: AssemblyVersion("1.6.0.0")]
-[assembly: AssemblyFileVersion("1.6.0.0")]
+[assembly: AssemblyFileVersion("1.6.0.1")]

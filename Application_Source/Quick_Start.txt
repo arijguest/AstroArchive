@@ -1,6 +1,6 @@
 AstroArchive 1.6.0
 Windows 10/11 x64 desktop app. Built-in .NET Framework 4.8 and Windows SQLite.
-No installer, Python or Google login required.
+Runs offline. No Python or Google login required.
 
 START HERE
 1. Open AstroArchive and choose your archive folder in Settings.
@@ -68,6 +68,18 @@ including high-depth integer and floating samples when supported by the codec.
 DSLR RAW compatibility depends on an installed Windows codec for that camera.
 Tile-compressed FITS (.fz), video and multi-frame scientific cubes need conversion.
 Archive imports remain FITS-only; previewing other formats does not index them.
+
+IMAGE ZOOM AND TABLE SORTING
+Select one repository file and choose Preview image… from its context menu.
+Pinch, use the wheel/trackpad or the zoom buttons; drag to pan. Fit (or F)
+recenters the image; Escape closes the preview. The gesture viewer uses the same
+colour decoders and display stretch as the preview pane. Source pixels stay intact.
+
+Click a column header to sort, click again to reverse, or Shift-click to add
+another column. Sorting survives filtering and import/progress refreshes.
+Exposure, gain, temperature, dimensions and performance fields sort numerically.
+Missing metadata appears as a dash; unknown targets retain Unknown. Bias and
+Master bias stay visible under Frame type and in the frame-type filter.
 
 WINDOWS FOLDER SELECTION AND GOOGLE DRIVE
 All folder selectors use native Windows Explorer dialogs, with This PC, mounted
@@ -266,6 +278,11 @@ after confirmation. Their checksums stay in deletion history. Source copies and
 shared session metadata stay. There is no
 undo, and cloud-synced deletions propagate. Locked files are reported and retained.
 The active repository is a small path at the top. Choose a different repository
-in Settings and save to apply it. Settings > Check for and download new releases
-checks the stable release and saves a verified AstroArchive1.x.x.x.exe installer.
-Close AstroArchive before running the downloaded installer.
+in Settings and save to apply it. Settings > Check for and install new releases
+checks the stable release. Choose Install release to download and verify setup
+inside the application's updates folder, save settings and the archive index,
+close AstroArchive, install immediately and restart automatically. The installer
+waits for the application and launcher; the restart skips the update check once.
+Download or verification failure leaves the app open. A setup failure preserves
+the previous installed package and shows an error. Portable copies install at
+the registered or default location and retain per-user settings.

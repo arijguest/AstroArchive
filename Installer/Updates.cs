@@ -4,12 +4,19 @@ using System.IO;
 using System.Net;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Diagnostics;
+using System.Linq;
 
 namespace AstroArchive.Installation {
  public sealed class UpdateManifest {
   public int schema;
   public string application_version, package_version, url, download_url, sha256;
   public long size;
+ }
+ public sealed class UpdateTarget {
+  public string Root, Cache;
+  public InstallRecord Running, Existing;
+  public InstallRecord Comparison {get{return Existing!=null&&InstallCore.Parse(Existing.PackageVersion??Existing.Version)>InstallCore.Parse(Running.PackageVersion??Running.Version)?Existing:Running;}}
  }
 
  public sealed class UpdateClient {
@@ -43,6 +50,34 @@ namespace AstroArchive.Installation {
   }
 
   public static string InstallerName(UpdateManifest manifest) { return "AstroArchive" + manifest.package_version + ".exe"; }
+  public static string InstallationCache(string root){return Path.Combine(InstallCore.Root(root),"updates");}
+
+  public static UpdateTarget ResolveTarget(string executable,string version,string registeredRoot,string runningPackage=null){
+   InstallCore.Parse(version);string app=Path.GetFullPath(executable),directory=Path.GetDirectoryName(app),parent=Path.GetDirectoryName(directory);
+   runningPackage=runningPackage??version+".0";
+   var package=InstallCore.Parse(runningPackage);var application=InstallCore.Parse(version);
+   if(package.Major!=application.Major||package.Minor!=application.Minor||package.Build!=application.Build)throw new IOException("Running application and package versions do not agree.");
+   InstallCore.NoLinks(app);
+   var record=parent==null?null:InstallCore.Read(parent);
+   if(record!=null&&record.Files.Any(relative=>string.Equals(InstallCore.Managed(parent,relative),app,StringComparison.OrdinalIgnoreCase))){
+    bool active=string.Equals(InstallCore.Managed(parent,record.ActiveDirectory+"\\AstroArchive.exe"),app,StringComparison.OrdinalIgnoreCase);
+    return new UpdateTarget{Root=InstallCore.Root(parent),Cache=InstallationCache(parent),Running=active?record:new InstallRecord{Version=version,PackageVersion=runningPackage},Existing=record};
+   }
+   string root=InstallCore.Root(registeredRoot);
+   return new UpdateTarget{Root=root,Cache=Path.Combine(directory,"updates"),Running=new InstallRecord{Version=version,PackageVersion=runningPackage},Existing=InstallCore.Read(root)};
+  }
+
+  public static ProcessStartInfo InstallerStartInfo(UpdateManifest manifest,string installer,string root,int waitPid){
+   Validate(manifest);root=InstallCore.Root(root);if(waitPid<=0)throw new IOException("An application process is required for update handoff.");
+   InstallCore.NoLinks(installer);var file=new FileInfo(installer);
+   if(!file.Exists||file.Length!=manifest.size||!string.Equals(InstallCore.HashFile(installer),manifest.sha256,StringComparison.OrdinalIgnoreCase))throw new IOException("Installer failed verification before launch.");
+   var installed=InstallCore.Read(root);
+   if(installed==null&&Directory.Exists(root)&&Directory.EnumerateFileSystemEntries(root).Any())throw new IOException("The installation folder contains unrelated files. Choose an empty folder for installation.");
+   if(installed!=null&&(InstallCore.Parse(manifest.application_version)<InstallCore.Parse(installed.Version)||InstallCore.Parse(manifest.package_version)<=InstallCore.Parse(installed.PackageVersion??installed.Version)))throw new IOException("This release is no longer newer than the installed package. Check for releases again.");
+   string arguments=(installed==null?"":"--update ")+"--silent --root "+Quote(root)+" --waitpid "+waitPid+" --restart";
+   return new ProcessStartInfo(Path.GetFullPath(installer),arguments){UseShellExecute=false,WorkingDirectory=Path.GetDirectoryName(Path.GetFullPath(installer))};
+  }
+  static string Quote(string path){if(path.IndexOf('"')>=0)throw new IOException("Quotes are not supported in the installation path.");return "\""+path+"\"";}
 
   public UpdateManifest Check(InstallRecord installed) {
    byte[] bytes = Fetch(new Uri(Feed), 64 * 1024);

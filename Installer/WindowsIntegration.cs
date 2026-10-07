@@ -5,6 +5,7 @@ using System.Linq;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Threading;
 using Microsoft.Win32;
 namespace AstroArchive.Installation {
  public static class WindowsIntegration {
@@ -13,7 +14,25 @@ namespace AstroArchive.Installation {
   public static string RegisteredRoot(){foreach(var view in new[]{RegistryView.Registry64,RegistryView.Registry32})try{using(var user=RegistryKey.OpenBaseKey(RegistryHive.CurrentUser,view))using(var key=user.OpenSubKey(RegistryPath)){string path=key==null?null:key.GetValue("InstallLocation") as string;if(!string.IsNullOrWhiteSpace(path))return path;}}catch{}return DefaultRoot;}
   public static void CheckEnvironment(){if(Environment.OSVersion.Platform!=PlatformID.Win32NT||!Environment.Is64BitOperatingSystem||Environment.OSVersion.Version.Major<10)throw new IOException("This installer requires Windows 10 or 11, 64-bit.");using(var machine=RegistryKey.OpenBaseKey(RegistryHive.LocalMachine,RegistryView.Registry64))using(var key=machine.OpenSubKey(@"SOFTWARE\Microsoft\NET Framework Setup\NDP\v4\Full")){if(key==null||Convert.ToInt32(key.GetValue("Release",0))<528040)throw new IOException("Install .NET Framework 4.8 or later before using AstroArchive.");}}
   public static string Quote(string text){if(text.IndexOf('"')>=0)throw new IOException("Quotes are not supported in this path.");return "\""+text+"\"";}
-  public static void EnsureClosed(string root){foreach(var p in Process.GetProcessesByName("AstroArchive")){try{string path=p.MainModule.FileName;if(Within(path,root))throw new IOException("Close AstroArchive before installing or updating.");}catch(System.ComponentModel.Win32Exception){}catch(InvalidOperationException){}finally{p.Dispose();}}}
+  public static int UpdateWaitProcess(string root,int applicationPid,string applicationPath){
+   if(!Within(applicationPath,root))return applicationPid;
+   var record=InstallCore.Read(root);if(record==null)return applicationPid;
+   string launcher=InstallCore.Managed(root,record.ActiveDirectory+"\\Start.exe");
+   foreach(var process in Process.GetProcessesByName("Start")){
+    try{if(string.Equals(process.MainModule.FileName,launcher,StringComparison.OrdinalIgnoreCase))return process.Id;}
+    catch(System.ComponentModel.Win32Exception){}catch(InvalidOperationException){}
+    finally{process.Dispose();}
+   }
+   return applicationPid;
+  }
+  public static void WaitForLauncher(string root){
+   using(var mutex=new Mutex(false,InstallCore.ApplicationMutexName(root))){bool held=false;
+    try{try{held=mutex.WaitOne(60000);}catch(AbandonedMutexException){held=true;}if(!held)throw new IOException("AstroArchive's launcher is still running. Close it and run setup again.");}
+    finally{if(held)mutex.ReleaseMutex();}
+   }
+  }
+  public static void EnsureClosed(string root){EnsureNoOtherApplications(root,0);}
+  public static void EnsureNoOtherApplications(string root,int allowedPid){foreach(var p in Process.GetProcessesByName("AstroArchive")){try{if(p.Id==allowedPid)continue;string path=p.MainModule.FileName;if(Within(path,root))throw new IOException("Close the other AstroArchive window before installing or updating.");}catch(System.ComponentModel.Win32Exception){}catch(InvalidOperationException){}finally{p.Dispose();}}}
   static bool Within(string path,string root){return Path.GetFullPath(path).StartsWith(Path.GetFullPath(root).TrimEnd('\\')+"\\",StringComparison.OrdinalIgnoreCase);}
   static string Menu{get{return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Programs),"AstroArchive");}}
   static string Desktop{get{return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory),"AstroArchive.lnk");}}

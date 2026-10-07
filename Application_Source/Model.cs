@@ -56,11 +56,12 @@ namespace AstroArchive {
   public FileStamp SourceStamp {get;set;} public FileStamp RepositoryStamp {get;set;} public FileStamp SourceMetadataStamp {get;set;} public string CameraEvidence {get;set;} public long Bytes {get;set;} public bool Rejected {get;set;} public string RotationReport {get;set;}
   public bool Screened {get;set;} public string ScreeningIssue {get;set;}
   public string ReviewText {get{return CaptureScreening.NeedsReview(this)?"Needs review":Screened?"Passed":"Not screened";}}
-  public string ExposureText {get{return Exposure.HasValue?Util.Num(Exposure)+" s":"Unknown";}}
+  public string ExposureText {get{return Exposure.HasValue?Util.Num(Exposure)+" s":"-";}}
   public string MakeText {get{return !string.IsNullOrEmpty(Make)?Make:InstrumentDetection.MakeOf(Model);}}
   public string InstrumentText {get{return string.IsNullOrEmpty(Model)||Model=="Auto"?MakeText:Model;}}
-  public string GainText {get{return Util.Num(Gain);}} public string TemperatureText {get{return Temperature.HasValue?Util.Num(Temperature)+" °C":"?";}}
-  public string SizeText {get{return Width+" × "+Height+(Channels>1?" × "+Channels:"");}}
+  public string GainText {get{return Gain.HasValue?Util.Num(Gain):"-";}} public string TemperatureText {get{return Temperature.HasValue?Util.Num(Temperature)+" °C":"-";}}
+  [ScriptIgnore]public long? PixelCount {get{return Width>0&&Height>0?(long?)((long)Width*Height*Math.Max(1,Channels)):null;}}
+  public string SizeText {get{return Width<=0||Height<=0?"-":Width+" × "+Height+(Channels>1?" × "+Channels:"");}}
   public string SearchText {get{return string.Join(" ",new[]{Target,Catalog.Aliases(Target),Telescope,MakeText,Model,MakeEvidence,TargetEvidence,SourceDisposition,Camera,Kind,Calibration,Filter,Mount,Night,Observed,OriginalName,Notes,Status,ReviewText,ScreeningIssue,Util.Num(Exposure),Util.Num(Gain),Util.Num(Temperature),SizeText,"bin"+BinX+"x"+BinY});}}
   public string Group {get{return string.Join("|",new[]{Telescope,MakeText,Camera,Filter,Width.ToString(),Height.ToString(),Channels.ToString(),BinX.ToString(),BinY.ToString(),Bayer,Calibration,Util.Num(Exposure),Util.Num(Gain)});}}
   public Frame Clone() { var copy=(Frame)MemberwiseClone();copy.SourceStamp=SourceStamp==null?null:SourceStamp.Clone();copy.RepositoryStamp=RepositoryStamp==null?null:RepositoryStamp.Clone();copy.SourceMetadataStamp=SourceMetadataStamp==null?null:SourceMetadataStamp.Clone();return copy; }

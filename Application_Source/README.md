@@ -4,6 +4,8 @@ Portable Windows 10/11 x64 WPF app for archiving smart-telescope FITS and creati
 
 ## Changes in 1.6.0
 
+- Pinch/wheel preview zoom and pan using the colour decoders; persistent numeric/Shift-column sorting, explicit bias rows, and dashes for unknown metadata except target names.
+- Install release saves settings/index, verifies setup inside the application files and installs/restarts automatically. Package revisions are included in portable update comparisons.
 - Local USB telescope detection and auto-upload, with saved profiles that survive changed drive letters and can be recovered from archive metadata.
 - Telescope renaming updates saved profiles, archive paths, index/manifests and deletion history while preserving capture bytes and session identity. Interrupted renames recover on reopen.
 - One Filters menu for both library and import results, including camera, night, session, calibration, exposure, dimensions, status and review. Import copies the ready files in the filtered view and shows their count.
@@ -33,7 +35,7 @@ Portable Windows 10/11 x64 WPF app for archiving smart-telescope FITS and creati
 - Right-click selected library rows to export copies, create a ready-to-stack folder, edit metadata, locate files or delete selected archive copies after confirmation.
 - Stacking exports offer optional matching calibrations, report availability and keep multiple targets separate. Rejected calibration candidates are omitted; unknown calibration status remains opt-in.
 - Repository selection lives in Settings. A compact path stays above the library.
-- Settings checks the latest stable release and saves a verified installer using the concise package filename.
+- Settings checks the latest stable release and installs/restarts after saving state and verifying the downloaded installer.
 
 ## Changes in 1.2.0
 

@@ -71,9 +71,10 @@ namespace AstroArchive {
    CameraDetection.Apply(f,h,text,Shot(shots,"cameraId","camera_id","camId","cam_id"));
    string type=h.Get("IMAGETYP","IMAGETYPE","FRAME","FRAMETYP").ToLowerInvariant();
    bool master=Regex.IsMatch(name,@"(?:^|[_-])(master|stacked|stack|staced)(?:[_-]|$)")||Regex.IsMatch(name,@"(?:^|[_-])stack[_-]?\d+")||low.Contains("cali_frame/");
-   bool dark=type.Contains("dark")||Regex.IsMatch(low,@"(?:^|[/_ -])darks?(?:[/_ -]|$)");
-   bool bias=type.Contains("bias")||type.Contains("offset")||Regex.IsMatch(low,@"(?:^|[/_ -])(bias|biases|offset)(?:[/_ -]|$)");
-   bool flat=type.Contains("flat")||Regex.IsMatch(low,@"(?:^|[/_ -])flats?(?:[/_ -]|$)");
+   string kindPath=low.Substring(0,low.Length-Path.GetFileName(path).Length)+name;
+   bool dark=type.Contains("dark")||Regex.IsMatch(kindPath,@"(?:^|[/_ -])darks?(?:[/_ -]|$)");
+   bool bias=type.Contains("bias")||type.Contains("offset")||Regex.IsMatch(kindPath,@"(?:^|[/_ -])(bias|biases|offset)(?:[/_ -]|$)");
+   bool flat=type.Contains("flat")||Regex.IsMatch(kindPath,@"(?:^|[/_ -])flats?(?:[/_ -]|$)");
    if(dark)f.Kind=master?"Master dark":"Dark";else if(bias)f.Kind=master?"Master bias":"Bias";else if(flat)f.Kind=master?"Master flat":"Flat";
    else if(master||type.Contains("stack")||low.Contains("restacked/")||Regex.IsMatch(name,@"\d+x\d+(?:\.\d+)?(?:s|sec)"))f.Kind="Stack";
    else if(type.Contains("light")||Regex.IsMatch(low,@"(?:_sub|[- ]sub)(?:/|$)")||low.Contains("dwarf_raw")||Regex.IsMatch(name,@"^(light|raw|sub)[_-]")||Regex.IsMatch(low,@"(?:^|/)lights?/")||type.Contains("science"))f.Kind="Light";

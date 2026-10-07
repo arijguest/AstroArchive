@@ -31,7 +31,7 @@ namespace AstroArchive.Installation {
       "AstroArchive update", MessageBoxButtons.YesNo, MessageBoxIcon.Information,
       MessageBoxDefaultButton.Button1) != DialogResult.Yes) return false;
     accepted = true;
-    string cache = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "AstroArchive", "updates");
+    string cache = UpdateClient.InstallationCache(root);
     string setup = null;
     Exception downloadError = null;
     using (var progress = new Form { Text = "Updating AstroArchive", Width = 430, Height = 125,
@@ -47,10 +47,9 @@ namespace AstroArchive.Installation {
     }
     if (downloadError != null) throw downloadError;
     if (setup == null) throw new IOException("The update download did not complete.");
-    string arguments = "--update --silent --root " + WindowsIntegration.Quote(root) +
-      " --waitpid " + Process.GetCurrentProcess().Id + " --restart";
     // The installer waits for this launcher to exit before changing application files.
-    Process.Start(new ProcessStartInfo(setup, arguments) { UseShellExecute = false });
+    using(var process=Process.Start(UpdateClient.InstallerStartInfo(update,setup,root,Process.GetCurrentProcess().Id)))
+     if(process==null)throw new IOException("The update installer could not start.");
     return true;
    } catch (Exception error) {
     Log(error);
@@ -66,7 +65,7 @@ namespace AstroArchive.Installation {
     string root = InstallCore.Root(Path.GetDirectoryName(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)));
     var record = InstallCore.Read(root);
     if (record == null) throw new IOException("Installation record is missing. Run the installer again to repair it.");
-    using (var mutex = new Mutex(false, "Local\\AstroArchive.App." + InstallCore.Hash(System.Text.Encoding.UTF8.GetBytes(root.ToLowerInvariant())))) {
+    using (var mutex = new Mutex(false, InstallCore.ApplicationMutexName(root))) {
      bool held = false;
      try {
       try { held = mutex.WaitOne(0); } catch (AbandonedMutexException) { held = true; }

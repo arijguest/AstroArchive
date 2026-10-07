@@ -1,54 +1,70 @@
 # Windows updates
 
-The installed `Start.exe` reads the latest stable release's `update.json` over
-HTTPS. It offers an upgrade only if its four-part package version is newer than
-the installed package and its application version is not older. The startup
-prompt uses Yes as the default; No continues to the installed application.
+The installed `Start.exe` checks the latest stable release's `update.json` over
+HTTPS. It offers a package only when its four-part version is newer and its
+application version is not older. The startup prompt defaults to Yes; No opens
+the current version.
 
-The manifest binds an exact application version, package revision, GitHub release
-asset URL, byte count and SHA-256. Only this repository's installer URL is accepted;
-HTTPS redirects are restricted to GitHub and its release-asset hosts. Downloads
-are bounded in size and time. TLS certificate verification remains enabled.
-A checksum detects a damaged or mismatched download; it is not a code-signing
-identity. The installer itself verifies all embedded payload hashes.
+In the application, open **Settings → Check for and install new releases**.
+Choose **Check for new releases**, then **Install release**. Installation follows
+this flow automatically:
 
-After acceptance and verification, the new installer waits for the launcher to
-exit, applies an in-place update and restarts AstroArchive. It uses the existing
-versioned folders, atomic installation record and exception rollback engine.
-It refuses running applications, unrelated folders and downgrades.
-Repositories and user settings are outside the managed application-file cleanup.
+1. Download the installer under `<installation>\updates\<download-id>\` and verify
+   its exact byte count and SHA-256. There is no save-location dialog.
+2. Save current settings and checkpoint the archive index.
+3. Reverify the saved installer, start it with the existing installation location
+   and a process-wait argument, and shut down the application and settings dialogs.
+4. Wait for both the application and launcher to exit, then stage and verify the
+   new payload, activate its installation record atomically and update shortcuts.
+5. Restart AstroArchive with the startup update check skipped once.
 
-The original offline package (1.2.0.1) cannot check for updates. Upgrade it once
-with package 1.2.0.2 or later. Installation and manual repairs remain offline.
+Downloads sit outside `app-<version>-r<revision>`, so they do not interfere with
+same-package repair or get mistaken for managed application payloads. Verified
+installers remain available for offline repair. The default installation is
+`%LOCALAPPDATA%\Programs\AstroArchive`; custom installations use their own folder.
+The application folder must be writable. A write/download/verification failure
+leaves the running app open. A later setup failure preserves the previous package
+through the existing rollback engine and displays its error. Reopen the app from
+its shortcut or rerun the installer to retry.
 
-## Manual and offline use
+A portable copy downloads under `updates` beside its executable and installs into
+the registered/default managed installation. It retains the portable copy and
+per-user settings. An existing registered installation is included in the version
+comparison so a portable copy cannot offer a downgrade. The application's file
+version includes the package revision, preventing an older published package
+from being offered to a newer portable build.
 
-In AstroArchive, open **Settings → Check for and download new releases**.
-Check for the latest stable release, then choose **Download release** and a save
-location. The installer is verified before saving as `AstroArchive<package>.exe`
-(for example, `AstroArchive1.3.0.1.exe`). Close the app before running it. A failed
-check or download leaves the current installation available.
+Repositories, captures, manifests, deletion history and user settings are outside
+managed application-file replacement. Active work must finish before opening
+Settings. Another open AstroArchive instance for the target installation blocks
+the handoff rather than losing its work.
 
-The feed retains the `url` asset expected by 1.2.0 launchers and adds
-`download_url` for the concise installer name. Both assets contain identical
-verified bytes; new launchers and Settings use the concise download.
+## Verification and compatibility
 
+The feed binds the application version, package revision, exact GitHub asset URL,
+byte count and SHA-256. Only this repository's installer URL is accepted; HTTPS
+redirects are restricted to GitHub's release hosts. Downloads have size and time
+limits and keep TLS certificate verification enabled. Cached bytes are checked
+again immediately before launch. The installer verifies its embedded payloads.
+SHA-256 detects damaged or mismatched bytes; it is not a code-signing identity.
 
-From the active `app-<version>-r<revision>` installation folder:
+The feed retains the legacy `url` asset and adds `download_url` for the concise
+`AstroArchive<package>.exe` name. Both assets contain identical verified bytes,
+allowing older launchers to upgrade. The original offline package 1.2.0.1 needs
+one manual upgrade to gain launcher update checks. No GitHub account/token is
+required, and the feed excludes draft and prerelease packages.
+
+## Offline launch and diagnosis
+
+From the active installation folder:
 
 ```powershell
-.\Start.exe --updates     # Check now and show the result
-.\Start.exe --no-updates  # Open the app without a network check
+.\Start.exe --updates     # Check now and offer installation
+.\Start.exe --no-updates  # Open without a network check
 ```
 
-Normal shortcuts check at every launch. A network failure opens the existing
-app; details are written to `%LOCALAPPDATA%\AstroArchive\updates\last-error.txt`.
-Downloaded installers are cached below that updates folder.
-Installer errors go to `%TEMP%\AstroArchive-setup-error.txt`.
-After a failed installation, run the existing shortcut or use the latest
-installer manually to retry or repair.
-
-No API token is installed in the application. Releases must remain publicly
-readable for unauthenticated updates. Private distribution would need a separate
-authentication design. Draft and prerelease packages are excluded by GitHub's
-latest stable release endpoint.
+Manual installation and repair work offline. Update-check errors are logged at
+`%LOCALAPPDATA%\AstroArchive\updates\last-error.txt`; setup errors are logged at
+`%TEMP%\AstroArchive-setup-error.txt`. Installer downloads for installed apps are
+stored inside the installation's `updates` folder. Older launcher downloads may
+remain under the per-user updates cache.
