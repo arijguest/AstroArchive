@@ -3,10 +3,10 @@
 
 # AstroArchive
 
-**From telescope captures to an organised archive.**
+**Your observing sessions, organised. Your stacking inputs, ready.**
 
-A Windows desktop app for cataloguing smart-telescope FITS captures,<br>
-verifying imports and preparing files for your next stack.
+A Windows desktop app for archiving astronomical images,<br>
+verifying imports and preparing files for external processing.
 
 [![Latest release](https://img.shields.io/github/v/release/arijguest/AstroArchive?style=flat-square&color=7c6cf2)](https://github.com/arijguest/AstroArchive/releases/latest)
 [![Windows build](https://github.com/arijguest/AstroArchive/actions/workflows/windows.yml/badge.svg)](https://github.com/arijguest/AstroArchive/actions/workflows/windows.yml)
@@ -18,180 +18,163 @@ verifying imports and preparing files for your next stack.
 
 ---
 
-## A home for every observing session
+## Recent changes
 
-AstroArchive organises captures by target, telescope, session and camera, including
-Seestar and DWARF folder layouts. Import from local storage, USB telescope devices
-or filesystem-mounted cloud folders, then find the frames you need and export a
-verified stacking project.
-
-| Capability | What you can do |
+| Version | Highlights |
 | --- | --- |
-| **Verified imports** | Import FITS and gzip-compressed FITS with SHA-256 verification and duplicate detection. Originals are kept by default. |
-| **Telescope profiles** | Save devices, detect local USB storage, import missing captures and recover profiles from archive records. Rename a device across the selected archive. |
-| **Capture review** | Search and filter by target, camera, night, session, exposure and more. Screen failed or rejected captures and import only the ready files shown. |
-| **Image previews** | Inspect FITS, XISF and standard image formats with zoom, pan and display stretch. Preview adjustments leave source pixels unchanged. |
-| **Stacking preparation** | Export selected files or create ready-to-stack folders with optional matching calibrations. Hand off a single FITS stack to supported AstroWizard or Siril builds. |
-| **Archive history** | Track imports and deletions in SQLite so later telescope imports skip captures you deliberately removed. |
+| **1.10.1** | Restored full-image previews, including resized and high-DPI images. A centred toolbar provides zoom, pan and a labelled **Fit** button. |
+| **1.10.0** | Compact filters with exposure/gain sliders, acquisition-session labels and live result counts. Portrait preview layout, Windows policy diagnostics and optional publisher-signing support. |
+| **1.9.0** | Grouped navigation menus, visible sort direction and priority, a first-run walkthrough and accessibility preferences. |
+| **1.8.x** | Broader image-format support, reviewed metadata, explicit FITS conversion, dark-flat recipes, grouped target lists and an offline observing-location picker. |
 
-Drop FITS files into the archive’s `Dump` folder to process them at startup.
-Verified imports and duplicates are cleared from that inbox; failed inputs remain
-for review. Optional plate solving with ASTAP or Astrometry.net can identify
-targets, and field-rotation analysis is also available.
+[Full change history](Application_Source/README.md) · [Published releases](https://github.com/arijguest/AstroArchive/releases)
+
+## What you can do
+
+| Workflow | Features |
+| --- | --- |
+| **Import and verify** | SHA-256 verification, duplicate detection, filtered imports, failure review and recovery. Source originals stay in place by default. |
+| **Manage telescopes** | Saved profiles, local USB storage detection and device renaming. Seestar/DWARF layouts plus explicit-header recognition for additional instruments. |
+| **Find captures** | Browse files, targets or observing sessions. Search common names and catalogue IDs, including all 109 Caldwell objects. |
+| **Review images** | Zoom, pan, display stretch and selected HDU/page/frame previews where supported. Display adjustments preserve original pixels. |
+| **Organise mosaics** | Named collections, reviewable panel assignments and separate completed-output roles. Prepare stacking inputs per panel. |
+| **Prepare processing** | Verified file exports, calibration matching, dark-flat recipes and explicit derived FITS conversion for eligible images. |
+
+Imports retain original bytes. Stacking and mosaic stitching take place in external software.
 
 ## Install on Windows
 
-**Requirements:** Windows 10 or 11, 64-bit, with .NET Framework 4.8 or later.
+| Requirement | Details |
+| --- | --- |
+| **System** | Windows 10 or 11, 64-bit; .NET Framework 4.8 or later. |
+| **Installer** | `AstroArchive<package-version>.exe` from the [latest release](https://github.com/arijguest/AstroArchive/releases/latest). |
+| **Location** | `%LOCALAPPDATA%\Programs\AstroArchive` by default. |
+| **Integration** | Desktop and Start menu shortcuts; an uninstaller in Windows Installed Apps. |
 
-1. Open the [latest release](https://github.com/arijguest/AstroArchive/releases/latest).
-2. Download `AstroArchive<package-version>.exe` from its assets.
-3. Run the installer, then open AstroArchive from the Desktop or Start menu shortcut.
-
-Installation works offline and requires no administrator access. The default
-location is `%LOCALAPPDATA%\Programs\AstroArchive`; the installer also adds an
-uninstaller to Windows Installed Apps.
-
-> **Download verification:** The installer is currently unsigned. Each release
-> includes SHA-256 checksum files; compare your download’s hash with the supplied
-> checksum before running it. A checksum verifies file integrity, not publisher identity.
->
-> If Windows reports **“An Application Control policy has blocked this file”**,
-> see [Windows signing and policy troubleshooting](docs/RELEASING.md#smartscreen-and-application-control).
-> This can block a component even after setup starts. Trusted publisher signing
-> requires signing account setup; an organisation-managed PC may also need
-> its administrator to approve the publisher.
+Download the installer, run it and open AstroArchive from its shortcut. Installation works offline and needs no administrator access at the default location.
 
 <details>
-<summary><strong>Check the installer in PowerShell</strong></summary>
+<summary><strong>Checksums, signing and Windows policy blocks</strong></summary>
 
-Replace the filename below with the installer you downloaded:
+Each release includes SHA-256 checksums. In PowerShell, substitute your downloaded installer’s filename:
 
 ```powershell
-Get-FileHash .\AstroArchive1.10.0.1.exe -Algorithm SHA256
+Get-FileHash .\AstroArchive1.10.1.1.exe -Algorithm SHA256
 ```
 
-Compare the `Hash` value with the corresponding `.sha256` file in the release.
+Compare `Hash` with the corresponding `.sha256` file. A checksum checks file integrity; publisher identity depends on code signing.
 
-</details>
-
-<details>
-<summary><strong>Upgrading from the original offline 1.2.0 installer</strong></summary>
-
-Close AstroArchive and install the latest release once in the existing location
-to enable future update checks. The [original offline installer](releases/offline-1.2.0)
-remains available for reference.
+- **Signing:** The release workflow supports trusted publisher signing when its account is configured and enabled. Check the package’s release notes for signing status.
+- **Application Control:** If Windows reports that a policy blocked a file, consult [Windows signing and policy troubleshooting](docs/RELEASING.md#smartscreen-and-application-control). Managed PCs may require administrator approval of the publisher.
+- **Original 1.2.0 installer:** Close the app and manually install the latest package once in the existing location to enable update checks. The [original offline installer](releases/offline-1.2.0) remains available.
 
 </details>
 
 ## Your first import
 
-1. **Choose an archive.** Open **Settings** and select the folder that will hold your captures.
-2. **Add a telescope.** In **Import**, choose its capture folder and assign a unique physical device ID, such as `Seestar-01` or `Dwarf-03`.
-3. **Review the scan.** Check the detected captures, use **Filters** to narrow the list and import the ready files shown.
-4. **Prepare a stack.** Search the library, select frames with **Ctrl/Shift** and right-click to export files or create a stacking folder.
+1. **Choose an archive:** Use **Repository → Choose repository folder**, or **Settings → Repository**.
+2. **Choose a source:** In **Import**, select a telescope or mirror folder and assign a unique device ID, such as `Seestar-01`.
+3. **Scan and review:** Check metadata, status and the import summary. Search and filter to select the ready files you want.
+4. **Import:** Copy and verify the eligible files shown. Keeping originals and skipping flagged captures are the defaults.
+5. **Export:** Select repository rows with **Ctrl/Shift**, then right-click **Export** for file copies or a stacking folder with optional matching calibrations.
 
-The [user guide](Application_Source/Quick_Start.txt) covers classification,
-telescope profiles, cloud folders, calibration matching and optional analysis.
+> **Backups and moves:** Keep `.astroarchive/index.sqlite` with the archive. Use one writer per archive, including cloud-synced folders.
 
-> **Moving or backing up an archive?** Keep `.astroarchive/index.sqlite` with
-> the captures. Use one writer per archive, including archives in cloud folders.
+## Navigation and viewing
 
-## Mosaic collections
+| Control | Use |
+| --- | --- |
+| **Import / Export / Repository / Settings / Guide** | Top menus group workflow actions, tools, diagnostics and help. The repository path above them opens its folder. |
+| **Filters** | Narrow captures by acquisition session, exposure, gain and review state. Advanced options include mosaic, format, capability and mount. |
+| **Columns** | Show or hide headings; drag to reorder or right-click to move left/right. Import and repository layouts save independently. |
+| **Table headings** | Click to sort; **Shift-click** adds columns. Arrows and priorities show the active sort order. |
+| **Preview toolbar** | Scroll or pinch to zoom; drag or use arrows to pan after zooming. **Fit** or **F** restores the whole image; **Escape** closes the popup. |
+| **Settings → Preferences** | System/light/dark themes, text size, comfortable rows, high contrast and reduced progress animation. |
+| **Guide** | Repeat the first-run walkthrough, search offline help or open About. **F1** opens help for the current tab. |
 
-Release 1.7.2 adds [metadata-first mosaic collections](docs/MOSAICS.md),
-reviewable panel assignments and independent stacking inputs per panel.
+Target groups show file counts and known sub-exposure totals. Stacks are counted separately and excluded from those exposure totals; unknown exposure remains explicit.
 
-The library also unifies recognized object IDs and common names, with target/session
-views and exposure summaries. Import review separates rejection, integrity and
-transfer problems, supports filtered retries and retains audited reimport choices.
-The offline Guide offers search, F1 contextual help and control tooltips.
+## Import review and mosaics
 
-## Failed captures
+- **Review and recovery:** Distinguish rejected captures, integrity problems and transfer failures. Review metadata evidence and conflicts before applying re-detected values; recorded user overrides retain priority.
+- **Ignore failed:** Enable **Import options → Ignore failed** to skip filenames containing `failed`, regardless of case. It applies to folder, USB and Dump imports; rescan after changing it. Ignored originals remain in place.
+- **Delete failed:** The repository’s **Delete failed** tool lists matches across the active archive for confirmation, regardless of filters. Source copies and shared metadata remain; recorded checksums prevent reimport.
+- **Dump inbox:** Drop FITS into the archive’s `Dump` folder before startup, or process it manually. Verified imports and duplicates are removed; failed inputs remain. Finish copying before processing.
+- **Mosaic collections:** Review metadata-derived suggestions, assign captures to panels and keep completed outputs separate. Normal import detection does not invoke a plate solver.
 
-Enable **Import options > Ignore failed** to skip FITS filenames containing
-`failed`, regardless of case. The setting is saved for folder, USB and Dump imports;
-ignored originals stay in place. Rescan after changing it.
-
-**Repository tools > Delete failed** lists matching captures across the active
-repository for confirmation, regardless of the current filters. Deletion retains
-source copies and shared metadata, and records checksums to prevent reimport.
-
-## Make the tables your own
-
-Use **Columns ▾** to show or hide repository/import headings, then drag headings
-to rearrange them. Right-click a heading for **Move left/right**. Each table saves
-its own layout; **Restore default columns** returns to the original headings.
-
-Caldwell IDs now resolve alongside other catalogue IDs: **C27 → NGC6888 → Crescent
-Nebula**. The catalogue recognises all 109 Caldwell objects and adds more common
-astrophotography names to labels, filenames and search. Tooltips and processing
-windows follow the light/dark theme with readable text.
+[Mosaic workflow and limits](docs/MOSAICS.md) · [Complete user guide](Application_Source/Quick_Start.txt)
 
 ## Formats and processing
 
-| Task | Supported files or setup |
+Import, preview and scientific export have different capabilities:
+
+| Format | Archive / original export | Pixel operations and processing |
+| --- | --- | --- |
+| **FITS / gzip FITS** | Supported. | Supported image HDUs and selected slices; eligible originals can go directly into stacking projects. |
+| **Tile-compressed FITS `.fz`** | Supported. | Optional CFITSIO codec for decoding and explicit derived FITS export. |
+| **TIFF / PNG** | Supported. | Supported Windows pixel layouts; confirm linearity before explicit FITS conversion. |
+| **JPEG** | Supported. | Display preview and original export. |
+| **XISF** | Supported. | Supported numeric layouts; optional Zstandard codec. Confirm linearity before explicit FITS conversion. |
+| **SER** | Supported. | Supported frame previews; export the recording for planetary processing. |
+| **AVI / camera RAW** | Supported for recognised formats. | No decoder bundled; original export only. External RAW previews depend on installed Windows codecs. |
+
+- **Derived FITS:** Conversion is explicit, records source/output checksums and leaves originals untouched. Scientific eligibility is shown separately from preview support.
+- **Calibration:** Matching explains accepted, review-needed and rejected candidates. Dark flats match raw-flat exposures in a separate preparation stage.
+- **Optional codecs:** CFITSIO and Zstandard are not bundled. Local codecs in `%LOCALAPPDATA%\AstroArchive\codecs` survive updates.
+- **External processors:** Single-stack AstroWizard/Siril handoffs use verified working copies. AstroWizard requires the specifically verified Windows build.
+- **Analysis:** ASTAP needs a separate installation and star database; Astrometry.net needs an account. The observing town/city picker works offline.
+- **Cloud folders:** Use filesystem-mounted or streamed folders, including Google Drive for desktop. Browser-only folders cannot be used.
+
+[Format, instrument and conversion limits](docs/COMPATIBILITY.md) · [Supported processor handoffs](docs/PROCESSOR_HANDOFFS.md)
+
+## Updates
+
+| Route | Behaviour |
 | --- | --- |
-| **Archive import** | FITS/gzip/.fz, TIFF/PNG/JPEG, XISF and SER; original-only AVI and common camera RAW. |
-| **Image preview** | FITS, XISF, TIFF, PNG, JPEG, BMP and GIF. Camera RAW support depends on installed Windows codecs. |
-| **Scientific conversion** | Explicit derived FITS for supported linear raster/XISF and selected containers; optional CFITSIO for `.fz`. |
-| **Plate solving** | A separately configured ASTAP installation and database, or an Astrometry.net account. |
-| **Cloud folders** | Filesystem-mounted or streamed folders, including Google Drive for desktop. Browser-only folders cannot be used. |
+| **Desktop / Start menu shortcut** | The launcher checks stable releases, displays package notes and offers **Install release** or **Later**. |
+| **Inside AstroArchive** | Open **Settings → Check for and install new releases**, then choose **Install release**. |
+| **After installation** | The app restarts; a dismissible banner confirms the installed package once. |
 
-Stacking runs in external software. AstroWizard and Siril handoffs use a separate
-working copy; see [supported processors and handoff requirements](docs/PROCESSOR_HANDOFFS.md).
-See [compatibility details](docs/COMPATIBILITY.md) for format limits, reviewed metadata, optional codecs and dark-flat recipes. Preview and scientific-export eligibility are shown separately.
+Downloads show progress and are verified before installation. Updates preserve archives, settings, history and local codecs; downgrades are refused. Offline or failed checks leave the installed app available.
 
-## Staying up to date
+<details>
+<summary><strong>Portable copies, offline launch and troubleshooting</strong></summary>
 
-The Desktop and Start menu shortcuts open a launcher that checks the latest
-stable GitHub release. If a newer package is available, **Install it now?** opens
-with **Yes** selected. Choose **No** to open the installed version, or **Yes** to
-download, verify, install and restart.
+- Running `AstroArchive.exe` directly skips the launcher’s startup check.
+- Updates started from a portable copy install at the registered/default location and retain the portable copy.
+- Public release checks require no GitHub login.
+- See the [update guide](docs/UPDATES.md) for offline launch, repair and diagnostic log locations.
 
-You can also use **Settings → Check for and install new releases**, then
-**Install release**. The app verifies the download, saves state and restarts
-automatically after installation.
-
-- Updates preserve archives, images, manifests, caches and user settings.
-- Downloads use HTTPS and SHA-256 verification. Public release checks require no GitHub login.
-- Offline or failed checks leave the installed app available; older versions are refused.
-- Running the portable app executable directly skips the launcher. Installing an update from a portable copy uses the registered or default installation location.
-
-See the [update guide](docs/UPDATES.md) for manual checks, offline launch and troubleshooting.
+</details>
 
 ## Build from source
 
-AstroArchive uses **C# 5 and WPF**, targeting **.NET Framework 4.8**. Build on
-Windows x64 with the .NET Framework compiler; no Visual Studio, SDK, NuGet or
-Python installation is required.
+**C# 5 · WPF · .NET Framework 4.8 · Windows x64**
+
+Use the .NET Framework compiler; the application build needs no Visual Studio, SDK or NuGet installation.
 
 ```powershell
-# Test the application and installer, build the package and run Windows smoke checks.
 powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\build-release.ps1
 ```
 
-Run release smoke checks on a **test account**: they temporarily register the app
-and create shortcuts. Outputs are written to `release-artifacts/`.
-
-[Windows CI](.github/workflows/windows.yml) runs on pushes to `main` and pull
-requests. A new package version on `main` automatically publishes a tested
-installer, checksums and update feed. Existing published releases are retained.
-See the [release guide](docs/RELEASING.md) for versioning and publication.
+- **Validation:** Application, installer, updater and Windows smoke checks. Run registration/install smoke checks on a test account.
+- **Output:** `release-artifacts/`.
+- **CI:** Pushes to `main` and pull requests run Windows validation; publication also checks release integrity and configured signatures.
+- **Publication:** A new package version on `main` publishes only after validation. Existing published releases are retained.
 
 | Location | Contents |
 | --- | --- |
-| [`Application_Source/`](Application_Source/README.md) | WPF application, catalogue, assets and generated-data tests. |
-| [`Installer/`](Installer/README.md) | Installer, Windows integration, launcher and update tests. |
-| [`scripts/`](scripts/build-release.ps1) | Windows release build and smoke validation. |
-| [`docs/`](docs) | Updates, processor handoffs, release instructions and validation notes. |
-| [`releases/offline-1.2.0/`](releases/offline-1.2.0) | Original installer and provenance. |
+| [`Application_Source/`](Application_Source/README.md) | Application, assets, data readers and tests. |
+| [`Installer/`](Installer/README.md) | Installer, launcher, Windows integration and update tests. |
+| [`docs/`](docs) | Compatibility, mosaics, processing, updates and release instructions. |
+| [`scripts/`](scripts/build-release.ps1) | Build and release validation. |
+
+[Release and signing guide](docs/RELEASING.md)
 
 ## Catalogue and licensing
 
-The bundled catalogue derives from **OpenNGC by Mattia Verga**, licensed under
-**CC BY-SA 4.0**. See [Catalogue_Notice.md](Application_Source/Catalogue_Notice.md)
-and [OpenNGC_README.md](Application_Source/OpenNGC_README.md) for attribution and provenance.
+The bundled catalogue derives from **OpenNGC by Mattia Verga and contributors**, licensed **CC BY-SA 4.0**.
+
+[Catalogue attribution](Application_Source/Catalogue_Notice.md) · [OpenNGC provenance](Application_Source/OpenNGC_README.md)
 
 The repository does not currently specify a licence for the application source.
-
-Toolbar navigation uses Import, Export, Repository, Settings and Guide menus, followed by Buy Me a Coffee. The centered repository path opens its folder. Guide includes a first-run walkthrough and About; Settings → Preferences contains theme and accessibility controls.
