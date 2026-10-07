@@ -52,12 +52,22 @@ Expand Capture details for device, camera, gain, temperature and classification.
 
 Stretch changes the display only; source pixels and FITS headers stay unchanged.
 - Linear: no nonlinear stretch; the initial choice for normal raster images.
-- Auto: linked RGB stretch that reveals faint data while retaining colour balance.
-- Strong: a brighter background for inspecting faint structure.
+- Auto: reveals faint data with linked RGB unless colour compensation is needed.
+- Strong: a brighter background, with the same automatic colour compensation.
 - Auto per channel: independently balance each channel's background.
-FITS and XISF start with the saved stretch, defaulting to Auto. Fit sizes the
+Auto/Strong compensate for recognised IRCUT/LP filters or a severe RGB cast.
+This balances the preview background; it is not a scientific colour calibration.
+Solar, lunar and planetary captures use Linear automatically, preserving their
+colour. Identification uses the target, observation mode or clear file/folder
+names. Correct an unknown target if an unlabelled capture needs this behaviour.
+FITS and XISF otherwise start with the saved stretch, defaulting to Auto. Viewing
+a solar/planetary image does not change that saved preference. Fit sizes the
 preview to its pane; zoom scales the sampled display. Large images are sampled
 to roughly 1400 pixels per side, so use an external tool for pixel inspection.
+
+Sun and Solar are one target named Sun. Imports and metadata edits use Sun;
+opening an archive also merges existing library labels and cached import records.
+New solar imports use Targets/Sun. Existing indexed file paths are preserved.
 
 Preview supports FITS and gzip FITS (integer/float, RGB and recognised Bayer CFA),
 XISF mono/RGB/CFA with UInt8/16/32/64 or Float32/64 samples, attached or base64

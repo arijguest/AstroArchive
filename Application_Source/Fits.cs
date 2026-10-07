@@ -79,7 +79,7 @@ namespace AstroArchive {
     Stream source=new ReadCounter(input,n=>ct.ThrowIfCancellationRequested());FitsHeader h=FindImage(source);string bayer=h.Get("BAYERPAT").ToUpperInvariant();bool cfa=h.Channels==1&&new[]{"RGGB","BGGR","GRBG","GBRG"}.Contains(bayer);
     int step=Math.Max(cfa?2:1,(int)Math.Ceiling(Math.Max(h.Width,h.Height)/1400.0));if(cfa&&step%2!=0)step++;
     int width=(h.Width+step-1)/step,height=(h.Height+step-1)/step,channels=cfa||h.Channels>=3?3:1;
-    var image=new PreviewData{Width=width,Height=height,SourceWidth=h.Width,SourceHeight=h.Height,Channels=channels,FlipY=true,Description="FITS · "+(cfa?bayer+" colour":channels==3?"RGB":"mono")+" · "+h.Bitpix+" bit"};
+    var image=new PreviewData{Width=width,Height=height,SourceWidth=h.Width,SourceHeight=h.Height,Channels=channels,Target=h.Get("OBJECT","OBJNAME","TARGET","TARGNAME","OBSTARG"),Filter=h.Get("FILTER","FILTERID","FILTNAME"),ObservationMode=h.Get("OBSMODE","CAPMODE","SHOOTMOD","MODE","IMAGETYP"),FlipY=true,Description="FITS · "+(cfa?bayer+" colour":channels==3?"RGB":"mono")+" · "+h.Bitpix+" bit"};
     image.Pixels=new double[checked(width*height*channels)];var counts=new int[image.Pixels.Length];
     int bpp=Math.Abs(h.Bitpix)/8;byte[] row=new byte[checked(h.Width*bpp)];double scale=h.Number("BSCALE")??1,zero=h.Number("BZERO")??0;double? blank=h.Number("BLANK");
     if(h.Bitpix>0){double low=h.Bitpix==8?0:-Math.Pow(2,h.Bitpix-1),high=h.Bitpix==8?255:Math.Pow(2,h.Bitpix-1)-1;image.Minimum=Math.Min(low*scale+zero,high*scale+zero);image.Maximum=Math.Max(low*scale+zero,high*scale+zero);}

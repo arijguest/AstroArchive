@@ -26,6 +26,7 @@ namespace AstroArchive {
      AddAlias(a[0],name);AddAlias(name,name);foreach(string t in a[7].Split(','))AddAlias(t,name);foreach(string t in a[8].Split(','))if(Regex.IsMatch(t.Trim(),@"^(M|NGC|IC|SH\s*2|B)\s*\d",RegexOptions.IgnoreCase))AddAlias(t,name);
     }
    }
+   AddAlias("Sun","Sun");AddAlias("Solar","Sun");
    AddAlias("Pleiades","M45");AddAlias("Andromeda","M31");AddAlias("Triangulum","M33");AddAlias("Pacman","NGC281");AddAlias("Pacman Nebula","NGC281");AddAlias("Wizard","NGC7380");AddAlias("Wizard Nebula","NGC7380");AddAlias("Crescent","NGC6888");AddAlias("Crescent Nebula","NGC6888");AddAlias("Hidden Galaxy","IC342");AddAlias("Orion Nebula","M42");
    AddAlias("Heart Nebula","IC1805");AddAlias("Soul Nebula","IC1848");AddAlias("Elephant's Trunk Nebula","IC1396");AddAlias("Elephant Trunk Nebula","IC1396");
    foreach(var phrase in phrases.GroupBy(p=>p.Key).Select(g=>g.First())){if(KnownName(phrase.Key)!=phrase.Value)continue;string pattern=@"\b"+string.Join(@"\s*",phrase.Key.Split(new[]{' '},StringSplitOptions.RemoveEmptyEntries).Select(Regex.Escape))+@"\b";var entry=new KeyValuePair<Regex,string>(new Regex(pattern,RegexOptions.CultureInvariant),phrase.Value);filenamePatterns.Add(entry);string token="";foreach(string word in phrase.Key.Split(' ')){token+=word;List<KeyValuePair<Regex,string>> list;if(!phraseIndex.TryGetValue(token,out list))phraseIndex[token]=list=new List<KeyValuePair<Regex,string>>();list.Add(entry);}}
@@ -37,6 +38,7 @@ namespace AstroArchive {
    string text=Regex.Replace(stem.ToUpperInvariant(),@"[^A-Z0-9]+"," ");var found=new HashSet<string>();
    foreach(Match match in Regex.Matches(text,@"\b(M|NGC|IC)\s*0*(\d+)([A-Z]?)\b")){string id=KnownName(match.Groups[1].Value+match.Groups[2].Value+match.Groups[3].Value);if(id!=null)found.Add(id);}
    foreach(string token in text.Split(new[]{' '},StringSplitOptions.RemoveEmptyEntries).Distinct()){List<KeyValuePair<Regex,string>> list;if(phraseIndex.TryGetValue(token,out list))foreach(var phrase in list)if(phrase.Key.IsMatch(text))found.Add(phrase.Value);}
+   if(Regex.IsMatch(text,@"\bSUN\b"))found.Add("Sun");
    return found;
   }
   public static string TargetFromFilename(string filename){var found=FilenameTargets(filename);return found.Count==1?found.First():null;}
@@ -90,7 +92,9 @@ namespace AstroArchive {
    if(f.Kind=="Light"&&f.StackCount>1){f.Kind="Stack";f.Notes+="Header indicates multiple combined exposures. ";}
    if(f.Kind=="Unknown"&&(h.Number("NCOMBINE","STACKCNT","NSTACK")??0)>1)f.Kind="Stack";
    string filter=h.Get("FILTER","FILTERID","FILTNAME");if(!string.IsNullOrEmpty(filter))f.Filter=filter;
-   else {double? ir=MatchNumber(text,@"(?:^|_)IR[_-]?(\d)");if(ir.HasValue)f.Filter=ir==0?"Standard":ir==1?"Astro":ir==2?"Dual band":"IR "+ir;else if(Regex.IsMatch(low,@"(?:^|[_/ -])(duo|dual|lp)[_-]?(band|filter)?(?:[_/ -]|$)"))f.Filter="Dual band";}
+   else {double? ir=MatchNumber(text,@"(?:^|_)IR[_-]?(\d)");if(ir.HasValue)f.Filter=ir==0?"Standard":ir==1?"Astro":ir==2?"Dual band":"IR "+ir;else if(Regex.IsMatch(low,@"(?:^|[_/ -])ir[_ -]*cut(?:[_/ .-]|$)"))f.Filter="IRCUT";else if(Regex.IsMatch(low,@"(?:^|[_/ -])(duo|dual|lp)[_-]?(band|filter)?(?:[_/ -]|$)"))f.Filter="Dual band";}
+   f.ObservationMode=h.Get("OBSMODE","CAPMODE","SHOOTMOD","MODE");
+   if(string.IsNullOrEmpty(f.ObservationMode)&&ObservationTargets.Unstretched(null,type))f.ObservationMode=type;
    string target=h.Get("OBJECT","OBJNAME","TARGET","TARGNAME","OBSTARG");
    if(Catalog.IsAmbiguous(target)){
     var m=Regex.Match(text,@"DWARF_RAW_(?:(?:TELE|WIDE)_)?(?:(?:MOSAIC)_)?(.+?)_EXP[_-]",RegexOptions.IgnoreCase);if(m.Success)target=m.Groups[1].Value;
@@ -102,6 +106,7 @@ namespace AstroArchive {
    if(!f.Gain.HasValue)f.Gain=ShotNumber(shots,"gain","cameraGain");if(!f.Exposure.HasValue)f.Exposure=ShotNumber(shots,"exposure_s","exposureSeconds","exposureTimeSec");
    if(f.Filter=="Unknown"){double? ir=ShotNumber(shots,"ir","irCut");if(ir.HasValue&&ir>=0&&ir<=2)f.Filter=ir==0?"Standard":ir==1?"Astro":"Dual band";}
    if(f.BinX==0){string b=Shot(shots,"binning","bin");var m=Regex.Match(b,@"^(\d+)(?:\s*[x*]\s*(\d+))?$");if(m.Success){f.BinX=int.Parse(m.Groups[1].Value);f.BinY=m.Groups[2].Success?int.Parse(m.Groups[2].Value):f.BinX;}}
+   if(Catalog.IsAmbiguous(target)){string hint=ObservationTargets.ModeFromPath(text);if(ObservationTargets.CanonicalSolar(hint)=="Sun")target="Sun";if(string.IsNullOrEmpty(f.ObservationMode))f.ObservationMode=hint;}
    string filenameTarget=Catalog.TargetFromFilename(f.OriginalName);
    f.Target=filenameTarget??Catalog.Normalize(target);f.TargetEvidence=filenameTarget!=null?"Recognised filename target":Catalog.KnownName(target)!=null?"Recognised header/session target":"Unrecognised label; plate solving required";
    if(f.Kind.Contains("dark")||f.Kind.Contains("bias")||f.Kind.Contains("flat")||f.Kind=="Dark"||f.Kind=="Bias"||f.Kind=="Flat"){f.Target="Calibration";f.TargetEvidence="Calibration frame";}

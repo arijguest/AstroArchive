@@ -46,7 +46,7 @@ namespace AstroArchive {
   public string Hash {get;set;} public string RelativePath {get;set;} public string SourcePath {get;set;} public string SourceRoot {get;set;} public string OriginalName {get;set;}
   public string Telescope {get;set;} public string TelescopeIdentity {get;set;} public string Model {get;set;} public string Camera {get;set;} public string Target {get;set;}
   public string Make {get;set;} public string MakeEvidence {get;set;} public string TargetEvidence {get;set;} public string SourceDisposition {get;set;}
-  public string Kind {get;set;} public string Calibration {get;set;} public string Filter {get;set;} public string Bayer {get;set;}
+  public string ObservationMode {get;set;} public string Kind {get;set;} public string Calibration {get;set;} public string Filter {get;set;} public string Bayer {get;set;}
   public string Mount {get;set;} public string MountEvidence {get;set;} public string Observed {get;set;} public string TimeSource {get;set;}
   public string Night {get;set;} public string Session {get;set;} public string Notes {get;set;} public string Status {get;set;}
   public string SourceMetadataPath {get;set;} public string SidecarRelativePath {get;set;}
