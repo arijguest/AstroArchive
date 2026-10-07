@@ -5,6 +5,14 @@ using System.Linq;
 namespace AstroArchive {
  public partial class Tests {
   static void PreviewGestureTests(){
+   Test("Portrait previews keep the whole image without letterboxing across frame sizes",()=>{
+    foreach(var dimensions in new[]{new[]{420.0,320.0},new[]{320.0,420.0},new[]{320.0,320.0},new[]{1400.0,200.0}}){
+     var geometry=new PreviewGeometry(dimensions[0],dimensions[1]);Check(geometry.Width<=geometry.Height&&geometry.Rotated==(dimensions[0]>dimensions[1]),"Preview orientation is not portrait");
+     foreach(var frame in new[]{new[]{264.0,520.0},new[]{700.0,260.0},new[]{160.0,300.0}}){double width,height;geometry.Frame(frame[0],frame[1],out width,out height);Check(width<=frame[0]+0.000001&&height<=frame[1]+0.000001,"Preview exceeds the available frame");var zoom=new PreviewZoom();zoom.Fit(width,height,geometry.Width,geometry.Height);Check(Math.Abs(zoom.X)<0.000001&&Math.Abs(zoom.Y)<0.000001,"Preview has black bars");
+      double fitted=zoom.Scale;zoom.Zoom(2,width/2,height/2);zoom.Pan(-10000,10000);zoom.Constrain(width,height,geometry.Width,geometry.Height);Check(zoom.X<=0&&zoom.Y<=0&&zoom.X+geometry.Width*zoom.Scale>=width-0.000001&&zoom.Y+geometry.Height*zoom.Scale>=height-0.000001,"Panning exposes empty borders");zoom.Zoom(0.01,width/2,height/2);zoom.Constrain(width,height,geometry.Width,geometry.Height);Check(Math.Abs(zoom.Scale-fitted)<0.000001&&Math.Abs(zoom.X)<0.000001&&Math.Abs(zoom.Y)<0.000001,"Zoom out does not stop at the whole image");
+     }
+    }
+   });
    Test("Unknown metadata display leaves targets and stored values intact",()=>{
     var frame=new Frame{Target="Unknown",Make="Unknown",Model="Other / unknown",Kind="Unknown",Camera="Unknown",Mount="Unknown",Night="Unknown date",Filter="Unknown",Calibration="Unknown"};var reopened=Util.Deserialize<Frame>(Util.Serialize(frame));
     foreach(string value in new[]{null,"","Unknown","Unknown date","Other / unknown","?"})Check(TableText.Display(value)=="-","Unknown metadata is visible as text");

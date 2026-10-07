@@ -96,7 +96,7 @@ namespace AstroArchive {
             var cleanup = ((CheckBox)Window.FindName("DeleteOriginalsCheck")).IsChecked == true;
             L("ImportPolicyLabel").Text = (cleanup ? "Originals will be deleted after verified import" : "Originals kept") +
                 " · " + (analysis ? "Optional analysis enabled" : "Analysis off") + " · " + (SkipFlagged ? "Flagged captures excluded" : "Flagged captures included") +
-                (settings.IgnoreFailed ? " · Failed filenames ignored" : "")+(importFilters.Values.Count>0?" · "+importFilters.Values.Count+" active filters":"");
+                (settings.IgnoreFailed ? " · Failed filenames ignored" : "")+(importFilters.ActiveCount>0?" · "+importFilters.ActiveCount+" active filters":"");
             L("ImportPolicyLabel").FontWeight = cleanup ? FontWeights.SemiBold : FontWeights.Normal;
             L("RateLabel").Visibility = cancel != null ? Visibility.Visible : Visibility.Collapsed;
             ((ProgressBar)Window.FindName("ProgressBar")).Visibility = cancel != null ? Visibility.Visible : Visibility.Collapsed;

@@ -1,4 +1,4 @@
-// AstroArchive 1.9.0. C# 5, .NET Framework 4.8, Windows 10/11 x64.
+// AstroArchive 1.10.0. C# 5, .NET Framework 4.8, Windows 10/11 x64.
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -52,7 +52,10 @@ namespace AstroArchive {
   public string ObjectId {get{return Catalog.ObjectId(Target);}} public string CommonName {get{return Catalog.CommonName(Target);}}
   public string TargetLabel {get{return Catalog.Label(Target);}}
   public string TargetName {get{return CommonName.Length>0?CommonName:ObjectId.Length==0?Target:"";}}
-  public string SessionGroup {get{return (Night??"Unknown date")+" · "+(Telescope??"Unknown device")+" · "+(Camera??"Unknown camera")+" · "+(string.IsNullOrEmpty(Session)?"Unassigned session":Session);}}
+  public string SessionKey {get{return CaptureSessions.Key(this);}}
+  public string AcquisitionDate {get;set;} public string AcquisitionDateSource {get;set;}
+  public string AcquisitionDateLabel {get{var date=CaptureSessions.Date(this);return date==null?"Unknown":date.Text;}}
+  public string SessionGroup {get{return SessionKey;}}
   public string Make {get;set;} public string MakeEvidence {get;set;} public string TargetEvidence {get;set;} public string SourceDisposition {get;set;}
   public string ObservationMode {get;set;} public string Kind {get;set;} public string Calibration {get;set;} public string Filter {get;set;} public string Bayer {get;set;}
   public string Mount {get;set;} public string MountEvidence {get;set;} public string Observed {get;set;} public string TimeSource {get;set;}
@@ -84,7 +87,7 @@ namespace AstroArchive {
   public string GainText {get{return Gain.HasValue?Util.Num(Gain):"-";}} public string TemperatureText {get{return Temperature.HasValue?Util.Num(Temperature)+" °C":"-";}}
   [ScriptIgnore]public long? PixelCount {get{return Width>0&&Height>0?(long?)((long)Width*Height*Math.Max(1,Channels)):null;}}
   public string SizeText {get{return Width<=0||Height<=0?"-":Width+" × "+Height+(Channels>1?" × "+Channels:"");}}
-  public string SearchText {get{return string.Join(" ",new[]{Target,ObjectId,CommonName,Catalog.Aliases(Target),Telescope,TelescopeModel,CameraModel,CameraId,AcquisitionSoftware,ReadoutMode,Roi,OpticalConfiguration,Format,CapabilityText,MakeText,Model,MakeEvidence,TargetEvidence,SourceDisposition,Camera,Kind,Calibration,Filter,Mount,MountText,Night,Observed,OriginalName,Notes,Status,ReviewText,ScreeningIssue,MosaicText,PanelText,Util.Num(Exposure),Util.Num(Gain),Util.Num(Temperature),SizeText,"bin"+BinX+"x"+BinY});}}
+  public string SearchText {get{return string.Join(" ",new[]{Target,ObjectId,CommonName,Catalog.Aliases(Target),Telescope,TelescopeModel,CameraModel,CameraId,AcquisitionSoftware,ReadoutMode,Roi,OpticalConfiguration,Format,CapabilityText,MakeText,Model,MakeEvidence,TargetEvidence,SourceDisposition,Camera,Kind,Calibration,Filter,Mount,MountText,Night,AcquisitionDate,AcquisitionDateLabel,Observed,OriginalName,Notes,Status,ReviewText,ScreeningIssue,MosaicText,PanelText,Util.Num(Exposure),Util.Num(Gain),Util.Num(Temperature),SizeText,"bin"+BinX+"x"+BinY});}}
   public string Group {get{return string.Join("|",new[]{Telescope,MakeText,Camera,Filter,Width.ToString(),Height.ToString(),Channels.ToString(),BinX.ToString(),BinY.ToString(),Bayer,Calibration,Util.Num(Exposure),Util.Num(Gain),Assets.CompatibilityKey(this)});}}
   public Frame Clone() { var copy=(Frame)MemberwiseClone();copy.Facts=Facts==null?null:Facts.ToDictionary(p=>p.Key,p=>new MetadataFact{Value=p.Value.Value,Raw=p.Value.Raw,Source=p.Value.Source,Unit=p.Value.Unit});copy.MetadataConflicts=MetadataConflicts==null?null:new List<string>(MetadataConflicts);copy.AssociatedFiles=AssociatedFiles==null?null:AssociatedFiles.Select(a=>new AssociatedFile{SourcePath=a.SourcePath,RelativePath=a.RelativePath,Hash=a.Hash,Role=a.Role,Stamp=a.Stamp==null?null:a.Stamp.Clone()}).ToList();copy.SourceStamp=SourceStamp==null?null:SourceStamp.Clone();copy.RepositoryStamp=RepositoryStamp==null?null:RepositoryStamp.Clone();copy.SourceMetadataStamp=SourceMetadataStamp==null?null:SourceMetadataStamp.Clone();copy.Mosaic=Mosaic==null?null:Mosaic.Clone();copy.Sky=Sky==null?null:Sky.Clone();copy.MosaicLabels=MosaicLabels==null?null:MosaicLabels.Select(m=>m.Clone()).ToList();return copy; }
  }

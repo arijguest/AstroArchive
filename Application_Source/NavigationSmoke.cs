@@ -38,10 +38,22 @@ namespace AstroArchive {
                     var view = root.Items.OfType<MenuItem>().Single(item => Convert.ToString(item.Header) == "View");
                     var filters = view.Items.OfType<MenuItem>().Single(item => Convert.ToString(item.Header) == "Filters");
                     view.IsSubmenuOpen = true; filters.IsSubmenuOpen = true; PumpPopupLayout();
-                    if (!filters.IsSubmenuOpen || filters.Items.OfType<MenuItem>().Count() < 10) throw new Exception("Repository filter tree is missing.");
+                    if (!filters.IsSubmenuOpen || !filters.Items.OfType<MenuItem>().Any(item=>Convert.ToString(item.Header)=="Open filters panel…")) throw new Exception("Compact filter panel is missing from navigation.");
                     filters.IsSubmenuOpen = false; view.IsSubmenuOpen = false;
                     root.IsSubmenuOpen = false;
                     PumpPopupLayout();
+                    ShowFilters(false);PumpPopupLayout();
+                    if(filtersPopup==null||!filtersPopup.IsOpen)throw new Exception("Compact filter popup did not open from top navigation.");
+                    var filterBody=(FrameworkElement)filtersPopup.Child;
+                    foreach(var label in PopupChildren<TextBlock>(filterBody).Where(t=>t.IsVisible&&t.IsEnabled&&!string.IsNullOrWhiteSpace(t.Text))){
+                        Brush background=((Border)filterBody).Background;
+                        for(DependencyObject parent=VisualTreeHelper.GetParent(label);parent!=null;parent=VisualTreeHelper.GetParent(parent)){
+                            var surface=parent as Border;var brush=surface==null?null:surface.Background as SolidColorBrush;
+                            if(brush!=null&&brush.Color.A==255){background=brush;break;}
+                        }
+                        Readable(label.Foreground,background,mode+" compact filter label: "+label.Text);
+                    }
+                    SavePopup(filterBody,Path.Combine(output,"AstroArchive_Filters_"+mode+".png"));filtersPopup.IsOpen=false;PumpPopupLayout();
                     Capture(Path.Combine(output, "AstroArchive_Navigation_" + mode + ".png"));
                 }
                 var grid = G("FramesGrid"); var exposure = grid.Columns.First(column => column.SortMemberPath == "Exposure");

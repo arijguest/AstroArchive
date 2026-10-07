@@ -10,7 +10,7 @@ namespace AstroArchive {
  public static class CaptureGroups {
   public static CaptureGroupSummary Summarize(IEnumerable<Frame> frames){
    var rows=frames.ToList();var subs=rows.Where(f=>f.Kind=="Light").ToList();
-   return new CaptureGroupSummary{Captures=rows.Count,Subs=subs.Count,Stacks=rows.Count(f=>f.Kind=="Stack"),Sessions=rows.Select(f=>f.Target+"|"+f.SessionGroup).Distinct().Count(),ExposureSeconds=subs.Where(KnownExposure).Sum(f=>f.Exposure.Value),UnknownExposure=subs.Count(f=>!KnownExposure(f)),Flagged=rows.Count(CaptureScreening.NeedsReview)};
+   return new CaptureGroupSummary{Captures=rows.Count,Subs=subs.Count,Stacks=rows.Count(f=>f.Kind=="Stack"),Sessions=rows.Select(f=>f.SessionKey).Distinct().Count(),ExposureSeconds=subs.Where(KnownExposure).Sum(f=>f.Exposure.Value),UnknownExposure=subs.Count(f=>!KnownExposure(f)),Flagged=rows.Count(CaptureScreening.NeedsReview)};
   }
   static bool KnownExposure(Frame f){return f.Exposure.HasValue&&f.Exposure.Value>0&&!double.IsNaN(f.Exposure.Value)&&!double.IsInfinity(f.Exposure.Value);}
   public static string ExposureLabel(double seconds,int unknown){

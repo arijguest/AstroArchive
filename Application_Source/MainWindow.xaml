@@ -584,7 +584,7 @@
        <ColumnDefinition Width="166" />
        <ColumnDefinition Width="*" MinWidth="260" />
        <ColumnDefinition x:Name="PreviewDividerColumn" Width="10" />
-       <ColumnDefinition x:Name="PreviewColumn" Width="330" MinWidth="0" />
+       <ColumnDefinition x:Name="PreviewColumn" Width="290" MinWidth="0" />
       </Grid.ColumnDefinitions>
       <Border Background="{DynamicResource Surface}" CornerRadius="8" BorderBrush="{DynamicResource Border}" BorderThickness="1" Margin="0,0,10,0">
        <DockPanel>
@@ -613,7 +613,7 @@
           <DataGridTextColumn Header="COMMON NAME / LABEL" Binding="{Binding TargetName}" Width="180" />
           <DataGridTextColumn Header="FRAME TYPE" Binding="{Binding Kind}" Width="110" />
           <DataGridTextColumn Header="FORMAT" Binding="{Binding Format}" Width="65" />
-          <DataGridTextColumn Header="NIGHT" Binding="{Binding Night}" Width="96" />
+          <DataGridTextColumn Header="ACQUIRED" Binding="{Binding AcquisitionDateLabel}" Width="96" />
           <DataGridTextColumn Header="EXPOSURE" Binding="{Binding ExposureText}" Width="76" />
           <DataGridTextColumn Header="FILTER" Binding="{Binding Filter}" Width="85" />
          </DataGrid.Columns>
@@ -639,30 +639,10 @@
          <TextBlock Text="IMAGE PREVIEW" FontSize="{DynamicResource UiFontCaption}" FontWeight="SemiBold" Foreground="{DynamicResource Muted}" VerticalAlignment="Center" />
         </DockPanel>
         <TextBlock Grid.Row="1" x:Name="PreviewName" Text="Select a capture" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" Margin="0,10,0,8" />
-        <Border Grid.Row="2" Background="#05080F" CornerRadius="5" ClipToBounds="True">
-         <Grid x:Name="PreviewStage">
-          <ScrollViewer x:Name="PreviewScroll" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
-           <Image x:Name="PreviewImage" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center" RenderOptions.BitmapScalingMode="HighQuality" />
-          </ScrollViewer>
-          <TextBlock x:Name="PreviewMessage" Text="Select a file or open an image.  FITS · XISF · TIFF · PNG · JPEG" Foreground="#A8B5CD" HorizontalAlignment="Center" VerticalAlignment="Center" TextWrapping="Wrap" TextAlignment="Center" Margin="18" />
-         </Grid>
-        </Border>
-        <Grid Grid.Row="3" Margin="0,10,0,0">
-         <Grid.ColumnDefinitions>
-          <ColumnDefinition Width="*" />
-          <ColumnDefinition Width="78" />
-         </Grid.ColumnDefinitions>
-         <StackPanel>
-          <TextBlock Text="DISPLAY STRETCH" FontSize="{DynamicResource UiFontCaption}" Foreground="{DynamicResource Muted}" Margin="0,0,0,4" />
-          <ComboBox x:Name="StretchMode" ToolTip="Preview only. Auto links RGB channels to preserve colour; Auto per channel balances the background." />
-         </StackPanel>
-         <StackPanel Grid.Column="1" Margin="6,0,0,0">
-          <TextBlock Text="ZOOM" FontSize="{DynamicResource UiFontCaption}" Foreground="{DynamicResource Muted}" Margin="0,0,0,4" />
-          <ComboBox x:Name="PreviewZoom" />
-         </StackPanel>
-        </Grid>
+      <Grid Grid.Row="2" x:Name="PreviewHost" ClipToBounds="True"><Grid x:Name="PreviewStage" ClipToBounds="True" HorizontalAlignment="Center" VerticalAlignment="Top"><Image x:Name="PreviewImage"/></Grid><TextBlock x:Name="PreviewMessage" Text="Select a capture or open an image." Foreground="{DynamicResource Muted}" HorizontalAlignment="Center" VerticalAlignment="Center" TextWrapping="Wrap" TextAlignment="Center" Margin="18"/></Grid>
+      <DockPanel Grid.Row="3" Margin="0,10,0,0"><TextBlock Text="Stretch" Foreground="{DynamicResource Muted}" VerticalAlignment="Center" Margin="0,0,8,0"/><ComboBox x:Name="StretchMode" ToolTip="Adjust the preview stretch. Auto preserves colour; Auto per channel balances the background."/></DockPanel>
         <StackPanel Grid.Row="4">
-         <TextBlock x:Name="PreviewInfo" Foreground="{DynamicResource Muted}" FontSize="{DynamicResource UiFontCaption}" TextWrapping="Wrap" Margin="0,8,0,0" />
+         <TextBlock x:Name="PreviewInfo" Foreground="{DynamicResource Muted}" FontSize="{DynamicResource UiFontCaption}" TextTrimming="CharacterEllipsis" Margin="0,8,0,0" />
          <Expander Header="Capture details" Margin="0,8,0,0" Foreground="{DynamicResource Muted}">
           <ScrollViewer MaxHeight="130">
            <StackPanel>
@@ -755,7 +735,7 @@
         <DataGridTextColumn Header="FRAME TYPE" Binding="{Binding Kind}" Width="100" />
         <DataGridTextColumn Header="FORMAT" Binding="{Binding Format}" Width="65" />
         <DataGridTextColumn Header="CAMERA" Binding="{Binding Camera}" Width="90" />
-        <DataGridTextColumn Header="NIGHT" Binding="{Binding Night}" Width="100" />
+        <DataGridTextColumn Header="ACQUIRED" Binding="{Binding AcquisitionDateLabel}" Width="100" />
         <DataGridTextColumn Header="EXPOSURE" Binding="{Binding ExposureText}" Width="80" />
         <DataGridTextColumn Header="FILE" Binding="{Binding OriginalName}" Width="*" MinWidth="180" />
        </DataGrid.Columns>
@@ -834,7 +814,7 @@
          <DataGridTextColumn Header="PANEL / ROLE" Binding="{Binding Panel}" Width="Auto" MinWidth="160" />
          <DataGridTextColumn Header="MEMBERSHIP" Binding="{Binding State}" Width="Auto" MinWidth="120" />
          <DataGridTextColumn Header="TARGET" Binding="{Binding Target}" Width="Auto" MinWidth="90" />
-         <DataGridTextColumn Header="NIGHT" Binding="{Binding Night}" Width="Auto" MinWidth="115" />
+         <DataGridTextColumn Header="ACQUIRED" Binding="{Binding AcquisitionDateLabel}" Width="Auto" MinWidth="115" />
          <DataGridTextColumn Header="FILTER" Binding="{Binding Filter}" Width="Auto" MinWidth="110" />
         </DataGrid.Columns>
        </DataGrid>
@@ -886,7 +866,7 @@
    <Button x:Name="LibraryColumnsButton" Content="Columns ▾" />
    <Button x:Name="PreviewToggle" Content="Preview" />
    <Button x:Name="MoreButton" Content="Tools ▾" Margin="0" />
-   <Button x:Name="LibraryFiltersButton" Grid.Column="1" Content="Filters ▾" Margin="8,0,0,0" />
+   <Button x:Name="LibraryFiltersButton" Grid.Column="1" Content="Filters" Margin="8,0,0,0" />
    <Button x:Name="ReviewLibraryButton" Content="Review flagged" />
    <Button x:Name="ScreenLibraryButton" Content="Screen for failures" ToolTip="Check selected or visible indexed captures for rejection markers and damaged FITS data." />
    <Button x:Name="RotationButton" Content="Rotation" Padding="10,5" />
@@ -897,7 +877,7 @@
    <Button x:Name="RebuildTelescopesButton" Content="Recover profiles" Padding="10,6" />
    <Button x:Name="RefreshUsbButton" Content="Refresh USB" Padding="10,6" Margin="0" />
    <Button DockPanel.Dock="Right" x:Name="AutoUploadButton" Content="Auto upload from USB" Visibility="Collapsed" Background="{DynamicResource Accent}" Foreground="White" Margin="8,0,0,0" />
-   <Button Grid.Column="1" x:Name="ImportFiltersButton" Content="Filters ▾" Margin="8,0,0,0" />
+   <Button Grid.Column="1" x:Name="ImportFiltersButton" Content="Filters" Margin="8,0,0,0" />
    <Button Grid.Column="3" x:Name="ScreenImportsButton" Content="Screen for failures" Margin="8,0,0,0" ToolTip="Check the visible captures for telescope failure/rejection markers and unreadable FITS data." />
    <CheckBox x:Name="SkipFlaggedCheck" Content="Skip flagged captures" IsChecked="True" VerticalAlignment="Center" Margin="0,0,16,8" />
    <Button x:Name="ReviewImportsButton" Content="Review flagged captures" Padding="12,6" Margin="0,0,8,8" />

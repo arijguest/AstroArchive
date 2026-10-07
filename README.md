@@ -54,6 +54,12 @@ uninstaller to Windows Installed Apps.
 > **Download verification:** The installer is currently unsigned. Each release
 > includes SHA-256 checksum files; compare your download’s hash with the supplied
 > checksum before running it. A checksum verifies file integrity, not publisher identity.
+>
+> If Windows reports **“An Application Control policy has blocked this file”**,
+> see [Windows signing and policy troubleshooting](docs/RELEASING.md#smartscreen-and-application-control).
+> This can block a component even after setup starts. Trusted publisher signing
+> requires signing account setup; an organisation-managed PC may also need
+> its administrator to approve the publisher.
 
 <details>
 <summary><strong>Check the installer in PowerShell</strong></summary>
@@ -61,7 +67,7 @@ uninstaller to Windows Installed Apps.
 Replace the filename below with the installer you downloaded:
 
 ```powershell
-Get-FileHash .\AstroArchive1.9.0.1.exe -Algorithm SHA256
+Get-FileHash .\AstroArchive1.10.0.1.exe -Algorithm SHA256
 ```
 
 Compare the `Hash` value with the corresponding `.sha256` file in the release.

@@ -1,5 +1,10 @@
 # Run with Windows PowerShell 5.1 from any directory.
-param([string]$OutputDirectory = (Join-Path $PSScriptRoot '..\release-artifacts'))
+param(
+    [string]$OutputDirectory = (Join-Path $PSScriptRoot '..\release-artifacts'),
+    [ValidateSet('All', 'Prepare', 'Package', 'Finalize')][string]$Stage = 'All',
+    [switch]$RequireSigned,
+    [string]$ExpectedPublisher = ''
+)
 $ErrorActionPreference = 'Stop'
 $root = Split-Path $PSScriptRoot -Parent
 $release = Get-Content (Join-Path $root 'Installer\release.json') -Raw | ConvertFrom-Json
@@ -9,11 +14,31 @@ $package = "$version.$revision"
 $tag = "v$package"
 $OutputDirectory = [IO.Path]::GetFullPath($OutputDirectory)
 [IO.Directory]::CreateDirectory($OutputDirectory) | Out-Null
-& (Join-Path $root 'Application_Source\test.ps1')
-& (Join-Path $root 'Application_Source\build.ps1')
 $app = Join-Path $root 'Application_Source\dist\AstroArchive.exe'
-& (Join-Path $root 'Installer\build.ps1') -AppExecutable $app -OutputDirectory $OutputDirectory
+$payload = Join-Path $root 'Installer\.build\payload'
+if ($Stage -in @('All', 'Prepare')) {
+    & (Join-Path $PSScriptRoot 'test-release-signatures.ps1')
+    & (Join-Path $root 'Application_Source\test.ps1')
+    & (Join-Path $root 'Application_Source\build.ps1')
+    & (Join-Path $root 'Installer\build.ps1') -AppExecutable $app -OutputDirectory $OutputDirectory -PreparePayloadOnly
+    if ($Stage -eq 'Prepare') { return }
+}
+if ($Stage -in @('All', 'Package')) {
+    if ($RequireSigned) {
+        & (Join-Path $PSScriptRoot 'verify-release-signatures.ps1') -Paths @((Join-Path $payload 'AstroArchive.exe'), (Join-Path $payload 'Start.exe')) -ExpectedPublisher $ExpectedPublisher
+    }
+    & (Join-Path $root 'Installer\build.ps1') -AppExecutable $app -OutputDirectory $OutputDirectory -UsePreparedPayload -SkipTests
+    if ($Stage -eq 'Package') { return }
+}
 $installer = Join-Path $OutputDirectory "AstroArchive$package.exe"
+if ($RequireSigned) {
+    & (Join-Path $PSScriptRoot 'verify-release-signatures.ps1') -Paths @($installer, (Join-Path $payload 'AstroArchive.exe'), (Join-Path $payload 'Start.exe')) -ExpectedPublisher $ExpectedPublisher -ReportPath (Join-Path $OutputDirectory 'signatures.json')
+} elseif (Test-Path (Join-Path $OutputDirectory 'signatures.json')) {
+    Remove-Item (Join-Path $OutputDirectory 'signatures.json')
+}
+# Signing changes bytes: refresh checksums and the compatibility copy afterwards.
+$installerHash = (Get-FileHash $installer -Algorithm SHA256).Hash.ToLowerInvariant()
+Set-Content "$installer.sha256" "$installerHash  $([IO.Path]::GetFileName($installer))" -Encoding ASCII
 # Keep the asset name expected by 1.2.0 launchers so existing users can upgrade.
 $compatibility = Join-Path $OutputDirectory "AstroArchive-$version-Windows-x64-Offline-Setup.exe"
 Copy-Item $installer $compatibility -Force
@@ -23,6 +48,7 @@ $feed = [ordered]@{
     schema = 1
     application_version = $version
     package_version = $package
+    authenticode_signed = [bool]$RequireSigned
     url = "https://github.com/arijguest/AstroArchive/releases/download/$tag/$([IO.Path]::GetFileName($compatibility))"
     download_url = "https://github.com/arijguest/AstroArchive/releases/download/$tag/$([IO.Path]::GetFileName($installer))"
     release_notes = [IO.File]::ReadAllText((Join-Path $PSScriptRoot '..\Installer\Payload\Release_Notes.txt'))
@@ -55,6 +81,9 @@ try {
     $record = Get-Content (Join-Path $smokeRoot 'install.json') -Raw | ConvertFrom-Json
     if ($record.PackageVersion -ne $package) { throw 'Smoke installation version mismatch.' }
     $installedApp = Join-Path $smokeRoot ($record.ActiveDirectory + '\AstroArchive.exe')
+    if ($RequireSigned) {
+        & (Join-Path $PSScriptRoot 'verify-release-signatures.ps1') -Paths @($installedApp, (Join-Path $smokeRoot ($record.ActiveDirectory + '\Start.exe')), (Join-Path $smokeRoot 'Uninstall.exe')) -ExpectedPublisher $ExpectedPublisher
+    }
     $preview = Join-Path $OutputDirectory 'ui-preview'
     Run-Checked $installedApp @('--ui-test', ('"' + $preview + '"'))
     Run-Checked $installer @('--ui-test', ('"' + $preview + '"'), '--root', ('"' + $smokeRoot + '"'))

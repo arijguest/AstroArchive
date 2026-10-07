@@ -16,18 +16,86 @@ concurrency:
 
 jobs:
   build:
+    outputs:
+      signing_enabled: ${{ steps.signing.outputs.enabled }}
     runs-on: windows-2022
-    timeout-minutes: 20
+    timeout-minutes: 30
     permissions:
       contents: read
       checks: write
+      id-token: write
     steps:
       - uses: actions/checkout@v5
-      - name: Test application, installer and updater; build Windows package
+      - name: Test publication gate
+        run: python scripts/test-release-report.py
+      - name: Choose signing mode
+        id: signing
+        shell: powershell
+        env:
+          SIGNING_ENABLED: ${{ vars.ASTROARCHIVE_SIGNING_ENABLED }}
+        run: |
+          $publishRef = $env:GITHUB_REF -eq 'refs/heads/main' -or $env:GITHUB_REF.StartsWith('refs/tags/v')
+          $enabled = $env:GITHUB_EVENT_NAME -ne 'pull_request' -and $publishRef -and $env:SIGNING_ENABLED -eq 'true'
+          "enabled=$($enabled.ToString().ToLowerInvariant())" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
+      - name: Test application, installer and updater; prepare Windows payload
         shell: powershell
         run: |
-          try { .\scripts\build-release.ps1 *>&1 | Tee-Object -FilePath windows-build.log }
+          try { .\scripts\build-release.ps1 -Stage Prepare *>&1 | Tee-Object -FilePath windows-build.log }
           catch { $_ | Out-String | Add-Content windows-build.log; throw }
+      - name: Authenticate signing identity with OIDC
+        if: steps.signing.outputs.enabled == 'true'
+        uses: azure/login@a641126d1b8aa4d1fa005f4f92df94a3a4c4c906 # v3
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+      - name: Sign app and launcher before embedding their hashes
+        if: steps.signing.outputs.enabled == 'true'
+        uses: azure/artifact-signing-action@c7ab2a863ab5f9a846ddb8265964877ef296ee82 # v2
+        with:
+          endpoint: ${{ vars.ASTROARCHIVE_SIGNING_ENDPOINT }}
+          signing-account-name: ${{ vars.ASTROARCHIVE_SIGNING_ACCOUNT }}
+          certificate-profile-name: ${{ vars.ASTROARCHIVE_SIGNING_PROFILE }}
+          files: |
+            ${{ github.workspace }}\Installer\.build\payload\AstroArchive.exe
+            ${{ github.workspace }}\Installer\.build\payload\Start.exe
+          file-digest: SHA256
+          timestamp-rfc3161: http://timestamp.acs.microsoft.com
+          timestamp-digest: SHA256
+          exclude-environment-credential: true
+          exclude-azure-cli-credential: false
+      - name: Build installer from the prepared payload
+        shell: powershell
+        env:
+          REQUIRE_SIGNED: ${{ steps.signing.outputs.enabled }}
+          SIGNING_PUBLISHER: ${{ vars.ASTROARCHIVE_SIGNING_PUBLISHER }}
+        run: |
+          try {
+            .\scripts\build-release.ps1 -Stage Package -RequireSigned:($env:REQUIRE_SIGNED -eq 'true') -ExpectedPublisher $env:SIGNING_PUBLISHER *>&1 | Tee-Object -FilePath windows-build.log -Append
+          } catch { $_ | Out-String | Add-Content windows-build.log; throw }
+      - name: Sign the installer before generating release checksums
+        if: steps.signing.outputs.enabled == 'true'
+        uses: azure/artifact-signing-action@c7ab2a863ab5f9a846ddb8265964877ef296ee82 # v2
+        with:
+          endpoint: ${{ vars.ASTROARCHIVE_SIGNING_ENDPOINT }}
+          signing-account-name: ${{ vars.ASTROARCHIVE_SIGNING_ACCOUNT }}
+          certificate-profile-name: ${{ vars.ASTROARCHIVE_SIGNING_PROFILE }}
+          files-folder: ${{ github.workspace }}\release-artifacts
+          files-folder-filter: exe
+          file-digest: SHA256
+          timestamp-rfc3161: http://timestamp.acs.microsoft.com
+          timestamp-digest: SHA256
+          exclude-environment-credential: true
+          exclude-azure-cli-credential: false
+      - name: Verify final signatures and run Windows install/update smoke checks
+        shell: powershell
+        env:
+          REQUIRE_SIGNED: ${{ steps.signing.outputs.enabled }}
+          SIGNING_PUBLISHER: ${{ vars.ASTROARCHIVE_SIGNING_PUBLISHER }}
+        run: |
+          try {
+            .\scripts\build-release.ps1 -Stage Finalize -RequireSigned:($env:REQUIRE_SIGNED -eq 'true') -ExpectedPublisher $env:SIGNING_PUBLISHER *>&1 | Tee-Object -FilePath windows-build.log -Append
+          } catch { $_ | Out-String | Add-Content windows-build.log; throw }
       - name: Report Windows failure details
         if: failure()
         shell: powershell
@@ -69,6 +137,8 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
+          SIGNING_PUBLISHER: ${{ vars.ASTROARCHIVE_SIGNING_PUBLISHER }}
+          REQUIRE_SIGNED: ${{ needs.build.outputs.signing_enabled }}
         shell: bash
         run: |
           set -euo pipefail
@@ -79,17 +149,35 @@ jobs:
             exit 1
           fi
           # 'release view' returns success for an existing release, including a draft.
+          create_release=false
           if gh release view "$tag" --json isDraft --jq .isDraft > /tmp/astroarchive-release-state; then
             if [[ "$(cat /tmp/astroarchive-release-state)" != true ]]; then
               echo "Release $tag already published; bump the version or installer revision for a new release."
               exit 0
             fi
           else
-            gh release create "$tag" --target "$GITHUB_SHA" --draft --title "AstroArchive $package" --notes-file release-artifacts/Release_Notes.txt
+            create_release=true
+          fi
+          if [[ "$REQUIRE_SIGNED" == true ]]; then
+            python3 scripts/verify-release-report.py release-artifacts
+          else
+            python3 scripts/verify-release-report.py release-artifacts --allow-unsigned
+            echo 'Publishing an unsigned package: publisher signing setup is pending.'
+            python3 - <<'PY'
+          from pathlib import Path
+          path = Path('release-artifacts/Release_Notes.txt')
+          path.write_text('Windows signing: This package is unsigned. Application Control or SmartScreen may still block it. Trusted publisher signing requires account setup.\n\n' + path.read_text(encoding='utf-8-sig'), encoding='utf-8')
+          PY
           fi
           (cd release-artifacts && sha256sum --check *.sha256)
+          if [[ "$create_release" == true ]]; then
+            gh release create "$tag" --target "$GITHUB_SHA" --draft --title "AstroArchive $package" --notes-file release-artifacts/Release_Notes.txt
+          fi
           gh release upload "$tag" release-artifacts/*.exe release-artifacts/*.sha256 release-artifacts/update.json --clobber
-          gh release edit "$tag" --draft=false --latest
+          if [[ "$REQUIRE_SIGNED" == true ]]; then
+            gh release upload "$tag" release-artifacts/signatures.json --clobber
+          fi
+          gh release edit "$tag" --draft=false --latest --notes-file release-artifacts/Release_Notes.txt
           if ! gh release view v1.2.0.1 >/dev/null 2>&1; then
             gh release create v1.2.0.1 releases/offline-1.2.0/*.exe releases/offline-1.2.0/*.sha256 --target "$GITHUB_SHA" --title 'AstroArchive 1.2.0 — original offline installer' --notes-file releases/offline-1.2.0/README.md --latest=false
           fi

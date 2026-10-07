@@ -14,3 +14,6 @@ windows-build.log
 failure-report.json
 
 Application_Source/RasterTests.exe*
+
+# Python build-script caches.
+__pycache__/
