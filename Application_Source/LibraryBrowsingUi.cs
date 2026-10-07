@@ -17,7 +17,7 @@ namespace AstroArchive {
   void DisplayLibrary(){
    var view=new ListCollectionView(displayed);string mode=Convert.ToString(C("LibraryViewBox").SelectedItem);
    if(mode!="Files"){view.GroupDescriptions.Add(new PropertyGroupDescription("TargetLabel"));if(mode=="By target and session")view.GroupDescriptions.Add(new PropertyGroupDescription("SessionGroup"));}
-   SetRows("FramesGrid",view);L("LibraryCount").Text=displayed.Count+" files";
+   SetRows("FramesGrid",view);L("LibraryCount").Text=displayed.Count+" files"+(libraryFilters.Values.Count>0?" · "+libraryFilters.Values.Count+" active filters":"");
    var summary=CaptureGroups.Summarize(displayed);L("LibrarySummaryLabel").Text=summary.Detail;
   }
  }

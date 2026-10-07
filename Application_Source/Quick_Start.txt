@@ -1,4 +1,4 @@
-AstroArchive 1.8.1
+AstroArchive 1.9.0
 Windows 10/11 x64 desktop app. Built-in .NET Framework 4.8 and Windows SQLite.
 Runs offline. No Python or Google login required.
 
@@ -568,3 +568,43 @@ cfitsio.dll/libzstd.dll and dependencies go in the optional codec folder opened 
 Settings, outside versioned app folders. Restart after provisioning. Missing
 codecs leave original-file import/export available. Unsupported complex/subblock
 layouts remain originals. Base64 inline/embedded XISF stays supported.
+
+NAVIGATION, ACCESSIBILITY AND WALKTHROUGH
+Import, Export, Repository, Settings, Guide and Buy Me a Coffee are grouped at
+upper left. The AstroArchive logo and title are at upper right. The concise
+repository path is centered above the menus; click it to open the folder in
+File Explorer. Repository > Choose repository folder changes the active archive.
+
+Repository replaces the Library page. Keep browsing/searching in the page;
+Repository > View has filters, columns, grouping and the preview pane. Selected
+files retain their right-click tools. Review, analysis, mosaics and maintenance
+are grouped under Repository. Destructive maintenance still uses its existing
+confirmation. Active filter counts remain visible beside the capture counts.
+
+Import holds source selection, scanning, USB devices, telescope management,
+review/recovery and import options. The page retains its source fields, Scan and
+Import buttons. Import policy stays visible, including original removal and
+optional analysis. Changing model/camera or ignored filenames requires a new
+scan. Originals remain kept by default. Export always uses archived repository
+files, including when opened from the Import page.
+
+The bottom bar shows the current status. Timing, progress and Cancel appear only
+while processing. Repository > Diagnostics opens the performance table and last
+import report when needed. Table headings show ascending (▲) or descending (▼)
+sorting. Numbers show priority when several headings sort together. Shift-click
+adds a heading; click again to reverse. Saved heading layouts remain independent.
+
+Settings > Preferences contains Appearance and Accessibility. Choose text size
+100/115/130/150%, comfortable table rows, high contrast, or reduced motion.
+Image pixels are unchanged. High contrast also follows Windows; reduced motion
+stops indeterminate progress animation while keeping status updates. Theme is
+selected in Appearance. Alt reveals menu access keys; arrow keys navigate menus,
+Escape closes them, and Tab follows visible controls with a clear focus outline.
+Ctrl+F focuses search; Ctrl+I opens Import; Ctrl+E opens Export; F1 opens page help.
+
+New installations show an optional interactive walkthrough. Next and Back move
+between steps and highlight the relevant controls; action buttons open the
+corresponding menu or preferences. The walkthrough never imports or deletes
+files automatically. Skip/close dismisses it, and Guide > Interactive walkthrough
+starts it again. Guide also holds searchable help and About AstroArchive,
+including Ari J. Guest's author credit and arijguest.com.

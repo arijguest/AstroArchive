@@ -61,7 +61,7 @@ uninstaller to Windows Installed Apps.
 Replace the filename below with the installer you downloaded:
 
 ```powershell
-Get-FileHash .\AstroArchive1.8.1.1.exe -Algorithm SHA256
+Get-FileHash .\AstroArchive1.9.0.1.exe -Algorithm SHA256
 ```
 
 Compare the `Hash` value with the corresponding `.sha256` file in the release.
@@ -187,3 +187,5 @@ The bundled catalogue derives from **OpenNGC by Mattia Verga**, licensed under
 and [OpenNGC_README.md](Application_Source/OpenNGC_README.md) for attribution and provenance.
 
 The repository does not currently specify a licence for the application source.
+
+Toolbar navigation uses Import, Export, Repository, Settings and Guide menus, followed by Buy Me a Coffee. The centered repository path opens its folder. Guide includes a first-run walkthrough and About; Settings → Preferences contains theme and accessibility controls.

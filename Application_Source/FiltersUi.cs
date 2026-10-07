@@ -64,12 +64,14 @@ namespace AstroArchive {
    var rows=imports?visibleImports.Where(f=>f.Status!="Deleted").ToList():Context();if(rows.Count==0)return;
    ScreenSelection(rows,imports);
   }
-  void ShowImportTools(){
+  ContextMenu BuildImportTools(){
    var menu=ThemedMenu();var selection=G("ImportGrid").SelectedItems.Cast<Frame>().Where(f=>f.Status!="Deleted").ToList();
    menu.Items.Add(FileAction("Edit selected metadata…",()=>Edit(true),selection.Count>0));
    menu.Items.Add(FileAction("Identify selected targets…",()=>Identify(true),selection.Count>0));
    menu.Items.Add(new Separator());menu.Items.Add(FileAction("Scan report…",()=>ShowReport("Scan report",plan==null?"Scan a folder first.":plan.Errors.Count==0?"All supported files were read successfully.":string.Join("\r\n\r\n",plan.Errors))));
-   menu.PlacementTarget=B("ImportToolsButton");menu.Placement=PlacementMode.Top;menu.IsOpen=true;
+   return menu;
+  }
+  void ShowImportTools(){var menu=BuildImportTools();menu.PlacementTarget=TopMenu("ImportMenu");menu.Placement=PlacementMode.Bottom;menu.IsOpen=true;
   }
  }
 }

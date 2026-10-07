@@ -55,7 +55,7 @@ namespace AstroArchive {
     if(choice!=null&&!(choice.Kind=="All"||choice.Kind=="Panel"&&choice.Id==m.PanelId||choice.Kind=="Output"&&m.Role=="Output"||choice.Kind=="Unassigned"&&m.Role=="Input"&&m.PanelId==null))continue;
     Frame f;frames.TryGetValue(m.Hash,out f);var panel=p.Panels.FirstOrDefault(x=>x.Id==m.PanelId);mosaicRows.Add(new MosaicRow{Frame=f,Member=m,Panel=m.Role=="Output"?"Completed output":panel==null?"Unassigned":panel.Name});
    }
-   G("MosaicGrid").ItemsSource=mosaicRows.OrderBy(r=>r.Panel).ThenBy(r=>r.Night).ThenBy(r=>r.Filename).ToList();
+   SetRows("MosaicGrid",mosaicRows.OrderBy(r=>r.Panel).ThenBy(r=>r.Night).ThenBy(r=>r.Filename).ToList());
    L("MosaicSummaryLabel").Text=p==null?"Collections link captures across targets and nights. Detection reuses metadata; plate solving is optional.":p.Label+" · "+mosaicRows.Count+" shown · "+mosaicRows.Count(r=>r.Member.State=="Suggested"||r.Member.PanelId==null&&r.Member.Role=="Input")+" need review · "+mosaicRows.Count(r=>r.Frame==null)+" missing archive records";
    if(repo!=null&&!string.IsNullOrEmpty(repo.MosaicWarning))L("MosaicSummaryLabel").Text=repo.MosaicWarning;MosaicSelectionChanged();
   }
@@ -95,9 +95,11 @@ namespace AstroArchive {
   void EditMosaicPanel(){
    var p=ActiveMosaic;var choice=ActiveMosaicPanel;if(p==null||choice==null||choice.Id==null)return;var d=new FormWindow(Window,"Rename mosaic panel",530,370);var name=d.Input("Panel name",choice.Name);d.Accept("Save panel",()=>ValidMosaicName(d,name.Text));if(d.Show())MosaicMutation(()=>{repo.RenameMosaicPanel(p.Id,choice.Id,name.Text);return "Mosaic panel renamed.";});
   }
-  void MosaicTools(){
-   if(repo==null||cancel!=null)return;var p=ActiveMosaic;var selection=SelectedMosaicRows().Where(r=>r.Frame!=null).Select(r=>r.Frame).ToList();var source=selection.Count>0?selection:Context();var menu=ThemedMenu();
-   menu.Items.Add(FileAction("Read headers/session metadata…",()=>DiscoverMosaics(source,true),source.Any(Repository.MosaicScience)));menu.Items.Add(FileAction("Solve selected representatives…",()=>SolveMosaicRepresentatives(selection),selection.Count>0));menu.Items.Add(new Separator());menu.Items.Add(FileAction("New panel…",NewMosaicPanel,p!=null));menu.Items.Add(FileAction("Edit collection…",EditMosaic,p!=null));menu.Items.Add(FileAction("Rename selected panel…",EditMosaicPanel,p!=null&&ActiveMosaicPanel!=null&&ActiveMosaicPanel.Id!=null));menu.Items.Add(FileAction("Dismiss collection…",()=>DismissMosaic(p),p!=null));menu.PlacementTarget=B("MosaicToolsButton");menu.IsOpen=true;
+  ContextMenu BuildMosaicTools(){
+   if(repo==null)return ThemedMenu();var p=ActiveMosaic;var selection=SelectedMosaicRows().Where(r=>r.Frame!=null).Select(r=>r.Frame).ToList();var source=selection.Count>0?selection:Context();var menu=ThemedMenu();
+   menu.Items.Add(FileAction("Read headers/session metadata…",()=>DiscoverMosaics(source,true),source.Any(Repository.MosaicScience)));menu.Items.Add(FileAction("Solve selected representatives…",()=>SolveMosaicRepresentatives(selection),selection.Count>0));menu.Items.Add(new Separator());menu.Items.Add(FileAction("New panel…",NewMosaicPanel,p!=null));menu.Items.Add(FileAction("Edit collection…",EditMosaic,p!=null));menu.Items.Add(FileAction("Rename selected panel…",EditMosaicPanel,p!=null&&ActiveMosaicPanel!=null&&ActiveMosaicPanel.Id!=null));menu.Items.Add(FileAction("Dismiss collection…",()=>DismissMosaic(p),p!=null));return menu;
+  }
+  void MosaicTools(){var menu=BuildMosaicTools();menu.PlacementTarget=TopMenu("RepositoryMenu");menu.IsOpen=true;
   }
   void DismissMosaic(MosaicProject p){if(p==null)return;var d=new FormWindow(Window,"Dismiss mosaic collection",560,400);d.Text(p.Name,true);d.Text("Remove this collection from the mosaic view and retain that choice during later detection. Its captures stay in the archive.");d.Accept("Dismiss collection",()=>true);if(d.Show())MosaicMutation(()=>{repo.IgnoreMosaic(p.Id);return "Collection dismissed; captures retained.";});}
   void ExportMosaicCollection(){
