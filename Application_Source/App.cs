@@ -26,6 +26,7 @@ namespace AstroArchive {
  public class Program {
   [STAThread]public static int Main(string[] args){
    AppContext.SetSwitch("Switch.System.IO.UseLegacyPathHandling",false);AppContext.SetSwitch("Switch.System.IO.BlockLongPaths",false);
+   if(args.Length>1&&args[0]=="--ui-test")AppDomain.CurrentDomain.UnhandledException+=(sender,eventArgs)=>{try{Directory.CreateDirectory(args[1]);File.WriteAllText(Path.Combine(args[1],"ui-smoke-error.txt"),Convert.ToString(eventArgs.ExceptionObject));}catch{}};
    try{
     var app=new Application{ShutdownMode=ShutdownMode.OnMainWindowClose};var ui=new MainUi(args.Length>0&&args[0]=="--ui-test");app.MainWindow=ui.Window;
     app.DispatcherUnhandledException+=(s,e)=>{MessageBox.Show(ui.Window,e.Exception.Message,"AstroArchive",MessageBoxButton.OK,MessageBoxImage.Error);e.Handled=true;};

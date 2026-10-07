@@ -43,6 +43,9 @@ function Run-Checked([string]$File, [string[]]$Arguments) {
     if ($process.ExitCode -ne 0) {
         $smokeError = Join-Path $OutputDirectory 'ui-preview\ui-smoke-error.txt'
         if (Test-Path $smokeError) { Get-Content $smokeError | Write-Output }
+        Get-WinEvent -FilterHashtable @{LogName='Application'; StartTime=(Get-Date).AddMinutes(-2)} -ErrorAction SilentlyContinue |
+            Where-Object { $_.ProviderName -eq '.NET Runtime' -and $_.Message -match 'AstroArchive' } |
+            ForEach-Object { $_.Message | Write-Output }
         throw "$File exited with $($process.ExitCode)."
     }
 }
