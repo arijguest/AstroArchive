@@ -18,7 +18,7 @@ namespace AstroArchive {
    if(filtersPopup!=null&&filtersPopup.IsOpen){filtersPopup.IsOpen=false;return;}
    var criteria=imports?importFilters:libraryFilters;var rows=imports?CurrentImportRows():all;
    FrameworkElement button=TopMenu(imports?"ImportMenu":"RepositoryMenu");
-   var popup=new Popup{PlacementTarget=button,Placement=PlacementMode.Bottom,StaysOpen=false,AllowsTransparency=true,PopupAnimation=PopupAnimation.Fade,VerticalOffset=6};filtersPopup=popup;
+   var popup=new Popup{PlacementTarget=button,Placement=PlacementMode.Bottom,StaysOpen=false,AllowsTransparency=true,PopupAnimation=settings.ReducedMotion?PopupAnimation.None:PopupAnimation.Fade,VerticalOffset=6};filtersPopup=popup;
    double width=Math.Max(380,Math.Min(620,SystemParameters.WorkArea.Width-48)),height=Math.Max(300,Math.Min(650,SystemParameters.WorkArea.Height-80));
    var border=new Border{Width=width,MaxHeight=height,Background=Brushes.White,BorderBrush=new SolidColorBrush(Color.FromRgb(203,213,227)),BorderThickness=new Thickness(1),CornerRadius=new CornerRadius(10),Padding=new Thickness(16)};
    border.Resources.MergedDictionaries.Add(Window.Resources);TextElement.SetFontFamily(border,Window.FontFamily);border.SetResourceReference(TextElement.FontSizeProperty,"UiFontSmall");Theme.Bind(border,Border.BackgroundProperty,"Surface");Theme.Bind(border,Border.BorderBrushProperty,"Border");
@@ -44,10 +44,16 @@ namespace AstroArchive {
    }
    body.Children.Add(new TextBlock{Text="Fields shared by every capture are hidden. Search and other filters stay in effect.",TextWrapping=TextWrapping.Wrap,FontSize=11,Foreground=Brushes.SlateGray,Margin=new Thickness(0,12,0,0)});
    border.PreviewKeyDown+=(s,e)=>{if(e.Key==Key.Escape){popup.IsOpen=false;e.Handled=true;}};
-   foreach(var label in PopupChildren<TextBlock>(border)){Theme.Bind(label,TextBlock.ForegroundProperty,label.FontWeight==FontWeights.SemiBold?"Text":"Muted");label.SetResourceReference(TextBlock.FontSizeProperty,label.FontWeight==FontWeights.SemiBold?"UiFontHeading":"UiFontSmall");}
+   foreach(var label in FilterLabels(border)){Theme.Bind(label,TextBlock.ForegroundProperty,label.FontWeight==FontWeights.SemiBold?"Text":"Muted");label.SetResourceReference(TextBlock.FontSizeProperty,label.FontWeight==FontWeights.SemiBold?"UiFontHeading":"UiFontSmall");}
    foreach(var label in new[]{count})Theme.Bind(label,TextBlock.ForegroundProperty,"Muted");
    popup.Closed+=(s,e)=>{if(filtersPopup==popup)filtersPopup=null;if(Window.IsActive)button.Focus();};popup.Child=border;refresh();
    popup.Opened+=(s,e)=>border.MoveFocus(new TraversalRequest(FocusNavigationDirection.First));popup.IsOpen=true;
+  }
+  // Popup visuals are not built until it opens; bind the declared labels through
+  // the logical tree so their colours and text scale are ready for the first frame.
+  static IEnumerable<TextBlock> FilterLabels(DependencyObject parent){
+   var label=parent as TextBlock;if(label!=null)yield return label;
+   foreach(var child in LogicalTreeHelper.GetChildren(parent).OfType<DependencyObject>())foreach(var text in FilterLabels(child))yield return text;
   }
   static Grid FilterGrid(){var grid=new Grid();grid.ColumnDefinitions.Add(new ColumnDefinition{Width=new GridLength(1,GridUnitType.Star)});grid.ColumnDefinitions.Add(new ColumnDefinition{Width=new GridLength(1,GridUnitType.Star)});return grid;}
   static void AddFilterCell(Grid grid,UIElement element,int cell){int row=cell/2;while(grid.RowDefinitions.Count<=row)grid.RowDefinitions.Add(new RowDefinition{Height=GridLength.Auto});Grid.SetColumn(element,cell%2);Grid.SetRow(element,row);grid.Children.Add(element);}
