@@ -1,4 +1,4 @@
-# AstroArchive 1.10.1
+# AstroArchive 1.10.2
 
 Portable Windows 10/11 x64 WPF app for archiving astronomical image originals and creating verified stacking projects. Open `AstroArchive.exe`; read `Quick_Start.txt` for the complete workflow.
 

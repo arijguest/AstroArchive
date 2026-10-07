@@ -67,7 +67,7 @@ uninstaller to Windows Installed Apps.
 Replace the filename below with the installer you downloaded:
 
 ```powershell
-Get-FileHash .\AstroArchive1.10.0.1.exe -Algorithm SHA256
+Get-FileHash .\AstroArchive1.10.2.1.exe -Algorithm SHA256
 ```
 
 Compare the `Hash` value with the corresponding `.sha256` file in the release.
