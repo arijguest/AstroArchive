@@ -46,7 +46,7 @@ namespace AstroArchive {
   void RefreshMosaicPanels(){
    var p=ActiveMosaic;string id=ActiveMosaicPanel==null?null:ActiveMosaicPanel.Id,kind=ActiveMosaicPanel==null?"All":ActiveMosaicPanel.Kind;
    var choices=new List<MosaicPanelChoice>();var members=p==null||repo==null?new List<MosaicMember>():repo.MosaicMembers(p.Id).Where(m=>m.State!="Ignored").ToList();mosaicCollectionMembers=members;
-   if(p!=null){choices.Add(new MosaicPanelChoice{Name="All panels",Kind="All",Count=members.Count});choices.AddRange(p.Panels.Select(panel=>new MosaicPanelChoice{Id=panel.Id,Name=panel.Name,Kind="Panel",Count=members.Count(m=>m.PanelId==panel.Id)}));choices.Add(new MosaicPanelChoice{Name="Unassigned",Kind="Unassigned",Count=members.Count(m=>m.PanelId==null&&m.Role=="Input")});choices.Add(new MosaicPanelChoice{Name="Completed outputs",Kind="Output",Count=members.Count(m=>m.Role=="Output")});}
+   if(p!=null){choices.Add(new MosaicPanelChoice{Name="All panels",Kind="All",Count=members.Count});choices.AddRange(p.Panels.OrderBy(panel=>panel.Name,StringComparer.OrdinalIgnoreCase).Select(panel=>new MosaicPanelChoice{Id=panel.Id,Name=panel.Name,Kind="Panel",Count=members.Count(m=>m.PanelId==panel.Id)}));choices.Add(new MosaicPanelChoice{Name="Unassigned",Kind="Unassigned",Count=members.Count(m=>m.PanelId==null&&m.Role=="Input")});choices.Add(new MosaicPanelChoice{Name="Completed outputs",Kind="Output",Count=members.Count(m=>m.Role=="Output")});}
    mosaicUpdating=true;try{MosaicPanels.ItemsSource=choices;MosaicPanels.SelectedItem=choices.FirstOrDefault(x=>x.Id==id&&x.Kind==kind)??choices.FirstOrDefault();}finally{mosaicUpdating=false;}RefreshMosaicRows();DrawMosaicMap(p);
   }
   void RefreshMosaicRows(){
