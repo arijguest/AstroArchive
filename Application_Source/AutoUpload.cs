@@ -20,7 +20,7 @@ namespace AstroArchive {
    var candidates=plan.Frames.Where(CaptureScreening.Importable).ToList();plan.Metrics.Phase(candidates.Count,0,"Screening files");
    var screening=repository.Screen(candidates,true,ct,p=>{plan.Metrics.UpdateLegacy(p.Done,p.Total,p.Text);plan.Metrics.Pulse(true);});foreach(var frame in plan.Frames)if(onFrame!=null)onFrame(frame.Clone());
    var ready=plan.Frames.Where(f=>CaptureScreening.Importable(f)&&!f.Rejected&&string.IsNullOrEmpty(f.ScreeningIssue)).ToList();
-   var imported=repository.Import(ready,ct,progress,new ImportOptions{SourceRoot=plan.Source,Workers=workers,DeleteOriginals=false,CloudSource=false,OnFrame=onFrame,ScanMetrics=plan.Metrics,DeferFinish=true});imported.Duplicates+=duplicates;imported.Failed+=plan.Frames.Count(f=>f.Status=="Unreadable");imported.SkippedDeleted+=plan.Frames.Count(f=>f.Status=="Deleted");imported.Warnings.AddRange(plan.Errors);imported.Warnings.AddRange(screening.Errors);
+   var imported=repository.Import(ready,ct,progress,new ImportOptions{SourceRoot=plan.Source,Workers=workers,DeleteOriginals=false,CloudSource=false,OnFrame=onFrame,ScanMetrics=plan.Metrics,DeferFinish=true});imported.Duplicates+=duplicates;imported.Failed+=plan.Frames.Count(f=>f.Status=="Unreadable");imported.SkippedDeleted=plan.Frames.Count(f=>f.Status=="Deleted");imported.Warnings.AddRange(plan.Errors);imported.Warnings.AddRange(screening.Errors);
    var result=new AutoUploadResult{Plan=plan,Import=imported,Restored=plan.Frames.Count(f=>f.Status=="Imported"&&restores.Contains(f.SourcePath))};repository.SaveImportReport(imported);return result;
   }
  }
