@@ -85,11 +85,11 @@ namespace AstroArchive {
    if(geometry){
     double[] q=Unwrap(accepted.Select(f=>Parallactic(Util.Time(f.ObservedUtc??f.Observed).Value,baseFrame.RA.Value,baseFrame.Dec.Value,latitude.Value,longitude.Value)).ToArray());double predicted=q.Max()-q.Min();
     double fitPlus=Median(y.Select((v,i)=>v-q[i])),fitMinus=Median(y.Select((v,i)=>v+q[i]));double rPlus=Math.Sqrt(y.Select((v,i)=>Math.Pow(v-q[i]-fitPlus,2)).Average()),rMinus=Math.Sqrt(y.Select((v,i)=>Math.Pow(v+q[i]-fitMinus,2)).Average());double modelError=Math.Min(rPlus,rMinus);
-    if(predicted>0.5&&result.DriftDegrees>0.35&&modelError<Math.Max(0.08,Math.Min(0.5,predicted*0.05))&&result.DriftDegrees>error*8){result.Mount="Alt/Az (likely)";result.Evidence=context+"Measured rotation agrees with the Alt/Az parallactic-angle model (RMS "+modelError.ToString("0.000")+"°). This remains an inference.";}
-    else if(predicted>2&&result.SpanMinutes>=15&&result.DriftDegrees<Math.Max(0.08,error*6)&&res<0.03){result.Mount="EQ (likely)";result.Evidence=context+"Stable orientation where Alt/Az predicts "+predicted.ToString("0.00")+"° rotation. Registered or derotated files can mimic EQ; only analyze acquisition subs.";}
-    else result.Evidence=context+"Neither mount model is sufficiently supported. Alt/Az expected angular range: "+predicted.ToString("0.00")+"°.";
-   }else if(result.DriftDegrees>0.6&&Math.Abs(slope)*result.SpanMinutes>0.5&&res<Math.Max(0.05,result.DriftDegrees*0.08)&&result.DriftDegrees>error*10){result.Mount="Alt/Az (likely)";result.Evidence=context+"Coherent rotation suggests Alt/Az. Without site and pointing data, poor EQ polar alignment or a rotating camera cannot be excluded.";}
-   else result.Evidence=context+"Low or inconsistent rotation cannot establish EQ. Add observing latitude/longitude and solved pointing to test the Alt/Az model.";
+    if(predicted>0.5&&result.DriftDegrees>0.35&&modelError<Math.Max(0.08,Math.Min(0.5,predicted*0.05))&&result.DriftDegrees>error*8){result.Mount="Alt-Az?";result.Evidence=context+"Measured rotation agrees with the Alt-Az parallactic-angle model (RMS "+modelError.ToString("0.000")+"°). This remains an inference.";}
+    else if(predicted>2&&result.SpanMinutes>=15&&result.DriftDegrees<Math.Max(0.08,error*6)&&res<0.03){result.Mount="EQ?";result.Evidence=context+"Stable orientation where Alt-Az predicts "+predicted.ToString("0.00")+"° rotation. Registered or derotated files can mimic EQ; only analyze acquisition subs.";}
+    else result.Evidence=context+"Neither mount model is sufficiently supported. Alt-Az expected angular range: "+predicted.ToString("0.00")+"°.";
+   }else if(result.DriftDegrees>0.6&&Math.Abs(slope)*result.SpanMinutes>0.5&&res<Math.Max(0.05,result.DriftDegrees*0.08)&&result.DriftDegrees>error*10){result.Mount="Alt-Az?";result.Evidence=context+"Coherent rotation suggests Alt-Az. Without site and pointing data, poor EQ polar alignment or a rotating camera cannot be excluded.";}
+   else result.Evidence=context+"Low or inconsistent rotation cannot establish EQ. Choose an observing town/city in Settings and add solved pointing to test the Alt-Az model.";
    return result;
   }
  }

@@ -1,4 +1,4 @@
-AstroArchive 1.8.1
+AstroArchive 1.8.2
 Windows 10/11 x64 desktop app. Built-in .NET Framework 4.8 and Windows SQLite.
 Runs offline. No Python or Google login required.
 
@@ -365,6 +365,18 @@ Clear observing location to use capture location metadata where available instea
 Small settlements may be absent: choose the nearest listed town/city.
 Place data: GeoNames (https://www.geonames.org), CC BY 4.0.
 See City_Catalogue_Notice.md for source/licence details.
+
+MOUNT LABELS
+Confirmed mount types show EQ or Alt-Az. A question mark marks a suggestion:
+EQ? or Alt-Az?, including older labels such as EQ (likely) and Alt/Az (likely).
+For unknown mounts, exposures over 20 seconds display EQ?; 20 seconds or less,
+or missing exposure, display Alt-Az?. This applies to existing database records
+and import results. Exposure guesses do not replace stored mount metadata or
+rotation evidence. A rotation-derived suggestion takes priority over exposure.
+Explicit imported mount metadata and user assignments retain confirmed labels.
+The Mount filter groups EQ with EQ?, and Alt-Az with Alt-Az?. Search, sorting,
+file details and catalogue CSV export use the displayed labels. Your saved Mount
+heading remains selected and in the same position after updating.
 
 Rotation uses timestamped acquisition subs, never stacks/registered frames. It samples
 up to 18 frames in the longest continuous segment, matches distributed stars and

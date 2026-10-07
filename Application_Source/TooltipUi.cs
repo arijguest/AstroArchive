@@ -26,7 +26,7 @@ namespace AstroArchive {
    {"Camera channel","Telephoto or Wide. Leave blank to keep each capture's camera; separate channels use separate calibration groups."},
    {"Instrument model","Choose the known model, or Keep existing to preserve each capture's current metadata."},
    {"Frame type","Light, Stack, Dark, Flat or Bias; master calibration frames stay separate from individual calibration frames."},
-   {"Mount mode","Assign EQ or Alt/Az when known. Unknown preserves uncertainty; rotation analysis provides evidence rather than certainty."},
+   {"Mount mode","Assign EQ or Alt-Az when known. Unknown displays an exposure-based suggestion: EQ? above 20 s, otherwise Alt-Az?. A question mark marks an inference."},
    {"Calibration state","Describe processing already applied. Calibrated and registered lights do not receive additional calibration during export."},
    {"Exposure seconds (optional)","Exposure duration in seconds, using a decimal dot. Leave blank to keep existing values; zero is valid for bias frames."},
    {"Gain (optional)","Camera gain, using a decimal dot. Leave blank to keep existing values."},
