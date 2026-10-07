@@ -14,12 +14,12 @@ namespace AstroArchive {
   public static JavaScriptSerializer Json() { return new JavaScriptSerializer { MaxJsonLength = int.MaxValue, RecursionLimit = 100 }; }
   public static string Serialize(object o) { return Json().Serialize(o); }
   public static T Deserialize<T>(string s) { return Json().Deserialize<T>(s); }
-  public static string Hash(string path, System.Threading.CancellationToken ct) {
-   using(var fs=new FileStream(path,FileMode.Open,FileAccess.Read,FileShare.Read,1048576))return Hash(fs,ct);
+  public static string Hash(string path, System.Threading.CancellationToken ct,Action<int> counted=null) {
+   ct.ThrowIfCancellationRequested();using(var fs=new FileStream(path,FileMode.Open,FileAccess.Read,FileShare.Read,1048576))return Hash(fs,ct,counted);
   }
-  public static string Hash(Stream stream, System.Threading.CancellationToken ct) {
-   using (var sha=SHA256.Create()) {
-    byte[] b=new byte[1048576]; int n; while((n=stream.Read(b,0,b.Length))>0) { ct.ThrowIfCancellationRequested(); sha.TransformBlock(b,0,n,b,0); }
+  public static string Hash(Stream stream, System.Threading.CancellationToken ct,Action<int> counted=null) {
+   using (var lease=FileTransfer.Rent()) using (var sha=SHA256.Create()) {
+    byte[] b=lease.Buffer; int n; while((n=stream.Read(b,0,b.Length))>0) { ct.ThrowIfCancellationRequested(); sha.TransformBlock(b,0,n,b,0);if(counted!=null)counted(n); }
     sha.TransformFinalBlock(new byte[0],0,0); return BitConverter.ToString(sha.Hash).Replace("-","").ToLowerInvariant();
    }
   }
@@ -61,13 +61,13 @@ namespace AstroArchive {
   public string SizeText {get{return Width+" × "+Height+(Channels>1?" × "+Channels:"");}}
   public string SearchText {get{return string.Join(" ",new[]{Target,Catalog.Aliases(Target),Telescope,MakeText,Model,MakeEvidence,TargetEvidence,SourceDisposition,Camera,Kind,Calibration,Filter,Mount,Night,Observed,OriginalName,Notes,Util.Num(Exposure),Util.Num(Gain),Util.Num(Temperature),SizeText,"bin"+BinX+"x"+BinY});}}
   public string Group {get{return string.Join("|",new[]{Telescope,MakeText,Camera,Filter,Width.ToString(),Height.ToString(),Channels.ToString(),BinX.ToString(),BinY.ToString(),Bayer,Calibration,Util.Num(Exposure),Util.Num(Gain)});}}
-  public Frame Clone() { return Util.Deserialize<Frame>(Util.Serialize(this)); }
+  public Frame Clone() { var copy=(Frame)MemberwiseClone();copy.SourceStamp=SourceStamp==null?null:SourceStamp.Clone();copy.RepositoryStamp=RepositoryStamp==null?null:RepositoryStamp.Clone();copy.SourceMetadataStamp=SourceMetadataStamp==null?null:SourceMetadataStamp.Clone();return copy; }
  }
  public class TargetSummary { public string Name{get;set;} public int Subs{get;set;} public int Stacks{get;set;} public int Sessions{get;set;} public string Detail {get{return Subs+" subs  ·  "+Stacks+" stacks  ·  "+Sessions+" sessions";}} }
  public class Settings { public Settings(){AutoSolve=false;AutoRotation=false;ThemeMode="System";PreviewStretch="Auto";ShowPreview=true;} public string ThemeMode {get;set;} public string PreviewStretch {get;set;} public bool ShowPreview {get;set;} public int CopyWorkers {get;set;} public string Repository{get;set;} public string LastSource{get;set;} public string Telescope{get;set;} public string Model{get;set;} public double? Latitude{get;set;} public double? Longitude{get;set;} public double? FieldHeight{get;set;} public string Astap{get;set;} public string StarDatabase{get;set;} public string ApiKeyProtected{get;set;} public bool UseOnline{get;set;} public bool AutoSolve{get;set;} public bool AutoRotation{get;set;} }
- public class ProgressInfo {[ScriptIgnore]public PipelineMetrics LiveMetrics{get;set;}public int Done{get;set;} public int Total{get;set;} public string Text{get;set;} public string Stage{get;set;} public long BytesDone{get;set;} public long BytesTotal{get;set;} public double ElapsedSeconds{get;set;} public double? RemainingSeconds{get;set;} public List<StageMetric> Stages{get;set;} }
- public class ImportPlan {public List<Frame> Frames=new List<Frame>(); public List<string> Errors=new List<string>(); public string Source; public long Bytes; public int CacheHits; public PipelineMetrics Metrics; }
- public class ImportOptions {public bool DeleteOriginals;public string SourceRoot; public int Workers; public bool Retune; public bool CloudSource; public Action<Frame> OnFrame;public PipelineMetrics ScanMetrics;}
+ public class ProgressInfo {[ScriptIgnore]public PipelineMetrics LiveMetrics{get;set;}public int Done{get;set;} public int Total{get;set;} public string Text{get;set;} public string Stage{get;set;} public long BytesDone{get;set;} public long BytesTotal{get;set;} public double ElapsedSeconds{get;set;} public double? RemainingSeconds{get;set;} public List<StageMetric> Stages{get;set;} public bool TotalKnown{get;set;} public bool Stalled{get;set;} public bool Finalising{get;set;} public bool Finished{get;set;} public double ProgressFraction{get;set;} public string Activity{get;set;} public double WorkPerSecond{get;set;} public bool CopyPhase{get;set;} }
+ public class ImportPlan {public List<Frame> Frames=new List<Frame>(); public List<string> Errors=new List<string>(); public string Source; public long Bytes; public int CacheHits;public int MetadataCacheHits; public PipelineMetrics Metrics; }
+ public class ImportOptions {public bool DeleteOriginals;public string SourceRoot; public int Workers; public bool Retune; public bool CloudSource; public Action<Frame> OnFrame;public PipelineMetrics ScanMetrics;public bool DeferFinish;}
  public class ImportResult {public int Imported;public int OriginalsDeleted;public int OriginalsKept;public int Duplicates;public int Failed;public int Workers=1;public List<WorkerTrial> Trials=new List<WorkerTrial>();public List<string> Errors=new List<string>();public List<string> CleanupErrors=new List<string>();public List<string> Warnings=new List<string>();public PipelineMetrics Metrics;}
  public class PairResult {public double Angle{get;set;} public double Rms{get;set;} public double Uncertainty{get;set;} public double Scale{get;set;} public int Matches{get;set;} public double Coverage{get;set;} }
  public class RotationPoint { public string File{get;set;} public string Time{get;set;} public double Minutes{get;set;} public double Angle{get;set;} public double Rms{get;set;} public int Stars{get;set;} public double Error{get;set;} }

@@ -1,4 +1,4 @@
-// C# 5 / .NET Framework 4.8. Stage times exclude pauses between active operations.
+// C# 5 / .NET Framework 4.8. Progress is sampled, independently of file completion.
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -10,20 +10,75 @@ namespace AstroArchive {
  public class WorkerTrial {public int Workers;public int Files;public long Bytes;public double Seconds;public double MBPerSecond{get{return Seconds>0?Bytes/1000000.0/Seconds:0;}}public int Failed;}
  public sealed class PipelineMetrics {
   class Meter {public long Files,Bytes,Ticks,Start;public int Active;}
-  readonly object gate=new object();readonly Dictionary<string,Meter> meters=new Dictionary<string,Meter>();readonly Stopwatch clock=Stopwatch.StartNew();readonly Action<ProgressInfo> callback;
-  long lastPulse;double phaseStart;public long DoneBytes,TotalBytes;public int Done,Total;public string Current="Starting",Stage="Discovery";
-  public PipelineMetrics(Action<ProgressInfo> progress){callback=progress;foreach(string s in new[]{"Discovery","Metadata","Duplicate checking","Copy + source hash","Verification","Cloud availability","Target identification","Rotation","Index/checkpoint"})meters[s]=new Meter();}
-  public Scope Begin(string stage,string file){lock(gate){Meter m;if(!meters.TryGetValue(stage,out m))meters[stage]=m=new Meter();if(m.Active++==0)m.Start=Stopwatch.GetTimestamp();Stage=stage;Current=file;}Pulse(true);return new Scope(this,stage);}
-  void End(string stage,long complete){lock(gate){var m=meters[stage];if(--m.Active==0)m.Ticks+=Stopwatch.GetTimestamp()-m.Start;m.Files+=complete;}Pulse(false);}
-  void Add(string stage,long bytes){lock(gate)meters[stage].Bytes+=bytes;Pulse(false);}
-  public List<StageMetric> Snapshot(){lock(gate){long now=Stopwatch.GetTimestamp();return meters.Select(k=>new StageMetric{Stage=k.Key,Files=k.Value.Files,Bytes=k.Value.Bytes,Seconds=(k.Value.Ticks+(k.Value.Active>0?now-k.Value.Start:0))/(double)Stopwatch.Frequency}).ToList();}}
+  class Sample {public double Seconds,Work;}
+  readonly object gate=new object();
+  readonly Dictionary<string,Meter> meters=new Dictionary<string,Meter>();
+  readonly HashSet<Transfer> transfers=new HashSet<Transfer>();
+  readonly Queue<Sample> samples=new Queue<Sample>();
+  readonly Stopwatch clock=Stopwatch.StartNew();readonly Func<double> time;readonly Action<ProgressInfo> callback;
+  double phaseStart,lastPulse=-1,lastAdvance,lastWork,settledWork,skippedWork;int generation,workers=1;
+  long doneBytes,totalBytes;int done,total;bool totalKnown,copyPhase,finished,finalising;string current="Starting",stage="Preparing";
+  public long DoneBytes {get{lock(gate)return doneBytes;}}
+  public long TotalBytes {get{lock(gate)return totalBytes;}set{lock(gate)totalBytes=value;}}
+  public int Done {get{lock(gate)return done;}}
+  public int Total {get{lock(gate)return total;}set{lock(gate){total=value;totalKnown=true;}}}
+  public string Current {get{lock(gate)return current;}set{lock(gate)current=value;}}
+  public string Stage {get{lock(gate)return stage;}set{lock(gate)stage=value;}}
+  public PipelineMetrics(Action<ProgressInfo> progress,Func<double> seconds=null){
+   callback=progress;time=seconds??(()=>clock.Elapsed.TotalSeconds);
+   foreach(string name in new[]{"Discovery","Metadata","Duplicate checking","Copy + source hash","Verification","Cloud availability","Target identification","Rotation","Index/checkpoint"})meters[name]=new Meter();
+   phaseStart=lastAdvance=time();samples.Enqueue(new Sample{Seconds=phaseStart});
+  }
+  public Scope Begin(string activity,string file){
+   lock(gate){Meter m;if(!meters.TryGetValue(activity,out m))meters[activity]=m=new Meter();if(m.Active++==0)m.Start=Stopwatch.GetTimestamp();current=file;}
+   Pulse(false);return new Scope(this,activity);
+  }
+  void End(string activity,long complete){lock(gate){var m=meters[activity];if(--m.Active==0)m.Ticks+=Stopwatch.GetTimestamp()-m.Start;m.Files+=complete;}}
+  void Add(string activity,long bytes){lock(gate)meters[activity].Bytes+=bytes;}
+  public List<StageMetric> Snapshot(){lock(gate){long tick=Stopwatch.GetTimestamp();return meters.Select(k=>new StageMetric{Stage=k.Key,Files=k.Value.Files,Bytes=k.Value.Bytes,Seconds=(k.Value.Ticks+(k.Value.Active>0?tick-k.Value.Start:0))/(double)Stopwatch.Frequency}).ToList();}}
   public void Accumulate(IEnumerable<StageMetric> previous){lock(gate){foreach(var s in previous){Meter m;if(!meters.TryGetValue(s.Stage,out m))meters[s.Stage]=m=new Meter();m.Files+=s.Files;m.Bytes+=s.Bytes;m.Ticks+=(long)(s.Seconds*Stopwatch.Frequency);}}}
-  public ProgressInfo Progress(){lock(gate){double seconds=clock.Elapsed.TotalSeconds;double phase=seconds-phaseStart;double? eta=Total>0&&Done>=Total?(double?)0:TotalBytes>0&&DoneBytes>0?(double?)(phase/DoneBytes*Math.Max(0,TotalBytes-DoneBytes)):Total>0&&Done>0?(double?)(phase/Done*(Total-Done)):null;return new ProgressInfo{LiveMetrics=this,Done=Done,Total=Total,Text=Current,Stage=Stage,BytesDone=DoneBytes,BytesTotal=TotalBytes,ElapsedSeconds=seconds,RemainingSeconds=eta,Stages=Snapshot()};}}
-  public void Phase(int total,long bytes){lock(gate){Done=0;DoneBytes=0;Total=total;TotalBytes=bytes;phaseStart=clock.Elapsed.TotalSeconds;}Pulse(true);}
-  public void Complete(long bytes){lock(gate){Done++;DoneBytes+=bytes;}Pulse(true);}
-  public void Pulse(bool force){long now=clock.ElapsedMilliseconds;lock(gate){if(!force&&now-lastPulse<200)return;lastPulse=now;}if(callback!=null)callback(Progress());}
+  public void Phase(int count,long bytes,string name=null,bool copying=false,bool known=true){
+   lock(gate){generation++;transfers.Clear();done=0;doneBytes=0;total=count;totalBytes=bytes;totalKnown=known;copyPhase=copying;finished=finalising=false;settledWork=skippedWork=lastWork=0;workers=1;phaseStart=lastAdvance=time();samples.Clear();samples.Enqueue(new Sample{Seconds=phaseStart});if(name!=null)stage=name;}
+   Pulse(true);
+  }
+  public void Discover(long bytes){lock(gate){total++;totalBytes+=Math.Max(0,bytes);}Pulse(false);}
+  public void InventoryComplete(){lock(gate)totalKnown=true;Pulse(true);}
+  public void Workers(int count){lock(gate){if(workers==count)return;workers=count;ResetSamples();}}
+  void ResetSamples(){samples.Clear();lastWork=Work();lastAdvance=time();samples.Enqueue(new Sample{Seconds=lastAdvance,Work=lastWork});}
+  double Work(){return copyPhase?settledWork+transfers.Sum(t=>(double)t.CopiedBytes+t.VerifiedBytes):done;}
+  public ProgressInfo Progress(bool details=true){
+   lock(gate){
+    double seconds=time(),work=Work();
+    if(work<lastWork)ResetSamples();
+    if(work>lastWork){lastAdvance=seconds;lastWork=work;}
+    if(samples.Count==0||seconds-samples.Last().Seconds>=0.2)samples.Enqueue(new Sample{Seconds=seconds,Work=work});
+    while(samples.Count>2&&seconds-samples.ElementAt(1).Seconds>8)samples.Dequeue();
+    var first=samples.Peek();double span=seconds-first.Seconds,rate=span>0?(work-first.Work)/span:0;
+    double remaining=copyPhase?Math.Max(0,2.0*totalBytes-skippedWork-work):Math.Max(0,total-done);
+    bool stalled=!finished&&!finalising&&seconds-lastAdvance>=3;
+    double? eta=finished?(double?)0:totalKnown&&!finalising&&!stalled&&remaining>0&&rate>0&&seconds-phaseStart>=1?(double?)(remaining/rate):null;
+    if(eta.HasValue&&copyPhase&&transfers.Count>0){double largest=transfers.Max(t=>Math.Max(0,2.0*t.Size-t.CopiedBytes-t.VerifiedBytes));eta=Math.Max(eta.Value,largest/(rate/Math.Max(1,Math.Min(workers,total-done))));}
+    long copied=doneBytes+transfers.Sum(t=>t.CopiedBytes);
+    return new ProgressInfo{LiveMetrics=this,Done=done,Total=total,TotalKnown=totalKnown,Text=current,Stage=stage,Activity=string.Join(", ",meters.Where(k=>k.Value.Active>0).Select(k=>k.Key)),BytesDone=Math.Min(totalBytes,copied),BytesTotal=totalBytes,ElapsedSeconds=seconds,RemainingSeconds=eta,Stalled=stalled,Finalising=finalising,Finished=finished,WorkPerSecond=rate,CopyPhase=copyPhase,ProgressFraction=finished?1:copyPhase?(totalBytes>0?Math.Min(0.99,work/(2.0*totalBytes)):0):(totalKnown&&total>0?(double)done/total:0),Stages=details?Snapshot():null};
+   }
+  }
+  public void UpdateLegacy(int count,int expected,string text){lock(gate){done=count;total=expected;totalKnown=expected>0;current=text;}}
+  public void Complete(long bytes){lock(gate){done++;doneBytes+=Math.Max(0,bytes);}Pulse(false);}
+  public Transfer Track(long bytes){lock(gate){var item=new Transfer(this,Math.Max(0,bytes),generation);transfers.Add(item);return item;}}
+  public void Finalise(string text){lock(gate){finalising=true;current=text;}Pulse(true);}
+  public void Finish(string text){lock(gate){finished=true;finalising=false;current=text;}Pulse(true);}
+  public void Pulse(bool force){double seconds=time();lock(gate){if(!force&&lastPulse>=0&&seconds-lastPulse<0.2)return;lastPulse=seconds;}if(callback!=null)callback(new ProgressInfo{LiveMetrics=this});}
   public string Report(){return string.Join("\r\n",Snapshot().Select(s=>s.Stage+": "+s.Files+" files; "+s.Seconds.ToString("0.00",CultureInfo.InvariantCulture)+" s; "+s.FilesPerSecond.ToString("0.00",CultureInfo.InvariantCulture)+" files/s; "+s.MBPerSecond.ToString("0.00",CultureInfo.InvariantCulture)+" MB/s"));}
-  public sealed class Scope:IDisposable {PipelineMetrics owner;readonly string stage;long complete;internal Scope(PipelineMetrics m,string s){owner=m;stage=s;}public void Bytes(long bytes){owner.Add(stage,bytes);}public void Complete(long files=1){complete=files;}public void Dispose(){if(owner!=null){owner.End(stage,complete);owner=null;}}}
+  public static string Duration(double seconds){var t=TimeSpan.FromSeconds(Math.Max(0,Math.Min(seconds,TimeSpan.MaxValue.TotalSeconds-1)));return ((long)t.TotalHours).ToString("00",CultureInfo.InvariantCulture)+t.ToString(@"\:mm\:ss");}
+  public sealed class Transfer {
+   readonly PipelineMetrics owner;readonly int version;internal long CopiedBytes,VerifiedBytes;public readonly long Size;bool resolved;
+   internal Transfer(PipelineMetrics metrics,long bytes,int phase){owner=metrics;Size=bytes;version=phase;}
+   public void Reset(){lock(owner.gate){if(resolved||version!=owner.generation)return;if(CopiedBytes==0&&VerifiedBytes==0)return;CopiedBytes=VerifiedBytes=0;owner.ResetSamples();}}
+   public void Copied(int bytes){lock(owner.gate){if(!resolved&&version==owner.generation)CopiedBytes=Math.Min(Size,CopiedBytes+bytes);}}
+   public void Verified(int bytes){lock(owner.gate){if(!resolved&&version==owner.generation)VerifiedBytes=Math.Min(Size,VerifiedBytes+bytes);}}
+   public void Resolve(bool success){lock(owner.gate){if(resolved||version!=owner.generation)return;resolved=true;owner.transfers.Remove(this);if(success){owner.settledWork+=2.0*Size;owner.doneBytes+=Size;}else{owner.skippedWork+=2.0*Size;owner.ResetSamples();}owner.done++;}owner.Pulse(false);}
+  }
+  public sealed class Scope:IDisposable {PipelineMetrics owner;readonly string activity;long complete;internal Scope(PipelineMetrics metrics,string name){owner=metrics;activity=name;}public void Bytes(long bytes){owner.Add(activity,bytes);}public void Complete(long files=1){complete=files;}public void Dispose(){if(owner!=null){owner.End(activity,complete);owner=null;}}}
  }
  public static class FileRetry {
   public static bool DiskFull(Exception ex){int code=ex.HResult&65535;return code==112||code==39||(ex.Data.Contains("SQLiteCode")&&(Convert.ToInt32(ex.Data["SQLiteCode"])&255)==13);}
