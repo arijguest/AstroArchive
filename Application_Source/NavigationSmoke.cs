@@ -68,6 +68,9 @@ namespace AstroArchive {
                 }
                 var tableViewer = PopupChildren<ScrollViewer>(grid).First();
                 if (tableViewer.ExtentWidth > tableViewer.ViewportWidth + 1 && !PopupChildren<ScrollBar>(tableViewer).Any(bar => bar.Orientation == Orientation.Horizontal && bar.IsVisible && bar.ActualWidth > 40)) throw new Exception("Wide table has no usable horizontal scrollbar.");
+                File.WriteAllText(Path.Combine(output, "navigation-layout.txt"), "Table " + grid.ActualWidth + " x " + grid.ActualHeight + "; extent " + tableViewer.ExtentWidth + "; viewport " + tableViewer.ViewportWidth + "\n" +
+                    string.Join("\n", grid.Columns.Where(column => column.Visibility == Visibility.Visible).Select(column => column.Header + ": " + column.Width + ", actual " + column.ActualWidth)) + "\n" +
+                    string.Join("\n", PopupChildren<ScrollBar>(tableViewer).Select(bar => bar.Orientation + ": " + bar.Visibility + ", visible " + bar.IsVisible + ", " + bar.ActualWidth + " x " + bar.ActualHeight)));
                 Capture(Path.Combine(output, "AstroArchive_Large_Text_UI.png"));
                 settings.ReducedMotion=true;var previousProgress=latestProgress;latestProgress=new ProgressInfo{TotalKnown=false};LiveTick(true);if(((ProgressBar)Window.FindName("ProgressBar")).IsIndeterminate)throw new Exception("Reduced motion still animates unknown progress.");latestProgress=previousProgress;
                 var preferences = new FormWindow(Window, "Accessibility smoke", 640, 620);
