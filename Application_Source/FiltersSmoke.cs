@@ -9,7 +9,7 @@ namespace AstroArchive { public partial class MainUi {
    libraryFilters.Values["Camera"]="Telephoto";libraryFilters.Values["Session"]=all[0].SessionKey;Filter(true);if(displayed.Count!=1)throw new Exception("Library acquisition-session filters did not combine.");
    libraryFilters.Ranges["Exposure"]=new CaptureRange{Mode=NumericFilterMode.Between,Minimum=30,Maximum=60};
    ShowFilters(false);PumpPopupLayout();if(filtersPopup==null||!filtersPopup.IsOpen)throw new Exception("Compact filters panel did not open.");
-   var body=(FrameworkElement)filtersPopup.Child;var minimum=PopupChildren<Slider>(body).First(slider=>AutomationProperties.GetName(slider)=="Exposure minimum");minimum.Value=minimum.Maximum;
+   var body=(FrameworkElement)filtersPopup.Child;if(!MenuScrolling.GetEnabled(PopupChildren<ScrollViewer>(body).First()))throw new Exception("Filter panel lacks proportional scrolling.");var minimum=PopupChildren<Slider>(body).First(slider=>AutomationProperties.GetName(slider)=="Exposure minimum");minimum.Value=minimum.Maximum;
    if(libraryFilters.Ranges["Exposure"].Minimum!=60||displayed.Count!=1)throw new Exception("Range slider did not filter the displayed session.");
    PopupChildren<Button>(body).Single(button=>Convert.ToString(button.Content)=="Clear filters").RaiseEvent(new RoutedEventArgs(Button.ClickEvent));PumpPopupLayout();
    if(libraryFilters.ActiveCount!=0||displayed.Count!=3)throw new Exception("Panel reset retained categories or ranges.");filtersPopup.IsOpen=false;

@@ -88,7 +88,7 @@ Compare `Hash` with the corresponding `.sha256` file. A checksum checks file int
 | **Filters** | Narrow captures by acquisition session, exposure, gain and review state. Advanced options include mosaic, format, capability and mount. |
 | **Columns** | Show or hide headings; drag to reorder or right-click to move left/right. Import and repository layouts save independently. |
 | **Table headings** | Click to sort; **Shift-click** adds columns. Arrows and priorities show the active sort order. |
-| **Preview toolbar** | Scroll or pinch to zoom; drag or use arrows to pan after zooming. **Fit** or **F** restores the whole image; **Escape** closes the popup. |
+| **Preview toolbar** | Controls sit below the image. Scroll or pinch to zoom; drag the image or use arrows to move the view after zooming. **Fit** or **F** restores the whole image; **Escape** closes the popup. |
 | **Settings → Preferences** | System/light/dark themes, text size, comfortable rows, high contrast and reduced progress animation. |
 | **Guide** | Repeat the first-run walkthrough, search offline help or open About. **F1** opens help for the current tab. |
 
