@@ -15,8 +15,8 @@ namespace AstroArchive {
   }
   void ProcessDumpUi(){
    if(repo==null||cancel!=null||closing)return;
-   ((CheckBox)Window.FindName("DeleteOriginalsCheck")).IsChecked=false;plan=null;BeginLive(true);DumpResult result=null;
-   Run(ct=>{result=repo.ProcessDump(ct,Progress,settings.CopyWorkers,LiveFrame);return result.Summary;},summary=>{
+   ((CheckBox)Window.FindName("DeleteOriginalsCheck")).IsChecked=false;plan=null;BeginLive(true);DumpResult result=null;bool ignoreFailed=settings.IgnoreFailed;
+   Run(ct=>{result=repo.ProcessDump(ct,Progress,settings.CopyWorkers,LiveFrame,ignoreFailed);return result.Summary;},summary=>{
     plan=result.Plan;FilterImports();
     L("ScanLabel").Text=summary;L("StatusLabel").Text=summary;
     if(result.NeedsReview)ShowReport("Dump folder: files retained for review",repo.LastReport);

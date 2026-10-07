@@ -111,12 +111,18 @@ namespace AstroArchive {
     return image;
    },image=>L("StatusLabel").Text=title+" launched with stack: "+image);
   }
-  void DeleteFiles(List<Frame> selected){
+  void DeleteFailedFiles(){
+   if(repo==null||cancel!=null)return;var matches=repo.FailedFiles();
+   if(matches.Count==0){L("StatusLabel").Text="No repository filenames contain 'failed'.";return;}
+   DeleteFiles(matches,true);
+  }
+  void DeleteFiles(List<Frame> selected,bool failedNames=false){
    if(repo==null||cancel!=null||selected.Count==0)return;
-   var d=new FormWindow(Window,"Delete selected files",640,520);d.Text("Delete "+selected.Count+" selected file"+(selected.Count==1?"":"s")+"?",true);d.Text(repo.Root);
+   var d=new FormWindow(Window,failedNames?"Delete failed":"Delete selected files",640,520);d.Text("Delete "+selected.Count+" "+(failedNames?"matching":"selected")+" file"+(selected.Count==1?"":"s")+"?",true);d.Text(repo.Root);
+   if(failedNames)d.Text("Searches the entire active repository for filenames containing 'failed', regardless of case. Current filters and telescope selection do not limit this action.");
    d.Text("This permanently removes the selected repository copies. Deletion history is retained so future telescope imports skip the same captures. Source copies, other archive files and shared session metadata stay. Cloud-synced deletions propagate to the cloud.");
    d.Add(new TextBox{Text=string.Join("\r\n",selected.Select(f=>f.RelativePath)),IsReadOnly=true,Height=170,VerticalScrollBarVisibility=ScrollBarVisibility.Auto,HorizontalScrollBarVisibility=ScrollBarVisibility.Auto});
-   d.Accept("Delete selected files",()=>true,true);if(!d.Show())return;CancelPreview();
+   d.Accept(failedNames?"Delete failed files":"Delete selected files",()=>true,true);if(!d.Show())return;CancelPreview();
    Run(ct=>{var result=repo.DeleteFrames(selected,ct,Progress);return result.Deleted+" selected files deleted."+(result.Errors.Count==0?"":"\r\n\r\n"+string.Join("\r\n",result.Errors));},message=>{plan=null;FilterImports();L("StatusLabel").Text=message.Split('\n')[0];if(message.Contains("\n"))ShowReport("File deletion report",message);});
   }
  }

@@ -61,7 +61,7 @@ uninstaller to Windows Installed Apps.
 Replace the filename below with the installer you downloaded:
 
 ```powershell
-Get-FileHash .\AstroArchive1.6.1.1.exe -Algorithm SHA256
+Get-FileHash .\AstroArchive1.6.2.1.exe -Algorithm SHA256
 ```
 
 Compare the `Hash` value with the corresponding `.sha256` file in the release.
@@ -95,6 +95,15 @@ telescope profiles, cloud folders, calibration matching and optional analysis.
 The 1.7.0 development branch adds [metadata-first mosaic collections](docs/MOSAICS.md),
 reviewable panel assignments and independent stacking inputs per panel. This
 feature is prepared for a future release; it is not in the current installer.
+## Failed captures
+
+Enable **Import options > Ignore failed** to skip FITS filenames containing
+`failed`, regardless of case. The setting is saved for folder, USB and Dump imports;
+ignored originals stay in place. Rescan after changing it.
+
+**Repository tools > Delete failed** lists matching captures across the active
+repository for confirmation, regardless of the current filters. Deletion retains
+source copies and shared metadata, and records checksums to prevent reimport.
 
 ## Formats and processing
 

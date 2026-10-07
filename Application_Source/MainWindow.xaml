@@ -98,7 +98,8 @@ FITS · XISF · TIFF · PNG · JPEG" Foreground="#A8B5CD" HorizontalAlignment="C
       <StackPanel Grid.Column="2" Margin="0,0,12,0"><TextBlock Text="TARGET ANALYSIS" FontSize="10"/><ComboBox x:Name="ImportSolveMode" Margin="0,5,0,0"/></StackPanel>
       <StackPanel Grid.Column="3"><TextBlock Text="ROTATION ANALYSIS" FontSize="10"/><ComboBox x:Name="ImportRotationMode" Margin="0,5,0,0"/></StackPanel>
      </Grid>
-     <CheckBox x:Name="DeleteOriginalsCheck" IsChecked="False" Content="Delete originals after verified import" Margin="0,12,0,0" ToolTip="Off by default. Removes newly imported source FITS only after verification and indexing. Cloud-synced source deletions propagate."/>
+     <CheckBox x:Name="IgnoreFailedCheck" IsChecked="False" Content="Ignore failed" Margin="0,12,0,0" ToolTip="Skip FITS filenames containing 'failed' anywhere, regardless of case. Saved for future folder, USB and Dump imports. Ignored source files are kept."/>
+     <CheckBox x:Name="DeleteOriginalsCheck" IsChecked="False" Content="Delete originals after verified import" Margin="0,10,0,0" ToolTip="Off by default. Removes newly imported source FITS only after verification and indexing. Cloud-synced source deletions propagate."/>
      <TextBlock Text="Originals are kept by default. Optional analysis can take longer." FontSize="11" Foreground="{DynamicResource Muted}" Margin="0,8,0,0"/>
     </StackPanel></Border></Expander>
     <Grid Grid.Row="2" Margin="0,0,0,10"><Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/></Grid.RowDefinitions><Grid><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/><ColumnDefinition Width="Auto"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
