@@ -91,16 +91,17 @@ namespace AstroArchive {
    Run(ct=>{result=repository==null?new TelescopeRenameResult():repository.RenameTelescope(profile.Id,newName,ct,Progress,null,config,originalSettings,renamedSettings);if(repository==null)Util.AtomicText(config,renamedSettings);return "Renamed telescope to "+newName+"; "+result.Files+" repository files updated.";},r=>{settings=candidate;ReloadScopes(newName,true);usbGeneration++;RefreshUsb();L("StatusLabel").Text=r;if(!string.IsNullOrEmpty(result.Warning))ShowReport("Telescope rename",result.Warning);});
   }
   void SmokeSavedTelescopes(){
-   var savedSettings=settings;var savedUsb=usbTelescopes;var savedPending=pendingUsb;var savedPlan=plan;string source=T("SourceBox").Text,id=T("TelescopeBox").Text,model=Convert.ToString(C("ModelBox").SelectedItem),camera=Convert.ToString(C("CameraBox").SelectedItem);
+   var savedSettings=settings;var savedUsb=usbTelescopes;var savedPending=pendingUsb;var savedPlan=plan;int tab=((TabControl)Window.FindName("MainTabs")).SelectedIndex;string source=T("SourceBox").Text,id=T("TelescopeBox").Text,model=Convert.ToString(C("ModelBox").SelectedItem),camera=Convert.ToString(C("CameraBox").SelectedItem);
    try{
-    settings=new Settings();TelescopeProfiles.Initialize(settings);TelescopeProfiles.MergeRepository(settings,all);ReloadScopes("Dwarf-03",true);
+    ((TabControl)Window.FindName("MainTabs")).SelectedIndex=1;PumpPopupLayout();settings=new Settings();TelescopeProfiles.Initialize(settings);TelescopeProfiles.MergeRepository(settings,all);ReloadScopes("Dwarf-03",true);PumpPopupLayout();
+    if(!PopupChildren<TextBlock>(C("SavedTelescopeBox")).Any(t=>t.Text=="Dwarf-03 · Dwarf 3"))throw new Exception("Saved telescope selection did not render its display name.");
     if(C("SavedTelescopeBox").Items.Count!=4||T("TelescopeBox").Text!="Dwarf-03"||Convert.ToString(C("ModelBox").SelectedItem)!="Dwarf 3")throw new Exception("Saved telescope dropdown did not recover repository profiles.");
     pendingUsb=new UsbTelescope{Volume=new UsbVolume{Root=@"E:\",Id="smoke-usb"},Source=@"E:\MyWorks",Make="Seestar"};C("SavedTelescopeBox").SelectedItem=TelescopeProfiles.Find(settings,"Seestar-01");
     if(T("SourceBox").Text!=@"E:\MyWorks")throw new Exception("Selecting an existing scope lost the USB setup source.");
     plan=new ImportPlan();T("TelescopeBox").Text="Edited scope";if(plan!=null)throw new Exception("Changed telescope left a stale scan plan.");
     usbTelescopes=new List<UsbTelescope>{pendingUsb};UpdateTelescopeState(true);if(B("AutoUploadButton").Visibility!=Visibility.Visible||B("AutoUploadButton").IsEnabled||C("SavedTelescopeBox").IsEnabled)throw new Exception("USB controls ignore busy state.");
     usbTelescopes.Clear();UpdateTelescopeState(false);if(B("AutoUploadButton").Visibility!=Visibility.Collapsed)throw new Exception("Disconnected USB upload action remains visible.");
-   }finally{settings=savedSettings;usbTelescopes=savedUsb;pendingUsb=savedPending;ReloadScopes(settings.SelectedTelescope,false);T("SourceBox").Text=source;T("TelescopeBox").Text=id;C("ModelBox").SelectedItem=model;C("CameraBox").SelectedItem=camera;plan=savedPlan;UpdateTelescopeState(false);}
+   }finally{settings=savedSettings;usbTelescopes=savedUsb;pendingUsb=savedPending;ReloadScopes(settings.SelectedTelescope,false);T("SourceBox").Text=source;T("TelescopeBox").Text=id;C("ModelBox").SelectedItem=model;C("CameraBox").SelectedItem=camera;plan=savedPlan;UpdateTelescopeState(false);((TabControl)Window.FindName("MainTabs")).SelectedIndex=tab;}
   }
  }
 }
