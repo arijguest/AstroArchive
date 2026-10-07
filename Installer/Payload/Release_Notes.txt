@@ -17,6 +17,17 @@ Package 1.9.0.1
   reduced progress animation. Keep theme selection in Preferences, and retain
   Windows high-contrast behavior and clear keyboard focus indicators.
 
+AstroArchive 1.8.2 — concise mount labels
+Package 1.8.2.1
+
+- Show unknown mounts as EQ? for exposures over 20 seconds, otherwise Alt-Az?.
+  Existing repository records and import tables use the same display rule.
+- Standardise legacy inferred labels to EQ? / Alt-Az?, including rotation results
+  and cached analysis. Confirmed imports and user assignments keep EQ / Alt-Az.
+- Group confirmed and suggested mounts together in the EQ and Alt-Az filters.
+  Search, sorting, file details and catalogue CSV export use the concise labels.
+- Preserve saved Mount column layouts, stored uncertainty and archive paths.
+
 AstroArchive 1.8.1 — observing town / city
 Package 1.8.1.1
 

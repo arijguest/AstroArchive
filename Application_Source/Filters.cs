@@ -15,7 +15,7 @@ namespace AstroArchive {
     case "Mosaic state":value=frame.MosaicLabels!=null&&frame.MosaicLabels.Count>0?string.Join("; ",frame.MosaicLabels.Select(m=>m.State).Distinct()):frame.Mosaic==null||frame.MosaicDismissed?"-":frame.Mosaic.Conflict!=null||!frame.Mosaic.Declared||frame.Mosaic.PanelKey==null&&!frame.Mosaic.Output?"Suggested":"Declared";break;
     case "Device":value=frame.Telescope;break;
     case "Frame type":value=frame.Kind;break;case "Format":value=frame.Format;break;case "Capabilities":value=frame.CapabilityText;break;
-    case "Mount":value=(frame.Mount??"").StartsWith("EQ")?"EQ":(frame.Mount??"").StartsWith("Alt/Az")?"Alt/Az":frame.Mount;break;
+    case "Mount":value=MountLabels.Type(frame.MountText);if(value.Length==0)value=frame.MountText;break;
     case "Camera":value=frame.Camera;break;
     case "Night":value=frame.Night;break;
     case "Session":value=frame.Session;break;

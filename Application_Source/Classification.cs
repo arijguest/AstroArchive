@@ -139,7 +139,7 @@ namespace AstroArchive {
    string raComment;if(!f.RA.HasValue&&h.Comments.TryGetValue("RA",out raComment)&&raComment.ToLowerInvariant().Contains("deg"))f.RA=h.Number("RA");
    if(h.Get("CTYPE1").StartsWith("RA")&&h.Get("CTYPE2").StartsWith("DEC")){f.RA=h.Number("CRVAL1")??f.RA;f.Dec=h.Number("CRVAL2")??f.Dec;}
    f.Latitude=h.Number("SITELAT","OBSGEO-B");f.Longitude=h.Number("SITELONG","SITELON","OBSGEO-L");
-   string mode=h.Get("MOUNTMOD","MOUNTMODE","TRACKMOD","MOUNTTYP").Trim().ToUpperInvariant();if(mode=="EQ"||mode.Contains("EQUATORIAL")){f.Mount="EQ";f.MountEvidence="Explicit FITS mount metadata";}else if(mode=="AZ"||mode=="ALT/AZ"||mode=="ALTAZ"||mode.Contains("ALT-AZ")){f.Mount="Alt/Az";f.MountEvidence="Explicit FITS mount metadata";}
+   string mode=h.Get("MOUNTMOD","MOUNTMODE","TRACKMOD","MOUNTTYP").Trim().ToUpperInvariant();if(mode=="EQ"||mode.Contains("EQUATORIAL")){f.Mount="EQ";f.MountEvidence="Explicit FITS mount metadata";}else if(mode=="AZ"||mode=="ALT/AZ"||mode=="ALTAZ"||mode.Contains("ALT-AZ")){f.Mount="Alt-Az";f.MountEvidence="Explicit FITS mount metadata";}
    string cal=h.Get("CALSTAT");if(h.Get("CALIBRAT","CALIBRED")=="T"||Regex.IsMatch(cal,@"[DBF]"))f.Calibration="Calibrated";
    if(h.Get("REGISTER","REGISTRD","DEROTATE")=="T"||Regex.IsMatch(name,@"^(r_|r_pp_|registered[_-])")||low.Contains("/registered/"))f.Calibration="Registered";
    if(f.Kind=="Stack")f.Calibration="Device stack";if(f.Kind.StartsWith("Master")||f.Kind=="Dark"||f.Kind=="Flat"||f.Kind=="Bias")f.Calibration="Calibration frame";

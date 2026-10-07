@@ -11,7 +11,7 @@ namespace AstroArchive {
   readonly Dictionary<string,List<string>> defaultColumns=new Dictionary<string,List<string>>();
   readonly Dictionary<string,List<string>> originalColumnOrder=new Dictionary<string,List<string>>();
   bool testingColumnLayouts;
-  static string ColumnId(DataGridColumn column){return ((Binding)((DataGridBoundColumn)column).Binding).Path.Path;}
+  static string ColumnId(DataGridColumn column){string path=((Binding)((DataGridBoundColumn)column).Binding).Path.Path;return path=="MountText"?"Mount":path;}
   void AddCaptureColumns(string name){
    var grid=G(name);defaultColumns[name]=grid.Columns.Select(ColumnId).ToList();
    string[] fields={"CapabilityText|CAPABILITIES|240","CameraModel|CAMERA MODEL|150","CameraId|CAMERA ID|150","TelescopeModel|TELESCOPE MODEL|150","Offset|OFFSET|70","ElectronsPerAdu|E-/ADU|80","ReadoutMode|READOUT MODE|130","Roi|ROI|140","OpticalConfiguration|OPTICAL CONFIGURATION|180","ObservedUtc|UTC CAPTURE TIME|180","TimeZoneId|TIMEZONE|140","OriginalName|FILE|220","ObjectId|OBJECT ID|90","TargetName|COMMON NAME / LABEL|220","Status|STATUS|110","ReviewText|REVIEW|115","Telescope|TELESCOPE|150","InstrumentText|DEVICE / MODEL|150","Camera|CAMERA|100","Kind|FRAME TYPE|110","Night|NIGHT|100","Observed|RECORDED CAPTURE TIME|160","ExposureText|EXPOSURE|85","GainText|GAIN|75","TemperatureText|TEMPERATURE|110","Filter|FILTER|100","Calibration|CALIBRATION|130","SizeText|DIMENSIONS|140","BinX|BIN X|70","BinY|BIN Y|70","Bayer|BAYER PATTERN|110","Mount|MOUNT|130","Session|SESSION|160","MosaicText|MOSAIC|160","PanelText|PANEL|110","Bytes|SIZE (BYTES)|115","ScreeningIssue|SCREENING ISSUE|240","SourceDisposition|SOURCE ACTION|240","RelativePath|REPOSITORY PATH|280","Notes|NOTES|280"};
