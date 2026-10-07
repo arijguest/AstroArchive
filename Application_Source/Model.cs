@@ -1,4 +1,4 @@
-// AstroArchive 1.2.0. C# 5, .NET Framework 4.8, Windows 10/11 x64.
+// AstroArchive 1.6.0. C# 5, .NET Framework 4.8, Windows 10/11 x64.
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -44,7 +44,7 @@ namespace AstroArchive {
  }
  public class Frame {
   public string Hash {get;set;} public string RelativePath {get;set;} public string SourcePath {get;set;} public string SourceRoot {get;set;} public string OriginalName {get;set;}
-  public string Telescope {get;set;} public string Model {get;set;} public string Camera {get;set;} public string Target {get;set;}
+  public string Telescope {get;set;} public string TelescopeIdentity {get;set;} public string Model {get;set;} public string Camera {get;set;} public string Target {get;set;}
   public string Make {get;set;} public string MakeEvidence {get;set;} public string TargetEvidence {get;set;} public string SourceDisposition {get;set;}
   public string Kind {get;set;} public string Calibration {get;set;} public string Filter {get;set;} public string Bayer {get;set;}
   public string Mount {get;set;} public string MountEvidence {get;set;} public string Observed {get;set;} public string TimeSource {get;set;}
@@ -66,7 +66,7 @@ namespace AstroArchive {
   public Frame Clone() { var copy=(Frame)MemberwiseClone();copy.SourceStamp=SourceStamp==null?null:SourceStamp.Clone();copy.RepositoryStamp=RepositoryStamp==null?null:RepositoryStamp.Clone();copy.SourceMetadataStamp=SourceMetadataStamp==null?null:SourceMetadataStamp.Clone();return copy; }
  }
  public class TargetSummary { public string Name{get;set;} public int Subs{get;set;} public int Stacks{get;set;} public int Sessions{get;set;} public string Detail {get{return Subs+" subs  ·  "+Stacks+" stacks  ·  "+Sessions+" sessions";}} }
- public class Settings { public Settings(){AutoSolve=false;AutoRotation=false;ThemeMode="System";PreviewStretch="Auto";ShowPreview=true;} public string ThemeMode {get;set;} public string PreviewStretch {get;set;} public bool ShowPreview {get;set;} public int CopyWorkers {get;set;} public string Repository{get;set;} public string LastSource{get;set;} public string Telescope{get;set;} public string Model{get;set;} public double? Latitude{get;set;} public double? Longitude{get;set;} public double? FieldHeight{get;set;} public string Astap{get;set;} public string StarDatabase{get;set;} public string ApiKeyProtected{get;set;} public bool UseOnline{get;set;} public bool AutoSolve{get;set;} public bool AutoRotation{get;set;} }
+ public class Settings { public List<TelescopeProfile> Telescopes{get;set;} public string SelectedTelescope{get;set;} public Settings(){AutoSolve=false;AutoRotation=false;ThemeMode="System";PreviewStretch="Auto";ShowPreview=true;} public string ThemeMode {get;set;} public string PreviewStretch {get;set;} public bool ShowPreview {get;set;} public int CopyWorkers {get;set;} public string Repository{get;set;} public string LastSource{get;set;} public string Telescope{get;set;} public string Model{get;set;} public double? Latitude{get;set;} public double? Longitude{get;set;} public double? FieldHeight{get;set;} public string Astap{get;set;} public string StarDatabase{get;set;} public string ApiKeyProtected{get;set;} public bool UseOnline{get;set;} public bool AutoSolve{get;set;} public bool AutoRotation{get;set;} }
  public class ProgressInfo {[ScriptIgnore]public PipelineMetrics LiveMetrics{get;set;}public int Done{get;set;} public int Total{get;set;} public string Text{get;set;} public string Stage{get;set;} public long BytesDone{get;set;} public long BytesTotal{get;set;} public double ElapsedSeconds{get;set;} public double? RemainingSeconds{get;set;} public List<StageMetric> Stages{get;set;} public bool TotalKnown{get;set;} public bool Stalled{get;set;} public bool Finalising{get;set;} public bool Finished{get;set;} public double ProgressFraction{get;set;} public string Activity{get;set;} public double WorkPerSecond{get;set;} public bool CopyPhase{get;set;} public bool EtaProvisional{get;set;} public double EffectiveBytesPerSecond{get;set;} }
  public class ImportPlan {public List<Frame> Frames=new List<Frame>(); public List<string> Errors=new List<string>(); public string Source; public long Bytes; public int CacheHits;public int MetadataCacheHits; public PipelineMetrics Metrics; }
  public class ImportOptions {public bool DeleteOriginals;public string SourceRoot; public int Workers; public bool Retune; public bool CloudSource; public Action<Frame> OnFrame;public PipelineMetrics ScanMetrics;public bool DeferFinish;}

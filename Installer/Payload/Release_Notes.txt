@@ -1,13 +1,30 @@
-AstroArchive 1.5.1 — readable dropdown menus
-Package 1.5.1.1
+AstroArchive 1.6.0 — USB imports, simpler filters and readable menus
+Package 1.6.0.1
 
-Fix the pale strip covering text in Export, right-click file menus and Tools.
-All menus, nested menus and dropdowns now reserve separate space for scrollbars.
-Short lists hide scrollbars; long lists remain scrollable within the screen.
-Scrollbars and menu separators match the active Light or Dark theme throughout
-AstroArchive, including Settings and other dialogs.
+This release combines the pending import interface, telescope management and
+programme-wide dropdown fixes with the released preview and performance updates.
 
-The 1.5.0 import performance and continuous ETA improvements are retained.
-Image previews, file tools, repositories and settings are preserved.
-New downloads use AstroArchive1.5.1.1.exe. Windows validation and checksums
-accompany the automated release.
+- Detect local USB telescope storage and auto-upload missing captures. Save or
+  select a physical telescope profile; recover profiles from the repository.
+  Volume identity keeps the association when Windows changes its drive letter.
+- Rename saved telescopes across archive paths, metadata, source manifests and
+  deletion history while preserving FITS bytes and acquisition sessions.
+  Interrupted renames recover or roll back when the repository reopens.
+- Use one Filters menu in the library and import views. Import only the ready
+  files shown in the filtered results; the button displays their count.
+- Compact source setup with collapsed import options. Screen captures for failure
+  and rejection markers, unreadable FITS payloads and archive checksum problems.
+  USB auto-upload leaves rejected or damaged captures available for review.
+- Preserve deletion history by SHA-256. Later imports skip matching content even
+  if the source name, folder or telescope drive letter changes. Archive reset
+  retains the log, which travels with the portable repository index.
+- Fix text overlap in menus and dropdowns throughout the programme. Popups reserve
+  separate space for themed scrollbars, hide them when unnecessary, and keep
+  long menus, submenus and selections reachable within the screen.
+- Retain the 1.4 colour previews/themes and 1.5 continuous progress, rolling ETA,
+  discovery/metadata caching and verified copy performance improvements.
+
+Download AstroArchive1.6.0.1.exe. The Windows release workflow validates application
+regressions, native file checks, installer repair/uninstall and WPF rendering.
+Physical telescope USB arrival/removal and live cloud provider behaviour require
+separate validation with real hardware and accounts.

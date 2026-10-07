@@ -1,17 +1,43 @@
-AstroArchive 1.5.1
+AstroArchive 1.6.0
 Windows 10/11 x64 desktop app. Built-in .NET Framework 4.8 and Windows SQLite.
 No installer, Python or Google login required.
 
 START HERE
 1. Open AstroArchive and choose your archive folder in Settings.
-2. Import: choose your telescope mirror and assign a unique physical device ID,
-   such as Seestar-01 or Dwarf-03. Leave model and camera on Auto unless you know
-   which override to apply. Scan folder, review the rows, then Import new files.
-3. Repository: search names, dates, devices, filter, exposure, gain or filename.
-   Clear resets the filters. It does not delete files.
+2. Import: choose a telescope or mirror folder and assign a unique device ID,
+   such as Seestar-01 or Dwarf-03. Scan folder, review the rows, then import.
+   Import options contains model/camera overrides, optional analysis and source
+   cleanup. Auto detection and keeping originals remain the defaults.
+3. Search either view, then use Filters to narrow target, device, frame type, mount,
+   camera, night, session, optical filter, calibration, exposure, gain, dimensions,
+   status or review state. Clear resets search and filters without deleting files.
+   Import copies only the ready files shown in the filtered view; its button shows
+   the count. Hidden candidates remain available for a later import.
 4. Select rows with Ctrl/Shift, or use all visible captures when none are selected.
    Right-click selected files, then Export to copy files or prepare a stacking
    folder, with matching calibrations if selected.
+
+USB TRANSFER AND SAVED TELESCOPES
+Connect a Seestar/DWARF as local USB storage. In Import captures, select a Saved
+telescope or enter its unique physical device ID and model. Browse its capture
+folder and press Save telescope. Choose the saved telescope from the dropdown on
+later imports. Existing device IDs are recovered from repository records;
+Recover from repository adds any missing profiles without replacing your choices.
+Recovered profiles need a USB folder association saved before auto upload.
+
+The Auto upload from button appears when a USB telescope source is available.
+Click it to screen supported FITS files, skip verified duplicates, import missing
+captures and restore missing/damaged archive copies. Originals stay on the USB
+device. Solving and rotation stay off for this action. Multiple connected sources
+are listed in a menu. Reconnect and click again to resume an interrupted import.
+The saved association uses volume identity and survives drive-letter changes.
+
+Rename telescope changes the saved name and matching indexed captures, import
+manifests and archive paths in the selected repository. Capture bytes and session
+grouping are preserved. Existing names and conflicting destinations are refused.
+Failures roll back; an interrupted rename is recovered when reopening the archive.
+Keep the local working index/recovery record until that recovery finishes. Other
+repositories and previously exported projects retain their existing labels.
 
 IMAGE PREVIEW AND APPEARANCE
 Settings > General offers System, Light and Dark themes. The small circle button
@@ -50,7 +76,7 @@ existing selection. If a Drive entry is absent, copy the full Windows path from
 Explorer and paste it into the selector address bar with Alt+D. The selected
 location must expose a filesystem path; a browser-only Drive folder cannot be used.
 
-For streamed Google Drive input, tick Streamed/cloud source before scanning.
+Select mounted cloud folders in the same way as local telescope folders.
 Windows placeholder attributes are detected automatically when available. Cloud
 availability time includes opening/reading provider-backed files, which may wait
 for a download. Copy + source hash measures local output/hashing separately for
@@ -68,7 +94,7 @@ The live Google Drive/Windows selector integration has not been tested here.
 IMPORT PROGRESS, PERFORMANCE AND RECOVERY
 Progress and elapsed time start before scanning or file preparation. Discovery
 continues while up to two local metadata workers inspect files; streamed/cloud
-mode keeps metadata reads at one worker. A local spill inventory lets traversal
+files are detected automatically; explicit cloud-mode jobs use one worker. A local spill inventory lets traversal
 finish without waiting for every metadata read. Until traversal finishes, the
 number discovered is provisional and the ETA says estimating.
 
@@ -97,7 +123,7 @@ Settings > Copy workers: Auto begins conservatively and reuses a profile for the
 source/archive pair, cloud mode and file-size class. Larger jobs sample up to
 four smaller size-spread batches at 1, 2, 4 and 8 workers. Trials stop when the
 next setting fails or stops improving throughput. Very large files are excluded
-from the pilot. Retune repeats sampling; fixed worker choices remain available.
+from the pilot. Fixed worker choices remain available in Settings.
 Workload, caching, storage and provider delays affect results.
 
 Temporary file locks and provider I/O errors get limited retries. A failed file
@@ -106,8 +132,27 @@ Disk-full errors stop the batch. Completed imports remain committed. Report open
 the diagnostics, also saved in .astroarchive/reports/last-import.txt. Free space or
 resolve the reported source problem, scan again and import to resume. Interrupted
 exports retain INCOMPLETE.txt; create a fresh project after an interrupted export.
-The exact cause of the previously reported copying failure cannot be established
-without that PC's error; the new diagnostics are intended to make it identifiable.
+
+SCREEN TELESCOPE FAILURES
+Screen for failures is available in Import and the capture library. It checks the
+visible import rows, or selected library files (all visible when none are selected).
+Failed/rejected filename and folder markers, FITS STATUS/CAPSTAT/IMGSTAT failure
+values and REJECTED flags appear as Needs review with a reason. Obvious markers
+are also flagged during scanning. Screening reads the full supported FITS image,
+including compressed data, and checks archive checksums for current files.
+Use Filters > Review > Needs review or Rejected / reference to inspect captures,
+or No issues flagged to leave them out of an import. Screening does not delete
+files or judge star quality, tracking, cloud cover or exposure quality. Rejected
+captures remain excluded from stacking by default. Review flags persist in the index.
+
+DELETION HISTORY
+Deleting library files records their SHA-256 checksums, UTC deletion times and
+original metadata. Future scans show matching captures as Deleted and exclude them
+from import, including renamed copies or imports directly from a telescope.
+Changed content at the same filename remains eligible. Repository tools > Deletion
+history shows the log. Keep .astroarchive/index.sqlite with the archive: it includes
+the deletion history and works after a portable restore. Archive reset also retains
+this history so clearing an archive does not silently repopulate it on the next scan.
 
 ORIGINALS AFTER IMPORT
 Delete originals after verified import is OFF by default and resets after scans
@@ -183,7 +228,8 @@ DELETE ALL ARCHIVE DATA
 Settings > Archive has a red Delete all archive data button. It shows the selected archive
 path and file count. Drag the slider fully right, then press Delete permanently.
 Closing the dialog cancels. This removes indexed archive FITS, saved session JSON,
-analysis/worker caches and reports. Source mirrors and unindexed files are retained.
+analysis/worker caches and reports. Deletion history, source mirrors and unindexed
+files are retained.
 Only the selected archive is affected. Cloud-synced deletions propagate and there is
 no undo. The repository Clear button remains solely a filter reset.
 
@@ -200,23 +246,24 @@ Compiled against Microsoft .NET Framework 4.8 reference assemblies. Generated-da
 regressions exercise FITS parsing, streaming scans, SHA-256 copying/deduplication,
 per-file failure recovery, caches, repeated checkpoints, DWARF calibration channels,
 session exports, archive-reset boundaries, rotation and solver protocol handling.
-See Validation.txt in the portable ZIP for exact counts and executable checks.
-Windows-native deletion/identity tests are included in test.ps1 but could not run in
-this Linux build environment. WPF interaction, live Drive and the slider confirmation
-need Windows validation. No real telescope data or authenticated plate solve was
-available here. The ASTAP protocol test uses a test double, not real sky solving.
+Windows release builds run application and installer regressions, native file
+identity/deletion checks, and WPF smoke checks for themes, previews, saved telescope
+selection, filters, live import updates and dropdown scrolling. Physical Seestar/
+DWARF USB arrival/removal and live Drive transfers still require real hardware or
+provider validation. The ASTAP protocol test uses a test double, not real sky solving.
 
 Catalogue: OpenNGC, Mattia Verga, https://github.com/mattiaverga/OpenNGC, CC-BY-SA-4.0.
 Attribution and reproducible source are included in AstroArchive_Source.zip.
 
-FILE ACTIONS AND RELEASES (1.3.0)
+FILE ACTIONS AND RELEASES
 Select files with Ctrl/Shift, then right-click one selected row. Export offers
 selected file copies, a ready-to-stack folder, or a ready-to-stack folder with
 matching calibrations. The dialog shows available calibration files. Unknown
 calibration status requires an explicit opt-in; calibrated/registered lights
 receive no extra calibration. Multiple targets get separate folders.
 Delete selected files removes only indexed repository copies and their records
-after confirmation. Source copies and shared session metadata stay. There is no
+after confirmation. Their checksums stay in deletion history. Source copies and
+shared session metadata stay. There is no
 undo, and cloud-synced deletions propagate. Locked files are reported and retained.
 The active repository is a small path at the top. Choose a different repository
 in Settings and save to apply it. Settings > Check for and download new releases

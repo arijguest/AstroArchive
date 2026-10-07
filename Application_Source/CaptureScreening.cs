@@ -40,7 +40,7 @@ namespace AstroArchive {
      if(frame.Rejected&&issue.Length==0)issue="Capture is marked rejected/reference; excluded from stacking by default.";
      if(issue.Length>0)frame.Rejected=true;
      if(source&&frame.Status=="Unreadable"){
-      string sourceRoot=frame.SourceRoot;var recovered=Classifier.Read(path,sourceRoot,frame.Telescope,frame.Model);
+      string sourceRoot=frame.SourceRoot;var recovered=Classifier.Read(path,sourceRoot,frame.TelescopeIdentity??frame.Telescope,frame.Model);recovered.Telescope=frame.Telescope;
       // Recover complete metadata before offering a formerly unreadable file for import.
       foreach(var property in typeof(Frame).GetProperties().Where(p=>p.CanWrite))property.SetValue(frame,property.GetValue(recovered,null),null);
       frame.SourceRoot=sourceRoot;

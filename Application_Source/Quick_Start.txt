@@ -1,4 +1,4 @@
-AstroArchive 1.5.1
+AstroArchive 1.6.0
 Windows 10/11 x64 desktop app. Built-in .NET Framework 4.8 and Windows SQLite.
 No installer, Python or Google login required.
 
@@ -16,6 +16,28 @@ START HERE
 4. Select rows with Ctrl/Shift, or use all visible captures when none are selected.
    Right-click selected files, then Export to copy files or prepare a stacking
    folder, with matching calibrations if selected.
+
+USB TRANSFER AND SAVED TELESCOPES
+Connect a Seestar/DWARF as local USB storage. In Import captures, select a Saved
+telescope or enter its unique physical device ID and model. Browse its capture
+folder and press Save telescope. Choose the saved telescope from the dropdown on
+later imports. Existing device IDs are recovered from repository records;
+Recover from repository adds any missing profiles without replacing your choices.
+Recovered profiles need a USB folder association saved before auto upload.
+
+The Auto upload from button appears when a USB telescope source is available.
+Click it to screen supported FITS files, skip verified duplicates, import missing
+captures and restore missing/damaged archive copies. Originals stay on the USB
+device. Solving and rotation stay off for this action. Multiple connected sources
+are listed in a menu. Reconnect and click again to resume an interrupted import.
+The saved association uses volume identity and survives drive-letter changes.
+
+Rename telescope changes the saved name and matching indexed captures, import
+manifests and archive paths in the selected repository. Capture bytes and session
+grouping are preserved. Existing names and conflicting destinations are refused.
+Failures roll back; an interrupted rename is recovered when reopening the archive.
+Keep the local working index/recovery record until that recovery finishes. Other
+repositories and previously exported projects retain their existing labels.
 
 IMAGE PREVIEW AND APPEARANCE
 Settings > General offers System, Light and Dark themes. The small circle button
@@ -72,7 +94,7 @@ The live Google Drive/Windows selector integration has not been tested here.
 IMPORT PROGRESS, PERFORMANCE AND RECOVERY
 Progress and elapsed time start before scanning or file preparation. Discovery
 continues while up to two local metadata workers inspect files; streamed/cloud
-mode keeps metadata reads at one worker. A local spill inventory lets traversal
+files are detected automatically; explicit cloud-mode jobs use one worker. A local spill inventory lets traversal
 finish without waiting for every metadata read. Until traversal finishes, the
 number discovered is provisional and the ETA says estimating.
 
@@ -101,7 +123,7 @@ Settings > Copy workers: Auto begins conservatively and reuses a profile for the
 source/archive pair, cloud mode and file-size class. Larger jobs sample up to
 four smaller size-spread batches at 1, 2, 4 and 8 workers. Trials stop when the
 next setting fails or stops improving throughput. Very large files are excluded
-from the pilot. Retune repeats sampling; fixed worker choices remain available.
+from the pilot. Fixed worker choices remain available in Settings.
 Workload, caching, storage and provider delays affect results.
 
 Temporary file locks and provider I/O errors get limited retries. A failed file
@@ -110,8 +132,6 @@ Disk-full errors stop the batch. Completed imports remain committed. Report open
 the diagnostics, also saved in .astroarchive/reports/last-import.txt. Free space or
 resolve the reported source problem, scan again and import to resume. Interrupted
 exports retain INCOMPLETE.txt; create a fresh project after an interrupted export.
-The exact cause of the previously reported copying failure cannot be established
-without that PC's error; the new diagnostics are intended to make it identifiable.
 
 SCREEN TELESCOPE FAILURES
 Screen for failures is available in Import and the capture library. It checks the
@@ -226,23 +246,24 @@ Compiled against Microsoft .NET Framework 4.8 reference assemblies. Generated-da
 regressions exercise FITS parsing, streaming scans, SHA-256 copying/deduplication,
 per-file failure recovery, caches, repeated checkpoints, DWARF calibration channels,
 session exports, archive-reset boundaries, rotation and solver protocol handling.
-See Validation.txt in the portable ZIP for exact counts and executable checks.
-Windows-native deletion/identity tests are included in test.ps1 but could not run in
-this Linux build environment. WPF interaction, live Drive and the slider confirmation
-need Windows validation. No real telescope data or authenticated plate solve was
-available here. The ASTAP protocol test uses a test double, not real sky solving.
+Windows release builds run application and installer regressions, native file
+identity/deletion checks, and WPF smoke checks for themes, previews, saved telescope
+selection, filters, live import updates and dropdown scrolling. Physical Seestar/
+DWARF USB arrival/removal and live Drive transfers still require real hardware or
+provider validation. The ASTAP protocol test uses a test double, not real sky solving.
 
 Catalogue: OpenNGC, Mattia Verga, https://github.com/mattiaverga/OpenNGC, CC-BY-SA-4.0.
 Attribution and reproducible source are included in AstroArchive_Source.zip.
 
-FILE ACTIONS AND RELEASES (1.3.0)
+FILE ACTIONS AND RELEASES
 Select files with Ctrl/Shift, then right-click one selected row. Export offers
 selected file copies, a ready-to-stack folder, or a ready-to-stack folder with
 matching calibrations. The dialog shows available calibration files. Unknown
 calibration status requires an explicit opt-in; calibrated/registered lights
 receive no extra calibration. Multiple targets get separate folders.
 Delete selected files removes only indexed repository copies and their records
-after confirmation. Source copies and shared session metadata stay. There is no
+after confirmation. Their checksums stay in deletion history. Source copies and
+shared session metadata stay. There is no
 undo, and cloud-synced deletions propagate. Locked files are reported and retained.
 The active repository is a small path at the top. Choose a different repository
 in Settings and save to apply it. Settings > Check for and download new releases

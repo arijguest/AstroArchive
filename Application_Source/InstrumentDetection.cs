@@ -19,6 +19,11 @@ namespace AstroArchive {
    if(make=="DWARFLAB"&&dwarf.Success){string n=dwarf.Groups[1].Value.ToUpperInvariant();return n=="MINI"?"Dwarf mini":n=="II"||n=="2"?"Dwarf II":"Dwarf 3";}
    return make=="Seestar"?"Seestar (model unknown)":make=="DWARFLAB"?"Dwarf (model unknown)":"Other / unknown";
   }
+  public static string LayoutMake(string context,bool shotsMetadata) {
+   bool dwarf=shotsMetadata||Regex.IsMatch(context,@"(?:^|/)(?:DWARF_(?:RAW|DARK|CALIBRATION)(?:[_/]|$)|CALI_FRAME(?:/|$)|(?:sdcard[-_ ]?)?DWARF\s*(?:II|III|2|3|mini)?(?:/|$))",RegexOptions.IgnoreCase);
+   bool seestar=Regex.IsMatch(context,@"(?:^|/)(?:MyWorks|EMMC Images|Seestar(?:[ _-]+S(?:30|50)(?:[ _-]+Pro)?)?)(?:/|$)",RegexOptions.IgnoreCase);
+   return dwarf&&seestar?"Unknown":dwarf?"DWARFLAB":seestar?"Seestar":"Unknown";
+  }
   public static void Apply(Frame frame,FitsHeader header,string root,string requested) {
    if(!string.IsNullOrEmpty(requested)&&requested!="Auto") {
     frame.Model=requested;frame.Make=MakeOf(requested);frame.MakeEvidence="User-selected model";return;
@@ -30,8 +35,7 @@ namespace AstroArchive {
    }
    string relative=frame.SourcePath.Substring(root.TrimEnd('\\','/').Length).TrimStart('\\','/');
    string context=Path.GetFileName(root.TrimEnd('\\','/'))+"/"+relative.Replace('\\','/');
-   bool dwarf=Regex.IsMatch(context,@"(?:^|/)(?:DWARF_(?:RAW|DARK|CALIBRATION)(?:[_/]|$)|CALI_FRAME(?:/|$)|(?:sdcard[-_ ]?)?DWARF\s*(?:II|III|2|3|mini)?(?:/|$))",RegexOptions.IgnoreCase)||!string.IsNullOrEmpty(frame.SourceMetadataPath);
-   bool seestar=Regex.IsMatch(context,@"(?:^|/)(?:MyWorks|EMMC Images|Seestar(?:[ _-]+S(?:30|50)(?:[ _-]+Pro)?)?)(?:/|$)",RegexOptions.IgnoreCase);
+   string layout=LayoutMake(context,!string.IsNullOrEmpty(frame.SourceMetadataPath));bool dwarf=layout=="DWARFLAB",seestar=layout=="Seestar";
    if(dwarf) {frame.Make="DWARFLAB";frame.Model=SpecificModel(context,"DWARFLAB");frame.MakeEvidence=!string.IsNullOrEmpty(frame.SourceMetadataPath)?"DWARF shotsInfo.json session metadata":"DWARF_RAW / DWARF_DARK / CALI_FRAME folder structure";}
    else if(seestar) {frame.Make="Seestar";frame.Model=SpecificModel(context,"Seestar");frame.MakeEvidence="Seestar MyWorks / EMMC Images folder structure";}
    else if(Regex.IsMatch(Path.GetDirectoryName(frame.SourcePath)??"",@"[_-]sub$",RegexOptions.IgnoreCase)&&Regex.IsMatch(frame.OriginalName??"",@"^Light[_-]",RegexOptions.IgnoreCase)) {

@@ -46,7 +46,7 @@ namespace AstroArchive {
   public Repository(string root){Root=Path.GetFullPath(root);Directory.CreateDirectory(Root);Meta=Path.Combine(Root,".astroarchive");Directory.CreateDirectory(Meta);
    mutex=new Mutex(false,"Local\\AstroArchive_"+Util.HashText(Root.ToLowerInvariant()));try{held=mutex.WaitOne(0);}catch(AbandonedMutexException){held=true;}if(!held){mutex.Dispose();throw new IOException("This repository is already open in another AstroArchive window.");}
    string local=Path.Combine(LocalIndexBase??Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),"AstroArchive","repositories"),Util.HashText(Root.ToLowerInvariant()));Directory.CreateDirectory(local);WorkingIndex=Path.Combine(local,"index.sqlite");
-   try{string portable=Path.Combine(Meta,"index.sqlite");if(!File.Exists(WorkingIndex)&&File.Exists(portable)){using(var original=new Database(portable))original.BackupTo(WorkingIndex,CancellationToken.None);}db=new Database(WorkingIndex);db.ManifestSchema();}catch{Dispose();throw;}
+   try{string portable=Path.Combine(Meta,"index.sqlite");if(!File.Exists(WorkingIndex)&&File.Exists(portable)){using(var original=new Database(portable))original.BackupTo(WorkingIndex,CancellationToken.None);}db=new Database(WorkingIndex);db.ManifestSchema();RecoverTelescopeRename();}catch{Dispose();throw;}
   }
   public void Checkpoint(CancellationToken ct){ct.ThrowIfCancellationRequested();if(db.Generation==checkpointGeneration&&File.Exists(Path.Combine(Meta,"index.sqlite"))&&FileStamp.Read(Path.Combine(Meta,"index.sqlite")).VerifiedUnchanged(checkpointStamp))return;long snapshotGeneration=db.Generation;string local=WorkingIndex+"."+Guid.NewGuid().ToString("N")+".snapshot",target=Path.Combine(Meta,"index.sqlite"),temp=target+"."+Guid.NewGuid().ToString("N")+".partial";try{db.BackupTo(local,ct);string hash=Util.Hash(local,ct);CopyVerified(local,temp,hash,ct);CommitTemporary(temp,target,ct);checkpoint=DateTime.UtcNow;checkpointGeneration=snapshotGeneration;checkpointStamp=FileStamp.Read(target);}finally{TryRemove(local);TryRemove(local+"-wal");TryRemove(local+"-shm");TryRemove(temp);}}
   public void Dispose(){if(db!=null){try{Checkpoint(CancellationToken.None);}catch{}db.Dispose();db=null;}if(held){mutex.ReleaseMutex();held=false;}if(mutex!=null)mutex.Dispose();}
@@ -59,7 +59,7 @@ namespace AstroArchive {
   public void SaveRotation(RotationResult r){db.Exec("INSERT OR REPLACE INTO sessions(id,data) VALUES(?,?)",r.Session,Util.Serialize(r));}
   public string FilePath(Frame f){string p=Path.GetFullPath(Path.Combine(Root,f.RelativePath??""));if(!Util.Within(p,Root))throw new IOException("Repository path escapes the selected folder.");return p;}
   sealed class Scanned {public Frame Frame;public long Bytes;public bool CacheHit,HeaderHit;public string Error;}
-  Scanned ScanOne(ScanEntry entry,string source,string telescope,string model,bool reindex,bool deferHash,bool cloudSource,Dictionary<string,SourceManifest> cached,HashSet<string> deleted,Dictionary<string,Classifier.ShotsMetadata> shots,MetadataHeaderCache headers,PipelineMetrics metrics,CancellationToken ct){
+  Scanned ScanOne(ScanEntry entry,string source,string telescope,string model,bool reindex,bool deferHash,bool cloudSource,string telescopeIdentity,Dictionary<string,SourceManifest> cached,HashSet<string> deleted,Dictionary<string,Classifier.ShotsMetadata> shots,MetadataHeaderCache headers,PipelineMetrics metrics,CancellationToken ct){
    var item=new Scanned();string name=Path.GetFileName(entry.Path);
    try{
     ct.ThrowIfCancellationRequested();FileStamp stamp=FileStamp.Read(new FileInfo(entry.Path),entry.Enumerated);item.Bytes=stamp.Size;Frame f=null,indexed=null;SourceManifest old;
@@ -76,7 +76,8 @@ namespace AstroArchive {
        if(!hit){using(var availability=(cloudSource||stamp.Cloud)?metrics.Begin("Cloud availability",name):null)using(var read=metrics.Begin("Header open/read",name)){
         header=Fits.Header(entry.Path,n=>{read.Bytes(n);metadata.Bytes(n);},value=>captured=value,ct);read.Complete();if(availability!=null)availability.Complete();
        }}
-       Frame parsed=Classifier.Read(entry.Path,source,telescope,model,stamp.Size,n=>metadata.Bytes(n),shots,header,captured,ct,metrics);
+       Frame parsed=Classifier.Read(entry.Path,source,telescopeIdentity??telescope,model,stamp.Size,n=>metadata.Bytes(n),shots,header,captured,ct,metrics);
+       parsed.Telescope=telescope;
        if(!stamp.ContentSame(parsed.SourceStamp)||(hit&&!stamp.ContentSame(FileStamp.Read(entry.Path))))throw new InvalidDataException("Source changed while reading metadata. Scan again.");
        if(!hit)headers.Put(entry.Path,parsed.SourceStamp,header);item.HeaderHit=hit;return parsed;
       },ct,message=>{metrics.Current=message;metrics.Pulse(true);});stamp=f.SourceStamp;f.Hash="";f.Status="New";metadata.Complete();
@@ -87,10 +88,10 @@ namespace AstroArchive {
      }}
     }
     f.SourceRoot=source;item.Frame=f;
-   }catch(OperationCanceledException){throw;}catch(Exception e){item.Error=FileRetry.Detail(entry.Path,e);item.Frame=new Frame{SourcePath=entry.Path,SourceRoot=source,OriginalName=name,Telescope=telescope,Model=model,Make="Unknown",Target="Unknown",Camera="Unknown",Kind="Unknown",Mount="Unknown",Night="Unknown date",Notes=item.Error,Status="Unreadable",Hash=""};}
+   }catch(OperationCanceledException){throw;}catch(Exception e){item.Error=FileRetry.Detail(entry.Path,e);item.Frame=new Frame{SourcePath=entry.Path,SourceRoot=source,OriginalName=name,Telescope=telescope,TelescopeIdentity=telescopeIdentity??telescope,Model=model,Make="Unknown",Target="Unknown",Camera="Unknown",Kind="Unknown",Mount="Unknown",Night="Unknown date",Notes=item.Error,Status="Unreadable",Hash=""};}
    return item;
   }
-  public ImportPlan Scan(string source,string telescope,string model,CancellationToken ct,Action<ProgressInfo> progress,bool reindex=false,Action<Frame> onFrame=null,bool deferHash=false,bool cloudSource=false,int metadataWorkers=0){
+  public ImportPlan Scan(string source,string telescope,string model,CancellationToken ct,Action<ProgressInfo> progress,bool reindex=false,Action<Frame> onFrame=null,bool deferHash=false,bool cloudSource=false,int metadataWorkers=0,string telescopeIdentity=null,bool deferFinish=false){
    var metrics=new PipelineMetrics(progress);metrics.Phase(0,0,"Scanning",false,false);
    source=Path.GetFullPath(source);if(!Directory.Exists(source))throw new DirectoryNotFoundException(source);if(!reindex&&(Util.Within(source,Root)||Util.Within(Root,source)))throw new IOException("Source and repository must be separate folders, with neither inside the other.");
    var plan=new ImportPlan{Source=source,Metrics=metrics};Dictionary<string,SourceManifest> cached;
@@ -114,12 +115,12 @@ namespace AstroArchive {
      plan.Frames.Add(frame);if(onFrame!=null)onFrame(frame.Clone());metrics.Complete(item.Error==null?item.Bytes:0);
     };
     try{
-     foreach(var entry in queue.GetConsumingEnumerable(ct).Concat(overflow.Read(ct))){ct.ThrowIfCancellationRequested();var captured=entry;pending.Add(Task.Run(()=>ScanOne(captured,source,telescope,model,reindex,deferHash,cloudSource,cached,deleted,shots,headers,metrics,linked.Token),linked.Token));
+     foreach(var entry in queue.GetConsumingEnumerable(ct).Concat(overflow.Read(ct))){ct.ThrowIfCancellationRequested();var captured=entry;pending.Add(Task.Run(()=>ScanOne(captured,source,telescope,model,reindex,deferHash,cloudSource,telescopeIdentity,cached,deleted,shots,headers,metrics,linked.Token),linked.Token));
       if(pending.Count>=workers){var ready=Task.WhenAny(pending).GetAwaiter().GetResult();pending.Remove(ready);collect(ready);}
      }
      while(pending.Count>0){ct.ThrowIfCancellationRequested();var ready=Task.WhenAny(pending).GetAwaiter().GetResult();pending.Remove(ready);collect(ready);}producer.GetAwaiter().GetResult();
      metrics.Finalise("Saving scan metadata cache");try{headers.Flush();}catch(Exception e){plan.Errors.Add("Metadata cache could not be saved: "+e.Message);}if(reindex)Checkpoint(ct);
-     metrics.Finish("Scan complete: "+plan.Frames.Count+" FITS; "+plan.CacheHits+" verified duplicates; "+plan.MetadataCacheHits+" cached headers");LastReport=metrics.Report()+"\r\n"+string.Join("\r\n",plan.Errors);return plan;
+     if(!deferFinish)metrics.Finish("Scan complete: "+plan.Frames.Count+" FITS; "+plan.CacheHits+" verified duplicates; "+plan.MetadataCacheHits+" cached headers");LastReport=metrics.Report()+"\r\n"+string.Join("\r\n",plan.Errors);return plan;
     }finally{linked.Cancel();try{producer.GetAwaiter().GetResult();}catch(OperationCanceledException){}foreach(var task in pending){try{task.GetAwaiter().GetResult();}catch(OperationCanceledException){}}}
    }
   }

@@ -65,6 +65,7 @@ namespace AstroArchive {
     if(path.EndsWith(".gz",StringComparison.OrdinalIgnoreCase))while(true){ct.ThrowIfCancellationRequested();if(input.Read(buffer,0,buffer.Length)==0)break;}
     return header;
    }
+  }
   [StructLayout(LayoutKind.Explicit)]struct Bits { [FieldOffset(0)]public uint Integer;[FieldOffset(0)]public float Single;[FieldOffset(0)]public ulong Long;[FieldOffset(0)]public double Double; }
   static double Decode(byte[] b,int p,int bits) {
    if(bits==8)return b[p];if(bits==16)return unchecked((short)((b[p]<<8)|b[p+1]));

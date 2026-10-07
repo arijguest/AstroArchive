@@ -16,7 +16,7 @@ A Windows desktop app for organising smart-telescope FITS captures and preparing
 
 Windows 10 or 11, **64-bit**, with **.NET Framework 4.8 or later**.
 Download `AstroArchive<package-version>.exe` from the latest
-release (for example, `AstroArchive1.3.0.1.exe`) and run it. Installation works offline and needs no administrator access.
+release (currently `AstroArchive1.6.0.1.exe`) and run it. Installation works offline and needs no administrator access.
 The default folder is `%LOCALAPPDATA%\Programs\AstroArchive`.
 Desktop and Start menu shortcuts and an Installed Apps uninstaller are included.
 
@@ -47,6 +47,8 @@ See [update details](docs/UPDATES.md) for manual checks, troubleshooting and off
 
 ## What it does
 
+- Detect local USB telescope storage and auto-upload missing FITS captures with verified duplicate screening.
+- Save/select telescope profiles, recover them from archive records, and rename devices across the selected archive.
 - Import `.fit`, `.fits`, `.fts` and gzip-compressed FITS with SHA-256 verification and duplicate detection.
 - Organise captures by target, device, session and camera, including Seestar and DWARF layouts.
 - Filter library and import views from a dropdown, screen failed/rejected telescope captures and import only the ready files shown.

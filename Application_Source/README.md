@@ -1,9 +1,13 @@
-# AstroArchive 1.5.1
+# AstroArchive 1.6.0
 
 Portable Windows 10/11 x64 WPF app for archiving smart-telescope FITS and creating verified stacking projects. Open `AstroArchive.exe`; read `Quick_Start.txt` for the complete workflow.
 
-## Changes in 1.5.1
+## Changes in 1.6.0
 
+- Local USB telescope detection and auto-upload, with saved profiles that survive changed drive letters and can be recovered from archive metadata.
+- Telescope renaming updates saved profiles, archive paths, index/manifests and deletion history while preserving capture bytes and session identity. Interrupted renames recover on reopen.
+- One Filters menu for both library and import results, including camera, night, session, calibration, exposure, dimensions, status and review. Import copies the ready files in the filtered view and shows their count.
+- Compact import setup with collapsed options, failure screening, durable checksum-based deletion history, and USB imports that leave flagged captures for review.
 - Export, file context menus and repository tools no longer draw the native icon gutter over menu text.
 - Menus, submenus and dropdowns share a popup layout that reserves separate space for scrollbars and hides them when all items fit.
 - Scrollbars and menu separators follow the selected theme throughout the application. Long popups remain scrollable within the screen.
@@ -58,7 +62,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\test.ps1
 
 `dist/AstroArchive.exe` embeds XAML, catalogue, logo, icons and Windows manifest. Settings/API-key protection and the working database use the Windows user's local app data. `.astroarchive/index.sqlite` is the portable snapshot and must stay with the archive. Run one writer for a given archive; cloud services do not provide distributed SQLite coordination. The code does not authenticate to Google Drive or require a particular mounted drive letter.
 
-The UI smoke option creates synthetic rows, checks filtering/defaults, renders light/dark/hidden-preview layouts, and exercises PNG/JPEG/high-depth TIFF codecs without importing user files. The console suite creates isolated generated-FITS data and an ASTAP protocol double. See `Validation.txt` for the packaged build's results. Windows-native file identity/deletion, WPF interaction and live Google Drive could not be tested in the Linux build environment. Real telescope captures and authenticated plate solving were unavailable. The protocol double does not solve real astronomical images.
+The UI smoke option creates synthetic rows, checks filtering/defaults, renders light/dark/hidden-preview layouts, and exercises PNG/JPEG/high-depth TIFF codecs without importing user files. The console suite creates isolated generated-FITS data and an ASTAP protocol double. See `Validation.txt` for the packaged build's results. The Windows release workflow runs native file identity/deletion, WPF and installer checks. Physical telescope USB behaviour, live Google Drive and authenticated plate solving require separate hardware/provider validation. The protocol double does not solve real astronomical images.
 
 ## Performance and failure handling
 
