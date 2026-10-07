@@ -36,7 +36,9 @@ Copy-Item (Join-Path $root 'Installer\Payload\Release_Notes.txt') (Join-Path $Ou
 $smokeRoot = Join-Path ([IO.Path]::GetTempPath()) ('AstroArchive-smoke-' + [Guid]::NewGuid().ToString('N'))
 $installed = $false
 function Run-Checked([string]$File, [string[]]$Arguments) {
-    $process = Start-Process -FilePath $File -ArgumentList $Arguments -PassThru -Wait
+    $process = Start-Process -FilePath $File -ArgumentList $Arguments -PassThru
+    # Wait for setup itself; PowerShell -Wait also waits for the restarted app.
+    $process.WaitForExit()
     if ($process.ExitCode -ne 0) {
         $smokeError = Join-Path $OutputDirectory 'ui-preview\ui-smoke-error.txt'
         if (Test-Path $smokeError) { Get-Content $smokeError | Write-Output }
