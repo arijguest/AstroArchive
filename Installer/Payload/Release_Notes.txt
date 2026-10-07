@@ -1,16 +1,20 @@
-AstroArchive 1.9.0 — Windows policy diagnostics and signing support
-Package 1.9.0.2
+AstroArchive 1.10.0 — compact filters, portrait previews and Windows diagnostics
+Package 1.10.0.1
 
-- Retain the navigation, accessibility, guided walkthrough and import fixes
-  from package 1.9.0.1.
-- Explain Windows Application Control and signature-verification blocks during
-  setup, including the executable that could not start. Save full diagnostic
-  details and the native Windows error code to AstroArchive-setup-error.txt.
-- Add publisher-signing support for the application, launcher and installer,
-  with checksums generated after signing and verification of installed files.
-  Trusted signing requires a validated publisher account to be configured.
-- Unsigned packages may still be blocked by Windows. This release does not
-  change Smart App Control or organisation-managed Application Control policies.
+- Add a compact filter panel with exposure/gain sliders and live result counts.
+  Replace separate Night and Session selectors with acquisition-date session
+  labels, retaining distinct sessions, partial dates and mixed clock evidence.
+  Keep mosaic, format, capability and mount filters under Advanced.
+- Display landscape previews in portrait, using frames fitted to the image.
+  Replace the Fit dropdown with overlay zoom, pan and recenter buttons. Support
+  scroll/pinch zoom, dragging and keyboard controls; keep source pixels unchanged.
+- Retain the new top menus, accessibility controls, walkthrough, readable tables,
+  import fixes and all other improvements already included in package 1.9.0.1.
+- Explain Windows Application Control/signature blocks during setup. Record the
+  executable that could not start and native Windows error code in the setup log.
+- Add publisher-signing support for the app, launcher and installer. Trusted
+  signing requires a validated publisher account to be configured. Unsigned
+  packages may still be blocked; this release does not alter Windows policies.
 
 AstroArchive 1.9.0 — navigation and accessibility
 Package 1.9.0.1

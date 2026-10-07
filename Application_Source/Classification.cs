@@ -131,6 +131,7 @@ namespace AstroArchive {
    if(!dt.HasValue){string pattern=@"(20\d{2})[-_]?(\d{2})[-_]?(\d{2})[-_T ](\d{2})[-_:]?(\d{2})[-_:]?(\d{2})(?:[-_.](\d{3}))?";var m=Regex.Match(stem,pattern);bool fromFile=m.Success;if(!m.Success)m=Regex.Match(text,pattern);if(m.Success) {try{dt=new DateTime(int.Parse(m.Groups[1].Value),int.Parse(m.Groups[2].Value),int.Parse(m.Groups[3].Value),int.Parse(m.Groups[4].Value),int.Parse(m.Groups[5].Value),int.Parse(m.Groups[6].Value),m.Groups[7].Success?int.Parse(m.Groups[7].Value):0,DateTimeKind.Unspecified);frameTime=fromFile;f.TimeSource=fromFile?"Filename (timezone unknown)":"Session folder (not frame time)";}catch{}}}
    else f.TimeSource=frameTime?"FITS UTC":"FITS date only";
    f.Observed=dt.HasValue&&frameTime?dt.Value.ToString("yyyy-MM-ddTHH:mm:ss.fff",CultureInfo.InvariantCulture):"";
+   CaptureSessions.SaveDate(f,CaptureSessions.HeaderDate(h)??CaptureSessions.FilenameDate(f.OriginalName));
    if(dt.HasValue){DateTime local=f.TimeSource=="FITS UTC"?TimeZoneInfo.ConvertTimeFromUtc(DateTime.SpecifyKind(dt.Value,DateTimeKind.Utc),TimeZoneInfo.Local):dt.Value;f.Night=local.AddHours(-12).ToString("yyyy-MM-dd");}else{f.Night="Unknown date";f.TimeSource="Unknown";}
    string sourceSession=Regex.Match(text,@"DWARF_RAW[^/]+",RegexOptions.IgnoreCase).Value;
    if(sourceSession.Length==0)sourceSession=Path.GetDirectoryName(rel)??"Root";

@@ -1,6 +1,12 @@
-# AstroArchive 1.9.0
+# AstroArchive 1.10.0
 
 Portable Windows 10/11 x64 WPF app for archiving astronomical image originals and creating verified stacking projects. Open `AstroArchive.exe`; read `Quick_Start.txt` for the complete workflow.
+
+## Changes in 1.10.0
+
+- Compact acquisition-session filters with exposure/gain range sliders, combined review choices and retained mosaic/format/mount options.
+- Portrait sidebar and popup previews with overlay controls and scroll/pinch/keyboard input. Source pixels are unchanged.
+- Windows policy diagnostics and optional publisher-signing integration.
 
 ## Changes in 1.9.0
 

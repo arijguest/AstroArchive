@@ -1,4 +1,4 @@
-AstroArchive 1.9.0
+AstroArchive 1.10.0
 Windows 10/11 x64 desktop app. Built-in .NET Framework 4.8 and Windows SQLite.
 Runs offline. No Python or Google login required.
 
@@ -9,7 +9,7 @@ START HERE
    Import options contains model/camera overrides, optional analysis and source
    cleanup. Auto detection and keeping originals remain the defaults.
 3. Search either view, then use Filters to narrow target, device, frame type, mount,
-   camera, night, session, optical filter, calibration, exposure, gain, dimensions,
+   camera, acquisition session, optical filter, calibration, exposure, gain, dimensions,
    status or review state. Clear resets search and filters without deleting files.
    The import summary shows ready files and their size, duplicates, previously
    deleted captures, rejection, file problems and transfer failures for this view.
@@ -91,7 +91,7 @@ Choose a different archive in Repository, or Settings > Repository and save.
 Select a capture to preview it, or double-click/right-click > Preview image.
 Repository > View can hide the preview pane to give the table more room; drag the divider
 to resize it. Open image previews a file outside the archive without importing it.
-The compact table shows filename, target, type, night, exposure and filter.
+The compact table shows filename, target, type, acquisition date, exposure and filter.
 Expand Capture details for device, camera, gain, temperature and classification.
 
 Stretch changes the display only; source pixels and FITS headers stay unchanged.
@@ -105,8 +105,9 @@ Solar, lunar and planetary captures use Linear automatically, preserving their
 colour. Identification uses the target, observation mode or clear file/folder
 names. Correct an unknown target if an unlabelled capture needs this behaviour.
 FITS and XISF otherwise start with the saved stretch, defaulting to Auto. Viewing
-a solar/planetary image does not change that saved preference. Fit sizes the
-preview to its pane; zoom scales the sampled display. Large images are sampled
+a solar/planetary image does not change that saved preference. Landscape previews
+rotate into portrait and the frame follows the image aspect ratio. Zoom scales
+the sampled display. Large images are sampled
 to roughly 1400 pixels per side, so use an external tool for pixel inspection.
 
 Sun and Solar are one target named Sun. Imports and metadata edits use Sun;
@@ -135,8 +136,9 @@ columns resets visibility and order for just that table. Hiding a sorted heading
 removes it from sorting; row selections and filters are retained.
 
 Select one repository file and choose Preview image… from its context menu.
-Pinch, use the wheel/trackpad or the zoom buttons; drag to pan. Fit (or F)
-recenters the image; Escape closes the preview. The gesture viewer uses the same
+Pinch, scroll or use the small buttons over the image to zoom. Drag or use the
+overlay arrows to pan; Recenter (or F) restores the whole image. Escape closes
+the popup preview. The gesture viewer uses the same
 colour decoders and display stretch as the preview pane. Source pixels stay intact.
 
 Click a column header to sort, click again to reverse, or Shift-click to add
@@ -456,8 +458,8 @@ focus. Ctrl+C copies selected guide text. Escape closes the guide.
 Library/import: Ctrl-click toggles rows; Shift-click selects a range. Shift-click
 a column header adds a sorting column. Delete in the library opens confirmation
 for deleting selected archive copies.
-Image preview: mouse wheel zooms, left-button drag pans, F fits and recenters,
-plus/minus zoom, and Escape closes the preview.
+Image preview: scroll or pinch to zoom, drag or use arrow keys/buttons to pan,
+F recenters, plus/minus zoom, and Escape closes the popup preview.
 Windows folder picker: Alt+D focuses the address bar for pasting a folder path.
 
 TROUBLESHOOTING
@@ -641,3 +643,20 @@ corresponding menu or preferences. The walkthrough never imports or deletes
 files automatically. Skip/close dismisses it, and Guide > Interactive walkthrough
 starts it again. Guide also holds searchable help and About AstroArchive,
 including Ari J. Guest's author credit and arijguest.com.
+
+COMPACT FILTERS AND ACQUISITION DATES
+Open Repository > View > Filters > Open filters panel, or the equivalent Import
+menu. Changes apply immediately; Done, Escape or a click outside closes the panel.
+Exposure and gain use inclusive range sliders that snap to recorded values. Select
+Any value, Known values only, Between limits or Unknown only. Between limits can
+explicitly include unknown values. Clear filters preserves the search; the main
+Clear action resets both search and filters. Constant fields hide automatically;
+less-used settings, including mosaic, format and mount filters, sit under Advanced.
+
+One Session selector replaces separate Night and Session filters. Entries show
+recorded acquisition dates, e.g. 26/09/24-27/09/24. Same-date sessions stay distinct
+with device/target/camera context. Partial dates and mixed clock evidence are marked.
+FITS timestamps use UTC; filename dates retain their calendar date and unknown
+clock basis. Shifted observing nights and file modification times are not used.
+Read missing dates from FITS can recover older date-only metadata without changing
+capture files. Tables show ACQUIRED dates; exports retain the date and its source.
