@@ -1,4 +1,4 @@
-AstroArchive 1.6.0
+AstroArchive 1.7.0
 Windows 10/11 x64 desktop app. Built-in .NET Framework 4.8 and Windows SQLite.
 Runs offline. No Python or Google login required.
 
@@ -80,6 +80,42 @@ another column. Sorting survives filtering and import/progress refreshes.
 Exposure, gain, temperature, dimensions and performance fields sort numerically.
 Missing metadata appears as a dash; unknown targets retain Unknown. Bias and
 Master bias stay visible under Frame type and in the frame-type filter.
+
+MOSAIC COLLECTIONS
+New imports preserve mosaic/project and panel metadata during their existing
+header/session reads. Mosaic markers with missing panel information stay
+Suggested. Normal mosaic detection does not plate-solve or decode images.
+
+Open Mosaics to review collections, panels, evidence and completed outputs.
+Detect from metadata uses selected Library captures, or the visible Library
+captures when none are selected. For older archives, Tools > Read headers/session
+metadata reads archived headers and preserved session JSON. Existing sky mappings
+can suggest adjacent panels and show their outlines; coordinate suggestions need
+confirmation. Ordinary target-centre coordinates cannot establish panel membership.
+
+Select captures in Library, right-click > Mosaics > Assign to panel or completed
+output. Choose/create a collection and panel, or attach a stitched output.
+Collections can span targets, nights, cameras and filters while archive paths and
+capture types remain intact. Confirm selected reviews known panel assignments;
+assign unresolved captures first. Remove selected retains the decision for later
+scans without deleting captures. Tools can edit names, create planned panels or
+dismiss a collection. Filters/search include mosaic and panel labels.
+
+Plate solving is optional: select representatives in Mosaics, then Tools > Solve
+selected representatives. Cached solutions are reused, and unassigned captures
+are solved separately. Complete WCS provides footprints; configured field height
+can provide approximate outlines, which are labelled. Target labels are retained.
+
+Export collection creates separate stacking inputs for every panel and compatible
+capture group. Completed images go in outputs/completed in Stacks/Both mode.
+Choose a collection explicitly when a capture belongs to several mosaics.
+Stack each panel first, then stitch the panel results in external software.
+Suggested or unresolved assignments must be reviewed before stacking exports.
+
+Keep .astroarchive/index.sqlite and .astroarchive/mosaics/manifest.json with the
+archive. The manifest restores stable collection/panel IDs after index loss;
+reindexing reconnects captures by hash. Deleted captures remain missing records
+in the collection. Archive reset retains collection definitions/deletion history.
 
 WINDOWS FOLDER SELECTION AND GOOGLE DRIVE
 All folder selectors use native Windows Explorer dialogs, with This PC, mounted

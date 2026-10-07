@@ -47,6 +47,8 @@ See [update details](docs/UPDATES.md) for manual checks, troubleshooting and off
 
 ## What it does
 
+- Organise [mosaic collections](docs/MOSAICS.md) from existing metadata, review stable panels and export independent stacking inputs without automatic solving.
+
 - Detect local USB telescope storage and auto-upload missing FITS captures with verified duplicate screening.
 - Save/select telescope profiles, recover them from archive records, and rename devices across the selected archive.
 - Import `.fit`, `.fits`, `.fts` and gzip-compressed FITS with SHA-256 verification and duplicate detection.

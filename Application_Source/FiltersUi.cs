@@ -29,7 +29,7 @@ namespace AstroArchive {
     string selected;criteria.Values.TryGetValue(field,out selected);
     var group=new MenuItem{Header=field+(selected==null?"":"  ·  "+selected)};
     AddFilterChoice(group,"All",selected==null,()=>{criteria.Values.Remove(field);ApplyFilters(imports);});
-    var values=rows.Select(f=>CaptureFilters.Value(f,field)).Distinct().OrderBy(v=>v).ToList();
+    var values=(new[]{"Mosaic","Panel","Mosaic state"}.Contains(field)?rows.SelectMany(f=>f.MosaicLabels!=null&&f.MosaicLabels.Count>0?f.MosaicLabels.Select(m=>field=="Mosaic"?m.Name:field=="Panel"?m.Panel:m.State):new[]{CaptureFilters.Value(f,field)}):rows.Select(f=>CaptureFilters.Value(f,field))).Distinct().OrderBy(v=>v).ToList();
     if(field=="Review")values=new List<string>{"Needs review","No issues flagged","Rejected / reference","Passed","Not screened"};
     if(selected!=null&&!values.Contains(selected))values.Add(selected);
     foreach(string value in values){string choice=value;AddFilterChoice(group,choice,selected==choice,()=>{criteria.Values[field]=choice;ApplyFilters(imports);});}

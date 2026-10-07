@@ -1,4 +1,4 @@
-// AstroArchive 1.6.0. C# 5, .NET Framework 4.8, Windows 10/11 x64.
+// AstroArchive 1.7.0. C# 5, .NET Framework 4.8, Windows 10/11 x64.
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -55,6 +55,11 @@ namespace AstroArchive {
   public int Channels {get;set;} public int BinX {get;set;} public int BinY {get;set;} public int StackCount {get;set;}
   public FileStamp SourceStamp {get;set;} public FileStamp RepositoryStamp {get;set;} public FileStamp SourceMetadataStamp {get;set;} public string CameraEvidence {get;set;} public long Bytes {get;set;} public bool Rejected {get;set;} public string RotationReport {get;set;}
   public bool Screened {get;set;} public string ScreeningIssue {get;set;}
+  public MosaicHint Mosaic {get;set;} public SkyGeometry Sky {get;set;}
+  [ScriptIgnore]public List<MosaicLabel> MosaicLabels {get;set;}
+  [ScriptIgnore]public bool MosaicDismissed {get;set;}
+  public string MosaicText {get{return MosaicLabels!=null&&MosaicLabels.Count>0?string.Join("; ",MosaicLabels.Select(m=>m.Name).Distinct()):Mosaic==null||MosaicDismissed?"-":Mosaic.Name??"Mosaic candidate";}}
+  public string PanelText {get{return MosaicLabels!=null&&MosaicLabels.Count>0?string.Join("; ",MosaicLabels.Select(m=>m.Panel)):Mosaic==null||MosaicDismissed?"-":Mosaic.PanelKey??"Unassigned";}}
   public string ReviewText {get{return CaptureScreening.NeedsReview(this)?"Needs review":Screened?"Passed":"Not screened";}}
   public string ExposureText {get{return Exposure.HasValue?Util.Num(Exposure)+" s":"-";}}
   public string MakeText {get{return !string.IsNullOrEmpty(Make)?Make:InstrumentDetection.MakeOf(Model);}}
@@ -62,9 +67,9 @@ namespace AstroArchive {
   public string GainText {get{return Gain.HasValue?Util.Num(Gain):"-";}} public string TemperatureText {get{return Temperature.HasValue?Util.Num(Temperature)+" °C":"-";}}
   [ScriptIgnore]public long? PixelCount {get{return Width>0&&Height>0?(long?)((long)Width*Height*Math.Max(1,Channels)):null;}}
   public string SizeText {get{return Width<=0||Height<=0?"-":Width+" × "+Height+(Channels>1?" × "+Channels:"");}}
-  public string SearchText {get{return string.Join(" ",new[]{Target,Catalog.Aliases(Target),Telescope,MakeText,Model,MakeEvidence,TargetEvidence,SourceDisposition,Camera,Kind,Calibration,Filter,Mount,Night,Observed,OriginalName,Notes,Status,ReviewText,ScreeningIssue,Util.Num(Exposure),Util.Num(Gain),Util.Num(Temperature),SizeText,"bin"+BinX+"x"+BinY});}}
+  public string SearchText {get{return string.Join(" ",new[]{Target,Catalog.Aliases(Target),Telescope,MakeText,Model,MakeEvidence,TargetEvidence,SourceDisposition,Camera,Kind,Calibration,Filter,Mount,Night,Observed,OriginalName,Notes,Status,ReviewText,ScreeningIssue,MosaicText,PanelText,Util.Num(Exposure),Util.Num(Gain),Util.Num(Temperature),SizeText,"bin"+BinX+"x"+BinY});}}
   public string Group {get{return string.Join("|",new[]{Telescope,MakeText,Camera,Filter,Width.ToString(),Height.ToString(),Channels.ToString(),BinX.ToString(),BinY.ToString(),Bayer,Calibration,Util.Num(Exposure),Util.Num(Gain)});}}
-  public Frame Clone() { var copy=(Frame)MemberwiseClone();copy.SourceStamp=SourceStamp==null?null:SourceStamp.Clone();copy.RepositoryStamp=RepositoryStamp==null?null:RepositoryStamp.Clone();copy.SourceMetadataStamp=SourceMetadataStamp==null?null:SourceMetadataStamp.Clone();return copy; }
+  public Frame Clone() { var copy=(Frame)MemberwiseClone();copy.SourceStamp=SourceStamp==null?null:SourceStamp.Clone();copy.RepositoryStamp=RepositoryStamp==null?null:RepositoryStamp.Clone();copy.SourceMetadataStamp=SourceMetadataStamp==null?null:SourceMetadataStamp.Clone();copy.Mosaic=Mosaic==null?null:Mosaic.Clone();copy.Sky=Sky==null?null:Sky.Clone();copy.MosaicLabels=MosaicLabels==null?null:MosaicLabels.Select(m=>m.Clone()).ToList();return copy; }
  }
  public class TargetSummary { public string Name{get;set;} public int Subs{get;set;} public int Stacks{get;set;} public int Sessions{get;set;} public string Detail {get{return Subs+" subs  ·  "+Stacks+" stacks  ·  "+Sessions+" sessions";}} }
  public class Settings { public List<TelescopeProfile> Telescopes{get;set;} public string SelectedTelescope{get;set;} public Settings(){AutoSolve=false;AutoRotation=false;ThemeMode="System";PreviewStretch="Auto";ShowPreview=true;} public string ThemeMode {get;set;} public string PreviewStretch {get;set;} public bool ShowPreview {get;set;} public int CopyWorkers {get;set;} public string Repository{get;set;} public string LastSource{get;set;} public string Telescope{get;set;} public string Model{get;set;} public double? Latitude{get;set;} public double? Longitude{get;set;} public double? FieldHeight{get;set;} public string Astap{get;set;} public string StarDatabase{get;set;} public string ApiKeyProtected{get;set;} public bool UseOnline{get;set;} public bool AutoSolve{get;set;} public bool AutoRotation{get;set;} }

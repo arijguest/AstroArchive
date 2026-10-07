@@ -2,6 +2,13 @@
 
 Portable Windows 10/11 x64 WPF app for archiving smart-telescope FITS and creating verified stacking projects. Open `AstroArchive.exe`; read `Quick_Start.txt` for the complete workflow.
 
+## Changes in 1.7.0
+
+- Metadata-first mosaic collections, stable panel assignments, explicit review states and completed-output roles across targets and sessions.
+- Existing-WCS footprints and conservative pointing suggestions, with optional cached representative solving.
+- Portable collection manifests and panel-aware stacking exports that preserve capture/calibration separation.
+- See [mosaic guide](../docs/MOSAICS.md) for supported metadata, recovery, uncertainty and validation limits.
+
 ## Changes in 1.6.0
 
 - Pinch/wheel preview zoom and pan using the colour decoders; persistent numeric/Shift-column sorting, explicit bias rows, and dashes for unknown metadata except target names.
