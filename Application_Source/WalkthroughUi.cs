@@ -54,6 +54,7 @@ namespace AstroArchive {
             UiHelp.Tip(Try, "Open the relevant menu or settings. Steps never import or delete files automatically.");
             UiHelp.Tip(close, "Close the walkthrough. Run it again from Guide whenever you need it.");
             Loaded += (s,e) => SetStep(0);
+            PreviewKeyDown += (s,e) => { if (e.Key == System.Windows.Input.Key.Escape) { e.Handled = true; Close(); } };
             Closed += (s,e) => this.complete(finished);
         }
         public void SetStep(int index) {

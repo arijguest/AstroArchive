@@ -185,7 +185,8 @@ namespace AstroArchive {
             menu.Items.Add(Branch("Diagnostics", performance, MenuAction("Last import report…", () => ShowReport("Import performance and errors", repo == null ? "Choose a repository first." : repo.LastReport), true, false)));
         }
         void BuildSettingsNavigation(MenuItem menu) {
-            menu.Items.Add(Branch("Preferences", MenuAction("Appearance…", () => Configure(0)), MenuAction("Accessibility…", () => Configure(4))));
+            menu.Items.Add(MenuAction("Preferences…", () => Configure(0)));
+            menu.Items.Add(MenuAction("Accessibility…", () => Configure(4)));
             menu.Items.Add(Branch("Import and processing", MenuAction("Copy workers and observing site…", () => Configure(1)), MenuAction("Import options…", ImportPreferences)));
             menu.Items.Add(MenuAction("Plate solving…", () => Configure(2)));
             menu.Items.Add(MenuAction("Repository settings…", () => Configure(3)));
