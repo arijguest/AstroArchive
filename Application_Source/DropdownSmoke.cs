@@ -91,7 +91,7 @@ namespace AstroArchive {
      }
      var fileMenu=ThemedMenu();BuildFileMenu(fileMenu,all);
      try{
-      var viewer=OpenSmokeMenu(fileMenu);CheckMenuSurface(fileMenu);
+      OpenSmokeMenu(fileMenu);CheckMenuSurface(fileMenu);
       var export=fileMenu.Items.OfType<MenuItem>().Single(m=>Convert.ToString(m.Header)=="Export");
       export.IsSubmenuOpen=true;PumpPopupLayout();
       var popup=(Popup)export.Template.FindName("PART_Popup",export);
