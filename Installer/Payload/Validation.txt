@@ -9,7 +9,7 @@ update feed. Its logs are authoritative for Windows results and package hashes.
 
 Supplementary validation in Linux compiles the application, installer, launcher,
 engine and raster test executables against official .NET Framework 4.8 references.
-193 engine tests passed under Mono/system SQLite; eight platform/optional-codec
+197 engine tests passed under Mono/system SQLite; eight platform/optional-codec
 cases were skipped. CFITSIO tile compression and Zstandard fixtures passed with
 independent system codecs. 47 installer/updater tests passed. WIC tests compile
 here but execute only in the Windows workflow; Linux does not establish WPF or

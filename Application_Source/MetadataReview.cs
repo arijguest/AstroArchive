@@ -67,7 +67,9 @@ namespace AstroArchive {
                 if(object.Equals(before,after))continue;
                 string value=Convert.ToString(before,CultureInfo.InvariantCulture);
                 bool known=value.Length>0&&value!="Unknown"&&value!="Other / unknown"&&value!="Auto"&&!((property.Name=="BinX"||property.Name=="BinY")&&value=="0");
-                bool keep=previous.Facts==null&&untracked.Contains(property.Name)&&known;
+                MetadataFact existingFact;
+                bool legacy=previous.Facts==null||previous.Facts.TryGetValue(property.Name,out existingFact)&&existingFact.Source=="Legacy indexed value (unattributed)";
+                bool keep=legacy&&untracked.Contains(property.Name)&&known;
                 changes.Add(new MetadataChange(previous,candidate,property.Name,!keep));
             }
             return changes;

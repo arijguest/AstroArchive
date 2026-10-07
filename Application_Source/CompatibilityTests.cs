@@ -364,6 +364,9 @@ namespace AstroArchive {
                 Check(!changes.Single(c=>c.Field=="Gain").Apply&&changes.Single(c=>c.Field=="CameraModel").Apply,"Legacy defaults wrong");
                 MetadataReview.Apply(changes);
                 Check(candidate.Gain==100&&candidate.Facts["Gain"].Source!="User"&&candidate.MetadataConflicts.Any(c=>c.StartsWith("Gain:")),"Unattributed edit lost or guessed as user evidence");
+                var redetected=candidate.Clone();
+                redetected.Gain=50;
+                Check(!MetadataReview.Compare(candidate,redetected).Single(c=>c.Field=="Gain").Apply,"Repeated review forgot unattributed edits");
                 var before=CalibrationFixture("Light",30);
                 var detected=before.Clone();
                 detected.ReadoutMode="Different";

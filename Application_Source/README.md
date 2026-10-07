@@ -1,8 +1,15 @@
-# AstroArchive 1.6.0
+# AstroArchive 1.8.0
 
-Portable Windows 10/11 x64 WPF app for archiving smart-telescope FITS and creating verified stacking projects. Open `AstroArchive.exe`; read `Quick_Start.txt` for the complete workflow.
+Portable Windows 10/11 x64 WPF app for archiving astronomical image originals and creating verified stacking projects. Open `AstroArchive.exe`; read `Quick_Start.txt` for the complete workflow.
 
-## Changes in 1.7.2
+## Changes in 1.8.0
+
+- Verified FITS/XISF/raster/SER importing, selected images and explicit derived FITS exports.
+- Versioned instrument/software profiles, evidence and field-level metadata review.
+- Conservative calibration matching and exposure-specific dark-flat recipes.
+- See [compatibility guide](../docs/COMPATIBILITY.md) for pixel layouts, optional codecs and validation limits.
+
+## Changes in 1.7.0
 
 - Metadata-first mosaic collections, stable panel assignments, explicit review states and completed-output roles across targets and sessions.
 - Existing-WCS footprints and conservative pointing suggestions, with optional cached representative solving.
