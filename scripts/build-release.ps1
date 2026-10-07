@@ -60,6 +60,28 @@ try {
     [IO.File]::WriteAllText($fixture, 'preserve this fixture')
     Run-Checked $installer @('--silent', '--root', ('"' + $smokeRoot + '"'))
     if ([IO.File]::ReadAllText($fixture) -ne 'preserve this fixture') { throw 'Repair changed fixture data.' }
+    # Exercise the native update handoff, process wait and offline restart.
+    $waitProcess = Start-Process -FilePath 'powershell.exe' -ArgumentList @('-NoProfile', '-Command', 'Start-Sleep -Seconds 5') -PassThru
+    $handoffClock = [Diagnostics.Stopwatch]::StartNew()
+    Run-Checked $installer @('--update', '--silent', '--root', ('"' + $smokeRoot + '"'), '--waitpid', $waitProcess.Id, '--restart')
+    $handoffClock.Stop()
+    if ($handoffClock.Elapsed.TotalSeconds -lt 2) { throw 'Installer did not wait for the handoff process.' }
+    $restarted = $null
+    $launchClock = [Diagnostics.Stopwatch]::StartNew()
+    while ($null -eq $restarted -and $launchClock.Elapsed.TotalSeconds -lt 15) {
+        foreach ($candidate in @(Get-Process -Name 'AstroArchive' -ErrorAction SilentlyContinue)) {
+            if ($candidate.Path -eq $installedApp -and $candidate.MainWindowHandle -ne 0) { $restarted = $candidate; break }
+        }
+        if ($null -eq $restarted) { Start-Sleep -Milliseconds 200 }
+    }
+    if ($null -eq $restarted) { throw 'Update handoff did not restart the application.' }
+    if ([IO.File]::ReadAllText($fixture) -ne 'preserve this fixture') { throw 'Update handoff changed archive fixture data.' }
+    if (-not $restarted.CloseMainWindow() -or -not $restarted.WaitForExit(10000)) { throw 'Restarted application did not close cleanly.' }
+    $launcherPath = Join-Path $smokeRoot ($record.ActiveDirectory + '\Start.exe')
+    foreach ($launcher in @(Get-Process -Name 'Start' -ErrorAction SilentlyContinue)) {
+        if ($launcher.Path -eq $launcherPath -and -not $launcher.WaitForExit(10000)) { throw 'Restarted launcher remained open.' }
+    }
+    Write-Output 'PASS native update handoff, process wait, offline restart and archive preservation'
     Run-Checked $installer @('--uninstall', '--silent', '--root', ('"' + $smokeRoot + '"'))
     $installed = $false
     if ((Test-Path (Join-Path $smokeRoot 'install.json')) -or -not (Test-Path $fixture)) { throw 'Uninstall smoke failed.' }
