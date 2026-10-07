@@ -125,9 +125,10 @@ namespace AstroArchive {
             menu.Items.Add(Branch("Saved telescopes", ButtonAction("Save current telescope…", "SaveTelescopeButton", 1),
                 ButtonAction("Rename saved telescope…", "RenameTelescopeButton", 1), ButtonAction("Recover profiles from repository", "RebuildTelescopesButton", 1)));
             menu.Items.Add(Branch("Review and recovery", ButtonAction("Review flagged captures…", "ReviewImportsButton", 1),
-                ButtonAction("Screen visible captures", "ScreenImportsButton", 1), ButtonAction("Retry failed imports", "RetryImportsButton", 1)));
-            var tools = Branch("Selected files"); MoveMenuItems(tools, BuildImportTools()); menu.Items.Add(tools);
-            menu.Items.Add(Branch("Table", MenuAction("Filters…", () => { GoToPage(1); ShowFilters(true); }, repo != null),
+                ButtonAction("Screen visible captures", "ScreenImportsButton", 1), ButtonAction("Retry failed imports", "RetryImportsButton", 1),
+                MenuAction("Scan report…", () => ShowReport("Scan report", plan == null ? "Scan a folder first." : plan.Errors.Count == 0 ? "All supported files were read successfully." : string.Join("\r\n\r\n", plan.Errors)))));
+            var tools = Branch("Selected files"); MoveMenuItems(tools, BuildImportTools(), item => item is MenuItem && Convert.ToString(((MenuItem)item).Header) != "Scan report…"); menu.Items.Add(tools);
+            menu.Items.Add(Branch("Table", FiltersNavigation(true),
                 ColumnsNavigation("ImportGrid"), MenuAction("Clear search and filters", () => B("ImportClearButton").RaiseEvent(new RoutedEventArgs(Button.ClickEvent)), repo != null)));
             menu.Items.Add(new Separator());
             menu.Items.Add(MenuAction("Import options…", ImportPreferences));
@@ -136,6 +137,9 @@ namespace AstroArchive {
         }
         MenuItem ColumnsNavigation(string table) {
             var item = Branch("Columns"); MoveMenuItems(item, BuildColumnsMenu(table, null)); return item;
+        }
+        MenuItem FiltersNavigation(bool imports) {
+            var item = Branch("Filters"); MoveMenuItems(item, BuildFiltersMenu(imports)); return item;
         }
         void BuildExportNavigation(MenuItem menu) {
             var selected = Context();
@@ -151,7 +155,7 @@ namespace AstroArchive {
             menu.Items.Add(MenuAction("Browse repository", () => GoToPage(0), true, false));
             menu.Items.Add(MenuAction("Choose repository folder…", ChooseRepository));
             menu.Items.Add(MenuAction("Open repository in Explorer", OpenRepositoryFolder, repo != null, false));
-            var view = Branch("View", MenuAction("Filters…", () => { GoToPage(0); ShowFilters(false); }, repo != null), ColumnsNavigation("FramesGrid"));
+            var view = Branch("View", FiltersNavigation(false), ColumnsNavigation("FramesGrid"));
             foreach (string label in new[] { "Files", "By target", "By target and session" }) {
                 string mode = label; var choice = MenuAction(mode, () => { GoToPage(0); C("LibraryViewBox").SelectedItem = mode; }, repo != null);
                 choice.IsCheckable = true; choice.IsChecked = Convert.ToString(C("LibraryViewBox").SelectedItem) == mode; view.Items.Add(choice);

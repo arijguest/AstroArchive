@@ -35,6 +35,11 @@ namespace AstroArchive {
                         item.ApplyTemplate();
                         Readable(item.Foreground, (Brush)Window.FindResource("Surface"), mode + " navigation menu");
                     }
+                    var view = root.Items.OfType<MenuItem>().Single(item => Convert.ToString(item.Header) == "View");
+                    var filters = view.Items.OfType<MenuItem>().Single(item => Convert.ToString(item.Header) == "Filters");
+                    view.IsSubmenuOpen = true; filters.IsSubmenuOpen = true; PumpPopupLayout();
+                    if (!filters.IsSubmenuOpen || filters.Items.OfType<MenuItem>().Count() < 10) throw new Exception("Repository filter tree is missing.");
+                    filters.IsSubmenuOpen = false; view.IsSubmenuOpen = false;
                     root.IsSubmenuOpen = false;
                     Capture(Path.Combine(output, "AstroArchive_Navigation_" + mode + ".png"));
                 }
