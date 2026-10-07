@@ -1,6 +1,12 @@
-# AstroArchive 1.5.0
+# AstroArchive 1.5.1
 
 Portable Windows 10/11 x64 WPF app for archiving smart-telescope FITS and creating verified stacking projects. Open `AstroArchive.exe`; read `Quick_Start.txt` for the complete workflow.
+
+## Changes in 1.5.1
+
+- Export, file context menus and repository tools no longer draw the native icon gutter over menu text.
+- Menus, submenus and dropdowns share a popup layout that reserves separate space for scrollbars and hides them when all items fit.
+- Scrollbars and menu separators follow the selected theme throughout the application. Long popups remain scrollable within the screen.
 
 ## Changes in 1.5.0
 
