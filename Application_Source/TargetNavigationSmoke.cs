@@ -1,0 +1,33 @@
+using System;
+using System.Linq;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Data;
+namespace AstroArchive {
+ public partial class MainUi {
+  void SmokeTargetNavigation(string output){
+   var previousRows=all;string previousSearch=T("SearchBox").Text;var previousFilters=libraryFilters.Values.ToList();string previousTarget=(Targets.SelectedItem as TargetSummary).Name;
+   try{
+    libraryFilters.Values.Clear();T("SearchBox").Text="";
+    all=new System.Collections.Generic.List<Frame>{
+     new Frame{Target="M42",Kind="Light",Exposure=60,OriginalName="orion.fit"},new Frame{Target="M42",Kind="Stack",OriginalName="orion-stack.fit"},new Frame{Target="NGC6888",Kind="Light",Exposure=120,OriginalName="crescent.fit"},
+     new Frame{Target="M31",Kind="Light",Exposure=60,OriginalName="andromeda.fit"},new Frame{Target="M45",Kind="Light",Exposure=60,OriginalName="pleiades.fit"},new Frame{Target="Moon",Kind="Stack",OriginalName="moon.fit"},
+     new Frame{Target="C/2023 A3 (Tsuchinshan-ATLAS)",Kind="Light",Exposure=30,OriginalName="comet.fit"},new Frame{Target="12P/Pons-Brooks",Kind="Stack",OriginalName="comet-stack.fit"},new Frame{Target="Unknown",Kind="Light",OriginalName="unknown.fit"}
+    };Filter(true);PumpPopupLayout();
+    var view=Targets.ItemsSource as ListCollectionView;if(view==null||view.GroupDescriptions.Count!=1||view.Groups==null)throw new Exception("Target type grouping is missing.");
+    if(!view.Groups.Cast<CollectionViewGroup>().Any(g=>Convert.ToString(g.Name)=="Comets"&&g.ItemCount==2)||!view.Groups.Cast<CollectionViewGroup>().Any(g=>Convert.ToString(g.Name)=="Nebulae"&&g.ItemCount==2))throw new Exception("Comets or nebulae do not share a section.");
+    if(Targets.Items.Cast<TargetSummary>().Count()!=9||Targets.Items.Cast<TargetSummary>().First().Name!="All targets"||PopupChildren<Expander>(Targets).Any())throw new Exception("Target sections require expanding or include selectable header rows.");
+    Targets.SelectedItem=Targets.Items.Cast<TargetSummary>().Single(t=>t.Name=="M42");if(displayed.Count!=2)throw new Exception("Grouped target selection did not filter files.");
+    T("SearchBox").Text="Orion";if((Targets.SelectedItem as TargetSummary).Name!="M42"||displayed.Count!=2)throw new Exception("Rebuilding type groups lost target selection.");
+    T("SearchBox").Text="C/2023";if((Targets.SelectedItem as TargetSummary).Name!="All targets"||displayed.Count!=1)throw new Exception("Missing target did not return to filtered All targets.");
+    T("SearchBox").Text="";PumpPopupLayout();
+    foreach(string theme in new[]{"Dark","Light"}){Targets.ScrollIntoView(Targets.Items[0]);Theme.Apply(Window,theme);PumpPopupLayout();
+     if(!PopupChildren<TextBlock>(Targets).Any(t=>t.Text=="Comets")||!PopupChildren<TextBlock>(Targets).Any(t=>t.Text=="Nebulae"))throw new Exception("Inline type headings did not render.");
+     var target=Targets.Items.Cast<TargetSummary>().Single(t=>t.Name=="M42");Targets.ScrollIntoView(target);PumpPopupLayout();var container=Targets.ItemContainerGenerator.ContainerFromItem(target) as ListBoxItem;
+     if(container==null||!Convert.ToString(container.ToolTip).Contains("2 files")||!PopupChildren<TextBlock>(container).Any(t=>t.Text=="Orion Nebula"&&t.TextTrimming==TextTrimming.CharacterEllipsis))throw new Exception("Concise row or full-detail tooltip did not render.");
+     Capture(System.IO.Path.Combine(output,"AstroArchive_Targets_"+theme+".png"));
+    }
+   }finally{all=previousRows;libraryFilters.Values.Clear();foreach(var filter in previousFilters)libraryFilters.Values[filter.Key]=filter.Value;T("SearchBox").Text=previousSearch;Filter(true);Targets.SelectedItem=Targets.Items.Cast<TargetSummary>().FirstOrDefault(t=>t.Name==previousTarget)??Targets.Items.Cast<TargetSummary>().First();Theme.Apply(Window,settings.ThemeMode);}
+  }
+ }
+}

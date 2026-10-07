@@ -325,6 +325,36 @@ Telephoto and wide calibration never share export groups or match one another.
 DWARF factory PNG files can be archived. Confirm linearity and camera metadata
 before explicitly converting eligible calibration data to FITS during export.
 
+REPOSITORY TARGET LIST
+The left target list groups objects under small, always-visible type headings:
+Solar system, Comets, Nebulae, Galaxies, Star clusters and Stars. Custom targets
+without a recognised type appear under Other targets; Calibration and Unidentified
+stay separate. Only populated groups are shown. All targets remains at the top.
+Catalogue types determine known deep-sky groups, including planetary nebulae and
+supernova remnants under Nebulae. Standard comet designations are recognised.
+Each row shows its common name (or target label) and a badge counting all files.
+The second line shows the catalogue/comet ID and compact acquisition-sub exposure,
+when available. A + ? marks additional subs with missing exposure. Stacks and
+calibration files do not add to that exposure total. Long names are shortened on
+screen; hover a row for the full identity, file/sub/stack counts,
+observing sessions and exposure totals. Search and filters update all counts.
+Select targets directly; headings are separators, not expandable menus.
+
+REPOSITORY TARGET LIST
+The left target list groups objects under small, always-visible type headings:
+Solar system, Comets, Nebulae, Galaxies, Star clusters and Stars. Custom targets
+without a recognised type appear under Other targets; Calibration and Unidentified
+stay separate. Only populated groups are shown. All targets remains at the top.
+Catalogue types determine known deep-sky groups, including planetary nebulae and
+supernova remnants under Nebulae. Standard comet designations are recognised.
+Each row shows its common name (or target label) and a badge counting all files.
+The second line shows the catalogue/comet ID and compact acquisition-sub exposure,
+when available. A + ? marks additional subs with missing exposure. Stacks and
+calibration files do not add to that exposure total. Long names are shortened on
+screen; hover a row for the full identity, file/sub/stack counts,
+observing sessions and exposure totals. Search and filters update all counts.
+Select targets directly; headings are separators, not expandable menus.
+
 TARGET IDENTIFICATION AND OPTIONAL ANALYSIS
 Targets show a catalogue object ID and common name, e.g. M51 / Whirlpool Galaxy
 or IC1805 / Heart Nebula. Recognised IDs, common names and combined labels share
