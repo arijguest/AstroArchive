@@ -1,36 +1,25 @@
-AstroArchive 1.6.0 — USB imports, simpler filters and readable menus
-Package 1.6.0.1
+AstroArchive 1.6.1 — processing handoffs, Dump inbox and preview refinements
+Package 1.6.1.1
 
-This release combines the pending import interface, telescope management and
-programme-wide dropdown fixes with the released preview and performance updates.
+Combines the completed changes across the development chats since 1.6.0.1.
 
-- Detect local USB telescope storage and auto-upload missing captures. Save or
-  select a physical telescope profile; recover profiles from the repository.
-  Volume identity keeps the association when Windows changes its drive letter.
-- Rename saved telescopes across archive paths, metadata, source manifests and
-  deletion history while preserving FITS bytes and acquisition sessions.
-  Interrupted renames recover or roll back when the repository reopens.
-- Use one Filters menu in the library and import views. Import only the ready
-  files shown in the filtered results; the button displays their count.
-- Compact source setup with collapsed import options. Screen captures for failure
-  and rejection markers, unreadable FITS payloads and archive checksum problems.
-  USB auto-upload leaves rejected or damaged captures available for review.
-- Preserve deletion history by SHA-256. Later imports skip matching content even
-  if the source name, folder or telescope drive letter changes. Archive reset
-  retains the log, which travels with the portable repository index.
-- Fix text overlap in menus and dropdowns throughout the programme. Popups reserve
-  separate space for themed scrollbars, hide them when unnecessary, and keep
-  long menus, submenus and selections reachable within the screen.
-- Add pinch/wheel zoom, drag-to-pan and Fit in the image preview menu, using the
-  existing colour decoders. Tables retain numeric/Shift-column sorting as rows
-  refresh; bias files are recognized and unknown metadata displays a dash.
-- Install release downloads and verifies setup inside the application files,
-  saves settings/index, closes, installs and restarts automatically. Portable
-  checks include the package revision and retain their per-user settings.
-- Retain the 1.4 colour previews/themes and 1.5 continuous progress, rolling ETA,
-  discovery/metadata caching and verified copy performance improvements.
+- Send a single uncompressed FITS stack directly to the verified 7 October
+  AstroWizard build or Siril, using a verified working copy outside the archive.
+  Direct incoming handoff to StackingWizard remains unavailable; use the existing
+  ready-to-stack export folders for individual subs.
+- Sort supported FITS from each archive's Dump folder when the archive opens.
+  Remove successfully verified inputs and duplicates; retain failed, changed,
+  unsupported or locked files. Settings includes open and retry controls.
+  Existing deletion-history exclusions continue to prevent unwanted reimports.
+- Compensate Auto/Strong previews for IRCUT/LP filters and severe colour casts.
+  Display identified solar, lunar and planetary images without stretching.
+  Source pixels and headers remain unchanged.
+- Merge Sun and Solar into one Sun target during import and archive opening.
+  Preserve existing indexed file paths and normalise cached and deleted labels.
+- Give setup and Install release dialogues larger starting sizes, wrapping copy,
+  spaced action buttons and a scrollable setup body for smaller screens.
 
-Download AstroArchive1.6.0.1.exe. The Windows release workflow validates application
-regressions, native file checks, installer repair/uninstall and WPF rendering.
-Physical telescope USB arrival/removal and live cloud provider behaviour require
-separate validation with real hardware and accounts.
+Download AstroArchive1.6.1.1.exe. Windows validation covers application regressions,
+installer/update tests, native cleanup, installation/restart and WPF smoke checks.
+Physical telescope USB, touchscreen gestures and live cloud transfers still need
+validation with real hardware and accounts.
