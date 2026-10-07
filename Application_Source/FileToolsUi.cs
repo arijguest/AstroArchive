@@ -46,7 +46,7 @@ namespace AstroArchive {
   }
   void BuildFileMenu(ContextMenu menu,List<Frame> selected){
    menu.Items.Clear();menu.Items.Add(new MenuItem{Header=selected.Count+" selected file"+(selected.Count==1?"":"s"),IsEnabled=false});
-   menu.Items.Add(FileAction("Preview image",PreviewSelected));menu.Items.Add(FileAction("Copy file paths",()=>Clipboard.SetText(string.Join(Environment.NewLine,selected.Select(repo.FilePath)))));menu.Items.Add(ExportMenu(selected));menu.Items.Add(FileAction("Export selection catalogue…",()=>ExportSelectionCsv(selected)));menu.Items.Add(new Separator());
+   menu.Items.Add(FileAction("Preview image…",()=>PreviewImage(selected[0]),selected.Count==1));menu.Items.Add(FileAction("Copy file paths",()=>Clipboard.SetText(string.Join(Environment.NewLine,selected.Select(repo.FilePath)))));menu.Items.Add(ExportMenu(selected));menu.Items.Add(FileAction("Export selection catalogue…",()=>ExportSelectionCsv(selected)));menu.Items.Add(new Separator());
    menu.Items.Add(FileAction("Edit metadata…",()=>Edit(false)));
    menu.Items.Add(FileAction("Identify target…",()=>Identify(false),selected.Any(f=>f.Kind=="Light"||f.Kind=="Stack"||f.Kind=="Unknown")));
    menu.Items.Add(FileAction("Show file in Explorer",()=>ShowFile(selected[0]),selected.Count==1));

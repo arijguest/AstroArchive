@@ -40,9 +40,9 @@ Updates preserve repositories, images, manifests, caches and user settings.
 Offline or failed checks leave the installed app available. Downloads use HTTPS
 and SHA-256 verification; release checks need no GitHub login for this public
 repository. Running the portable app executable directly bypasses the launcher.
-Use **Settings → Check for and download new releases** to check manually and
-save a verified installer, including when running the portable app directly.
-Close AstroArchive before running the downloaded installer.
+Use **Settings → Check for and install new releases**, then **Install release**.
+The app verifies the download, saves state, closes, installs and restarts automatically.
+Portable copies install at the registered/default location.
 See [update details](docs/UPDATES.md) for manual checks, troubleshooting and offline launch.
 
 ## What it does

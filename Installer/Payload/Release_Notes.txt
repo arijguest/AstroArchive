@@ -21,6 +21,12 @@ programme-wide dropdown fixes with the released preview and performance updates.
 - Fix text overlap in menus and dropdowns throughout the programme. Popups reserve
   separate space for themed scrollbars, hide them when unnecessary, and keep
   long menus, submenus and selections reachable within the screen.
+- Add pinch/wheel zoom, drag-to-pan and Fit in the image preview menu, using the
+  existing colour decoders. Tables retain numeric/Shift-column sorting as rows
+  refresh; bias files are recognized and unknown metadata displays a dash.
+- Install release downloads and verifies setup inside the application files,
+  saves settings/index, closes, installs and restarts automatically. Portable
+  checks include the package revision and retain their per-user settings.
 - Retain the 1.4 colour previews/themes and 1.5 continuous progress, rolling ETA,
   discovery/metadata caching and verified copy performance improvements.
 

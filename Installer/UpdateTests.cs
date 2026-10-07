@@ -23,6 +23,48 @@ static class UpdateTests {
   throw new Exception("Expected update refusal.");
  }
  public static void Run(Action<string, Action> test, string scratch) {
+  test("Installed release targets keep downloads outside the active application folder",()=>{
+   string root=Path.Combine(scratch,"installed release with spaces");var package=FixturePackage("1.2.0",1);var record=new InstallCore().Install(root,package,Installer);
+   string app=InstallCore.Managed(root,record.ActiveDirectory+"\\AstroArchive.exe");var target=UpdateClient.ResolveTarget(app,"1.2.0",Path.Combine(scratch,"unused registered root"));
+   Check(target.Root==root&&target.Cache==Path.Combine(root,"updates")&&target.Running.PackageVersion=="1.2.0.1","Installed update target was not retained");
+   var manifest=Manifest();string setup=Client(manifest).Prepare(manifest,target.Cache);var start=UpdateClient.InstallerStartInfo(manifest,setup,target.Root,12345);
+   Check(start.FileName==setup&&!start.UseShellExecute&&start.WorkingDirectory==Path.GetDirectoryName(setup),"Verified installer launch location changed");
+   Check(start.Arguments=="--update --silent --root \""+root+"\" --waitpid 12345 --restart","Update did not wait, install silently and restart");
+   new InstallCore().Install(root,FixturePackage("1.2.0",2),Installer,true);Check(InstallCore.Read(root).PackageVersion=="1.2.0.2"&&File.Exists(setup),"Cached update prevented activation or was deleted");
+   new InstallCore().Install(root,FixturePackage("1.2.0",2),Installer);Check(InstallCore.Read(root).PackageVersion=="1.2.0.2","Updates folder prevented same-package repair");
+  });
+  test("Portable release targets use a managed registered installation and local program downloads",()=>{
+   string directory=Path.Combine(scratch,"portable program"),root=Path.Combine(scratch,"portable installed target");Directory.CreateDirectory(directory);string app=Path.Combine(directory,"AstroArchive.exe");File.WriteAllText(app,"portable");
+   var target=UpdateClient.ResolveTarget(app,"1.2.0",root);Check(target.Root==root&&target.Cache==Path.Combine(directory,"updates")&&target.Existing==null,"Portable install target or download folder incorrect");
+   var manifest=Manifest();string setup=Client(manifest).Prepare(manifest,target.Cache);var start=UpdateClient.InstallerStartInfo(manifest,setup,root,4321);
+   Check(!start.Arguments.Contains("--update")&&start.Arguments.Contains("--waitpid 4321 --restart"),"Portable install incorrectly required an existing record");Check(File.ReadAllText(app)=="portable"&&!Directory.Exists(root),"Preparing portable installation changed application files");
+  });
+  test("A retained older app version still updates its own installation root",()=>{
+   string root=Path.Combine(scratch,"retained older version");var older=new InstallCore().Install(root,FixturePackage("1.2.0",1),Installer);string app=InstallCore.Managed(root,older.ActiveDirectory+"\\AstroArchive.exe");new InstallCore().Install(root,FixturePackage("1.3.0",1),Installer);
+   var target=UpdateClient.ResolveTarget(app,"1.2.0",Path.Combine(scratch,"wrong registered root"),"1.2.0.1");Check(target.Root==root&&target.Cache==Path.Combine(root,"updates")&&target.Running.PackageVersion=="1.2.0.1"&&target.Comparison.PackageVersion=="1.3.0.1","Retained application was treated as an unrelated portable copy");
+  });
+  test("Portable checks respect the embedded package revision and newer registered installations",()=>{
+   string directory=Path.Combine(scratch,"portable revision"),root=Path.Combine(scratch,"registered newer");Directory.CreateDirectory(directory);string app=Path.Combine(directory,"AstroArchive.exe");File.WriteAllText(app,"portable");
+   var target=UpdateClient.ResolveTarget(app,"1.3.0",root,"1.3.0.2");Check(Client(Manifest("1.3.0",1)).Check(target.Comparison)==null,"Published older package offered to a newer portable build");
+   new InstallCore().Install(root,FixturePackage("1.4.0",1),Installer);target=UpdateClient.ResolveTarget(app,"1.3.0",root,"1.3.0.2");Check(target.Comparison.PackageVersion=="1.4.0.1"&&Client(Manifest("1.3.0",3)).Check(target.Comparison)==null,"Registered installation downgrade offered");
+  });
+  test("Installer launch revalidates cached bytes and retains the existing installation on corruption",()=>{
+   string root=Path.Combine(scratch,"launch corruption root");new InstallCore().Install(root,FixturePackage("1.2.0",1),Installer);
+   var manifest=Manifest();string setup=Client(manifest).Prepare(manifest,UpdateClient.InstallationCache(root));var damaged=new byte[Installer.Length];File.WriteAllBytes(setup,damaged);
+   Refused(()=>UpdateClient.InstallerStartInfo(manifest,setup,root,10));Check(InstallCore.Read(root).PackageVersion=="1.2.0.1","Corrupt cached update changed the installation");
+  });
+  test("Installer handoff rejects stale releases and invalid wait processes",()=>{
+   string root=Path.Combine(scratch,"stale launch root");new InstallCore().Install(root,FixturePackage("1.2.0",3),Installer);var manifest=Manifest();string setup=Client(manifest).Prepare(manifest,UpdateClient.InstallationCache(root));
+   Refused(()=>UpdateClient.InstallerStartInfo(manifest,setup,root,10));Refused(()=>UpdateClient.InstallerStartInfo(manifest,setup,root,0));Check(InstallCore.Read(root).PackageVersion=="1.2.0.3","Stale update replaced a newer installed package");
+  });
+  test("Fresh install handoff refuses unrelated files without overwriting them",()=>{
+   string root=Path.Combine(scratch,"foreign launch target"),cache=Path.Combine(scratch,"foreign launch downloads");Directory.CreateDirectory(root);File.WriteAllText(Path.Combine(root,"keep.txt"),"keep");var manifest=Manifest();string setup=Client(manifest).Prepare(manifest,cache);
+   Refused(()=>UpdateClient.InstallerStartInfo(manifest,setup,root,10));Check(File.ReadAllText(Path.Combine(root,"keep.txt"))=="keep"&&!File.Exists(Path.Combine(root,"install.json")),"Foreign folder was modified");
+  });
+  test("Application handoff mutex matches launcher identity for equivalent installation paths",()=>{
+   string root=Path.Combine(scratch,"launcher identity");Check(InstallCore.ApplicationMutexName(root)==InstallCore.ApplicationMutexName(root+Path.DirectorySeparatorChar),"Launcher and installer mutex identities differ");
+   Check(InstallCore.ApplicationMutexName(root)!=InstallCore.ApplicationMutexName(root+"-other"),"Separate installations shared an update mutex");
+  });
   test("Concise release installers are validated and used for verified downloads", () => {
    var manifest=Manifest("1.3.0",1);manifest.download_url=UpdateClient.Repository+"/releases/download/v1.3.0.1/AstroArchive1.3.0.1.exe";
    string requested=null;var client=new UpdateClient{Fetch=(uri,limit)=>{requested=uri.AbsoluteUri;return Installer;}};
@@ -93,4 +135,5 @@ static class UpdateTests {
    Check(installed.Version == "1.2.0" && installed.PackageVersion == "1.2.0.1", "Offline check changed the record.");
   });
  }
+ static InstallPackage FixturePackage(string version,int revision){var package=new InstallPackage{Version=version,PackageVersion=version+"."+revision,Revision=revision};foreach(string name in new[]{"AstroArchive.exe","Start.exe"}){var bytes=Encoding.UTF8.GetBytes(version+":"+revision+":"+name);package.Files.Add(new PayloadFile{Name=name,Bytes=bytes,Hash=InstallCore.Hash(bytes)});}return package;}
 }
