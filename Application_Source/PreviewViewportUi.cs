@@ -30,8 +30,7 @@ namespace AstroArchive {
    zoomOutButton=AddButton(controls,"−","Zoom out",()=>ZoomAt(1/1.25,Center));fitButton=AddButton(controls,"Fit","Recenter image",Fit);fitButton.Width=38;fitButton.FontSize=12;zoomInButton=AddButton(controls,"+","Zoom in",()=>ZoomAt(1.25,Center));
    controls.Children.Add(new Border{Width=1,Height=20,Background=new SolidColorBrush(Color.FromArgb(150,148,165,192)),Margin=new Thickness(5,0,5,0)});
    panButtons.Add(AddButton(controls,"←","View left",()=>Navigate(-40,0)));panButtons.Add(AddButton(controls,"↑","View up",()=>Navigate(0,-40)));panButtons.Add(AddButton(controls,"↓","View down",()=>Navigate(0,40)));panButtons.Add(AddButton(controls,"→","View right",()=>Navigate(40,0)));
-   host.RowDefinitions.Add(new RowDefinition{Height=GridLength.Auto});host.RowDefinitions.Add(new RowDefinition{Height=GridLength.Auto});host.RowDefinitions.Add(new RowDefinition{Height=new GridLength(1,GridUnitType.Star)});
-   Grid.SetRow(viewport,0);Grid.SetRow(toolbarHost,1);host.Children.Add(toolbarHost);host.SizeChanged+=(s,e)=>Resize();
+   host.Children.Add(toolbarHost);host.SizeChanged+=(s,e)=>Resize();
    viewport.PreviewMouseWheel+=(s,e)=>{if(geometry==null)return;ZoomAt(Math.Pow(1.2,e.Delta/120.0),e.GetPosition(viewport));e.Handled=true;};
    viewport.ManipulationStarting+=(s,e)=>{if(geometry==null||FromControl(e.OriginalSource)){e.Cancel();return;}e.ManipulationContainer=viewport;e.Mode=ManipulationModes.Scale|ManipulationModes.Translate;fitting=false;e.Handled=true;};
    viewport.ManipulationDelta+=(s,e)=>{if(geometry==null)return;Manipulate(Math.Sqrt(e.DeltaManipulation.Scale.X*e.DeltaManipulation.Scale.Y),e.ManipulationOrigin,e.DeltaManipulation.Translation.X,e.DeltaManipulation.Translation.Y);e.Handled=true;};
@@ -56,7 +55,10 @@ namespace AstroArchive {
    if(reset||changed)fitting=true;Resize();
   }
   public void Resize(){
-   if(geometry==null)return;double width,height;geometry.Frame(host.ActualWidth,Math.Max(0,host.ActualHeight-ToolbarSpace),out width,out height);viewport.Width=width;viewport.Height=height;toolbarHost.MaxWidth=Math.Max(0,width-12);
+   if(geometry==null)return;double width,height;geometry.Frame(host.ActualWidth,Math.Max(0,host.ActualHeight-ToolbarSpace),out width,out height);viewport.Width=width;viewport.Height=height;
+   // Keep the bitmap's existing measure path, with a separate control area
+   // immediately below the image rather than a new auto-sized image row.
+   toolbarHost.MaxWidth=Math.Max(0,width-12);toolbarHost.Margin=new Thickness(6,height+6,6,0);
    if(fitting)Fit();else Apply();
   }
   Point Center{get{return new Point(viewport.Width/2,viewport.Height/2);}}

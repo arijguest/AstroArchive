@@ -27,7 +27,7 @@ namespace AstroArchive {
        int[] order=width>height?new[]{2,0,3,1}:new[]{0,1,2,3};
        for(int quadrant=0;quadrant<4;quadrant++){
         int x=(int)(w*(quadrant%2==0?0.2:0.8)),y=(int)(h*(quadrant<2?0.2:0.7)),offset=(y*w+x)*4;var expected=colors[order[quadrant]];
-        if(Math.Abs(actual[offset+2]-expected[0])>12||Math.Abs(actual[offset+1]-expected[1])>12||Math.Abs(actual[offset]-expected[2])>12||actual[offset+3]<250)throw new InvalidOperationException("Preview image clipped or scaled incorrectly: "+width+"x"+height+", "+dpi+" DPI, viewport "+w+"x"+h+", quadrant "+quadrant+", actual RGBA "+actual[offset+2]+","+actual[offset+1]+","+actual[offset]+","+actual[offset+3]+".");
+        if(Math.Abs(actual[offset+2]-expected[0])>12||Math.Abs(actual[offset+1]-expected[1])>12||Math.Abs(actual[offset]-expected[2])>12||actual[offset+3]<250)throw new InvalidOperationException("Preview image clipped or scaled incorrectly: "+width+"x"+height+", "+dpi+" DPI, viewport "+w+"x"+h+", quadrant "+quadrant+", actual RGBA "+actual[offset+2]+","+actual[offset+1]+","+actual[offset]+","+actual[offset+3]+", stage origin "+origin+", host clip "+System.Windows.Controls.Primitives.LayoutInformation.GetLayoutClip(host)+", stage clip "+System.Windows.Controls.Primitives.LayoutInformation.GetLayoutClip(stage)+".");
        }
        if(Math.Abs(image.ActualWidth-width)>0.001||Math.Abs(image.ActualHeight-height)>0.001)throw new InvalidOperationException("Preview layout truncated the untransformed bitmap.");
        preview.SmokeGestures();cases++;
