@@ -9,15 +9,6 @@ using System.Threading.Tasks;
 
 namespace AstroArchive.Installation {
  static class Launcher {
-  static void Log(Exception error) {
-   try {
-    string directory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "AstroArchive", "updates");
-    InstallCore.NoLinks(directory); Directory.CreateDirectory(directory);
-    string path = Path.Combine(directory, "last-error.txt"); InstallCore.NoLinks(path);
-    File.WriteAllText(path, DateTime.UtcNow.ToString("u") + "\r\n" + error);
-   } catch { }
-  }
-
   static bool ConfirmUpdate(UpdateManifest update,string current,string notes){
    using(var form=new Form{Text="Install AstroArchive release",ClientSize=new System.Drawing.Size(680,490),MinimumSize=new System.Drawing.Size(600,440),StartPosition=FormStartPosition.CenterScreen,Font=new System.Drawing.Font("Segoe UI",10),Padding=new Padding(24)}){
     var title=new Label{Text="Package "+update.package_version+" is available. Installed: "+current+".\nYour repositories, images and settings will be retained.",Dock=DockStyle.Top,Height=76};
@@ -29,8 +20,9 @@ namespace AstroArchive.Installation {
   }
   static bool Update(string root, InstallRecord record, bool explicitCheck) {
    bool accepted = false;
+   UpdateManifest update=null;string setup=null;DateTime attemptedUtc=DateTime.MinValue;
    try {
-    var client = new UpdateClient(); var update = client.Check(record);
+    var client = new UpdateClient(); update = client.Check(record);
     if (update == null) {
      if (explicitCheck) MessageBox.Show("AstroArchive is up to date.", "AstroArchive updates");
      return false;
@@ -39,7 +31,6 @@ namespace AstroArchive.Installation {
     if(!ConfirmUpdate(update,record.PackageVersion??record.Version,notes))return false;
     accepted = true;
     string cache = UpdateClient.InstallationCache(root);
-    string setup = null;
     Exception downloadError = null;
     using (var progress = new Form { Text = "Updating AstroArchive", ClientSize = new System.Drawing.Size(560,170), Padding=new Padding(24), Font=new System.Drawing.Font("Segoe UI",10),
       StartPosition = FormStartPosition.CenterScreen, FormBorderStyle = FormBorderStyle.FixedDialog,
@@ -56,12 +47,13 @@ namespace AstroArchive.Installation {
     if (downloadError != null) throw downloadError;
     if (setup == null) throw new IOException("The update download did not complete.");
     // The installer waits for this launcher to exit before changing application files.
-    using(var process=Process.Start(UpdateClient.InstallerStartInfo(update,setup,root,Process.GetCurrentProcess().Id)))
+    var start=UpdateClient.InstallerStartInfo(update,setup,root,Process.GetCurrentProcess().Id);attemptedUtc=DateTime.UtcNow;
+    using(var process=WindowsIntegration.StartProcess(start))
      if(process==null)throw new IOException("The update installer could not start.");
     return true;
    } catch (Exception error) {
-    Log(error);
-    if (explicitCheck || accepted) MessageBox.Show("The update could not be installed. Your current version is still available.\r\n\r\n" + error.Message,
+    string log=UpdateDiagnostics.Record(error,update,setup,attemptedUtc);
+    if (explicitCheck || accepted) MessageBox.Show("The update could not be installed. Your current version is still available.\r\n\r\n" + UpdateDiagnostics.Message(error,log),
       "AstroArchive updates", MessageBoxButtons.OK, MessageBoxIcon.Warning);
     return false;
    }
