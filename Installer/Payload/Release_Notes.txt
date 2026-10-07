@@ -1,3 +1,23 @@
+AstroArchive 1.9.0 — navigation and accessibility
+Package 1.9.0.1
+
+- Organize Import, Export, Repository, Settings and Guide in the top-left menu
+  bar, followed by Buy Me a Coffee. Move the brand to the top right and place
+  a concise, clickable repository path above the menus.
+- Rename the Library page to Repository. Keep primary Import/Export actions
+  on the pages and group secondary tools, filters, columns, telescope management,
+  review, recovery, diagnostics and maintenance in dropdown trees.
+- Show table sort arrows and multi-column priorities, including accessible
+  header descriptions. Keep columns readable with horizontal scrolling on narrow
+  windows and larger text. Retain reordering and independent saved layouts.
+- Keep the idle status bar concise; show timing, progress and Cancel during jobs.
+  Keep import policy and active filter counts visible when options move into menus.
+- Add a first-run interactive walkthrough, repeatable from Guide, and an About
+  page crediting Ari J. Guest with a link to arijguest.com.
+- Add preference controls for text size, comfortable rows, high contrast and
+  reduced progress animation. Keep theme selection in Preferences, and retain
+  Windows high-contrast behavior and clear keyboard focus indicators.
+
 AstroArchive 1.8.4 — target type recognition
 Package 1.8.4.1
 

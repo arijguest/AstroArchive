@@ -17,18 +17,18 @@ namespace AstroArchive {
  public partial class MainUi {
   readonly Dictionary<string,List<SortDescription>> tableSorts=new Dictionary<string,List<SortDescription>>();
   void InitializeTables(){
-   AddCaptureColumns("FramesGrid");AddCaptureColumns("ImportGrid");var converter=new MetadataCellConverter();foreach(string name in new[]{"FramesGrid","ImportGrid","MetricsGrid"}){var grid=G(name);grid.CanUserSortColumns=true;tableSorts[name]=new List<SortDescription>();
+   AddCaptureColumns("FramesGrid");AddCaptureColumns("ImportGrid");var converter=new MetadataCellConverter();foreach(string name in new[]{"FramesGrid","ImportGrid","MetricsGrid","MosaicGrid"}){var grid=G(name);grid.CanUserSortColumns=true;tableSorts[name]=new List<SortDescription>();
     foreach(var column in grid.Columns.OfType<DataGridBoundColumn>()){var binding=column.Binding as Binding;if(binding==null||binding.Path==null)continue;string path=binding.Path.Path;if(path=="Mount")path="MountText";var header=new Style(typeof(DataGridColumnHeader),Window.TryFindResource(typeof(DataGridColumnHeader)) as Style);string tip=Convert.ToString(column.Header)+": click to sort; click again to reverse. Shift-click adds a sorting column."+(name=="MetricsGrid"?"":" Drag to rearrange; right-click to choose headings.");if(path=="MountText")tip+=" A question mark marks an inference. Unknown mounts use EQ? above 20 s, otherwise Alt-Az?. Confirmed import or user labels have no question mark.";else if(path=="SizeText")tip+=" Dimensions sort by total pixel count.";else if(path=="ExposureText"||path=="GainText"||path=="TemperatureText"||name=="MetricsGrid"&&path!="Stage")tip+=" Values sort numerically.";header.Setters.Add(new Setter(FrameworkElement.ToolTipProperty,new ToolTip{Content=new TextBlock{Text=tip,TextWrapping=TextWrapping.Wrap,MaxWidth=360}}));column.HeaderStyle=header;column.SortMemberPath=path=="ExposureText"?"Exposure":path=="GainText"?"Gain":path=="TemperatureText"?"Temperature":path=="SizeText"?"PixelCount":path;
-     if(name!="MetricsGrid"&&path!="OriginalName"){column.Binding=new Binding(path){Mode=BindingMode.OneWay,Converter=converter,ConverterParameter=path,StringFormat=binding.StringFormat};}
+     if((name=="FramesGrid"||name=="ImportGrid")&&path!="OriginalName"){column.Binding=new Binding(path){Mode=BindingMode.OneWay,Converter=converter,ConverterParameter=path,StringFormat=binding.StringFormat};}
     }
-    string table=name;grid.Sorting+=(s,e)=>{e.Handled=true;SortTable(table,e.Column,(Keyboard.Modifiers&ModifierKeys.Shift)!=0);};
+    string table=name;TableSortIndicators.Attach(grid);grid.Sorting+=(s,e)=>{e.Handled=true;SortTable(table,e.Column,(Keyboard.Modifiers&ModifierKeys.Shift)!=0);};
    }
    InitializeColumnLayouts();
   }
   void SortTable(string name,DataGridColumn column,bool additive){string property=column.SortMemberPath;if(string.IsNullOrEmpty(property))return;var direction=column.SortDirection==ListSortDirection.Ascending?ListSortDirection.Descending:ListSortDirection.Ascending;var sorts=tableSorts[name];if(!additive)sorts.Clear();int index=sorts.FindIndex(d=>d.PropertyName==property);var sort=new SortDescription(property,direction);if(index<0)sorts.Add(sort);else sorts[index]=sort;RestoreTableSort(name);}
   void SetRows(string name,IEnumerable rows){G(name).ItemsSource=rows;RestoreTableSort(name);}
   void RestoreTableSort(string name){List<SortDescription> sorts;if(!tableSorts.TryGetValue(name,out sorts))return;var grid=G(name);if(grid.Items.CanSort)using(grid.Items.DeferRefresh()){grid.Items.SortDescriptions.Clear();foreach(var sort in sorts)grid.Items.SortDescriptions.Add(sort);}
-   foreach(var column in grid.Columns){var sort=sorts.FirstOrDefault(d=>d.PropertyName==column.SortMemberPath);column.SortDirection=string.IsNullOrEmpty(sort.PropertyName)?(ListSortDirection?)null:sort.Direction;}
+   foreach(var column in grid.Columns){var sort=sorts.FirstOrDefault(d=>d.PropertyName==column.SortMemberPath);column.SortDirection=string.IsNullOrEmpty(sort.PropertyName)?(ListSortDirection?)null:sort.Direction;}TableSortIndicators.Update(grid);
   }
   void SmokeTablesAndPreview(){
    var rows=new[]{new Frame{Kind="Light",Target="Unknown",Exposure=10},new Frame{Kind="Light",Exposure=2},new Frame{Kind="Bias",Target="Calibration",Exposure=0},new Frame{Kind="Unknown"}};
