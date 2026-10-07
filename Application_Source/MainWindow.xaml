@@ -520,7 +520,7 @@
   </Style>
   <Thickness x:Key="FocusWidth">2</Thickness>
  </Window.Resources>
- <Grid Margin="18,14" x:Name="WorkspaceRoot">
+ <Grid Margin="18,2,18,14" x:Name="WorkspaceRoot">
   <Grid.RowDefinitions>
    <RowDefinition Height="Auto" />
    <RowDefinition Height="Auto" />
@@ -532,7 +532,7 @@
     <RowDefinition Height="Auto" />
     <RowDefinition Height="Auto" />
    </Grid.RowDefinitions>
-   <Button x:Name="OpenRepositoryFolderButton" HorizontalAlignment="Center" MaxWidth="650" Padding="10,2" Margin="0" Background="Transparent" BorderThickness="0" ToolTip="Open the active repository folder in File Explorer.">
+   <Button x:Name="OpenRepositoryFolderButton" HorizontalAlignment="Center" MaxWidth="650" Padding="10,1" Margin="0,0,0,4" Background="Transparent" BorderThickness="0" ToolTip="Open the active repository folder in File Explorer.">
     <TextBlock x:Name="RepositoryLabel" Text="Choose a repository from the Repository menu" TextTrimming="CharacterEllipsis" Foreground="{DynamicResource Muted}" FontSize="{DynamicResource UiFontSmall}" />
    </Button>
    <Grid Grid.Row="1">
@@ -540,7 +540,7 @@
      <ColumnDefinition Width="*" />
      <ColumnDefinition Width="Auto" />
     </Grid.ColumnDefinitions>
-    <ScrollViewer VerticalScrollBarVisibility="Disabled" HorizontalScrollBarVisibility="Disabled" Focusable="False" VerticalAlignment="Top">
+    <ScrollViewer VerticalScrollBarVisibility="Disabled" HorizontalScrollBarVisibility="Disabled" Focusable="False" VerticalAlignment="Center">
      <Menu x:Name="MainMenu" Background="Transparent" Foreground="{DynamicResource Text}" VerticalAlignment="Center" KeyboardNavigation.TabNavigation="Once">
       <Menu.ItemsPanel>
        <ItemsPanelTemplate><WrapPanel /></ItemsPanelTemplate>
@@ -553,7 +553,7 @@
       <MenuItem x:Name="CoffeeMenu" Header="_Buy Me a Coffee" Style="{StaticResource TopNavigationMenu}" Background="{DynamicResource SupportSurface}" FontWeight="Bold" />
      </Menu>
     </ScrollViewer>
-    <StackPanel x:Name="BrandPanel" Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Top" Margin="22,0,0,0">
+    <StackPanel x:Name="BrandPanel" Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" Margin="22,0,0,4">
      <Image x:Name="BrandLogo" Width="40" Height="40" Stretch="Uniform" RenderOptions.BitmapScalingMode="HighQuality" />
      <TextBlock x:Name="BrandTitle" Text="AstroArchive" FontSize="{DynamicResource UiFontHeaderBrand}" FontWeight="SemiBold" Margin="10,0,0,0" VerticalAlignment="Center" />
     </StackPanel>
