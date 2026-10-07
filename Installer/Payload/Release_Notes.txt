@@ -1,3 +1,24 @@
+AstroArchive 1.7.1 — configurable tables, common names and popup styling
+Package 1.7.1.1
+
+- Rename the Capture library heading to Repository.
+- Add compact Columns choosers to repository and import tables. Choose headings,
+  drag to reorder, or right-click a heading for Move left/right. Layouts are saved
+  independently; Restore default columns restores the existing default layout.
+- Resolve all 109 Caldwell IDs, including C27 / NGC6888 / Crescent Nebula.
+  Accept spaced/zero-padded IDs in existing archives, filenames and search.
+  Expand common names for popular nebulae, clusters and galaxies while preserving
+  ambiguous labels and separate Veil components.
+- Theme tooltips, processing/report windows and guide surfaces consistently.
+  Share popup resources, preserve inherited text colours and improve light-mode
+  muted text contrast. Secondary windows follow theme changes while open.
+
+Download AstroArchive1.7.1.1.exe. Windows validation includes application tests,
+installer/update tests, native cleanup, saved column layouts and actual popup
+contrast checks in both themes. Existing archive data and file paths are retained.
+
+Previous release notes
+
 AstroArchive 1.7.0 — mosaic collections, import review and offline help
 Package 1.7.0.1
 

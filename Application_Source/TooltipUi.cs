@@ -100,6 +100,8 @@ namespace AstroArchive {
    {"AutoUploadButton","Screen a connected USB telescope for FITS files, import missing captures and retain telescope originals."},
    {"SearchBox","Search targets, dates, device names, filters, exposure, filenames and notes. Every word must match."},
    {"ClearButton","Reset library search, filters and target selection to show all captures."},
+   {"LibraryColumnsButton","Choose repository headings. Check or uncheck columns, drag headings to rearrange, or restore the default layout. This table remembers its own choices."},
+   {"ImportColumnsButton","Choose import headings. Drag headings to rearrange; right-click one for Move left/right. Choices are saved independently of the repository table."},
    {"TargetList","Choose a target to filter the library. All targets shows every target matching the current filters."},
    {"FramesGrid","Click a column header to sort; click again to reverse. Shift-click adds a sort column. Ctrl/Shift selects files; right-click opens file tools."},
    {"ExportButton","Export selected captures, or all visible captures when none are selected. Choose file copies or a stacking project."},
