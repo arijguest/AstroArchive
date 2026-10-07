@@ -1,3 +1,13 @@
+AstroArchive 1.8.1 — observing town / city
+Package 1.8.1.1
+
+- Replace manual latitude/longitude settings with an offline town/city picker.
+  Search worldwide place names, alternate spellings, region or country; select
+  the matching result to use its centre for rotation analysis.
+- Preserve previously saved coordinates until a town/city is selected or cleared.
+  Canceling Settings leaves the observing location unchanged.
+- Bundle GeoNames place data and attribution; the picker needs no online service.
+
 AstroArchive 1.8.0 — image and instrument compatibility
 Package 1.8.0.1
 

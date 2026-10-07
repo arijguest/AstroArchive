@@ -1,4 +1,4 @@
-AstroArchive 1.7.2
+AstroArchive 1.8.1
 Windows 10/11 x64 desktop app. Built-in .NET Framework 4.8 and Windows SQLite.
 Runs offline. No Python or Google login required.
 
@@ -114,7 +114,8 @@ New solar imports use Targets/Sun. Existing indexed file paths are preserved.
 Preview supports FITS and gzip FITS (integer/float, RGB and recognised Bayer CFA),
 XISF mono/RGB/CFA with UInt8/16/32/64 or Float32/64 samples, attached or base64
 inline/embedded data, and uncompressed, zlib, LZ4/LZ4HC or byte-shuffled samples.
-XISF previews are limited to 256 MB of decoded samples; zstd is unsupported.
+External XISF previews retain their 256 MB limit. Imported image decoding has a
+32-million-sample limit and supports Zstandard when its optional codec is installed.
 TIFF, PNG, JPEG, BMP, GIF and Windows photo formats use Windows image codecs,
 including high-depth integer and floating samples when supported by the codec.
 DSLR RAW compatibility depends on an installed Windows codec for that camera.
@@ -319,8 +320,8 @@ DWARF camera IDs and cam_0 folders identify telephoto; cam_1 identifies wide.
 Explicit tele/wide markers are used, including calibration folders. Dimensions or
 binning alone do not establish the camera. Conflicting markers remain Unknown.
 Telephoto and wide calibration never share export groups or match one another.
-This remains a FITS archive. DWARF factory PNG calibration needs conversion to
-FITS with the relevant camera metadata or preserved cam_0/cam_1 folder structure.
+DWARF factory PNG files can be archived. Confirm linearity and camera metadata
+before explicitly converting eligible calibration data to FITS during export.
 
 TARGET IDENTIFICATION AND OPTIONAL ANALYSIS
 Targets show a catalogue object ID and common name, e.g. M51 / Whirlpool Galaxy
@@ -352,6 +353,18 @@ ASTAP uses temporary copies and does not edit the archive/original FITS.
 Astrometry.net: https://nova.astrometry.net
 The API key is stored with Windows user encryption. Online solving submits detected
 star coordinates as a FITS table, not image pixels, and requests non-public submissions.
+
+OBSERVING TOWN / CITY
+In Settings > Processing, choose your nearest town or city for rotation analysis.
+Search by name, region or country, then select the matching result and save Settings.
+The offline list includes over 236,000 places, with alternate spellings and accents.
+Region/country labels distinguish places with the same name. City-centre coordinates
+are resolved automatically; no latitude/longitude entry or internet access is needed.
+Previously saved coordinates remain active until you select or clear a place.
+Clear observing location to use capture location metadata where available instead.
+Small settlements may be absent: choose the nearest listed town/city.
+Place data: GeoNames (https://www.geonames.org), CC BY 4.0.
+See City_Catalogue_Notice.md for source/licence details.
 
 Rotation uses timestamped acquisition subs, never stacks/registered frames. It samples
 up to 18 frames in the longest continuous segment, matches distributed stars and
@@ -463,12 +476,14 @@ Repository: the archive copies plus their portable index and associated metadata
 Source: telescope storage or a mirrored folder from which captures are imported.
 
 SUPPORTED FILES
-.fit, .fits, .fts and .gz variants; primary/IMAGE HDUs; 8/16/32/64-bit integer or
-32/64-bit floating data; mono/CFA and up to four colour planes. Tile-compressed .fz,
-multi-frame cubes and videos need other tools/conversion. TIFF, JPEG, PNG and
-XISF can be previewed; convert them to FITS before archive import.
-FITS pixels/headers are never rewritten. Existing export projects are never replaced.
-Repository tools index existing FITS, verify checksums and export a CSV catalogue.
+Import FITS and gzip FITS, .fz, TIFF, PNG, JPEG, XISF and SER originals. Select
+FITS HDUs/cube slices, TIFF/XISF images or SER frames for preview and analysis.
+AVI and common camera RAW extensions can be archived without a bundled decoder.
+Optional codecs enable .fz and XISF Zstandard decoding. See Image import and
+scientific export compatibility for supported layouts and limits.
+Original pixels/headers are retained. FITS conversion creates separate derived
+exports only. Existing export projects are never replaced. Repository tools index
+supported images, verify checksums and export a CSV catalogue.
 
 VALIDATION
 Compiled against Microsoft .NET Framework 4.8 reference assemblies. Generated-data
@@ -508,3 +523,48 @@ After a successful update, a dismissible banner confirms the installed package
 once on the next launch. Release notes are included in new update feeds, with a
 bounded GitHub exact-tag fallback for older feeds and a link to the release page.
 Notes being unavailable does not prevent installation.
+
+
+IMAGE IMPORT AND SCIENTIFIC EXPORT COMPATIBILITY
+Archive FITS/gzip/.fz, TIFF/PNG/JPEG, XISF and SER originals through the existing
+verified import engine. AVI and common camera RAW originals can also be preserved.
+FITS containers expose HDUs and cube slices; TIFF and XISF expose individual images.
+SER preview supports mono, common Bayer patterns and RGB/BGR, with 8/16-bit samples.
+
+Right-click Choose HDU / page / frame to preview a selection and save it for
+analysis/export. Ordinary preview retains the existing colour, stretch, zoom and
+pan controls. Unlabelled FITS extra axes are slices; RGB needs an explicit label.
+Choose a slice explicitly before exporting a cube as scientific data.
+
+Edit metadata adds telescope/camera model, camera serial/ID, offset, readout, ROI,
+optical configuration, linearity and capture timezone. Re-detect metadata and review
+shows proposed changes before applying them; user overrides retain priority.
+Gain settings are separate from electrons/ADU. Explicit exposure/temperature units
+are normalized and raw values/evidence are retained. Filename times with unknown
+timezones cannot drive rotation inference. Invalid/ambiguous DST times are rejected.
+
+Ready-to-stack export offers explicit conversion to derived Float64 FITS. Confirm
+TIFF/PNG/XISF linearity first; JPEG and processed previews remain original exports.
+Normalized headers and source/output checksums are recorded; originals stay intact.
+64-bit integer conversion is refused to protect precision. Pixel operations in the
+new import readers are bounded to 32 million samples per image. Existing external
+previews retain their documented limits.
+
+Review calibration matches and reasons in the export dialog. Identity, dimensions,
+binning, Bayer, gain, serial/model, offset, readout and ROI must be compatible.
+Darks match light exposure/temperature; flats also match filter/night and optical
+configuration. Dark flats match raw-flat exposure, in separate exposure folders.
+The manifest maps flat sets to their dark flats. Never subtract both a dark flat
+and a bias from the same flat. Stacking/master generation remain external.
+
+Existing Seestar/DWARF structure/channel rules and processor/mosaic workflows stay
+in use. Explicit-header profiles recognize Vaonis/Unistellar identities and common
+acquisition software independently. Adjacent capture/session sidecars up to 16 MB
+are preserved as evidence without inventing undocumented schemas.
+
+Settings > Supported formats and conversion shows details and optional codec
+availability. CFITSIO (.fz) and Zstandard (XISF) DLLs are not bundled. Trusted x64
+cfitsio.dll/libzstd.dll and dependencies go in the optional codec folder opened by
+Settings, outside versioned app folders. Restart after provisioning. Missing
+codecs leave original-file import/export available. Unsupported complex/subblock
+layouts remain originals. Base64 inline/embedded XISF stays supported.

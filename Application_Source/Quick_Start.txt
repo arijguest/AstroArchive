@@ -1,4 +1,4 @@
-AstroArchive 1.8.0
+AstroArchive 1.8.1
 Windows 10/11 x64 desktop app. Built-in .NET Framework 4.8 and Windows SQLite.
 Runs offline. No Python or Google login required.
 
@@ -353,6 +353,18 @@ ASTAP uses temporary copies and does not edit the archive/original FITS.
 Astrometry.net: https://nova.astrometry.net
 The API key is stored with Windows user encryption. Online solving submits detected
 star coordinates as a FITS table, not image pixels, and requests non-public submissions.
+
+OBSERVING TOWN / CITY
+In Settings > Processing, choose your nearest town or city for rotation analysis.
+Search by name, region or country, then select the matching result and save Settings.
+The offline list includes over 236,000 places, with alternate spellings and accents.
+Region/country labels distinguish places with the same name. City-centre coordinates
+are resolved automatically; no latitude/longitude entry or internet access is needed.
+Previously saved coordinates remain active until you select or clear a place.
+Clear observing location to use capture location metadata where available instead.
+Small settlements may be absent: choose the nearest listed town/city.
+Place data: GeoNames (https://www.geonames.org), CC BY 4.0.
+See City_Catalogue_Notice.md for source/licence details.
 
 Rotation uses timestamped acquisition subs, never stacks/registered frames. It samples
 up to 18 frames in the longest continuous segment, matches distributed stars and
