@@ -72,7 +72,7 @@ namespace AstroArchive {
   }
   void UploadUsbMenu(){
    if(cancel!=null||repo==null)return;if(usbTelescopes.Count==1){UploadUsb(usbTelescopes[0]);return;}
-   var menu=ThemedMenu();foreach(var telescope in usbTelescopes){var selected=telescope;menu.Items.Add(FileAction((selected.ProfileId??selected.Make)+" · "+selected.Source,()=>UploadUsb(selected)));}menu.PlacementTarget=B("AutoUploadButton");menu.IsOpen=true;
+   var menu=ThemedMenu();foreach(var telescope in usbTelescopes){var selected=telescope;menu.Items.Add(FileAction((selected.ProfileId??selected.Make)+" · "+selected.Source,()=>UploadUsb(selected)));}menu.PlacementTarget=TopMenu("ImportMenu");menu.IsOpen=true;
   }
   void UploadUsb(UsbTelescope telescope){
    if(cancel!=null||repo==null)return;((TabControl)Window.FindName("MainTabs")).SelectedIndex=1;

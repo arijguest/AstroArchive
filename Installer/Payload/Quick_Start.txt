@@ -1,9 +1,9 @@
-AstroArchive 1.8.4
+AstroArchive 1.9.0
 Windows 10/11 x64 desktop app. Built-in .NET Framework 4.8 and Windows SQLite.
 Runs offline. No Python or Google login required.
 
 START HERE
-1. Open AstroArchive and choose your archive folder in Settings.
+1. Choose Repository > Choose repository folder, or Settings > Repository.
 2. Import: choose a telescope or mirror folder and assign a unique device ID,
    such as Seestar-01 or Dwarf-03. Scan folder, review the rows, then import.
    Import options contains model/camera overrides, optional analysis and source
@@ -18,7 +18,7 @@ START HERE
    Skip flagged captures is on by default. Unscreened files are labelled explicitly.
 4. Select rows with Ctrl/Shift, or use all visible captures when none are selected.
    Right-click selected files, then Export to copy files or prepare a stacking
-   folder, with matching calibrations if selected. Use the library view selector
+   folder, with matching calibrations if selected. Use Repository > View
    to browse files, targets, or targets with observing sessions. Group headers and
    target summaries show counts and total known exposure in subs; stacks are counted
    separately and are never added to subs exposure. Unknown exposure is reported.
@@ -32,19 +32,21 @@ Choose a topic on the left; guide text can be selected and copied. Save guide sa
 the complete bundled guide as a text file. Help works offline.
 
 IMPORT WORKFLOW
-1. Choose your archive in Settings, then open Import.
+1. Choose your archive in Repository, then open the Import page.
 2. Select a saved telescope, or enter a unique physical device ID. Browse the
-   source capture folder; Save telescope retains its name, model and association.
+   source capture folder; Import > Saved telescopes > Save telescope retains
+   its name, model and association.
 3. Leave model and camera on Auto unless a known override is needed. Solving and
    rotation are Off by default. Keep source originals unless deletion is intended.
 4. Scan folder discovers FITS and reads metadata without copying. Review the
    frame type, target and status; correct uncertain metadata before importing.
 5. Import new files copies and verifies eligible captures. Duplicate records are
-   skipped; missing or changed archive copies can be restored. Use Scan report
-   for discovery errors and Report for import errors and timing.
+   skipped; missing or changed archive copies can be restored. Use Import >
+   Review and recovery for discovery errors; Repository > Diagnostics opens
+   the last import report and performance details.
 6. Completed files remain imported after Cancel or a later failure. Resolve the
    problem, scan again and import to resume.
-For a recognised connected USB scope, Auto upload from screens and imports new
+For a recognised connected USB scope, Import > USB telescopes screens and imports new
 captures directly, with originals retained and analysis off.
 
 LIBRARY WORKFLOW
@@ -67,8 +69,8 @@ later imports. Existing device IDs are recovered from repository records;
 Recover from repository adds any missing profiles without replacing your choices.
 Recovered profiles need a USB folder association saved before auto upload.
 
-The Auto upload from button appears when a USB telescope source is available.
-Click it to screen supported FITS files, skip verified duplicates, import missing
+Import > USB telescopes lists connected telescope storage.
+Choose a device to screen supported FITS files, skip verified duplicates, import missing
 captures and restore missing/damaged archive copies. Originals stay on the USB
 device. Solving and rotation stay off for this action. Multiple connected sources
 are listed in a menu. Reconnect and click again to resume an interrupted import.
@@ -82,12 +84,12 @@ Keep the local working index/recovery record until that recovery finishes. Other
 repositories and previously exported projects retain their existing labels.
 
 IMAGE PREVIEW AND APPEARANCE
-Settings > General offers System, Light and Dark themes. The small circle button
-in the header switches Light/Dark immediately. The active archive path stays in
-the header; choose a different archive in Settings and save.
+Settings > Preferences offers System, Light and Dark themes. The active archive
+path stays centered above the menus; click it to open the folder in Explorer.
+Choose a different archive in Repository, or Settings > Repository and save.
 
 Select a capture to preview it, or double-click/right-click > Preview image.
-The Preview button hides the pane to give the table more room; drag the divider
+Repository > View can hide the preview pane to give the table more room; drag the divider
 to resize it. Open image previews a file outside the archive without importing it.
 The compact table shows filename, target, type, night, exposure and filter.
 Expand Capture details for device, camera, gain, temperature and classification.
@@ -160,13 +162,13 @@ header/session reads. Mosaic markers with missing panel information stay
 Suggested. Normal mosaic detection does not plate-solve or decode images.
 
 Open Mosaics to review collections, panels, evidence and completed outputs.
-Detect from metadata uses selected Library captures, or the visible Library
+Detect from metadata uses selected Repository captures, or the visible Repository
 captures when none are selected. For older archives, Tools > Read headers/session
 metadata reads archived headers and preserved session JSON. Existing sky mappings
 can suggest adjacent panels and show their outlines; coordinate suggestions need
 confirmation. Ordinary target-centre coordinates cannot establish panel membership.
 
-Select captures in Library, right-click > Mosaics > Assign to panel or completed
+Select captures in Repository, right-click > Mosaics > Assign to panel or completed
 output. Choose/create a collection and panel, or attach a stitched output.
 Collections can span targets, nights, cameras and filters while archive paths and
 capture types remain intact. Confirm selected reviews known panel assignments;
@@ -447,7 +449,8 @@ are outside these direct handoffs. StackingWizard incoming handoff and Siril seq
 preparation remain planned; existing ready-to-stack folders are the manual route.
 
 KEYBOARD SHORTCUTS
-Main window: F1 opens help for the current tab.
+Main window: Ctrl+F focuses search; Ctrl+I opens Import; Ctrl+E opens Export.
+Alt activates menu access keys. F1 opens help for the current tab.
 Guide: Ctrl+F or F1 focuses search; Up/Down browses topics when the topic list has
 focus. Ctrl+C copies selected guide text. Escape closes the guide.
 Library/import: Ctrl-click toggles rows; Shift-click selects a range. Shift-click
@@ -595,3 +598,46 @@ cfitsio.dll/libzstd.dll and dependencies go in the optional codec folder opened 
 Settings, outside versioned app folders. Restart after provisioning. Missing
 codecs leave original-file import/export available. Unsupported complex/subblock
 layouts remain originals. Base64 inline/embedded XISF stays supported.
+
+NAVIGATION, ACCESSIBILITY AND WALKTHROUGH
+Import, Export, Repository, Settings, Guide and Buy Me a Coffee are grouped at
+upper left. The AstroArchive logo and title are at upper right. The concise
+repository path is centered above the menus; click it to open the folder in
+File Explorer. Repository > Choose repository folder changes the active archive.
+
+Repository replaces the Library page. Keep browsing/searching in the page;
+Repository > View has filters, columns, grouping and the preview pane. Selected
+files retain their right-click tools. Review, analysis, mosaics and maintenance
+are grouped under Repository. Destructive maintenance still uses its existing
+confirmation. Active filter counts remain visible beside the capture counts.
+
+Import holds source selection, scanning, USB devices, telescope management,
+review/recovery and import options. The page retains its source fields, Scan and
+Import buttons. Import policy stays visible, including original removal and
+optional analysis. Changing model/camera or ignored filenames requires a new
+scan. Originals remain kept by default. Export always uses archived repository
+files, including when opened from the Import page.
+
+The bottom bar shows the current status. Timing, progress and Cancel appear only
+while processing. Repository > Diagnostics opens the performance table and last
+import report when needed. Table headings show ascending (▲) or descending (▼)
+sorting. Numbers show priority when several headings sort together. Shift-click
+adds a heading; click again to reverse. Saved heading layouts remain independent.
+Tables keep readable heading widths. Use horizontal scrolling or hide the preview
+pane from Repository > View to see additional columns.
+
+Settings > Preferences contains Appearance; Settings > Accessibility opens
+accessibility preferences. Choose text size
+100/115/130/150%, comfortable table rows, high contrast, or reduced motion.
+Image pixels are unchanged. High contrast also follows Windows; reduced motion
+stops indeterminate progress animation while keeping status updates. Theme is
+selected in Appearance. Alt reveals menu access keys; arrow keys navigate menus,
+Escape closes them, and Tab follows visible controls with a clear focus outline.
+Ctrl+F focuses search; Ctrl+I opens Import; Ctrl+E opens Export; F1 opens page help.
+
+New installations show an optional interactive walkthrough. Next and Back move
+between steps and highlight the relevant controls; action buttons open the
+corresponding menu or preferences. The walkthrough never imports or deletes
+files automatically. Skip/close dismisses it, and Guide > Interactive walkthrough
+starts it again. Guide also holds searchable help and About AstroArchive,
+including Ari J. Guest's author credit and arijguest.com.

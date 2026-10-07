@@ -26,7 +26,7 @@ namespace AstroArchive {
     L("ImportDetailsLabel").Text=frame==null?"Select a capture to see screening or import details.":frame.OriginalName+"  ·  "+frame.Status+"  ·  "+(CaptureScreening.NeedsReview(frame)?frame.ReviewCategory+" · "+frame.ReviewReason:frame.SourceDisposition??frame.Notes);
    };
   }
-  void ShowFilters(bool imports){
+  ContextMenu BuildFiltersMenu(bool imports){
    var criteria=imports?importFilters:libraryFilters;
    var rows=imports?(G("ImportGrid").ItemsSource==null?new List<Frame>():CurrentImportRows()):all;
    var menu=ThemedMenu();
@@ -43,8 +43,9 @@ namespace AstroArchive {
    }
    menu.Items.Add(new Separator());
    var clear=new MenuItem{Header="Reset filters",IsEnabled=criteria.Values.Count>0};clear.Click+=(s,e)=>{criteria.Values.Clear();ApplyFilters(imports);};menu.Items.Add(clear);
-   menu.PlacementTarget=B(imports?"ImportFiltersButton":"LibraryFiltersButton");menu.Placement=PlacementMode.Bottom;menu.IsOpen=true;
+   return menu;
   }
+  void ShowFilters(bool imports){var menu=BuildFiltersMenu(imports);menu.PlacementTarget=TopMenu(imports?"ImportMenu":"RepositoryMenu");menu.Placement=PlacementMode.Bottom;menu.IsOpen=true;}
   static void AddFilterChoice(MenuItem parent,string label,bool selected,Action action){var item=new MenuItem{Header=label,IsCheckable=true,IsChecked=selected};item.Click+=(s,e)=>action();parent.Items.Add(item);}
   void ApplyFilters(bool imports){if(imports)FilterImports();else Filter(true);}
   List<Frame> CurrentImportRows(){return importLive?importRows.ToList():plan==null?new List<Frame>():plan.Frames;}
@@ -64,12 +65,14 @@ namespace AstroArchive {
    var rows=imports?visibleImports.Where(f=>f.Status!="Deleted").ToList():Context();if(rows.Count==0)return;
    ScreenSelection(rows,imports);
   }
-  void ShowImportTools(){
+  ContextMenu BuildImportTools(){
    var menu=ThemedMenu();var selection=G("ImportGrid").SelectedItems.Cast<Frame>().Where(f=>f.Status!="Deleted").ToList();
    menu.Items.Add(FileAction("Edit selected metadata…",()=>Edit(true),selection.Count>0));
    menu.Items.Add(FileAction("Identify selected targets…",()=>Identify(true),selection.Count>0));
    menu.Items.Add(new Separator());menu.Items.Add(FileAction("Scan report…",()=>ShowReport("Scan report",plan==null?"Scan a folder first.":plan.Errors.Count==0?"All supported files were read successfully.":string.Join("\r\n\r\n",plan.Errors))));
-   menu.PlacementTarget=B("ImportToolsButton");menu.Placement=PlacementMode.Top;menu.IsOpen=true;
+   return menu;
+  }
+  void ShowImportTools(){var menu=BuildImportTools();menu.PlacementTarget=TopMenu("ImportMenu");menu.Placement=PlacementMode.Bottom;menu.IsOpen=true;
   }
  }
 }

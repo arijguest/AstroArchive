@@ -1,19 +1,25 @@
-AstroArchive 1.8.0 validation
-Package 1.8.0.1; Windows 10/11 x64; .NET Framework 4.8.
+AstroArchive 1.9.0 validation
+Package 1.9.0.1; Windows 10/11 x64; .NET Framework 4.8.
 
 The Windows release workflow runs application regressions, a separate five-case
 Windows WIC integration suite, installer/updater regressions, x64 compilation,
 WPF application/installer rendering and disposable install/repair/uninstall checks.
 A successful workflow is required before publishing installers and the SHA-256
-update feed. Its logs are authoritative for Windows results and package hashes.
+update feed. Its logs are authoritative for test counts and package hashes.
+
+Windows navigation checks exercise ordered menus in both themes, source and file
+action availability, repository path/branding placement, rendered ascending and
+descending sort indicators and multi-column priorities, accessible header names,
+larger text and comfortable rows, high contrast, reduced progress animation,
+walkthrough navigation, author attribution and the idle status bar. Rendered
+previews are retained in the workflow artifact for visual review.
 
 Supplementary validation in Linux compiles the application, installer, launcher,
 engine and raster test executables against official .NET Framework 4.8 references.
-197 engine tests passed under Mono/system SQLite; eight platform/optional-codec
-cases were skipped. CFITSIO tile compression and Zstandard fixtures passed with
-independent system codecs. 47 installer/updater tests passed. WIC tests compile
-here but execute only in the Windows workflow; Linux does not establish WPF or
-Windows-native behavior.
+Engine regressions run under Mono/system SQLite; platform/optional-codec cases
+are reported separately. CFITSIO tile compression and Zstandard fixtures pass
+with independent system codecs. WIC tests compile here but execute only in the
+Windows workflow; Linux does not establish WPF or Windows-native behavior.
 
 Compatibility fixtures cover FITS HDUs/cubes/gzip/scaling, numeric XISF attachment
 and base64 layouts, zlib/LZ4/shuffle/Zstandard, CFA metadata, SER byte order/frame

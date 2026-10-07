@@ -14,11 +14,11 @@ namespace AstroArchive {
   CancellationTokenSource previewCancel;int previewGeneration;PreviewData previewData;Frame previewFrame;string previewPath;bool previewReady,choosingStretch;
   public static string CompactPath(string path){if(string.IsNullOrEmpty(path))return "Set an archive folder in Settings";if(path.Length<=75)return path;return Path.GetPathRoot(path)+"…"+Path.DirectorySeparatorChar+new DirectoryInfo(path).Name;}
   void InitializeWorkspace(){
-   Theme.Apply(Window,settings.ThemeMode);C("StretchMode").ItemsSource=PreviewData.StretchModes;C("StretchMode").SelectedItem=settings.PreviewStretch??"Auto";if(C("StretchMode").SelectedIndex<0)C("StretchMode").SelectedItem="Auto";
+   ApplyAppearance();C("StretchMode").ItemsSource=PreviewData.StretchModes;C("StretchMode").SelectedItem=settings.PreviewStretch??"Auto";if(C("StretchMode").SelectedIndex<0)C("StretchMode").SelectedItem="Auto";
    settings.PreviewStretch=Convert.ToString(C("StretchMode").SelectedItem);
    C("PreviewZoom").ItemsSource=new[]{"Fit","100%","200%","400%"};C("PreviewZoom").SelectedIndex=0;
    B("CoffeeButton").Click+=(s,e)=>{try{Process.Start(new ProcessStartInfo("https://ko-fi.com/arijguest"){UseShellExecute=true});}catch(Exception error){MessageBox.Show(Window,"Could not open your browser. Visit https://ko-fi.com/arijguest\n\n"+error.Message,"Ko-fi link",MessageBoxButton.OK,MessageBoxImage.Information);}};
-   B("ThemeButton").Click+=(s,e)=>{settings.ThemeMode=Theme.IsDark(settings.ThemeMode)?"Light":"Dark";Theme.Apply(Window,settings.ThemeMode);SaveSettings();};
+   B("ThemeButton").Click+=(s,e)=>{settings.ThemeMode=Theme.IsDark(settings.ThemeMode)?"Light":"Dark";ApplyAppearance();SaveSettings();};
    B("PreviewToggle").Click+=(s,e)=>{settings.ShowPreview=!settings.ShowPreview;SetPreviewVisibility();SaveSettings();if(settings.ShowPreview)PreviewSelected();};
    B("OpenPreviewButton").Click+=(s,e)=>OpenPreviewFile();
    C("StretchMode").SelectionChanged+=(s,e)=>{if(!previewReady||choosingStretch)return;if(previewPath==null||ScientificPreview(previewPath)){settings.PreviewStretch=Convert.ToString(C("StretchMode").SelectedItem);SaveSettings();}if(previewPath!=null)LoadPreview(previewPath,false);};
@@ -27,7 +27,7 @@ namespace AstroArchive {
   }
   void SetPreviewVisibility(){((FrameworkElement)Window.FindName("PreviewPane")).Visibility=settings.ShowPreview?Visibility.Visible:Visibility.Collapsed;((FrameworkElement)Window.FindName("PreviewDivider")).Visibility=settings.ShowPreview?Visibility.Visible:Visibility.Collapsed;((ColumnDefinition)Window.FindName("PreviewColumn")).Width=new GridLength(settings.ShowPreview?330:0);((ColumnDefinition)Window.FindName("PreviewDividerColumn")).Width=new GridLength(settings.ShowPreview?10:0);B("PreviewToggle").Content=settings.ShowPreview?"Hide preview":"Preview";if(!settings.ShowPreview)CancelPreview();}
   void CancelPreview(){previewGeneration++;if(previewCancel!=null){previewCancel.Cancel();previewCancel.Dispose();previewCancel=null;}previewData=null;previewFrame=null;previewPath=null;C("StretchMode").IsEnabled=true;var image=Window.FindName("PreviewImage") as Image;if(image!=null)image.Source=null;}
-  void AppearanceChanged(object sender,UserPreferenceChangedEventArgs args){if(Window.Dispatcher.HasShutdownStarted)return;Window.Dispatcher.BeginInvoke(new Action(()=>{if(string.IsNullOrEmpty(settings.ThemeMode)||settings.ThemeMode=="System")Theme.Apply(Window,"System");}));}
+  void AppearanceChanged(object sender,UserPreferenceChangedEventArgs args){if(Window.Dispatcher.HasShutdownStarted)return;Window.Dispatcher.BeginInvoke(new Action(()=>{ApplyAppearance();}));}
   void DisposePreview(){SystemEvents.UserPreferenceChanged-=AppearanceChanged;CancelPreview();}
   void UpdateSelection(){if(!previewReady)return;int count=G("FramesGrid").SelectedItems.Count;L("SelectionLabel").Text=count==0?"Ctrl / Shift to select · Right-click for file actions":count+" selected · Right-click for file actions";if(settings.ShowPreview)PreviewSelected();}
   void PreviewSelected(){if(!previewReady)return;Frame f=G("FramesGrid").SelectedItem as Frame;if(f==null){CancelPreview();L("PreviewName").Text="Select a capture";L("PreviewInfo").Text="";PreviewMessage("Select a file or open an image.\n\nFITS · XISF · TIFF · PNG · JPEG");return;}if(repo==null)return;
