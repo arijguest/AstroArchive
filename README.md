@@ -49,7 +49,8 @@ See [update details](docs/UPDATES.md) for manual checks, troubleshooting and off
 
 - Import `.fit`, `.fits`, `.fts` and gzip-compressed FITS with SHA-256 verification and duplicate detection.
 - Organise captures by target, device, session and camera, including Seestar and DWARF layouts.
-- Track imports with SQLite, stream progress and recover from per-file failures.
+- Filter library and import views from a dropdown, screen failed/rejected telescope captures and import only the ready files shown.
+- Track imports and deletion history with SQLite so later telescope imports skip captures you removed.
 - Right-click selected files to export copies, prepare ready-to-stack folders with optional matching calibrations, edit metadata or delete archive copies.
 - Optionally identify targets with local ASTAP or Astrometry.net and analyse field rotation.
 - Read filesystem-mounted or streamed cloud folders, including Google Drive for desktop.

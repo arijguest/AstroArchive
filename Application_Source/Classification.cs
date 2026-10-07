@@ -77,7 +77,7 @@ namespace AstroArchive {
    if(dark)f.Kind=master?"Master dark":"Dark";else if(bias)f.Kind=master?"Master bias":"Bias";else if(flat)f.Kind=master?"Master flat":"Flat";
    else if(master||type.Contains("stack")||low.Contains("restacked/")||Regex.IsMatch(name,@"\d+x\d+(?:\.\d+)?(?:s|sec)"))f.Kind="Stack";
    else if(type.Contains("light")||Regex.IsMatch(low,@"(?:_sub|[- ]sub)(?:/|$)")||low.Contains("dwarf_raw")||Regex.IsMatch(name,@"^(light|raw|sub)[_-]")||Regex.IsMatch(low,@"(?:^|/)lights?/")||type.Contains("science"))f.Kind="Light";
-   if(low.Contains("solving_failed")||Regex.IsMatch(low,@"(?:^|[/_-])(rejected|reject|failed|reference|weight|weights)(?:[/_-]|$)")) {f.Rejected=true;f.Notes+="Reference, rejected, failed or weight file; excluded from export by default. ";if(name.Contains("weight"))f.Kind="Auxiliary";}
+   string rejection=CaptureScreening.Rejection(h,text);if(rejection.Length>0){f.Rejected=true;f.ScreeningIssue=rejection;f.Notes+=rejection+" Excluded from stacking by default. ";if(name.Contains("weight"))f.Kind="Auxiliary";}
    f.Exposure=h.Number("EXPTIME","EXPOSURE","EXP_TIME","EXPOS");if(!f.Exposure.HasValue)f.Exposure=MatchNumber(text,@"(?:^|[/_ -])EXP(?:OSURE)?[_ =-]*(\d+(?:\.\d+)?)");
    if(!f.Exposure.HasValue)f.Exposure=MatchNumber(stem,@"(?:^|[_ -])(\d+(?:\.\d+)?)\s*(?:sec|s)(?:[_ -]|$)");
    if(!f.Exposure.HasValue)f.Exposure=MatchNumber(text,@"\d+x(\d+(?:\.\d+)?)(?:sec|s)");

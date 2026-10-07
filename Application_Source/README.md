@@ -37,9 +37,9 @@ Portable Windows 10/11 x64 WPF app for archiving smart-telescope FITS and creati
 - Indexed SQLite source manifest with path, file identity, size, modification/change times, SHA-256, destination, metadata and completion status. Stable verified NTFS/ReFS files can skip content reads; cloud/unsupported metadata never establishes a duplicate.
 - Source hashing during temporary copying, destination verification, coordinated transactions and guarded source removal. Limited retries isolate per-file failures. Disk-full errors stop safely with committed copies retained.
 - A local working SQLite index with FULL synchronous rollback-journal transactions and verified portable snapshots avoids an active database on a provider-backed archive. Snapshot backups use SQLite's backup API and self-contained rollback-journal destinations. Error reports include paths and native/SQLite codes.
-- Adaptive 1/2/4/8-worker trials use real import batches, starting at 1 and retaining a faster result. Fixed worker counts and Retune are available. Workload and cache effects apply.
+- Adaptive 1/2/4/8-worker trials use real import batches, starting at 1 and retaining a faster result. Fixed worker counts remain available in Settings. Workload and cache effects apply.
 - Solving and rotation are off by default. Import selects Off, Ambiguous only or All, warns about runtime, and runs analysis after copying. Representative/session analysis and content-validated caches avoid unnecessary repetition.
-- Explicit streamed/cloud source mode separates provider read/download waiting from local copying. Nonredirecting cloud placeholder directories are allowed; directory symlinks/junctions are skipped. Offline inputs avoid on-demand download delays.
+- Automatically detected cloud placeholders separate provider read/download waiting from local copying. Nonredirecting cloud placeholder directories are allowed; directory symlinks/junctions are skipped. Offline inputs avoid on-demand download delays.
 - DWARF `cam_0`/camera 0 = telephoto, `cam_1`/camera 1 = wide. Conflicts remain unknown. Camera-specific calibration matching and export groups never mix channels.
 - Stacking projects have an off-by-default Separate sessions option. Compatible sessions merge by default; opting in gives each session its own subdirectory. Merged calibration must match every light.
 - The Clear filter button stays. Settings adds a red archive reset requiring a completed slider drag and a separate permanent-delete click. Sources and unindexed files remain outside its scope.
@@ -81,7 +81,8 @@ Metadata corrections may move archived copies without modifying FITS pixels/head
 - `Model.cs`, `FileState.cs`: metadata, settings, file identity/change stamps and cloud/reparse handling.
 - `Fits.cs`, `Classification.cs`, `InstrumentDetection.cs`, `CameraDetection.cs`: parsing, catalogue, filename/header/structure classification and session metadata cache.
 - `Repository.cs`, `ImportEngine.cs`, `FileTransfer.cs`, `Pipeline.cs`: SQLite index/manifest, bounded discovery/copy pipeline, hashing, retries, worker tuning and telemetry.
-- `SourceCleanup.cs`, `ArchiveReset.cs`, `FileDeletion.cs`: verified source cleanup and scoped archive deletion.
+- `SourceCleanup.cs`, `ArchiveReset.cs`, `FileDeletion.cs`, `DeletionHistory.cs`: verified source cleanup, scoped archive deletion and portable exclusions.
+- `CaptureScreening.cs`, `Filters.cs`, `FiltersUi.cs`: telescope failure screening and shared library/import filters.
 - `Rotation.cs`, `PlateSolve.cs`: star matching, mount inference, ASTAP/Astrometry.net and candidate matching.
 - `Export.cs`: session-aware verified projects and calibration safeguards.
 - `PreviewData.cs`, `Xisf.cs`, `PreviewUi.cs`, `Theme.cs`: bounded image samples, stretch, native XISF decoding, preview pane and appearance.

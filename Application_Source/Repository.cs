@@ -32,7 +32,7 @@ namespace AstroArchive {
   IOException Failure(){var error=new IOException(Error());error.Data["SQLiteCode"]=sqlite3_extended_errcode(db);return error;}
   public Database(string path,bool wal=false){databasePath=path;if(sqlite3_open_v2(UTF(path),out db,0x10006,IntPtr.Zero)!=0){string e=Error();Dispose();throw new IOException(e);}try{Exec("PRAGMA busy_timeout=5000");Exec(wal?"PRAGMA journal_mode=WAL":"PRAGMA journal_mode=DELETE");Exec("PRAGMA synchronous=FULL");Exec("CREATE TABLE IF NOT EXISTS files(hash TEXT PRIMARY KEY, data TEXT NOT NULL)");Exec("CREATE TABLE IF NOT EXISTS sessions(id TEXT PRIMARY KEY,data TEXT NOT NULL)");ManifestSchema();}catch{Dispose();throw;}}
   public List<string> Query(string sql,params string[] args){lock(sync){IntPtr s;if(sqlite3_prepare_v2(db,UTF(sql),-1,out s,IntPtr.Zero)!=0)throw Failure();try{for(int i=0;i<args.Length;i++){byte[] b=UTF(args[i]??"");if(sqlite3_bind_text(s,i+1,b,b.Length-1,new IntPtr(-1))!=0)throw Failure();}var result=new List<string>();int n;while((n=sqlite3_step(s))==100){int len=sqlite3_column_bytes(s,0);byte[] b=new byte[len];if(len>0)Marshal.Copy(sqlite3_column_text(s,0),b,0,len);result.Add(Encoding.UTF8.GetString(b));}if(n!=101)throw Failure();return result;}finally{sqlite3_finalize(s);}}}
-  public void ManifestSchema(){Exec("CREATE TABLE IF NOT EXISTS source_manifest(root TEXT,path TEXT,identity TEXT,size INTEGER,mtime INTEGER,hash TEXT,destination TEXT,status TEXT,data TEXT,PRIMARY KEY(root,path))");Exec("CREATE INDEX IF NOT EXISTS manifest_identity ON source_manifest(identity)");Exec("CREATE INDEX IF NOT EXISTS manifest_hash ON source_manifest(hash,status)");}
+  public void ManifestSchema(){Exec("CREATE TABLE IF NOT EXISTS source_manifest(root TEXT,path TEXT,identity TEXT,size INTEGER,mtime INTEGER,hash TEXT,destination TEXT,status TEXT,data TEXT,PRIMARY KEY(root,path))");Exec("CREATE INDEX IF NOT EXISTS manifest_identity ON source_manifest(identity)");Exec("CREATE INDEX IF NOT EXISTS manifest_hash ON source_manifest(hash,status)");Exec("CREATE TABLE IF NOT EXISTS deleted_files(hash TEXT PRIMARY KEY,data TEXT NOT NULL)");}
   public void Exec(string sql,params string[] args){lock(sync){Query(sql,args);if(sql.StartsWith("INSERT",StringComparison.OrdinalIgnoreCase)||sql.StartsWith("UPDATE",StringComparison.OrdinalIgnoreCase)||sql.StartsWith("DELETE",StringComparison.OrdinalIgnoreCase))generation++;}}
   public void Transaction(Action action){lock(sync){Exec("BEGIN IMMEDIATE");try{action();Exec("COMMIT");}catch{Exec("ROLLBACK");throw;}}}
   public void BackupTo(string path,CancellationToken ct){lock(sync){using(var destination=new Database(path,false)){IntPtr backup=sqlite3_backup_init(destination.db,UTF("main"),db,UTF("main"));if(backup==IntPtr.Zero)throw new IOException(destination.Error());int code=0;try{for(int i=0;i<40;i++){ct.ThrowIfCancellationRequested();code=sqlite3_backup_step(backup,-1);if(code==101)break;if(code!=5&&code!=6)throw new IOException("SQLite backup: "+destination.Error());if(ct.WaitHandle.WaitOne(50))ct.ThrowIfCancellationRequested();}if(code!=101)throw new IOException("SQLite snapshot remained busy.");}finally{if(sqlite3_backup_finish(backup)!=0)throw new IOException("SQLite snapshot could not commit: "+destination.Error());}destination.Exec("PRAGMA journal_mode=DELETE");}}}
@@ -59,7 +59,7 @@ namespace AstroArchive {
   public void SaveRotation(RotationResult r){db.Exec("INSERT OR REPLACE INTO sessions(id,data) VALUES(?,?)",r.Session,Util.Serialize(r));}
   public string FilePath(Frame f){string p=Path.GetFullPath(Path.Combine(Root,f.RelativePath??""));if(!Util.Within(p,Root))throw new IOException("Repository path escapes the selected folder.");return p;}
   sealed class Scanned {public Frame Frame;public long Bytes;public bool CacheHit,HeaderHit;public string Error;}
-  Scanned ScanOne(ScanEntry entry,string source,string telescope,string model,bool reindex,bool deferHash,bool cloudSource,Dictionary<string,SourceManifest> cached,Dictionary<string,Classifier.ShotsMetadata> shots,MetadataHeaderCache headers,PipelineMetrics metrics,CancellationToken ct){
+  Scanned ScanOne(ScanEntry entry,string source,string telescope,string model,bool reindex,bool deferHash,bool cloudSource,Dictionary<string,SourceManifest> cached,HashSet<string> deleted,Dictionary<string,Classifier.ShotsMetadata> shots,MetadataHeaderCache headers,PipelineMetrics metrics,CancellationToken ct){
    var item=new Scanned();string name=Path.GetFileName(entry.Path);
    try{
     ct.ThrowIfCancellationRequested();FileStamp stamp=FileStamp.Read(new FileInfo(entry.Path),entry.Enumerated);item.Bytes=stamp.Size;Frame f=null,indexed=null;SourceManifest old;
@@ -67,7 +67,7 @@ namespace AstroArchive {
      if(cached.TryGetValue(entry.Path,out old)&&old.Status=="Complete"&&stamp.VerifiedUnchanged(old.Source)&&(indexed=Find(old.Hash))!=null){
       f=indexed.Clone();f.SourcePath=entry.Path;f.SourceStamp=stamp;
       if(File.Exists(FilePath(indexed))&&FileStamp.Read(FilePath(indexed)).VerifiedUnchanged(indexed.RepositoryStamp??old.Copy)){f.Status="Duplicate (cached)";item.CacheHit=true;}else f.Status="Restore";
-     }check.Complete();
+     }if(f==null&&old!=null&&old.Status=="Deleted"&&deleted.Contains(old.Hash)&&old.Metadata!=null&&stamp.VerifiedUnchanged(old.Source)){f=old.Metadata.Clone();f.SourcePath=entry.Path;f.SourceStamp=stamp;MarkDeleted(f);}check.Complete();
     }
     if(f==null){
      using(var metadata=metrics.Begin("Metadata",name)){
@@ -81,9 +81,9 @@ namespace AstroArchive {
        if(!hit)headers.Put(entry.Path,parsed.SourceStamp,header);item.HeaderHit=hit;return parsed;
       },ct,message=>{metrics.Current=message;metrics.Pulse(true);});stamp=f.SourceStamp;f.Hash="";f.Status="New";metadata.Complete();
      }
-     if(!deferHash||reindex){using(var check=metrics.Begin("Duplicate checking",name)){
+     if(!deferHash||reindex||deleted.Count>0){using(var check=metrics.Begin("Duplicate checking",name)){
       string hash=Util.Hash(entry.Path,ct,n=>check.Bytes(n));if(!stamp.ContentSame(FileStamp.Read(entry.Path)))throw new InvalidDataException("Source changed during scanning.");
-      Frame existing=Find(hash);if(existing!=null){f=existing.Clone();f.SourcePath=entry.Path;f.SourceStamp=stamp;f.Status=File.Exists(FilePath(existing))&&Util.Hash(FilePath(existing),ct)==hash?"Duplicate":"Restore";}else f.Hash=hash;check.Complete();
+      Frame existing=Find(hash);if(deleted.Contains(hash)){f.Hash=hash;MarkDeleted(f);}else if(existing!=null){f=existing.Clone();f.SourcePath=entry.Path;f.SourceStamp=stamp;f.Status=File.Exists(FilePath(existing))&&Util.Hash(FilePath(existing),ct)==hash?"Duplicate":"Restore";}else f.Hash=hash;check.Complete();
      }}
     }
     f.SourceRoot=source;item.Frame=f;
@@ -95,7 +95,7 @@ namespace AstroArchive {
    source=Path.GetFullPath(source);if(!Directory.Exists(source))throw new DirectoryNotFoundException(source);if(!reindex&&(Util.Within(source,Root)||Util.Within(Root,source)))throw new IOException("Source and repository must be separate folders, with neither inside the other.");
    var plan=new ImportPlan{Source=source,Metrics=metrics};Dictionary<string,SourceManifest> cached;
    using(var index=metrics.Begin("Index loading","Loading source manifest")){cached=db.Query("SELECT data FROM source_manifest WHERE root=?",source).Select(Util.Deserialize<SourceManifest>).ToDictionary(m=>m.Path,StringComparer.OrdinalIgnoreCase);index.Complete();}
-   var shots=new Dictionary<string,Classifier.ShotsMetadata>(StringComparer.OrdinalIgnoreCase);var seen=new HashSet<string>();
+   var deleted=DeletedHashes();var shots=new Dictionary<string,Classifier.ShotsMetadata>(StringComparer.OrdinalIgnoreCase);var seen=new HashSet<string>();
    var headers=new MetadataHeaderCache(Path.GetDirectoryName(WorkingIndex),source);int workers=cloudSource?1:metadataWorkers>0?Math.Min(4,metadataWorkers):Math.Min(2,Math.Max(1,Environment.ProcessorCount));
    using(var queue=new BlockingCollection<ScanEntry>(128))using(var overflow=new ScanOverflow(Path.GetDirectoryName(WorkingIndex)))using(var linked=CancellationTokenSource.CreateLinkedTokenSource(ct)){
     var producer=Task.Run(()=>{
@@ -110,11 +110,11 @@ namespace AstroArchive {
     var pending=new List<Task<Scanned>>();
     Action<Task<Scanned>> collect=task=>{var item=task.GetAwaiter().GetResult();Frame frame=item.Frame;plan.Bytes+=item.Bytes;if(item.Error!=null){lock(plan.Errors)plan.Errors.Add(item.Error);}if(item.CacheHit)plan.CacheHits++;if(item.HeaderHit)plan.MetadataCacheHits++;
      if(!string.IsNullOrEmpty(frame.Hash)&&frame.Status=="New"&&!seen.Add(frame.Hash))frame.Status="Duplicate in source";
-     if(reindex&&item.Error==null){frame.RelativePath=frame.SourcePath.Substring(Root.TrimEnd('\\','/').Length).TrimStart('\\','/');frame.Status="Indexed";frame.RepositoryStamp=FileStamp.Read(frame.SourcePath);Save(frame);}
+     if(reindex&&item.Error==null&&frame.Status!="Deleted"){frame.RelativePath=frame.SourcePath.Substring(Root.TrimEnd('\\','/').Length).TrimStart('\\','/');frame.Status="Indexed";frame.RepositoryStamp=FileStamp.Read(frame.SourcePath);Save(frame);}
      plan.Frames.Add(frame);if(onFrame!=null)onFrame(frame.Clone());metrics.Complete(item.Error==null?item.Bytes:0);
     };
     try{
-     foreach(var entry in queue.GetConsumingEnumerable(ct).Concat(overflow.Read(ct))){ct.ThrowIfCancellationRequested();var captured=entry;pending.Add(Task.Run(()=>ScanOne(captured,source,telescope,model,reindex,deferHash,cloudSource,cached,shots,headers,metrics,linked.Token),linked.Token));
+     foreach(var entry in queue.GetConsumingEnumerable(ct).Concat(overflow.Read(ct))){ct.ThrowIfCancellationRequested();var captured=entry;pending.Add(Task.Run(()=>ScanOne(captured,source,telescope,model,reindex,deferHash,cloudSource,cached,deleted,shots,headers,metrics,linked.Token),linked.Token));
       if(pending.Count>=workers){var ready=Task.WhenAny(pending).GetAwaiter().GetResult();pending.Remove(ready);collect(ready);}
      }
      while(pending.Count>0){ct.ThrowIfCancellationRequested();var ready=Task.WhenAny(pending).GetAwaiter().GetResult();pending.Remove(ready);collect(ready);}producer.GetAwaiter().GetResult();

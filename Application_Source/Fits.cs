@@ -57,6 +57,14 @@ namespace AstroArchive {
   }
   sealed class ReadCounter:Stream {readonly Stream input;readonly Action<int> count;public ReadCounter(Stream stream,Action<int> callback){input=stream;count=callback;}public override int Read(byte[] buffer,int offset,int length){int n=input.Read(buffer,offset,length);count(n);return n;}public override bool CanRead{get{return input.CanRead;}}public override bool CanSeek{get{return input.CanSeek;}}public override bool CanWrite{get{return false;}}public override long Length{get{return input.Length;}}public override long Position{get{return input.Position;}set{input.Position=value;}}public override long Seek(long offset,SeekOrigin origin){return input.Seek(offset,origin);}public override void Flush(){}public override void SetLength(long length){throw new NotSupportedException();}public override void Write(byte[] buffer,int offset,int length){throw new NotSupportedException();}}
   public static FitsHeader Header(string path,Action<int> count=null,Action<FileStamp> lockedStamp=null,System.Threading.CancellationToken ct=default(System.Threading.CancellationToken)){ct.ThrowIfCancellationRequested();using(var input=Open(path)){var header=FindImage(new ReadCounter(input,n=>{ct.ThrowIfCancellationRequested();if(count!=null)count(n);}));if(lockedStamp!=null)lockedStamp(FileStamp.Read(path));return header;}}
+  public static FitsHeader Validate(string path,System.Threading.CancellationToken ct){
+   using(var input=Open(path)){
+    ct.ThrowIfCancellationRequested();var header=FindImage(new ReadCounter(input,n=>ct.ThrowIfCancellationRequested()));long remaining=header.DataBytes;var buffer=new byte[65536];
+    while(remaining>0){ct.ThrowIfCancellationRequested();int read=input.Read(buffer,0,(int)Math.Min(remaining,buffer.Length));if(read==0)throw new InvalidDataException("Truncated FITS image.");remaining-=read;}
+    // Read gzip trailers as well as the image; header-only parsing cannot validate compressed payloads.
+    if(path.EndsWith(".gz",StringComparison.OrdinalIgnoreCase))while(true){ct.ThrowIfCancellationRequested();if(input.Read(buffer,0,buffer.Length)==0)break;}
+    return header;
+   }
   [StructLayout(LayoutKind.Explicit)]struct Bits { [FieldOffset(0)]public uint Integer;[FieldOffset(0)]public float Single;[FieldOffset(0)]public ulong Long;[FieldOffset(0)]public double Double; }
   static double Decode(byte[] b,int p,int bits) {
    if(bits==8)return b[p];if(bits==16)return unchecked((short)((b[p]<<8)|b[p+1]));

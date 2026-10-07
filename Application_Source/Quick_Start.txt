@@ -4,11 +4,15 @@ No installer, Python or Google login required.
 
 START HERE
 1. Open AstroArchive and choose your archive folder in Settings.
-2. Import: choose your telescope mirror and assign a unique physical device ID,
-   such as Seestar-01 or Dwarf-03. Leave model and camera on Auto unless you know
-   which override to apply. Scan folder, review the rows, then Import new files.
-3. Repository: search names, dates, devices, filter, exposure, gain or filename.
-   Clear resets the filters. It does not delete files.
+2. Import: choose a telescope or mirror folder and assign a unique device ID,
+   such as Seestar-01 or Dwarf-03. Scan folder, review the rows, then import.
+   Import options contains model/camera overrides, optional analysis and source
+   cleanup. Auto detection and keeping originals remain the defaults.
+3. Search either view, then use Filters to narrow target, device, frame type, mount,
+   camera, night, session, optical filter, calibration, exposure, gain, dimensions,
+   status or review state. Clear resets search and filters without deleting files.
+   Import copies only the ready files shown in the filtered view; its button shows
+   the count. Hidden candidates remain available for a later import.
 4. Select rows with Ctrl/Shift, or use all visible captures when none are selected.
    Right-click selected files, then Export to copy files or prepare a stacking
    folder, with matching calibrations if selected.
@@ -50,7 +54,7 @@ existing selection. If a Drive entry is absent, copy the full Windows path from
 Explorer and paste it into the selector address bar with Alt+D. The selected
 location must expose a filesystem path; a browser-only Drive folder cannot be used.
 
-For streamed Google Drive input, tick Streamed/cloud source before scanning.
+Select mounted cloud folders in the same way as local telescope folders.
 Windows placeholder attributes are detected automatically when available. Cloud
 availability time includes opening/reading provider-backed files, which may wait
 for a download. Copy + source hash measures local output/hashing separately for
@@ -108,6 +112,27 @@ resolve the reported source problem, scan again and import to resume. Interrupte
 exports retain INCOMPLETE.txt; create a fresh project after an interrupted export.
 The exact cause of the previously reported copying failure cannot be established
 without that PC's error; the new diagnostics are intended to make it identifiable.
+
+SCREEN TELESCOPE FAILURES
+Screen for failures is available in Import and the capture library. It checks the
+visible import rows, or selected library files (all visible when none are selected).
+Failed/rejected filename and folder markers, FITS STATUS/CAPSTAT/IMGSTAT failure
+values and REJECTED flags appear as Needs review with a reason. Obvious markers
+are also flagged during scanning. Screening reads the full supported FITS image,
+including compressed data, and checks archive checksums for current files.
+Use Filters > Review > Needs review or Rejected / reference to inspect captures,
+or No issues flagged to leave them out of an import. Screening does not delete
+files or judge star quality, tracking, cloud cover or exposure quality. Rejected
+captures remain excluded from stacking by default. Review flags persist in the index.
+
+DELETION HISTORY
+Deleting library files records their SHA-256 checksums, UTC deletion times and
+original metadata. Future scans show matching captures as Deleted and exclude them
+from import, including renamed copies or imports directly from a telescope.
+Changed content at the same filename remains eligible. Repository tools > Deletion
+history shows the log. Keep .astroarchive/index.sqlite with the archive: it includes
+the deletion history and works after a portable restore. Archive reset also retains
+this history so clearing an archive does not silently repopulate it on the next scan.
 
 ORIGINALS AFTER IMPORT
 Delete originals after verified import is OFF by default and resets after scans
@@ -183,7 +208,8 @@ DELETE ALL ARCHIVE DATA
 Settings > Archive has a red Delete all archive data button. It shows the selected archive
 path and file count. Drag the slider fully right, then press Delete permanently.
 Closing the dialog cancels. This removes indexed archive FITS, saved session JSON,
-analysis/worker caches and reports. Source mirrors and unindexed files are retained.
+analysis/worker caches and reports. Deletion history, source mirrors and unindexed
+files are retained.
 Only the selected archive is affected. Cloud-synced deletions propagate and there is
 no undo. The repository Clear button remains solely a filter reset.
 
