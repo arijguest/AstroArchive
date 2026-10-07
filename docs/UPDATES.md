@@ -23,6 +23,17 @@ with package 1.2.0.2 or later. Installation and manual repairs remain offline.
 
 ## Manual and offline use
 
+In AstroArchive, open **Settings → Check for and download new releases**.
+Check for the latest stable release, then choose **Download release** and a save
+location. The installer is verified before saving as `AstroArchive<package>.exe`
+(for example, `AstroArchive1.3.0.1.exe`). Close the app before running it. A failed
+check or download leaves the current installation available.
+
+The feed retains the `url` asset expected by 1.2.0 launchers and adds
+`download_url` for the concise installer name. Both assets contain identical
+verified bytes; new launchers and Settings use the concise download.
+
+
 From the active `app-<version>-r<revision>` installation folder:
 
 ```powershell

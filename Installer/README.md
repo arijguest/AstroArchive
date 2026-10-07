@@ -1,10 +1,10 @@
 # AstroArchive Windows installer
 
-Application 1.2.0, installer package 1.2.0.2, Windows 10/11 x64 and .NET Framework 4.8 or later.
+Application 1.3.0, installer package 1.3.0.1, Windows 10/11 x64 and .NET Framework 4.8 or later.
 
 ## Install, update or repair
 
-Close AstroArchive and run `AstroArchive-1.2.0-Windows-x64-Offline-Setup.exe`.
+Close AstroArchive and run `AstroArchive1.3.0.1.exe`.
 The installer finds the per-user installation registered by the supplied
 example. Use its existing folder to update it. New installations default to
 `%LOCALAPPDATA%\Programs\AstroArchive`. Administrative elevation is not needed.
@@ -22,7 +22,7 @@ SHA-256, installed in place, and AstroArchive restarts. Failed or offline checks
 leave the existing app available. Manual installation remains fully offline.
 See [update details](../docs/UPDATES.md) and [release instructions](../docs/RELEASING.md).
 
-The application remains version 1.2.0. The release workflow rebuilds it from source.
+The release workflow rebuilds application 1.3.0 from source.
 Its source is included separately in `Application_Source`. A portable executable
 alone has no installation registration: installing this package creates a new
 installation while retaining the app's existing per-user settings.
@@ -52,7 +52,9 @@ From the `Installer` directory, run in Windows PowerShell 5.1:
 .\build.ps1
 ```
 
-The included original prebuilt app is the default payload for an installer-only local build. The release workflow supplies a fresh source build. No SDK, Visual Studio,
+The default payload is `Application_Source/dist/AstroArchive.exe`; the installer
+build creates it from source if absent. The historical prebuilt payload is retained
+for provenance and is not used for a new release. No SDK, Visual Studio,
 third-party installer compiler or GitHub connection is required. The scripts
 use the .NET Framework C# compiler shipped with Windows.
 
@@ -76,13 +78,13 @@ in Windows Installed Apps; the package revision is stored separately.
 
 ```powershell
 # Silent fresh install or upgrade at the registered/default location
-.\AstroArchive-1.2.0-Windows-x64-Offline-Setup.exe --silent
+.\AstroArchive1.3.0.1.exe --silent
 
 # Update only; fail when the folder has no recognized installation
-.\AstroArchive-1.2.0-Windows-x64-Offline-Setup.exe --update --silent --root 'C:\Users\Me\AppData\Local\Programs\AstroArchive'
+.\AstroArchive1.3.0.1.exe --update --silent --root 'C:\Users\Me\AppData\Local\Programs\AstroArchive'
 
 # Uninstall this installation, retaining repository and settings data
-.\AstroArchive-1.2.0-Windows-x64-Offline-Setup.exe --uninstall --root 'C:\Users\Me\AppData\Local\Programs\AstroArchive'
+.\AstroArchive1.3.0.1.exe --uninstall --root 'C:\Users\Me\AppData\Local\Programs\AstroArchive'
 ```
 
 Exit code 0 means success; 1 means failure or an unfinished setup. `--restart`

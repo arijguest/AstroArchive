@@ -15,13 +15,13 @@ A Windows desktop app for organising smart-telescope FITS captures and preparing
 ## Install
 
 Windows 10 or 11, **64-bit**, with **.NET Framework 4.8 or later**.
-Download `AstroArchive-<version>-Windows-x64-Offline-Setup.exe` from the latest
-release and run it. Installation works offline and needs no administrator access.
+Download `AstroArchive<package-version>.exe` from the latest
+release (for example, `AstroArchive1.3.0.1.exe`) and run it. Installation works offline and needs no administrator access.
 The default folder is `%LOCALAPPDATA%\Programs\AstroArchive`.
 Desktop and Start menu shortcuts and an Installed Apps uninstaller are included.
 
 The installer is currently unsigned. SHA-256 checksum files accompany releases.
-To check a download in PowerShell, run `Get-FileHash .\AstroArchive-<version>-Windows-x64-Offline-Setup.exe -Algorithm SHA256` and compare it with the release checksum.
+To check a download in PowerShell, run `Get-FileHash .\AstroArchive<package-version>.exe -Algorithm SHA256` and compare it with the release checksum.
 
 Already using the original offline 1.2.0 installer? Close AstroArchive and install
 the latest release **once** in the existing location to enable future update checks.
@@ -40,6 +40,9 @@ Updates preserve repositories, images, manifests, caches and user settings.
 Offline or failed checks leave the installed app available. Downloads use HTTPS
 and SHA-256 verification; release checks need no GitHub login for this public
 repository. Running the portable app executable directly bypasses the launcher.
+Use **Settings → Check for and download new releases** to check manually and
+save a verified installer, including when running the portable app directly.
+Close AstroArchive before running the downloaded installer.
 See [update details](docs/UPDATES.md) for manual checks, troubleshooting and offline launch.
 
 ## What it does
@@ -47,7 +50,7 @@ See [update details](docs/UPDATES.md) for manual checks, troubleshooting and off
 - Import `.fit`, `.fits`, `.fts` and gzip-compressed FITS with SHA-256 verification and duplicate detection.
 - Organise captures by target, device, session and camera, including Seestar and DWARF layouts.
 - Track imports with SQLite, stream progress and recover from per-file failures.
-- Export verified stacking projects with camera and calibration matching safeguards.
+- Right-click selected files to export copies, prepare ready-to-stack folders with optional matching calibrations, edit metadata or delete archive copies.
 - Optionally identify targets with local ASTAP or Astrometry.net and analyse field rotation.
 - Read filesystem-mounted or streamed cloud folders, including Google Drive for desktop.
 
@@ -57,10 +60,10 @@ Plate solving requires a separately configured ASTAP database or Astrometry.net 
 
 ## Start using it
 
-1. Open AstroArchive and choose an archive folder.
+1. Open AstroArchive and choose an archive folder in Settings.
 2. In Import, choose your telescope folder and assign a unique physical device ID.
 3. Scan, review the detected captures and import new files.
-4. Search the Repository and create a stacking project from selected captures.
+4. Search the library, select files with Ctrl/Shift, and right-click for file tools.
 
 Keep `.astroarchive/index.sqlite` with the archive when moving or backing it up.
 Use one writer per archive. Read the [complete guide](Application_Source/Quick_Start.txt)

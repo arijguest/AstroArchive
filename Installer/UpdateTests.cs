@@ -23,6 +23,16 @@ static class UpdateTests {
   throw new Exception("Expected update refusal.");
  }
  public static void Run(Action<string, Action> test, string scratch) {
+  test("Concise release installers are validated and used for verified downloads", () => {
+   var manifest=Manifest("1.3.0",1);manifest.download_url=UpdateClient.Repository+"/releases/download/v1.3.0.1/AstroArchive1.3.0.1.exe";
+   string requested=null;var client=new UpdateClient{Fetch=(uri,limit)=>{requested=uri.AbsoluteUri;return Installer;}};
+   string path=client.Prepare(manifest,Path.Combine(scratch,"concise-cache"));Check(requested==manifest.download_url&&Path.GetFileName(path)=="AstroArchive1.3.0.1.exe","Concise installer was not used");
+   manifest.url=manifest.download_url;manifest.download_url=null;UpdateClient.Validate(manifest);
+  });
+  test("Concise download URLs cannot change repository or package", () => {
+   var manifest=Manifest();manifest.download_url=UpdateClient.Repository+"/releases/download/v1.2.0.3/AstroArchive1.2.0.3.exe";Refused(()=>UpdateClient.Validate(manifest));
+   manifest.download_url="https://example.com/AstroArchive1.2.0.2.exe";Refused(()=>UpdateClient.Validate(manifest));
+  });
   test("Update feed discovers a newer installer revision", () => {
    Check(Client(Manifest()).Check(Installed()).package_version == "1.2.0.2", "Revision upgrade was missed.");
   });

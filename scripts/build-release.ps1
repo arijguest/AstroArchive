@@ -13,12 +13,18 @@ $OutputDirectory = [IO.Path]::GetFullPath($OutputDirectory)
 & (Join-Path $root 'Application_Source\build.ps1')
 $app = Join-Path $root 'Application_Source\dist\AstroArchive.exe'
 & (Join-Path $root 'Installer\build.ps1') -AppExecutable $app -OutputDirectory $OutputDirectory
-$installer = Join-Path $OutputDirectory "AstroArchive-$version-Windows-x64-Offline-Setup.exe"
+$installer = Join-Path $OutputDirectory "AstroArchive$package.exe"
+# Keep the asset name expected by 1.2.0 launchers so existing users can upgrade.
+$compatibility = Join-Path $OutputDirectory "AstroArchive-$version-Windows-x64-Offline-Setup.exe"
+Copy-Item $installer $compatibility -Force
+$compatibilityHash = (Get-FileHash $compatibility -Algorithm SHA256).Hash.ToLowerInvariant()
+Set-Content "$compatibility.sha256" "$compatibilityHash  $([IO.Path]::GetFileName($compatibility))" -Encoding ASCII
 $feed = [ordered]@{
     schema = 1
     application_version = $version
     package_version = $package
-    url = "https://github.com/arijguest/AstroArchive/releases/download/$tag/$([IO.Path]::GetFileName($installer))"
+    url = "https://github.com/arijguest/AstroArchive/releases/download/$tag/$([IO.Path]::GetFileName($compatibility))"
+    download_url = "https://github.com/arijguest/AstroArchive/releases/download/$tag/$([IO.Path]::GetFileName($installer))"
     sha256 = (Get-FileHash $installer -Algorithm SHA256).Hash.ToLowerInvariant()
     size = (Get-Item $installer).Length
 }
@@ -41,6 +47,8 @@ try {
     $installedApp = Join-Path $smokeRoot ($record.ActiveDirectory + '\AstroArchive.exe')
     $preview = Join-Path $OutputDirectory 'ui-preview'
     Run-Checked $installedApp @('--ui-test', ('"' + $preview + '"'))
+    Run-Checked $installer @('--ui-test', ('"' + $preview + '"'), '--root', ('"' + $smokeRoot + '"'))
+    if (-not (Test-Path (Join-Path $preview 'AstroArchive_Installer_UI.png'))) { throw 'Installer UI smoke did not render.' }
     if (-not (Get-ChildItem $preview -Filter '*.png')) { throw 'UI smoke did not render images.' }
     $fixtureDirectory = Join-Path $smokeRoot 'repository'
     [IO.Directory]::CreateDirectory($fixtureDirectory) | Out-Null

@@ -1,6 +1,13 @@
-# AstroArchive 1.2.0
+# AstroArchive 1.3.0
 
 Portable Windows 10/11 x64 WPF app for archiving smart-telescope FITS and creating verified stacking projects. Open `AstroArchive.exe`; read `Quick_Start.txt` for the complete workflow.
+
+## Changes in 1.3.0
+
+- Right-click selected library rows to export copies, create a ready-to-stack folder, edit metadata, locate files or delete selected archive copies after confirmation.
+- Stacking exports offer optional matching calibrations, report availability and keep multiple targets separate. Rejected calibration candidates are omitted; unknown calibration status remains opt-in.
+- Repository selection lives in Settings. A compact path stays above the library.
+- Settings checks the latest stable release and saves a verified installer using the concise package filename.
 
 ## Changes in 1.2.0
 
@@ -50,10 +57,10 @@ Metadata corrections may move archived copies without modifying FITS pixels/head
 - `Model.cs`, `FileState.cs`: metadata, settings, file identity/change stamps and cloud/reparse handling.
 - `Fits.cs`, `Classification.cs`, `InstrumentDetection.cs`, `CameraDetection.cs`: parsing, catalogue, filename/header/structure classification and session metadata cache.
 - `Repository.cs`, `ImportEngine.cs`, `FileTransfer.cs`, `Pipeline.cs`: SQLite index/manifest, bounded discovery/copy pipeline, hashing, retries, worker tuning and telemetry.
-- `SourceCleanup.cs`, `ArchiveReset.cs`: verified source cleanup and scoped archive deletion.
+- `SourceCleanup.cs`, `ArchiveReset.cs`, `FileDeletion.cs`: verified source cleanup and scoped archive deletion.
 - `Rotation.cs`, `PlateSolve.cs`: star matching, mount inference, ASTAP/Astrometry.net and candidate matching.
 - `Export.cs`: session-aware verified projects and calibration safeguards.
-- `App.cs`, `MainWindow.xaml`, `NativeFolderPicker.cs`, `Assets/`: WPF interface, native selectors and embedded branding.
+- `App.cs`, `FileToolsUi.cs`, `ReleasesUi.cs`, `MainWindow.xaml`, `NativeFolderPicker.cs`, `Assets/`: WPF interface, native selectors and embedded branding.
 - `Tests.cs`, `MockAstap.cs.txt`, `test.ps1`, `build.ps1`: generated-data checks and Windows build.
 
 ## External documentation and catalogue

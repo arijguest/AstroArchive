@@ -1,16 +1,17 @@
-AstroArchive 1.2.0
+AstroArchive 1.3.0
 Windows 10/11 x64 desktop app. Built-in .NET Framework 4.8 and Windows SQLite.
 No installer, Python or Google login required.
 
 START HERE
-1. Open AstroArchive.exe and choose your archive folder.
+1. Open AstroArchive and choose your archive folder in Settings.
 2. Import: choose your telescope mirror and assign a unique physical device ID,
    such as Seestar-01 or Dwarf-03. Leave model and camera on Auto unless you know
    which override to apply. Scan folder, review the rows, then Import new files.
 3. Repository: search names, dates, devices, filter, exposure, gain or filename.
    Clear resets the filters. It does not delete files.
 4. Select rows with Ctrl/Shift, or use all visible captures when none are selected.
-   Create stacking project makes verified copies in a new destination folder.
+   Right-click selected files, then Export to copy files or prepare a stacking
+   folder, with matching calibrations if selected.
 
 WINDOWS FOLDER SELECTION AND GOOGLE DRIVE
 All folder selectors use native Windows Explorer dialogs, with This PC, mounted
@@ -169,3 +170,17 @@ available here. The ASTAP protocol test uses a test double, not real sky solving
 
 Catalogue: OpenNGC, Mattia Verga, https://github.com/mattiaverga/OpenNGC, CC-BY-SA-4.0.
 Attribution and reproducible source are included in AstroArchive_Source.zip.
+
+FILE ACTIONS AND RELEASES (1.3.0)
+Select files with Ctrl/Shift, then right-click one selected row. Export offers
+selected file copies, a ready-to-stack folder, or a ready-to-stack folder with
+matching calibrations. The dialog shows available calibration files. Unknown
+calibration status requires an explicit opt-in; calibrated/registered lights
+receive no extra calibration. Multiple targets get separate folders.
+Delete selected files removes only indexed repository copies and their records
+after confirmation. Source copies and shared session metadata stay. There is no
+undo, and cloud-synced deletions propagate. Locked files are reported and retained.
+The active repository is a small path at the top. Choose a different repository
+in Settings and save to apply it. Settings > Check for and download new releases
+checks the stable release and saves a verified AstroArchive1.x.x.x.exe installer.
+Close AstroArchive before running the downloaded installer.

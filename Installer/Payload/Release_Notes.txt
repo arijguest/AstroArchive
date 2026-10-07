@@ -1,16 +1,12 @@
-AstroArchive application 1.2.0 — installer package 1.2.0.2
+AstroArchive 1.3.0 — file tools and settings
+Package 1.3.0.1
 
-The installed launcher checks the latest stable GitHub release at startup.
-When an update is available, it asks whether to install with Yes selected by
-default. No opens the installed version. Accepted downloads are checked for
-exact size and SHA-256, then installed in place and AstroArchive is restarted.
-Offline or failed checks keep the current app usable. --no-updates skips checks;
---updates performs a manual check and shows its result.
-
-Existing original offline installations need this installer once to gain the
-new launcher. Repositories, images, import manifests, caches and settings are
-retained. Manual installation, repair and uninstall remain available offline.
-
-The application remains version 1.2.0. Windows CI builds the application from
-source and validates application, installer, updater and Windows smoke checks
-before publishing installers and the update feed. The package is unsigned.
+Select files and right-click to export, prepare stacking folders, edit metadata,
+locate a file, or delete only the selected archive copies after confirmation.
+Stacking exports offer matching calibrations, show their availability, and keep
+multiple targets in separate folders. Sources and shared metadata are retained.
+Repository selection is now in Settings, with a compact active path at the top.
+Settings can check for releases and save a checksum-verified installer.
+The installer has clearer install/update/repair states and a refreshed layout.
+New downloads use the concise name AstroArchive1.3.0.1.exe.
+A compatibility download alias lets existing launchers upgrade normally.

@@ -8,7 +8,7 @@ using System.Text.RegularExpressions;
 namespace AstroArchive.Installation {
  public sealed class UpdateManifest {
   public int schema;
-  public string application_version, package_version, url, sha256;
+  public string application_version, package_version, url, download_url, sha256;
   public long size;
  }
 
@@ -34,11 +34,15 @@ namespace AstroArchive.Installation {
     throw new IOException("Update application and package versions do not agree.");
    string expected = Repository + "/releases/download/v" + manifest.package_version +
     "/AstroArchive-" + manifest.application_version + "-Windows-x64-Offline-Setup.exe";
-   if (!string.Equals(manifest.url, expected, StringComparison.Ordinal) ||
+   string concise = Repository + "/releases/download/v" + manifest.package_version + "/" + InstallerName(manifest);
+   if ((!string.Equals(manifest.url, expected, StringComparison.Ordinal) && !string.Equals(manifest.url, concise, StringComparison.Ordinal)) ||
+    (manifest.download_url != null && !string.Equals(manifest.download_url, concise, StringComparison.Ordinal)) ||
     !Regex.IsMatch(manifest.sha256 ?? "", @"^[a-fA-F0-9]{64}$") ||
     manifest.size < 1 || manifest.size > MaximumInstallerSize)
     throw new IOException("Invalid update asset, checksum or size.");
   }
+
+  public static string InstallerName(UpdateManifest manifest) { return "AstroArchive" + manifest.package_version + ".exe"; }
 
   public UpdateManifest Check(InstallRecord installed) {
    byte[] bytes = Fetch(new Uri(Feed), 64 * 1024);
@@ -52,14 +56,14 @@ namespace AstroArchive.Installation {
 
   public string Prepare(UpdateManifest manifest, string cache) {
    Validate(manifest);
-   byte[] bytes = Fetch(new Uri(manifest.url), manifest.size);
+   byte[] bytes = Fetch(new Uri(manifest.download_url ?? manifest.url), manifest.size);
    if (bytes == null || bytes.LongLength != manifest.size ||
     !string.Equals(InstallCore.Hash(bytes), manifest.sha256, StringComparison.OrdinalIgnoreCase))
     throw new IOException("Downloaded update failed SHA-256 verification.");
    InstallCore.NoLinks(cache);
    string directory = Path.Combine(cache, Guid.NewGuid().ToString("N"));
    Directory.CreateDirectory(directory);
-   string path = Path.Combine(directory, "AstroArchive-" + manifest.package_version + "-Setup.exe");
+   string path = Path.Combine(directory, InstallerName(manifest));
    try {
     InstallCore.NoLinks(path);
     using (var file = new FileStream(path, FileMode.CreateNew, FileAccess.Write, FileShare.None)) {

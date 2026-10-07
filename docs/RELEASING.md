@@ -21,8 +21,9 @@ installed launchers offer that package even though the app version is unchanged.
 
 The workflow runs application tests, installer/update tests, application and
 installer builds, real Windows install/repair/uninstall smoke checks and a WPF
-render smoke. Only a successful build can publish. Release assets are uploaded
-into a draft before publication: the offline installer, its SHA-256 and
+render smoke for both the application and installer. Only a successful build can publish. Release assets are uploaded
+into a draft before publication: the concise `AstroArchive<package>.exe` installer, a compatibility alias for
+1.2.0 launchers, their SHA-256 checksums and
 `update.json`. Publishing makes the completed release the latest stable version.
 Published releases are not overwritten; increment the version for corrections.
 The original supplied 1.2.0.1 offline installer is also published as a historical
