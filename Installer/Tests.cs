@@ -46,6 +46,7 @@ class Tests {
     var error=new IOException("Could not start C:\\Example\\Start.exe",new System.ComponentModel.Win32Exception(code));
     string message=WindowsPolicyError.Message(error);
     Check(message.Contains("Application Control")&&message.Contains("C:\\Example\\Start.exe")&&message.Contains("AstroArchive-setup-error.txt")&&message.Contains("administrator"),"Policy failure lost diagnosis or context");
+    Check(WindowsPolicyError.Details(error).Contains("Native Windows error: "+code),"Diagnostic log lost the native policy code");
    }
    string com=WindowsPolicyError.Message(new COMException("Blocked component",unchecked((int)0x800711c7)));
    Check(com.Contains("Application Control"),"COM policy HRESULT was not recognized");

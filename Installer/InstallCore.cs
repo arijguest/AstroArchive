@@ -10,6 +10,14 @@ using System.Web.Script.Serialization;
 
 namespace AstroArchive.Installation {
  public static class WindowsPolicyError {
+  public static string Details(Exception error) {
+   string details=error.ToString();
+   for(Exception current=error;current!=null;current=current.InnerException){
+    var native=current as System.ComponentModel.Win32Exception;
+    if(native!=null)details+="\r\nNative Windows error: "+native.NativeErrorCode;
+   }
+   return details;
+  }
   public static string Message(Exception error) {
    for(Exception current=error;current!=null;current=current.InnerException){
     var native=current as System.ComponentModel.Win32Exception;
