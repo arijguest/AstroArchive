@@ -66,6 +66,7 @@ namespace AstroArchive {
    ct.ThrowIfCancellationRequested();FileStamp sourceStamp=parsedStamp;FitsHeader h=parsedHeader??Fits.Header(path,counted,stamp=>sourceStamp=stamp,ct);string rel=path.Substring(root.TrimEnd('\\','/').Length).TrimStart('\\','/');string text=Path.GetFileName(root.TrimEnd('\\','/'))+"/"+rel.Replace('\\','/');string low=text.ToLowerInvariant();string stem=CleanStem(Path.GetFileName(path));string name=stem.ToLowerInvariant();
    var f=new Frame{SourcePath=path,OriginalName=Path.GetFileName(path),Telescope=telescope,Model=model,Camera="Unknown",Target="Unknown",Kind="Unknown",Calibration="Unknown",Filter="Unknown",Bayer=h.Get("BAYERPAT","BAYERPATTERN"),Mount="Unknown",MountEvidence="Not analyzed",Notes="",Status="New",Bytes=enumeratedSize??new FileInfo(path).Length,Width=h.Width,Height=h.Height,Channels=h.Channels,BinX=(int)(h.Number("XBINNING","CCDXBIN","BINNING")??0),BinY=(int)(h.Number("YBINNING","CCDYBIN","BINNING")??0)};
    f.SourceStamp=sourceStamp;var shots=ReadShots(path,root,f,shotsCache,counted,ct,metrics);
+   using(var classification=metrics==null?null:metrics.Begin("Classification",Path.GetFileName(path))){
    InstrumentDetection.Apply(f,h,root,model);
    CameraDetection.Apply(f,h,text,Shot(shots,"cameraId","camera_id","camId","cam_id"));
    string type=h.Get("IMAGETYP","IMAGETYPE","FRAME","FRAMETYP").ToLowerInvariant();
@@ -120,7 +121,8 @@ namespace AstroArchive {
    if(h.Get("REGISTER","REGISTRD","DEROTATE")=="T"||Regex.IsMatch(name,@"^(r_|r_pp_|registered[_-])")||low.Contains("/registered/"))f.Calibration="Registered";
    if(f.Kind=="Stack")f.Calibration="Device stack";if(f.Kind.StartsWith("Master")||f.Kind=="Dark"||f.Kind=="Flat"||f.Kind=="Bias")f.Calibration="Calibration frame";
    if(f.Target=="Unknown")f.Notes+="Target needs identification. ";if(f.Kind=="Unknown")f.Notes+="Frame type needs review. ";if(f.Camera=="Unknown")f.Notes+="Camera channel unknown. ";
-   return f;
+   if(classification!=null)classification.Complete();return f;
+   }
   }
   static Dictionary<string,string> ReadShots(string path,string root,Frame f,Dictionary<string,ShotsMetadata> cache,Action<int> counted,System.Threading.CancellationToken ct,PipelineMetrics metrics){
    using(var scope=metrics==null?null:metrics.Begin("Session metadata",Path.GetFileName(path))){if(cache==null)return ReadShotsCore(path,root,f,cache,counted,ct);lock(cache)return ReadShotsCore(path,root,f,cache,counted,ct);}

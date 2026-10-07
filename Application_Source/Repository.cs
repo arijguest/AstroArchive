@@ -76,7 +76,7 @@ namespace AstroArchive {
        if(!hit){using(var availability=(cloudSource||stamp.Cloud)?metrics.Begin("Cloud availability",name):null)using(var read=metrics.Begin("Header open/read",name)){
         header=Fits.Header(entry.Path,n=>{read.Bytes(n);metadata.Bytes(n);},value=>captured=value,ct);read.Complete();if(availability!=null)availability.Complete();
        }}
-       Frame parsed;using(var classify=metrics.Begin("Classification",name)){parsed=Classifier.Read(entry.Path,source,telescope,model,stamp.Size,n=>metadata.Bytes(n),shots,header,captured,ct,metrics);classify.Complete();}
+       Frame parsed=Classifier.Read(entry.Path,source,telescope,model,stamp.Size,n=>metadata.Bytes(n),shots,header,captured,ct,metrics);
        if(!stamp.ContentSame(parsed.SourceStamp)||(hit&&!stamp.ContentSame(FileStamp.Read(entry.Path))))throw new InvalidDataException("Source changed while reading metadata. Scan again.");
        if(!hit)headers.Put(entry.Path,parsed.SourceStamp,header);item.HeaderHit=hit;return parsed;
       },ct,message=>{metrics.Current=message;metrics.Pulse(true);});stamp=f.SourceStamp;f.Hash="";f.Status="New";metadata.Complete();
