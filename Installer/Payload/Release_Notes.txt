@@ -1,12 +1,19 @@
-AstroArchive 1.3.0 — file tools and settings
-Package 1.3.0.1
+AstroArchive 1.4.0 — compact library, themes and image previews
+Package 1.4.0.1
 
-Select files and right-click to export, prepare stacking folders, edit metadata,
-locate a file, or delete only the selected archive copies after confirmation.
-Stacking exports offer matching calibrations, show their availability, and keep
-multiple targets in separate folders. Sources and shared metadata are retained.
-Repository selection is now in Settings, with a compact active path at the top.
-Settings can check for releases and save a checksum-verified installer.
-The installer has clearer install/update/repair states and a refreshed layout.
-New downloads use the concise name AstroArchive1.3.0.1.exe.
-A compatibility download alias lets existing launchers upgrade normally.
+A compact six-column library and smaller header make more space for captures.
+System, Light and Dark themes apply to the library, settings, dialogs and menus.
+The preview pane can be resized or hidden; detailed capture metadata lives there.
+
+Preview FITS/gzip FITS, colour and Bayer CFA images, and XISF with zlib/LZ4
+compression. Windows image codecs provide TIFF, PNG, JPEG and other raster
+formats; camera RAW compatibility depends on an installed codec.
+Choose Linear, Auto, Strong or per-channel autostretch. Previews are sampled for
+responsiveness and never modify source pixels. Archive imports remain FITS-only.
+
+The file tools from 1.3.0 remain: selected deletion/export, ready-to-stack folders,
+matching calibration availability, repository selection in Settings and verified
+release downloads. Context menus also offer preview, path copy and selected CSV.
+
+New downloads use AstroArchive1.4.0.1.exe. Existing repositories and settings
+are preserved. Windows validation and checksums accompany the automated release.

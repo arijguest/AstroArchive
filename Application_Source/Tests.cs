@@ -9,7 +9,7 @@ using System.Text;
 using System.Threading;
 
 namespace AstroArchive {
- public class Tests {
+ public partial class Tests {
   static int passed,skipped;static string root;static CancellationToken ct=CancellationToken.None;
   static void Check(bool test,string message){if(!test)throw new Exception(message);}
   static void Test(string name,Action action){try{action();passed++;Console.WriteLine("PASS "+name);}catch(Exception e){Console.WriteLine("FAIL "+name+": "+e);Environment.ExitCode=1;}}
@@ -111,6 +111,7 @@ namespace AstroArchive {
     string source=Path.Combine(root,"delete-lock-source");Directory.CreateDirectory(source);for(int i=0;i<2;i++)Write(Path.Combine(source,"Light_"+i+".fit"),64,48,(x,y)=>1400+i,new Dictionary<string,string>());using(var repo=new Repository(Path.Combine(root,"delete-lock-repo"))){repo.Import(repo.Scan(source,"Unit-01","Dwarf 3",ct,NoProgress).Frames,ct,NoProgress);var frames=repo.All();using(File.Open(repo.FilePath(frames[0]),FileMode.Open,FileAccess.Read,FileShare.None)){var result=repo.DeleteFrames(frames,ct,NoProgress);Check(result.Deleted==1&&result.Errors.Count==1&&repo.All().Single().Hash==frames[0].Hash,"Locked capture was removed or other selected capture was skipped");}}
    });
    WindowsTest("Verified unchanged sources skip payload reads on subsequent fast scans",()=>{string source=Path.Combine(root,"cached-source");Directory.CreateDirectory(source);Write(Path.Combine(source,"Light_M33.fit"),64,48,(x,y)=>1100,new Dictionary<string,string>());using(var repo=new Repository(Path.Combine(root,"cached-repo"))){var plan=repo.Scan(source,"Unit-01","Auto",ct,NoProgress,false,null,true);repo.Import(plan.Frames,ct,NoProgress,new ImportOptions{SourceRoot=source});var second=repo.Scan(source,"Unit-01","Auto",ct,NoProgress,false,null,true);Check(second.CacheHits==1&&second.Frames.Single().Status=="Duplicate (cached)"&&second.Metrics.Snapshot().Single(s=>s.Stage=="Metadata").Bytes==0,"Unchanged source reread payload");}});
+   PreviewTests();
    Console.WriteLine(passed+" tests passed; "+skipped+" Windows-only tests skipped.");File.WriteAllText(Path.Combine(root,"test-results.txt"),passed+" tests passed; "+skipped+" Windows-only tests skipped. Exit code "+Environment.ExitCode);return Environment.ExitCode;
   }
   [System.Runtime.InteropServices.DllImport("kernel32.dll",EntryPoint="CreateHardLinkW",CharSet=System.Runtime.InteropServices.CharSet.Unicode,SetLastError=true)]static extern bool CreateHardLink(string link,string existing,IntPtr security);

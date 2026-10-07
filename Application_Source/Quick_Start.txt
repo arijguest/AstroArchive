@@ -1,4 +1,4 @@
-AstroArchive 1.3.0
+AstroArchive 1.4.0
 Windows 10/11 x64 desktop app. Built-in .NET Framework 4.8 and Windows SQLite.
 No installer, Python or Google login required.
 
@@ -12,6 +12,36 @@ START HERE
 4. Select rows with Ctrl/Shift, or use all visible captures when none are selected.
    Right-click selected files, then Export to copy files or prepare a stacking
    folder, with matching calibrations if selected.
+
+IMAGE PREVIEW AND APPEARANCE
+Settings > General offers System, Light and Dark themes. The small circle button
+in the header switches Light/Dark immediately. The active archive path stays in
+the header; choose a different archive in Settings and save.
+
+Select a capture to preview it, or double-click/right-click > Preview image.
+The Preview button hides the pane to give the table more room; drag the divider
+to resize it. Open image previews a file outside the archive without importing it.
+The compact table shows filename, target, type, night, exposure and filter.
+Expand Capture details for device, camera, gain, temperature and classification.
+
+Stretch changes the display only; source pixels and FITS headers stay unchanged.
+- Linear: no nonlinear stretch; the initial choice for normal raster images.
+- Auto: linked RGB stretch that reveals faint data while retaining colour balance.
+- Strong: a brighter background for inspecting faint structure.
+- Auto per channel: independently balance each channel's background.
+FITS and XISF start with the saved stretch, defaulting to Auto. Fit sizes the
+preview to its pane; zoom scales the sampled display. Large images are sampled
+to roughly 1400 pixels per side, so use an external tool for pixel inspection.
+
+Preview supports FITS and gzip FITS (integer/float, RGB and recognised Bayer CFA),
+XISF mono/RGB/CFA with UInt8/16/32/64 or Float32/64 samples, attached or base64
+inline/embedded data, and uncompressed, zlib, LZ4/LZ4HC or byte-shuffled samples.
+XISF previews are limited to 256 MB of decoded samples; zstd is unsupported.
+TIFF, PNG, JPEG, BMP, GIF and Windows photo formats use Windows image codecs,
+including high-depth integer and floating samples when supported by the codec.
+DSLR RAW compatibility depends on an installed Windows codec for that camera.
+Tile-compressed FITS (.fz), video and multi-frame scientific cubes need conversion.
+Archive imports remain FITS-only; previewing other formats does not index them.
 
 WINDOWS FOLDER SELECTION AND GOOGLE DRIVE
 All folder selectors use native Windows Explorer dialogs, with This PC, mounted
@@ -57,7 +87,7 @@ never prove a duplicate. Verified, unchanged NTFS/ReFS files with stable identit
 and change metadata can skip payload reads. Unsupported/cloud filesystems use
 content hashing instead. Solving/rotation caches also validate archived content.
 
-Settings > Copy workers: Auto begins at 1. With at least 64 files and 64 MB it
+Settings > Processing > Copy workers: Auto begins at 1. With at least 64 files and 64 MB it
 compares four actual 16-file batches at 1, 2, 4 and 8 workers, and retains a faster
 setting for that source/archive pair. Retune repeats the pilot. Differences in
 file size, caching, storage and cloud downloads affect the result. Small imports
@@ -143,7 +173,7 @@ Do not combine stacks with constituent subs or overlapping live-stack snapshots.
 Exports include a manifest and workflow notes. Actual stacking uses external software.
 
 DELETE ALL ARCHIVE DATA
-Settings has a red Delete all archive data button. It shows the selected archive
+Settings > Archive has a red Delete all archive data button. It shows the selected archive
 path and file count. Drag the slider fully right, then press Delete permanently.
 Closing the dialog cancels. This removes indexed archive FITS, saved session JSON,
 analysis/worker caches and reports. Source mirrors and unindexed files are retained.
@@ -153,7 +183,8 @@ no undo. The repository Clear button remains solely a filter reset.
 SUPPORTED FILES
 .fit, .fits, .fts and .gz variants; primary/IMAGE HDUs; 8/16/32/64-bit integer or
 32/64-bit floating data; mono/CFA and up to four colour planes. Tile-compressed .fz,
-multi-frame cubes, TIFF, JPEG, PNG and videos need other tools/conversion.
+multi-frame cubes and videos need other tools/conversion. TIFF, JPEG, PNG and
+XISF can be previewed; convert them to FITS before archive import.
 FITS pixels/headers are never rewritten. Existing export projects are never replaced.
 Repository tools index existing FITS, verify checksums and export a CSV catalogue.
 

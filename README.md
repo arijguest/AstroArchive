@@ -54,8 +54,9 @@ See [update details](docs/UPDATES.md) for manual checks, troubleshooting and off
 - Optionally identify targets with local ASTAP or Astrometry.net and analyse field rotation.
 - Read filesystem-mounted or streamed cloud folders, including Google Drive for desktop.
 
-Originals are retained by default. Stacking runs in external software. PNG,
-JPEG, video and tile-compressed `.fz` files need conversion or other tools.
+Originals are retained by default. Stacking runs in external software. Archive
+imports use FITS; XISF, TIFF, PNG and JPEG can be previewed. Camera RAW preview
+depends on installed Windows codecs. Video and tile-compressed `.fz` need conversion.
 Plate solving requires a separately configured ASTAP database or Astrometry.net account.
 
 ## Start using it

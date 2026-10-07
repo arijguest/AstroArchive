@@ -18,7 +18,7 @@ namespace AstroArchive {
  }
  public class FitsImage {public double[] Pixels; public int Width; public int Height; }
  public static class Fits {
-  static Stream Open(string path) {Stream s=new FileStream(path,FileMode.Open,FileAccess.Read,FileShare.Read,65536); return path.EndsWith(".gz",StringComparison.OrdinalIgnoreCase)?(Stream)new GZipStream(s,CompressionMode.Decompress):s;}
+  static Stream Open(string path,bool preview=false) {Stream s=new FileStream(path,FileMode.Open,FileAccess.Read,preview?FileShare.ReadWrite|FileShare.Delete:FileShare.Read,65536); return path.EndsWith(".gz",StringComparison.OrdinalIgnoreCase)?(Stream)new GZipStream(s,CompressionMode.Decompress):s;}
   static void ReadFull(Stream s,byte[] b,int n) {int k=0,r; while(k<n&&(r=s.Read(b,k,n-k))>0) k+=r; if(k!=n) throw new InvalidDataException("Truncated FITS file.");}
   static void Skip(Stream s,long n) {if(s.CanSeek) {if(n>s.Length-s.Position)throw new InvalidDataException("Truncated FITS data.");s.Seek(n,SeekOrigin.Current);} else {byte[] b=new byte[65536];while(n>0){int r=s.Read(b,0,(int)Math.Min(n,b.Length));if(r==0)throw new InvalidDataException("Truncated FITS data.");n-=r;}}}
   static FitsHeader FindImage(Stream s) {
@@ -64,6 +64,28 @@ namespace AstroArchive {
    if(bits==64){ulong v=0;for(int k=0;k<8;k++)v=(v<<8)|b[p+k];return unchecked((long)v);}
    if(bits==-32){var q=new Bits{Integer=((uint)b[p]<<24)|((uint)b[p+1]<<16)|((uint)b[p+2]<<8)|b[p+3]};return q.Single;}
    ulong u=0;for(int k=0;k<8;k++)u=(u<<8)|b[p+k];return new Bits{Long=u}.Double;
+  }
+  public static PreviewData Preview(string path,System.Threading.CancellationToken ct) {
+   ct.ThrowIfCancellationRequested();using(var input=Open(path,true)){
+    Stream source=new ReadCounter(input,n=>ct.ThrowIfCancellationRequested());FitsHeader h=FindImage(source);string bayer=h.Get("BAYERPAT").ToUpperInvariant();bool cfa=h.Channels==1&&new[]{"RGGB","BGGR","GRBG","GBRG"}.Contains(bayer);
+    int step=Math.Max(cfa?2:1,(int)Math.Ceiling(Math.Max(h.Width,h.Height)/1400.0));if(cfa&&step%2!=0)step++;
+    int width=(h.Width+step-1)/step,height=(h.Height+step-1)/step,channels=cfa||h.Channels>=3?3:1;
+    var image=new PreviewData{Width=width,Height=height,SourceWidth=h.Width,SourceHeight=h.Height,Channels=channels,FlipY=true,Description="FITS · "+(cfa?bayer+" colour":channels==3?"RGB":"mono")+" · "+h.Bitpix+" bit"};
+    image.Pixels=new double[checked(width*height*channels)];var counts=new int[image.Pixels.Length];
+    int bpp=Math.Abs(h.Bitpix)/8;byte[] row=new byte[checked(h.Width*bpp)];double scale=h.Number("BSCALE")??1,zero=h.Number("BZERO")??0;double? blank=h.Number("BLANK");
+    if(h.Bitpix>0){double low=h.Bitpix==8?0:-Math.Pow(2,h.Bitpix-1),high=h.Bitpix==8?255:Math.Pow(2,h.Bitpix-1)-1;image.Minimum=Math.Min(low*scale+zero,high*scale+zero);image.Maximum=Math.Max(low*scale+zero,high*scale+zero);}
+    int offsetX=(int)(h.Number("XBAYROFF")??0),offsetY=(int)(h.Number("YBAYROFF")??0);
+    for(int c=0;c<h.Channels;c++)for(int y=0;y<h.Height;y++){
+     ct.ThrowIfCancellationRequested();ReadFull(source,row,row.Length);if(c>=channels)continue;
+     for(int x=0;x<h.Width;x++){
+      double raw=Decode(row,x*bpp,h.Bitpix);if((blank.HasValue&&h.Bitpix>0&&raw==blank.Value)||double.IsNaN(raw)||double.IsInfinity(raw))continue;
+      int channel=cfa?"RGB".IndexOf(bayer[((y+offsetY)&1)*2+((x+offsetX)&1)]):channels==1?0:c;
+      int index=((y/step)*width+x/step)*channels+channel;image.Pixels[index]+=raw*scale+zero;counts[index]++;
+     }
+    }
+    for(int n=0;n<image.Pixels.Length;n++)image.Pixels[n]=counts[n]>0?image.Pixels[n]/counts[n]:double.NaN;
+    return image;
+   }
   }
   public static FitsImage Image(string path,System.Threading.CancellationToken ct,Action<int> counted=null) {
    using(var input=Open(path)){Stream s=counted==null?input:(Stream)new ReadCounter(input,counted);

@@ -12,10 +12,11 @@ using System.Windows.Media;
 
 namespace AstroArchive {
  public partial class MainUi {
+  ContextMenu ThemedMenu(){var menu=new ContextMenu();menu.Resources.MergedDictionaries.Add(Window.Resources);return menu;}
   bool contextOnFile;
   void InitializeFileTools() {
    var grid=G("FramesGrid");
-   grid.ContextMenu=new ContextMenu();
+   grid.ContextMenu=ThemedMenu();
    grid.PreviewMouseRightButtonDown+=(s,e)=>{
     var row=ItemsControl.ContainerFromElement(grid,e.OriginalSource as DependencyObject) as DataGridRow;
     contextOnFile=row!=null;
@@ -45,13 +46,14 @@ namespace AstroArchive {
   }
   void BuildFileMenu(ContextMenu menu,List<Frame> selected){
    menu.Items.Clear();menu.Items.Add(new MenuItem{Header=selected.Count+" selected file"+(selected.Count==1?"":"s"),IsEnabled=false});
-   menu.Items.Add(ExportMenu(selected));menu.Items.Add(new Separator());
+   menu.Items.Add(FileAction("Preview image",PreviewSelected));menu.Items.Add(FileAction("Copy file paths",()=>Clipboard.SetText(string.Join(Environment.NewLine,selected.Select(repo.FilePath)))));menu.Items.Add(ExportMenu(selected));menu.Items.Add(FileAction("Export selection catalogue…",()=>ExportSelectionCsv(selected)));menu.Items.Add(new Separator());
    menu.Items.Add(FileAction("Edit metadata…",()=>Edit(false)));
    menu.Items.Add(FileAction("Identify target…",()=>Identify(false),selected.Any(f=>f.Kind=="Light"||f.Kind=="Stack"||f.Kind=="Unknown")));
    menu.Items.Add(FileAction("Show file in Explorer",()=>ShowFile(selected[0]),selected.Count==1));
    menu.Items.Add(new Separator());var delete=FileAction("Delete selected files…",()=>DeleteFiles(selected));delete.Foreground=new SolidColorBrush(Color.FromRgb(183,40,51));menu.Items.Add(delete);
   }
-  void ShowExportMenu(){if(repo==null||cancel!=null)return;var selected=Context();var menu=new ContextMenu();var choices=ExportMenu(selected);foreach(MenuItem item in choices.Items.Cast<MenuItem>().ToList()){choices.Items.Remove(item);menu.Items.Add(item);}menu.PlacementTarget=B("ExportButton");menu.Placement=PlacementMode.Top;menu.IsOpen=true;}
+  void ShowExportMenu(){if(repo==null||cancel!=null)return;var selected=Context();var menu=ThemedMenu();var choices=ExportMenu(selected);foreach(MenuItem item in choices.Items.Cast<MenuItem>().ToList()){choices.Items.Remove(item);menu.Items.Add(item);}menu.PlacementTarget=B("ExportButton");menu.Placement=PlacementMode.Top;menu.IsOpen=true;}
+  void ExportSelectionCsv(List<Frame> selected){var picker=new Microsoft.Win32.SaveFileDialog{FileName="AstroArchive_selection.csv",Filter="CSV catalogue|*.csv"};if(picker.ShowDialog(Window)==true){repo.ExportIndex(picker.FileName,selected);L("StatusLabel").Text=selected.Count+" catalogue rows exported.";}}
   void ShowFile(Frame frame){string path=repo.FilePath(frame);if(File.Exists(path))Process.Start(new ProcessStartInfo("explorer.exe","/select,\""+path+"\""){UseShellExecute=true});else MessageBox.Show(Window,"This file is missing from the repository.","File unavailable");}
   void ExportFiles(List<Frame> selected){
    if(selected.Count==0)return;var d=new FormWindow(Window,"Export selected files",610,440);
@@ -73,7 +75,7 @@ namespace AstroArchive {
    ComboBox mode=d.Select("Inputs",new[]{"Subs","Stacks","Both"},items.All(f=>f.Kind=="Light")?"Subs":items.All(f=>f.Kind=="Stack")?"Stacks":"Both");
    CheckBox sessions=d.Check("Separate sessions into their own folders",false),calibration=d.Check("Include matching calibration files",withCalibration),unknown=d.Check("Include calibrations for subs with unknown calibration state",false),rejected=d.Check("Include files marked rejected/reference",false);
    var availableCalibrations=Exporter.ExistingCalibrations(repo,all);
-   var availability=new TextBlock{TextWrapping=TextWrapping.Wrap,Foreground=Brushes.SlateGray,Margin=new Thickness(0,12,0,8)};d.Add(availability);
+   var availability=new TextBlock{TextWrapping=TextWrapping.Wrap,Margin=new Thickness(0,12,0,8)};Theme.Bind(availability,TextBlock.ForegroundProperty,"Muted");d.Add(availability);
    Action summary=()=>{unknown.IsEnabled=calibration.IsChecked==true&&Convert.ToString(mode.SelectedItem)!="Stacks";var lights=items.Where(f=>f.Kind=="Light"&&(rejected.IsChecked==true||!f.Rejected)).ToList();int count=Convert.ToString(mode.SelectedItem)=="Stacks"||calibration.IsChecked!=true?0:Exporter.AvailableCalibrations(lights,availableCalibrations,sessions.IsChecked==true,unknown.IsChecked==true).Count;availability.Text=calibration.IsChecked!=true?"Selected inputs only. Calibration files are omitted.":Convert.ToString(mode.SelectedItem)=="Stacks"?"Existing stacks receive no additional calibration files.":count>0?count+" matching calibration files available. Already calibrated or registered subs receive no extra calibration.":"No matching calibration files are available for these inputs. You can still export the selected captures.";};
    foreach(var check in new[]{sessions,calibration,unknown,rejected}){check.Checked+=(s,e)=>summary();check.Unchecked+=(s,e)=>summary();}mode.SelectionChanged+=(s,e)=>summary();summary();
    d.Text("Each target, camera and compatible capture group has its own input folder. Masters and raw calibration sets stay separate. Stack the exported inputs in your preferred software.");
@@ -87,7 +89,7 @@ namespace AstroArchive {
    var d=new FormWindow(Window,"Delete selected files",640,520);d.Text("Delete "+selected.Count+" selected file"+(selected.Count==1?"":"s")+"?",true);d.Text(repo.Root);
    d.Text("This permanently removes the selected repository copies and their database records. Source copies, other archive files and shared session metadata stay. Cloud-synced deletions propagate to the cloud.");
    d.Add(new TextBox{Text=string.Join("\r\n",selected.Select(f=>f.RelativePath)),IsReadOnly=true,Height=170,VerticalScrollBarVisibility=ScrollBarVisibility.Auto,HorizontalScrollBarVisibility=ScrollBarVisibility.Auto});
-   d.Accept("Delete selected files",()=>true,true);if(!d.Show())return;
+   d.Accept("Delete selected files",()=>true,true);if(!d.Show())return;CancelPreview();
    Run(ct=>{var result=repo.DeleteFrames(selected,ct,Progress);return result.Deleted+" selected files deleted."+(result.Errors.Count==0?"":"\r\n\r\n"+string.Join("\r\n",result.Errors));},message=>{plan=null;G("ImportGrid").ItemsSource=null;L("StatusLabel").Text=message.Split('\n')[0];if(message.Contains("\n"))ShowReport("File deletion report",message);});
   }
  }

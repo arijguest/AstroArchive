@@ -22,7 +22,7 @@ namespace AstroArchive {
    InstallRecord installed;try{installed=RunningRelease();}catch(Exception e){d.Text("The installation record could not be read: "+e.Message);d.CloseOnly();d.Show();return;}
    d.Text("Current version: "+installed.Version+"  ·  Package: "+installed.PackageVersion);
    d.Text("Check the latest stable release and download its Windows installer. Downloads are verified before saving. Close AstroArchive before running the installer.");
-   var status=new TextBlock{Text="Ready to check for a new release.",TextWrapping=TextWrapping.Wrap,Foreground=Brushes.SlateGray,Margin=new Thickness(0,12,0,16)};d.Add(status);
+   var status=new TextBlock{Text="Ready to check for a new release.",TextWrapping=TextWrapping.Wrap,Margin=new Thickness(0,12,0,16)};Theme.Bind(status,TextBlock.ForegroundProperty,"Muted");d.Add(status);
    var progress=new ProgressBar{Height=5,IsIndeterminate=true,Visibility=Visibility.Collapsed,Margin=new Thickness(0,0,0,16)};d.Add(progress);
    var client=new UpdateClient();UpdateManifest available=null;bool busy=false;Button check=null,download=null;string saved=null;
    Action refresh=()=>{check.IsEnabled=!busy;download.IsEnabled=!busy&&available!=null;progress.Visibility=busy?Visibility.Visible:Visibility.Collapsed;};

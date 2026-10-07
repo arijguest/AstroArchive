@@ -1,6 +1,14 @@
-# AstroArchive 1.3.0
+# AstroArchive 1.4.0
 
 Portable Windows 10/11 x64 WPF app for archiving smart-telescope FITS and creating verified stacking projects. Open `AstroArchive.exe`; read `Quick_Start.txt` for the complete workflow.
+
+## Changes in 1.4.0
+
+- Compact six-column library, smaller header, resizable preview pane, and settings categories.
+- Persistent System/Light/Dark appearance with a quick theme switch; dialogs and menus share the theme.
+- Cancellable colour previews for FITS/gzip FITS and XISF, with Linear, Auto, Strong and per-channel stretch. CFA metadata is respected; previews never modify source pixels.
+- TIFF, PNG, JPEG, BMP, GIF and Windows photo codecs, preserving high-depth samples. Camera RAW formats need a compatible installed Windows codec.
+- Preview/path-copy actions and selection-only CSV exports alongside the upstream file tools.
 
 ## Changes in 1.3.0
 
@@ -36,7 +44,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\test.ps1
 
 `dist/AstroArchive.exe` embeds XAML, catalogue, logo, icons and Windows manifest. Settings/API-key protection and the working database use the Windows user's local app data. `.astroarchive/index.sqlite` is the portable snapshot and must stay with the archive. Run one writer for a given archive; cloud services do not provide distributed SQLite coordination. The code does not authenticate to Google Drive or require a particular mounted drive letter.
 
-The UI smoke option creates synthetic rows, checks filtering/defaults and renders the interface without importing user files. The console suite creates isolated generated-FITS data and an ASTAP protocol double. See `Validation.txt` for the packaged build's results. Windows-native file identity/deletion, WPF interaction and live Google Drive could not be tested in the Linux build environment. Real telescope captures and authenticated plate solving were unavailable. The protocol double does not solve real astronomical images.
+The UI smoke option creates synthetic rows, checks filtering/defaults, renders light/dark/hidden-preview layouts, and exercises PNG/JPEG/high-depth TIFF codecs without importing user files. The console suite creates isolated generated-FITS data and an ASTAP protocol double. See `Validation.txt` for the packaged build's results. Windows-native file identity/deletion, WPF interaction and live Google Drive could not be tested in the Linux build environment. Real telescope captures and authenticated plate solving were unavailable. The protocol double does not solve real astronomical images.
 
 ## Performance and failure handling
 
@@ -50,6 +58,8 @@ The previous user's time-dependent import failure could not be reproduced agains
 
 Supported FITS suffixes: `.fit`, `.fits`, `.fts`, and `.gz` variants. Primary/IMAGE HDUs; integer/floating pixels, mono/CFA and up to four colour planes. Tile-compressed `.fz`, multi-frame cubes and non-FITS data require conversion. DWARF factory PNG calibration is outside this FITS archive; converted files need camera metadata or preserved `cam_0`/`cam_1` structure. Dimensions/binning alone do not identify the camera. Unknown make/model, conflicting channels and uncertain target intent remain for review.
 
+Preview supports FITS RGB and Bayer CFA, and XISF mono/RGB/CFA images with integer or floating samples, planar or interleaved storage, attached or base64 data, zlib/LZ4/LZ4HC compression, and byte shuffle. XISF decoded samples are bounded to 256 MB; zstd and complex samples are unsupported. Standard raster and camera RAW previews use installed Windows codecs. Large previews are sampled to about 1400 pixels per side; zoom scales the display sample. Preview support does not extend FITS-only archive import.
+
 Metadata corrections may move archived copies without modifying FITS pixels/headers. Exports create new folders and do not overwrite projects. Stacking itself is performed in external software.
 
 ## Source layout
@@ -60,8 +70,9 @@ Metadata corrections may move archived copies without modifying FITS pixels/head
 - `SourceCleanup.cs`, `ArchiveReset.cs`, `FileDeletion.cs`: verified source cleanup and scoped archive deletion.
 - `Rotation.cs`, `PlateSolve.cs`: star matching, mount inference, ASTAP/Astrometry.net and candidate matching.
 - `Export.cs`: session-aware verified projects and calibration safeguards.
+- `PreviewData.cs`, `Xisf.cs`, `PreviewUi.cs`, `Theme.cs`: bounded image samples, stretch, native XISF decoding, preview pane and appearance.
 - `App.cs`, `FileToolsUi.cs`, `ReleasesUi.cs`, `MainWindow.xaml`, `NativeFolderPicker.cs`, `Assets/`: WPF interface, native selectors and embedded branding.
-- `Tests.cs`, `MockAstap.cs.txt`, `test.ps1`, `build.ps1`: generated-data checks and Windows build.
+- `Tests.cs`, `PreviewTests.cs`, `MockAstap.cs.txt`, `test.ps1`, `build.ps1`: generated-data checks and Windows build.
 
 ## External documentation and catalogue
 
