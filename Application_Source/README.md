@@ -1,6 +1,12 @@
-# AstroArchive 1.10.0
+# AstroArchive 1.10.1
 
 Portable Windows 10/11 x64 WPF app for archiving astronomical image originals and creating verified stacking projects. Open `AstroArchive.exe`; read `Quick_Start.txt` for the complete workflow.
+
+## Changes in 1.10.1
+
+- Fix WPF clipping the bitmap before the portrait fit transform, restoring the whole image in sidebar and popup previews, including resized and high-DPI bitmaps.
+- Use a centred, single-row preview toolbar with a labelled Fit button. Pan and zoom-out controls enable after zooming; overlay controls retain wheel, pinch, drag and keyboard support.
+- Windows rendering checks inspect all four image quadrants in 16 fit/resize/DPI cases and exercise zoom, pan and Fit button actions.
 
 ## Changes in 1.10.0
 

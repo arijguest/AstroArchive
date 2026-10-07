@@ -1,3 +1,16 @@
+AstroArchive 1.10.1 — image preview display and navigation fix
+Package 1.10.1.1
+
+- Restore the full image in sidebar and popup previews. The portrait renderer now
+  lays out the complete bitmap before applying rotation, fit, zoom and pan, fixing
+  the small upper-left image and large black area introduced in 1.10.0.1.
+- Arrange preview controls in one centred toolbar with a labelled Fit button.
+  Pan and zoom-out controls become available after zooming, and Fit restores the
+  whole image. Wheel, pinch, drag and keyboard controls are retained.
+- Add Windows pixel-rendering checks across portrait, landscape, square, resized,
+  upscaled and high-DPI bitmap previews, plus button navigation checks.
+- Preview changes affect display only; originals and archive image data stay intact.
+
 AstroArchive 1.10.0 — compact filters, portrait previews and Windows diagnostics
 Package 1.10.0.1
 
