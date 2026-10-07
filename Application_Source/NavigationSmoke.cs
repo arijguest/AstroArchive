@@ -68,6 +68,8 @@ namespace AstroArchive {
                     if (bounds.Right > menu.ActualWidth + 1 || bounds.Bottom > menu.ActualHeight + 1 || item.FontSize < 19) throw new Exception("Large-text navigation is clipped or does not scale.");
                 }
                 var tableViewer = PopupChildren<ScrollViewer>(grid).First();
+                if (grid.Columns.Any(column => column.Visibility == Visibility.Visible && column.ActualWidth + 1 < column.MinWidth)) throw new Exception("Table squeezed columns below their readable minimum.");
+                if (grid.Columns.Where(column => column.Visibility == Visibility.Visible).Sum(column => column.MinWidth) > grid.ActualWidth + 1 && tableViewer.ExtentWidth <= tableViewer.ViewportWidth + 1) throw new Exception("Wide columns cannot be reached by scrolling.");
                 if (tableViewer.ExtentWidth > tableViewer.ViewportWidth + 1 && !PopupChildren<ScrollBar>(tableViewer).Any(bar => bar.Orientation == Orientation.Horizontal && bar.IsVisible && bar.ActualWidth > 40)) throw new Exception("Wide table has no usable horizontal scrollbar.");
                 File.WriteAllText(Path.Combine(output, "navigation-layout.txt"), "Table " + grid.ActualWidth + " x " + grid.ActualHeight + "; extent " + tableViewer.ExtentWidth + "; viewport " + tableViewer.ViewportWidth + "\n" +
                     string.Join("\n", grid.Columns.Where(column => column.Visibility == Visibility.Visible).Select(column => column.Header + ": " + column.Width + ", actual " + column.ActualWidth)) + "\n" +

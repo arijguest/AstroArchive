@@ -25,6 +25,10 @@ namespace AstroArchive {
             Window.Resources["CaptureRowHeight"] = (settings.ComfortableRows ? 44.0 : 32.0) * scale;
             Window.Resources["PreferHighContrast"] = settings.HighContrast;
             Theme.Apply(Window, settings.ThemeMode);
+            foreach (string name in new[] { "FramesGrid", "ImportGrid", "MetricsGrid", "MosaicGrid" }) {
+                var table = Window.FindName(name) as DataGrid;
+                if (table != null) TableSortIndicators.SizeColumns(table, scale);
+            }
         }
         AccessibilityChoices AddAccessibilityPreferences(FormWindow dialog) {
             dialog.Tab(4);

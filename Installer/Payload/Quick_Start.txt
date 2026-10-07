@@ -623,6 +623,8 @@ while processing. Repository > Diagnostics opens the performance table and last
 import report when needed. Table headings show ascending (▲) or descending (▼)
 sorting. Numbers show priority when several headings sort together. Shift-click
 adds a heading; click again to reverse. Saved heading layouts remain independent.
+Tables keep readable heading widths. Use horizontal scrolling or hide the preview
+pane from Repository > View to see additional columns.
 
 Settings > Preferences contains Appearance; Settings > Accessibility opens
 accessibility preferences. Choose text size
