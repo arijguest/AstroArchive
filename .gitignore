@@ -10,3 +10,5 @@ Installer/GeneratedVersion.cs
 *.suo
 .vs/
 release-artifacts/
+windows-build.log
+failure-report.json

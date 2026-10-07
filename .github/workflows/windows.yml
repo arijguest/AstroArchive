@@ -18,11 +18,35 @@ jobs:
   build:
     runs-on: windows-2022
     timeout-minutes: 20
+    permissions:
+      contents: read
+      checks: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Test application, installer and updater; build Windows package
         shell: powershell
-        run: .\scripts\build-release.ps1
+        run: |
+          Start-Transcript -Path windows-build.log
+          try { .\scripts\build-release.ps1 }
+          finally { Stop-Transcript }
+      - name: Report Windows failure details
+        if: failure()
+        shell: powershell
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $log = if (Test-Path windows-build.log) { Get-Content windows-build.log -Raw } else { 'Build failed before a transcript was created.' }
+          if ($log.Length -gt 50000) { $log = $log.Substring($log.Length - 50000) }
+          $report = @{
+            name = 'Windows validation details'
+            head_sha = $env:GITHUB_SHA
+            status = 'completed'
+            conclusion = 'failure'
+            output = @{ title = 'Windows validation failed'; summary = ('```text' + "`n" + $log + "`n" + '```') }
+          } | ConvertTo-Json -Depth 5
+          [IO.File]::WriteAllText('failure-report.json', $report, (New-Object Text.UTF8Encoding($false)))
+          gh api "repos/$env:GITHUB_REPOSITORY/check-runs" --method POST --input failure-report.json
+          if ($LASTEXITCODE -ne 0) { throw 'Could not report Windows failure details.' }
       - uses: actions/upload-artifact@v4
         with:
           name: windows-release
