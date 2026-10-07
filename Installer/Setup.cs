@@ -30,29 +30,35 @@ namespace AstroArchive.Installation {
    TextBox location;Button install,browse,cancel;Label status,summary;ProgressBar progress;CheckBox launch;bool busy;readonly bool updateOnly;public int Result=1;
    public SetupForm(string root,bool onlyUpdate){
     updateOnly=onlyUpdate;Text="AstroArchive "+ApplicationVersion+" Setup";Icon=Icon.ExtractAssociatedIcon(Assembly.GetExecutingAssembly().Location);
-    AutoScaleDimensions=new SizeF(96,96);AutoScaleMode=AutoScaleMode.Dpi;ClientSize=new Size(720,490);MinimumSize=new Size(700,520);MaximizeBox=false;StartPosition=FormStartPosition.CenterScreen;
+    AutoScaleDimensions=new SizeF(96,96);AutoScaleMode=AutoScaleMode.Dpi;ClientSize=new Size(820,650);MinimumSize=new Size(780,640);StartPosition=FormStartPosition.CenterScreen;
     Font=new Font("Segoe UI",10);BackColor=Color.FromArgb(242,245,250);
     var header=new Panel{Dock=DockStyle.Top,Height=112,BackColor=Color.FromArgb(17,28,55)};
     using(var stream=new MemoryStream(Resource("logo.png")))header.Controls.Add(new PictureBox{Image=new Bitmap(Image.FromStream(stream)),SizeMode=PictureBoxSizeMode.Zoom,Location=new Point(24,18),Size=new Size(76,76)});
     header.Controls.Add(new Label{Text="AstroArchive",ForeColor=Color.White,Font=new Font("Segoe UI",23,FontStyle.Bold),Location=new Point(120,23),AutoSize=true});
     header.Controls.Add(new Label{Text="Version "+ApplicationVersion+"  ·  Windows 10 / 11",ForeColor=Color.FromArgb(194,210,235),Location=new Point(123,72),AutoSize=true});
-    var footer=new Panel{Dock=DockStyle.Bottom,Height=108,BackColor=Color.White,Padding=new Padding(28,12,28,16)};
-    status=new Label{Text="Ready. Close AstroArchive before continuing.",Dock=DockStyle.Top,Height=25,AutoEllipsis=true,ForeColor=Color.FromArgb(77,96,124)};footer.Controls.Add(status);
-    progress=new ProgressBar{Dock=DockStyle.Top,Height=5,Visible=false,Style=ProgressBarStyle.Marquee};footer.Controls.Add(progress);progress.BringToFront();
-    var actions=new FlowLayoutPanel{Dock=DockStyle.Bottom,Height=40,FlowDirection=FlowDirection.RightToLeft,WrapContents=false};
-    install=new Button{Text="Install AstroArchive",AutoSize=true,MinimumSize=new Size(164,36),Padding=new Padding(12,3,12,3),BackColor=Color.FromArgb(77,85,199),ForeColor=Color.White,FlatStyle=FlatStyle.Flat,Cursor=Cursors.Hand};install.FlatAppearance.BorderSize=0;install.Click+=InstallClick;actions.Controls.Add(install);
-    cancel=new Button{Text="Cancel",Size=new Size(100,36),FlatStyle=FlatStyle.Flat,BackColor=Color.White,ForeColor=Color.FromArgb(36,50,71),Cursor=Cursors.Hand,Margin=new Padding(0,3,12,3)};cancel.FlatAppearance.BorderColor=Color.FromArgb(203,213,227);cancel.Click+=(sender,args)=>Close();actions.Controls.Add(cancel);footer.Controls.Add(actions);
-    var body=new TableLayoutPanel{Dock=DockStyle.Fill,Padding=new Padding(28,20,28,16),ColumnCount=1,RowCount=6};body.ColumnStyles.Add(new ColumnStyle(SizeType.Percent,100));
-    for(int row=0;row<5;row++)body.RowStyles.Add(new RowStyle(SizeType.AutoSize));body.RowStyles.Add(new RowStyle(SizeType.Percent,100));
-    body.Controls.Add(new Label{Text=updateOnly?"Update your capture library":"Set up your capture library",AutoSize=true,Font=new Font("Segoe UI",15,FontStyle.Bold),ForeColor=Color.FromArgb(36,50,71),Margin=new Padding(0,0,0,12)},0,0);
-    summary=new Label{AutoSize=true,MaximumSize=new Size(650,0),ForeColor=Color.FromArgb(77,96,124),Margin=new Padding(0,0,0,18)};body.Controls.Add(summary,0,1);
+    var footer=new TableLayoutPanel{Dock=DockStyle.Bottom,AutoSize=true,AutoSizeMode=AutoSizeMode.GrowAndShrink,BackColor=Color.White,Padding=new Padding(32,16,32,20),ColumnCount=1,RowCount=3};
+    footer.ColumnStyles.Add(new ColumnStyle(SizeType.Percent,100));for(int row=0;row<3;row++)footer.RowStyles.Add(new RowStyle(SizeType.AutoSize));
+    status=new Label{Text="Ready. Close AstroArchive before continuing.",AutoSize=true,ForeColor=Color.FromArgb(77,96,124),Margin=new Padding(0,0,0,12)};footer.Controls.Add(status,0,0);
+    progress=new ProgressBar{Dock=DockStyle.Fill,Height=6,Visible=false,Style=ProgressBarStyle.Marquee,Margin=new Padding(0,0,0,12)};footer.Controls.Add(progress,0,1);
+    var actions=new FlowLayoutPanel{Dock=DockStyle.Fill,AutoSize=true,FlowDirection=FlowDirection.RightToLeft,WrapContents=false,Margin=new Padding(0)};
+    install=new Button{Text="Install AstroArchive",AutoSize=true,MinimumSize=new Size(184,42),Padding=new Padding(16,6,16,6),Margin=new Padding(0),BackColor=Color.FromArgb(77,85,199),ForeColor=Color.White,FlatStyle=FlatStyle.Flat,Cursor=Cursors.Hand};install.FlatAppearance.BorderSize=0;install.Click+=InstallClick;actions.Controls.Add(install);
+    cancel=new Button{Text="Cancel",AutoSize=true,MinimumSize=new Size(108,42),Padding=new Padding(12,6,12,6),FlatStyle=FlatStyle.Flat,BackColor=Color.White,ForeColor=Color.FromArgb(36,50,71),Cursor=Cursors.Hand,Margin=new Padding(0,0,12,0)};cancel.FlatAppearance.BorderColor=Color.FromArgb(203,213,227);cancel.Click+=(sender,args)=>Close();actions.Controls.Add(cancel);footer.Controls.Add(actions,0,2);
+    var viewport=new Panel{Dock=DockStyle.Fill,AutoScroll=true};
+    var body=new TableLayoutPanel{Dock=DockStyle.Top,AutoSize=true,AutoSizeMode=AutoSizeMode.GrowAndShrink,Padding=new Padding(32,28,32,28),ColumnCount=1,RowCount=6};body.ColumnStyles.Add(new ColumnStyle(SizeType.Percent,100));
+    for(int row=0;row<6;row++)body.RowStyles.Add(new RowStyle(SizeType.AutoSize));
+    body.Controls.Add(new Label{Text=updateOnly?"Update your capture library":"Set up your capture library",AutoSize=true,Font=new Font("Segoe UI",15,FontStyle.Bold),ForeColor=Color.FromArgb(36,50,71),Margin=new Padding(0,0,0,16)},0,0);
+    summary=new Label{AutoSize=true,ForeColor=Color.FromArgb(77,96,124),Margin=new Padding(0,0,0,24)};body.Controls.Add(summary,0,1);
     body.Controls.Add(new Label{Text="Installation folder",AutoSize=true,ForeColor=Color.FromArgb(83,98,120),Margin=new Padding(0,0,0,7)},0,2);
-    var folder=new TableLayoutPanel{Dock=DockStyle.Fill,ColumnCount=2,AutoSize=true,Margin=new Padding(0,0,0,12)};folder.ColumnStyles.Add(new ColumnStyle(SizeType.Percent,100));folder.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
-    location=new TextBox{Text=root,Dock=DockStyle.Fill,Margin=new Padding(0,4,12,0),ReadOnly=updateOnly};folder.Controls.Add(location,0,0);
-    browse=new Button{Text="Browse…",Size=new Size(98,32),Margin=new Padding(0),Enabled=!updateOnly,Cursor=Cursors.Hand};browse.Click+=(sender,args)=>{string path=AstroArchive.NativeFolderPicker.Select(Handle,"Choose an installation folder",location.Text);if(path!=null)location.Text=path;};folder.Controls.Add(browse,1,0);body.Controls.Add(folder,0,3);
-    body.Controls.Add(new Label{Text="Your repositories, images and settings are kept.\nDesktop and Start menu shortcuts are included. No administrator access is needed.",AutoSize=true,MaximumSize=new Size(650,0),ForeColor=Color.FromArgb(77,96,124),Margin=new Padding(0,0,0,16)},0,4);
+    var folder=new TableLayoutPanel{Dock=DockStyle.Fill,ColumnCount=2,AutoSize=true,Margin=new Padding(0,0,0,24)};folder.ColumnStyles.Add(new ColumnStyle(SizeType.Percent,100));folder.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
+    location=new TextBox{Text=root,Dock=DockStyle.Fill,Margin=new Padding(0,6,12,6),ReadOnly=updateOnly};folder.Controls.Add(location,0,0);
+    browse=new Button{Text="Browse…",AutoSize=true,MinimumSize=new Size(108,38),Padding=new Padding(8,4,8,4),Margin=new Padding(0),Enabled=!updateOnly,Cursor=Cursors.Hand};browse.Click+=(sender,args)=>{string path=AstroArchive.NativeFolderPicker.Select(Handle,"Choose an installation folder",location.Text);if(path!=null)location.Text=path;};folder.Controls.Add(browse,1,0);body.Controls.Add(folder,0,3);
+    var preservation=new Label{Text="Your repositories, images and settings are kept.\nDesktop and Start menu shortcuts are included. No administrator access is needed.",AutoSize=true,ForeColor=Color.FromArgb(77,96,124),Margin=new Padding(0,0,0,24)};body.Controls.Add(preservation,0,4);
     launch=new CheckBox{Text="Launch AstroArchive when finished",Checked=true,AutoSize=true,Margin=new Padding(0,0,0,0)};body.Controls.Add(launch,0,5);
-    Controls.Add(body);Controls.Add(footer);Controls.Add(header);location.TextChanged+=(sender,args)=>Describe();Describe();
+    viewport.Controls.Add(body);Controls.Add(viewport);Controls.Add(footer);Controls.Add(header);
+    // Wrap copy to the current content width; the body scrolls on small/high-DPI screens.
+    Action wrap=()=>{int width=Math.Max(240,viewport.ClientSize.Width-body.Padding.Horizontal-SystemInformation.VerticalScrollBarWidth);summary.MaximumSize=preservation.MaximumSize=new Size(width,0);status.MaximumSize=new Size(Math.Max(240,footer.ClientSize.Width-footer.Padding.Horizontal),0);};
+    viewport.SizeChanged+=(sender,args)=>wrap();footer.SizeChanged+=(sender,args)=>wrap();wrap();
+    location.TextChanged+=(sender,args)=>Describe();Describe();
     AcceptButton=install;CancelButton=cancel;FormClosing+=(sender,args)=>{if(busy)args.Cancel=true;};
    }
    void Describe(){
