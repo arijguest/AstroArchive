@@ -1,3 +1,10 @@
+AstroArchive 1.10.3 — larger header branding
+Package 1.10.3.1
+
+- Enlarge the top-right logo from 32 to 40 pixels and the title from 20 to 26.
+  Keep the menus close beneath the repository path and scale the title with
+  accessibility text settings.
+
 AstroArchive 1.10.2 — guide cleanup and toolbar buttons
 Package 1.10.2.1
 

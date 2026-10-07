@@ -19,8 +19,8 @@ namespace AstroArchive {
         void ApplyAppearance() {
             int percent = new[] { 100, 115, 130, 150 }.Contains(settings.TextScalePercent) ? settings.TextScalePercent : 100;
             double scale = percent / 100.0;
-            string[] names = { "UiFontCaption", "UiFontSmall", "UiFontBody", "UiFontControl", "UiFontHeading", "UiFontTitle", "UiFontBrand" };
-            double[] sizes = { 10, 11, 12, 13, 16, 18, 20 };
+            string[] names = { "UiFontCaption", "UiFontSmall", "UiFontBody", "UiFontControl", "UiFontHeading", "UiFontTitle", "UiFontBrand", "UiFontHeaderBrand" };
+            double[] sizes = { 10, 11, 12, 13, 16, 18, 20, 26 };
             for (int i = 0; i < names.Length; i++) Window.Resources[names[i]] = sizes[i] * scale;
             Window.Resources["CaptureRowHeight"] = (settings.ComfortableRows ? 44.0 : 32.0) * scale;
             Window.Resources["PreferHighContrast"] = settings.HighContrast;
