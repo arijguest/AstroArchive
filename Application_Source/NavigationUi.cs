@@ -234,7 +234,7 @@ namespace AstroArchive {
         void ImportPreferences() {
             var dialog = new FormWindow(Window, "Import options", 640, 690);
             dialog.Text("Options for the next import", true);
-            dialog.Text("Review the policy summary on the Import page before copying. Changing model or camera requires a new scan.");
+            dialog.Text("Review the policy summary on the Import page before copying. Changing model, camera or ignored filenames requires a new scan.");
             var model = dialog.Select("Instrument model", TelescopeProfiles.Models.ToArray(), Convert.ToString(C("ModelBox").SelectedItem));
             var camera = dialog.Select("Camera channel", new[] { "Auto", "Telephoto", "Wide" }, Convert.ToString(C("CameraBox").SelectedItem));
             var solve = dialog.Select("Target analysis", new[] { "Off", "Ambiguous only", "All light/stack files" }, Convert.ToString(C("ImportSolveMode").SelectedItem));
@@ -246,7 +246,7 @@ namespace AstroArchive {
             dialog.Text("Original removal applies only to newly imported, verified files. Scanning another source resets it. Cloud-synced source deletions propagate.");
             dialog.Accept("Apply import options", () => true);
             if (!dialog.Show()) return;
-            bool rescan = !Equals(model.SelectedItem, C("ModelBox").SelectedItem) || !Equals(camera.SelectedItem, C("CameraBox").SelectedItem);
+            bool rescan = !Equals(model.SelectedItem, C("ModelBox").SelectedItem) || !Equals(camera.SelectedItem, C("CameraBox").SelectedItem) || failed.IsChecked != ((CheckBox)Window.FindName("IgnoreFailedCheck")).IsChecked;
             C("ModelBox").SelectedItem = model.SelectedItem; C("CameraBox").SelectedItem = camera.SelectedItem;
             C("ImportSolveMode").SelectedItem = solve.SelectedItem; C("ImportRotationMode").SelectedItem = rotation.SelectedItem;
             ((CheckBox)Window.FindName("SkipFlaggedCheck")).IsChecked = flagged.IsChecked;
