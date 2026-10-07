@@ -8,8 +8,8 @@ namespace AstroArchive {
  public partial class MainUi {
   // Check the pixels WPF actually draws: transform-only tests miss layout clips.
   void SmokePreviewRendering(string output){
-   var host=new Grid{Width=264,Height=520};var stage=new Grid();var image=new Image();stage.Children.Add(image);host.Children.Add(stage);var preview=new PreviewViewport(host,stage,image);
-   var window=new Window{Owner=Window,Content=host,SizeToContent=SizeToContent.WidthAndHeight,WindowStartupLocation=WindowStartupLocation.CenterOwner,ShowInTaskbar=false};
+   var host=new Grid{Width=264,Height=520,HorizontalAlignment=HorizontalAlignment.Left,VerticalAlignment=VerticalAlignment.Top};var stage=new Grid();var image=new Image();stage.Children.Add(image);host.Children.Add(stage);var preview=new PreviewViewport(host,stage,image);
+   var window=new Window{Owner=Window,Content=host,Width=600,Height=650,WindowStartupLocation=WindowStartupLocation.CenterOwner,ShowInTaskbar=false};
    int cases=0;try{window.Show();
     foreach(var dimensions in new[]{new[]{1280,720},new[]{720,1280},new[]{1024,1024},new[]{120,180}}){
      int width=dimensions[0],height=dimensions[1];var rgb=new byte[width*height*3];
@@ -20,9 +20,10 @@ namespace AstroArchive {
       foreach(var size in new[]{new[]{264.0,520.0},new[]{460.0,300.0}}){
        host.Width=size[0];host.Height=size[1];PumpPopupLayout();preview.Resize();PumpPopupLayout();preview.Fit();PumpPopupLayout();
        int w=(int)Math.Ceiling(stage.ActualWidth),h=(int)Math.Ceiling(stage.ActualHeight);if(w<1||h<1)throw new InvalidOperationException("Preview render fixture has no viewport.");
-       // Capture local viewport coordinates, excluding its centring offset in the host.
-       var drawing=new DrawingVisual();using(var context=drawing.RenderOpen())context.DrawRectangle(new VisualBrush(stage){ViewboxUnits=BrushMappingMode.Absolute,Viewbox=new Rect(0,0,stage.ActualWidth,stage.ActualHeight),Stretch=Stretch.Fill},null,new Rect(0,0,w,h));
-       var rendered=new RenderTargetBitmap(w,h,96,96,PixelFormats.Pbgra32);rendered.Render(drawing);var actual=new byte[w*h*4];rendered.CopyPixels(actual,w*4,0);
+       // Capture the root, then crop the centred stage in its host coordinates.
+       // Rendering a centred child directly retains its parent layout offset.
+       var full=new RenderTargetBitmap((int)Math.Ceiling(host.ActualWidth),(int)Math.Ceiling(host.ActualHeight),96,96,PixelFormats.Pbgra32);full.Render(host);
+       var origin=stage.TranslatePoint(new Point(),host);var rendered=new CroppedBitmap(full,new Int32Rect((int)Math.Round(origin.X),(int)Math.Round(origin.Y),w,h));var actual=new byte[w*h*4];rendered.CopyPixels(actual,w*4,0);
        int[] order=width>height?new[]{2,0,3,1}:new[]{0,1,2,3};
        for(int quadrant=0;quadrant<4;quadrant++){
         int x=(int)(w*(quadrant%2==0?0.2:0.8)),y=(int)(h*(quadrant<2?0.2:0.7)),offset=(y*w+x)*4;var expected=colors[order[quadrant]];
