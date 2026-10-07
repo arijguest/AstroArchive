@@ -1,26 +1,30 @@
-AstroArchive 1.5.0 — import performance and continuous ETA
-Package 1.5.0.1
+AstroArchive 1.6.0 — USB imports, simpler filters and readable menus
+Package 1.6.0.1
 
-Progress and elapsed timers start before metadata processing. Copy progress and
-ETA now advance inside the first large file and during destination verification.
-Recent throughput and measured copy/verification costs drive estimates; prior
-timings seed provisional estimates. Provider stalls, optional cleanup and final
-index/manifest work are shown explicitly. Project and selected-file exports share these timers.
+This release combines the pending import interface, telescope management and
+programme-wide dropdown fixes with the released preview and performance updates.
 
-Discovery continues while bounded metadata workers inspect files. A local spill
-inventory avoids delaying scan totals behind cloud reads. Shared session JSON is
-read once per scan, filename target matching is indexed and live frame snapshots
-avoid JSON serialization. Trusted unchanged FITS headers can be reused on a
-rescan before import; current session metadata and user overrides are reapplied.
+- Detect local USB telescope storage and auto-upload missing captures. Save or
+  select a physical telescope profile; recover profiles from the repository.
+  Volume identity keeps the association when Windows changes its drive letter.
+- Rename saved telescopes across archive paths, metadata, source manifests and
+  deletion history while preserving FITS bytes and acquisition sessions.
+  Interrupted renames recover or roll back when the repository reopens.
+- Use one Filters menu in the library and import views. Import only the ready
+  files shown in the filtered results; the button displays their count.
+- Compact source setup with collapsed import options. Screen captures for failure
+  and rejection markers, unreadable FITS payloads and archive checksum problems.
+  USB auto-upload leaves rejected or damaged captures available for review.
+- Preserve deletion history by SHA-256. Later imports skip matching content even
+  if the source name, folder or telescope drive letter changes. Archive reset
+  retains the log, which travels with the portable repository index.
+- Fix text overlap in menus and dropdowns throughout the programme. Popups reserve
+  separate space for themed scrollbars, hide them when unnecessary, and keep
+  long menus, submenus and selections reachable within the screen.
+- Retain the 1.4 colour previews/themes and 1.5 continuous progress, rolling ETA,
+  discovery/metadata caching and verified copy performance improvements.
 
-Copy/hash buffers are reused, duplicate checks use indexed archive lookups,
-unchanged verified snapshots are skipped, and worker tuning uses smaller
-size-spread samples and stops escalation when throughput stops improving.
-SHA-256 copying, independent destination verification and source-retention
-checks remain in place. Cloud filesystem completion does not imply that a
-provider has finished its subsequent remote upload.
-
-The 1.4.0 themes, compact library, colour previews and file tools are retained.
-New downloads use AstroArchive1.5.0.1.exe. Existing archives and settings are
-preserved. Windows regression, build and installation/UI smoke checks gate the
-release. Planning documents are not included.
+Download AstroArchive1.6.0.1.exe. The Windows release workflow validates application
+regressions, native file checks, installer repair/uninstall and WPF rendering.
+Physical telescope USB arrival/removal and live cloud provider behaviour require
+separate validation with real hardware and accounts.

@@ -87,10 +87,10 @@ namespace AstroArchive {
   void DeleteFiles(List<Frame> selected){
    if(repo==null||cancel!=null||selected.Count==0)return;
    var d=new FormWindow(Window,"Delete selected files",640,520);d.Text("Delete "+selected.Count+" selected file"+(selected.Count==1?"":"s")+"?",true);d.Text(repo.Root);
-   d.Text("This permanently removes the selected repository copies and their database records. Source copies, other archive files and shared session metadata stay. Cloud-synced deletions propagate to the cloud.");
+   d.Text("This permanently removes the selected repository copies. Deletion history is retained so future telescope imports skip the same captures. Source copies, other archive files and shared session metadata stay. Cloud-synced deletions propagate to the cloud.");
    d.Add(new TextBox{Text=string.Join("\r\n",selected.Select(f=>f.RelativePath)),IsReadOnly=true,Height=170,VerticalScrollBarVisibility=ScrollBarVisibility.Auto,HorizontalScrollBarVisibility=ScrollBarVisibility.Auto});
    d.Accept("Delete selected files",()=>true,true);if(!d.Show())return;CancelPreview();
-   Run(ct=>{var result=repo.DeleteFrames(selected,ct,Progress);return result.Deleted+" selected files deleted."+(result.Errors.Count==0?"":"\r\n\r\n"+string.Join("\r\n",result.Errors));},message=>{plan=null;G("ImportGrid").ItemsSource=null;L("StatusLabel").Text=message.Split('\n')[0];if(message.Contains("\n"))ShowReport("File deletion report",message);});
+   Run(ct=>{var result=repo.DeleteFrames(selected,ct,Progress);return result.Deleted+" selected files deleted."+(result.Errors.Count==0?"":"\r\n\r\n"+string.Join("\r\n",result.Errors));},message=>{plan=null;FilterImports();L("StatusLabel").Text=message.Split('\n')[0];if(message.Contains("\n"))ShowReport("File deletion report",message);});
   }
  }
 }

@@ -1,6 +1,16 @@
-# AstroArchive 1.5.0
+# AstroArchive 1.6.0
 
 Portable Windows 10/11 x64 WPF app for archiving smart-telescope FITS and creating verified stacking projects. Open `AstroArchive.exe`; read `Quick_Start.txt` for the complete workflow.
+
+## Changes in 1.6.0
+
+- Local USB telescope detection and auto-upload, with saved profiles that survive changed drive letters and can be recovered from archive metadata.
+- Telescope renaming updates saved profiles, archive paths, index/manifests and deletion history while preserving capture bytes and session identity. Interrupted renames recover on reopen.
+- One Filters menu for both library and import results, including camera, night, session, calibration, exposure, dimensions, status and review. Import copies the ready files in the filtered view and shows their count.
+- Compact import setup with collapsed options, failure screening, durable checksum-based deletion history, and USB imports that leave flagged captures for review.
+- Export, file context menus and repository tools no longer draw the native icon gutter over menu text.
+- Menus, submenus and dropdowns share a popup layout that reserves separate space for scrollbars and hides them when all items fit.
+- Scrollbars and menu separators follow the selected theme throughout the application. Long popups remain scrollable within the screen.
 
 ## Changes in 1.5.0
 
@@ -31,9 +41,9 @@ Portable Windows 10/11 x64 WPF app for archiving smart-telescope FITS and creati
 - Indexed SQLite source manifest with path, file identity, size, modification/change times, SHA-256, destination, metadata and completion status. Stable verified NTFS/ReFS files can skip content reads; cloud/unsupported metadata never establishes a duplicate.
 - Source hashing during temporary copying, destination verification, coordinated transactions and guarded source removal. Limited retries isolate per-file failures. Disk-full errors stop safely with committed copies retained.
 - A local working SQLite index with FULL synchronous rollback-journal transactions and verified portable snapshots avoids an active database on a provider-backed archive. Snapshot backups use SQLite's backup API and self-contained rollback-journal destinations. Error reports include paths and native/SQLite codes.
-- Adaptive 1/2/4/8-worker trials use real import batches, starting at 1 and retaining a faster result. Fixed worker counts and Retune are available. Workload and cache effects apply.
+- Adaptive 1/2/4/8-worker trials use real import batches, starting at 1 and retaining a faster result. Fixed worker counts remain available in Settings. Workload and cache effects apply.
 - Solving and rotation are off by default. Import selects Off, Ambiguous only or All, warns about runtime, and runs analysis after copying. Representative/session analysis and content-validated caches avoid unnecessary repetition.
-- Explicit streamed/cloud source mode separates provider read/download waiting from local copying. Nonredirecting cloud placeholder directories are allowed; directory symlinks/junctions are skipped. Offline inputs avoid on-demand download delays.
+- Automatically detected cloud placeholders separate provider read/download waiting from local copying. Nonredirecting cloud placeholder directories are allowed; directory symlinks/junctions are skipped. Offline inputs avoid on-demand download delays.
 - DWARF `cam_0`/camera 0 = telephoto, `cam_1`/camera 1 = wide. Conflicts remain unknown. Camera-specific calibration matching and export groups never mix channels.
 - Stacking projects have an off-by-default Separate sessions option. Compatible sessions merge by default; opting in gives each session its own subdirectory. Merged calibration must match every light.
 - The Clear filter button stays. Settings adds a red archive reset requiring a completed slider drag and a separate permanent-delete click. Sources and unindexed files remain outside its scope.
@@ -52,7 +62,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\test.ps1
 
 `dist/AstroArchive.exe` embeds XAML, catalogue, logo, icons and Windows manifest. Settings/API-key protection and the working database use the Windows user's local app data. `.astroarchive/index.sqlite` is the portable snapshot and must stay with the archive. Run one writer for a given archive; cloud services do not provide distributed SQLite coordination. The code does not authenticate to Google Drive or require a particular mounted drive letter.
 
-The UI smoke option creates synthetic rows, checks filtering/defaults, renders light/dark/hidden-preview layouts, and exercises PNG/JPEG/high-depth TIFF codecs without importing user files. The console suite creates isolated generated-FITS data and an ASTAP protocol double. See `Validation.txt` for the packaged build's results. Windows-native file identity/deletion, WPF interaction and live Google Drive could not be tested in the Linux build environment. Real telescope captures and authenticated plate solving were unavailable. The protocol double does not solve real astronomical images.
+The UI smoke option creates synthetic rows, checks filtering/defaults, renders light/dark/hidden-preview layouts, and exercises PNG/JPEG/high-depth TIFF codecs without importing user files. The console suite creates isolated generated-FITS data and an ASTAP protocol double. See `Validation.txt` for the packaged build's results. The Windows release workflow runs native file identity/deletion, WPF and installer checks. Physical telescope USB behaviour, live Google Drive and authenticated plate solving require separate hardware/provider validation. The protocol double does not solve real astronomical images.
 
 ## Performance and failure handling
 
@@ -75,7 +85,8 @@ Metadata corrections may move archived copies without modifying FITS pixels/head
 - `Model.cs`, `FileState.cs`: metadata, settings, file identity/change stamps and cloud/reparse handling.
 - `Fits.cs`, `Classification.cs`, `InstrumentDetection.cs`, `CameraDetection.cs`: parsing, catalogue, filename/header/structure classification and session metadata cache.
 - `Repository.cs`, `ImportEngine.cs`, `FileTransfer.cs`, `Pipeline.cs`: SQLite index/manifest, bounded discovery/copy pipeline, hashing, retries, worker tuning and telemetry.
-- `SourceCleanup.cs`, `ArchiveReset.cs`, `FileDeletion.cs`: verified source cleanup and scoped archive deletion.
+- `SourceCleanup.cs`, `ArchiveReset.cs`, `FileDeletion.cs`, `DeletionHistory.cs`: verified source cleanup, scoped archive deletion and portable exclusions.
+- `CaptureScreening.cs`, `Filters.cs`, `FiltersUi.cs`: telescope failure screening and shared library/import filters.
 - `Rotation.cs`, `PlateSolve.cs`: star matching, mount inference, ASTAP/Astrometry.net and candidate matching.
 - `Export.cs`: session-aware verified projects and calibration safeguards.
 - `PreviewData.cs`, `Xisf.cs`, `PreviewUi.cs`, `Theme.cs`: bounded image samples, stretch, native XISF decoding, preview pane and appearance.

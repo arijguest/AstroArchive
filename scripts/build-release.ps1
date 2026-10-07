@@ -37,7 +37,11 @@ $smokeRoot = Join-Path ([IO.Path]::GetTempPath()) ('AstroArchive-smoke-' + [Guid
 $installed = $false
 function Run-Checked([string]$File, [string[]]$Arguments) {
     $process = Start-Process -FilePath $File -ArgumentList $Arguments -PassThru -Wait
-    if ($process.ExitCode -ne 0) { throw "$File exited with $($process.ExitCode)." }
+    if ($process.ExitCode -ne 0) {
+        $smokeError = Join-Path $OutputDirectory 'ui-preview\ui-smoke-error.txt'
+        if (Test-Path $smokeError) { Get-Content $smokeError | Write-Output }
+        throw "$File exited with $($process.ExitCode)."
+    }
 }
 try {
     Run-Checked $installer @('--silent', '--root', ('"' + $smokeRoot + '"'))
