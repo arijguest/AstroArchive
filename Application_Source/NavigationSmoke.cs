@@ -41,6 +41,7 @@ namespace AstroArchive {
                     if (!filters.IsSubmenuOpen || filters.Items.OfType<MenuItem>().Count() < 10) throw new Exception("Repository filter tree is missing.");
                     filters.IsSubmenuOpen = false; view.IsSubmenuOpen = false;
                     root.IsSubmenuOpen = false;
+                    PumpPopupLayout();
                     Capture(Path.Combine(output, "AstroArchive_Navigation_" + mode + ".png"));
                 }
                 var grid = G("FramesGrid"); var exposure = grid.Columns.First(column => column.SortMemberPath == "Exposure");

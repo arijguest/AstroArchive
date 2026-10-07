@@ -11,14 +11,15 @@ using System.Windows.Input;
 namespace AstroArchive {
     public partial class MainUi {
         bool navigationReady;
+        bool preparingNavigation;
         MenuItem TopMenu(string name) { return (MenuItem)Window.FindName(name); }
         void GoToPage(int index) { ((TabControl)Window.FindName("MainTabs")).SelectedIndex = index; }
         void OpenTopMenu(string name) {
             var menu = TopMenu(name);
             if (!menu.IsEnabled) return;
-            PopulateNavigation(name);
-            menu.Focus();
-            menu.IsSubmenuOpen = true;
+            preparingNavigation = true;
+            try { PopulateNavigation(name); menu.Focus(); menu.IsSubmenuOpen = true; }
+            finally { preparingNavigation = false; }
         }
         MenuItem MenuAction(string label, Action action, bool available = true, bool requiresIdle = true) {
             var item = new MenuItem { Header = label, IsEnabled = available && (!requiresIdle || cancel == null) };
@@ -48,7 +49,7 @@ namespace AstroArchive {
             foreach (string name in new[] { "ImportMenu", "ExportMenu", "RepositoryMenu", "SettingsMenu", "GuideMenu" }) {
                 string captured = name;
                 var menu = TopMenu(name);
-                menu.GotKeyboardFocus += (s,e) => { if (ReferenceEquals(e.NewFocus, menu) && !menu.IsSubmenuOpen) PopulateNavigation(captured); };
+                menu.GotKeyboardFocus += (s,e) => { if (!preparingNavigation && ReferenceEquals(e.NewFocus, menu) && !menu.IsSubmenuOpen) PopulateNavigation(captured); };
                 menu.PreviewMouseLeftButtonDown += (s,e) => { if (!menu.IsSubmenuOpen) PopulateNavigation(captured); };
                 PopulateNavigation(name);
             }
