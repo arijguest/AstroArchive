@@ -91,10 +91,10 @@ namespace AstroArchive {
    }catch(OperationCanceledException){throw;}catch(Exception e){item.Error=FileRetry.Detail(entry.Path,e);item.Frame=new Frame{SourcePath=entry.Path,SourceRoot=source,OriginalName=name,Telescope=telescope,TelescopeIdentity=telescopeIdentity??telescope,Model=model,Make="Unknown",Target="Unknown",Camera="Unknown",Kind="Unknown",Mount="Unknown",Night="Unknown date",Notes=item.Error,Status="Unreadable",Hash=""};}
    return item;
   }
-  public ImportPlan Scan(string source,string telescope,string model,CancellationToken ct,Action<ProgressInfo> progress,bool reindex=false,Action<Frame> onFrame=null,bool deferHash=false,bool cloudSource=false,int metadataWorkers=0,string telescopeIdentity=null,bool deferFinish=false){
-   return ScanCore(source,telescope,model,ct,progress,reindex,onFrame,deferHash,cloudSource,false,metadataWorkers,telescopeIdentity,deferFinish);
+  public ImportPlan Scan(string source,string telescope,string model,CancellationToken ct,Action<ProgressInfo> progress,bool reindex=false,Action<Frame> onFrame=null,bool deferHash=false,bool cloudSource=false,int metadataWorkers=0,string telescopeIdentity=null,bool deferFinish=false,bool ignoreFailed=false){
+   return ScanCore(source,telescope,model,ct,progress,reindex,onFrame,deferHash,cloudSource,false,metadataWorkers,telescopeIdentity,deferFinish,ignoreFailed);
   }
-  ImportPlan ScanCore(string source,string telescope,string model,CancellationToken ct,Action<ProgressInfo> progress,bool reindex,Action<Frame> onFrame,bool deferHash,bool cloudSource,bool dump,int metadataWorkers=0,string telescopeIdentity=null,bool deferFinish=false){
+  ImportPlan ScanCore(string source,string telescope,string model,CancellationToken ct,Action<ProgressInfo> progress,bool reindex,Action<Frame> onFrame,bool deferHash,bool cloudSource,bool dump,int metadataWorkers=0,string telescopeIdentity=null,bool deferFinish=false,bool ignoreFailed=false){
    var metrics=new PipelineMetrics(progress);metrics.Phase(0,0,"Scanning",false,false);
    source=Path.GetFullPath(source);if(!Directory.Exists(source))throw new DirectoryNotFoundException(source);if(dump)ValidateDumpFolder();else if(!reindex&&(Util.Within(source,Root)||Util.Within(Root,source)))throw new IOException("Source and repository must be separate folders, with neither inside the other.");
    var plan=new ImportPlan{Source=source,Metrics=metrics};Dictionary<string,SourceManifest> cached;
@@ -107,7 +107,7 @@ namespace AstroArchive {
      try{var stack=new Stack<DirectoryInfo>();stack.Push(new DirectoryInfo(source));while(stack.Count>0){linked.Token.ThrowIfCancellationRequested();var directory=stack.Pop();try{
       using(var discovery=metrics.Begin("Discovery",directory.FullName)){long files=0;foreach(var info in directory.EnumerateFileSystemInfos()){
        linked.Token.ThrowIfCancellationRequested();if((info.Attributes&FileAttributes.Directory)!=0){if(info.Name!=".astroarchive"&&!(reindex&&info.FullName.Equals(DumpFolder,StringComparison.OrdinalIgnoreCase))){if(FileStamp.CanTraverse((DirectoryInfo)info))stack.Push((DirectoryInfo)info);else lock(plan.Errors)plan.Errors.Add("Skipped linked or unresolvable directory: "+info.FullName);}}
-       else if(Util.IsFits(info.Name)){var entry=ScanEntry.From((FileInfo)info);if(!queue.TryAdd(entry))overflow.Add(entry);metrics.Discover(entry.Enumerated.Size);files++;}
+       else if(Util.IsFits(info.Name)){if(ignoreFailed&&Util.FailedFilename(info.Name)){plan.IgnoredFailed++;continue;}var entry=ScanEntry.From((FileInfo)info);if(!queue.TryAdd(entry))overflow.Add(entry);metrics.Discover(entry.Enumerated.Size);files++;}
       }discovery.Complete(files);}
      }catch(OperationCanceledException){throw;}catch(Exception e){lock(plan.Errors)plan.Errors.Add(FileRetry.Detail(directory.FullName,e));}}}
      finally{try{overflow.Seal();}finally{metrics.InventoryComplete();queue.CompleteAdding();}}
@@ -124,7 +124,7 @@ namespace AstroArchive {
      }
      while(pending.Count>0){ct.ThrowIfCancellationRequested();var ready=Task.WhenAny(pending).GetAwaiter().GetResult();pending.Remove(ready);collect(ready);}producer.GetAwaiter().GetResult();
      metrics.Finalise("Saving scan metadata cache");try{headers.Flush();}catch(Exception e){plan.Errors.Add("Metadata cache could not be saved: "+e.Message);}if(reindex)Checkpoint(ct);
-     if(!deferFinish)metrics.Finish("Scan complete: "+plan.Frames.Count+" FITS; "+plan.CacheHits+" verified duplicates; "+plan.MetadataCacheHits+" cached headers");LastReport=metrics.Report()+"\r\n"+string.Join("\r\n",plan.Errors);return plan;
+     if(!deferFinish)metrics.Finish("Scan complete: "+plan.Frames.Count+" FITS; "+plan.CacheHits+" verified duplicates; "+plan.MetadataCacheHits+" cached headers; "+plan.IgnoredFailed+" failed filenames ignored");LastReport=metrics.Report()+"\r\n"+string.Join("\r\n",plan.Errors);return plan;
     }finally{linked.Cancel();try{producer.GetAwaiter().GetResult();}catch(OperationCanceledException){}foreach(var task in pending){try{task.GetAwaiter().GetResult();}catch(OperationCanceledException){}}}
    }
   }

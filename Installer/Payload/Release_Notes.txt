@@ -1,3 +1,22 @@
+AstroArchive 1.6.2 — failed filename cleanup and import exclusions
+Package 1.6.2.1
+
+- Repository tools > Delete failed searches all indexed captures for filenames
+  containing "failed", regardless of case or current filters/telescope selection.
+  Review and confirm the matching files before deleting repository copies.
+  Originals and shared metadata stay; deletion history prevents reimport.
+- Import options > Ignore failed saves a filename exclusion for folder imports,
+  USB auto uploads and Dump processing. Matching FITS, including .gz variants,
+  are skipped before reading their image data. Ignored originals are retained.
+- Scan/import summaries report the number of ignored filenames. Rescan after
+  changing the option. It is off by default and matches filename text, not
+  folder names, target labels or failure statuses.
+
+Download AstroArchive1.6.2.1.exe. Windows validation covers application regressions,
+installer/update tests, native cleanup, installation/restart and WPF smoke checks.
+
+Previous release notes
+
 AstroArchive 1.6.1 — processing handoffs, Dump inbox and preview refinements
 Package 1.6.1.1
 

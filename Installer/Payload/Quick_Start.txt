@@ -1,4 +1,4 @@
-AstroArchive 1.6.1
+AstroArchive 1.6.2
 Windows 10/11 x64 desktop app. Built-in .NET Framework 4.8 and Windows SQLite.
 Runs offline. No Python or Google login required.
 
@@ -156,6 +156,20 @@ Use Filters > Review > Needs review or Rejected / reference to inspect captures,
 or No issues flagged to leave them out of an import. Screening does not delete
 files or judge star quality, tracking, cloud cover or exposure quality. Rejected
 captures remain excluded from stacking by default. Review flags persist in the index.
+
+FAILED FILENAMES
+Import options > Ignore failed skips FITS filenames containing "failed" anywhere,
+regardless of case, before image data is read. This saved option applies to folder,
+USB auto uploads and Dump imports. Ignored files stay in their source folders;
+counts appear in scan and import summaries. Change the option and scan again to
+refresh the import list. It is off by default. Folder names, target labels and
+failure statuses do not affect this filename rule.
+
+Repository tools > Delete failed searches all indexed captures in the active
+repository, across filters and telescope selections. Review the matching files
+and confirm to remove their repository copies. Originals and shared metadata stay.
+Deleted checksums enter deletion history and future uploads skip those captures.
+Cloud-synced deletions propagate. This action has no undo.
 
 DELETION HISTORY
 Deleting library files records their SHA-256 checksums, UTC deletion times and

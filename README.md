@@ -61,7 +61,7 @@ uninstaller to Windows Installed Apps.
 Replace the filename below with the installer you downloaded:
 
 ```powershell
-Get-FileHash .\AstroArchive1.6.1.1.exe -Algorithm SHA256
+Get-FileHash .\AstroArchive1.6.2.1.exe -Algorithm SHA256
 ```
 
 Compare the `Hash` value with the corresponding `.sha256` file in the release.
@@ -89,6 +89,16 @@ telescope profiles, cloud folders, calibration matching and optional analysis.
 
 > **Moving or backing up an archive?** Keep `.astroarchive/index.sqlite` with
 > the captures. Use one writer per archive, including archives in cloud folders.
+
+## Failed captures
+
+Enable **Import options > Ignore failed** to skip FITS filenames containing
+`failed`, regardless of case. The setting is saved for folder, USB and Dump imports;
+ignored originals stay in place. Rescan after changing it.
+
+**Repository tools > Delete failed** lists matching captures across the active
+repository for confirmation, regardless of the current filters. Deletion retains
+source copies and shared metadata, and records checksums to prevent reimport.
 
 ## Formats and processing
 

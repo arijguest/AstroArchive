@@ -9,6 +9,11 @@ namespace AstroArchive {
   readonly CaptureFilters libraryFilters=new CaptureFilters(),importFilters=new CaptureFilters();
   bool importLive;
   List<Frame> visibleImports=new List<Frame>();
+  void InitializeFailedImports(){
+   var ignore=(CheckBox)Window.FindName("IgnoreFailedCheck");ignore.IsChecked=settings.IgnoreFailed;
+   RoutedEventHandler changed=(s,e)=>{if(cancel!=null||settings.IgnoreFailed==(ignore.IsChecked==true))return;settings.IgnoreFailed=ignore.IsChecked==true;SaveSettings();InvalidateImportPlan();L("StatusLabel").Text="Import option saved. Scan the source folder again to apply it.";};
+   ignore.Checked+=changed;ignore.Unchecked+=changed;
+  }
   void InitializeFilters(){
    B("LibraryFiltersButton").Click+=(s,e)=>ShowFilters(false);
    B("ImportFiltersButton").Click+=(s,e)=>ShowFilters(true);
@@ -50,7 +55,7 @@ namespace AstroArchive {
    B("ImportButton").Content="Import "+ready+" file"+(ready==1?"":"s");B("ImportButton").ToolTip="Imports the ready files in this filtered view.";
    B("ImportButton").IsEnabled=cancel==null&&repo!=null&&plan!=null&&ready>0;
    B("ScreenImportsButton").IsEnabled=cancel==null&&repo!=null&&visibleImports.Any(f=>f.Status!="Deleted");
-   L("ScanLabel").Text=source.Count==0?"Choose a source folder and scan to begin.":visibleImports.Count+" / "+source.Count+" shown  ·  "+ready+" ready  ·  "+source.Count(CaptureScreening.NeedsReview)+" need review  ·  "+source.Count(f=>f.Status=="Deleted")+" previously deleted";
+   L("ScanLabel").Text=source.Count==0&&plan==null?"Choose a source folder and scan to begin.":visibleImports.Count+" / "+source.Count+" shown  ·  "+ready+" ready  ·  "+source.Count(CaptureScreening.NeedsReview)+" need review  ·  "+source.Count(f=>f.Status=="Deleted")+" previously deleted"+(plan!=null&&plan.IgnoredFailed>0?"  ·  "+plan.IgnoredFailed+" failed filenames ignored":"");
   }
   void ScreenFiles(bool imports){
    if(repo==null||cancel!=null)return;
