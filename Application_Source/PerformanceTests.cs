@@ -12,6 +12,16 @@ namespace AstroArchive {
     item.Copied(10);seconds=2;var p=metrics.Progress();Check(p.Done==0&&p.BytesDone==10&&p.RemainingSeconds.HasValue,"First-file progress missing");Check(Math.Abs(p.RemainingSeconds.Value-38)<0.01,"Verification absent from remaining work");
     item.Copied(90);seconds=3;p=metrics.Progress();Check(p.ProgressFraction<1&&!p.Finished&&p.RemainingSeconds>0,"Copy completion concealed verification");item.Verified(100);item.Resolve(true);metrics.Finalise("Index");Check(metrics.Progress().Finalising&&!metrics.Progress().RemainingSeconds.HasValue,"Premature job completion");metrics.Finish("Complete");Check(metrics.Progress().RemainingSeconds==0&&metrics.Progress().ProgressFraction==1,"Terminal completion missing");
    });
+   Test("ETA learns different copy and verification costs",()=>{
+    double seconds=0;var metrics=new PipelineMetrics(NoProgress,()=>seconds);metrics.Phase(2,200,"Copy",true);var first=metrics.Track(100);first.BeginCopy();first.Copied(100);seconds=10;first.EndCopy();first.BeginVerification();first.Verified(100);seconds=12;first.EndVerification();first.Resolve(true);
+    Check(Math.Abs(metrics.VerificationWeight-0.2)<0.001,"Verification speed was treated as source-copy speed");var second=metrics.Track(100);second.BeginCopy();second.Copied(20);seconds=14;var p=metrics.Progress();Check(Math.Abs(p.RemainingSeconds.Value-10)<0.01&&!p.EtaProvisional,"Measured costs did not correct remaining time");
+   });
+   Test("A compatible previous timing profile seeds a provisional first-file ETA",()=>{
+    double seconds=0;var metrics=new PipelineMetrics(NoProgress,()=>seconds);metrics.Phase(1,100,"Copy",true);metrics.SeedVerificationWeight(0.2);var item=metrics.Track(100);item.Copied(10);seconds=2;var p=metrics.Progress();Check(p.EtaProvisional&&Math.Abs(p.RemainingSeconds.Value-22)<0.01,"Previous measured costs were ignored");
+   });
+   Test("Optional original cleanup remains in the transfer work budget",()=>{
+    double seconds=0;var metrics=new PipelineMetrics(NoProgress,()=>seconds);metrics.Phase(1,100,"Copy",true,true,true);var item=metrics.Track(100);item.Copied(100);item.Verified(100);seconds=2;var p=metrics.Progress();Check(p.RemainingSeconds.HasValue&&p.ProgressFraction==0.5,"Cleanup hashes disappeared from remaining work");item.Cleanup(100);seconds=3;Check(metrics.Progress().ProgressFraction==0.75,"Cleanup hash reads did not advance progress");item.Resolve(true);metrics.Finalise("Complete index");Check(!metrics.Progress().Finished,"Cleanup completion skipped finalisation");
+   });
    Test("Scan totals remain provisional until discovery finishes",()=>{
     double seconds=0;var metrics=new PipelineMetrics(NoProgress,()=>seconds);metrics.Phase(0,0,"Scan",false,false);metrics.Discover(1000000);metrics.Discover(10);metrics.Discover(20);metrics.Complete(1000000);seconds=2;
     Check(!metrics.Progress().TotalKnown&&!metrics.Progress().RemainingSeconds.HasValue,"Partial inventory presented as final");metrics.InventoryComplete();Check(Math.Abs(metrics.Progress().RemainingSeconds.Value-4)<0.01,"Scan weighted by image bytes instead of inspected files");

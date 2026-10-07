@@ -3,8 +3,9 @@ Package 1.5.0.1
 
 Progress and elapsed timers start before metadata processing. Copy progress and
 ETA now advance inside the first large file and during destination verification.
-Recent throughput drives estimates; provider stalls and final index/manifest
-work are shown explicitly. Project and selected-file exports share these timers.
+Recent throughput and measured copy/verification costs drive estimates; prior
+timings seed provisional estimates. Provider stalls, optional cleanup and final
+index/manifest work are shown explicitly. Project and selected-file exports share these timers.
 
 Discovery continues while bounded metadata workers inspect files. A local spill
 inventory avoids delaying scan totals behind cloud reads. Shared session JSON is

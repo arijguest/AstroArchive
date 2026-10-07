@@ -74,7 +74,8 @@ number discovered is provisional and the ETA says estimating.
 
 Imports, selected-file exports and stacking-project copies update progress inside
 large files, including SHA-256 destination verification. ETA uses recent progress
-and includes copying and verification. Provider stalls show a waiting state;
+and learns the different costs of copying, verification and optional source
+cleanup. Compatible prior timings seed a provisional estimate marked ~. Provider stalls show a waiting state;
 final index and manifest work show Finalising rather than a completed timer.
 The timers describe filesystem work by AstroArchive. A cloud provider may continue
 uploading after local copies have completed.

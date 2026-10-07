@@ -16,7 +16,7 @@ namespace AstroArchive {
   public void Add(ScanEntry entry){if(output==null)output=new BinaryWriter(new FileStream(path,FileMode.CreateNew,FileAccess.Write,FileShare.None,65536));output.Write(entry.Path);output.Write(entry.Enumerated.Size);output.Write(entry.Enumerated.Modified);output.Write(entry.Enumerated.Created);output.Write(entry.Enumerated.Attributes);}
   public void Seal(){if(output!=null){output.Dispose();output=null;}}
   public IEnumerable<ScanEntry> Read(CancellationToken ct){if(!File.Exists(path))yield break;using(var input=new BinaryReader(File.OpenRead(path))){while(input.BaseStream.Position<input.BaseStream.Length){ct.ThrowIfCancellationRequested();yield return new ScanEntry{Path=input.ReadString(),Enumerated=new FileStamp{Size=input.ReadInt64(),Modified=input.ReadInt64(),Created=input.ReadInt64(),Attributes=input.ReadInt32(),Identity=""}};}}}
-  public void Dispose(){Seal();Repository.TryRemove(path);}
+  public void Dispose(){try{Seal();}finally{Repository.TryRemove(path);}}
  }
  internal sealed class HeaderCacheEntry {public FileStamp Stamp;public FitsHeader Header;}
  internal sealed class MetadataHeaderCache {
