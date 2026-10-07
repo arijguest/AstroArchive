@@ -2,5 +2,5 @@ using System.Reflection;
 [assembly: AssemblyTitle("AstroArchive")]
 [assembly: AssemblyDescription("Local smart telescope FITS archive and stacking project organiser")]
 [assembly: AssemblyProduct("AstroArchive")]
-[assembly: AssemblyVersion("1.10.2.0")]
-[assembly: AssemblyFileVersion("1.10.2.1")]
+[assembly: AssemblyVersion("1.10.3.0")]
+[assembly: AssemblyFileVersion("1.10.3.1")]

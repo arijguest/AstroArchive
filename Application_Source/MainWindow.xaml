@@ -3,6 +3,7 @@
   <SolidColorBrush Color="#FBBF24" x:Key="Focus" />
   <sys:Double x:Key="CaptureRowHeight">32</sys:Double>
   <sys:Double x:Key="UiFontBrand">20</sys:Double>
+  <sys:Double x:Key="UiFontHeaderBrand">26</sys:Double>
   <sys:Double x:Key="UiFontTitle">18</sys:Double>
   <sys:Double x:Key="UiFontHeading">16</sys:Double>
   <sys:Double x:Key="UiFontControl">13</sys:Double>
@@ -539,7 +540,7 @@
      <ColumnDefinition Width="*" />
      <ColumnDefinition Width="Auto" />
     </Grid.ColumnDefinitions>
-    <ScrollViewer VerticalScrollBarVisibility="Disabled" HorizontalScrollBarVisibility="Disabled" Focusable="False">
+    <ScrollViewer VerticalScrollBarVisibility="Disabled" HorizontalScrollBarVisibility="Disabled" Focusable="False" VerticalAlignment="Top">
      <Menu x:Name="MainMenu" Background="Transparent" Foreground="{DynamicResource Text}" VerticalAlignment="Center" KeyboardNavigation.TabNavigation="Once">
       <Menu.ItemsPanel>
        <ItemsPanelTemplate><WrapPanel /></ItemsPanelTemplate>
@@ -552,9 +553,9 @@
       <MenuItem x:Name="CoffeeMenu" Header="_Buy Me a Coffee" Style="{StaticResource TopNavigationMenu}" Background="{DynamicResource SupportSurface}" FontWeight="Bold" />
      </Menu>
     </ScrollViewer>
-    <StackPanel x:Name="BrandPanel" Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" Margin="22,0,0,0">
-     <Image x:Name="BrandLogo" Width="32" Height="32" Stretch="Uniform" RenderOptions.BitmapScalingMode="HighQuality" />
-     <TextBlock x:Name="BrandTitle" Text="AstroArchive" FontSize="{DynamicResource UiFontBrand}" FontWeight="SemiBold" Margin="9,0,0,0" VerticalAlignment="Center" />
+    <StackPanel x:Name="BrandPanel" Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Top" Margin="22,0,0,0">
+     <Image x:Name="BrandLogo" Width="40" Height="40" Stretch="Uniform" RenderOptions.BitmapScalingMode="HighQuality" />
+     <TextBlock x:Name="BrandTitle" Text="AstroArchive" FontSize="{DynamicResource UiFontHeaderBrand}" FontWeight="SemiBold" Margin="10,0,0,0" VerticalAlignment="Center" />
     </StackPanel>
    </Grid>
   </Grid>
