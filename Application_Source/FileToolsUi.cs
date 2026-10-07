@@ -36,7 +36,7 @@ namespace AstroArchive {
   }
   List<Frame> SelectedFiles(){return G("FramesGrid").SelectedItems.Cast<Frame>().ToList();}
   void SelectContextRow(Frame frame){if(frame==null)return;var grid=G("FramesGrid");if(!grid.SelectedItems.Contains(frame)){grid.SelectedItems.Clear();grid.SelectedItems.Add(frame);}}
-  MenuItem FileAction(string title,Action action,bool enabled=true){var item=new MenuItem{Header=title,IsEnabled=enabled};item.Click+=(s,e)=>{if(cancel==null)action();};return item;}
+  MenuItem FileAction(string title,Action action,bool enabled=true){var item=new MenuItem{Header=title,IsEnabled=enabled};UiHelp.For(item,title);item.Click+=(s,e)=>{if(cancel==null)action();};return item;}
   MenuItem ExportMenu(List<Frame> selected){
    var menu=new MenuItem{Header="Export",IsEnabled=selected.Count>0};
    menu.Items.Add(FileAction("Export selected files…",()=>ExportFiles(selected)));

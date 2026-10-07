@@ -4,19 +4,21 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Globalization;
 using System.Linq;
+using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Data;
 using System.Windows.Input;
 namespace AstroArchive {
  public class MetadataCellConverter:IValueConverter {
-  public object Convert(object value,Type target,object parameter,CultureInfo culture){return value==null||value is string?TableText.Display(value as string,System.Convert.ToString(parameter)=="Target"):value;}
+  public object Convert(object value,Type target,object parameter,CultureInfo culture){return value==null||value is string?TableText.Display(value as string,new[]{"Target","TargetName","TargetLabel"}.Contains(System.Convert.ToString(parameter))):value;}
   public object ConvertBack(object value,Type target,object parameter,CultureInfo culture){throw new NotSupportedException();}
  }
  public partial class MainUi {
   readonly Dictionary<string,List<SortDescription>> tableSorts=new Dictionary<string,List<SortDescription>>();
   void InitializeTables(){
    var converter=new MetadataCellConverter();foreach(string name in new[]{"FramesGrid","ImportGrid","MetricsGrid"}){var grid=G(name);grid.CanUserSortColumns=true;tableSorts[name]=new List<SortDescription>();
-    foreach(var column in grid.Columns.OfType<DataGridBoundColumn>()){var binding=column.Binding as Binding;if(binding==null||binding.Path==null)continue;string path=binding.Path.Path;column.SortMemberPath=path=="ExposureText"?"Exposure":path=="GainText"?"Gain":path=="TemperatureText"?"Temperature":path=="SizeText"?"PixelCount":path;
+    foreach(var column in grid.Columns.OfType<DataGridBoundColumn>()){var binding=column.Binding as Binding;if(binding==null||binding.Path==null)continue;string path=binding.Path.Path;var header=new Style(typeof(DataGridColumnHeader),Window.TryFindResource(typeof(DataGridColumnHeader)) as Style);string tip=Convert.ToString(column.Header)+": click to sort; click again to reverse. Shift-click adds a sorting column.";if(path=="SizeText")tip+=" Dimensions sort by total pixel count.";else if(path=="ExposureText"||path=="GainText"||path=="TemperatureText"||name=="MetricsGrid"&&path!="Stage")tip+=" Values sort numerically.";header.Setters.Add(new Setter(FrameworkElement.ToolTipProperty,new ToolTip{Content=new TextBlock{Text=tip,TextWrapping=TextWrapping.Wrap,MaxWidth=360}}));column.HeaderStyle=header;column.SortMemberPath=path=="ExposureText"?"Exposure":path=="GainText"?"Gain":path=="TemperatureText"?"Temperature":path=="SizeText"?"PixelCount":path;
      if(name!="MetricsGrid"&&path!="OriginalName"){column.Binding=new Binding(path){Mode=BindingMode.OneWay,Converter=converter,ConverterParameter=path,StringFormat=binding.StringFormat};}
     }
     string table=name;grid.Sorting+=(s,e)=>{e.Handled=true;SortTable(table,e.Column,(Keyboard.Modifiers&ModifierKeys.Shift)!=0);};
@@ -34,7 +36,7 @@ namespace AstroArchive {
      SetRows(name,rows.Reverse().ToList());if(grid.Items.Cast<Frame>().Last().Exposure!=10||exposure.SortDirection!=ListSortDirection.Ascending)throw new InvalidOperationException("Table refresh lost its sorting.");SortTable(name,exposure,false);if(grid.Items.Cast<Frame>().First().Exposure!=10)throw new InvalidOperationException("Repeated header sorting did not reverse direction.");
      var kind=grid.Columns.First(c=>c.SortMemberPath=="Kind");SortTable(name,kind,true);SortTable(name,exposure,true);if(tableSorts[name][0].PropertyName!="Exposure"||tableSorts[name][1].PropertyName!="Kind")throw new InvalidOperationException("Shift sorting changed column priority.");
      var binding=((DataGridBoundColumn)kind).Binding as Binding;if(binding==null||!object.Equals(binding.Converter.Convert("Bias",typeof(string),binding.ConverterParameter,CultureInfo.InvariantCulture),"Bias")||!object.Equals(binding.Converter.Convert("Unknown",typeof(string),binding.ConverterParameter,CultureInfo.InvariantCulture),"-"))throw new InvalidOperationException("Frame type cells hid bias or displayed Unknown.");
-     binding=((DataGridBoundColumn)grid.Columns.First(c=>c.SortMemberPath=="Target")).Binding as Binding;if(!object.Equals(binding.Converter.Convert("Unknown",typeof(string),binding.ConverterParameter,CultureInfo.InvariantCulture),"Unknown"))throw new InvalidOperationException("Target cells lost the Unknown exception.");
+     binding=((DataGridBoundColumn)grid.Columns.First(c=>c.SortMemberPath=="TargetName")).Binding as Binding;if(!object.Equals(binding.Converter.Convert("Unknown",typeof(string),binding.ConverterParameter,CultureInfo.InvariantCulture),"Unknown"))throw new InvalidOperationException("Target cells lost the Unknown exception.");
     }finally{tableSorts[name]=saved;SetRows(name,original);}}
    var metrics=G("MetricsGrid");var oldMetrics=metrics.ItemsSource;var oldSorts=tableSorts["MetricsGrid"].ToList();try{SetRows("MetricsGrid",new[]{new StageMetric{Stage="Ten",Seconds=10},new StageMetric{Stage="Two",Seconds=2}});SortTable("MetricsGrid",metrics.Columns.First(c=>c.SortMemberPath=="Seconds"),false);if(metrics.Items.Cast<StageMetric>().First().Seconds!=2)throw new InvalidOperationException("Performance column did not sort numerically.");}finally{tableSorts["MetricsGrid"]=oldSorts;SetRows("MetricsGrid",oldMetrics);}
    var menu=new ContextMenu();BuildFileMenu(menu,rows.Take(1).ToList());var preview=menu.Items.OfType<MenuItem>().First(i=>Convert.ToString(i.Header)=="Preview image…");if(!preview.IsEnabled)throw new InvalidOperationException("Single-image preview is disabled.");BuildFileMenu(menu,rows.Take(2).ToList());if(menu.Items.OfType<MenuItem>().First(i=>Convert.ToString(i.Header)=="Preview image…").IsEnabled)throw new InvalidOperationException("Multi-selection incorrectly enables single-image preview.");

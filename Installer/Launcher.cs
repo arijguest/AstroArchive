@@ -18,6 +18,15 @@ namespace AstroArchive.Installation {
    } catch { }
   }
 
+  static bool ConfirmUpdate(UpdateManifest update,string current,string notes){
+   using(var form=new Form{Text="Install AstroArchive release",ClientSize=new System.Drawing.Size(680,490),MinimumSize=new System.Drawing.Size(600,440),StartPosition=FormStartPosition.CenterScreen,Font=new System.Drawing.Font("Segoe UI",10),Padding=new Padding(24)}){
+    var title=new Label{Text="Package "+update.package_version+" is available. Installed: "+current+".\nYour repositories, images and settings will be retained.",Dock=DockStyle.Top,Height=76};
+    var body=new TextBox{Text=notes,ReadOnly=true,Multiline=true,ScrollBars=ScrollBars.Vertical,Dock=DockStyle.Fill,BackColor=System.Drawing.Color.White};
+    var actions=new FlowLayoutPanel{Dock=DockStyle.Bottom,Height=58,FlowDirection=FlowDirection.RightToLeft,Padding=new Padding(0,12,0,0)};
+    var install=new Button{Text="Install release",AutoSize=true,MinimumSize=new System.Drawing.Size(150,38),DialogResult=DialogResult.OK};var skip=new Button{Text="Later",AutoSize=true,MinimumSize=new System.Drawing.Size(100,38),DialogResult=DialogResult.Cancel};
+    actions.Controls.Add(install);actions.Controls.Add(skip);form.Controls.Add(body);form.Controls.Add(actions);form.Controls.Add(title);form.AcceptButton=install;form.CancelButton=skip;return form.ShowDialog()==DialogResult.OK;
+   }
+  }
   static bool Update(string root, InstallRecord record, bool explicitCheck) {
    bool accepted = false;
    try {
@@ -26,22 +35,21 @@ namespace AstroArchive.Installation {
      if (explicitCheck) MessageBox.Show("AstroArchive is up to date.", "AstroArchive updates");
      return false;
     }
-    if (MessageBox.Show("AstroArchive " + update.application_version + " (package " + update.package_version +
-      ") is available. Install it now?\r\n\r\nYour repositories, images and settings will be retained.",
-      "AstroArchive update", MessageBoxButtons.YesNo, MessageBoxIcon.Information,
-      MessageBoxDefaultButton.Button1) != DialogResult.Yes) return false;
+    string notes;try{notes=client.ReleaseNotes(update);}catch{notes="Release notes are unavailable. View this release at "+UpdateClient.ReleasePage(update);}
+    if(!ConfirmUpdate(update,record.PackageVersion??record.Version,notes))return false;
     accepted = true;
     string cache = UpdateClient.InstallationCache(root);
     string setup = null;
     Exception downloadError = null;
-    using (var progress = new Form { Text = "Updating AstroArchive", Width = 430, Height = 125,
+    using (var progress = new Form { Text = "Updating AstroArchive", ClientSize = new System.Drawing.Size(560,170), Padding=new Padding(24), Font=new System.Drawing.Font("Segoe UI",10),
       StartPosition = FormStartPosition.CenterScreen, FormBorderStyle = FormBorderStyle.FixedDialog,
       ControlBox = false }) {
-     progress.Controls.Add(new Label { Text = "Downloading and verifying the update...", Dock = DockStyle.Fill, TextAlign = System.Drawing.ContentAlignment.MiddleCenter });
+     var label=new Label{Text="Downloading and verifying the update…",Dock=DockStyle.Fill,TextAlign=System.Drawing.ContentAlignment.MiddleCenter};var bar=new ProgressBar{Dock=DockStyle.Bottom,Height=12,Maximum=100};progress.Controls.Add(label);progress.Controls.Add(bar);
+     client.Progress=p=>{if(progress.IsDisposed||!progress.IsHandleCreated)return;try{progress.BeginInvoke(new Action(()=>{if(progress.IsDisposed)return;bar.Value=p.Percent;label.Text="Downloading package "+update.package_version+": "+p.Percent+"%\n"+(p.Received/1048576.0).ToString("0.0")+" / "+(p.Total/1048576.0).ToString("0.0")+" MB";}));}catch(InvalidOperationException){}};
      progress.Shown += async (sender, args) => {
       try { setup = await Task.Run(() => client.Prepare(update, cache)); }
       catch (Exception error) { downloadError = error; }
-      finally { progress.Close(); }
+      finally { client.Progress=null;progress.Close(); }
      };
      progress.ShowDialog();
     }

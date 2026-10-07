@@ -46,6 +46,14 @@ Portable Windows 10/11 x64 WPF app for archiving smart-telescope FITS and creati
 - TIFF, PNG, JPEG, BMP, GIF and Windows photo codecs, preserving high-depth samples. Camera RAW formats need a compatible installed Windows codec.
 - Preview/path-copy actions and selection-only CSV exports alongside the upstream file tools.
 
+## Guide and tooltips
+
+Hover over controls and table headers for explanations. **Guide** offers common
+help topics, full-text search, troubleshooting, shortcuts and a frame glossary.
+**F1** opens help for the current tab; **Ctrl+F** searches within the help window.
+The guide is bundled for offline use and can be saved as text. The import tab is
+labelled **Import**.
+
 ## Changes in 1.3.0
 
 - Right-click selected library rows to export copies, create a ready-to-stack folder, edit metadata, locate files or delete selected archive copies after confirmation.
@@ -121,3 +129,9 @@ Metadata corrections may move archived copies without modifying FITS pixels/head
 - SQLite WAL: https://www.sqlite.org/wal.html
 
 OpenNGC by Mattia Verga is licensed CC-BY-SA-4.0. See `Catalogue_Notice.md` and `OpenNGC_README.md` for the selected-column derivative's attribution and provenance.
+
+## Release 1.7.0 / package 1.7.0.1
+
+Mosaic collections and panel exports, canonical object IDs/common names, grouped
+library exposure summaries, import review and filtered retries, audited reimport
+permissions, searchable offline help and package notes/progress during updates.

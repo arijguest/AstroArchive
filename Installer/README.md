@@ -16,8 +16,9 @@ AstroArchive with an uninstaller. Running the same package again repairs its
 managed application files. Downgrades are refused using numeric versions.
 
 The installed launcher checks the latest stable GitHub release at startup.
-When a newer package is available it asks whether to install, with Yes selected
-by default. No opens the current version. Accepted downloads are verified with
+When a newer package is available, it shows package-specific release notes with
+Install release selected by default. Later opens the current version. Downloads
+show received bytes and percentage and are verified with
 SHA-256, installed in place, and AstroArchive restarts. Failed or offline checks
 leave the existing app available. Manual installation remains fully offline.
 See [update details](../docs/UPDATES.md) and [release instructions](../docs/RELEASING.md).
@@ -113,3 +114,7 @@ Recommended smoke test on a Windows test account:
 
 This source package includes the app's existing catalogue notices and quick
 start instructions. The installer introduces no additional runtime packages.
+
+New release feeds include plain-text release notes; older feeds use an exact-tag
+GitHub API fallback. Missing notes do not block installation. A version-specific
+receipt confirms successful updates once in the app, including updates from setup.

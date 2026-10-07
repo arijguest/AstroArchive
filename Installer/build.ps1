@@ -97,7 +97,7 @@ $setupArgs = $shared + @("/out:$setupPath", '/r:System.Drawing.dll', '/r:System.
     "/resource:$build\payload.zip,payload.zip", "/resource:$build\payload.json,payload.json",
     "/resource:$PSScriptRoot\Assets\AstroArchive_Logo.png,logo.png",
     "$PSScriptRoot\InstallCore.cs", "$PSScriptRoot\WindowsIntegration.cs", "$PSScriptRoot\NativeFolderPicker.cs",
-    "$PSScriptRoot\Setup.cs", "$build\GeneratedVersion.cs")
+    "$PSScriptRoot\Setup.cs", "$PSScriptRoot\Updates.cs", "$build\GeneratedVersion.cs")
 & $compiler @setupArgs
 if ($LASTEXITCODE -ne 0) { throw 'Installer compilation failed.' }
 $actual = [Diagnostics.FileVersionInfo]::GetVersionInfo($setupPath).FileVersion
