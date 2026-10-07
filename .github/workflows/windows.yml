@@ -16,6 +16,8 @@ concurrency:
 
 jobs:
   build:
+    outputs:
+      signing_enabled: ${{ steps.signing.outputs.enabled }}
     runs-on: windows-2022
     timeout-minutes: 30
     permissions:
@@ -136,6 +138,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
           SIGNING_PUBLISHER: ${{ vars.ASTROARCHIVE_SIGNING_PUBLISHER }}
+          REQUIRE_SIGNED: ${{ needs.build.outputs.signing_enabled }}
         shell: bash
         run: |
           set -euo pipefail
@@ -155,13 +158,26 @@ jobs:
           else
             create_release=true
           fi
-          python3 scripts/verify-release-report.py release-artifacts
+          if [[ "$REQUIRE_SIGNED" == true ]]; then
+            python3 scripts/verify-release-report.py release-artifacts
+          else
+            python3 scripts/verify-release-report.py release-artifacts --allow-unsigned
+            echo 'Publishing an unsigned package: publisher signing setup is pending.'
+            python3 - <<'PY'
+          from pathlib import Path
+          path = Path('release-artifacts/Release_Notes.txt')
+          path.write_text('Windows signing: This package is unsigned. Application Control or SmartScreen may still block it. Trusted publisher signing requires account setup.\n\n' + path.read_text(encoding='utf-8-sig'), encoding='utf-8')
+          PY
+          fi
           (cd release-artifacts && sha256sum --check *.sha256)
           if [[ "$create_release" == true ]]; then
             gh release create "$tag" --target "$GITHUB_SHA" --draft --title "AstroArchive $package" --notes-file release-artifacts/Release_Notes.txt
           fi
-          gh release upload "$tag" release-artifacts/*.exe release-artifacts/*.sha256 release-artifacts/update.json release-artifacts/signatures.json --clobber
-          gh release edit "$tag" --draft=false --latest
+          gh release upload "$tag" release-artifacts/*.exe release-artifacts/*.sha256 release-artifacts/update.json --clobber
+          if [[ "$REQUIRE_SIGNED" == true ]]; then
+            gh release upload "$tag" release-artifacts/signatures.json --clobber
+          fi
+          gh release edit "$tag" --draft=false --latest --notes-file release-artifacts/Release_Notes.txt
           if ! gh release view v1.2.0.1 >/dev/null 2>&1; then
             gh release create v1.2.0.1 releases/offline-1.2.0/*.exe releases/offline-1.2.0/*.sha256 --target "$GITHUB_SHA" --title 'AstroArchive 1.2.0 — original offline installer' --notes-file releases/offline-1.2.0/README.md --latest=false
           fi

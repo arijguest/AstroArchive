@@ -101,7 +101,7 @@ and process checks replaced by test callbacks. Native Windows UI, shortcuts,
 Installed Apps registration, app launch, and self-removing uninstall require
 a Windows smoke test; they cannot be exercised in the Linux build environment.
 Local builds are unsigned by default. The Windows release workflow supports
-trusted publisher signing and requires verified signatures before publication;
+trusted publisher signing and requires verified signatures when signing is enabled;
 see [signing setup and policy troubleshooting](../docs/RELEASING.md).
 
 Recommended smoke test on a Windows test account:

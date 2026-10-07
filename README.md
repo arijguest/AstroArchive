@@ -58,7 +58,7 @@ uninstaller to Windows Installed Apps.
 > If Windows reports **“An Application Control policy has blocked this file”**,
 > see [Windows signing and policy troubleshooting](docs/RELEASING.md#smartscreen-and-application-control).
 > This can block a component even after setup starts. Trusted publisher signing
-> is being added for future releases; an organisation-managed PC may also need
+> requires signing account setup; an organisation-managed PC may also need
 > its administrator to approve the publisher.
 
 <details>
@@ -67,7 +67,7 @@ uninstaller to Windows Installed Apps.
 Replace the filename below with the installer you downloaded:
 
 ```powershell
-Get-FileHash .\AstroArchive1.9.0.1.exe -Algorithm SHA256
+Get-FileHash .\AstroArchive1.9.0.2.exe -Algorithm SHA256
 ```
 
 Compare the `Hash` value with the corresponding `.sha256` file in the release.

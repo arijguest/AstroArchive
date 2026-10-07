@@ -32,9 +32,13 @@ release, without making it latest.
 The workflow uses GitHub's built-in `GITHUB_TOKEN` with `contents: write` only in
 the publishing job. No personal access token or third-party release service is
 required. Enable GitHub Actions for the repository if organisational policy has
-disabled it. New public releases require trusted, timestamped Authenticode
-signatures from the configured publisher. Pull requests and local builds can
-still build unsigned executables; an unsigned artifact cannot pass publication.
+disabled it. With `ASTROARCHIVE_SIGNING_ENABLED=true`, public releases require
+trusted, timestamped Authenticode signatures from the configured publisher.
+Until a validated signing account is configured and enabled, releases remain
+unsigned and the release notes explicitly say so. Pull requests and local builds
+can also build unsigned executables. Every published package must pass installer,
+alias, SHA-256 and update-feed integrity checks; a build marked as signed cannot
+fall back to unsigned publication.
 
 ## Configure Windows signing
 
@@ -72,7 +76,7 @@ test file signed with your profile (`(Get-AuthenticodeSignature .\test.exe).Sign
 Do not use a self-signed certificate; ordinary user machines will not trust it.
 Use the validated publisher identity consistently across future releases.
 
-The build prepares the application and launcher, signs both with SHA-256 and an
+When signing is enabled, the build prepares the application and launcher, signs both with SHA-256 and an
 RFC3161 timestamp, verifies their trusted signatures and publisher, then embeds
 their signed bytes and hashes. It signs the compiled setup next. Finalization
 verifies all three signatures, refreshes installer checksums, copies the signed
@@ -80,7 +84,10 @@ compatibility alias, generates the update feed and verifies the installed app,
 launcher and uninstaller during the Windows smoke test. `Uninstall.exe` is a
 byte-for-byte copy of the signed setup. The publication job checks
 `signatures.json` against the final installer bytes, alias, checksums and feed.
-It fails before creating or publishing a new release if signing is missing.
+It fails before creating or publishing a signed release if signing is missing.
+The update feed records the build's `authenticode_signed` status. Unsigned
+publication is allowed only when signing was disabled for the build and the
+feed also explicitly identifies an unsigned package.
 
 After setup, publish a **new package version**; existing unsigned published
 assets are retained. For an installer revision, also align the fourth part of

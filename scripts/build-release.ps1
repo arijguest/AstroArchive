@@ -48,6 +48,7 @@ $feed = [ordered]@{
     schema = 1
     application_version = $version
     package_version = $package
+    authenticode_signed = [bool]$RequireSigned
     url = "https://github.com/arijguest/AstroArchive/releases/download/$tag/$([IO.Path]::GetFileName($compatibility))"
     download_url = "https://github.com/arijguest/AstroArchive/releases/download/$tag/$([IO.Path]::GetFileName($installer))"
     release_notes = [IO.File]::ReadAllText((Join-Path $PSScriptRoot '..\Installer\Payload\Release_Notes.txt'))
