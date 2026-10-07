@@ -16,7 +16,13 @@ namespace AstroArchive {
   }
   public static void DeleteVerified(string source,string destination,string expected,string sourceRoot,string repository,CancellationToken ct,Action<int> counted=null) {
    ValidateRoots(sourceRoot,repository);
-   if(!Util.Within(source,sourceRoot)||Util.Within(source,repository)||!Util.Within(destination,repository))throw new IOException("Source cleanup refused a path outside the import boundaries.");
+   DeleteCore(source,destination,expected,sourceRoot,repository,ct,false,counted);
+  }
+  internal static void DeleteDumpVerified(string source,string destination,string expected,string repository,CancellationToken ct,Action<int> counted=null) {
+   DeleteCore(source,destination,expected,Path.Combine(repository,"Dump"),repository,ct,true,counted);
+  }
+  static void DeleteCore(string source,string destination,string expected,string sourceRoot,string repository,CancellationToken ct,bool dump,Action<int> counted) {
+   if(!Util.Within(source,sourceRoot)||(!dump&&Util.Within(source,repository))||!Util.Within(destination,repository)||(dump&&Util.Within(destination,sourceRoot)))throw new IOException("Source cleanup refused a path outside the import boundaries.");
    if(Environment.OSVersion.Platform!=PlatformID.Win32NT)throw new PlatformNotSupportedException("Verified source removal requires Windows file handles.");
    ct.ThrowIfCancellationRequested();
    // ShareRead prevents concurrent writers, renames and deletes until this handle closes.
@@ -25,7 +31,8 @@ namespace AstroArchive {
     using(var original=new FileStream(handle,FileAccess.Read,1048576,false))
     using(var copy=new FileStream(destination,FileMode.Open,FileAccess.Read,FileShare.Read,1048576)) {
      string realSource=FinalPath(handle),realMirror=DirectoryPath(sourceRoot),realRepository=DirectoryPath(repository),realCopy=FinalPath(copy.SafeFileHandle);
-     if(!Util.Within(realSource,realMirror)||Util.Within(realSource,realRepository)||!Util.Within(realCopy,realRepository)||Util.Within(realMirror,realRepository)||Util.Within(realRepository,realMirror))throw new IOException("Original was kept: resolved source/repository locations overlap or leave the selected folders.");
+     bool badBoundary=dump?!realMirror.Equals(Path.Combine(realRepository,"Dump"),StringComparison.OrdinalIgnoreCase)||Util.Within(realCopy,realMirror):Util.Within(realSource,realRepository)||Util.Within(realMirror,realRepository)||Util.Within(realRepository,realMirror);
+     if(!Util.Within(realSource,realMirror)||!Util.Within(realCopy,realRepository)||badBoundary)throw new IOException("Original was kept: resolved source/repository locations overlap or leave the selected folders.");
      FileIdentity a,b;
      if(!GetFileInformationByHandle(handle,out a)||!GetFileInformationByHandle(copy.SafeFileHandle,out b))throw new Win32Exception(Marshal.GetLastWin32Error(),"Original was kept because file identity could not be verified.");
      if(a.VolumeSerial==b.VolumeSerial&&a.IndexHigh==b.IndexHigh&&a.IndexLow==b.IndexLow)throw new IOException("Original was kept: source and destination have the same file identity.");

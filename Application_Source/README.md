@@ -2,6 +2,11 @@
 
 Portable Windows 10/11 x64 WPF app for archiving smart-telescope FITS and creating verified stacking projects. Open `AstroArchive.exe`; read `Quick_Start.txt` for the complete workflow.
 
+## Changes in 1.6.1
+
+- Startup Dump inbox imports and verified duplicate cleanup, with retry controls in Settings.
+- Direct single-stack handoff to the verified AstroWizard build and Siril. [Supported handoffs](../docs/PROCESSOR_HANDOFFS.md).
+
 ## Changes in 1.6.0
 
 - Pinch/wheel preview zoom and pan using the colour decoders; persistent numeric/Shift-column sorting, explicit bias rows, and dashes for unknown metadata except target names.
