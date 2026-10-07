@@ -45,7 +45,14 @@ namespace AstroArchive {
                     ShowFilters(false);PumpPopupLayout();
                     if(filtersPopup==null||!filtersPopup.IsOpen)throw new Exception("Compact filter popup did not open from top navigation.");
                     var filterBody=(FrameworkElement)filtersPopup.Child;
-                    foreach(var label in PopupChildren<TextBlock>(filterBody).Where(t=>!string.IsNullOrWhiteSpace(t.Text)))Readable(label.Foreground,((Border)filterBody).Background,mode+" compact filter label");
+                    foreach(var label in PopupChildren<TextBlock>(filterBody).Where(t=>t.IsVisible&&t.IsEnabled&&!string.IsNullOrWhiteSpace(t.Text))){
+                        Brush background=((Border)filterBody).Background;
+                        for(DependencyObject parent=VisualTreeHelper.GetParent(label);parent!=null;parent=VisualTreeHelper.GetParent(parent)){
+                            var surface=parent as Border;var brush=surface==null?null:surface.Background as SolidColorBrush;
+                            if(brush!=null&&brush.Color.A==255){background=brush;break;}
+                        }
+                        Readable(label.Foreground,background,mode+" compact filter label: "+label.Text);
+                    }
                     SavePopup(filterBody,Path.Combine(output,"AstroArchive_Filters_"+mode+".png"));filtersPopup.IsOpen=false;PumpPopupLayout();
                     Capture(Path.Combine(output, "AstroArchive_Navigation_" + mode + ".png"));
                 }
