@@ -1,4 +1,4 @@
-AstroArchive 1.8.3
+AstroArchive 1.8.4
 Windows 10/11 x64 desktop app. Built-in .NET Framework 4.8 and Windows SQLite.
 Runs offline. No Python or Google login required.
 

@@ -1,3 +1,10 @@
+AstroArchive 1.8.4 — target type recognition
+Package 1.8.4.1
+
+- Retain the grouped, concise target list introduced in 1.8.3.
+- Recognise the comet designations 2I/Borisov and 3I/ATLAS. Leave asteroidal
+  A/ designations and unclassified interstellar objects in Other targets.
+
 AstroArchive 1.8.3 — grouped, concise repository targets
 Package 1.8.3.1
 

@@ -7,9 +7,10 @@ namespace AstroArchive {
     foreach(string target in new[]{"M42","M57","NGC6888","C27","IC1805","B33","NGC6960"})Check(TargetNavigation.Group(target)=="Nebulae","Nebula catalogue type missing: "+target);
     foreach(string target in new[]{"M31","M51","NGC253"})Check(TargetNavigation.Group(target)=="Galaxies","Galaxy misgrouped: "+target);
     foreach(string target in new[]{"M45","M13","M44","C14"})Check(TargetNavigation.Group(target)=="Star clusters","Cluster catalogue type missing: "+target);
-    foreach(string target in new[]{"C/2023 A3 (Tsuchinshan-ATLAS)","C2023A3","C/2014 UN271","12P/Pons-Brooks","1P Halley","2I/Borisov","Comet ATLAS","NEOWISE"})Check(TargetNavigation.Group(target)=="Comets","Comet designation missing: "+target);
+    foreach(string target in new[]{"C/2023 A3 (Tsuchinshan-ATLAS)","C2023A3","C/2014 UN271","12P/Pons-Brooks","1P Halley","2I/Borisov","3I/ATLAS","Comet ATLAS","NEOWISE"})Check(TargetNavigation.Group(target)=="Comets","Comet designation missing: "+target);
     foreach(string target in new[]{"Sun","Solar","Moon","Jupiter"})Check(TargetNavigation.Group(target)=="Solar system","Solar-system target misgrouped: "+target);
     Check(TargetNavigation.Group("Calibration")=="Calibration"&&TargetNavigation.Group("Unknown")=="Unidentified"&&TargetNavigation.Group("My wide field")=="Other targets","Unclassified/calibration targets lost");
+    Check(TargetNavigation.Group("A/2017 U1")=="Other targets"&&TargetNavigation.Group("1I/Oumuamua")=="Other targets","Asteroidal or unclassified interstellar designation treated as a comet");
     Check(TargetNavigation.Group("Custom nebula and galaxy")=="Other targets","Conflicting custom type guessed");
    });
    Test("Grouped navigation retains every file and keeps type sections contiguous",()=>{

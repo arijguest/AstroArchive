@@ -21,7 +21,7 @@ namespace AstroArchive {
     }
    }
    string label=target+" "+Catalog.CommonName(target);var hints=new HashSet<string>();
-   if(Regex.IsMatch(label,@"\bcomet\b|^[CPDXAI]\s*/?\s*\d{4}\s*[A-Z]{1,2}\d{1,3}\b|^\d{1,4}\s*[PDI](?:\s*/|\s+|$)|\b(Halley|Hale[- ]Bopp|Hyakutake|NEOWISE)\b",RegexOptions.IgnoreCase|RegexOptions.CultureInvariant))hints.Add("Comets");
+   if(Regex.IsMatch(label,@"\bcomet\b|^[CPDX]\s*/?\s*\d{4}\s*[A-Z]{1,2}\d{1,3}\b|^\d{1,4}\s*[PD](?:\s*/|\s+|$)|^2I\s*/\s*Borisov\b|^3I\s*/\s*ATLAS\b|\b(Halley|Hale[- ]Bopp|Hyakutake|NEOWISE)\b",RegexOptions.IgnoreCase|RegexOptions.CultureInvariant))hints.Add("Comets");
    if(Regex.IsMatch(label,@"\b(nebula|nebulae|supernova remnant)\b",RegexOptions.IgnoreCase))hints.Add("Nebulae");
    if(Regex.IsMatch(label,@"\b(galaxy|galaxies)\b",RegexOptions.IgnoreCase))hints.Add("Galaxies");
    if(Regex.IsMatch(label,@"\b(cluster|clusters)\b",RegexOptions.IgnoreCase))hints.Add("Star clusters");
@@ -33,7 +33,7 @@ namespace AstroArchive {
   }
   static Match CometName(string name){return Regex.Match(name??"",@"^([CPDXAI]\s*/?\s*\d{4}\s*[A-Z]{1,2}\d{1,3}\b|\d{1,4}\s*[PDI]\b)\s*[/ -]?\s*(.*)$",RegexOptions.IgnoreCase|RegexOptions.CultureInvariant);}
   public static string ShortName(string name){if(name=="All targets")return name;string common=Catalog.CommonName(name);if(common.Length>0)return common;if(Group(name)=="Comets"){var match=CometName(name);if(match.Success&&match.Groups[2].Value.Length>0)return match.Groups[2].Value.Trim('(',')',' ');if(name.StartsWith("Comet ",StringComparison.OrdinalIgnoreCase))return name.Substring(6).Trim();}return name;}
-  public static string Identifier(string name){if(name=="All targets")return "";if(Catalog.CommonName(name).Length>0)return Catalog.ObjectId(name);var match=CometName(name);return match.Success&&match.Groups[2].Value.Length>0?match.Groups[1].Value.Trim():"";}
+  public static string Identifier(string name){if(name=="All targets")return "";if(Catalog.CommonName(name).Length>0)return Catalog.ObjectId(name);var match=CometName(name);return Group(name)=="Comets"&&match.Success&&match.Groups[2].Value.Length>0?match.Groups[1].Value.Trim():"";}
   static TargetSummary Summarize(string name,IEnumerable<Frame> frames){var summary=CaptureGroups.Summarize(frames);return new TargetSummary{Name=name,Files=summary.Captures,Subs=summary.Subs,Stacks=summary.Stacks,Sessions=summary.Sessions,ExposureSeconds=summary.ExposureSeconds,UnknownExposure=summary.UnknownExposure};}
   public static string Exposure(double seconds){return seconds>=3600?((int)(seconds/3600))+"h"+(seconds%3600>=60?" "+((int)(seconds%3600/60))+"m":""):seconds>=60?((int)(seconds/60))+"m"+(seconds%60>=1?" "+((int)(seconds%60))+"s":""):seconds.ToString("0.#",CultureInfo.InvariantCulture)+"s";}
  }
