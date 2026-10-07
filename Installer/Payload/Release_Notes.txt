@@ -1,3 +1,10 @@
+AstroArchive 1.10.3 — header alignment refinement
+Package 1.10.3.2
+
+- Move the repository path to the top of the app content with minimal padding
+  and a small gap below it. Center the logo and title vertically against the
+  menu buttons, including when larger text wraps the menus.
+
 AstroArchive 1.10.3 — larger header branding
 Package 1.10.3.1
 
