@@ -73,7 +73,7 @@
    <Image x:Name="BrandLogo" Width="34" Height="34" Stretch="Uniform" RenderOptions.BitmapScalingMode="HighQuality"/>
    <TextBlock Grid.Column="1" Text="AstroArchive" FontSize="21" FontWeight="SemiBold" VerticalAlignment="Center" Margin="8,0,22,0"/>
    <TextBlock Grid.Column="2" x:Name="RepositoryLabel" Text="Set an archive folder in Settings" TextTrimming="CharacterEllipsis" Foreground="{DynamicResource Muted}" FontSize="11" VerticalAlignment="Center" MaxWidth="650" HorizontalAlignment="Left"/>
-   <StackPanel Grid.Column="3" Orientation="Horizontal"><Button x:Name="ThemeButton" Content="◐" ToolTip="Switch light / dark mode" Padding="10,6"/><Button x:Name="SettingsButton" Content="Settings"/><Button x:Name="HelpButton" Content="Guide" Margin="0"/></StackPanel>
+   <StackPanel Grid.Column="3" Orientation="Horizontal"><Button x:Name="CoffeeButton" Content="☕ Buy me a coffee" Background="{DynamicResource Selection}" Foreground="{DynamicResource Text}" BorderBrush="{DynamicResource Accent}" BorderThickness="1.5" FontSize="13" Padding="14,7" Margin="0,0,10,0"/><Button x:Name="ThemeButton" Content="◐" ToolTip="Switch light / dark mode" Padding="10,6"/><Button x:Name="SettingsButton" Content="Settings"/><Button x:Name="HelpButton" Content="Guide" Margin="0"/></StackPanel>
   </Grid>
   <Border Grid.Row="1" x:Name="UpdateNotice" Visibility="Collapsed" Background="{DynamicResource SurfaceAlt}" Padding="12" Margin="0,8,0,10" CornerRadius="6"><DockPanel><Button DockPanel.Dock="Right" x:Name="DismissUpdateNotice" Content="Dismiss"/><TextBlock x:Name="UpdateNoticeText" TextWrapping="Wrap" VerticalAlignment="Center"/></DockPanel></Border>
   <TabControl Grid.Row="2" x:Name="MainTabs">

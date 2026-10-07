@@ -2,7 +2,7 @@
 
 Portable Windows 10/11 x64 WPF app for archiving smart-telescope FITS and creating verified stacking projects. Open `AstroArchive.exe`; read `Quick_Start.txt` for the complete workflow.
 
-## Changes in 1.7.1
+## Changes in 1.7.2
 
 - Metadata-first mosaic collections, stable panel assignments, explicit review states and completed-output roles across targets and sessions.
 - Existing-WCS footprints and conservative pointing suggestions, with optional cached representative solving.
@@ -130,7 +130,7 @@ Metadata corrections may move archived copies without modifying FITS pixels/head
 
 OpenNGC by Mattia Verga is licensed CC-BY-SA-4.0. See `Catalogue_Notice.md` and `OpenNGC_README.md` for the selected-column derivative's attribution and provenance.
 
-## Release 1.7.1 / package 1.7.1.1
+## Release 1.7.2 / package 1.7.2.1
 
 Mosaic collections and panel exports, canonical object IDs/common names, grouped
 library exposure summaries, import review and filtered retries, audited reimport

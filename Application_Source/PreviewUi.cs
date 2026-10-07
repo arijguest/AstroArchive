@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
@@ -16,6 +17,7 @@ namespace AstroArchive {
    Theme.Apply(Window,settings.ThemeMode);C("StretchMode").ItemsSource=PreviewData.StretchModes;C("StretchMode").SelectedItem=settings.PreviewStretch??"Auto";if(C("StretchMode").SelectedIndex<0)C("StretchMode").SelectedItem="Auto";
    settings.PreviewStretch=Convert.ToString(C("StretchMode").SelectedItem);
    C("PreviewZoom").ItemsSource=new[]{"Fit","100%","200%","400%"};C("PreviewZoom").SelectedIndex=0;
+   B("CoffeeButton").Click+=(s,e)=>{try{Process.Start(new ProcessStartInfo("https://ko-fi.com/arijguest"){UseShellExecute=true});}catch(Exception error){MessageBox.Show(Window,"Could not open your browser. Visit https://ko-fi.com/arijguest\n\n"+error.Message,"Ko-fi link",MessageBoxButton.OK,MessageBoxImage.Information);}};
    B("ThemeButton").Click+=(s,e)=>{settings.ThemeMode=Theme.IsDark(settings.ThemeMode)?"Light":"Dark";Theme.Apply(Window,settings.ThemeMode);SaveSettings();};
    B("PreviewToggle").Click+=(s,e)=>{settings.ShowPreview=!settings.ShowPreview;SetPreviewVisibility();SaveSettings();if(settings.ShowPreview)PreviewSelected();};
    B("OpenPreviewButton").Click+=(s,e)=>OpenPreviewFile();

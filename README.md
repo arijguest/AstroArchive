@@ -61,7 +61,7 @@ uninstaller to Windows Installed Apps.
 Replace the filename below with the installer you downloaded:
 
 ```powershell
-Get-FileHash .\AstroArchive1.7.1.1.exe -Algorithm SHA256
+Get-FileHash .\AstroArchive1.7.2.1.exe -Algorithm SHA256
 ```
 
 Compare the `Hash` value with the corresponding `.sha256` file in the release.
@@ -92,7 +92,7 @@ telescope profiles, cloud folders, calibration matching and optional analysis.
 
 ## Mosaic collections
 
-Release 1.7.1 adds [metadata-first mosaic collections](docs/MOSAICS.md),
+Release 1.7.2 adds [metadata-first mosaic collections](docs/MOSAICS.md),
 reviewable panel assignments and independent stacking inputs per panel.
 
 The library also unifies recognized object IDs and common names, with target/session

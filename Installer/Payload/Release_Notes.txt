@@ -1,3 +1,14 @@
+AstroArchive 1.7.2 — support button
+Package 1.7.2.1
+
+- Add a prominent Buy me a coffee button directly left of the theme toggle.
+  Uses the app's theme colours and opens https://ko-fi.com/arijguest in the
+  default browser. Includes a descriptive tooltip and browser-launch fallback.
+
+Download AstroArchive1.7.2.1.exe.
+
+Previous release notes
+
 AstroArchive 1.7.1 — configurable tables, common names and popup styling
 Package 1.7.1.1
 

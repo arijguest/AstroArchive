@@ -81,6 +81,7 @@ namespace AstroArchive {
    {"OpenPreviewButton","Open a supported image in the image preview."},
    {"StretchMode","Adjust the display stretch without changing image data."},
    {"PreviewZoom","Set image magnification."},
+   {"CoffeeButton","Support AstroArchive on Ko-fi. Opens https://ko-fi.com/arijguest in your default browser."},
    {"ThemeButton","Switch between the light and dark themes."},
    {"DismissUpdateNotice","Dismiss the confirmation for the installed update."},
    {"NewMosaicButton","Create a mosaic collection manually."},
