@@ -16,7 +16,7 @@ A Windows desktop app for organising smart-telescope FITS captures and preparing
 
 Windows 10 or 11, **64-bit**, with **.NET Framework 4.8 or later**.
 Download `AstroArchive<package-version>.exe` from the latest
-release (currently `AstroArchive1.6.0.1.exe`) and run it. Installation works offline and needs no administrator access.
+release (currently `AstroArchive1.6.1.1.exe`) and run it. Installation works offline and needs no administrator access.
 The default folder is `%LOCALAPPDATA%\Programs\AstroArchive`.
 Desktop and Start menu shortcuts and an Installed Apps uninstaller are included.
 
@@ -54,6 +54,8 @@ See [update details](docs/UPDATES.md) for manual checks, troubleshooting and off
 - Filter library and import views from a dropdown, screen failed/rejected telescope captures and import only the ready files shown.
 - Track imports and deletion history with SQLite so later telescope imports skip captures you removed.
 - Right-click selected files to export copies, prepare ready-to-stack folders with optional matching calibrations, edit metadata or delete archive copies.
+- Process FITS dropped into the archive’s `Dump` folder on startup. Verified imports and duplicates are removed; failed inputs remain.
+- Send a single FITS stack to the verified AstroWizard build or Siril using a separate working copy. See [handoff support](docs/PROCESSOR_HANDOFFS.md).
 - Optionally identify targets with local ASTAP or Astrometry.net and analyse field rotation.
 - Read filesystem-mounted or streamed cloud folders, including Google Drive for desktop.
 
