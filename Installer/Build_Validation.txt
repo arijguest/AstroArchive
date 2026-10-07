@@ -1,0 +1,37 @@
+AstroArchive offline Windows installer validation
+Build date: 2026-10-07 UTC
+Application version: 1.2.0
+Installer/launcher file and assembly version: 1.2.0.1
+
+Installer engine: 23 passed; 0 failed, executed under Mono 6.8 on Linux.
+Coverage: fresh installation; adoption of legacy 1.1.0 and the attached 1.2.0
+record formats; same-version repair; newer app and installer revision updates;
+numeric downgrade refusal; update-only refusal without an existing install;
+unrelated folders, invalid records, hashes, traversal and linked-path refusal;
+staging, commit and registration failure rollback; running-app refusal;
+additional-file preservation; scoped multi-version uninstall; matching package
+versions; progress-window failures cannot damage a committed installation.
+
+Actual embedded package smoke test: passed on Linux using the shipped setup
+assembly's package reader and engine. All 7 SHA-256 payload hashes matched;
+its actual application installed, repaired, and uninstalled while retaining a
+fixture repository. Registry, shortcuts, UI and process checks were not invoked.
+
+Binary checks: setup, launcher and app are AMD64 Windows GUI PE files with
+native icons, version information, asInvoker execution and long-path manifests.
+Installer/launcher versions are 1.2.0.1, and the app is 1.2.0.0. References are
+standard .NET Framework assemblies, without Mono-specific runtime references.
+The embedded launcher equals the included offline Start.exe. All seven payload
+entries and hashes were verified independently from the compiled setup EXE.
+
+The supplied application executable is byte-for-byte unchanged:
+SHA-256: 8518b38355b58f76b57f5231e40ccf0ff34da56125eb33c1fd914ccbc5d78617
+
+Installer SHA-256: 4b086ce14b5753ed5533178c5f28707e72960ebf2f44e4dc0e9086874acbee69
+
+Limitations: no native Windows execution was available. Windows setup UI,
+shortcuts, registry registration, app launch, and self-removing uninstall need
+the Windows smoke test in README.md. Build.ps1 and test.ps1 are supplied for
+Windows and were reviewed but not executed in this Linux environment. The
+package is unsigned. The app's earlier validation report is included unchanged
+as Payload/Validation.txt; its application suite was not rerun for this installer.

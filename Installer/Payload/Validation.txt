@@ -1,0 +1,41 @@
+AstroArchive 1.2.0 validation
+Windows 10/11 x64, .NET Framework 4.8, C# 5.
+Executable SHA-256: 8518B38355B58F76B57F5231E40CCF0FF34DA56125EB33C1FD914CCBC5D78617
+
+Compiled against Microsoft .NET Framework 4.8 reference assemblies.
+Verified assembly version 1.2.0.0, x64 PE32+ Windows GUI format, embedded XAML,
+catalogue/logo hashes, native Explorer selector, complete Windows manifest and
+all six icon resolutions. Checked XAML XML, named control references, Clear
+filter wiring and slider-guard wiring. No System.Windows.Forms dependency.
+
+60 generated-data tests passed under Mono 6.8/system SQLite in Linux, and a
+second fresh run also passed. Tests exercise FITS parsing, target/make detection,
+streamed scan/live events, combined copying/hashing, same-name/size content changes,
+per-file failures, cloud hydration stamps, session metadata caching/changes,
+content-validated solving caches, indexed manifests and portable migration,
+1/2/4/8-worker real-file pilot and retained decision, stage bytes/ETA, repeated
+checkpoint/close/reopen durability, DWARF camera calibration, session exports,
+merged calibration compatibility, scoped reset/cancellation, star matching,
+rotation inference and local ASTAP protocol handling.
+
+4 Windows-only tests remain included in test.ps1 and were skipped here:
+- Native verified source deletion of newly imported FITS, retaining duplicates/JSON.
+- Refusal to delete a source when its archive copy has changed.
+- Refusal to delete a source hard-linked to its archive copy.
+- Trusted unchanged-file shortcuts on stable Windows file identities/change stamps.
+
+Native selectors, WPF interaction/slider confirmation, source deletion and a live
+Google Drive installation could not be exercised on Windows in this environment.
+The --ui-test option is included for Windows and checks filters, analysis defaults
+and rendering using synthetic data. No new rendered UI preview is claimed.
+Real telescope files, a real ASTAP star catalogue and authenticated Astrometry.net
+solving were unavailable. The ASTAP test double checks the process protocol only.
+
+The user's exact time-dependent copying failure remains unconfirmed without its
+on-PC error. This build adds transient retries, per-file error isolation, cloud
+hydration handling, a local synchronous rollback-journal index and detailed path/
+error-code reports. It retains committed work on failed or interrupted imports.
+
+The app archives FITS only. DWARF factory PNG calibration needs conversion first.
+Target solving requires separately configured ASTAP/star data or an online account.
+Actual stacking is performed in external software.

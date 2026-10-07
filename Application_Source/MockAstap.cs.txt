@@ -1,0 +1,6 @@
+// Test-only ASTAP protocol double. This is not a plate solver.
+using System;
+using System.IO;
+class MockAstap {
+ static int Main(string[] args){string output=null,input=null;for(int i=0;i<args.Length-1;i++){if(args[i]=="-o")output=args[i+1];if(args[i]=="-f")input=args[i+1];}if(output==null||input==null||!File.Exists(input))return 16;File.WriteAllText(output+".ini","PLTSOLVD=T\r\nCRVAL1=56.75\r\nCRVAL2=24.1167\r\nCDELT1=-0.005\r\nCDELT2=0.005\r\n");return 0;}
+}

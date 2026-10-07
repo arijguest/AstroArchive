@@ -1,0 +1,12 @@
+# Generated application/installer builds and synthetic test data.
+**/dist/
+**/.build/
+Application_Source/test-data/
+Application_Source/ui-preview/
+Application_Source/AstroArchiveTests.exe*
+Application_Source/MockAstap.exe*
+Installer/GeneratedVersion.cs
+*.user
+*.suo
+.vs/
+release-artifacts/

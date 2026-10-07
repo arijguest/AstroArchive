@@ -1,0 +1,129 @@
+// Metadata rules are conservative: missing information remains Unknown.
+using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.IO;
+using System.Linq;
+using System.Reflection;
+using System.Text.RegularExpressions;
+
+namespace AstroArchive {
+ public class CatalogObject {
+  public string Name; public string Common; public string Aliases; public string Type; public double RA; public double Dec; public double Diameter; public double? Magnitude;
+  public string Label {get{return Name+(string.IsNullOrEmpty(Common)?"":"  ·  "+Common);}}
+ }
+ public class Candidate {public string Name{get;set;} public string Common{get;set;} public double Separation{get;set;} public string DistanceText{get{return Separation.ToString("0.000",CultureInfo.InvariantCulture)+"° from centre";}} }
+ public static class Catalog {
+  public static List<CatalogObject> Objects=new List<CatalogObject>(); static Dictionary<string,string> aliases=new Dictionary<string,string>(StringComparer.OrdinalIgnoreCase);static Dictionary<string,string> descriptions=new Dictionary<string,string>(StringComparer.OrdinalIgnoreCase);static HashSet<string> ambiguous=new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+  static List<KeyValuePair<string,string>> phrases=new List<KeyValuePair<string,string>>();
+  static List<KeyValuePair<Regex,string>> filenamePatterns=new List<KeyValuePair<Regex,string>>();
+  static Catalog(){
+   using(var s=Assembly.GetExecutingAssembly().GetManifestResourceStream("catalog.csv"))using(var r=new StreamReader(s)) {
+    r.ReadLine();string line;while((line=r.ReadLine())!=null){string[] a=line.Split(';');if(a.Length<9)continue;double? ra=Sex(a[2],true),dec=Sex(a[3],false);if(!ra.HasValue||!dec.HasValue)continue;
+     string name=CompactId(a[0]);if(!string.IsNullOrEmpty(a[6]))name="M"+a[6].TrimStart('0');
+     double d,mag;var o=new CatalogObject{Name=name,Common=a[7].Split(',')[0],Aliases=a[8],Type=a[1],RA=ra.Value,Dec=dec.Value,Diameter=double.TryParse(a[4],NumberStyles.Float,CultureInfo.InvariantCulture,out d)?d/60:0,Magnitude=double.TryParse(a[5],NumberStyles.Float,CultureInfo.InvariantCulture,out mag)?(double?)mag:null};Objects.Add(o);
+     AddAlias(a[0],name);AddAlias(name,name);foreach(string t in a[7].Split(','))AddAlias(t,name);foreach(string t in a[8].Split(','))if(Regex.IsMatch(t.Trim(),@"^(M|NGC|IC|SH\s*2|B)\s*\d",RegexOptions.IgnoreCase))AddAlias(t,name);
+    }
+   }
+   AddAlias("Pleiades","M45");AddAlias("Andromeda","M31");AddAlias("Triangulum","M33");AddAlias("Pacman","NGC281");AddAlias("Pacman Nebula","NGC281");AddAlias("Wizard","NGC7380");AddAlias("Wizard Nebula","NGC7380");AddAlias("Crescent","NGC6888");AddAlias("Crescent Nebula","NGC6888");AddAlias("Hidden Galaxy","IC342");AddAlias("Orion Nebula","M42");
+   AddAlias("Heart Nebula","IC1805");AddAlias("Soul Nebula","IC1848");AddAlias("Elephant's Trunk Nebula","IC1396");AddAlias("Elephant Trunk Nebula","IC1396");
+   foreach(var phrase in phrases.GroupBy(p=>p.Key).Select(g=>g.First())){if(KnownName(phrase.Key)!=phrase.Value)continue;string pattern=@"\b"+string.Join(@"\s*",phrase.Key.Split(new[]{' '},StringSplitOptions.RemoveEmptyEntries).Select(Regex.Escape))+@"\b";filenamePatterns.Add(new KeyValuePair<Regex,string>(new Regex(pattern,RegexOptions.Compiled|RegexOptions.CultureInvariant),phrase.Value));}
+  }
+  static void AddAlias(string a,string name){if(string.IsNullOrWhiteSpace(a))return;string label;if(!descriptions.TryGetValue(name,out label))label="";descriptions[name]=label+" "+a;string key=Key(a);if(key.Length==0||ambiguous.Contains(key))return;string existing;if(aliases.TryGetValue(key,out existing)&&existing!=name){aliases.Remove(key);ambiguous.Add(key);}else aliases[key]=name;string words=Regex.Replace(a.ToUpperInvariant(),@"[^A-Z0-9]+"," ").Trim();if(words.Length>=4&&!Regex.IsMatch(key,@"^(M|NGC|IC|C|B|SH2)\d+[A-Z]?$")&&words.Any(char.IsLetter))phrases.Add(new KeyValuePair<string,string>(words,name));}
+  public static string KnownName(string name){string value;return aliases.TryGetValue(Key(name),out value)?value:null;}
+  static HashSet<string> FilenameTargets(string filename){
+   string stem=Regex.Replace(Path.GetFileName(filename??""),@"\.(fit|fits|fts)(\.gz)?$","",RegexOptions.IgnoreCase);
+   string text=Regex.Replace(stem.ToUpperInvariant(),@"[^A-Z0-9]+"," ");var found=new HashSet<string>();
+   foreach(Match match in Regex.Matches(text,@"\b(M|NGC|IC)\s*0*(\d+)([A-Z]?)\b")){string id=KnownName(match.Groups[1].Value+match.Groups[2].Value+match.Groups[3].Value);if(id!=null)found.Add(id);}
+   foreach(var phrase in filenamePatterns)if(phrase.Key.IsMatch(text))found.Add(phrase.Value);
+   return found;
+  }
+  public static string TargetFromFilename(string filename){var found=FilenameTargets(filename);return found.Count==1?found.First():null;}
+  public static bool HasFilenameConflict(string filename){return FilenameTargets(filename).Count>1;}
+  public static string Aliases(string target){string s;return !string.IsNullOrEmpty(target)&&descriptions.TryGetValue(target,out s)?s:"";}
+  static string Key(string s){return Regex.Replace((s??"").ToUpperInvariant(),@"[^A-Z0-9]","");}
+  public static string CompactId(string s){var m=Regex.Match(s??"",@"^(NGC|IC|M|C|B)\s*0*(\d+)(.*)$",RegexOptions.IgnoreCase);return m.Success?m.Groups[1].Value.ToUpperInvariant()+m.Groups[2].Value+m.Groups[3].Value:s;}
+  public static double? Sex(string s,bool hours){
+   string[] p=Regex.Split((s??"").Trim().Replace("h",":").Replace("m",":").Replace("s",""),@"[:\s]+");double a,b,c;if(p.Length<2||!double.TryParse(p[0],NumberStyles.Float,CultureInfo.InvariantCulture,out a)||!double.TryParse(p[1],NumberStyles.Float,CultureInfo.InvariantCulture,out b))return null;c=0;if(p.Length>2&&!double.TryParse(p[2],NumberStyles.Float,CultureInfo.InvariantCulture,out c))return null;
+   double v=(Math.Abs(a)+b/60+c/3600)*(s.TrimStart().StartsWith("-")?-1:1);return hours?v*15:v;
+  }
+  public static string Normalize(string s){
+   s=(s??"").Trim().Trim('_','-');if(IsAmbiguous(s))return "Unknown";string val;if(aliases.TryGetValue(Key(s),out val))return val;
+   var m=Regex.Match(s,@"\b(M|NGC|IC)\s*[_-]?\s*0*(\d+)([A-Z]?)\b",RegexOptions.IgnoreCase);if(m.Success){string id=m.Groups[1].Value.ToUpperInvariant()+m.Groups[2].Value+m.Groups[3].Value.ToUpperInvariant();return aliases.TryGetValue(Key(id),out val)?val:id;}
+   return s.Replace('_',' ').Trim();
+  }
+  public static bool IsAmbiguous(string s){return string.IsNullOrWhiteSpace(s)||Regex.IsMatch(s.Trim(),@"^(unknown|unnamed|none|n/?a|target|object|sky|test|light|raw|image|frame|manual|custom|calibration|\d+)([_\s-]*\d*)$",RegexOptions.IgnoreCase);}
+  public static double Distance(double ra,double dec,double ra2,double dec2){double k=Math.PI/180;double x=Math.Sin((dec2-dec)*k/2),y=Math.Sin((ra2-ra)*k/2);double h=x*x+Math.Cos(dec*k)*Math.Cos(dec2*k)*y*y;return 2*Math.Asin(Math.Sqrt(Math.Min(1,h)))/k;}
+  public static List<Candidate> Nearby(double ra,double dec,double radius){return Objects.Select(o=>new Candidate{Name=o.Name,Common=o.Common,Separation=Distance(ra,dec,o.RA,o.Dec)}).Where(c=>c.Separation<=radius).OrderBy(c=>c.Separation).GroupBy(c=>c.Name).Select(g=>g.First()).Take(30).ToList();}
+  public static List<CatalogObject> Search(string q){string v=Key(q);return Objects.Where(o=>Key(o.Name+" "+o.Common+" "+o.Aliases).Contains(v)).Take(50).ToList();}
+ }
+ public static class Classifier {
+  public sealed class ShotsMetadata {public Dictionary<string,string> Values=new Dictionary<string,string>(StringComparer.OrdinalIgnoreCase);public string Path;public string Note;public FileStamp Stamp;}
+  static double? MatchNumber(string text,string pattern){var m=Regex.Match(text,pattern,RegexOptions.IgnoreCase);double d;return m.Success&&double.TryParse(m.Groups[1].Value,NumberStyles.Float,CultureInfo.InvariantCulture,out d)?(double?)d:null;}
+  static string CleanStem(string s){return Regex.Replace(s,@"\.(fit|fits|fts)(\.gz)?$","",RegexOptions.IgnoreCase);}
+  public static Frame Read(string path,string root,string telescope,string model,long? enumeratedSize=null,Action<int> counted=null,Dictionary<string,ShotsMetadata> shotsCache=null){
+   FileStamp sourceStamp=null;FitsHeader h=Fits.Header(path,counted,stamp=>sourceStamp=stamp);string rel=path.Substring(root.TrimEnd('\\','/').Length).TrimStart('\\','/');string text=Path.GetFileName(root.TrimEnd('\\','/'))+"/"+rel.Replace('\\','/');string low=text.ToLowerInvariant();string stem=CleanStem(Path.GetFileName(path));string name=stem.ToLowerInvariant();
+   var f=new Frame{SourcePath=path,OriginalName=Path.GetFileName(path),Telescope=telescope,Model=model,Camera="Unknown",Target="Unknown",Kind="Unknown",Calibration="Unknown",Filter="Unknown",Bayer=h.Get("BAYERPAT","BAYERPATTERN"),Mount="Unknown",MountEvidence="Not analyzed",Notes="",Status="New",Bytes=enumeratedSize??new FileInfo(path).Length,Width=h.Width,Height=h.Height,Channels=h.Channels,BinX=(int)(h.Number("XBINNING","CCDXBIN","BINNING")??0),BinY=(int)(h.Number("YBINNING","CCDYBIN","BINNING")??0)};
+   f.SourceStamp=sourceStamp;var shots=ReadShots(path,root,f,shotsCache,counted);
+   InstrumentDetection.Apply(f,h,root,model);
+   CameraDetection.Apply(f,h,text,Shot(shots,"cameraId","camera_id","camId","cam_id"));
+   string type=h.Get("IMAGETYP","IMAGETYPE","FRAME","FRAMETYP").ToLowerInvariant();
+   bool master=Regex.IsMatch(name,@"(?:^|[_-])(master|stacked|stack|staced)(?:[_-]|$)")||Regex.IsMatch(name,@"(?:^|[_-])stack[_-]?\d+")||low.Contains("cali_frame/");
+   bool dark=type.Contains("dark")||Regex.IsMatch(low,@"(?:^|[/_ -])darks?(?:[/_ -]|$)");
+   bool bias=type.Contains("bias")||type.Contains("offset")||Regex.IsMatch(low,@"(?:^|[/_ -])(bias|biases|offset)(?:[/_ -]|$)");
+   bool flat=type.Contains("flat")||Regex.IsMatch(low,@"(?:^|[/_ -])flats?(?:[/_ -]|$)");
+   if(dark)f.Kind=master?"Master dark":"Dark";else if(bias)f.Kind=master?"Master bias":"Bias";else if(flat)f.Kind=master?"Master flat":"Flat";
+   else if(master||type.Contains("stack")||low.Contains("restacked/")||Regex.IsMatch(name,@"\d+x\d+(?:\.\d+)?(?:s|sec)"))f.Kind="Stack";
+   else if(type.Contains("light")||Regex.IsMatch(low,@"(?:_sub|[- ]sub)(?:/|$)")||low.Contains("dwarf_raw")||Regex.IsMatch(name,@"^(light|raw|sub)[_-]")||Regex.IsMatch(low,@"(?:^|/)lights?/")||type.Contains("science"))f.Kind="Light";
+   if(low.Contains("solving_failed")||Regex.IsMatch(low,@"(?:^|[/_-])(rejected|reject|failed|reference|weight|weights)(?:[/_-]|$)")) {f.Rejected=true;f.Notes+="Reference, rejected, failed or weight file; excluded from export by default. ";if(name.Contains("weight"))f.Kind="Auxiliary";}
+   f.Exposure=h.Number("EXPTIME","EXPOSURE","EXP_TIME","EXPOS");if(!f.Exposure.HasValue)f.Exposure=MatchNumber(text,@"(?:^|[/_ -])EXP(?:OSURE)?[_ =-]*(\d+(?:\.\d+)?)");
+   if(!f.Exposure.HasValue)f.Exposure=MatchNumber(stem,@"(?:^|[_ -])(\d+(?:\.\d+)?)\s*(?:sec|s)(?:[_ -]|$)");
+   if(!f.Exposure.HasValue)f.Exposure=MatchNumber(text,@"\d+x(\d+(?:\.\d+)?)(?:sec|s)");
+   f.Gain=h.Number("GAIN","CCDGAIN");if(!f.Gain.HasValue)f.Gain=MatchNumber(text,@"GAIN[_ =-](-?\d+(?:\.\d+)?)");
+   f.Temperature=h.Number("CCD-TEMP","SENSOR_T","SENSORT","CAMTEMP","TEMPERAT");if(!f.Temperature.HasValue)f.Temperature=MatchNumber(text,@"(?:^|[_ -])T?(-?\d+(?:\.\d+)?)\s*°?C(?:[_ .-]|$)");
+   double? bin=MatchNumber(text,@"BIN[_ =-](\d+)");if(bin.HasValue&&!h.Number("XBINNING","BINNING").HasValue)f.BinX=f.BinY=(int)bin.Value;
+   f.StackCount=(int)(h.Number("NCOMBINE","STACKCNT","NSTACK","STACKNUM")??0);
+   if(f.StackCount==0){double? n=MatchNumber(name,@"(?:stack[_-]?|^)(\d+)(?:x|$|_)");if(n.HasValue)f.StackCount=(int)n.Value;}
+   if(f.Kind=="Light"&&f.StackCount>1){f.Kind="Stack";f.Notes+="Header indicates multiple combined exposures. ";}
+   if(f.Kind=="Unknown"&&(h.Number("NCOMBINE","STACKCNT","NSTACK")??0)>1)f.Kind="Stack";
+   string filter=h.Get("FILTER","FILTERID","FILTNAME");if(!string.IsNullOrEmpty(filter))f.Filter=filter;
+   else {double? ir=MatchNumber(text,@"(?:^|_)IR[_-]?(\d)");if(ir.HasValue)f.Filter=ir==0?"Standard":ir==1?"Astro":ir==2?"Dual band":"IR "+ir;else if(Regex.IsMatch(low,@"(?:^|[_/ -])(duo|dual|lp)[_-]?(band|filter)?(?:[_/ -]|$)"))f.Filter="Dual band";}
+   string target=h.Get("OBJECT","OBJNAME","TARGET","TARGNAME","OBSTARG");
+   if(Catalog.IsAmbiguous(target)){
+    var m=Regex.Match(text,@"DWARF_RAW_(?:(?:TELE|WIDE)_)?(?:(?:MOSAIC)_)?(.+?)_EXP[_-]",RegexOptions.IgnoreCase);if(m.Success)target=m.Groups[1].Value;
+    if(Catalog.IsAmbiguous(target)) {var cat=Regex.Match(text,@"(?:^|[/_ -])(M|NGC|IC)[ _-]*0*(\d+)([A-Za-z]?)(?=[/_ .-]|$)",RegexOptions.IgnoreCase);if(cat.Success)target=cat.Groups[1].Value+cat.Groups[2].Value+cat.Groups[3].Value;}
+    if(Catalog.IsAmbiguous(target)) {string[] parts=text.Split('/');foreach(var part in parts.Reverse().Skip(1)){if(Regex.IsMatch(part,@"[_ -]sub$",RegexOptions.IgnoreCase)){target=Regex.Replace(part,@"[_ -]sub$","",RegexOptions.IgnoreCase);break;}}}
+    if(Catalog.IsAmbiguous(target)){var p=Regex.Match(stem,@"^(?:Stacked|Light|Raw|Sub|staced)[_-](.+?)(?:[_-](?:EXP|GAIN|\d+(?:\.\d+)?s|\d{4}[-_]\d{2})|$)",RegexOptions.IgnoreCase);if(p.Success)target=p.Groups[1].Value;}
+   }
+   if(Catalog.IsAmbiguous(target))target=Shot(shots,"targetName","target_name","objectName","object_name","target");
+   if(!f.Gain.HasValue)f.Gain=ShotNumber(shots,"gain","cameraGain");if(!f.Exposure.HasValue)f.Exposure=ShotNumber(shots,"exposure_s","exposureSeconds","exposureTimeSec");
+   if(f.Filter=="Unknown"){double? ir=ShotNumber(shots,"ir","irCut");if(ir.HasValue&&ir>=0&&ir<=2)f.Filter=ir==0?"Standard":ir==1?"Astro":"Dual band";}
+   if(f.BinX==0){string b=Shot(shots,"binning","bin");var m=Regex.Match(b,@"^(\d+)(?:\s*[x*]\s*(\d+))?$");if(m.Success){f.BinX=int.Parse(m.Groups[1].Value);f.BinY=m.Groups[2].Success?int.Parse(m.Groups[2].Value):f.BinX;}}
+   string filenameTarget=Catalog.TargetFromFilename(f.OriginalName);
+   f.Target=filenameTarget??Catalog.Normalize(target);f.TargetEvidence=filenameTarget!=null?"Recognised filename target":Catalog.KnownName(target)!=null?"Recognised header/session target":"Unrecognised label; plate solving required";
+   if(f.Kind.Contains("dark")||f.Kind.Contains("bias")||f.Kind.Contains("flat")||f.Kind=="Dark"||f.Kind=="Bias"||f.Kind=="Flat"){f.Target="Calibration";f.TargetEvidence="Calibration frame";}
+   string obs=h.Get("DATE-OBS","DATEOBS","DATE_OBS");DateTime? dt=Util.Time(obs);bool frameTime=dt.HasValue&&obs.Length>10;
+   if(!dt.HasValue){string pattern=@"(20\d{2})[-_]?(\d{2})[-_]?(\d{2})[-_T ](\d{2})[-_:]?(\d{2})[-_:]?(\d{2})(?:[-_.](\d{3}))?";var m=Regex.Match(stem,pattern);bool fromFile=m.Success;if(!m.Success)m=Regex.Match(text,pattern);if(m.Success) {try{dt=new DateTime(int.Parse(m.Groups[1].Value),int.Parse(m.Groups[2].Value),int.Parse(m.Groups[3].Value),int.Parse(m.Groups[4].Value),int.Parse(m.Groups[5].Value),int.Parse(m.Groups[6].Value),m.Groups[7].Success?int.Parse(m.Groups[7].Value):0,DateTimeKind.Unspecified);frameTime=fromFile;f.TimeSource=fromFile?"Filename (timezone unknown)":"Session folder (not frame time)";}catch{}}}
+   else f.TimeSource=frameTime?"FITS UTC":"FITS date only";
+   f.Observed=dt.HasValue&&frameTime?dt.Value.ToString("yyyy-MM-ddTHH:mm:ss.fff",CultureInfo.InvariantCulture):"";
+   if(dt.HasValue){DateTime local=f.TimeSource=="FITS UTC"?TimeZoneInfo.ConvertTimeFromUtc(DateTime.SpecifyKind(dt.Value,DateTimeKind.Utc),TimeZoneInfo.Local):dt.Value;f.Night=local.AddHours(-12).ToString("yyyy-MM-dd");}else{f.Night="Unknown date";f.TimeSource="Unknown";}
+   string sourceSession=Regex.Match(text,@"DWARF_RAW[^/]+",RegexOptions.IgnoreCase).Value;
+   if(sourceSession.Length==0)sourceSession=Path.GetDirectoryName(rel)??"Root";
+   f.Session=Util.HashText(telescope+"|"+sourceSession+"|"+f.Night+"|"+f.Target+"|"+f.Camera+"|"+f.Width+"x"+f.Height).Substring(0,16);
+   f.RA=Catalog.Sex(h.Get("OBJCTRA"),true)??h.Number("RA_DEG","RADEG","RA_OBJ");f.Dec=Catalog.Sex(h.Get("OBJCTDEC"),false)??h.Number("DEC_DEG","DECDEG","DEC_OBJ","DEC");
+   string raComment;if(!f.RA.HasValue&&h.Comments.TryGetValue("RA",out raComment)&&raComment.ToLowerInvariant().Contains("deg"))f.RA=h.Number("RA");
+   if(h.Get("CTYPE1").StartsWith("RA")&&h.Get("CTYPE2").StartsWith("DEC")){f.RA=h.Number("CRVAL1")??f.RA;f.Dec=h.Number("CRVAL2")??f.Dec;}
+   f.Latitude=h.Number("SITELAT","OBSGEO-B");f.Longitude=h.Number("SITELONG","SITELON","OBSGEO-L");
+   string mode=h.Get("MOUNTMOD","MOUNTMODE","TRACKMOD","MOUNTTYP").Trim().ToUpperInvariant();if(mode=="EQ"||mode.Contains("EQUATORIAL")){f.Mount="EQ";f.MountEvidence="Explicit FITS mount metadata";}else if(mode=="AZ"||mode=="ALT/AZ"||mode=="ALTAZ"||mode.Contains("ALT-AZ")){f.Mount="Alt/Az";f.MountEvidence="Explicit FITS mount metadata";}
+   string cal=h.Get("CALSTAT");if(h.Get("CALIBRAT","CALIBRED")=="T"||Regex.IsMatch(cal,@"[DBF]"))f.Calibration="Calibrated";
+   if(h.Get("REGISTER","REGISTRD","DEROTATE")=="T"||Regex.IsMatch(name,@"^(r_|r_pp_|registered[_-])")||low.Contains("/registered/"))f.Calibration="Registered";
+   if(f.Kind=="Stack")f.Calibration="Device stack";if(f.Kind.StartsWith("Master")||f.Kind=="Dark"||f.Kind=="Flat"||f.Kind=="Bias")f.Calibration="Calibration frame";
+   if(f.Target=="Unknown")f.Notes+="Target needs identification. ";if(f.Kind=="Unknown")f.Notes+="Frame type needs review. ";if(f.Camera=="Unknown")f.Notes+="Camera channel unknown. ";
+   return f;
+  }
+  static Dictionary<string,string> ReadShots(string path,string root,Frame f,Dictionary<string,ShotsMetadata> cache,Action<int> counted){string dir=Path.GetDirectoryName(path);for(int i=0;i<4&&dir!=null&&Util.Within(dir,root);i++,dir=Path.GetDirectoryName(dir)){string sidecar=Path.Combine(dir,"shotsInfo.json");ShotsMetadata metadata;if(cache==null||!cache.TryGetValue(sidecar,out metadata)){metadata=new ShotsMetadata();if(File.Exists(sidecar)){metadata.Path=sidecar;try{if(new FileInfo(sidecar).Length>4*1024*1024)metadata.Note="Large shotsInfo.json preserved but not parsed. ";else{using(var stream=new FileStream(sidecar,FileMode.Open,FileAccess.Read,FileShare.Read)){using(var reader=new StreamReader(stream)){string json=reader.ReadToEnd();if(counted!=null)counted((int)stream.Position);Flatten(Util.Deserialize<Dictionary<string,object>>(json),metadata.Values,0);metadata.Stamp=FileStamp.Read(sidecar);}}}}catch{metadata.Note="shotsInfo.json could not be parsed. ";}}if(cache!=null)cache[sidecar]=metadata;}if(metadata.Path==null)continue;f.SourceMetadataPath=metadata.Path;f.SourceMetadataStamp=metadata.Stamp;f.Notes+=metadata.Note;return metadata.Values;}return new Dictionary<string,string>(StringComparer.OrdinalIgnoreCase);}
+  static void Flatten(Dictionary<string,object> obj,Dictionary<string,string> values,int depth){if(obj==null||depth>5)return;foreach(var kv in obj){var nested=kv.Value as Dictionary<string,object>;if(nested!=null){Flatten(nested,values,depth+1);continue;}if(kv.Value is string||kv.Value is int||kv.Value is long||kv.Value is double||kv.Value is decimal)if(!values.ContainsKey(kv.Key))values[kv.Key]=Convert.ToString(kv.Value,CultureInfo.InvariantCulture);}}
+  static string Shot(Dictionary<string,string> obj,params string[] names){foreach(string name in names){string s;if(obj.TryGetValue(name,out s)&&s.Length>0)return s;}return "";}
+  static double? ShotNumber(Dictionary<string,string> obj,params string[] names){double n;return double.TryParse(Shot(obj,names),NumberStyles.Float,CultureInfo.InvariantCulture,out n)&&!double.IsNaN(n)&&!double.IsInfinity(n)?(double?)n:null;}
+ }
+}

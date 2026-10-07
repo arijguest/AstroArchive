@@ -1,0 +1,12 @@
+# Uses generated FITS data only. .NET Framework 4.8, Windows x64.
+param([string]$TestDirectory = (Join-Path $PSScriptRoot 'test-data'))
+$ErrorActionPreference = 'Stop'
+$compiler = Join-Path $env:WINDIR 'Microsoft.NET\Framework64\v4.0.30319\csc.exe'
+$sources = @('Model.cs','Fits.cs','Classification.cs','InstrumentDetection.cs','CameraDetection.cs','FileState.cs','Pipeline.cs','FileTransfer.cs','ImportEngine.cs','ArchiveReset.cs','SourceCleanup.cs','Repository.cs','Rotation.cs','PlateSolve.cs','Export.cs','Tests.cs') | ForEach-Object { Join-Path $PSScriptRoot $_ }
+& $compiler /nologo /target:exe /platform:x64 "/out:$PSScriptRoot\MockAstap.exe" "$PSScriptRoot\MockAstap.cs.txt"
+if ($LASTEXITCODE -ne 0) { throw 'Protocol-double compilation failed.' }
+& $compiler /nologo /target:exe /platform:x64 /optimize+ "/out:$PSScriptRoot\AstroArchiveTests.exe" "/win32manifest:$PSScriptRoot\app.manifest" "/resource:$PSScriptRoot\catalog.csv,catalog.csv" /r:System.Web.Extensions.dll /r:System.Security.dll @sources
+if ($LASTEXITCODE -ne 0) { throw 'Test compilation failed.' }
+$runDirectory = Join-Path $TestDirectory ('run-' + [Guid]::NewGuid().ToString('N').Substring(0,12))
+& "$PSScriptRoot\AstroArchiveTests.exe" $runDirectory
+if ($LASTEXITCODE -ne 0) { throw 'Tests failed.' }

@@ -1,0 +1,58 @@
+# Run with Windows PowerShell 5.1 from any directory.
+param([string]$OutputDirectory = (Join-Path $PSScriptRoot '..\release-artifacts'))
+$ErrorActionPreference = 'Stop'
+$root = Split-Path $PSScriptRoot -Parent
+$release = Get-Content (Join-Path $root 'Installer\release.json') -Raw | ConvertFrom-Json
+$version = $release.application_version
+$revision = [int]$release.installer_revision
+$package = "$version.$revision"
+$tag = "v$package"
+$OutputDirectory = [IO.Path]::GetFullPath($OutputDirectory)
+[IO.Directory]::CreateDirectory($OutputDirectory) | Out-Null
+& (Join-Path $root 'Application_Source\test.ps1')
+& (Join-Path $root 'Application_Source\build.ps1')
+$app = Join-Path $root 'Application_Source\dist\AstroArchive.exe'
+& (Join-Path $root 'Installer\build.ps1') -AppExecutable $app -OutputDirectory $OutputDirectory
+$installer = Join-Path $OutputDirectory "AstroArchive-$version-Windows-x64-Offline-Setup.exe"
+$feed = [ordered]@{
+    schema = 1
+    application_version = $version
+    package_version = $package
+    url = "https://github.com/arijguest/AstroArchive/releases/download/$tag/$([IO.Path]::GetFileName($installer))"
+    sha256 = (Get-FileHash $installer -Algorithm SHA256).Hash.ToLowerInvariant()
+    size = (Get-Item $installer).Length
+}
+[IO.File]::WriteAllText((Join-Path $OutputDirectory 'update.json'), ($feed | ConvertTo-Json), (New-Object Text.UTF8Encoding($false)))
+Copy-Item (Join-Path $root 'Installer\Payload\Release_Notes.txt') (Join-Path $OutputDirectory 'Release_Notes.txt') -Force
+
+# Windows-only smoke: real registration/shortcuts, repair, uninstall and WPF rendering.
+# The runner uses a disposable account; no real captures are imported.
+$smokeRoot = Join-Path ([IO.Path]::GetTempPath()) ('AstroArchive-smoke-' + [Guid]::NewGuid().ToString('N'))
+$installed = $false
+function Run-Checked([string]$File, [string[]]$Arguments) {
+    $process = Start-Process -FilePath $File -ArgumentList $Arguments -PassThru -Wait
+    if ($process.ExitCode -ne 0) { throw "$File exited with $($process.ExitCode)." }
+}
+try {
+    Run-Checked $installer @('--silent', '--root', ('"' + $smokeRoot + '"'))
+    $installed = $true
+    $record = Get-Content (Join-Path $smokeRoot 'install.json') -Raw | ConvertFrom-Json
+    if ($record.PackageVersion -ne $package) { throw 'Smoke installation version mismatch.' }
+    $installedApp = Join-Path $smokeRoot ($record.ActiveDirectory + '\AstroArchive.exe')
+    $preview = Join-Path $OutputDirectory 'ui-preview'
+    Run-Checked $installedApp @('--ui-test', ('"' + $preview + '"'))
+    if (-not (Get-ChildItem $preview -Filter '*.png')) { throw 'UI smoke did not render images.' }
+    $fixtureDirectory = Join-Path $smokeRoot 'repository'
+    [IO.Directory]::CreateDirectory($fixtureDirectory) | Out-Null
+    $fixture = Join-Path $fixtureDirectory 'keep.txt'
+    [IO.File]::WriteAllText($fixture, 'preserve this fixture')
+    Run-Checked $installer @('--silent', '--root', ('"' + $smokeRoot + '"'))
+    if ([IO.File]::ReadAllText($fixture) -ne 'preserve this fixture') { throw 'Repair changed fixture data.' }
+    Run-Checked $installer @('--uninstall', '--silent', '--root', ('"' + $smokeRoot + '"'))
+    $installed = $false
+    if ((Test-Path (Join-Path $smokeRoot 'install.json')) -or -not (Test-Path $fixture)) { throw 'Uninstall smoke failed.' }
+} finally {
+    if ($installed) { Run-Checked $installer @('--uninstall', '--silent', '--root', ('"' + $smokeRoot + '"')) }
+    if (Test-Path $smokeRoot) { Remove-Item $smokeRoot -Recurse -Force }
+}
+Write-Output "Validated Windows release $tag"
