@@ -23,7 +23,7 @@ namespace AstroArchive {
    B("ScreenLibraryButton").Click+=(s,e)=>ScreenFiles(false);
    G("ImportGrid").SelectionChanged+=(s,e)=>{
     var frame=G("ImportGrid").SelectedItem as Frame;
-    L("ImportDetailsLabel").Text=frame==null?"Select a capture to see screening or import details.":frame.OriginalName+"  ·  "+frame.Status+"  ·  "+(string.IsNullOrEmpty(frame.ScreeningIssue)?frame.SourceDisposition??frame.Notes:frame.ScreeningIssue);
+    L("ImportDetailsLabel").Text=frame==null?"Select a capture to see screening or import details.":frame.OriginalName+"  ·  "+frame.Status+"  ·  "+(CaptureScreening.NeedsReview(frame)?frame.ReviewCategory+" · "+frame.ReviewReason:frame.SourceDisposition??frame.Notes);
    };
   }
   void ShowFilters(bool imports){
@@ -34,10 +34,11 @@ namespace AstroArchive {
     string selected;criteria.Values.TryGetValue(field,out selected);
     var group=new MenuItem{Header=field+(selected==null?"":"  ·  "+selected)};
     AddFilterChoice(group,"All",selected==null,()=>{criteria.Values.Remove(field);ApplyFilters(imports);});
-    var values=rows.Select(f=>CaptureFilters.Value(f,field)).Distinct().OrderBy(v=>v).ToList();
+    var values=(new[]{"Mosaic","Panel","Mosaic state"}.Contains(field)?rows.SelectMany(f=>f.MosaicLabels!=null&&f.MosaicLabels.Count>0?f.MosaicLabels.Select(m=>field=="Mosaic"?m.Name:field=="Panel"?m.Panel:m.State):new[]{CaptureFilters.Value(f,field)}):rows.Select(f=>CaptureFilters.Value(f,field))).Distinct().OrderBy(v=>v).ToList();
     if(field=="Review")values=new List<string>{"Needs review","No issues flagged","Rejected / reference","Passed","Not screened"};
+    if(field=="Review type")values=new List<string>{"Telescope rejected / reference","File integrity problem","Transfer failure","Screened, no issues","Not screened"};
     if(selected!=null&&!values.Contains(selected))values.Add(selected);
-    foreach(string value in values){string choice=value;AddFilterChoice(group,choice,selected==choice,()=>{criteria.Values[field]=choice;ApplyFilters(imports);});}
+    foreach(string value in values){string choice=value;AddFilterChoice(group,field=="Target"?Catalog.Label(choice):choice,selected==choice,()=>{criteria.Values[field]=choice;ApplyFilters(imports);});}
     menu.Items.Add(group);
    }
    menu.Items.Add(new Separator());
@@ -51,20 +52,17 @@ namespace AstroArchive {
    if(updating)return;var source=CurrentImportRows();visibleImports=importFilters.Apply(source,T("ImportSearchBox").Text);
    var grid=G("ImportGrid");var selection=new HashSet<string>(grid.SelectedItems.Cast<Frame>().Select(f=>f.SourcePath));SetRows("ImportGrid",visibleImports);foreach(var frame in visibleImports.Where(f=>selection.Contains(f.SourcePath)))if(!grid.SelectedItems.Contains(frame))grid.SelectedItems.Add(frame);
    B("ImportFiltersButton").Content="Filters"+(importFilters.Values.Count>0?" ("+importFilters.Values.Count+")":"")+" ▾";
-   int ready=visibleImports.Count(CaptureScreening.Importable);
+   var summary=ImportWorkflow.Summarize(source,visibleImports,SkipFlagged);int ready=summary.Ready;L("ImportSummaryLabel").Text=summary.Text;
    B("ImportButton").Content="Import "+ready+" file"+(ready==1?"":"s");B("ImportButton").ToolTip="Imports the ready files in this filtered view.";
    B("ImportButton").IsEnabled=cancel==null&&repo!=null&&plan!=null&&ready>0;
    B("ScreenImportsButton").IsEnabled=cancel==null&&repo!=null&&visibleImports.Any(f=>f.Status!="Deleted");
-   L("ScanLabel").Text=source.Count==0&&plan==null?"Choose a source folder and scan to begin.":visibleImports.Count+" / "+source.Count+" shown  ·  "+ready+" ready  ·  "+source.Count(CaptureScreening.NeedsReview)+" need review  ·  "+source.Count(f=>f.Status=="Deleted")+" previously deleted"+(plan!=null&&plan.IgnoredFailed>0?"  ·  "+plan.IgnoredFailed+" failed filenames ignored":"");
+   B("ReviewImportsButton").IsEnabled=cancel==null&&repo!=null&&summary.Flagged>0;int retry=plan==null?0:ImportWorkflow.Select(visibleImports,SkipFlagged,true).Count;B("RetryImportsButton").Content="Retry "+retry+" failed import"+(retry==1?"":"s");B("RetryImportsButton").IsEnabled=cancel==null&&repo!=null&&retry>0;
+   L("ScanLabel").Text=source.Count==0&&plan==null?"Choose a source folder and scan to begin.":summary.Shown+" / "+summary.Total+" shown · "+(summary.Total-summary.Shown)+" hidden by search/filters · "+importFilters.Values.Count+" active filters"+(SkipFlagged?" · "+summary.SkippedFlagged+" flagged candidates skipped":" · flagged captures included")+(plan!=null&&plan.IgnoredFailed>0?"  ·  "+plan.IgnoredFailed+" failed filenames ignored":"");
   }
   void ScreenFiles(bool imports){
    if(repo==null||cancel!=null)return;
    var rows=imports?visibleImports.Where(f=>f.Status!="Deleted").ToList():Context();if(rows.Count==0)return;
-   ScreeningResult result=null;
-   Run(ct=>{result=repo.Screen(rows,imports,ct,Progress);return result.Checked+" screened; "+result.Problems+" need review.";},message=>{
-    if(imports)FilterImports();else Filter(true);L("StatusLabel").Text=message;
-    if(result.Problems>0)ShowReport("Telescope capture screening",string.Join("\r\n\r\n",result.Errors));
-   });
+   ScreenSelection(rows,imports);
   }
   void ShowImportTools(){
    var menu=ThemedMenu();var selection=G("ImportGrid").SelectedItems.Cast<Frame>().Where(f=>f.Status!="Deleted").ToList();

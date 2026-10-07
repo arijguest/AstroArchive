@@ -13,7 +13,7 @@ using System.Text;
 using System.Threading;
 
 namespace AstroArchive {
- public class SolveResult {public double RA{get;set;}public double Dec{get;set;}public double Radius{get;set;}public string Solver{get;set;}public string Suggested{get;set;}public List<Candidate> Candidates{get;set;}}
+ public class SolveResult {public SkyGeometry Sky{get;set;}public double RA{get;set;}public double Dec{get;set;}public double Radius{get;set;}public string Solver{get;set;}public string Suggested{get;set;}public List<Candidate> Candidates{get;set;}}
  public static class PlateSolve {
   public static string Protect(string key){return string.IsNullOrWhiteSpace(key)?"":Convert.ToBase64String(ProtectedData.Protect(Encoding.UTF8.GetBytes(key.Trim()),null,DataProtectionScope.CurrentUser));}
   public static string Unprotect(string data){if(string.IsNullOrEmpty(data))return "";try{return Encoding.UTF8.GetString(ProtectedData.Unprotect(Convert.FromBase64String(data),null,DataProtectionScope.CurrentUser));}catch{return "";}}
@@ -38,8 +38,16 @@ namespace AstroArchive {
      var h=ParseIni(File.ReadAllText(ini));if(h.Get("PLTSOLVD")!="T")throw new InvalidDataException("ASTAP could not solve this frame. "+h.Get("ERROR","WARNING"));double? ra=h.Number("CRVAL1"),dec=h.Number("CRVAL2");if(!ra.HasValue||!dec.HasValue)throw new InvalidDataException("ASTAP solution lacks valid coordinates.");
      double sx=Math.Abs(h.Number("CDELT1")??Math.Sqrt(Math.Pow(h.Number("CD1_1")??0,2)+Math.Pow(h.Number("CD2_1")??0,2))),sy=Math.Abs(h.Number("CDELT2")??Math.Sqrt(Math.Pow(h.Number("CD1_2")??0,2)+Math.Pow(h.Number("CD2_2")??0,2)));
      double radius=Math.Sqrt(Math.Pow(sx*header.Width,2)+Math.Pow(sy*header.Height,2))/2;if(radius<=0)radius=1;
-     return new SolveResult{RA=ra.Value,Dec=dec.Value,Radius=radius,Solver="ASTAP"};}
+     return new SolveResult{RA=ra.Value,Dec=dec.Value,Radius=radius,Solver="ASTAP",Sky=LocalGeometry(h,temp,input,header.Width,header.Height)};}
    }finally{foreach(string f in Directory.GetFiles(temp)){try{File.Delete(f);}catch{}}try{Directory.Delete(temp);}catch{}}
+  }
+  static SkyGeometry LocalGeometry(FitsHeader ini,string directory,string input,int width,int height){
+   var sky=MosaicGeometry.FromHeader(ini,width,height,"ASTAP WCS");if(sky!=null)return sky;
+   foreach(string path in new[]{Path.Combine(directory,"solution.wcs"),Path.Combine(directory,"frame.wcs")})try{if(File.Exists(path))using(var stream=File.OpenRead(path)){sky=MosaicGeometry.FromHeader(MosaicGeometry.WcsCards(stream),width,height,"ASTAP WCS");if(sky!=null)return sky;}}catch{}
+   try{return MosaicGeometry.FromHeader(Fits.Header(input),width,height,"ASTAP temporary FITS WCS");}catch{return null;}
+  }
+  static SkyGeometry OnlineGeometry(long job,int width,int height,CancellationToken ct){
+   try{var request=(HttpWebRequest)WebRequest.Create("https://nova.astrometry.net/wcs_file/"+job);request.Timeout=30000;request.ReadWriteTimeout=30000;using(ct.Register(()=>request.Abort()))using(var response=request.GetResponse())using(var stream=response.GetResponseStream())return MosaicGeometry.FromHeader(MosaicGeometry.WcsCards(stream),width,height,"Astrometry.net WCS");}catch{ct.ThrowIfCancellationRequested();return null;}
   }
   public static FitsHeader ParseIni(string text){var h=new FitsHeader();foreach(string line in text.Split(new[]{'\r','\n'},StringSplitOptions.RemoveEmptyEntries)){int i=line.IndexOf('=');if(i<1)continue;string k=line.Substring(0,i).Trim(),v=line.Substring(i+1).Trim();int comment=v.IndexOf("//",StringComparison.Ordinal);if(comment>=0)v=v.Substring(0,comment).Trim();h.Values[k]=v;}return h;}
   static Dictionary<string,object> Request(string url,string form,byte[] multipart,string boundary,CancellationToken ct){
@@ -55,7 +63,7 @@ namespace AstroArchive {
    progress("Submitting star coordinates to Astrometry.net...");var upload=Request("https://nova.astrometry.net/api/upload",null,body,boundary,ct);object sub;if(!upload.TryGetValue("subid",out sub))throw new InvalidDataException("Astrometry.net returned no submission ID.");
    DateTime deadline=DateTime.UtcNow.AddMinutes(10);long job=0;
    while(DateTime.UtcNow<deadline){ct.ThrowIfCancellationRequested();if(job==0){var status=Request("https://nova.astrometry.net/api/submissions/"+sub,null,null,null,ct);object jobs;if(status.TryGetValue("jobs",out jobs)){foreach(object j in (IEnumerable)jobs)if(j!=null){job=Convert.ToInt64(j);break;}}progress("Astrometry.net: waiting for solve job...");}else{
-     var status=Request("https://nova.astrometry.net/api/jobs/"+job,null,null,null,ct);object state;status.TryGetValue("status",out state);if(Convert.ToString(state)=="failure")throw new InvalidDataException("Astrometry.net could not solve this field.");if(Convert.ToString(state)=="success"){var cal=Request("https://nova.astrometry.net/api/jobs/"+job+"/calibration/",null,null,null,ct);return new SolveResult{RA=Convert.ToDouble(cal["ra"],CultureInfo.InvariantCulture),Dec=Convert.ToDouble(cal["dec"],CultureInfo.InvariantCulture),Radius=Convert.ToDouble(cal["radius"],CultureInfo.InvariantCulture),Solver="Astrometry.net job "+job};}progress("Astrometry.net: solving job "+job+"...");}
+     var status=Request("https://nova.astrometry.net/api/jobs/"+job,null,null,null,ct);object state;status.TryGetValue("status",out state);if(Convert.ToString(state)=="failure")throw new InvalidDataException("Astrometry.net could not solve this field.");if(Convert.ToString(state)=="success"){var cal=Request("https://nova.astrometry.net/api/jobs/"+job+"/calibration/",null,null,null,ct);return new SolveResult{RA=Convert.ToDouble(cal["ra"],CultureInfo.InvariantCulture),Dec=Convert.ToDouble(cal["dec"],CultureInfo.InvariantCulture),Radius=Convert.ToDouble(cal["radius"],CultureInfo.InvariantCulture),Solver="Astrometry.net job "+job,Sky=OnlineGeometry(job,image.Width,image.Height,ct)};}progress("Astrometry.net: solving job "+job+"...");}
     if(ct.WaitHandle.WaitOne(2000))ct.ThrowIfCancellationRequested();
    }throw new TimeoutException("Astrometry.net has not completed the solve after ten minutes. Try again later or use local ASTAP.");
   }

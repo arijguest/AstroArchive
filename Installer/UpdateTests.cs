@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Linq;
 using System.Text;
 using AstroArchive.Installation;
 
@@ -23,6 +24,21 @@ static class UpdateTests {
   throw new Exception("Expected update refusal.");
  }
  public static void Run(Action<string, Action> test, string scratch) {
+  test("Release notes use the feed when present and a bounded exact-tag API fallback",()=>{
+   var manifest=Manifest();manifest.release_notes="New import and session views.";var client=new UpdateClient{Fetch=(uri,limit)=>{throw new Exception("Embedded notes should not fetch");}};Check(client.ReleaseNotes(manifest)==manifest.release_notes,"Embedded notes changed");
+   manifest.release_notes=null;string requested=null;long maximum=0;client.Fetch=(uri,limit)=>{requested=uri.AbsoluteUri;maximum=limit;return Encoding.UTF8.GetBytes("{\"body\":\"Package notes\"}");};Check(client.ReleaseNotes(manifest)=="Package notes"&&requested.EndsWith("/releases/tags/v1.2.0.2")&&maximum==256*1024,"Notes fallback used the wrong package or unbounded response");
+   Check(UpdateClient.ReleasePage(manifest)==UpdateClient.Repository+"/releases/tag/v1.2.0.2","Release page differs from package");manifest.release_notes=new string('a',48001);Refused(()=>UpdateClient.Validate(manifest));
+  });
+  test("Verified update downloads report bytes and percentage without changing cached content",()=>{
+   var manifest=Manifest();var client=Client(manifest);var progress=new System.Collections.Generic.List<UpdateDownloadProgress>();client.Progress=p=>progress.Add(p);string setup=client.Prepare(manifest,Path.Combine(scratch,"progress-cache"));
+   Check(progress.First().Received==0&&progress.Last().Received==manifest.size&&progress.Last().Percent==100&&progress.All(p=>p.Total==manifest.size),"Download progress totals differ");Check(InstallCore.HashFile(setup)==manifest.sha256,"Progress changed downloaded bytes");
+   Check(new UpdateDownloadProgress{Received=20,Total=10}.Percent==100&&new UpdateDownloadProgress{Received=10,Total=0}.Percent==0,"Progress percentage was not bounded");
+  });
+  test("Successful update confirmation is version-specific and consumed once",()=>{
+   string root=Path.Combine(scratch,"receipt-root");new InstallCore().Install(root,FixturePackage("1.2.0",2),Installer);UpdateClient.RecordInstalledUpdate(root,"1.2.0.1");
+   Check(UpdateClient.ConsumeInstalledUpdate(root,"1.2.0.1")==null&&File.Exists(Path.Combine(root,"update-receipt.json")),"Wrong running version claimed an update");var receipt=UpdateClient.ConsumeInstalledUpdate(root,"1.2.0.2");Check(receipt.PackageVersion=="1.2.0.2"&&receipt.PreviousPackageVersion=="1.2.0.1"&&receipt.InstalledUtc.Length>0,"Confirmation lost update metadata");Check(UpdateClient.ConsumeInstalledUpdate(root,"1.2.0.2")==null,"Update confirmation repeated");
+   UpdateClient.RecordInstalledUpdate(root,"1.2.0.1");new InstallCore().Install(root,FixturePackage("1.3.0",1),Installer);Check(UpdateClient.ConsumeInstalledUpdate(root,"1.2.0.2")==null,"Stale confirmation ignored active installation");
+  });
   test("Installed release targets keep downloads outside the active application folder",()=>{
    string root=Path.Combine(scratch,"installed release with spaces");var package=FixturePackage("1.2.0",1);var record=new InstallCore().Install(root,package,Installer);
    string app=InstallCore.Managed(root,record.ActiveDirectory+"\\AstroArchive.exe");var target=UpdateClient.ResolveTarget(app,"1.2.0",Path.Combine(scratch,"unused registered root"));

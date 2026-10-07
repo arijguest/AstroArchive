@@ -33,7 +33,7 @@ namespace AstroArchive {
   }
   public void SmokeGestures(){Fit();double fitted=zoom.Scale;var wheel=new MouseWheelEventArgs(Mouse.PrimaryDevice,0,120){RoutedEvent=UIElement.PreviewMouseWheelEvent};viewport.RaiseEvent(wheel);if(!wheel.Handled||zoom.Scale<=fitted||transform.Matrix.M11!=zoom.Scale)throw new InvalidOperationException("Preview wheel zoom did not update the image transform.");zoom.Pan(30,-20);Fit();if(Math.Abs(zoom.Scale-fitted)>0.000001||transform.Matrix.OffsetX!=zoom.X||transform.Matrix.OffsetY!=zoom.Y)throw new InvalidOperationException("Preview Fit did not restore its viewport.");}
   Point Center{get{return new Point(viewport.ActualWidth/2,viewport.ActualHeight/2);}}
-  void AddButton(Panel toolbar,string text,Action action){var button=new Button{Content=text};button.Click+=(s,e)=>action();toolbar.Children.Add(button);}
+  void AddButton(Panel toolbar,string text,Action action){var button=new Button{Content=text};UiHelp.For(button,text);button.Click+=(s,e)=>action();toolbar.Children.Add(button);}
   void Fit(){fitting=true;zoom.Fit(viewport.ActualWidth,viewport.ActualHeight,imageWidth,imageHeight);Apply();}
   void ZoomAt(double factor,Point origin){fitting=false;zoom.Zoom(factor,origin.X,origin.Y);Apply();}
   void Apply(){transform.Matrix=new Matrix(zoom.Scale,0,0,zoom.Scale,zoom.X,zoom.Y);percentage.Text=(zoom.Scale*100).ToString("0")+"%";}

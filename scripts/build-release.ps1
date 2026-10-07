@@ -25,6 +25,7 @@ $feed = [ordered]@{
     package_version = $package
     url = "https://github.com/arijguest/AstroArchive/releases/download/$tag/$([IO.Path]::GetFileName($compatibility))"
     download_url = "https://github.com/arijguest/AstroArchive/releases/download/$tag/$([IO.Path]::GetFileName($installer))"
+    release_notes = [IO.File]::ReadAllText((Join-Path $PSScriptRoot '..\Installer\Payload\Release_Notes.txt'))
     sha256 = (Get-FileHash $installer -Algorithm SHA256).Hash.ToLowerInvariant()
     size = (Get-Item $installer).Length
 }
@@ -42,6 +43,9 @@ function Run-Checked([string]$File, [string[]]$Arguments) {
     if ($process.ExitCode -ne 0) {
         $smokeError = Join-Path $OutputDirectory 'ui-preview\ui-smoke-error.txt'
         if (Test-Path $smokeError) { Get-Content $smokeError | Write-Output }
+        Get-WinEvent -FilterHashtable @{LogName='Application'; StartTime=(Get-Date).AddMinutes(-2)} -ErrorAction SilentlyContinue |
+            Where-Object { $_.ProviderName -eq '.NET Runtime' -and $_.Message -match 'AstroArchive' } |
+            ForEach-Object { $_.Message | Write-Output }
         throw "$File exited with $($process.ExitCode)."
     }
 }

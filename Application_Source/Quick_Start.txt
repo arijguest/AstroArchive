@@ -1,4 +1,4 @@
-AstroArchive 1.6.2
+AstroArchive 1.7.0
 Windows 10/11 x64 desktop app. Built-in .NET Framework 4.8 and Windows SQLite.
 Runs offline. No Python or Google login required.
 
@@ -11,14 +11,56 @@ START HERE
 3. Search either view, then use Filters to narrow target, device, frame type, mount,
    camera, night, session, optical filter, calibration, exposure, gain, dimensions,
    status or review state. Clear resets search and filters without deleting files.
-   Import copies only the ready files shown in the filtered view; its button shows
-   the count. Hidden candidates remain available for a later import.
+   The import summary shows ready files and their size, duplicates, previously
+   deleted captures, rejection, file problems and transfer failures for this view.
+   It also shows how many rows search/filters hide. Import copies only the eligible
+   ready files shown; its button shows the count. Hidden candidates remain available.
+   Skip flagged captures is on by default. Unscreened files are labelled explicitly.
 4. Select rows with Ctrl/Shift, or use all visible captures when none are selected.
    Right-click selected files, then Export to copy files or prepare a stacking
-   folder, with matching calibrations if selected.
+   folder, with matching calibrations if selected. Use the library view selector
+   to browse files, targets, or targets with observing sessions. Group headers and
+   target summaries show counts and total known exposure in subs; stacks are counted
+   separately and are never added to subs exposure. Unknown exposure is reported.
+
+GUIDE AND TOOLTIPS
+Hover over controls or table headers for explanations, including disabled controls.
+Guide opens a help menu with common topics, troubleshooting and Search the guide.
+F1 in the main window opens help for the current tab. In the guide, search matches
+every entered word across topic titles and complete text. Clear restores all topics.
+Choose a topic on the left; guide text can be selected and copied. Save guide saves
+the complete bundled guide as a text file. Help works offline.
+
+IMPORT WORKFLOW
+1. Choose your archive in Settings, then open Import.
+2. Select a saved telescope, or enter a unique physical device ID. Browse the
+   source capture folder; Save telescope retains its name, model and association.
+3. Leave model and camera on Auto unless a known override is needed. Solving and
+   rotation are Off by default. Keep source originals unless deletion is intended.
+4. Scan folder discovers FITS and reads metadata without copying. Review the
+   frame type, target and status; correct uncertain metadata before importing.
+5. Import new files copies and verifies eligible captures. Duplicate records are
+   skipped; missing or changed archive copies can be restored. Use Scan report
+   for discovery errors and Report for import errors and timing.
+6. Completed files remain imported after Cancel or a later failure. Resolve the
+   problem, scan again and import to resume.
+For a recognised connected USB scope, Auto upload from screens and imports new
+captures directly, with originals retained and analysis off.
+
+LIBRARY WORKFLOW
+Search and use make, device, frame-type and mount filters to narrow the library.
+Choose a target on the left, or All targets. Clear restores the full library.
+Click headers to sort and Shift-click to add sorting columns. Selection is by
+capture: Ctrl adds/removes rows, Shift selects a range, and right-click preserves
+an existing selected group. Select one row for Preview image or Show file in
+Explorer. Export, metadata and analysis buttons use selected captures; without a
+selection they use the visible captures. Review the count before a bulk action.
+Unknown targets retain their label; other missing table metadata appears as a dash.
+Bias and Master bias remain visible under Frame type. Metadata changes correct
+classification without rewriting FITS headers or image pixels.
 
 USB TRANSFER AND SAVED TELESCOPES
-Connect a Seestar/DWARF as local USB storage. In Import captures, select a Saved
+Connect a Seestar/DWARF as local USB storage. In Import, select a Saved
 telescope or enter its unique physical device ID and model. Browse its capture
 folder and press Save telescope. Choose the saved telescope from the dropdown on
 later imports. Existing device IDs are recovered from repository records;
@@ -79,7 +121,7 @@ DSLR RAW compatibility depends on an installed Windows codec for that camera.
 Tile-compressed FITS (.fz), video and multi-frame scientific cubes need conversion.
 Archive imports remain FITS-only; previewing other formats does not index them.
 
-IMAGE ZOOM AND TABLE SORTING
+IMAGE PREVIEW AND TABLES
 Select one repository file and choose Preview image… from its context menu.
 Pinch, use the wheel/trackpad or the zoom buttons; drag to pan. Fit (or F)
 recenters the image; Escape closes the preview. The gesture viewer uses the same
@@ -90,6 +132,42 @@ another column. Sorting survives filtering and import/progress refreshes.
 Exposure, gain, temperature, dimensions and performance fields sort numerically.
 Missing metadata appears as a dash; unknown targets retain Unknown. Bias and
 Master bias stay visible under Frame type and in the frame-type filter.
+
+MOSAIC COLLECTIONS AND PANELS
+New imports preserve mosaic/project and panel metadata during their existing
+header/session reads. Mosaic markers with missing panel information stay
+Suggested. Normal mosaic detection does not plate-solve or decode images.
+
+Open Mosaics to review collections, panels, evidence and completed outputs.
+Detect from metadata uses selected Library captures, or the visible Library
+captures when none are selected. For older archives, Tools > Read headers/session
+metadata reads archived headers and preserved session JSON. Existing sky mappings
+can suggest adjacent panels and show their outlines; coordinate suggestions need
+confirmation. Ordinary target-centre coordinates cannot establish panel membership.
+
+Select captures in Library, right-click > Mosaics > Assign to panel or completed
+output. Choose/create a collection and panel, or attach a stitched output.
+Collections can span targets, nights, cameras and filters while archive paths and
+capture types remain intact. Confirm selected reviews known panel assignments;
+assign unresolved captures first. Remove selected retains the decision for later
+scans without deleting captures. Tools can edit names, create planned panels or
+dismiss a collection. Filters/search include mosaic and panel labels.
+
+Plate solving is optional: select representatives in Mosaics, then Tools > Solve
+selected representatives. Cached solutions are reused, and unassigned captures
+are solved separately. Complete WCS provides footprints; configured field height
+can provide approximate outlines, which are labelled. Target labels are retained.
+
+Export collection creates separate stacking inputs for every panel and compatible
+capture group. Completed images go in outputs/completed in Stacks/Both mode.
+Choose a collection explicitly when a capture belongs to several mosaics.
+Stack each panel first, then stitch the panel results in external software.
+Suggested or unresolved assignments must be reviewed before stacking exports.
+
+Keep .astroarchive/index.sqlite and .astroarchive/mosaics/manifest.json with the
+archive. The manifest restores stable collection/panel IDs after index loss;
+reindexing reconnects captures by hash. Deleted captures remain missing records
+in the collection. Archive reset retains collection definitions/deletion history.
 
 WINDOWS FOLDER SELECTION AND GOOGLE DRIVE
 All folder selectors use native Windows Explorer dialogs, with This PC, mounted
@@ -152,7 +230,11 @@ Temporary file locks and provider I/O errors get limited retries. A failed file
 is shown with its full path, exception/error code and reason; later files continue.
 Disk-full errors stop the batch. Completed imports remain committed. Report opens
 the diagnostics, also saved in .astroarchive/reports/last-import.txt. Free space or
-resolve the reported source problem, scan again and import to resume. Interrupted
+resolve the reported source problem, then choose Retry failed imports. This retries
+only failed transfers in the current filtered view, using the existing scan plan.
+With Skip flagged captures enabled, rejected or damaged files remain excluded from
+retry. Changed sources require another scan; source stamp and checksum guards stay.
+After reopening the app, scan again to discover unfinished work. Interrupted
 exports retain INCOMPLETE.txt; create a fresh project after an interrupted export.
 
 SCREEN TELESCOPE FAILURES
@@ -162,8 +244,12 @@ Failed/rejected filename and folder markers, FITS STATUS/CAPSTAT/IMGSTAT failure
 values and REJECTED flags appear as Needs review with a reason. Obvious markers
 are also flagged during scanning. Screening reads the full supported FITS image,
 including compressed data, and checks archive checksums for current files.
-Use Filters > Review > Needs review or Rejected / reference to inspect captures,
-or No issues flagged to leave them out of an import. Screening does not delete
+Use Review flagged captures for a list with the problem type, full reason and
+action to screen selected captures again. Filters > Review type separates telescope
+rejection/reference, file integrity and transfer failures. A capture can have more
+than one problem. Skip flagged captures excludes them from normal imports by
+default; uncheck it to include eligible flagged captures deliberately. Not screened
+is distinct from Passed; No issues flagged may include unscreened files. Screening does not delete
 files or judge star quality, tracking, cloud cover or exposure quality. Rejected
 captures remain excluded from stacking by default. Review flags persist in the index.
 
@@ -186,7 +272,11 @@ Deleting library files records their SHA-256 checksums, UTC deletion times and
 original metadata. Future scans show matching captures as Deleted and exclude them
 from import, including renamed copies or imports directly from a telescope.
 Changed content at the same filename remains eligible. Repository tools > Deletion
-history shows the log. Keep .astroarchive/index.sqlite with the archive: it includes
+history shows the log. Select exclusions and choose Allow selected captures to be
+imported again to lift them. This does not restore deleted files; a source copy is
+required. Deleted rows in the current scan are rechecked individually. Deletion
+and permission events are retained, including after another deletion; deleting
+the capture again renews its exclusion. Keep .astroarchive/index.sqlite with the archive: it includes
 the deletion history and works after a portable restore. Archive reset also retains
 this history so clearing an archive does not silently repopulate it on the next scan.
 
@@ -213,6 +303,13 @@ This remains a FITS archive. DWARF factory PNG calibration needs conversion to
 FITS with the relevant camera metadata or preserved cam_0/cam_1 folder structure.
 
 TARGET IDENTIFICATION AND OPTIONAL ANALYSIS
+Targets show a catalogue object ID and common name, e.g. M51 / Whirlpool Galaxy
+or IC1805 / Heart Nebula. Recognised IDs, common names and combined labels share
+one canonical target in scans, the library and exports. Older index records are
+normalised when read, retaining their existing file paths and checksums. Custom
+and conflicting multi-target labels stay separate for review. No FITS headers or
+pixels are rewritten to merge labels. Search finds either the ID or common name.
+
 Identify target first uses unambiguous catalogue IDs/common names in filenames,
 such as M33, NGC281 or Heart Nebula (IC1805), without needing a solver. Conflicting
 names, HID labels and unrecognised niche targets use the configured plate solver.
@@ -289,6 +386,62 @@ Siril uses siril.exe, not siril-cli.exe. Gzip, multiple stacks and individual su
 are outside these direct handoffs. StackingWizard incoming handoff and Siril sequence
 preparation remain planned; existing ready-to-stack folders are the manual route.
 
+KEYBOARD SHORTCUTS
+Main window: F1 opens help for the current tab.
+Guide: Ctrl+F or F1 focuses search; Up/Down browses topics when the topic list has
+focus. Ctrl+C copies selected guide text. Escape closes the guide.
+Library/import: Ctrl-click toggles rows; Shift-click selects a range. Shift-click
+a column header adds a sorting column. Delete in the library opens confirmation
+for deleting selected archive copies.
+Image preview: mouse wheel zooms, left-button drag pans, F fits and recenters,
+plus/minus zoom, and Escape closes the preview.
+Windows folder picker: Alt+D focuses the address bar for pasting a folder path.
+
+TROUBLESHOOTING
+Import actions unavailable: choose an archive in Settings, enter a physical device
+ID and an existing source folder, then Scan folder. Wait for a running operation
+to finish. Import needs new, restore or failed captures in the scan.
+USB telescope not detected: check that Windows exposes local USB storage, browse
+the capture folder, select/save the telescope and Refresh USB. A recovered profile
+needs a saved USB source association. Mixed telescope folders need separate source
+choices. Direct Wi-Fi transfer is not part of the USB workflow.
+No library rows: Clear search and filters, choose All targets and check that the
+correct archive is open. Bias frames use the Calibration target and Bias frame type.
+Unknown classification: inspect metadata and folder structure, choose a known
+model/camera override before scanning, or Edit metadata. Do not infer a camera
+solely from image dimensions. A dash means missing/uncertain metadata, not zero.
+Import failure: open Scan report or Report, check the reported file path and error,
+ensure free disk space and make cloud files available offline if needed. Completed
+imports are retained; re-scan after resolving the failure to retry remaining files.
+Missing/damaged archive file: use Repository tools to verify checksums, then scan
+and import from the original source to restore the copy. Keep the archive index
+with the FITS files when moving or backing up the repository.
+Slow import: start with solving and rotation Off. Compare the performance stages;
+cloud read time can include downloads. Retune copy workers only with a sufficiently
+large import. Increasing workers cannot guarantee faster storage or network reads.
+Target identification fails: check ASTAP and its installed star database, or the
+online API key/internet connection. Wide cameras may need an explicit image height.
+Rotation remains uncertain: use timestamped acquisition subs with enough matched
+stars and time coverage. Stacks or insufficient geometry cannot establish EQ.
+Calibration absent from export: review camera, dimensions, gain, exposure,
+temperature, night and processing state. Unknown calibration needs explicit opt-in.
+Rename fails: use a unique telescope name, resolve conflicting destinations or file
+locks, and verify archived copies. Reopen the archive to recover an interrupted rename.
+
+FRAME TYPES AND GLOSSARY
+Light / sub: a single acquisition exposure suitable for stacking.
+Stack: a device-combined or registered result; export separately from its source subs.
+Dark: a covered exposure used to measure dark current and other sensor signal.
+Flat: a uniform-field exposure used to correct illumination and dust patterns.
+Bias / offset: a short or zero-duration exposure used to measure sensor readout offset.
+Master dark / flat / bias: a combined calibration image, kept distinct from raw frames.
+Calibration state: processing already applied to a capture; uncertain state needs review.
+Session: a related acquisition group. Session separation during export is optional.
+Physical device ID: the saved name of one actual telescope, distinct from its model.
+Plate solving: locating an image's sky position by matching detected stars.
+Repository: the archive copies plus their portable index and associated metadata.
+Source: telescope storage or a mirrored folder from which captures are imported.
+
 SUPPORTED FILES
 .fit, .fits, .fts and .gz variants; primary/IMAGE HDUs; 8/16/32/64-bit integer or
 32/64-bit floating data; mono/CFA and up to four colour planes. Tile-compressed .fz,
@@ -323,10 +476,15 @@ shared session metadata stay. There is no
 undo, and cloud-synced deletions propagate. Locked files are reported and retained.
 The active repository is a small path at the top. Choose a different repository
 in Settings and save to apply it. Settings > Check for and install new releases
-checks the stable release. Choose Install release to download and verify setup
+checks the stable release and shows package-specific release notes. Choose Install release to download and verify setup
 inside the application's updates folder, save settings and the archive index,
 close AstroArchive, install immediately and restart automatically. The installer
 waits for the application and launcher; the restart skips the update check once.
 Download or verification failure leaves the app open. A setup failure preserves
 the previous installed package and shows an error. Portable copies install at
 the registered or default location and retain per-user settings.
+
+After a successful update, a dismissible banner confirms the installed package
+once on the next launch. Release notes are included in new update feeds, with a
+bounded GitHub exact-tag fallback for older feeds and a link to the release page.
+Notes being unavailable does not prevent installation.

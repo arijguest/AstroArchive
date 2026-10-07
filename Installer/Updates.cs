@@ -11,8 +11,11 @@ namespace AstroArchive.Installation {
  public sealed class UpdateManifest {
   public int schema;
   public string application_version, package_version, url, download_url, sha256;
+  public string release_notes;
   public long size;
  }
+ public sealed class UpdateDownloadProgress {public long Received,Total;public int Percent {get{return Total<=0?0:(int)Math.Max(0,Math.Min(100,Received*100/Total));}}}
+ public sealed class UpdateReceipt {public int Schema=1;public string PackageVersion,PreviousPackageVersion,InstalledUtc;}
  public sealed class UpdateTarget {
   public string Root, Cache;
   public InstallRecord Running, Existing;
@@ -24,11 +27,12 @@ namespace AstroArchive.Installation {
   public const string Feed = Repository + "/releases/latest/download/update.json";
   public const long MaximumInstallerSize = 128L * 1024 * 1024;
   public Func<Uri, long, byte[]> Fetch = Download;
+  public Action<UpdateDownloadProgress> Progress;
 
   public static bool TrustedDownload(Uri uri) {
    return uri != null && uri.Scheme == "https" && uri.Port == 443 &&
     uri.UserInfo.Length == 0 && (uri.Host == "github.com" ||
-    uri.Host == "release-assets.githubusercontent.com" || uri.Host == "objects.githubusercontent.com");
+    uri.Host == "release-assets.githubusercontent.com" || uri.Host == "objects.githubusercontent.com" || uri.Host == "api.github.com");
   }
 
   public static void Validate(UpdateManifest manifest) {
@@ -45,12 +49,34 @@ namespace AstroArchive.Installation {
    if ((!string.Equals(manifest.url, expected, StringComparison.Ordinal) && !string.Equals(manifest.url, concise, StringComparison.Ordinal)) ||
     (manifest.download_url != null && !string.Equals(manifest.download_url, concise, StringComparison.Ordinal)) ||
     !Regex.IsMatch(manifest.sha256 ?? "", @"^[a-fA-F0-9]{64}$") ||
-    manifest.size < 1 || manifest.size > MaximumInstallerSize)
+    manifest.size < 1 || manifest.size > MaximumInstallerSize || (manifest.release_notes!=null&&manifest.release_notes.Length>48000))
     throw new IOException("Invalid update asset, checksum or size.");
   }
 
   public static string InstallerName(UpdateManifest manifest) { return "AstroArchive" + manifest.package_version + ".exe"; }
   public static string InstallationCache(string root){return Path.Combine(InstallCore.Root(root),"updates");}
+  public static string ReleasePage(UpdateManifest manifest){Validate(manifest);return Repository+"/releases/tag/v"+manifest.package_version;}
+  public string ReleaseNotes(UpdateManifest manifest){
+   Validate(manifest);if(!string.IsNullOrWhiteSpace(manifest.release_notes))return manifest.release_notes;
+   byte[] bytes=Fetch(new Uri("https://api.github.com/repos/arijguest/AstroArchive/releases/tags/v"+manifest.package_version),256*1024);
+   if(bytes==null||bytes.Length>256*1024)throw new IOException("Release notes response is too large.");
+   var release=InstallCore.Json().Deserialize<System.Collections.Generic.Dictionary<string,object>>(Encoding.UTF8.GetString(bytes));object body;
+   string notes=release!=null&&release.TryGetValue("body",out body)?body as string:null;
+   return string.IsNullOrWhiteSpace(notes)?"No release notes were provided for this package.":notes.Substring(0,Math.Min(notes.Length,48000));
+  }
+  static string ReceiptPath(string root){string path=Path.Combine(InstallCore.Root(root),"update-receipt.json");InstallCore.NoLinks(path);return path;}
+  public static void RecordInstalledUpdate(string root,string previousPackage){
+   var record=InstallCore.Read(root);if(record==null)throw new IOException("Cannot record an update without an active installation.");
+   string path=ReceiptPath(root);string temp=path+"."+Guid.NewGuid().ToString("N")+".tmp";
+   try{File.WriteAllText(temp,InstallCore.Json().Serialize(new UpdateReceipt{PackageVersion=record.PackageVersion??record.Version,PreviousPackageVersion=previousPackage,InstalledUtc=DateTime.UtcNow.ToString("o")}),new UTF8Encoding(false));if(File.Exists(path))File.Replace(temp,path,null);else File.Move(temp,path);}finally{if(File.Exists(temp))File.Delete(temp);}
+  }
+  public static UpdateReceipt ConsumeInstalledUpdate(string root,string runningPackage){
+   string path=ReceiptPath(root);if(!File.Exists(path))return null;if(new FileInfo(path).Length>4096)throw new IOException("Invalid update confirmation.");
+   var receipt=InstallCore.Json().Deserialize<UpdateReceipt>(File.ReadAllText(path));
+   if(receipt==null||receipt.Schema!=1||receipt.PackageVersion!=runningPackage)return null;
+   var installed=InstallCore.Read(root);if(installed==null||(installed.PackageVersion??installed.Version)!=runningPackage)return null;
+   File.Delete(path);return receipt;
+  }
 
   public static UpdateTarget ResolveTarget(string executable,string version,string registeredRoot,string runningPackage=null){
    InstallCore.Parse(version);string app=Path.GetFullPath(executable),directory=Path.GetDirectoryName(app),parent=Path.GetDirectoryName(directory);
@@ -91,10 +117,13 @@ namespace AstroArchive.Installation {
 
   public string Prepare(UpdateManifest manifest, string cache) {
    Validate(manifest);
-   byte[] bytes = Fetch(new Uri(manifest.download_url ?? manifest.url), manifest.size);
+   Action<long> report=received=>{if(Progress!=null)Progress(new UpdateDownloadProgress{Received=received,Total=manifest.size});};report(0);
+   var uri=new Uri(manifest.download_url ?? manifest.url);
+   byte[] bytes = Fetch == Download ? DownloadProgressive(uri,manifest.size,report) : Fetch(uri,manifest.size);
    if (bytes == null || bytes.LongLength != manifest.size ||
     !string.Equals(InstallCore.Hash(bytes), manifest.sha256, StringComparison.OrdinalIgnoreCase))
     throw new IOException("Downloaded update failed SHA-256 verification.");
+   report(bytes.LongLength);
    InstallCore.NoLinks(cache);
    string directory = Path.Combine(cache, Guid.NewGuid().ToString("N"));
    Directory.CreateDirectory(directory);
@@ -110,7 +139,8 @@ namespace AstroArchive.Installation {
    } catch { if (File.Exists(path)) File.Delete(path); if (Directory.Exists(directory)) Directory.Delete(directory); throw; }
   }
 
-  static byte[] Download(Uri uri, long limit) {
+  static byte[] Download(Uri uri,long limit){return DownloadProgressive(uri,limit,null);}
+  static byte[] DownloadProgressive(Uri uri, long limit,Action<long> progress) {
    if (limit < 1 || limit > MaximumInstallerSize) throw new IOException("Invalid download limit.");
    // TLS and certificate validation remain enabled. Every redirect is checked.
    ServicePointManager.SecurityProtocol |= SecurityProtocolType.Tls12;
@@ -133,6 +163,7 @@ namespace AstroArchive.Installation {
       while ((count = stream.Read(buffer, 0, buffer.Length)) > 0) {
        if (output.Length + count > limit || watch.Elapsed.TotalMinutes > 3) throw new IOException("Update download exceeded its limit.");
        output.Write(buffer, 0, count);
+       if(progress!=null)progress(output.Length);
       }
       return output.ToArray();
      }

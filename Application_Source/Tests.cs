@@ -16,7 +16,7 @@ namespace AstroArchive {
   static void Expect(Action action,string message){bool threw=false;try{action();}catch{threw=true;}Check(threw,message);}
   static void WindowsTest(string name,Action action){if(Environment.OSVersion.Platform==PlatformID.Win32NT)Test(name,action);else{skipped++;Console.WriteLine("SKIP (Windows required) "+name);}}
   public static int Main(string[] args){AppContext.SetSwitch("Switch.System.IO.UseLegacyPathHandling",false);AppContext.SetSwitch("Switch.System.IO.BlockLongPaths",false);root=Path.GetFullPath(args.Length>0?args[0]:"test-data");Directory.CreateDirectory(root);Repository.LocalIndexBase=Path.Combine(root,"working-indexes");
-   TelescopeTests();PreviewGestureTests();FailedFilenameTests();
+   TelescopeTests();PreviewGestureTests();MosaicTests();FailedFilenameTests();
    Test("Dump imports nested telescope data and preserves failures and metadata",()=>{
     using(var repo=new Repository(Path.Combine(root,"dump-repo"))){repo.EnsureDumpFolder();Check(Directory.Exists(repo.DumpFolder),"Dump folder missing");string directory=Path.Combine(repo.DumpFolder,"DWARF_RAW_TELE_M45_EXP_60_GAIN_60_2026-10-06-21-00-00-000");Directory.CreateDirectory(directory);
      string file=Path.Combine(directory,"raw_001.fit");Write(file,64,48,(x,y)=>1800,LightHeaders(new DateTime(2026,10,6,21,0,0),"M45"));string hash=Util.Hash(file,ct);File.WriteAllText(Path.Combine(directory,"shotsInfo.json"),"{\"targetName\":\"M45\"}");File.WriteAllText(Path.Combine(repo.DumpFolder,"bad.fit"),"not FITS");File.WriteAllText(Path.Combine(repo.DumpFolder,"keep.txt"),"keep");
@@ -182,6 +182,7 @@ namespace AstroArchive {
    WindowsTest("Verified unchanged sources skip payload reads on subsequent fast scans",()=>{string source=Path.Combine(root,"cached-source");Directory.CreateDirectory(source);Write(Path.Combine(source,"Light_M33.fit"),64,48,(x,y)=>1100,new Dictionary<string,string>());using(var repo=new Repository(Path.Combine(root,"cached-repo"))){var plan=repo.Scan(source,"Unit-01","Auto",ct,NoProgress,false,null,true);repo.Import(plan.Frames,ct,NoProgress,new ImportOptions{SourceRoot=source});var second=repo.Scan(source,"Unit-01","Auto",ct,NoProgress,false,null,true);Check(second.CacheHits==1&&second.Frames.Single().Status=="Duplicate (cached)"&&second.Metrics.Snapshot().Single(s=>s.Stage=="Metadata").Bytes==0,"Unchanged source reread payload");}});
    PreviewTests();
    PerformanceTests();
+   WorkflowRegressions();HelpTests();
    Console.WriteLine(passed+" tests passed; "+skipped+" Windows-only tests skipped.");File.WriteAllText(Path.Combine(root,"test-results.txt"),passed+" tests passed; "+skipped+" Windows-only tests skipped. Exit code "+Environment.ExitCode);return Environment.ExitCode;
   }
   [System.Runtime.InteropServices.DllImport("kernel32.dll",EntryPoint="CreateHardLinkW",CharSet=System.Runtime.InteropServices.CharSet.Unicode,SetLastError=true)]static extern bool CreateHardLink(string link,string existing,IntPtr security);

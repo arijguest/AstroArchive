@@ -2,6 +2,13 @@
 
 Portable Windows 10/11 x64 WPF app for archiving smart-telescope FITS and creating verified stacking projects. Open `AstroArchive.exe`; read `Quick_Start.txt` for the complete workflow.
 
+## Changes in 1.7.0
+
+- Metadata-first mosaic collections, stable panel assignments, explicit review states and completed-output roles across targets and sessions.
+- Existing-WCS footprints and conservative pointing suggestions, with optional cached representative solving.
+- Portable collection manifests and panel-aware stacking exports that preserve capture/calibration separation.
+- See [mosaic guide](../docs/MOSAICS.md) for supported metadata, recovery, uncertainty and validation limits.
+
 ## Changes in 1.6.1
 
 - Auto/Strong previews compensate for IRCUT/LP filters and severe colour casts.
@@ -38,6 +45,14 @@ Portable Windows 10/11 x64 WPF app for archiving smart-telescope FITS and creati
 - Cancellable colour previews for FITS/gzip FITS and XISF, with Linear, Auto, Strong and per-channel stretch. CFA metadata is respected; previews never modify source pixels.
 - TIFF, PNG, JPEG, BMP, GIF and Windows photo codecs, preserving high-depth samples. Camera RAW formats need a compatible installed Windows codec.
 - Preview/path-copy actions and selection-only CSV exports alongside the upstream file tools.
+
+## Guide and tooltips
+
+Hover over controls and table headers for explanations. **Guide** offers common
+help topics, full-text search, troubleshooting, shortcuts and a frame glossary.
+**F1** opens help for the current tab; **Ctrl+F** searches within the help window.
+The guide is bundled for offline use and can be saved as text. The import tab is
+labelled **Import**.
 
 ## Changes in 1.3.0
 
@@ -114,3 +129,9 @@ Metadata corrections may move archived copies without modifying FITS pixels/head
 - SQLite WAL: https://www.sqlite.org/wal.html
 
 OpenNGC by Mattia Verga is licensed CC-BY-SA-4.0. See `Catalogue_Notice.md` and `OpenNGC_README.md` for the selected-column derivative's attribution and provenance.
+
+## Release 1.7.0 / package 1.7.0.1
+
+Mosaic collections and panel exports, canonical object IDs/common names, grouped
+library exposure summaries, import review and filtered retries, audited reimport
+permissions, searchable offline help and package notes/progress during updates.

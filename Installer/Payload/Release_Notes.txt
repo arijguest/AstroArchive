@@ -1,3 +1,45 @@
+AstroArchive 1.7.0 — mosaic collections, import review and offline help
+Package 1.7.0.1
+
+- Preserve mosaic/project and panel hints during existing FITS/session reads.
+  Explicit capture metadata is declared; missing/conflicting panel data stays
+  available for review. Normal import detection never invokes a plate solver.
+- Browse named collections and stable panels across targets, nights and filters.
+  Assign captures manually, confirm suggestions, retain removed-member decisions,
+  and attach completed stitched images separately from their contributing inputs.
+- Reuse supported existing WCS to suggest adjacent fields and display footprints.
+  Dithering and target-centre coordinates do not establish mosaic intent.
+  Optional representative solving reuses caches; approximate outlines are labelled.
+- Preserve collections in the portable index and a versioned hash/path manifest.
+  Reindexing reconnects captures after index loss. Image paths and bytes stay intact.
+- Export separate stacking inputs per panel and compatible capture group, keeping
+  calibrations, cameras, filters and completed outputs separate. Review unresolved
+  memberships before stacking. Stitch panel results in your external software.
+
+Generated-data and native Windows checks cover detection, uncertainty, portable
+recovery, panel export separation, collection controls and light/dark UI rendering.
+Real telescope mosaic metadata and authenticated solver responses need validation
+against the device firmware/provider in use.
+
+Recognised object IDs and common names now share canonical target groups, including
+older index records. The library shows object IDs/common names and can group files
+by target and observing session, with known exposure totals for subs.
+
+Import summaries show filtered counts and bytes, duplicates, exclusions and review
+reasons. Flagged captures are skipped by default. A dedicated review list separates
+telescope rejection, integrity problems and failed transfers; failed transfers can
+be retried from the current filtered scan. Deletion history can explicitly allow
+selected captures to be imported again while retaining the full event history.
+
+The expanded offline Guide offers full-text search, contextual F1 help, shortcuts,
+troubleshooting and control/table tooltips. Updates show package release notes,
+download progress and a dismissible confirmation after installation.
+
+Download AstroArchive1.7.0.1.exe. Windows validation covers the application,
+installer/updater, WPF UI and native installation, repair, restart and uninstall.
+
+Previous release notes
+
 AstroArchive 1.6.2 — failed filename cleanup and import exclusions
 Package 1.6.2.1
 
