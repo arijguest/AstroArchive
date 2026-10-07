@@ -20,11 +20,13 @@ namespace AstroArchive {
       foreach(var size in new[]{new[]{264.0,520.0},new[]{460.0,300.0}}){
        host.Width=size[0];host.Height=size[1];PumpPopupLayout();preview.Resize();PumpPopupLayout();preview.Fit();PumpPopupLayout();
        int w=(int)Math.Ceiling(stage.ActualWidth),h=(int)Math.Ceiling(stage.ActualHeight);if(w<1||h<1)throw new InvalidOperationException("Preview render fixture has no viewport.");
-       var rendered=new RenderTargetBitmap(w,h,96,96,PixelFormats.Pbgra32);rendered.Render(stage);var actual=new byte[w*h*4];rendered.CopyPixels(actual,w*4,0);
+       // Capture local viewport coordinates, excluding its centring offset in the host.
+       var drawing=new DrawingVisual();using(var context=drawing.RenderOpen())context.DrawRectangle(new VisualBrush(stage){ViewboxUnits=BrushMappingMode.Absolute,Viewbox=new Rect(0,0,stage.ActualWidth,stage.ActualHeight),Stretch=Stretch.Fill},null,new Rect(0,0,w,h));
+       var rendered=new RenderTargetBitmap(w,h,96,96,PixelFormats.Pbgra32);rendered.Render(drawing);var actual=new byte[w*h*4];rendered.CopyPixels(actual,w*4,0);
        int[] order=width>height?new[]{2,0,3,1}:new[]{0,1,2,3};
        for(int quadrant=0;quadrant<4;quadrant++){
         int x=(int)(w*(quadrant%2==0?0.2:0.8)),y=(int)(h*(quadrant<2?0.2:0.7)),offset=(y*w+x)*4;var expected=colors[order[quadrant]];
-        if(Math.Abs(actual[offset+2]-expected[0])>12||Math.Abs(actual[offset+1]-expected[1])>12||Math.Abs(actual[offset]-expected[2])>12||actual[offset+3]<250)throw new InvalidOperationException("Preview image clipped or scaled incorrectly: "+width+"x"+height+", "+dpi+" DPI, viewport "+w+"x"+h+", quadrant "+quadrant+".");
+        if(Math.Abs(actual[offset+2]-expected[0])>12||Math.Abs(actual[offset+1]-expected[1])>12||Math.Abs(actual[offset]-expected[2])>12||actual[offset+3]<250)throw new InvalidOperationException("Preview image clipped or scaled incorrectly: "+width+"x"+height+", "+dpi+" DPI, viewport "+w+"x"+h+", quadrant "+quadrant+", actual RGBA "+actual[offset+2]+","+actual[offset+1]+","+actual[offset]+","+actual[offset+3]+".");
        }
        if(Math.Abs(image.ActualWidth-width)>0.001||Math.Abs(image.ActualHeight-height)>0.001)throw new InvalidOperationException("Preview layout truncated the untransformed bitmap.");
        preview.SmokeGestures();cases++;
