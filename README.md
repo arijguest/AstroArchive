@@ -54,6 +54,12 @@ uninstaller to Windows Installed Apps.
 > **Download verification:** The installer is currently unsigned. Each release
 > includes SHA-256 checksum files; compare your download’s hash with the supplied
 > checksum before running it. A checksum verifies file integrity, not publisher identity.
+>
+> If Windows reports **“An Application Control policy has blocked this file”**,
+> see [Windows signing and policy troubleshooting](docs/RELEASING.md#smartscreen-and-application-control).
+> This can block a component even after setup starts. Trusted publisher signing
+> is being added for future releases; an organisation-managed PC may also need
+> its administrator to approve the publisher.
 
 <details>
 <summary><strong>Check the installer in PowerShell</strong></summary>
