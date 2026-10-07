@@ -9,6 +9,15 @@ Portable Windows 10/11 x64 WPF app for archiving smart-telescope FITS and creati
 - Portable collection manifests and panel-aware stacking exports that preserve capture/calibration separation.
 - See [mosaic guide](../docs/MOSAICS.md) for supported metadata, recovery, uncertainty and validation limits.
 
+## Changes in 1.6.1
+
+- Auto/Strong previews compensate for IRCUT/LP filters and severe colour casts.
+- Solar, lunar and planetary previews display linearly; Sun/Solar labels merge into Sun without moving existing archive files.
+- Larger installer and update dialogues with wrapping text and a scrollable setup body.
+
+- Startup Dump inbox imports and verified duplicate cleanup, with retry controls in Settings.
+- Direct single-stack handoff to the verified AstroWizard build and Siril. [Supported handoffs](../docs/PROCESSOR_HANDOFFS.md).
+
 ## Changes in 1.6.0
 
 - Pinch/wheel preview zoom and pan using the colour decoders; persistent numeric/Shift-column sorting, explicit bias rows, and dashes for unknown metadata except target names.

@@ -52,12 +52,22 @@ Expand Capture details for device, camera, gain, temperature and classification.
 
 Stretch changes the display only; source pixels and FITS headers stay unchanged.
 - Linear: no nonlinear stretch; the initial choice for normal raster images.
-- Auto: linked RGB stretch that reveals faint data while retaining colour balance.
-- Strong: a brighter background for inspecting faint structure.
+- Auto: reveals faint data with linked RGB unless colour compensation is needed.
+- Strong: a brighter background, with the same automatic colour compensation.
 - Auto per channel: independently balance each channel's background.
-FITS and XISF start with the saved stretch, defaulting to Auto. Fit sizes the
+Auto/Strong compensate for recognised IRCUT/LP filters or a severe RGB cast.
+This balances the preview background; it is not a scientific colour calibration.
+Solar, lunar and planetary captures use Linear automatically, preserving their
+colour. Identification uses the target, observation mode or clear file/folder
+names. Correct an unknown target if an unlabelled capture needs this behaviour.
+FITS and XISF otherwise start with the saved stretch, defaulting to Auto. Viewing
+a solar/planetary image does not change that saved preference. Fit sizes the
 preview to its pane; zoom scales the sampled display. Large images are sampled
 to roughly 1400 pixels per side, so use an external tool for pixel inspection.
+
+Sun and Solar are one target named Sun. Imports and metadata edits use Sun;
+opening an archive also merges existing library labels and cached import records.
+New solar imports use Targets/Sun. Existing indexed file paths are preserved.
 
 Preview supports FITS and gzip FITS (integer/float, RGB and recognised Bayer CFA),
 XISF mono/RGB/CFA with UInt8/16/32/64 or Float32/64 samples, attached or base64
@@ -280,6 +290,26 @@ analysis/worker caches and reports. Deletion history, source mirrors and unindex
 files are retained.
 Only the selected archive is affected. Cloud-synced deletions propagate and there is
 no undo. The repository Clear button remains solely a filter reset.
+
+DUMP INBOX AND DIRECT PROCESSING HANDOFFS
+Each selected archive contains a Dump folder. Drop FITS files or telescope folders
+there before opening AstroArchive. Startup sorts them into the archive and removes
+successfully processed FITS, including verified duplicates. Failed, unsupported,
+locked or changed files stay for retry. Session JSON and subfolders stay; metadata
+needed by new captures is preserved in the archive. Physical telescope IDs start
+Unknown: assign them with Edit metadata before matching calibrations.
+Settings offers Open dump folder and Process dump folder now. Finish copying files
+before processing. The dump flow has progress/cancellation and saves a last-dump.txt
+report in .astroarchive/reports. Normal import cleanup preferences do not affect it.
+
+Select one stack and right-click Export > Send stack to AstroWizard or Siril.
+Choose the executable and a working-copy folder outside the archive. The image is
+copied, verified and passed directly to the receiving GUI. AstroWizard accepts
+.fit/.fits via this route and requires the official signed Clear Eyes Windows build
+of 7 October 2026 (verified by checksum). Other builds are refused pending validation.
+Siril uses siril.exe, not siril-cli.exe. Gzip, multiple stacks and individual subs
+are outside these direct handoffs. StackingWizard incoming handoff and Siril sequence
+preparation remain planned; existing ready-to-stack folders are the manual route.
 
 SUPPORTED FILES
 .fit, .fits, .fts and .gz variants; primary/IMAGE HDUs; 8/16/32/64-bit integer or

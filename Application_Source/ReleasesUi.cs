@@ -18,7 +18,7 @@ namespace AstroArchive {
   }
   void Releases(Window owner){
    if(cancel!=null)return;
-   var d=new FormWindow(owner,"AstroArchive releases",630,500);d.Text("App releases",true);
+   var d=new FormWindow(owner,"Install a release",760,600);d.Window.MinWidth=680;d.Window.MinHeight=540;d.Text("Install a release",true);
    UpdateTarget target;try{target=ReleaseTarget();}catch(Exception e){d.Text("The installation record could not be read: "+e.Message);d.CloseOnly();d.Show();return;}
    d.Text("Current version: "+target.Running.Version+"  ·  Package: "+target.Running.PackageVersion);
    d.Text("Install release downloads and verifies the update, closes AstroArchive, installs it and restarts the app. Your repositories, images and settings are kept.");
@@ -27,13 +27,17 @@ namespace AstroArchive {
    var progress=new ProgressBar{Height=5,IsIndeterminate=true,Visibility=Visibility.Collapsed,Margin=new Thickness(0,0,0,16)};d.Add(progress);
    var client=new UpdateClient();UpdateManifest available=null;bool busy=false;Button check=null,install=null;
    Action refresh=()=>{check.IsEnabled=!busy;install.IsEnabled=!busy&&available!=null;progress.Visibility=busy?Visibility.Visible:Visibility.Collapsed;};
-   check=d.Button("Check for new releases",async ()=>{
+   var actions=new WrapPanel{Margin=new Thickness(0,8,0,0)};
+   check=new Button{Content="Check for releases",MinWidth=170,MinHeight=42,Margin=new Thickness(0,0,12,12)};
+   install=new Button{Content="Install release",MinWidth=150,MinHeight=42,Margin=new Thickness(0,0,0,12),Background=new SolidColorBrush(Color.FromRgb(23,107,116)),Foreground=Brushes.White};
+   actions.Children.Add(check);actions.Children.Add(install);d.Add(actions);
+   check.Click+=async (sender,args)=>{
     if(busy)return;busy=true;available=null;status.Text="Checking the latest stable release…";refresh();
     try{target=ReleaseTarget();available=await Task.Run(()=>client.Check(target.Comparison));status.Text=available==null?"No newer release is available.":"AstroArchive "+available.application_version+" (package "+available.package_version+") is available.";}
     catch(Exception e){status.Text="Could not check for releases.\n"+e.Message;}
     finally{busy=false;refresh();}
-   });
-   install=d.Button("Install release",async ()=>{
+   };
+   install.Click+=async (sender,args)=>{
     if(busy||available==null||cancel!=null)return;
     var release=available;bool started=false;
     busy=true;status.Text="Downloading and verifying AstroArchive "+release.package_version+"…";refresh();
@@ -51,7 +55,7 @@ namespace AstroArchive {
     // Shutdown closes both modal settings windows and disposes the repository.
     // The installer waits for this app (and its launcher) to exit before replacing files.
     if(started)Application.Current.Shutdown();
-   });install.IsEnabled=false;
+   };install.IsEnabled=false;
    d.Window.Closing+=(s,e)=>{if(busy)e.Cancel=true;};d.CloseOnly();d.Show();
   }
  }
