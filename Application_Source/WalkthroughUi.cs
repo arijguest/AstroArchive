@@ -27,7 +27,8 @@ namespace AstroArchive {
         public WalkthroughWindow(Window owner, WalkthroughStep[] steps, Action<WalkthroughStep> select, Action<WalkthroughStep> action, Action<bool> complete) {
             Owner = owner; this.steps = steps; this.select = select; this.action = action; this.complete = complete;
             Title = "AstroArchive walkthrough";
-            Width = Math.Min(490, SystemParameters.WorkArea.Width - 24); Height = 380; MinHeight = 330;
+            Width = Math.Min(530, SystemParameters.WorkArea.Width - 24); MinWidth = Math.Min(460, Width);
+            Height = Math.Min(430, SystemParameters.WorkArea.Height - 24); MinHeight = Math.Min(330, Height);
             WindowStartupLocation = WindowStartupLocation.CenterOwner; FontFamily = owner.FontFamily; FontSize = owner.FontSize;
             Resources.MergedDictionaries.Add(owner.Resources); SetResourceReference(Control.FontSizeProperty, "UiFontControl"); Theme.Bind(this, Control.BackgroundProperty, "Canvas"); Theme.Bind(this, Control.ForegroundProperty, "Text");
             var layout = new Grid { Margin = new Thickness(22) };
@@ -39,7 +40,7 @@ namespace AstroArchive {
             var title = new StackPanel { Margin = new Thickness(0, 0, 0, 14) }; title.Children.Add(Count); title.Children.Add(Heading); layout.Children.Add(title);
             Heading.SetResourceReference(TextBlock.FontSizeProperty, "UiFontTitle"); Theme.Bind(Count, TextBlock.ForegroundProperty, "Muted");
             Count.Margin = new Thickness(0, 0, 0, 8);
-            var reading = new ScrollViewer { Content = Body, VerticalScrollBarVisibility = ScrollBarVisibility.Auto };
+            var reading = new ScrollViewer { Content = Body, VerticalScrollBarVisibility = ScrollBarVisibility.Auto, HorizontalScrollBarVisibility = ScrollBarVisibility.Disabled };
             Grid.SetRow(reading, 1); layout.Children.Add(reading);
             Try.HorizontalAlignment = HorizontalAlignment.Left; Try.Margin = new Thickness(0, 14, 0, 8); Grid.SetRow(Try, 2); layout.Children.Add(Try);
             Try.Click += (s,e) => this.action(steps[StepIndex]);
@@ -84,7 +85,7 @@ namespace AstroArchive {
                 new WalkthroughStep { Title = "Import verified copies", Page = 1, Target = "ImportButton", Action = "Show import actions", Body = "Import copies only ready files in the filtered scan and verifies their checksums. Already archived content is skipped. During a job, timing and progress appear in the bottom bar; Cancel stops safely after the current operation. This walkthrough never starts an import for you." },
                 new WalkthroughStep { Title = "Browse, preview and sort", Page = 0, Target = "FramesGrid", Action = "Open Repository view options", Body = "Search your captures or browse targets and sessions. Click a table heading to sort; click again to reverse. Shift-click adds another heading. ▲ and ▼ show direction, and numbers show sort priority. Ctrl/Shift selects files; right-click opens file actions. View contains filters, columns and the preview pane." },
                 new WalkthroughStep { Title = "Export a stacking project", Page = 0, Target = "ExportButton", Action = "Open Export menu", Body = "Select repository files and choose Export for original copies or a ready-to-stack folder. Matching calibrations are offered with reasons; scientific conversion is explicit. Stacking happens in your chosen processing software. Existing export folders are never replaced." },
-                new WalkthroughStep { Title = "Make AstroArchive comfortable", Page = 0, Target = "MainMenu", Action = "Open accessibility preferences", Body = "Settings → Preferences contains appearance and accessibility. Choose larger text, comfortable rows, high contrast or reduced progress animation. Guide holds searchable help, this walkthrough and About AstroArchive. F1 opens help for the current page." }
+                new WalkthroughStep { Title = "Make AstroArchive comfortable", Page = 0, Target = "MainMenu", Action = "Open accessibility preferences", Body = "Settings → Preferences contains appearance; Settings → Accessibility adjusts larger text, comfortable rows, high contrast and reduced progress animation. Guide holds searchable help, this walkthrough and About AstroArchive. F1 opens help for the current page." }
             };
         }
         void StartWalkthrough() {

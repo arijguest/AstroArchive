@@ -453,6 +453,7 @@
   </Style>
   <Style TargetType="MenuItem">
    <Setter Property="Foreground" Value="{DynamicResource Text}" />
+   <Setter Property="FontSize" Value="{DynamicResource UiFontControl}" />
    <Setter Property="Template">
     <Setter.Value>
      <ControlTemplate TargetType="MenuItem">
@@ -465,7 +466,7 @@
         </Grid.ColumnDefinitions>
         <TextBlock x:Name="Checkmark" Text="✓" Margin="0,0,8,0" Visibility="Collapsed" />
         <ContentPresenter Grid.Column="1" ContentSource="Header" RecognizesAccessKey="True" />
-        <TextBlock Grid.Column="2" Text="›" Margin="20,0,0,0" Visibility="{Binding HasItems, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource BoolVisibility}}" />
+        <TextBlock x:Name="SubmenuArrow" Grid.Column="2" Text="›" Margin="20,0,0,0" Visibility="{Binding HasItems, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource BoolVisibility}}" />
         <Popup x:Name="PART_Popup" IsOpen="{TemplateBinding IsSubmenuOpen}" Placement="Right" PlacementTarget="{Binding ElementName=Item}" AllowsTransparency="True" Focusable="False">
          <Border Background="{DynamicResource Surface}" BorderBrush="{DynamicResource Border}" BorderThickness="1" Padding="4" MaxHeight="{Binding Source={x:Static SystemParameters.WorkArea}, Path=Height}" MaxWidth="{Binding Source={x:Static SystemParameters.WorkArea}, Path=Width}">
           <ScrollViewer Style="{StaticResource PopupScrollViewer}">
@@ -487,6 +488,8 @@
        </Trigger>
        <Trigger Property="Role" Value="TopLevelHeader">
         <Setter TargetName="PART_Popup" Property="Placement" Value="Bottom" />
+        <Setter TargetName="SubmenuArrow" Property="Text" Value="▾" />
+        <Setter TargetName="SubmenuArrow" Property="Margin" Value="6,0,0,0" />
        </Trigger>
       </ControlTemplate.Triggers>
      </ControlTemplate>
@@ -515,8 +518,11 @@
      <ColumnDefinition Width="*" />
      <ColumnDefinition Width="Auto" />
     </Grid.ColumnDefinitions>
-    <ScrollViewer VerticalScrollBarVisibility="Disabled" HorizontalScrollBarVisibility="Auto" Focusable="False">
+    <ScrollViewer VerticalScrollBarVisibility="Disabled" HorizontalScrollBarVisibility="Disabled" Focusable="False">
      <Menu x:Name="MainMenu" Background="Transparent" Foreground="{DynamicResource Text}" VerticalAlignment="Center" KeyboardNavigation.TabNavigation="Once">
+      <Menu.ItemsPanel>
+       <ItemsPanelTemplate><WrapPanel /></ItemsPanelTemplate>
+      </Menu.ItemsPanel>
       <MenuItem x:Name="ImportMenu" Header="_Import" />
       <MenuItem x:Name="ExportMenu" Header="_Export" />
       <MenuItem x:Name="RepositoryMenu" Header="_Repository" />
@@ -644,11 +650,11 @@
           <ColumnDefinition Width="78" />
          </Grid.ColumnDefinitions>
          <StackPanel>
-          <TextBlock Text="DISPLAY STRETCH" FontSize="9" Foreground="{DynamicResource Muted}" Margin="0,0,0,4" />
+          <TextBlock Text="DISPLAY STRETCH" FontSize="{DynamicResource UiFontCaption}" Foreground="{DynamicResource Muted}" Margin="0,0,0,4" />
           <ComboBox x:Name="StretchMode" ToolTip="Preview only. Auto links RGB channels to preserve colour; Auto per channel balances the background." />
          </StackPanel>
          <StackPanel Grid.Column="1" Margin="6,0,0,0">
-          <TextBlock Text="ZOOM" FontSize="9" Foreground="{DynamicResource Muted}" Margin="0,0,0,4" />
+          <TextBlock Text="ZOOM" FontSize="{DynamicResource UiFontCaption}" Foreground="{DynamicResource Muted}" Margin="0,0,0,4" />
           <ComboBox x:Name="PreviewZoom" />
          </StackPanel>
         </Grid>
@@ -856,7 +862,7 @@
    <Grid Margin="0,5,0,0">
     <Grid.ColumnDefinitions>
      <ColumnDefinition Width="*" />
-     <ColumnDefinition Width="240" />
+     <ColumnDefinition x:Name="StatusProgressColumn" Width="0" />
      <ColumnDefinition Width="Auto" />
     </Grid.ColumnDefinitions>
     <StackPanel>
@@ -897,7 +903,7 @@
    <Button DockPanel.Dock="Right" x:Name="ImportToolsButton" Content="Import tools ▾" Margin="0" />
    <Button x:Name="NewMosaicButton" Content="New mosaic…" />
    <Button x:Name="DetectMosaicsButton" Content="Detect from metadata" />
-   <Button x:Name="AssignMosaicButton" Content="Assign library selection…" />
+   <Button x:Name="AssignMosaicButton" Content="Assign repository selection…" />
    <Button x:Name="MosaicToolsButton" Content="Tools ▾" />
    <Button x:Name="MosaicConfirmButton" Content="Confirm selected" />
    <Button x:Name="MosaicRemoveButton" Content="Remove selected" />

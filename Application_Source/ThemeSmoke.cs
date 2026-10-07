@@ -10,7 +10,7 @@ namespace AstroArchive {
  public partial class MainUi {
   static double Luminance(Color colour){Func<byte,double> linear=v=>{double s=v/255.0;return s<=0.04045?s/12.92:Math.Pow((s+0.055)/1.055,2.4);};return 0.2126*linear(colour.R)+0.7152*linear(colour.G)+0.0722*linear(colour.B);}
   static void Readable(Brush text,Brush background,string label){var foreground=text as SolidColorBrush;var surface=background as SolidColorBrush;if(foreground==null||surface==null)throw new Exception(label+" did not resolve solid theme brushes.");double a=Luminance(foreground.Color),b=Luminance(surface.Color);if((Math.Max(a,b)+0.05)/(Math.Min(a,b)+0.05)<4.5)throw new Exception(label+" has unreadable contrast.");}
-  static void CapturePopup(Window window,string path){var visual=(FrameworkElement)window.Content;visual.UpdateLayout();var bitmap=new RenderTargetBitmap((int)Math.Ceiling(visual.ActualWidth),(int)Math.Ceiling(visual.ActualHeight),96,96,PixelFormats.Pbgra32);bitmap.Render(visual);var png=new PngBitmapEncoder();png.Frames.Add(BitmapFrame.Create(bitmap));using(var stream=File.Create(path))png.Save(stream);}
+  static void CapturePopup(Window window,string path){window.UpdateLayout();var bitmap=PopupBitmap(window);var png=new PngBitmapEncoder();png.Frames.Add(BitmapFrame.Create(bitmap));using(var stream=File.Create(path))png.Save(stream);}
   void SmokePopupThemes(string output){
    foreach(string mode in new[]{"Dark","Light"}){
     Theme.Apply(Window,mode);var dialog=new FormWindow(Window,"Processing capture",650,480);dialog.Tabs("Processing","Details");dialog.Text("Processing captures",true);dialog.Text("Verifying copied files before updating the repository.");
