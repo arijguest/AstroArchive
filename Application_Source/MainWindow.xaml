@@ -18,6 +18,7 @@
   <SolidColorBrush x:Key="Muted" Color="#94A5C0" />
   <SolidColorBrush x:Key="Accent" Color="#6965E8" />
   <SolidColorBrush x:Key="Selection" Color="#30385D" />
+  <SolidColorBrush x:Key="SupportSurface" Color="#29314B" />
   <ControlTemplate x:Key="ScrollPageButton" TargetType="RepeatButton">
    <Border Background="Transparent" />
   </ControlTemplate>
@@ -367,22 +368,20 @@
   </Style>
   <Style TargetType="TabItem">
    <Setter Property="Padding" Value="16,9" />
+   <Setter Property="Margin" Value="0,0,6,0" />
+   <Setter Property="FocusVisualStyle" Value="{DynamicResource KeyboardFocusOutline}" />
    <Setter Property="FontWeight" Value="SemiBold" />
    <Setter Property="Foreground" Value="{DynamicResource Muted}" />
    <Setter Property="Template">
     <Setter.Value>
      <ControlTemplate TargetType="TabItem">
-      <Border x:Name="Tab" Background="Transparent" CornerRadius="6" Margin="0,0,6,0" Padding="{TemplateBinding Padding}">
+      <Border x:Name="Tab" Background="Transparent" CornerRadius="6" Padding="{TemplateBinding Padding}">
        <ContentPresenter ContentSource="Header" />
       </Border>
       <ControlTemplate.Triggers>
        <Trigger Property="IsSelected" Value="True">
         <Setter TargetName="Tab" Property="Background" Value="{DynamicResource Selection}" />
         <Setter Property="Foreground" Value="{DynamicResource Text}" />
-       </Trigger>
-       <Trigger Property="IsKeyboardFocusWithin" Value="True">
-        <Setter TargetName="Tab" Property="BorderBrush" Value="{DynamicResource Focus}" />
-        <Setter TargetName="Tab" Property="BorderThickness" Value="1" />
        </Trigger>
       </ControlTemplate.Triggers>
      </ControlTemplate>
@@ -452,12 +451,16 @@
    </Setter>
   </Style>
   <Style TargetType="MenuItem">
+   <Setter Property="Background" Value="Transparent" />
+   <Setter Property="BorderThickness" Value="0" />
    <Setter Property="Foreground" Value="{DynamicResource Text}" />
    <Setter Property="FontSize" Value="{DynamicResource UiFontControl}" />
+   <Setter Property="FontWeight" Value="Normal" />
+   <Setter Property="Padding" Value="12,7" />
    <Setter Property="Template">
     <Setter.Value>
      <ControlTemplate TargetType="MenuItem">
-      <Border x:Name="Item" Background="Transparent" Padding="12,7">
+      <Border x:Name="Item" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="6" Padding="{TemplateBinding Padding}">
        <Grid>
         <Grid.ColumnDefinitions>
          <ColumnDefinition Width="Auto" />
@@ -496,6 +499,24 @@
     </Setter.Value>
    </Setter>
   </Style>
+  <Style x:Key="KeyboardFocusOutline" TargetType="Control">
+   <Setter Property="Template">
+    <Setter.Value>
+     <ControlTemplate TargetType="Control">
+      <Border BorderBrush="{DynamicResource Focus}" BorderThickness="{DynamicResource FocusWidth}" CornerRadius="6" IsHitTestVisible="False" />
+     </ControlTemplate>
+    </Setter.Value>
+   </Setter>
+  </Style>
+  <Style x:Key="TopNavigationMenu" TargetType="MenuItem" BasedOn="{StaticResource {x:Type MenuItem}}">
+   <Setter Property="Background" Value="{DynamicResource SurfaceAlt}" />
+   <Setter Property="BorderBrush" Value="{DynamicResource Border}" />
+   <Setter Property="BorderThickness" Value="1" />
+   <Setter Property="FontWeight" Value="SemiBold" />
+   <Setter Property="Margin" Value="0,0,6,4" />
+   <Setter Property="FocusVisualStyle" Value="{StaticResource KeyboardFocusOutline}" />
+   <Setter Property="Cursor" Value="Hand" />
+  </Style>
   <Thickness x:Key="FocusWidth">2</Thickness>
  </Window.Resources>
  <Grid Margin="18,14" x:Name="WorkspaceRoot">
@@ -510,7 +531,7 @@
     <RowDefinition Height="Auto" />
     <RowDefinition Height="Auto" />
    </Grid.RowDefinitions>
-   <Button x:Name="OpenRepositoryFolderButton" HorizontalAlignment="Center" MaxWidth="650" Padding="10,4" Margin="0,0,0,9" Background="Transparent" BorderThickness="0" ToolTip="Open the active repository folder in File Explorer.">
+   <Button x:Name="OpenRepositoryFolderButton" HorizontalAlignment="Center" MaxWidth="650" Padding="10,2" Margin="0" Background="Transparent" BorderThickness="0" ToolTip="Open the active repository folder in File Explorer.">
     <TextBlock x:Name="RepositoryLabel" Text="Choose a repository from the Repository menu" TextTrimming="CharacterEllipsis" Foreground="{DynamicResource Muted}" FontSize="{DynamicResource UiFontSmall}" />
    </Button>
    <Grid Grid.Row="1">
@@ -523,12 +544,12 @@
       <Menu.ItemsPanel>
        <ItemsPanelTemplate><WrapPanel /></ItemsPanelTemplate>
       </Menu.ItemsPanel>
-      <MenuItem x:Name="ImportMenu" Header="_Import" />
-      <MenuItem x:Name="ExportMenu" Header="_Export" />
-      <MenuItem x:Name="RepositoryMenu" Header="_Repository" />
-      <MenuItem x:Name="SettingsMenu" Header="_Settings" />
-      <MenuItem x:Name="GuideMenu" Header="_Guide" />
-      <MenuItem x:Name="CoffeeMenu" Header="_Buy Me a Coffee" />
+      <MenuItem x:Name="ImportMenu" Header="_Import" Style="{StaticResource TopNavigationMenu}" />
+      <MenuItem x:Name="ExportMenu" Header="_Export" Style="{StaticResource TopNavigationMenu}" />
+      <MenuItem x:Name="RepositoryMenu" Header="_Repository" Style="{StaticResource TopNavigationMenu}" />
+      <MenuItem x:Name="SettingsMenu" Header="_Settings" Style="{StaticResource TopNavigationMenu}" />
+      <MenuItem x:Name="GuideMenu" Header="_Guide" Style="{StaticResource TopNavigationMenu}" />
+      <MenuItem x:Name="CoffeeMenu" Header="_Buy Me a Coffee" Style="{StaticResource TopNavigationMenu}" Background="{DynamicResource SupportSurface}" FontWeight="Bold" />
      </Menu>
     </ScrollViewer>
     <StackPanel x:Name="BrandPanel" Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" Margin="22,0,0,0">

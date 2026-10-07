@@ -1,5 +1,5 @@
-AstroArchive 1.9.0 validation
-Package 1.9.0.1; Windows 10/11 x64; .NET Framework 4.8.
+AstroArchive 1.10.2 validation
+Package 1.10.2.1; Windows 10/11 x64; .NET Framework 4.8.
 
 The Windows release workflow runs application regressions, a separate five-case
 Windows WIC integration suite, installer/updater regressions, x64 compilation,
@@ -11,7 +11,9 @@ Windows navigation checks exercise ordered menus in both themes, source and file
 action availability, repository path/branding placement, rendered ascending and
 descending sort indicators and multi-column priorities, accessible header names,
 larger text and comfortable rows, high contrast, reduced progress animation,
-walkthrough navigation, author attribution and the idle status bar. Rendered
+walkthrough navigation, author attribution and the idle status bar. The preview regression additionally checks rendered quadrant pixels in 16
+portrait/landscape/square/upscale, resize and bitmap-DPI cases, and exercises
+zoom/pan/Fit button availability and actions. Rendered
 previews are retained in the workflow artifact for visual review.
 
 Supplementary validation in Linux compiles the application, installer, launcher,
