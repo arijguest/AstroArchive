@@ -14,7 +14,7 @@ namespace AstroArchive {
    if(string.IsNullOrWhiteSpace(source))throw new ArgumentException("A source folder is required when deleting originals.");
    if(Util.Within(source,repository)||Util.Within(repository,source))throw new IOException("Deletion requires separate source and repository folders.");
   }
-  public static void DeleteVerified(string source,string destination,string expected,string sourceRoot,string repository,CancellationToken ct) {
+  public static void DeleteVerified(string source,string destination,string expected,string sourceRoot,string repository,CancellationToken ct,Action<int> counted=null) {
    ValidateRoots(sourceRoot,repository);
    if(!Util.Within(source,sourceRoot)||Util.Within(source,repository)||!Util.Within(destination,repository))throw new IOException("Source cleanup refused a path outside the import boundaries.");
    if(Environment.OSVersion.Platform!=PlatformID.Win32NT)throw new PlatformNotSupportedException("Verified source removal requires Windows file handles.");
@@ -29,7 +29,7 @@ namespace AstroArchive {
      FileIdentity a,b;
      if(!GetFileInformationByHandle(handle,out a)||!GetFileInformationByHandle(copy.SafeFileHandle,out b))throw new Win32Exception(Marshal.GetLastWin32Error(),"Original was kept because file identity could not be verified.");
      if(a.VolumeSerial==b.VolumeSerial&&a.IndexHigh==b.IndexHigh&&a.IndexLow==b.IndexLow)throw new IOException("Original was kept: source and destination have the same file identity.");
-     if(Util.Hash(original,ct)!=expected||Util.Hash(copy,ct)!=expected)throw new IOException("Original was kept because the source or repository checksum changed.");
+     if(Util.Hash(original,ct,counted)!=expected||Util.Hash(copy,ct,counted)!=expected)throw new IOException("Original was kept because the source or repository checksum changed.");
      ct.ThrowIfCancellationRequested();
      var disposition=new FileDisposition{DeleteFile=1};
      if(!SetFileInformationByHandle(handle,4,ref disposition,1))throw new Win32Exception(Marshal.GetLastWin32Error(),"Windows could not remove this original; the repository copy is retained.");

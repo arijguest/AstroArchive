@@ -1,4 +1,4 @@
-AstroArchive 1.4.0
+AstroArchive 1.5.0
 Windows 10/11 x64 desktop app. Built-in .NET Framework 4.8 and Windows SQLite.
 No installer, Python or Google login required.
 
@@ -66,32 +66,39 @@ A blocked snapshot is reported while the local committed index remains available
 The live Google Drive/Windows selector integration has not been tested here.
 
 IMPORT PROGRESS, PERFORMANCE AND RECOVERY
-Rows appear during discovery and as each file changes to Copying, Imported,
-Duplicate or Failed. Repository rows appear as imports commit. The progress bar
-shows completed files and a throughput-based ETA once sufficient work is measured;
-scan totals and cloud/solver waiting can make the estimate change.
+Progress and elapsed time start before scanning or file preparation. Discovery
+continues while up to two local metadata workers inspect files; streamed/cloud
+mode keeps metadata reads at one worker. A local spill inventory lets traversal
+finish without waiting for every metadata read. Until traversal finishes, the
+number discovered is provisional and the ETA says estimating.
 
-Expand Performance details to compare discovery, metadata, duplicate checking,
-copy + source hash, verification, cloud availability, target identification,
-rotation and index/checkpoint. The report includes stage seconds, files/s and
-processed MB/s. These are app work counters, not physical disk/network benchmarks.
-FITS gzip parsing counts decoded bytes; external ASTAP/database I/O is not measured.
-Stage wall times can overlap when workers run concurrently and are not additive.
+Imports, selected-file exports and stacking-project copies update progress inside
+large files, including SHA-256 destination verification. ETA uses recent progress
+and learns the different costs of copying, verification and optional source
+cleanup. Compatible prior timings seed a provisional estimate marked ~. Provider stalls show a waiting state;
+final index and manifest work show Finalising rather than a completed timer.
+The timers describe filesystem work by AstroArchive. A cloud provider may continue
+uploading after local copies have completed.
 
-Scanning uses one directory enumeration and a bounded queue. FITS headers and
-session JSON are read before expensive work; shared JSON is read once per scan.
-New file hashes are deferred until copying, avoiding a separate full source read.
-SHA-256 is computed while writing a temporary copy. The destination is read back
-and verified before committing its file/index record. A matching name and size
-never prove a duplicate. Verified, unchanged NTFS/ReFS files with stable identity
-and change metadata can skip payload reads. Unsupported/cloud filesystems use
-content hashing instead. Solving/rotation caches also validate archived content.
+Expand Performance details for discovery, header open/read, classification,
+session metadata, duplicate checking, copy/hash, verification and checkpoints.
+Overlapping stages are not additive; byte counters describe app reads/writes,
+not measured physical disk or network traffic. Gzip parsing counts decoded bytes.
+External solver/database reads are not observable.
 
-Settings > Processing > Copy workers: Auto begins at 1. With at least 64 files and 64 MB it
-compares four actual 16-file batches at 1, 2, 4 and 8 workers, and retains a faster
-setting for that source/archive pair. Retune repeats the pilot. Differences in
-file size, caching, storage and cloud downloads affect the result. Small imports
-stay conservative, and fixed 1/2/4/8-worker choices are available.
+Shared session JSON is loaded once per scan. Trusted unchanged local headers
+can be reused on a later scan before import; session metadata and model/camera
+choices are applied again. New source hashes are calculated while copying.
+The destination is read back and verified before each record commits. Name,
+size or mtime alone never prove a duplicate. Source cleanup keeps its final
+physical-boundary and checksum checks.
+
+Settings > Copy workers: Auto begins conservatively and reuses a profile for the
+source/archive pair, cloud mode and file-size class. Larger jobs sample up to
+four smaller size-spread batches at 1, 2, 4 and 8 workers. Trials stop when the
+next setting fails or stops improving throughput. Very large files are excluded
+from the pilot. Retune repeats sampling; fixed worker choices remain available.
+Workload, caching, storage and provider delays affect results.
 
 Temporary file locks and provider I/O errors get limited retries. A failed file
 is shown with its full path, exception/error code and reason; later files continue.

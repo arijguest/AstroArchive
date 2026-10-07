@@ -1,6 +1,14 @@
-# AstroArchive 1.4.0
+# AstroArchive 1.5.0
 
 Portable Windows 10/11 x64 WPF app for archiving smart-telescope FITS and creating verified stacking projects. Open `AstroArchive.exe`; read `Quick_Start.txt` for the complete workflow.
+
+## Changes in 1.5.0
+
+- Immediate elapsed/progress feedback and rolling ETA through copy and destination verification, shared by imports and project/selected-file exports.
+- Discovery spills pending paths locally instead of waiting for metadata; bounded metadata workers share one session JSON cache.
+- Indexed filename phrases, inexpensive isolated frame snapshots, validated pre-import header caching and explicit classification/header timings.
+- Reused transfer buffers, indexed duplicate lookups, smaller comparable worker trials and unchanged verified checkpoint reuse.
+- Provider stalls and finalisation have explicit progress states; local filesystem completion does not certify a later provider upload.
 
 ## Changes in 1.4.0
 
