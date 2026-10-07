@@ -1,3 +1,15 @@
+AstroArchive 1.8.3 — grouped, concise repository targets
+Package 1.8.3.1
+
+- Group the existing target list by astronomical type with inline headings.
+  Comets, nebulae, galaxies and clusters stay together; no submenu or expansion.
+  Use bundled catalogue types and standard comet designations for grouping.
+- Show a short common name, file-count badge and compact ID/sub-exposure line.
+  Hover a row for its complete identity and subs, stacks, sessions and exposure.
+  Compact named comet entries while retaining their designations and full labels.
+- Preserve target selection, saved table layouts and existing search/filter rules.
+  Counts reflect the filtered files; stack/calibration exposures remain excluded.
+
 AstroArchive 1.8.2 — concise mount labels
 Package 1.8.2.1
 

@@ -117,7 +117,7 @@ namespace AstroArchive {
    {"ClearButton","Reset library search, filters and target selection to show all captures."},
    {"LibraryColumnsButton","Choose repository headings. Check or uncheck columns, drag headings to rearrange, or restore the default layout. This table remembers its own choices."},
    {"ImportColumnsButton","Choose import headings. Drag headings to rearrange; right-click one for Move left/right. Choices are saved independently of the repository table."},
-   {"TargetList","Choose a target to filter the library. All targets shows every target matching the current filters."},
+   {"TargetList","Targets are grouped by astronomical type. Choose a target to filter the repository; All targets shows the current filtered files. Each badge counts files; hover for the full name, subs, stacks, sessions and exposure totals."},
    {"FramesGrid","Click a column header to sort; click again to reverse. Shift-click adds a sort column. Ctrl/Shift selects files; right-click opens file tools."},
    {"ExportButton","Export selected captures, or all visible captures when none are selected. Choose file copies or a stacking project."},
    {"RotationButton","Analyse rotation in acquisition subs to assess EQ or Alt/Az evidence. Device stacks are not used; sufficient timestamps and stars are required."},
