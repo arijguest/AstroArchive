@@ -28,6 +28,10 @@ namespace AstroArchive {
                 if (position.X < Window.ActualWidth / 2 || path.TranslatePoint(new Point(), Window).Y >= menu.TranslatePoint(new Point(), Window).Y) throw new Exception("Brand/path layout did not move to the right and above navigation.");
                 foreach (string mode in new[] { "Light", "Dark" }) {
                     settings.ThemeMode = mode; ApplyAppearance();
+                    foreach (var item in menu.Items.Cast<MenuItem>()) {
+                        item.ApplyTemplate();
+                        Readable(item.Foreground, item.Background, mode + " top menu");
+                    }
                     OpenTopMenu("RepositoryMenu"); PumpPopupLayout();
                     var root = TopMenu("RepositoryMenu");
                     if (!root.IsSubmenuOpen || root.ActualWidth == 0) throw new Exception("Repository menu failed to open.");
@@ -98,7 +102,7 @@ namespace AstroArchive {
                 try { about.Window.Show(); PumpPopupLayout(); if (!PopupChildren<TextBlock>(about.Window).Any(text => text.Text == "Ari J. Guest")) throw new Exception("About page lacks author attribution."); CapturePopup(about.Window, Path.Combine(output, "AstroArchive_About_UI.png")); }
                 finally { about.Window.Close(); }
                 var steps = WalkthroughSteps(); var originalSource = T("SourceBox").Text;
-                var tour = new WalkthroughWindow(Window, steps, SelectWalkthroughStep, step => { }, finished => RemoveWalkthroughHighlight());
+                StartWalkthrough(); var tour = walkthrough;
                 try {
                     tour.Show(); PumpPopupLayout();
                     for (int index = 0; index < steps.Length; index++) { tour.SetStep(index); PumpPopupLayout(); if (tour.StepIndex != index || tour.Heading.Text != steps[index].Title) throw new Exception("Walkthrough lost a step."); }
@@ -109,6 +113,19 @@ namespace AstroArchive {
                         if (!button.IsVisible || bounds.Right > tour.ActualWidth || bounds.Bottom > tour.ActualHeight) throw new Exception("Large-text walkthrough actions are clipped.");
                     }
                     CapturePopup(tour, Path.Combine(output, "AstroArchive_Walkthrough_UI.png"));
+                    tour.SetStep(steps.Length - 1); PumpPopupLayout();
+                    var highlight = walkthroughHighlight; var layer = walkthroughHighlightLayer;
+                    if (highlight == null || layer == null) throw new Exception("Walkthrough highlight was not attached.");
+                    tour.Next.RaiseEvent(new RoutedEventArgs(Button.ClickEvent)); PumpPopupLayout();
+                    if (walkthrough != null || walkthroughHighlight != null || walkthroughHighlightLayer != null || !settings.GuideCompleted || (layer.GetAdorners(highlight.AdornedElement) ?? new System.Windows.Documents.Adorner[0]).Contains(highlight)) throw new Exception("Finished walkthrough left a highlight behind.");
+                    GoToPage(0); T("SearchBox").Focus(); PumpPopupLayout();
+                    var repositoryTab = (TabItem)tabs.Items[0];
+                    var tabSurface = repositoryTab.Template.FindName("Tab", repositoryTab) as Border;
+                    if (tabSurface == null || tabSurface.BorderThickness.Left != 0 || repositoryTab.FocusVisualStyle == null) throw new Exception("Page focus outlines its tab or keyboard focus styling is missing.");
+                    Capture(Path.Combine(output, "AstroArchive_After_Guide_UI.png"));
+                    StartWalkthrough(); walkthrough.SetStep(4); var skippedHighlight = walkthroughHighlight; var skippedLayer = walkthroughHighlightLayer;
+                    walkthrough.Close(); PumpPopupLayout();
+                    if (walkthroughHighlight != null || walkthroughHighlightLayer != null || (skippedLayer.GetAdorners(skippedHighlight.AdornedElement) ?? new System.Windows.Documents.Adorner[0]).Contains(skippedHighlight)) throw new Exception("Dismissed walkthrough left a highlight behind.");
                 } finally { tour.Close(); RemoveWalkthroughHighlight(); }
                 if (L("RateLabel").IsVisible || ((ProgressBar)Window.FindName("ProgressBar")).IsVisible) throw new Exception("Idle status bar still displays processing indicators.");
             } finally { settings = Util.Deserialize<Settings>(saved); ApplyAppearance(); GoToPage(page); UpdateNavigationState(); }

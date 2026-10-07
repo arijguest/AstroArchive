@@ -17,6 +17,7 @@ namespace AstroArchive {
    if(contrast){light=new[]{"#FFFFFF","#FFFFFF","#F3F3F3","#000000","#000000","#000000","#1D4ED8","#DDEBFF"};night=new[]{"#000000","#000000","#151515","#FFFFFF","#FFFFFF","#FFFFFF","#1D4ED8","#183E69"};}
    window.Resources["Focus"]=new SolidColorBrush(dark?Color.FromRgb(251,191,36):Color.FromRgb(29,78,216));
    for(int i=0;i<keys.Length;i++){var brush=new SolidColorBrush((Color)ColorConverter.ConvertFromString((dark?night:light)[i]));brush.Freeze();window.Resources[keys[i]]=brush;}
+   var support=new SolidColorBrush((Color)ColorConverter.ConvertFromString(contrast?(dark?"#183E69":"#DDEBFF"):(dark?"#29314B":"#E7E9F8")));support.Freeze();window.Resources["SupportSurface"]=support;
    // Tooltips and popup windows have separate visual trees. Share the palette and
    // implicit control styles at application scope so they resolve the same colours.
    if(Application.Current!=null&&!Application.Current.Resources.MergedDictionaries.Contains(window.Resources))Application.Current.Resources.MergedDictionaries.Add(window.Resources);

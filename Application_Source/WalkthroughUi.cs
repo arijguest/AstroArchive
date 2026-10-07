@@ -77,6 +77,7 @@ namespace AstroArchive {
     public partial class MainUi {
         WalkthroughWindow walkthrough;
         WalkthroughHighlight walkthroughHighlight;
+        AdornerLayer walkthroughHighlightLayer;
         int walkthroughOriginalPage;
         static WalkthroughStep[] WalkthroughSteps() {
             return new[] {
@@ -103,6 +104,7 @@ namespace AstroArchive {
                 else OpenTopMenu("RepositoryMenu");
             }, finished => {
                 RemoveWalkthroughHighlight(); walkthrough = null;
+                foreach (var item in ((Menu)Window.FindName("MainMenu")).Items) ((MenuItem)item).IsSubmenuOpen = false;
                 if (finished) settings.GuideCompleted = true;
                 SaveSettings(); GoToPage(walkthroughOriginalPage);
             });
@@ -118,13 +120,13 @@ namespace AstroArchive {
             if (target == null) return;
             var layer = AdornerLayer.GetAdornerLayer(target);
             if (layer == null) return;
-            walkthroughHighlight = new WalkthroughHighlight(target); layer.Add(walkthroughHighlight);
+            walkthroughHighlight = new WalkthroughHighlight(target); walkthroughHighlightLayer = layer; layer.Add(walkthroughHighlight);
         }
         void RemoveWalkthroughHighlight() {
             if (walkthroughHighlight == null) return;
-            var layer = AdornerLayer.GetAdornerLayer(walkthroughHighlight.AdornedElement);
-            if (layer != null) layer.Remove(walkthroughHighlight);
+            if (walkthroughHighlightLayer != null) walkthroughHighlightLayer.Remove(walkthroughHighlight);
             walkthroughHighlight = null;
+            walkthroughHighlightLayer = null;
         }
         FormWindow AboutPage() {
             var dialog = new FormWindow(Window, "About AstroArchive", 650, 640);

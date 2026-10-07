@@ -1,4 +1,4 @@
-AstroArchive 1.10.0
+AstroArchive 1.10.2
 Windows 10/11 x64 desktop app. Built-in .NET Framework 4.8 and Windows SQLite.
 Runs offline. No Python or Google login required.
 
@@ -136,8 +136,9 @@ columns resets visibility and order for just that table. Hiding a sorted heading
 removes it from sorting; row selections and filters are retained.
 
 Select one repository file and choose Preview image… from its context menu.
-Pinch, scroll or use the small buttons over the image to zoom. Drag or use the
-overlay arrows to pan; Recenter (or F) restores the whole image. Escape closes
+Pinch, scroll or use the centred toolbar over the image to zoom. After zooming,
+drag or use the arrows to pan; Fit (or F) restores the whole image. Pan and zoom-out
+buttons are disabled while the whole image is fitted. Escape closes
 the popup preview. The gesture viewer uses the same
 colour decoders and display stretch as the preview pane. Source pixels stay intact.
 

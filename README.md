@@ -59,7 +59,7 @@ Download the installer, run it and open AstroArchive from its shortcut. Installa
 Each release includes SHA-256 checksums. In PowerShell, substitute your downloaded installer’s filename:
 
 ```powershell
-Get-FileHash .\AstroArchive1.10.1.1.exe -Algorithm SHA256
+Get-FileHash .\AstroArchive1.10.2.1.exe -Algorithm SHA256
 ```
 
 Compare `Hash` with the corresponding `.sha256` file. A checksum checks file integrity; publisher identity depends on code signing.

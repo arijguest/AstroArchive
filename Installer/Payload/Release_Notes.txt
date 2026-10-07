@@ -1,3 +1,16 @@
+AstroArchive 1.10.2 — guide cleanup and toolbar buttons
+Package 1.10.2.1
+
+- Remove walkthrough highlights on Finish, Skip/close and Escape. Keep the exact
+  adorner layer for cleanup when navigating between pages.
+- Show tab focus outlines only during keyboard navigation, so focusing a page
+  or returning from the guide does not leave a gold border around Repository.
+- Give top-bar menus rounded, subtly filled button surfaces matching Import.
+  Keep submenu rows compact and keyboard focus visible. Bring the toolbar
+  close to the centered repository path by removing the extra header gap.
+- Highlight Buy Me a Coffee with a slightly stronger, theme-aware background
+  and a bold caption, including readable high-contrast styling.
+
 AstroArchive 1.10.1 — image preview display and navigation fix
 Package 1.10.1.1
 
