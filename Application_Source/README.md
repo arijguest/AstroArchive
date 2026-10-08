@@ -13,6 +13,12 @@ Its 757 star vectors and drawing are cached; no sky timer, network or 3D engine 
 
 Portable Windows 10/11 x64 WPF app for archiving astronomical image originals and creating verified stacking projects. Open `AstroArchive.exe`; read `Quick_Start.txt` for the complete workflow.
 
+## Changes in 1.13.1
+
+- Repeat folder scans and USB uploads match saved session folders and file inventories for the physical device. Unchanged imports skip metadata/hash reads and review rows, while new files in older folders and subfolders remain discoverable.
+- Visit unknown folder trees first and newer names first, exclude filesystem bookkeeping folders, and load archive lookups once for the scan.
+- Show skipped file/folder counts and offer Import → Full rescan of source to bypass caches and read/hash everything. FAT/exFAT inventory uses sizes/timestamps; NTFS/ReFS additionally checks identity/change-time. New copies keep checksum verification and skipped originals stay out of cleanup.
+
 ## Changes in 1.13.0
 
 - Shared search supports phrases, exclusions, OR, fields, filename globs and numeric comparisons, with concise help and safe syntax errors.
@@ -21,12 +27,6 @@ Portable Windows 10/11 x64 WPF app for archiving astronomical image originals an
 - Owned scan/import progress windows follow main-window minimising and hiding.
 - Stable Windows shell identity and logo cache repair version-stale taskbar shortcuts during installation/update.
 - Remove Mosaic navigation, detection, collections and panel export logic. Existing captures remain available for ordinary exports.
-
-## Changes in 1.13.1
-
-- Repeat folder scans and USB uploads match saved session folders and file inventories for the physical device. Unchanged imports skip metadata/hash reads and review rows, while new files in older folders and subfolders remain discoverable.
-- Visit unknown folder trees first and newer names first, exclude filesystem bookkeeping folders, and load archive lookups once for the scan.
-- Show skipped file/folder counts and offer Import → Full rescan of source to bypass caches and read/hash everything. FAT/exFAT inventory uses sizes/timestamps; NTFS/ReFS additionally checks identity/change-time. New copies keep checksum verification and skipped originals stay out of cleanup.
 
 ## Changes in 1.10.1
 

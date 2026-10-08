@@ -97,11 +97,10 @@ namespace AstroArchive {
   ImportPlan ScanCore(string source,string telescope,string model,CancellationToken ct,Action<ProgressInfo> progress,bool reindex,Action<Frame> onFrame,bool deferHash,bool cloudSource,bool dump,int metadataWorkers=0,string telescopeIdentity=null,bool deferFinish=false,bool ignoreFailed=false,bool ignoreRaster=false,bool quickScan=false,bool fullScan=false){
    var metrics=new PipelineMetrics(progress);metrics.Phase(0,0,"Scanning",false,false);
    source=Path.GetFullPath(source);if(!Directory.Exists(source))throw new DirectoryNotFoundException(source);if(dump)ValidateDumpFolder();else if(!reindex&&(Util.Within(source,Root)||Util.Within(Root,source)))throw new IOException("Source and repository must be separate folders, with neither inside the other.");
-   var plan=new ImportPlan{Source=source,Metrics=metrics};Dictionary<string,SourceManifest> cached;
-   using(var index=metrics.Begin("Index loading","Loading source manifest")){cached=db.Query("SELECT data FROM source_manifest WHERE root=?",source).Select(Util.Deserialize<SourceManifest>).ToDictionary(m=>m.Path,StringComparer.OrdinalIgnoreCase);index.Complete();}
+   var plan=new ImportPlan{Source=source,Metrics=metrics};Dictionary<string,SourceManifest> cached;Dictionary<string,Frame> archive;
+   using(var index=metrics.Begin("Index loading","Loading source manifest and archive lookups")){cached=db.Query("SELECT data FROM source_manifest WHERE root=?",source).Select(Util.Deserialize<SourceManifest>).ToDictionary(m=>m.Path,StringComparer.OrdinalIgnoreCase);archive=db.Query("SELECT data FROM files").Select(Util.Deserialize<Frame>).ToDictionary(f=>f.Hash,StringComparer.OrdinalIgnoreCase);index.Complete();}
    if(dump)cached.Clear();
    // One immutable archive snapshot avoids per-file SQLite queries/deserialisation.
-   var archive=db.Query("SELECT data FROM files").Select(Util.Deserialize<Frame>).ToDictionary(f=>f.Hash,StringComparer.OrdinalIgnoreCase);
    bool fast=quickScan&&!fullScan&&!cloudSource&&!reindex&&!dump;
    var sessions=fast?new SessionScanCache(this,source,telescopeIdentity??telescope,model,cached,archive):null;
    var workerCache=fullScan||fast?new Dictionary<string,SourceManifest>(StringComparer.OrdinalIgnoreCase):cached;
@@ -135,7 +134,7 @@ namespace AstroArchive {
      }
      while(pending.Count>0){ct.ThrowIfCancellationRequested();var ready=Task.WhenAny(pending).GetAwaiter().GetResult();pending.Remove(ready);collect(ready);}producer.GetAwaiter().GetResult();
      metrics.Finalise("Saving scan metadata cache");try{headers.Flush();}catch(Exception e){plan.Errors.Add("Metadata cache could not be saved: "+e.Message);}if(reindex)Checkpoint(ct);
-     if(!deferFinish)metrics.Finish("Scan complete: "+plan.Frames.Count+" candidates; "+plan.FastSkippedFiles+" unchanged archived files skipped across "+plan.FastSkippedFolders+" folders; "+plan.CacheHits+" verified duplicates; "+plan.MetadataCacheHits+" cached headers; "+plan.IgnoredFailed+" failed filenames ignored; "+plan.IgnoredRaster+" PNG/JPG files ignored");LastReport=plan.ScanReport=metrics.Report()+"\r\n"+string.Join("\r\n",plan.Errors);return plan;
+     string summary="Scan complete: "+plan.Frames.Count+" candidates; "+plan.FastSkippedFiles+" unchanged archived files skipped across "+plan.FastSkippedFolders+" folders; "+plan.CacheHits+" verified duplicates; "+plan.MetadataCacheHits+" cached headers; "+plan.IgnoredFailed+" failed filenames ignored; "+plan.IgnoredRaster+" PNG/JPG files ignored";if(!deferFinish)metrics.Finish(summary);LastReport=plan.ScanReport=summary+"\r\n\r\n"+metrics.Report()+"\r\n"+string.Join("\r\n",plan.Errors);return plan;
     }finally{linked.Cancel();try{producer.GetAwaiter().GetResult();}catch(OperationCanceledException){}foreach(var task in pending){try{task.GetAwaiter().GetResult();}catch(OperationCanceledException){}}}
    }
   }

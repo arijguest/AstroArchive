@@ -25,12 +25,15 @@ namespace AstroArchive {
    Test("Session discovery skips filesystem bookkeeping and keeps unknown session names",()=>{
     foreach(string name in new[]{"$RECYCLE.BIN","System Volume Information",".Spotlight-V100",".Trashes",".ASTROARCHIVE"})Check(SessionScanCache.SystemFolder(name),"System folder traversed");Check(!SessionScanCache.SystemFolder("DWARF_RAW_20261008")&&!SessionScanCache.SystemFolder("MyWorks"),"Capture folder excluded");
    });
+   Test("Import reports distinguish inventory skips from verified duplicates",()=>{
+    using(var repo=new Repository(Path.Combine(root,"inventory-report-repo"))){repo.SaveImportReport(new ImportResult{Duplicates=2,FastSkipped=1,Metrics=new PipelineMetrics(NoProgress)});Check(repo.LastReport.Contains("1 verified duplicates; 1 unchanged archived inventory skipped"),"Inventory heuristic reported as checksum verification");}
+   });
    WindowsTest("Incremental scan reads only new files in existing and nested session folders",()=>{
     string source=Path.Combine(root,"incremental-source"),session=Path.Combine(source,"DWARF_RAW_M33_20261007");Directory.CreateDirectory(session);
     for(int i=0;i<100;i++){int pixel=1200+i;Write(Path.Combine(session,"Light_"+i.ToString("000")+".fit"),64,48,(x,y)=>pixel,new Dictionary<string,string>());}
     using(var repo=new Repository(Path.Combine(root,"incremental-repo"))){var initial=repo.Scan(source,"Scope","Auto",ct,NoProgress);Check(repo.Import(initial.Frames,ct,NoProgress).Imported==100,"Fixture imports failed");
      Write(Path.Combine(session,"Light_100.fit"),64,48,(x,y)=>2200,new Dictionary<string,string>());string nested=Path.Combine(session,"later-subframes");Directory.CreateDirectory(nested);Write(Path.Combine(nested,"Light_101.fit"),64,48,(x,y)=>2300,new Dictionary<string,string>());
-     int emitted=0;var scan=repo.Scan(source,"Scope","Auto",ct,NoProgress,onFrame:f=>emitted++,deferHash:true,quickScan:true);Check(scan.FastSkippedFiles==100&&scan.FastSkippedFolders==1&&scan.Frames.Count==2&&emitted==2&&scan.Errors.Count==0,"Old rows rebuilt or new nested frames missed");
+     int emitted=0;var scan=repo.Scan(source,"Scope","Auto",ct,NoProgress,onFrame:f=>emitted++,deferHash:true,quickScan:true);Check(scan.FastSkippedFiles==100&&scan.FastSkippedFolders==1&&scan.Frames.Count==2&&emitted==2&&scan.Errors.Count==0&&scan.ScanReport.Contains("100 unchanged archived files skipped across 1 folders"),"Old rows rebuilt or new nested frames missed");
      Check(scan.Metrics.Snapshot().Single(s=>s.Stage=="Header open/read").Bytes==2*2880,"Old headers were reread");Check(scan.Metrics.Progress().Done==102&&scan.Metrics.Progress().Total==102,"Skipped inventory missing from progress");
      var full=repo.Scan(source,"Scope","Auto",ct,NoProgress,deferHash:true,quickScan:true,fullScan:true);Check(full.FastSkippedFiles==0&&full.MetadataCacheHits==0&&full.Frames.Count==102&&full.Frames.Count(f=>f.Status.StartsWith("Duplicate"))==100,"Full scan did not read and hash all sources");Check(full.Metrics.Snapshot().Single(s=>s.Stage=="Header open/read").Bytes==102*2880,"Full rescan reused old headers");
      var imported=repo.Import(scan.Frames,ct,NoProgress,new ImportOptions{SourceRoot=source,DeleteOriginals=true});Check(imported.Imported==2&&imported.OriginalsDeleted==2&&Directory.GetFiles(session,"*.fit").Length==100,"Skipped originals entered cleanup selection");
@@ -48,7 +51,7 @@ namespace AstroArchive {
    });
    WindowsTest("USB repeat upload reports skipped imports without transferring them",()=>{
     string source=Path.Combine(root,"incremental-usb"),session=Path.Combine(source,"DWARF_RAW_20261008");Directory.CreateDirectory(session);Write(Path.Combine(session,"Light_M33.fit"),64,48,(x,y)=>1700,new Dictionary<string,string>());
-    using(var repo=new Repository(Path.Combine(root,"incremental-usb-repo"))){var profile=new TelescopeProfile{Id="USB Scope",Model="Dwarf 3"};repo.Import(repo.Scan(source,profile.Id,profile.Model,ct,NoProgress).Frames,ct,NoProgress);var result=UsbAutoUpload.Run(repo,profile,source,1,ct,NoProgress);Check(result.Plan.FastSkippedFiles==1&&result.Plan.Frames.Count==0&&result.Import.Imported==0&&result.Import.Duplicates==1&&result.Summary.Contains("1 skipped by session inventory")&&Directory.GetFiles(session,"*.fit").Length==1,"Repeated USB upload did unnecessary work or lost accounting");}
+    using(var repo=new Repository(Path.Combine(root,"incremental-usb-repo"))){var profile=new TelescopeProfile{Id="USB Scope",Model="Dwarf 3"};repo.Import(repo.Scan(source,profile.Id,profile.Model,ct,NoProgress).Frames,ct,NoProgress);var result=UsbAutoUpload.Run(repo,profile,source,1,ct,NoProgress);Check(result.Plan.FastSkippedFiles==1&&result.Plan.Frames.Count==0&&result.Import.Imported==0&&result.Import.Duplicates==1&&result.Import.FastSkipped==1&&repo.LastReport.Contains("0 verified duplicates; 1 unchanged archived inventory skipped")&&result.Summary.Contains("1 skipped by session inventory")&&Directory.GetFiles(session,"*.fit").Length==1,"Repeated USB upload did unnecessary work or lost accounting");}
    });
   }
  }
