@@ -22,6 +22,7 @@ verifying imports and preparing files for external processing.
 
 | Version | Highlights |
 | --- | --- |
+| **1.13.5** | Check Dump quietly at startup; show progress only when importable files are being processed. |
 | **1.13.4** | Reuse imported DWARF sessions across parent/session folder selections; load relevant history only and clearly report nothing new to import. |
 | **1.13.2** | Keep the preview frame and sky visible while loading; paint Linear pixels before background stretching, reuse decoded samples and cancel passed-over loads. |
 | **1.13.1** | Faster repeat telescope scans using saved session inventories, newer folders first and an explicit full rescan. |
