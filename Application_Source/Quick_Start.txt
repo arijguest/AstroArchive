@@ -378,11 +378,9 @@ the bottom-left. N/E/S/W appear only with a capture time/site and enough clear
 space outside the globe. Targets include Comets when comet images are present.
 All Targets: merged subs, stacks, ungrouped files, then calibration frames.
 Individual targets: stacks above lights. Column sorts apply within each section.
-Calibration and below-horizon previews hide the map. Selected Light groups show
-a track from their capture times through the final exposure. Stacks show an
-estimated track when time,
-site, pointing and total duration are known: recorded time is assumed to be the
-end and integration duration approximates elapsed time without acquisition gaps.
+Calibration and below-horizon previews hide the map. The marker shows the
+previewed image's position at its recorded capture time. For grouped subs, the
+map uses the image shown in Preview.
 
 In the export dialog, Open with… after export can open one FITS stack in Siril
 after its copies are verified. Select None to export without opening an app.
