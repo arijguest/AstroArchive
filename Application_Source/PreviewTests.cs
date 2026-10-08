@@ -10,6 +10,25 @@ using System.Threading;
 namespace AstroArchive {
  public partial class Tests {
   static void PreviewTests(){
+   Test("Fast linear previews preserve declared ranges colours invalid pixels and cancellation",()=>{
+    var data=new PreviewData{Width=2,Height=2,Channels=3,Minimum=-10,Maximum=10,FlipY=true,Pixels=new[]{-10.0,0,10,10,5,-5,double.NaN,double.PositiveInfinity,double.NegativeInfinity,-5.0,0,5}};var samples=(double[])data.Pixels.Clone();
+    Check(data.Render("Linear",ct).SequenceEqual(new byte[]{0,0,0,64,128,191,0,128,255,255,191,64}),"Fast linear conversion changed ranges, colour, origin or invalid values");Check(data.Pixels.SequenceEqual(samples),"Initial display altered samples");
+    using(var cancellation=new CancellationTokenSource()){cancellation.Cancel();Expect(()=>data.Render("Linear",cancellation.Token),"Fast linear conversion ignored cancellation");}
+   });
+   Test("Decoded preview cache reuses samples without sharing display metadata",()=>{
+    string path=Path.Combine(root,"preview-cache.fit");File.WriteAllText(path,"fixture");int reads=0;var cache=new PreviewCache(128);
+    Func<PreviewData> read=()=>{reads++;return new PreviewData{Width=4,Height=2,Channels=1,Pixels=new double[8],Target="M31",Filter="Ha"};};
+    var first=cache.Get(path,null,read,ct);first.ApplyContext(new Frame{Target="M51",Filter="OIII"},path);first.Render("Linear",ct);var second=cache.Get(path,null,read,ct);
+    Check(reads==1&&cache.Count==1&&cache.Bytes==64&&ReferenceEquals(first.Pixels,second.Pixels),"Decoded sample buffer was not reused");Check(second.Target=="M31"&&second.Filter=="Ha"&&second.DisplayMode==null,"One display changed cached metadata or stretch state");
+    File.SetLastWriteTimeUtc(path,File.GetLastWriteTimeUtc(path).AddSeconds(5));cache.Get(path,null,read,ct);Check(reads==2,"Changed modification time reused old pixels");File.AppendAllText(path,"changed");cache.Get(path,null,read,ct);Check(reads==3,"Changed file length reused old pixels");
+   });
+   Test("Preview cache obeys its memory budget and separates image views",()=>{
+    string path=Path.Combine(root,"preview-cache-views.fit");File.WriteAllText(path,"fixture");int reads=0;var cache=new PreviewCache(64);Func<PreviewData> read=()=>{reads++;return new PreviewData{Width=4,Height=2,Channels=1,Pixels=new double[8]};};
+    var first=new Frame{Format="FITS",ImageKey="hdu:0",ImageIndex=0};var second=new Frame{Format="FITS",ImageKey="hdu:1",ImageIndex=0};cache.Get(path,first,read,ct);cache.Get(path,second,read,ct);Check(reads==2&&cache.Count==1&&cache.Bytes==64,"Image views shared data or exceeded cache budget");cache.Get(path,first,read,ct);Check(reads==3,"Least-recently used samples were not evicted");
+    second.ImageIndex=1;cache.Get(path,second,read,ct);Check(reads==4,"Sequence frame index reused another frame");cache.Clear();Check(cache.Bytes==0&&cache.Count==0,"Clearing previews retained samples");
+    var oversized=new PreviewCache(1);oversized.Get(path,null,read,ct);oversized.Get(path,null,read,ct);Check(oversized.Count==0&&oversized.Bytes==0&&reads==6,"Oversized sample buffers were retained");
+    using(var cancellation=new CancellationTokenSource()){cancellation.Cancel();Expect(()=>cache.Get(path,null,read,cancellation.Token),"Cancelled load entered cache/decoder");Check(reads==6,"Cancelled cache load decoded pixels");}
+   });
    Test("Auto preview compensates IRCUT and LP colour casts without changing samples",()=>{
     var data=new PreviewData{Width=100,Height=100,Channels=3,Pixels=Enumerable.Range(0,10000).SelectMany(n=>new[]{0.04+n*0.000002,0.02+n*0.000001,0.015+n*0.00000075}).ToArray()};var original=(double[])data.Pixels.Clone();
     var natural=new PreviewData{Width=100,Height=100,Channels=3,Pixels=Enumerable.Range(0,10000).SelectMany(n=>new[]{0.01+n*0.000001,0.02+n*0.000001,0.03+n*0.000001}).ToArray()};byte[] linked=natural.Render("Auto",ct);Check(linked[15000]<linked[15001]&&linked[15001]<linked[15002]&&!natural.DisplayMode.Contains("compensated"),"Normal linked RGB colour was unexpectedly neutralised");

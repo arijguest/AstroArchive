@@ -23,10 +23,18 @@ namespace AstroArchive {
   const string FilterPattern=@"(?:^|[^a-z0-9])(ir[ _-]*cut|lp|lpf|light[ _-]*pollution|dual[ _-]*band|duo[ _-]*band|l[ _-]*(enhance|extreme|ultimate)|uhc)(?:[^a-z0-9]|$)";
   public static bool FilterColourCompensation(string filter){return Regex.IsMatch(filter??"",FilterPattern,RegexOptions.IgnoreCase);}
   public static readonly string[] StretchModes={"Linear","Auto","Strong","Auto per channel"};
+  // Decoded samples are read-only in the viewer. Each display gets its own
+  // metadata/stretch state while sharing the bounded sample buffer.
+  public PreviewData Copy(){return (PreviewData)MemberwiseClone();}
   public byte[] Render(string mode,CancellationToken ct) {
    int count=checked(Width*Height);if(Pixels==null||Pixels.Length!=count*Channels)throw new ArgumentException("Invalid preview samples.");
    if(Width<=0||Height<=0||(Channels!=1&&Channels!=3))throw new ArgumentException("Invalid preview geometry or channels.");
    bool linear=mode=="Linear"||SkipStretch,separate=mode=="Auto per channel";double[] black=new double[Channels],white=new double[Channels],mid=new double[Channels];
+   if(linear){
+    DisplayMode="Linear"+(SkipStretch?" · solar / planetary":"");
+    for(int c=0;c<Channels;c++){black[c]=Minimum;white[c]=Maximum;mid[c]=0.5;if(!(white[c]>black[c]))white[c]=black[c]+Math.Max(1,Math.Abs(black[c])*0.001);}
+    return RenderPixels(black,white,mid,true,ct);
+   }
    // Sample each colour independently; linked statistics must not conceal a filter cast.
    var colours=Enumerable.Range(0,Channels).Select(c=>new List<double>()).ToArray();var linked=new List<double>();int stride=Math.Max(1,count/60000);
    for(int i=0;i<count;i+=stride){if(i%4096==0)ct.ThrowIfCancellationRequested();double sum=0;int valid=0;for(int c=0;c<Channels;c++){double value=Pixels[i*Channels+c];if(double.IsNaN(value)||double.IsInfinity(value))continue;colours[c].Add(value);sum+=value;valid++;}if(valid==Channels)linked.Add(sum/Channels);}
@@ -47,7 +55,10 @@ namespace AstroArchive {
     double median=(sample[sample.Count/2]-black[c])/(white[c]-black[c]);double target=mode=="Strong"?0.35:0.22;
     mid[c]=linear?0.5:Math.Max(0.00001,Math.Min(0.99999,Midtone(target,Math.Max(0.000001,Math.Min(0.999999,median)))));
    }
-   byte[] output=new byte[checked(count*3)];
+   return RenderPixels(black,white,mid,false,ct);
+  }
+  byte[] RenderPixels(double[] black,double[] white,double[] mid,bool linear,CancellationToken ct){
+   byte[] output=new byte[checked(Width*Height*3)];
    for(int y=0;y<Height;y++){ct.ThrowIfCancellationRequested();for(int x=0;x<Width;x++){int src=((FlipY?Height-1-y:y)*Width+x)*Channels,dst=(y*Width+x)*3;
     for(int k=0;k<3;k++){int c=Channels==1?0:k;double value=(Pixels[src+c]-black[c])/(white[c]-black[c]);if(double.IsNaN(value)||double.IsInfinity(value))value=0;value=Math.Max(0,Math.Min(1,value));output[dst+k]=(byte)Math.Round(255*(linear?value:Midtone(mid[c],value)));}
    }}return output;
