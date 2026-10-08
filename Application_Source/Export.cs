@@ -21,6 +21,8 @@ namespace AstroArchive {
   public static List<Frame> AvailableCalibrations(IEnumerable<Frame> selection,List<Frame> all,bool separateSessions,bool allowUnknown,Repository repo=null,string mosaicId=null){var layout=repo==null?null:new MosaicExportLayout(repo,mosaicId);return selection.Where(f=>f.Kind=="Light"&&(layout==null||!layout.Output(f))).GroupBy(f=>(layout==null?"":layout.Key(f)+"|")+f.Target+"|"+f.Group+(separateSessions?"|"+f.Session:"")).SelectMany(g=>CalibrationFor(g,all,allowUnknown)).GroupBy(f=>f.Hash).Select(g=>g.First()).ToList();}
   static string FlatBucket(Frame frame){return Util.Safe("exp"+Util.Num(frame.Exposure)+"s_"+Util.HashText(frame.Group).Substring(0,8));}
   public static bool RequiresConversion(Frame f){var image=Assets.Selected(f);return !string.IsNullOrEmpty(f.Format)&&(f.Format!="FITS"||image!=null&&(image.Compression=="cfitsio"||image.Count>1||f.Images.Count>1));}
+  static bool OriginalOutput(MosaicExportLayout layout,Frame frame){try{return layout.Output(frame);}catch(InvalidOperationException){return false;}}
+  static string OriginalPrefix(MosaicExportLayout layout,Frame frame){try{return layout.Prefix(frame);}catch(InvalidOperationException){return "";}}
   static string SubFolder(Frame light,int index){return Path.Combine("subs",index.ToString("00")+"_"+Util.Safe(light.MakeText)+"_"+Util.Safe(light.Telescope)+"_"+Util.Safe(light.Camera)+"_"+Util.Safe(light.Filter)+"_"+Util.Safe(Util.Num(light.Exposure)+"s"));}
   public static string Destination(Repository repo,ExportOptions options){
    if(string.IsNullOrWhiteSpace(options.Parent)||!Directory.Exists(options.Parent))throw new IOException("Choose an existing destination folder.");
@@ -50,7 +52,14 @@ namespace AstroArchive {
    string dest=Destination(repo,options);
    var layout=new MosaicExportLayout(repo,options.MosaicId);if(options.Mode!="Files")foreach(var f in selection.Where(Repository.MosaicScience))layout.Member(f);var manifest=new List<object>();var recipes=new List<object>();var warnings=new List<string>();var all=ExistingCalibrations(repo,repo.All());var copy=new List<Tuple<Frame,string>>();var workflows=new List<Tuple<string,string>>();bool subs=options.Mode=="Subs"||options.Mode=="Both",stacks=options.Mode=="Stacks"||options.Mode=="Both";
    bool multipleTargets=selection.Where(f=>f.Kind=="Light"||f.Kind=="Stack").Select(f=>f.Target).Distinct().Count()>1;
-   if(options.Mode=="Files"){int index=0;foreach(var group in selection.Where(f=>f.Kind=="Light").GroupBy(f=>f.Target+"|"+f.Group).OrderBy(g=>g.Key)){Frame light=group.First();string directory=Path.Combine(SubFolder(light,++index),"lights");if(multipleTargets)directory=Path.Combine("targets",Util.Safe(light.Target),directory);foreach(var f in group.GroupBy(f=>f.Hash).Select(g=>g.First()))copy.Add(Tuple.Create(f,directory));}foreach(var f in selection.Where(f=>f.Kind!="Light").GroupBy(f=>f.Hash).Select(g=>g.First()))copy.Add(Tuple.Create(f,""));}
+   if(options.Mode=="Files"){
+    var originals=selection.GroupBy(f=>f.Hash).Select(g=>g.First()).ToList();int index=0;
+    // Honour known panel folders; original copies remain available for unresolved memberships.
+    var lights=originals.Where(f=>f.Kind=="Light").Select(f=>Tuple.Create(f,OriginalPrefix(layout,f),OriginalOutput(layout,f))).ToList();
+    foreach(var group in lights.Where(item=>!item.Item3).GroupBy(item=>item.Item2+"|"+item.Item1.Target+"|"+item.Item1.Group).OrderBy(g=>g.Key)){Frame light=group.First().Item1;string directory=Path.Combine(SubFolder(light,++index),"lights");if(multipleTargets)directory=Path.Combine("targets",Util.Safe(light.Target),directory);directory=Path.Combine(group.First().Item2,directory);foreach(var item in group)copy.Add(Tuple.Create(item.Item1,directory));}
+    foreach(var item in lights.Where(item=>item.Item3))copy.Add(Tuple.Create(item.Item1,""));
+    foreach(var f in originals.Where(f=>f.Kind!="Light"))copy.Add(Tuple.Create(f,""));
+   }
    if(subs){var groups=selection.Where(f=>f.Kind=="Light"&&!layout.Output(f)&&(options.IncludeRejected||!f.Rejected)).GroupBy(f=>layout.Key(f)+"|"+f.Target+"|"+f.Group+(options.SeparateSessions?"|"+f.Session:"")).OrderBy(g=>g.Key).ToList();int index=0;
     foreach(var g in groups){Frame light=g.First();string group=Path.Combine(options.SeparateSessions?Path.Combine("sessions",Util.Safe(light.Night)+"_"+Util.Safe(light.Session),"subs"):"subs",Path.GetFileName(SubFolder(light,++index)));
      if(multipleTargets)group=Path.Combine("targets",Util.Safe(light.Target),group);group=Path.Combine(layout.Prefix(light),group);
