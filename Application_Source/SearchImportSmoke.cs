@@ -30,6 +30,7 @@ namespace AstroArchive {
     }));ImportPreferences();if(optionsError!=null)throw new Exception("Import preferences UI validation failed.",optionsError);
     if(plan==null||plan.Frames[0].Target!="NGC6888"||plan.Frames[1].Target!="M45"||plan.Frames[2].Target!="Unknown"||B("AssignUnknownTargetButton").IsEnabled)throw new Exception("Import preferences overwrote known/calibration targets or failed to assign Unknown lights.");
     T("ImportSearchBox").Text="target:NGC 6888 -type:Dark";if(visibleImports.Count!=1)throw new Exception("Advanced import search does not share Repository rules.");
+    var candidates=plan;plan=new ImportPlan{FastSkippedFiles=12,FastSkippedFolders=1};FilterImports();PumpPopupLayout();if(!L("ScanLabel").IsVisible||!L("ScanLabel").Text.StartsWith("Nothing new to import")||!L("ScanLabel").Text.Contains("12 archived files"))throw new Exception("Completed session scan lacks a visible no-new-files summary.");plan=candidates;FilterImports();
     foreach(string mode in new[]{"Light","Dark"})foreach(int percent in new[]{100,150}){
      settings.ThemeMode=mode;settings.TextScalePercent=percent;ApplyAppearance();PumpPopupLayout();
      foreach(string name in new[]{"ImportOptionsButton","AssignUnknownTargetButton","ImportSearchHelpButton"}){var button=B(name);var bounds=PopupBounds(button,Window);if(bounds.Left<0||bounds.Right>Window.ActualWidth+1)throw new Exception("Import controls clipped with larger text.");Readable(button.Foreground,button.Background,mode+" "+name);}
