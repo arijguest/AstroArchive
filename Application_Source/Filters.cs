@@ -24,6 +24,8 @@ namespace AstroArchive {
   public static readonly string[] ReviewChoices={"Needs review","No issues flagged","Passed","Not screened","Telescope rejected / reference","File integrity problem","Transfer failure"};
   public int ActiveCount {get{return Values.Count+Ranges.Count(p=>p.Value.Active);}}
   public void Reset(){Values.Clear();Ranges.Clear();}
+  public CaptureFilters Snapshot(){var copy=new CaptureFilters();foreach(var entry in Values)copy.Values[entry.Key]=entry.Value;foreach(var entry in Ranges)copy.Ranges[entry.Key]=new CaptureRange{Mode=entry.Value.Mode,Minimum=entry.Value.Minimum,Maximum=entry.Value.Maximum,IncludeUnknown=entry.Value.IncludeUnknown};return copy;}
+  public bool Matches(Frame frame){return Values.All(pair=>Matches(frame,pair.Key,pair.Value))&&Ranges.All(pair=>pair.Value.Matches(Number(frame,pair.Key)));}
   public static double? Number(Frame frame,string field){double? value=field=="Exposure"?frame.Exposure:field=="Gain"?frame.Gain:null;return value.HasValue&&!double.IsNaN(value.Value)&&!double.IsInfinity(value.Value)&&(field!="Exposure"||value.Value>=0)?value:null;}
   public static string Value(Frame frame,string field){
    string value;
@@ -56,7 +58,7 @@ namespace AstroArchive {
   public static IEnumerable<string> Options(IEnumerable<Frame> frames,string field){return frames.Select(f=>Value(f,field)).Distinct().OrderBy(v=>v); }
   public List<Frame> Apply(IEnumerable<Frame> frames,string search){
    var query=FileSearch.Parse(search);
-   return frames.Where(f=>Values.All(pair=>Matches(f,pair.Key,pair.Value))&&Ranges.All(pair=>pair.Value.Matches(Number(f,pair.Key)))&&query.Matches(f)).ToList();
+   return frames.Where(f=>Matches(f)&&query.Matches(f)).ToList();
   }
   static bool Matches(Frame frame,string field,string value){
    if(field=="Target")return frame.Target==Catalog.CanonicalTarget(value);

@@ -34,12 +34,12 @@ namespace AstroArchive {
     BuildFileMenu(grid.ContextMenu,selected);
    };
    grid.PreviewKeyDown+=(s,e)=>{
-    if(e.Key==Key.Delete&&cancel==null&&repo!=null&&SelectedFiles().Count>0){e.Handled=true;DeleteFiles(SelectedFiles());}
+    if(e.Key==Key.Delete&&!SearchBlocked("SearchBox")&&cancel==null&&repo!=null&&SelectedFiles().Count>0){e.Handled=true;DeleteFiles(SelectedFiles());}
    };
   }
   List<Frame> SelectedFiles(){return G("FramesGrid").SelectedItems.OfType<Frame>().Concat(subframeSessions.Where(g=>g.IsSelected).SelectMany(g=>g.Frames)).Distinct().ToList();}
   void SelectContextRow(Frame frame){if(frame==null)return;var grid=G("FramesGrid");if(!SelectedFiles().Contains(frame)){ClearSessionSelection();grid.SelectedItems.Clear();grid.SelectedItems.Add(frame);}}
-  MenuItem FileAction(string title,Action action,bool enabled=true){var item=new MenuItem{Header=title,IsEnabled=enabled};UiHelp.For(item,title);item.Click+=(s,e)=>{if(cancel==null)action();};return item;}
+  MenuItem FileAction(string title,Action action,bool enabled=true){var item=new MenuItem{Header=title,IsEnabled=enabled};UiHelp.For(item,title);item.Click+=(s,e)=>{if(cancel==null&&!ActiveSearchBlocked)action();};return item;}
   MenuItem ExportMenu(List<Frame> selected){
    var menu=new MenuItem{Header="Export",IsEnabled=selected.Count>0};
    menu.Items.Add(FileAction("Export selected files…",()=>ExportFiles(selected)));

@@ -16,20 +16,20 @@ namespace AstroArchive {
    InitializeSessionSelection();
   }
   List<SubframeSession> subframeSessions=new List<SubframeSession>();
-  void DisplayLibrary(){
+  void DisplayLibrary(List<SubframeSession> preparedSessions=null,CaptureGroupSummary preparedSummary=null,bool presorted=false){
    var selected=new HashSet<Frame>(G("FramesGrid").SelectedItems.OfType<Frame>());var hashes=new HashSet<string>(selected.Where(f=>!string.IsNullOrEmpty(f.Hash)).Select(f=>f.Hash));
    var view=new ListCollectionView(displayed);string mode=Convert.ToString(C("LibraryViewBox").SelectedItem);
    if(mode=="Session summaries"){
-    var previous=subframeSessions.ToDictionary(g=>g.Key);subframeSessions=SubframeSessions.Build(displayed);foreach(var session in subframeSessions){SubframeSession old;if(previous.TryGetValue(session.Key,out old)){session.Expanded=old.Expanded;session.IsSelected=old.IsSelected;}}
+    var previous=subframeSessions.ToDictionary(g=>g.Key);subframeSessions=preparedSessions??SubframeSessions.Build(displayed);foreach(var session in subframeSessions){SubframeSession old;if(previous.TryGetValue(session.Key,out old)){session.Expanded=old.Expanded;session.IsSelected=old.IsSelected;}}
     view.GroupDescriptions.Add(new SubframeSessionDescription(subframeSessions));
    }else{subframeSessions.Clear();activeSessionKey=null;if(mode!="Files"&&mode!="Show all files"){view.GroupDescriptions.Add(new PropertyGroupDescription("TargetLabel"));if(mode=="By target and session")view.GroupDescriptions.Add(new PropertyGroupDescription("SessionKey"));}}
    changingSessionSelection=true;try{
-    SetRows("FramesGrid",view);
+    SetRows("FramesGrid",view,presorted);
     // WPF can retain a current row when the grouped view is replaced. Restore
     // only the explicit file selection intersected with the new visible rows.
     var grid=G("FramesGrid");grid.SelectedItems.Clear();foreach(var frame in displayed.Where(f=>selected.Contains(f)||f.Hash!=null&&hashes.Contains(f.Hash)))grid.SelectedItems.Add(frame);
    }finally{changingSessionSelection=false;}Details();
-   var summary=CaptureGroups.Summarize(displayed);L("LibrarySummaryLabel").Text=summary.Detail;
+   var summary=preparedSummary??CaptureGroups.Summarize(displayed);L("LibrarySummaryLabel").Text=summary.Detail;
   }
  }
  public sealed class SubframeSessionDescription:GroupDescription {

@@ -12,6 +12,8 @@ namespace AstroArchive {
   public readonly Dictionary<string,string> Fields=new Dictionary<string,string>();
   public readonly Dictionary<string,double?> Numbers=new Dictionary<string,double?>();
   readonly Dictionary<string,string> folded=new Dictionary<string,string>();
+  string canonical,canonicalSource;
+  public string CanonicalTarget{get{if(canonical==null||canonicalSource!=Target){canonicalSource=Target;canonical=Catalog.CanonicalTarget(Target);}return canonical;}}
   public string Value(string field){string value;return field.Length==0?Text:Fields.TryGetValue(field,out value)?value:"";}
   public string Folded(string field){string value;if(!folded.TryGetValue(field,out value))folded[field]=value=FileSearch.Fold(Value(field));return value;}
   public static SearchDocument FromFrame(Frame f){
@@ -31,7 +33,7 @@ namespace AstroArchive {
    public bool Matches(SearchDocument document){
     bool match;
     if(Comparison!=null){double? n;match=document.Numbers.TryGetValue(Field,out n)&&n.HasValue&&!double.IsNaN(n.Value)&&!double.IsInfinity(n.Value)&&(Comparison==">"?n.Value>Number:Comparison==">="?n.Value>=Number:Comparison=="<"?n.Value<Number:Comparison=="<="?n.Value<=Number:n.Value==Number);}
-    else if(Known!=null&&(Field.Length==0||Field=="target")&&Catalog.CanonicalTarget(document.Target)==Known)match=true;
+    else if(Known!=null&&(Field.Length==0||Field=="target")&&document.CanonicalTarget==Known)match=true;
     else if(Glob!=null){try{match=Glob.IsMatch(document.Value(Field)??"");}catch(RegexMatchTimeoutException){match=false;}}
     else match=(document.Value(Field)??"").IndexOf(Text,StringComparison.OrdinalIgnoreCase)>=0||Folded.Length>0&&Text.IndexOf('?')<0&&document.Folded(Field).IndexOf(Folded,StringComparison.Ordinal)>=0;
     return Exclude?!match:match;

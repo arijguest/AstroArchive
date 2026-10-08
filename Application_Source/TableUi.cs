@@ -28,7 +28,7 @@ namespace AstroArchive {
    InitializeColumnLayouts();
   }
   void SortTable(string name,DataGridColumn column,bool additive){string property=column.SortMemberPath;if(string.IsNullOrEmpty(property))return;var direction=column.SortDirection==ListSortDirection.Ascending?ListSortDirection.Descending:ListSortDirection.Ascending;var sorts=tableSorts[name];if(!additive)sorts.Clear();int index=sorts.FindIndex(d=>d.PropertyName==property);var sort=new SortDescription(property,direction);if(index<0)sorts.Add(sort);else sorts[index]=sort;RestoreTableSort(name);}
-  void SetRows(string name,IEnumerable rows){G(name).ItemsSource=rows;RestoreTableSort(name);}
+  void SetRows(string name,IEnumerable rows,bool presorted=false){G(name).ItemsSource=rows;if(presorted){var sorts=tableSorts[name];foreach(var column in G(name).Columns){var sort=sorts.FirstOrDefault(d=>d.PropertyName==column.SortMemberPath);column.SortDirection=string.IsNullOrEmpty(sort.PropertyName)?(ListSortDirection?)null:sort.Direction;}TableSortIndicators.Update(G(name),sorts);}else RestoreTableSort(name);}
   void RestoreTableSort(string name){List<SortDescription> sorts;if(!tableSorts.TryGetValue(name,out sorts))return;var grid=G(name);if(grid.Items.CanSort)using(grid.Items.DeferRefresh()){grid.Items.SortDescriptions.Clear();foreach(var sort in sorts)grid.Items.SortDescriptions.Add(sort);}
    foreach(var column in grid.Columns){var sort=sorts.FirstOrDefault(d=>d.PropertyName==column.SortMemberPath);column.SortDirection=string.IsNullOrEmpty(sort.PropertyName)?(ListSortDirection?)null:sort.Direction;}TableSortIndicators.Update(grid);
   }

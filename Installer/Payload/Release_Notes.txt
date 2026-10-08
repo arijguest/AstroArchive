@@ -1,3 +1,18 @@
+AstroArchive 1.13.8 — responsive search across Repository, Import and Edited
+Package 1.13.8.1
+- Wait briefly for a typing pause and run query matching, grouping, summaries
+  and numeric ordering in the background. Enter searches immediately; Escape
+  clears the query while retaining filters.
+- Reuse prepared search metadata between queries. Invalidate it after metadata
+  corrections or source changes; process large data refreshes in the background.
+- Keep one active worker and one replaceable pending request per view. Cancel
+  obsolete searches and only publish the latest query's results.
+- Keep query syntax, filters, target grouping, sorting and surviving selections.
+  File actions wait for current results, preventing imports from an older view.
+- Replace repeated full-list membership scans in import summaries with set
+  lookups; compute capture summaries in one cancellable pass.
+- Retain the metadata editor, theme contrast and stacking-app improvements.
+
 AstroArchive 1.13.7 — clearer single-file and batch metadata editing
 Package 1.13.7.1
 - Fill in existing editable metadata, including exposure, gain, temperature,
