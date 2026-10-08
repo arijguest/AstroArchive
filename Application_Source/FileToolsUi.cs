@@ -21,6 +21,7 @@ namespace AstroArchive {
    grid.ContextMenu=ThemedMenu();
    grid.PreviewMouseRightButtonDown+=(s,e)=>{
     if(e.Handled)return;
+    var session=HeaderSession(e.OriginalSource as DependencyObject);if(session!=null){contextOnFile=true;SelectContextSession(session);e.Handled=true;return;}
     var row=ItemsControl.ContainerFromElement(grid,e.OriginalSource as DependencyObject) as DataGridRow;
     contextOnFile=row!=null;
     if(row==null){grid.ContextMenu.IsOpen=false;e.Handled=true;return;}
@@ -36,8 +37,8 @@ namespace AstroArchive {
     if(e.Key==Key.Delete&&cancel==null&&repo!=null&&SelectedFiles().Count>0){e.Handled=true;DeleteFiles(SelectedFiles());}
    };
   }
-  List<Frame> SelectedFiles(){return G("FramesGrid").SelectedItems.Cast<Frame>().ToList();}
-  void SelectContextRow(Frame frame){if(frame==null)return;var grid=G("FramesGrid");if(!grid.SelectedItems.Contains(frame)){grid.SelectedItems.Clear();grid.SelectedItems.Add(frame);}}
+  List<Frame> SelectedFiles(){return G("FramesGrid").SelectedItems.OfType<Frame>().Concat(subframeSessions.Where(g=>g.IsSelected).SelectMany(g=>g.Frames)).Distinct().ToList();}
+  void SelectContextRow(Frame frame){if(frame==null)return;var grid=G("FramesGrid");if(!SelectedFiles().Contains(frame)){ClearSessionSelection();grid.SelectedItems.Clear();grid.SelectedItems.Add(frame);}}
   MenuItem FileAction(string title,Action action,bool enabled=true){var item=new MenuItem{Header=title,IsEnabled=enabled};UiHelp.For(item,title);item.Click+=(s,e)=>{if(cancel==null)action();};return item;}
   MenuItem ExportMenu(List<Frame> selected){
    var menu=new MenuItem{Header="Export",IsEnabled=selected.Count>0};

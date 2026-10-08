@@ -1,3 +1,25 @@
+AstroArchive 1.12.1 — cleaner previews and selectable session groups
+Package 1.12.1.1
+
+- Remove all visible sky captions, constellation names and compass/pole text.
+  Keep capture time, location, direction and pointing evidence in the map tooltip.
+- Place compact Stretch, a capture-details information icon and an Open image
+  icon together in the preview header. Show Auto per channel as Auto RGB; keep
+  saved stretch settings and image rendering unchanged. Edited uses an enlarge
+  icon. Dimensions and metadata appear in the themed details popup, closed by Esc.
+- Fit the image as large as possible first, with navigation directly below it.
+  Let the sky fill only the remaining space, scaling with window size and image
+  aspect; hide it when no useful space remains. Keep cached offline rendering.
+- Select collapsed session groups as independent entities, or select files inside
+  expanded groups. Ctrl toggles groups, Shift selects a range. Resolve group
+  actions to visible members and deduplicate overlapping file/group selections.
+  Preserve group selection when expanding or refreshing; remove filtered-out
+  groups from action scope. Preview shows the first group capture.
+- Use a roomy, minimalist V-shaped group expand/collapse button, separate from
+  selection. Match group labels to file-row text and selection colours.
+- Sort Repository and Import by Frame Type by default; retain header controls
+  for choosing another sort and reversing it.
+
 AstroArchive 1.12.0 — capture sky, compact previews and session browsing
 Package 1.12.0.1
 

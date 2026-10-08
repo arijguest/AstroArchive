@@ -13,16 +13,16 @@ namespace AstroArchive {
    C("LibraryViewBox").ItemsSource=new[]{"Session summaries","Show all files","By target","By target and session"};C("LibraryViewBox").SelectedIndex=0;
    C("LibraryViewBox").SelectionChanged+=(s,e)=>{if(!updating)Filter(false);};
    G("FramesGrid").GroupStyle.Add(new GroupStyle{ContainerStyle=(Style)Window.FindResource("CaptureSessionGroupStyle")});
-
+   InitializeSessionSelection();
   }
   List<SubframeSession> subframeSessions=new List<SubframeSession>();
   void DisplayLibrary(){
    var view=new ListCollectionView(displayed);string mode=Convert.ToString(C("LibraryViewBox").SelectedItem);
    if(mode=="Session summaries"){
-    var previous=subframeSessions.ToDictionary(g=>g.Key,g=>g.Expanded);subframeSessions=SubframeSessions.Build(displayed);foreach(var session in subframeSessions){bool expanded;if(previous.TryGetValue(session.Key,out expanded))session.Expanded=expanded;}
+    var previous=subframeSessions.ToDictionary(g=>g.Key);subframeSessions=SubframeSessions.Build(displayed);foreach(var session in subframeSessions){SubframeSession old;if(previous.TryGetValue(session.Key,out old)){session.Expanded=old.Expanded;session.IsSelected=old.IsSelected;}}
     view.GroupDescriptions.Add(new SubframeSessionDescription(subframeSessions));
-   }else if(mode!="Files"&&mode!="Show all files"){view.GroupDescriptions.Add(new PropertyGroupDescription("TargetLabel"));if(mode=="By target and session")view.GroupDescriptions.Add(new PropertyGroupDescription("SessionKey"));}
-   SetRows("FramesGrid",view);
+   }else{subframeSessions.Clear();activeSessionKey=null;if(mode!="Files"&&mode!="Show all files"){view.GroupDescriptions.Add(new PropertyGroupDescription("TargetLabel"));if(mode=="By target and session")view.GroupDescriptions.Add(new PropertyGroupDescription("SessionKey"));}}
+   changingSessionSelection=true;try{SetRows("FramesGrid",view);}finally{changingSessionSelection=false;}Details();
    var summary=CaptureGroups.Summarize(displayed);L("LibrarySummaryLabel").Text=summary.Detail;
   }
  }

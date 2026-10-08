@@ -1,10 +1,15 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 namespace AstroArchive {
  // A real acquisition session, scoped to a target and physical instrument.
- public sealed class SubframeSession {
-  public bool Expanded{get;set;} public string Key,Label;public List<Frame> Frames;
+ public sealed class SubframeSession:INotifyPropertyChanged {
+  bool selected,expanded;public string Key,Label;public List<Frame> Frames;
+  public event PropertyChangedEventHandler PropertyChanged;
+  void Changed(string name){if(PropertyChanged!=null)PropertyChanged(this,new PropertyChangedEventArgs(name));}
+  public bool IsSelected{get{return selected;}set{if(selected==value)return;selected=value;Changed("IsSelected");}}
+  public bool Expanded{get{return expanded;}set{if(expanded==value)return;expanded=value;Changed("Expanded");}}
  }
  public static class SubframeSessions {
   public static List<SubframeSession> Build(IEnumerable<Frame> rows){
