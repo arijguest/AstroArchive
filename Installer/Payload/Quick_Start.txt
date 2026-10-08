@@ -14,7 +14,7 @@ Originals are kept by default. Imports verify copies and skip duplicates.
 Stacking and image processing take place in your external software.
 
 GUIDE AND TOOLTIPS
-F1 opens help for the current page. Guide > Search the guide searches titles
+F1 opens help for the current page. Guide > Help searches titles
 and full text; enter several words to narrow results. Ctrl+F focuses help search.
 Hover over controls and headings for concise hints. Help is available offline.
 Guide > Interactive walkthrough shows the main controls without importing files.

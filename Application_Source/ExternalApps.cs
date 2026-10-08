@@ -42,7 +42,7 @@ namespace AstroArchive {
   }
   public static ExternalSelection Selection(IEnumerable<Frame> frames){
    var items=frames.ToList();if(items.Count==0)throw new InvalidOperationException("Select files to export.");
-   if(items.Any(f=>f.Rejected||f.Status=="Failed"||CaptureScreening.FileProblem(f)))throw new InvalidOperationException("Select usable files only. Rejected or failed files can still be copied with Save files….");
+   if(items.Any(f=>f.Rejected||f.Status=="Failed"||CaptureScreening.FileProblem(f)))throw new InvalidOperationException("Select usable files only. Rejected or failed files can still be copied with Export files….");
    if(items.Any(f=>f.Kind=="Light")&&items.Any(f=>f.Kind!="Light"))throw new InvalidOperationException("Select subframes on their own, or select finished images. Matching calibrations can be added in the export dialog.");
    bool subs=items.All(f=>f.Kind=="Light");return new ExternalSelection{Paths=items.Select(f=>f.OriginalName??f.RelativePath).ToList(),Subframes=subs,Folder=subs||items.Any(f=>new[]{"SER","AVI"}.Contains(FileType(f.OriginalName??f.RelativePath)))};
   }

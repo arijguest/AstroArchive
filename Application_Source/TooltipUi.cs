@@ -54,7 +54,7 @@ namespace AstroArchive {
    {"Include files marked rejected/reference","Include rejected and reference frames in this export."},
    {"New telescope name","Renames this device and its archived captures."},
    {"Export to","Open verified working copies or stacking inputs in a compatible app."},
-   {"Save files","Copy selected files; metadata is optional."},
+   {"Export files","Copy selected files; metadata is optional."},
    {"Stacking folder","Group selected lights or stacks by compatible settings."},
    {"Export destinations","Choose application locations and defaults by file type."},
    {"Ready-to-stack folder","Group selected lights or stacks by compatible settings."},
