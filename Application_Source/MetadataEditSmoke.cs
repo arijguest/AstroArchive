@@ -30,7 +30,9 @@ namespace AstroArchive {
         foreach(var label in PopupChildren<TextBlock>(editor.Form.Window).Where(t=>t.IsVisible&&!string.IsNullOrWhiteSpace(t.Text))){
          Brush background=editor.Form.Window.Background;
          for(DependencyObject parent=VisualTreeHelper.GetParent(label);parent!=null;parent=VisualTreeHelper.GetParent(parent)){
-          var border=parent as Border;var control=parent as Control;Brush surface=border!=null?border.Background:control!=null?control.Background:null;var solid=surface as SolidColorBrush;
+          // A Control.Background need not be painted behind its text (CheckBox).
+          // Use the rendered container surfaces in the visual tree instead.
+          var border=parent as Border;var panel=parent as Panel;Brush surface=border!=null?border.Background:panel!=null?panel.Background:null;var solid=surface as SolidColorBrush;
           if(solid!=null&&solid.Color.A==255){background=surface;break;}
          }
          Readable(label.Foreground,background,mode+" metadata label: "+label.Text);
