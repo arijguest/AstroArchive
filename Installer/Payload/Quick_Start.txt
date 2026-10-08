@@ -642,7 +642,10 @@ scan. Originals remain kept by default. Export always uses archived repository
 files, including when opened from the Import page.
 
 The workspace fills the space previously used by the bottom status bar. Progress
-and Cancel appear in a temporary panel only while processing. Repository > Diagnostics opens the performance table and last
+and Cancel appear in a temporary panel only while processing. Progress panels,
+including Dump progress, hide with the minimised application. Imports continue
+in the background; restoring the application shows progress only if it is still
+running. Repository > Diagnostics opens the performance table and last
 import report when needed. Table headings show ascending (▲) or descending (▼)
 sorting. Numbers show priority when several headings sort together. Shift-click
 adds a heading; click again to reverse. Saved heading layouts remain independent.
@@ -758,6 +761,17 @@ folder offers Browse and Scan, then a review before copying. Parent folders may
 include the repository: its subtree, .astroarchive folders and archived originals
 (including renamed byte-identical copies) are excluded. Originals remain intact.
 Moon and Lunar appear together as Moon.
+
+Edited matches names against catalogue aliases and targets in the archive.
+Small spelling errors such as Whirlpol Galaxy resolve to M51 / Whirlpool Galaxy.
+Exact IDs and recognised image metadata take priority. Close competing matches
+stay unresolved; image details show the matched target and name similarity.
+Unnamed exports can use their target folder name. Refresh rechecks existing
+edited images. Catalogue numbers are never corrected by fuzzy spelling matching.
+File Type shows formats such as FITS, TIFF, JPEG, PNG and GIF; its heading sorts
+the files and search includes the type. GIF is also an image class in Filters.
+Total Exposure is kept in image details and hidden from the default headings;
+enable it from the column list when needed.
 
 GIFs can show processing history. A GIF matches a still image in the same folder
 when their stems are identical, or the GIF adds _processing, _progress, _animation,

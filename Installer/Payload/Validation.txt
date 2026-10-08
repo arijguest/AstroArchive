@@ -16,7 +16,13 @@ space and height-limited hiding, aspect changes, all four image quadrant pixels,
 text-free cached drawings, accessible header icons and details popup/Escape.
 Session checks cover group selection, individual files, Ctrl/Shift, deduplication,
 right-click membership, expansion/refresh retention, filtered-out groups, matching
-row typography, roomy chevrons and default Frame Type sorting. The combined release retains session summaries, Edited
+row typography, roomy chevrons and default Frame Type sorting. Edited regressions
+check fuzzy catalogue/common names, custom archive targets, header/ID precedence,
+ambiguous matches, acquisition inheritance and add/import/refresh integration.
+Native WPF checks cover GIF class filtering and the visible sortable File Type
+column with Total Exposure hidden by default. Progress tests minimise/restore active operations and Dump windows,
+start/update/finish them while minimised, and retain safe cancellation behavior.
+The combined release retains session summaries, Edited
 browsing, GIF/SER/video playback and the existing Windows installation tests.
 
 Windows navigation checks exercise ordered menus in both themes, source and file

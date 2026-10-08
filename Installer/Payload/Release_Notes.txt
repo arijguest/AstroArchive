@@ -1,4 +1,4 @@
-AstroArchive 1.12.1 — cleaner previews and selectable session groups
+AstroArchive 1.12.1 — preview, progress and Edited refinements
 Package 1.12.1.1
 
 - Remove all visible sky captions, constellation names and compass/pole text.
@@ -19,6 +19,17 @@ Package 1.12.1.1
   selection. Match group labels to file-row text and selection colours.
 - Sort Repository and Import by Frame Type by default; retain header controls
   for choosing another sort and reversing it.
+- Hide operation panels and Dump progress when the main window is minimised.
+  Restore live progress with the application, keeping imports running in the
+  background. Finished operations stay closed when the application is restored.
+- Match edited target names against catalogue aliases and archive targets with
+  bounded fuzzy spelling matching, including target folders for unnamed exports.
+  Keep exact IDs and explicit metadata authoritative; leave close ties unresolved
+  and show match evidence in image details. Re-evaluate existing outputs on refresh.
+- Add GIF to Edited image classes and its filter menu. Show a sortable File Type
+  column in the Edited viewer and folder-import review; include type in search.
+- Hide Total Exposure from the default Edited headings, retaining acquisition
+  values in image details and the optional column list.
 
 AstroArchive 1.12.0 — capture sky, compact previews and session browsing
 Package 1.12.0.1

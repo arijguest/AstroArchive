@@ -13,7 +13,7 @@ namespace AstroArchive {
   public string Label {get{return Name+(string.IsNullOrEmpty(Common)?"":"  ·  "+Common);}}
  }
  public class Candidate {public string Name{get;set;} public string Common{get;set;} public double Separation{get;set;} public string DistanceText{get{return Separation.ToString("0.000",CultureInfo.InvariantCulture)+"° from centre";}} }
- public static class Catalog {
+ public static partial class Catalog {
   public static List<CatalogObject> Objects=new List<CatalogObject>(); static Dictionary<string,string> aliases=new Dictionary<string,string>(StringComparer.OrdinalIgnoreCase);static Dictionary<string,string> descriptions=new Dictionary<string,string>(StringComparer.OrdinalIgnoreCase);static HashSet<string> ambiguous=new HashSet<string>(StringComparer.OrdinalIgnoreCase);
   static Dictionary<string,string> commonNames=new Dictionary<string,string>(StringComparer.OrdinalIgnoreCase);
   static List<KeyValuePair<string,string>> phrases=new List<KeyValuePair<string,string>>();
