@@ -1,10 +1,25 @@
 using System;
 using System.Diagnostics;
+using System.IO;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 namespace AstroArchive {
  public partial class MainUi {
   bool dumpStartupChecked;
+  Window dumpProgressWindow;TextBlock dumpProgressStatus,dumpProgressRate;ProgressBar dumpProgressBar;Button dumpProgressCancel;
+  void OpenDumpProgress(){
+   var window=new Window{Owner=Window,Title="Processing Dump folder",Width=580,SizeToContent=SizeToContent.Height,ResizeMode=ResizeMode.NoResize,WindowStartupLocation=WindowStartupLocation.CenterOwner,FontFamily=Window.FontFamily,FontSize=Window.FontSize};window.Resources.MergedDictionaries.Add(Window.Resources);Theme.Bind(window,Control.BackgroundProperty,"Canvas");Theme.Bind(window,Control.ForegroundProperty,"Text");
+   var content=new StackPanel{Margin=new Thickness(24)};content.Children.Add(new TextBlock{Text="Processing Dump folder",FontWeight=FontWeights.SemiBold,Margin=new Thickness(0,0,0,12)});
+   dumpProgressStatus=new TextBlock{Text="Checking files…",TextWrapping=TextWrapping.Wrap};content.Children.Add(dumpProgressStatus);
+   dumpProgressRate=new TextBlock{TextWrapping=TextWrapping.Wrap,Margin=new Thickness(0,8,0,0)};content.Children.Add(dumpProgressRate);
+   dumpProgressBar=new ProgressBar{Minimum=0,Maximum=1,Height=8,Margin=new Thickness(0,16,0,0)};content.Children.Add(dumpProgressBar);
+   dumpProgressCancel=new Button{Content="Cancel",HorizontalAlignment=HorizontalAlignment.Right,Margin=new Thickness(0,18,0,0)};dumpProgressCancel.Click+=(s,e)=>{B("CancelButton").RaiseEvent(new RoutedEventArgs(Button.ClickEvent));dumpProgressStatus.Text="Canceling after the current operation…";dumpProgressCancel.IsEnabled=false;};content.Children.Add(dumpProgressCancel);
+   window.Closing+=(s,e)=>{if(dumpProgressWindow==window&&cancel!=null){e.Cancel=true;dumpProgressCancel.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));}};
+   window.Content=content;dumpProgressWindow=window;window.Show();
+  }
+  void CloseDumpProgress(){var window=dumpProgressWindow;dumpProgressWindow=null;dumpProgressStatus=dumpProgressRate=null;dumpProgressBar=null;dumpProgressCancel=null;if(window!=null)window.Close();}
+  void UpdateDumpProgress(ProgressInfo progress){if(dumpProgressWindow==null)return;dumpProgressStatus.Text=L("StatusLabel").Text;dumpProgressRate.Text=L("RateLabel").Text;dumpProgressBar.IsIndeterminate=!settings.ReducedMotion&&!progress.TotalKnown&&!progress.Finished;dumpProgressBar.Value=progress.ProgressFraction;}
   void AddDumpSettings(FormWindow dialog){
    dialog.Text("Dump folder",true);
    dialog.Text("Drop FITS files or telescope folders into Dump inside your archive. On opening the archive, AstroArchive sorts them and removes successfully verified inputs, including duplicates. Failed or unsupported files stay. Edit metadata to assign each physical telescope ID.");
@@ -15,10 +30,12 @@ namespace AstroArchive {
   }
   void ProcessDumpUi(){
    if(repo==null||cancel!=null||closing)return;
+   try{repo.EnsureDumpFolder();if(!Directory.EnumerateFileSystemEntries(repo.DumpFolder).Any())return;}catch(Exception error){MessageBox.Show(Window,error.Message,"Dump folder unavailable",MessageBoxButton.OK,MessageBoxImage.Warning);return;}
+   OpenDumpProgress();
    ((CheckBox)Window.FindName("DeleteOriginalsCheck")).IsChecked=false;plan=null;BeginLive(true);DumpResult result=null;bool ignoreFailed=settings.IgnoreFailed;
    Run(ct=>{result=repo.ProcessDump(ct,Progress,settings.CopyWorkers,LiveFrame,ignoreFailed);return result.Summary;},summary=>{
     plan=result.Plan;FilterImports();
-    L("ScanLabel").Text=summary;L("StatusLabel").Text=summary;
+    L("StatusLabel").Text=summary;
     if(result.NeedsReview)ShowReport("Dump folder: files retained for review",repo.LastReport);
    });
   }

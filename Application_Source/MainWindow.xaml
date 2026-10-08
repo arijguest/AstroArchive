@@ -680,7 +680,7 @@
     </Grid>
    </TabItem>
    <TabItem Header="Import">
-    <Grid Margin="0,14,0,0">
+    <Grid Margin="0,14,0,8">
      <Grid.RowDefinitions>
       <RowDefinition Height="Auto" />
       <RowDefinition Height="Auto" />

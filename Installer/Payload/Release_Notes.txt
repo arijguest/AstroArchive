@@ -1,8 +1,12 @@
-AstroArchive 1.11.2 — original preview filenames
+AstroArchive 1.11.2 — cleaner Import progress and original preview filenames
 Package 1.11.2.1
 
 - Show the original capture filename in Preview, including after changing its
   stretch, rather than the stored archive filename with its session prefix.
+- Replace the lingering Dump summary line on Import with a dedicated progress
+  window while Dump files are processed. Include status, progress and Cancel;
+  close it after success, cancellation or failure. Empty Dump folders stay quiet.
+- Add eight pixels below the Import page so its buttons sit clear of the border.
 
 AstroArchive 1.11.1 — exposure evidence, spacing and catalogue identities
 Package 1.11.1.1
