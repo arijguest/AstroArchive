@@ -6,6 +6,43 @@ using System.Threading;
 namespace AstroArchive {
  public partial class Tests {
   static void EditedRegressions(){
+   Test("Edited add skips renamed content duplicates and keeps changed same-name versions",()=>{
+    string source=Path.Combine(root,"edited-dedup-add"),one=Path.Combine(source,"one","M31_final.fit"),renamed=Path.Combine(source,"renamed.fit"),changed=Path.Combine(source,"two","M31_final.fit");
+    Write(one,64,48,(x,y)=>1500,new Dictionary<string,string>());File.Copy(one,renamed);Write(changed,64,48,(x,y)=>2100,new Dictionary<string,string>());File.SetLastWriteTimeUtc(changed,File.GetLastWriteTimeUtc(one));
+    using(var repo=new Repository(Path.Combine(root,"edited-dedup-add-repo"))){
+     var result=new EditedImportResult();var project=repo.AddEditedImages(new[]{one,renamed,changed},null,"Versions",ct,NoProgress,result);
+     Check(result.Imported==2&&result.SkippedDuplicates==1&&result.NameConflicts==1&&project.Sources.Count==2,"Add did not distinguish duplicate content from changed name");
+     Check(project.Sources.Select(s=>Util.Hash(repo.EditedPath(project,s.RelativePath),ct)).OrderBy(h=>h).SequenceEqual(new[]{Util.Hash(one,ct),Util.Hash(changed,ct)}.OrderBy(h=>h)),"Changed version overwrote original");
+     result=new EditedImportResult();Check(repo.AddEditedImages(new[]{renamed},null,"Empty duplicate project",ct,NoProgress,result)==null&&result.SkippedDuplicates==1,"Duplicate-only add made a project");
+     result=new EditedImportResult();Check(repo.AddEditedImages(new[]{one},project,"",ct,NoProgress,result).Sources.Count==2&&result.Imported==0,"Repeat add to existing project made a copy");
+     List<string> errors;Check(repo.EditedProjects(out errors).Count==1&&File.Exists(one)&&File.Exists(changed),"Duplicate handling altered sources or project count");
+    }
+   });
+   Test("Edited folder review marks duplicates and same-name revisions and rechecks before import",()=>{
+    string source=Path.Combine(root,"edited-dedup-folder"),one=Path.Combine(source,"one","M51_final.fit"),two=Path.Combine(source,"two","M51_final.fit"),copy=Path.Combine(source,"copy.fit");
+    Write(one,64,48,(x,y)=>1500,new Dictionary<string,string>());Write(two,64,48,(x,y)=>2100,new Dictionary<string,string>());File.Copy(one,copy);
+    using(var repo=new Repository(Path.Combine(root,"edited-dedup-folder-repo"))){
+     var plan=repo.ScanEditedFolder(source,true,ct,NoProgress);Check(plan.Images.Count==3&&plan.Images.Count(i=>i.Include)==2&&plan.Images.Count(i=>!string.IsNullOrEmpty(i.DuplicateReason))==1&&plan.Images.Any(i=>!string.IsNullOrEmpty(i.NameConflict)),"Folder review missed duplicates or name conflict");
+     var result=new EditedImportResult();var project=repo.ImportEditedFolder(plan,"Folder versions",ct,NoProgress,result);Check(project.Sources.Count==2&&result.Imported==2&&result.SkippedDuplicates==1&&result.NameConflicts==1,"Folder import made repeated or overwritten files");
+     result=new EditedImportResult();Check(repo.ImportEditedFolder(plan,"Stale duplicate plan",ct,NoProgress,result)==null&&result.SkippedDuplicates==3,"Import did not recheck current Edited files");
+     var repeat=repo.ScanEditedFolder(source,true,ct,NoProgress);Check(repeat.Images.All(i=>!i.Include&&!i.CanInclude&&i.Status=="Duplicate"),"Repeat scan offered existing files");
+     List<string> errors;Check(repo.EditedProjects(out errors).Count==1,"Repeat import created an empty project");
+    }
+   });
+   Test("Edited duplicate search reads mutable copies and unrecorded editor outputs",()=>{
+    string source=Path.Combine(root,"edited-mutable-duplicate"),file=Path.Combine(source,"M31_final.fit"),outputCopy=Path.Combine(source,"output-copy.fit");Write(file,64,48,(x,y)=>1500,new Dictionary<string,string>());
+    using(var repo=new Repository(Path.Combine(root,"edited-mutable-duplicate-repo"))){
+     var project=repo.AddEditedImages(new[]{file},null,"Mutable",ct,NoProgress);string working=repo.EditedPath(project,project.Sources.Single().RelativePath);DateTime time=File.GetLastWriteTimeUtc(working);Write(working,64,48,(x,y)=>2200,new Dictionary<string,string>());File.SetLastWriteTimeUtc(working,time);
+     string output=Path.Combine(repo.EditedProjectFolder(project),"M51_editor_output.fit");Write(output,64,48,(x,y)=>3100,new Dictionary<string,string>());File.Copy(output,outputCopy);
+     var plan=repo.ScanEditedFolder(source,true,ct,NoProgress);var original=plan.Images.Single(i=>i.Path==file);Check(original.Include&&original.Status=="New version (same name)"&&plan.Images.Single(i=>i.Path==outputCopy).Status=="Duplicate","Mutable file record or unrecorded output caused wrong classification");
+     var result=new EditedImportResult();var restored=repo.AddEditedImages(new[]{file,outputCopy},null,"Original retained",ct,NoProgress,result);Check(restored.Sources.Count==1&&result.Imported==1&&result.SkippedDuplicates==1&&result.NameConflicts==1&&Util.Hash(working,ct)!=Util.Hash(file,ct),"Mutable original was discarded or output duplicated");
+     File.Delete(output);result=new EditedImportResult();Check(repo.AddEditedImages(new[]{outputCopy},null,"Missing output recovered",ct,NoProgress,result)!=null&&result.Imported==1,"Missing output hash prevented recovery");
+    }
+   });
+   Test("Edited import detects changed bytes even when source size and timestamp are restored",()=>{
+    string source=Path.Combine(root,"edited-dedup-stale"),file=Path.Combine(source,"M31_final.fit");Write(file,64,48,(x,y)=>1500,new Dictionary<string,string>());
+    using(var repo=new Repository(Path.Combine(root,"edited-dedup-stale-repo"))){var plan=repo.ScanEditedFolder(source,true,ct,NoProgress);DateTime time=File.GetLastWriteTimeUtc(file);long size=new FileInfo(file).Length;Write(file,64,48,(x,y)=>2200,new Dictionary<string,string>());File.SetLastWriteTimeUtc(file,time);Check(new FileInfo(file).Length==size,"Fixture size changed");Expect(()=>repo.ImportEditedFolder(plan,"Stale",ct,NoProgress),"Changed content was treated as reviewed data");List<string> errors;Check(repo.EditedProjects(out errors).Count==0,"Stale content created a project");}
+   });
    Test("Edited fuzzy names resolve catalogue aliases and spelling errors",()=>{
     foreach(var sample in new[]{new[]{"WhirlpolGalaxy_Ha_20x60s_starless.fit","M51"},new[]{"Andromdea_Galaxy_final.tif","M31"},new[]{"Heart_Neblua_SHO.png","IC1805"},new[]{"ElephntsTrunkNebula_stars.fit","IC1396"},new[]{"Sevn_Sisters_edit.tif","M45"}}){var metadata=EditedMetadata.Read(sample[0],null);Check(metadata.Object==sample[1]&&metadata.Evidence.Contains("fuzzy name matching"),"Fuzzy target missed: "+sample[0]+" -> "+metadata.Object);}
     Check(EditedMetadata.Read(Path.Combine("Whirlpol_Galaxy","final.fit"),null).Object=="M51","Target folder spelling did not identify unnamed export");
@@ -28,7 +65,7 @@ namespace AstroArchive {
     string source=Path.Combine(root,"edited-fuzzy-source"),capture=Path.Combine(source,"capture.fit"),edited=Path.Combine(source,"Barnads_Loop_Ha_starless.fit");Write(capture,64,48,(x,y)=>1000,LightHeaders(new DateTime(2026,10,8,21,0,0),"Barnards Loop"));Write(edited,64,48,(x,y)=>2200,new Dictionary<string,string>());
     using(var repo=new Repository(Path.Combine(root,"edited-fuzzy-repo"))){repo.Import(repo.Scan(source,"Scope-1","Auto",ct,NoProgress).Frames.Where(f=>f.SourcePath==capture).ToList(),ct,NoProgress);var project=repo.AddEditedImages(new[]{edited},null,"Loop edits",ct,NoProgress);Check(project.Sources.Single().Metadata.Object=="Barnards Loop","Adding ignored database target names");
      var row=repo.EditedImages(project).Single();Check(row.Metadata.Object=="Barnards Loop"&&row.Metadata.Evidence.Contains("fuzzy name matching"),"Existing Edited output did not resolve database target");
-     var plan=repo.ScanEditedFolder(source,true,ct,NoProgress);Check(plan.Images.Single(i=>i.Path==edited).Metadata.Object=="Barnards Loop","Folder review ignored database names");var imported=repo.ImportEditedFolder(plan,"Loop folder",ct,NoProgress);Check(repo.EditedImages(imported).Single().Metadata.Object=="Barnards Loop"&&repo.All().Count==1,"Folder import lost target or altered capture index");}
+     var plan=repo.ScanEditedFolder(source,true,ct,NoProgress);Check(plan.Images.Single(i=>i.Path==edited).Metadata.Object=="Barnards Loop"&&!plan.Images.Single(i=>i.Path==edited).Include,"Folder review ignored database names or existing Edited image");var imported=repo.ImportEditedFolder(plan,"Loop folder",ct,NoProgress);Check(imported==null&&repo.EditedImages(project).Single().Metadata.Object=="Barnards Loop"&&repo.All().Count==1,"Duplicate folder import lost target or altered capture index");}
    });
    Test("GIF import uniquely matches nearby edited images and preserves acquisition details",()=>{
     string source=Path.Combine(root,"gif-source"),still=Path.Combine(source,"finish.fit"),gif=Path.Combine(source,"finish_processing.gif");
@@ -97,13 +134,13 @@ namespace AstroArchive {
     using(var repo=new Repository(Path.Combine(root,"edited-folder-repo"))){var top=repo.ScanEditedFolder(source,false,ct,NoProgress);Check(top.Images.Count==2,"Non-recursive scan entered a subfolder");var plan=repo.ScanEditedFolder(source,true,ct,NoProgress);Check(plan.Images.Count==3&&plan.Images.Count(i=>i.Include)==2&&plan.Images.Single(i=>i.Filename=="broken.fit").Problem!=null,"Unreadable images were not isolated");Check(!Directory.Exists(repo.EditedFolder),"Review copied images");var project=repo.ImportEditedFolder(plan,"Existing edits",ct,NoProgress);var images=repo.EditedImages(project);Check(images.Count==2&&images.All(i=>i.Metadata.Subs==10&&i.Metadata.TotalExposure==600)&&project.Sources.Any(s=>s.RelativePath.Contains("nested")),"Folder structure or metadata lost");Check(Directory.GetFiles(source,"*.fit",SearchOption.AllDirectories).Length==3&&repo.All().Count==0,"Crawl altered sources or original index");}
    });
    Test("Folder import refuses changed sources and removes its unpublished project",()=>{
-    string source=Path.Combine(root,"edited-stale-source"),file=Path.Combine(source,"M31_starless.fit");Write(file,64,48,(x,y)=>1800,new Dictionary<string,string>());using(var repo=new Repository(Path.Combine(root,"edited-stale-repo"))){var plan=repo.ScanEditedFolder(source,true,ct,NoProgress);File.AppendAllText(file,"changed");Expect(()=>repo.ImportEditedFolder(plan,"Stale",ct,NoProgress),"Changed source accepted");List<string> errors;Check(repo.EditedProjects(out errors).Count==0&&errors.Count==0&&!Directory.EnumerateDirectories(repo.EditedFolder).Any(),"Changed import left a partial project");}
+    string source=Path.Combine(root,"edited-stale-source"),file=Path.Combine(source,"M31_starless.fit");Write(file,64,48,(x,y)=>1800,new Dictionary<string,string>());using(var repo=new Repository(Path.Combine(root,"edited-stale-repo"))){var plan=repo.ScanEditedFolder(source,true,ct,NoProgress);File.AppendAllText(file,"changed");Expect(()=>repo.ImportEditedFolder(plan,"Stale",ct,NoProgress),"Changed source accepted");List<string> errors;Check(repo.EditedProjects(out errors).Count==0&&errors.Count==0&&(!Directory.Exists(repo.EditedFolder)||!Directory.EnumerateDirectories(repo.EditedFolder).Any()),"Changed import left a partial project");}
    });
    Test("Edited parent-folder crawl skips repository database trees and archived copies by content",()=>{
     string parent=Path.Combine(root,"edited-mixed-parent"),source=Path.Combine(parent,"captures"),file=Path.Combine(source,"Light_M31.fit");Write(file,64,48,(x,y)=>1000,LightHeaders(new DateTime(2026,10,8,21,0,0),"M31"));
     using(var repo=new Repository(Path.Combine(parent,"archive"))){repo.Import(repo.Scan(source,"Scope-01","Auto",ct,NoProgress).Frames,ct,NoProgress);string renamed=Path.Combine(source,"M31_unprocessed_renamed.fit");File.Copy(file,renamed);string edited=Path.Combine(source,"M31_starless.fit");Write(edited,64,48,(x,y)=>2000,new Dictionary<string,string>());string database=Path.Combine(parent,".ASTROARCHIVE","do-not-import.fit");Write(database,64,48,(x,y)=>3000,new Dictionary<string,string>());
      var plan=repo.ScanEditedFolder(parent,true,ct,NoProgress);Check(plan.Images.Count==1&&plan.Images[0].Path==edited&&plan.SkippedArchived==2&&plan.SkippedFolders.Count==2,"Parent crawl entered repository/database folders or included renamed archived originals");var project=repo.ImportEditedFolder(plan,"Mixed edits",ct,NoProgress);Check(repo.EditedImages(project).Count==1&&repo.All().Count==1&&File.Exists(file)&&File.Exists(renamed)&&File.Exists(database),"Mixed import changed archive or source data");
-     var after=repo.ScanEditedFolder(source,true,ct,NoProgress);repo.Import(repo.Scan(source,"Scope-01","Auto",ct,NoProgress).Frames,ct,NoProgress);Expect(()=>repo.ImportEditedFolder(after,"Already archived",ct,NoProgress),"Capture archived after review was imported again");
+     var after=repo.ScanEditedFolder(source,true,ct,NoProgress);repo.Import(repo.Scan(source,"Scope-01","Auto",ct,NoProgress).Frames,ct,NoProgress);Check(repo.ImportEditedFolder(after,"Already archived",ct,NoProgress)==null,"Capture archived after review was imported again");
     }
    });
    Test("Cancelled edited copies retain sources and no partial project",()=>{

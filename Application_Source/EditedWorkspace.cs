@@ -52,15 +52,19 @@ namespace AstroArchive {
     AddEditedFile(project,FilePath(capture),capture.OriginalName,capture.Hash,capture.Hash,ct,progress,null,metadata);}return project;}
    catch{RemoveNewEditedProject(project);throw;}
   }
-  public EditedProject AddEditedImages(IEnumerable<string> files,EditedProject project,string name,CancellationToken ct,Action<ProgressInfo> progress){
+  public EditedProject AddEditedImages(IEnumerable<string> files,EditedProject project,string name,CancellationToken ct,Action<ProgressInfo> progress,EditedImportResult result=null){
    ct.ThrowIfCancellationRequested();var inputs=files.Distinct(StringComparer.OrdinalIgnoreCase).ToList();if(inputs.Count==0)throw new ArgumentException("Choose images to add.");
-   var matcher=new EditedTargetMatcher(All().Select(f=>f.Target));
-   bool created=project==null;if(created){project=NewEditedProject(name,"","");Directory.CreateDirectory(EditedProjectFolder(project));}
-   else{string id=project.Id,path=Path.Combine(EditedProjectFolder(project),"edited-project.json");CheckManagedPath(path,Root);project=Util.Deserialize<EditedProject>(File.ReadAllText(path));if(project==null||project.Id!=id||project.Schema!=1||project.Sources==null)throw new InvalidDataException("Invalid edited project record.");foreach(var record in project.Sources)EditedPath(project,record.RelativePath);}
+   result=result??new EditedImportResult();var matcher=new EditedTargetMatcher(All().Select(f=>f.Target));var duplicates=EditedDuplicates(ct,progress,result.Warnings);
+   bool created=project==null;
+   if(!created){string id=project.Id,path=Path.Combine(EditedProjectFolder(project),"edited-project.json");CheckManagedPath(path,Root);project=Util.Deserialize<EditedProject>(File.ReadAllText(path));if(project==null||project.Id!=id||project.Schema!=1||project.Sources==null)throw new InvalidDataException("Invalid edited project record.");foreach(var record in project.Sources)EditedPath(project,record.RelativePath);}
    try{foreach(string file in inputs){ct.ThrowIfCancellationRequested();if(!Util.IsImageAsset(file))throw new NotSupportedException("Choose a supported image: "+Path.GetFileName(file));
-     var metadata=EditedMetadata.Read(Path.GetFileName(file),Assets.Inspect(file).Header,null,matcher);string hash=Util.Hash(file,ct);AddEditedFile(project,file,Path.GetFileName(file),hash,null,ct,progress,null,metadata);
-    }return project;
-   }catch{if(created)RemoveNewEditedProject(project);throw;}
+     var stamp=FileStamp.Read(file);string hash=Util.Hash(file,ct);if(!stamp.ContentSame(FileStamp.Read(file)))throw new IOException("Image changed during duplicate check: "+Path.GetFileName(file));
+     string duplicate=duplicates.Duplicate(hash);if(duplicate!=null){result.SkippedDuplicates++;duplicates.Add(Path.GetFileName(file),hash,duplicate);continue;}
+     var metadata=EditedMetadata.Read(Path.GetFileName(file),Assets.Inspect(file).Header,null,matcher);bool conflict=!string.IsNullOrEmpty(duplicates.NameConflict(Path.GetFileName(file),hash));
+     if(project==null){project=NewEditedProject(name,"","");Directory.CreateDirectory(EditedProjectFolder(project));}
+     AddEditedFile(project,file,Path.GetFileName(file),hash,null,ct,progress,null,metadata);result.Imported++;if(conflict)result.NameConflicts++;duplicates.Add(Path.GetFileName(file),hash,project.Name+" / "+Path.GetFileName(file));
+    }result.Project=project;return project;
+   }catch{if(created&&project!=null)RemoveNewEditedProject(project);throw;}
   }
   void AddEditedFile(EditedProject project,string source,string name,string hash,string archiveHash,CancellationToken ct,Action<ProgressInfo> progress,string importedRelative=null,EditedMetadata metadata=null){
    string basename=Util.SafeFile(name),relative=Path.Combine("images",importedRelative??basename);EditedPath(project,relative);int suffix=1;string directory=Path.GetDirectoryName(relative);
