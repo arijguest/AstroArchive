@@ -56,7 +56,7 @@ namespace AstroArchive {
      frame.ObservedUtc="2026-10-07T23:00:00Z";frame.RA=null;frame.Dec=null;frame.Latitude=51.5;frame.Longitude=0;
      var preview=prefix.Length==0?previewViewport:editedPreviewViewport;var host=(Grid)Window.FindName(prefix+"PreviewHost");var stage=(Grid)Window.FindName(prefix+"PreviewStage");var globe=(SkyGlobeView)Window.FindName(prefix+"PreviewSky");var popup=(Popup)Window.FindName(prefix+"PreviewDetailsPopup");var header=(Grid)Window.FindName(prefix+"PreviewHeader");var original=((Image)Window.FindName(prefix+"PreviewImage")).Source as BitmapSource;
      try{
-      GoToPage(prefix.Length==0?0:3);
+      GoToPage(prefix.Length==0?0:2);
       foreach(string mode in new[]{"Dark","Light"})foreach(int textScale in new[]{100,150}){
        settings.ThemeMode=mode;settings.TextScalePercent=textScale;ApplyAppearance();Window.Width=1180;Window.Height=1000;UpdateCaptureSky(prefix,frame);L(prefix+"PreviewMessage").Visibility=Visibility.Collapsed;preview.SetImage(image,true);PumpPopupLayout();preview.Resize();PumpPopupLayout();CheckSkyFit(prefix,preview);
        var imageArea=stage.TransformToAncestor(host).TransformBounds(new Rect(stage.RenderSize));var full=CaptureSidebar(host,Path.Combine(output,"AstroArchive_Capture_Sky_"+prefix+mode+"_"+textScale+".png"));var pixels=new byte[full.PixelWidth*full.PixelHeight*4];full.CopyPixels(pixels,full.PixelWidth*4,0);
