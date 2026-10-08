@@ -102,8 +102,11 @@ namespace AstroArchive {
                     if (snapshot.TextScalePercent != 150 || !snapshot.HighContrast || !snapshot.ComfortableRows) throw new Exception("Accessibility preferences were not preserved.");
                 } finally { preferences.Window.Close(); }
                 var about = AboutPage();
-                try { about.Window.Show(); PumpPopupLayout(); if (!PopupChildren<TextBlock>(about.Window).Any(text => text.Text == "Ari J. Guest")) throw new Exception("About page lacks author attribution."); CapturePopup(about.Window, Path.Combine(output, "AstroArchive_About_UI.png")); }
+                try { about.Window.Show(); PumpPopupLayout(); if (!PopupChildren<TextBlock>(about.Window).Any(text => text.Text == "Ari J. Guest")) throw new Exception("About page lacks author attribution."); if (!PopupChildren<TextBlock>(about.Window).Any(text => text.Text.Contains("PolyForm Noncommercial License 1.0.0"))) throw new Exception("About page lacks software licensing."); CapturePopup(about.Window, Path.Combine(output, "AstroArchive_About_UI.png")); }
                 finally { about.Window.Close(); }
+                var licence = LicencePage();
+                try { licence.Window.Show(); PumpPopupLayout(); if (!PopupChildren<TextBlock>(licence.Window).Any(text => text.Text.Contains("Required Notice: Copyright 2026 Ari J. Guest") && text.Text.Contains("## Noncommercial Purposes"))) throw new Exception("Offline software licence is incomplete."); CapturePopup(licence.Window, Path.Combine(output, "AstroArchive_Licence_UI.png")); }
+                finally { licence.Window.Close(); }
                 var steps = WalkthroughSteps(); var originalSource = T("SourceBox").Text;
                 StartWalkthrough(); var tour = walkthrough;
                 try {

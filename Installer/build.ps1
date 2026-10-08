@@ -44,6 +44,8 @@ if (-not $UsePreparedPayload) {
     $noticePath = Join-Path $payload 'Catalogue_Notice.md'
     $skyNoticePath = Join-Path $PSScriptRoot '..\Application_Source\Sky_Catalogue_Notice.md'
     [IO.File]::WriteAllText($noticePath, ([IO.File]::ReadAllText($noticePath) + "`r`n`r`n" + [IO.File]::ReadAllText($skyNoticePath)), (New-Object Text.UTF8Encoding($false)))
+    Copy-Item (Join-Path $PSScriptRoot '..\LICENSE') (Join-Path $payload 'LICENSE.txt') -Force
+    Copy-Item (Join-Path $PSScriptRoot '..\LICENSING.md') (Join-Path $payload 'LICENSING.md') -Force
     Copy-Item $AppExecutable (Join-Path $payload 'AstroArchive.exe') -Force
 }
 $generatedVersion = @"
@@ -60,6 +62,7 @@ using System.Runtime.Versioning;
 [assembly: AssemblyVersion("$packageVersion")]
 [assembly: AssemblyFileVersion("$packageVersion")]
 [assembly: TargetFramework(".NETFramework,Version=v4.8")]
+[assembly: AssemblyCopyright("Copyright 2026 Ari J. Guest")]
 namespace AstroArchive.Installation {
  internal static class ReleaseVersion {
   public const string Application="$($release.application_version)";
@@ -94,7 +97,7 @@ if ($PreparePayloadOnly) { Write-Output $payload; return }
 # Hash and embed them only after signing.
 Add-Type -AssemblyName System.IO.Compression
 $names = @('AstroArchive.exe', 'Start.exe', 'Quick_Start.txt', 'Validation.txt',
-    'Catalogue_Notice.md', 'City_Catalogue_Notice.md', 'OpenNGC_README.md', 'Release_Notes.txt')
+    'Catalogue_Notice.md', 'City_Catalogue_Notice.md', 'OpenNGC_README.md', 'Release_Notes.txt', 'LICENSE.txt', 'LICENSING.md')
 $hashes = [ordered]@{}
 $zipPath = Join-Path $build 'payload.zip'
 if (Test-Path $zipPath) { Remove-Item $zipPath }

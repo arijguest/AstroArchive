@@ -1,3 +1,13 @@
+AstroArchive 1.13.3 — software licensing and attribution
+Package 1.13.3.1
+- Adopt PolyForm Noncommercial License 1.0.0 for AstroArchive's first-party
+  software. Noncommercial use, modification and sharing are permitted under its
+  terms; commercial use or resale outside permitted purposes needs a separate licence.
+- Add the licence summary, offline full terms and commercial enquiries to About.
+- Include LICENSE.txt and LICENSING.md in the managed installation, and explain
+  the licence in the bundled guide. Third-party data keeps its separate terms;
+  imported images and processing outputs are not relicensed.
+
 AstroArchive 1.13.2 — responsive progressive previews
 Package 1.13.2.1
 - Clear only image pixels while a new capture loads. Keep the last image frame,

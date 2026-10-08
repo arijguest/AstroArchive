@@ -145,8 +145,23 @@ namespace AstroArchive {
             dialog.Button("Visit arijguest.com", () => OpenWebsite("https://arijguest.com"));
             dialog.Button("Source code and releases", () => OpenWebsite("https://github.com/arijguest/AstroArchive"));
             dialog.Button("Buy Me a Coffee", () => OpenWebsite("https://ko-fi.com/arijguest"));
+            dialog.Text("Software licence", true);
+            dialog.Text("Copyright 2026 Ari J. Guest. AstroArchive is source-available under the PolyForm Noncommercial License 1.0.0. Noncommercial use, modification and sharing are permitted under its terms. Commercial use, including resale outside the permitted purposes, requires separate permission.");
+            dialog.Button("Read software licence (offline)", () => LicencePage().Show());
+            dialog.Button("Commercial licensing enquiries", () => OpenWebsite("https://astroarchive.arijguest.com/#contact"));
             dialog.Text("Catalogue acknowledgements", true);
-            dialog.Text("Target names and positions use OpenNGC; observing towns and cities use GeoNames. Their notices are included with the installation. Original image data remains in your repository; derived exports are identified separately.");
+            dialog.Text("Target names and positions use OpenNGC (CC BY-SA 4.0); observing towns and cities use GeoNames (CC BY 4.0); constellation figures use D3-Celestial (BSD 3-clause). These datasets retain their own licences; their notices are included with the installation. Original image data remains in your repository; derived exports are identified separately.");
+            dialog.CloseOnly(); return dialog;
+        }
+        FormWindow LicencePage() {
+            var dialog = new FormWindow(Window, "AstroArchive software licence", 720, 700);
+            dialog.Text("PolyForm Noncommercial License 1.0.0", true);
+            using (var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream("LICENSE")) {
+                if (stream == null) throw new InvalidOperationException("The bundled software licence is missing.");
+                using (var reader = new StreamReader(stream)) dialog.Text(reader.ReadToEnd());
+            }
+            dialog.Text("Third-party data keeps its separate licences. Your images and processing outputs are not relicensed by using AstroArchive.");
+            dialog.Button("Licensing summary and third-party notices", () => OpenWebsite("https://github.com/arijguest/AstroArchive/blob/main/LICENSING.md"));
             dialog.CloseOnly(); return dialog;
         }
         void About() { AboutPage().Show(); }

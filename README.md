@@ -186,4 +186,11 @@ The bundled catalogue derives from **OpenNGC by Mattia Verga and contributors**,
 The offline constellation figures derive from **D3-Celestial by Olaf Frohn**, under
 the BSD 3-clause licence. [Constellation attribution](Application_Source/Sky_Catalogue_Notice.md).
 
-The repository does not currently specify a licence for the application source.
+**AstroArchive is source-available under [PolyForm Noncommercial 1.0.0](LICENSE).**
+
+- Noncommercial use, modification and sharing are permitted under the licence.
+- Commercial use, including resale outside the permitted purposes, requires separate permission from Ari J. Guest.
+- Distributions must preserve the Required Notice and include the licence terms or their official URL.
+- Your images and outputs remain yours; third-party data retains the licences listed above.
+
+[Licensing summary and scope](LICENSING.md) · [Commercial licensing enquiries](https://astroarchive.arijguest.com/#contact)
