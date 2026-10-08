@@ -1,15 +1,20 @@
-AstroArchive 1.13.12
-Package 1.13.12.1
+AstroArchive 1.13.13
+Package 1.13.13.1
 
-- Sky-map reset sits at the bottom-left beside the map on Repository and Edited,
-  without a footer row or extra panel height. Image previews keep their full fit.
-- N/E/S/W indicators follow the capture horizon and current camera orientation.
-  Labels hide when obscured by the globe, clipped by the panel, or missing a
-  reliable capture time/site. Zooming and rotating update them automatically.
-- All Targets lists merged subframe groups first, stacks next, ungrouped files
-  after stacks and every calibration type last. Individual target views keep
-  stacks before lights. Column sorting is retained within each section.
-- Calibration previews hide the sky map. Stacks with known time, location,
-  pointing and integration duration show a cached estimated movement track.
-- Removed the Filters / Channels column from the Edited table.
-- Verified the existing Comets category for Repository and Edited Targets.
+- Target identification solves one representative per selected Light session,
+  target and compatible instrument group, updating the selected group together.
+  Stacks are solved individually; batch review offers each target after solving.
+- The nearest major target in the solved field is selected automatically, including
+  when several major targets are nearby. Review allows individual overrides or
+  leaving a group unchanged. Fields without major candidates require a choice.
+- Solved positions use the image centre, with the WCS footprint when available.
+  Group updates retain individual capture times and existing pointings. IDs and
+  common names continue to share one target identity.
+- A single progress window shows job counts, representative filename, group scope,
+  solver stage, elapsed time and time limits. The repeated solve/save dialog cycle
+  and per-subframe star-matching reads have been removed.
+- Progress windows open without stealing focus and detach before closing, keeping
+  the main window's state intact. Error messages appear after progress has closed.
+- Cancellation terminates unresponsive local solver processes. Local and online
+  solving have five- and ten-minute deadlines; failed fields do not stop the batch.
+- Unknown Common name values display as a dash in Repository, Import and Edited.
