@@ -38,7 +38,7 @@ namespace AstroArchive {
     var view=grid.ItemsSource as ListCollectionView??CollectionViewSource.GetDefaultView(grid.ItemsSource) as ListCollectionView;
     if(view!=null){var target=Targets.SelectedItem as TargetSummary;var ordered=RepositoryOrdering.Order(view.SourceCollection.Cast<Frame>(),SearchSorts(name),grid.Items.Culture,target==null||target.Name=="All targets",Convert.ToString(C("LibraryViewBox").SelectedItem)=="Session summaries",System.Threading.CancellationToken.None);view.CustomSort=new RepositoryPositionComparer(ordered);}
    }else foreach(var sort in sorts)grid.Items.SortDescriptions.Add(sort);}
-   foreach(var column in grid.Columns){var sort=sorts.FirstOrDefault(d=>d.PropertyName==column.SortMemberPath);column.SortDirection=string.IsNullOrEmpty(sort.PropertyName)?(ListSortDirection?)null:sort.Direction;}TableSortIndicators.Update(grid);
+   foreach(var column in grid.Columns){var sort=sorts.FirstOrDefault(d=>d.PropertyName==column.SortMemberPath);column.SortDirection=string.IsNullOrEmpty(sort.PropertyName)?(ListSortDirection?)null:sort.Direction;}TableSortIndicators.Update(grid,sorts);
   }
   void SmokeTablesAndPreview(){
    foreach(string name in new[]{"FramesGrid","ImportGrid"}){var sorts=tableSorts[name];if(sorts.Count==0||sorts[0].PropertyName!="Kind"||sorts[0].Direction!=ListSortDirection.Ascending)throw new Exception("Frame Type is not the default capture sort");}
