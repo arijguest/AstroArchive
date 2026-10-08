@@ -54,6 +54,7 @@ namespace AstroArchive {
   }
   void PreviewSize(){previewViewport.Resize();}
   void SmokePreview(string output){
+   SmokeStackingApps(output);
    SmokePreviewRendering(output);
    SmokeCaptureSky(output);
    SmokeProgressivePreview(output);

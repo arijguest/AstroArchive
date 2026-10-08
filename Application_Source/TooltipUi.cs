@@ -59,7 +59,7 @@ namespace AstroArchive {
    {"Preview image","Open a sampled image preview. Pinch or use the wheel to zoom, drag to pan, and use Recenter to restore the whole image. Select one file."},
    {"Show file in Explorer","Locate the selected archive copy in Windows Explorer. Select one file."},
    {"Delete selected files","Remove selected archive copies after confirmation. Telescope/source originals are retained."},
-   {"Edit metadata","Edit classification and labels for the selected captures. Blank fields retain their current values."},
+   {"Edit metadata","Review existing values and edit metadata for selected captures. Mixed fields retain each file's value; only changed, nonblank fields are applied."},
    {"Identify target","Use recognised filename targets first; unresolved fields require a configured plate solver."},
    {"Verify repository checksums","Compare archive copies with their recorded checksums and report missing or changed files."},
    {"Index an existing repository","Discover and index supported image originals already in the repository without copying or moving them. Review uncertain telescope identities afterwards."},
@@ -75,7 +75,9 @@ namespace AstroArchive {
    {"100%","Show one sampled preview pixel per screen pixel. The FITS preview may be downsampled."},
    {"Save report","Save the displayed report to a text file."},
    {"Save settings","Validate and save settings, then open the chosen repository."},
-   {"Save metadata","Validate and apply the entered metadata to the selected captures or sessions."},
+   {"Save metadata","Validate and apply only changed fields to selected files or sessions. Existing values and their sources are retained for untouched fields."},
+   {"Reset changes","Restore all edit fields to the original selection. Mixed values continue to keep each file's current value."},
+   {"Apply changes to entire selected sessions","Apply only changed fields to every capture in the sessions containing the selected files. Files without a recorded session stay individually selected."},
   };
  }
  public partial class MainUi {
@@ -113,7 +115,7 @@ namespace AstroArchive {
    {"ExportButton","Export selected captures, or all visible captures when none are selected. Choose file copies or a stacking project."},
    {"RotationButton","Analyse rotation in acquisition subs to assess EQ or Alt/Az evidence. Device stacks are not used; sufficient timestamps and stars are required."},
    {"SolveButton","Identify selected or visible light/stack targets from recognised filenames first; other fields require a configured solver."},
-   {"EditButton","Edit metadata for selected files, or all visible files when none are selected. Blank fields keep their existing values."},
+   {"EditButton","Review and edit metadata for selected files, or all visible files when none are selected. Common values are filled in; mixed and untouched fields keep their existing values."},
    {"MoreButton","Verify archive checksums, index existing images, export a catalogue CSV or locate a selected file."},
    {"SavedTelescopeBox","Select a saved physical telescope to reuse its device name, model and source association."},
    {"SaveTelescopeButton","Save the current telescope name, model and source folder for future imports and USB recognition."},

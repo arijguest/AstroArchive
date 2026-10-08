@@ -1,4 +1,4 @@
-AstroArchive 1.13.5
+AstroArchive 1.13.7
 Windows 10/11 x64 desktop app. Built-in .NET Framework 4.8 and Windows SQLite.
 Runs offline. No Python or Google login required.
 
@@ -451,6 +451,16 @@ Masters stay separate and require explicit selection in your stacking software.
 Do not combine stacks with constituent subs or overlapping live-stack snapshots.
 Exports include a manifest and workflow notes. Actual stacking uses external software.
 
+After creating a ready-to-stack folder, the Export complete popup offers Siril,
+StackingWizard and Other… alongside Open exported folder. Locate the installed
+application when prompted. Siril and StackingWizard reuse their saved locations;
+Other… opens a chooser starting from your previous app. Siril starts with the
+export as its working directory. Load the appropriate lights/calibrations or
+stacks from within the processor, following the exported workflow notes.
+The popup stays open so you can browse the folder or try another app. Cancelling
+the app chooser or a launch failure retains the completed export. These buttons
+launch separately installed applications; AstroArchive does not install them.
+
 DELETE ALL ARCHIVE DATA
 Settings > Archive has a red Delete all archive data button. It shows the selected archive
 path and file count. Drag the slider fully right, then press Delete permanently.
@@ -600,8 +610,19 @@ analysis/export. Ordinary preview retains the existing colour, stretch, zoom and
 pan controls. Unlabelled FITS extra axes are slices; RGB needs an explicit label.
 Choose a slice explicitly before exporting a cube as scientific data.
 
-Edit metadata adds telescope/camera model, camera serial/ID, offset, readout, ROI,
-optical configuration, linearity and capture timezone. Re-detect metadata and review
+Edit metadata fills in all existing editable values. Capture, Equipment and
+Processing tabs include exposure, gain, temperature, binning, models, camera ID,
+offset, readout, ROI, optical configuration, linearity, capture timezone and notes.
+For multiple files, shared values are filled in; different values show Mixed.
+Enter a replacement to apply it to the selection. Blank or untouched fields keep
+each file's current value and metadata source. Only edited fields are extended
+when Apply changes to entire selected sessions is enabled. Reset changes restores
+the initial fields. Save without edits leaves the repository unchanged.
+The Current metadata tab shows recorded fields and sources for an individual file;
+choose a file there to inspect it without changing the batch edit fields. Hover
+truncated values to read them in full. Mounts with ? remain inferred until you
+select EQ or Alt-Az explicitly. Gain edits preserve any recorded gain unit.
+Re-detect metadata and review
 shows proposed changes before applying them; user overrides retain priority.
 Gain settings are separate from electrons/ADU. Explicit exposure/temperature units
 are normalized and raw values/evidence are retained. Filename times with unknown

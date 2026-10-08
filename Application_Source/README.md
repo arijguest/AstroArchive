@@ -1,4 +1,4 @@
-# AstroArchive 1.13.5
+# AstroArchive 1.13.7
 
 All toolbar actions, including Settings, Guide and Buy Me a Coffee, are grouped on the left. The purple dropdown labelled PAGE centres in the top row when there is room, or in its own compact row below the actions. Ctrl+1–3 selects Repository, Edited or Import; Ctrl+Tab cycles pages. The interactive guide introduces the selector.
 
@@ -19,6 +19,26 @@ Portable Windows 10/11 x64 WPF app for archiving astronomical image originals an
 - Opt-in robust matching checks same-name edits, changed metadata and missing archive copies.
 - Visible one-click connected import selects a bound, selected matching or unique saved telescope profile.
 - See [repeat-import details](../docs/FAST_IMPORTS.md) for session scoping, skipped-folder semantics and validation.
+
+## Changes in 1.13.7
+
+The metadata editor fills in all existing editable values, including exposure,
+gain, temperature, binning, equipment and processing metadata. Capture, Equipment
+and Processing tabs adapt to narrow windows and larger text. Batch edits show
+shared values and mark mixed values explicitly. Current metadata lets you inspect
+each selected file's complete recorded scalar fields and their sources.
+Only changed, nonblank fields are applied, including when extending edits to whole
+sessions. Untouched evidence, gain units and inferred mounts remain intact.
+Reset changes restores the selection; saving without changes leaves files alone.
+
+## Changes in 1.13.6
+
+Ready-to-stack export completion offers Siril, StackingWizard and Other… buttons.
+Choose an installed executable on first use; saved locations are reused for Siril
+and StackingWizard. Other… lets you choose a different app each time, starting
+from the previous choice. Siril starts in the exported working directory; load
+inputs in the selected processor. Launch failures retain the verified folder and
+report its location. Ordinary file exports keep their concise completion popup.
 
 ## Changes in 1.13.5
 

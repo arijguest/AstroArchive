@@ -87,9 +87,34 @@ namespace AstroArchive {
    d.Text("Each target, camera and compatible capture group has its own input folder. Masters and raw calibration sets stay separate. Stack the exported inputs in your preferred software.");
    d.Accept("Export folder",()=>{string selectedMode=Convert.ToString(mode.SelectedItem);if(!items.Any(f=>(rejected.IsChecked==true||!f.Rejected)&&(selectedMode=="Both"||selectedMode=="Subs"&&f.Kind=="Light"||selectedMode=="Stacks"&&f.Kind=="Stack"))){MessageBox.Show(d.Window,"This input choice has no eligible files.");return false;}return ValidExportDestination(d,parent,name);});if(!d.Show())return;
    var options=new ExportOptions{Parent=parent.Text.Trim(),Name=name.Text.Trim(),Mode=Convert.ToString(mode.SelectedItem),IncludeCalibration=calibration.IsChecked==true,IncludeUnknownCalibration=unknown.IsChecked==true,IncludeRejected=rejected.IsChecked==true,SeparateSessions=sessions.IsChecked==true,ConvertToFits=convert.IsChecked==true};
-   Run(ct=>Exporter.Create(repo,items,options,ct,Progress),ExportComplete);
+   Run(ct=>Exporter.Create(repo,items,options,ct,Progress),path=>ExportComplete(path,true));
   }
-  void ExportComplete(string path){L("StatusLabel").Text="Exported folder: "+path;var d=new FormWindow(Window,"Export complete",600,400);d.Text("Your exported folder is ready",true);d.Text(path);d.Text("Files have been copied and verified. Stacking folders include workflow notes and a manifest.");d.Button("Open exported folder",()=>Process.Start(new ProcessStartInfo(path){UseShellExecute=true}));d.CloseOnly();d.Show();}
+  void ExportComplete(string path){ExportComplete(path,false);}
+  void ExportComplete(string path,bool stacking){L("StatusLabel").Text="Exported folder: "+path;ExportCompleteDialog(path,stacking).Show();}
+  FormWindow ExportCompleteDialog(string path,bool stacking,Action<StackingApplication> launch=null){
+   var d=new FormWindow(Window,"Export complete",640,stacking?480:400);d.Text(stacking?"Your stacking folder is ready":"Your exported folder is ready",true);d.Text(path);d.Text("Files have been copied and verified.");
+   d.Button("Open exported folder",()=>{try{Process.Start(new ProcessStartInfo(path){UseShellExecute=true});}catch(Exception e){MessageBox.Show(d.Window,e.Message,"Folder unavailable");}});
+   if(stacking){
+    d.Text("Open a stacking app, then load the inputs from this folder.");var apps=new WrapPanel{Margin=new Thickness(0,0,0,8)};
+    foreach(StackingApplication app in Enum.GetValues(typeof(StackingApplication))){var choice=app;var button=new Button{Content=StackingApps.Name(app),Margin=new Thickness(0,0,8,8),MinWidth=100,ToolTip=app==StackingApplication.Siril?"Start Siril with the exported folder as its working directory. Select the inputs in Siril.":app==StackingApplication.StackingWizard?"Start StackingWizard, then load the exported inputs.":"Choose another installed stacking app."};button.Click+=(s,e)=>{if(launch!=null)launch(choice);else OpenStackingApp(d,path,choice);};apps.Children.Add(button);}d.Add(apps);
+   }
+   d.CloseOnly();return d;
+  }
+  void OpenStackingApp(FormWindow dialog,string folder,StackingApplication app){
+   string executable=app==StackingApplication.Siril?settings.SirilExecutable:app==StackingApplication.StackingWizard?settings.StackingWizardExecutable:settings.OtherStackingExecutable;
+   try{
+    if(app==StackingApplication.Other||string.IsNullOrWhiteSpace(executable)||!File.Exists(executable)){
+     var picker=new OpenFileDialog{Title=app==StackingApplication.Other?"Choose a stacking app":"Locate "+StackingApps.Name(app),Filter=app==StackingApplication.Siril?"Siril GUI|siril.exe":"Applications|*.exe",CheckFileExists=true};
+     if(!string.IsNullOrEmpty(executable)&&File.Exists(executable))picker.FileName=executable;
+     if(picker.ShowDialog(dialog.Window)!=true)return;executable=picker.FileName;
+    }
+    var start=StackingApps.LaunchInfo(executable,folder,app);
+    using(var process=Process.Start(start)){if(process==null)throw new IOException("The application did not start.");}
+    if(app==StackingApplication.Siril)settings.SirilExecutable=executable;else if(app==StackingApplication.StackingWizard)settings.StackingWizardExecutable=executable;else settings.OtherStackingExecutable=executable;
+    L("StatusLabel").Text=Path.GetFileNameWithoutExtension(executable)+" launched · "+folder;
+    try{SaveSettings();}catch(Exception e){L("StatusLabel").Text+=" · App location could not be saved: "+e.Message;}
+   }catch(Exception e){MessageBox.Show(dialog.Window,"The stacking app could not be opened. Your exported folder is still available at:\n"+folder+"\n\n"+e.Message,"Stacking app unavailable",MessageBoxButton.OK,MessageBoxImage.Warning);}
+  }
   void SendStackToSiril(List<Frame> selected){
    if(!SirilHandoff.CanSend(selected))return;
    const string title="Siril";
