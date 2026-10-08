@@ -46,7 +46,7 @@ and an optional target for Unknown science captures. Analysis contains optional
 solving and rotation. Ignore non-raw files (PNG/JPG/JPEG) is ON by default; turn it
 off to import those formats and your choice is saved for folder, USB and Dump flows.
 Other supported scientific and camera formats remain available. Ignored originals
-stay in place. Changing ignored formats or filenames rescans the selected source.
+stay in place. Changing ignored formats or filenames requires scanning the source again.
 
 After scanning, Set Unknown targets assigns a chosen catalogue or custom target
 to selected Unknown lights/stacks, or visible Unknown lights/stacks if nothing is

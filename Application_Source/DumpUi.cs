@@ -10,19 +10,27 @@ namespace AstroArchive {
   bool dumpStartupChecked,operationBusy;
   Window dumpProgressWindow;TextBlock dumpProgressStatus,dumpProgressRate;ProgressBar dumpProgressBar;Button dumpProgressCancel;
   Window operationProgressWindow;
+  bool OperationProgressVisible{get{return operationProgressWindow!=null&&operationProgressWindow.IsVisible;}}
   void InitializeProgressVisibility(){Window.StateChanged+=(s,e)=>UpdateProgressVisibility();Window.IsVisibleChanged+=(s,e)=>UpdateProgressVisibility();}
   void EnsureOperationProgress(){
    if(operationProgressWindow!=null)return;
    var popup=(Popup)Window.FindName("OperationPopup");popup.IsOpen=false;var content=popup.Child;popup.Child=null;
    var window=new Window{Owner=Window,Icon=ApplicationIcon.Image,ShowInTaskbar=false,Title="AstroArchive — file progress",SizeToContent=SizeToContent.WidthAndHeight,ResizeMode=ResizeMode.NoResize,WindowStartupLocation=WindowStartupLocation.CenterOwner,FontFamily=Window.FontFamily};
    window.Resources.MergedDictionaries.Add(Window.Resources);window.SetResourceReference(Control.FontSizeProperty,"UiFontControl");Theme.Bind(window,Control.BackgroundProperty,"Surface");Theme.Bind(window,Control.ForegroundProperty,"Text");window.Content=content;
-   window.Closing+=(s,e)=>{if(cancel!=null){e.Cancel=true;B("CancelButton").RaiseEvent(new RoutedEventArgs(Button.ClickEvent));}};
+   window.Closing+=(s,e)=>{if(operationProgressWindow==window&&operationBusy&&cancel!=null){e.Cancel=true;B("CancelButton").RaiseEvent(new RoutedEventArgs(Button.ClickEvent));}};
    operationProgressWindow=window;
   }
   void UpdateProgressVisibility(){
    bool visible=Window.IsVisible&&Window.WindowState!=WindowState.Minimized;
    // A WPF Popup is an independent native window; use an owned window instead.
    ((Popup)Window.FindName("OperationPopup")).IsOpen=false;
+   // Windows restores owned windows after the owner's StateChanged event. Remove
+   // completed progress windows from that list instead of leaving them hidden.
+   if(!operationBusy&&operationProgressWindow!=null){
+    var finished=operationProgressWindow;operationProgressWindow=null;
+    var content=(UIElement)finished.Content;finished.Content=null;
+    ((Popup)Window.FindName("OperationPopup")).Child=content;finished.Close();
+   }
    if(operationBusy&&dumpProgressWindow==null&&visible)EnsureOperationProgress();
    if(operationProgressWindow!=null){
     if(!visible||!operationBusy||dumpProgressWindow!=null)operationProgressWindow.Hide();
