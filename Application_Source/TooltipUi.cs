@@ -68,7 +68,6 @@ namespace AstroArchive {
    {"Index an existing repository","Index existing images without copying or moving them."},
    {"Export searchable catalogue CSV","Export capture metadata as CSV."},
    {"Show selected file location","Locate the selected archive copy."},
-   {"Export files","Copy selected files to the destination."},
    {"Export folder","Create the stacking folder."},
    {"Search catalogue or enter a custom target","Choose a catalogue target or enter a custom name."},
    {"Zoom out","Zoom out (−)."},
