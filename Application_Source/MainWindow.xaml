@@ -661,7 +661,7 @@
      </Grid>
      <Grid Grid.Row="2" x:Name="LibraryBody">
       <Grid.ColumnDefinitions>
-       <ColumnDefinition Width="166" />
+       <ColumnDefinition Width="260" />
        <ColumnDefinition Width="*" MinWidth="260" />
        <ColumnDefinition x:Name="PreviewDividerColumn" Width="10" />
        <ColumnDefinition x:Name="PreviewColumn" Width="290" MinWidth="0" />
@@ -677,9 +677,9 @@
         </Grid>
        </DataTemplate></GroupStyle.HeaderTemplate></GroupStyle></ListBox.GroupStyle>
        <ListBox.ItemTemplate><DataTemplate><Grid><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions><Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
-        <TextBlock Text="{Binding DisplayName}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" VerticalAlignment="Center"/>
+        <TextBlock Text="{Binding DisplayName}" FontWeight="SemiBold" TextWrapping="Wrap" VerticalAlignment="Center"/>
         <Border Grid.Column="1" Background="{DynamicResource SurfaceAlt}" CornerRadius="3" Padding="4,1" Margin="5,0,0,0" VerticalAlignment="Center"><TextBlock Text="{Binding FileCount}" FontSize="{DynamicResource UiFontCaption}" Foreground="{DynamicResource Muted}"/></Border>
-        <TextBlock Grid.Row="1" Grid.ColumnSpan="2" Text="{Binding Subline}" FontSize="{DynamicResource UiFontCaption}" Foreground="{DynamicResource Muted}" TextTrimming="CharacterEllipsis" Margin="0,3,0,0"><TextBlock.Style><Style TargetType="TextBlock"><Style.Triggers><DataTrigger Binding="{Binding Subline}" Value=""><Setter Property="Visibility" Value="Collapsed"/></DataTrigger></Style.Triggers></Style></TextBlock.Style></TextBlock>
+        <TextBlock Grid.Row="1" Grid.ColumnSpan="2" Text="{Binding Subline}" FontSize="{DynamicResource UiFontCaption}" Foreground="{DynamicResource Muted}" TextWrapping="Wrap" Margin="0,3,0,0"><TextBlock.Style><Style TargetType="TextBlock"><Style.Triggers><DataTrigger Binding="{Binding Subline}" Value=""><Setter Property="Visibility" Value="Collapsed"/></DataTrigger></Style.Triggers></Style></TextBlock.Style></TextBlock>
        </Grid></DataTemplate></ListBox.ItemTemplate>
       </ListBox>
        </DockPanel>
@@ -866,7 +866,7 @@
      </StackPanel>
      <DockPanel Grid.Row="1" Margin="0,0,0,10"><Button DockPanel.Dock="Right" x:Name="EditedClearButton" Content="Clear" Margin="8,0,0,0"/><Button DockPanel.Dock="Right" x:Name="EditedFiltersButton" Content="Filters" Margin="8,0,0,0"/><TextBlock DockPanel.Dock="Right" x:Name="EditedSummary" Foreground="{DynamicResource Muted}" VerticalAlignment="Center" Margin="12,0,0,0"/><ComboBox x:Name="EditedClassFilter" Visibility="Collapsed"/><Grid><TextBox x:Name="EditedSearchBox" ToolTip="Search edited images and metadata. ? shows examples." Padding="9,6,34,6"/><TextBlock x:Name="EditedSearchHint" Text="Search edited images…" Foreground="{DynamicResource Muted}" Margin="10,0" VerticalAlignment="Center" IsHitTestVisible="False"/><Button x:Name="EditedSearchHelpButton" Content="?" Width="24" Height="24" MinHeight="0" Padding="0" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,5,0" AutomationProperties.Name="Search syntax and examples"/></Grid></DockPanel>
      <Grid Grid.Row="2" x:Name="EditedBody">
-      <Grid.ColumnDefinitions><ColumnDefinition Width="166"/><ColumnDefinition Width="*" MinWidth="260"/><ColumnDefinition Width="10"/><ColumnDefinition Width="290" MinWidth="0"/></Grid.ColumnDefinitions>
+      <Grid.ColumnDefinitions><ColumnDefinition Width="260"/><ColumnDefinition Width="*" MinWidth="260"/><ColumnDefinition Width="10"/><ColumnDefinition Width="290" MinWidth="0"/></Grid.ColumnDefinitions>
       <Border Background="{DynamicResource Surface}" BorderBrush="{DynamicResource Border}" BorderThickness="1" CornerRadius="8" Margin="0,0,10,0"><DockPanel><TextBlock DockPanel.Dock="Top" Text="TARGETS" FontSize="{DynamicResource UiFontCaption}" FontWeight="SemiBold" Foreground="{DynamicResource Muted}" Margin="12,13,0,8"/><ListBox x:Name="EditedTargetList" BorderThickness="0" Background="Transparent" ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.CanContentScroll="True" VirtualizingPanel.IsVirtualizingWhenGrouping="True" VirtualizingPanel.VirtualizationMode="Recycling" TextSearch.TextPath="DisplayName" IsTextSearchEnabled="True">
        <ListBox.ItemContainerStyle><Style TargetType="ListBoxItem" BasedOn="{StaticResource {x:Type ListBoxItem}}"><Setter Property="Padding" Value="7,6"/><Setter Property="Margin" Value="4,1"/><Setter Property="ToolTip" Value="{Binding Tooltip}"/><Setter Property="AutomationProperties.Name" Value="{Binding Label}"/><Setter Property="AutomationProperties.HelpText" Value="{Binding Tooltip}"/><Setter Property="ToolTipService.ShowDuration" Value="20000"/></Style></ListBox.ItemContainerStyle>
        <ListBox.GroupStyle><GroupStyle><GroupStyle.HeaderTemplate><DataTemplate>
@@ -875,9 +875,9 @@
         </Grid>
        </DataTemplate></GroupStyle.HeaderTemplate></GroupStyle></ListBox.GroupStyle>
        <ListBox.ItemTemplate><DataTemplate><Grid><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions><Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
-        <TextBlock Text="{Binding DisplayName}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" VerticalAlignment="Center"/>
+        <TextBlock Text="{Binding DisplayName}" FontWeight="SemiBold" TextWrapping="Wrap" VerticalAlignment="Center"/>
         <Border Grid.Column="1" Background="{DynamicResource SurfaceAlt}" CornerRadius="3" Padding="4,1" Margin="5,0,0,0" VerticalAlignment="Center"><TextBlock Text="{Binding FileCount}" FontSize="{DynamicResource UiFontCaption}" Foreground="{DynamicResource Muted}"/></Border>
-        <TextBlock Grid.Row="1" Grid.ColumnSpan="2" Text="{Binding Subline}" FontSize="{DynamicResource UiFontCaption}" Foreground="{DynamicResource Muted}" TextTrimming="CharacterEllipsis" Margin="0,3,0,0"><TextBlock.Style><Style TargetType="TextBlock"><Style.Triggers><DataTrigger Binding="{Binding Subline}" Value=""><Setter Property="Visibility" Value="Collapsed"/></DataTrigger></Style.Triggers></Style></TextBlock.Style></TextBlock>
+        <TextBlock Grid.Row="1" Grid.ColumnSpan="2" Text="{Binding Subline}" FontSize="{DynamicResource UiFontCaption}" Foreground="{DynamicResource Muted}" TextWrapping="Wrap" Margin="0,3,0,0"><TextBlock.Style><Style TargetType="TextBlock"><Style.Triggers><DataTrigger Binding="{Binding Subline}" Value=""><Setter Property="Visibility" Value="Collapsed"/></DataTrigger></Style.Triggers></Style></TextBlock.Style></TextBlock>
        </Grid></DataTemplate></ListBox.ItemTemplate>
       </ListBox></DockPanel></Border>
       <Grid Grid.Column="1"><Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="*"/></Grid.RowDefinitions>

@@ -1,6 +1,15 @@
 // Common astrophotography labels supplement OpenNGC without changing positions.
+using System;
+using System.Collections.Generic;
 namespace AstroArchive {
  public static class CatalogNames {
+  // Whole-region names shared by catalogue components use an explicit owner.
+  // Specific component IDs remain independently addressable.
+  public static readonly Dictionary<string,string> NameOwners=new Dictionary<string,string>(StringComparer.OrdinalIgnoreCase){
+   {"Rosette Nebula","NGC2237"},{"Eagle Nebula","M16"},{"Flame Nebula","NGC2024"},
+   {"Eastern Veil","NGC6992"},{"Network Nebula","NGC6992"}
+  };
+  public static readonly string[] AmbiguousNames={"Lobster Nebula"};
   // Canonical ID | preferred common name | additional names (semicolon separated).
   public static readonly string[] Entries={
    "M1|Crab Nebula|",
@@ -23,6 +32,28 @@ namespace AstroArchive {
    "M97|Owl Nebula|",
    "M101|Pinwheel Galaxy|",
    "M104|Sombrero Galaxy|",
+   // Caldwell/common-name coverage: docs/CATALOGUE_NAMES.md.
+   "NGC40|Bow-Tie Nebula|Bow Tie Nebula",
+   "NGC55|String of Pearls Galaxy|",
+   "NGC188|Polarissima Cluster|",
+   "NGC246|Skull Nebula|",
+   "NGC300|Sculptor Pinwheel Galaxy|",
+   "NGC457|Owl Cluster|E.T. Cluster;ET Cluster",
+   "NGC891|Silver Sliver Galaxy|Outer Limits Galaxy;Silver Sliver",
+   "NGC2261|Hubble's Variable Nebula|Hubble's Nebula;Hubble Variable Nebula",
+   "NGC2362|Tau Canis Majoris Cluster|Tau CMa Cluster",
+   "NGC2419|Intergalactic Wanderer|",
+   "NGC3132|Eight-Burst Nebula|Eight Burst Nebula;Southern Ring Nebula",
+   "NGC3242|Ghost of Jupiter|Jupiter's Ghost Nebula;Ghost of Jupiter Nebula",
+   "NGC4244|Silver Needle Galaxy|",
+   "NGC4889|Coma B|",
+   "NGC5907|Splinter Galaxy|",
+   "NGC6087|S Normae Cluster|S Nor Cluster",
+   "NGC6752|Great Peacock Globular|",
+   "NGC6826|Blinking Planetary Nebula|Blinking Planetary;Blinking Nebula",
+   "NGC7479|Superman Galaxy|",
+   "NGC7662|Blue Snowball Nebula|Blue Snowball;Copeland's Blue Snowball",
+   "NGC7814|Little Sombrero Galaxy|Little Sombrero",
    "NGC253|Sculptor Galaxy|Silver Dollar Galaxy",
    "NGC281|Pacman Nebula|Pac-Man Nebula",
    "NGC7293|Helix Nebula|",
@@ -37,7 +68,7 @@ namespace AstroArchive {
    "NGC4565|Needle Galaxy|",
    "NGC4631|Whale Galaxy|",
    "NGC6334|Cat's Paw Nebula|Cats Paw Nebula;Cat’s Paw Nebula",
-   "NGC6357|Lobster Nebula|War and Peace Nebula",
+   "NGC6357|War and Peace Nebula|Lobster Nebula (NGC6357)",
    "NGC6960|Western Veil Nebula|Western Veil;Witch's Broom Nebula;Witch’s Broom Nebula",
    "NGC6992|Eastern Veil Nebula|Eastern Veil;Network Nebula",
    "NGC7000|North America Nebula|North American Nebula",
@@ -67,7 +98,7 @@ namespace AstroArchive {
    "B33|Horsehead Nebula|Barnard 33",
    // Caldwell-only entries in the bundled position catalogue.
    "C9|Cave Nebula|Caldwell 9;SH2155;Sh2-155;Sharpless 155",
-   "C14|Double Cluster|Caldwell 14;h and chi Persei",
+   "C14|Double Cluster|Caldwell 14;h and chi Persei;h and χ Persei;h χ Persei",
    "C41|Hyades|Caldwell 41;Melotte 25;Mel 25",
    "C99|Coalsack Nebula|Caldwell 99;Coalsack"
   };
