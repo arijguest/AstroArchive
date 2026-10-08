@@ -73,7 +73,7 @@ namespace AstroArchive {
       var targets=TargetNavigation.Build(rows,token);string active=targets.Any(t=>t.Name==target)?target:"All targets";if(active!="All targets")rows=rows.Where(f=>f.Target==active).ToList();
       // Preserve the established target/session order as a stable tie-breaker.
       rows=rows.Select(f=>new{Frame=f,Date=CaptureSessions.Date(f)}).OrderBy(f=>f.Frame.Target).ThenBy(f=>f.Date==null?DateTime.MaxValue:f.Date.Date).ThenBy(f=>f.Frame.SessionKey).ThenBy(f=>f.Frame.Observed).ThenBy(f=>f.Frame.OriginalName).Select(f=>f.Frame).ToList();
-      rows=SearchOrdering.Order(rows,sorts,culture,token);var sessions=mode=="Session summaries"?SubframeSessions.Build(rows,token):null;token.ThrowIfCancellationRequested();
+      rows=RepositoryOrdering.Order(rows,sorts,culture,active=="All targets",mode=="Session summaries",token);var sessions=mode=="Session summaries"?SubframeSessions.Build(rows,token):null;token.ThrowIfCancellationRequested();
       return new SearchResult{Query=query,Frames=rows,Targets=targets,Target=active,Sessions=sessions,Summary=CaptureGroups.Summarize(rows,token)};};
     }
     SearchResult result=await state.Worker.Submit(work);

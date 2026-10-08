@@ -47,7 +47,30 @@ namespace AstroArchive {
   static readonly Lazy<Dictionary<string,CatalogObject>> positions=new Lazy<Dictionary<string,CatalogObject>>(()=>Catalog.Objects.GroupBy(o=>o.Name).ToDictionary(g=>g.Key,g=>g.First(),StringComparer.OrdinalIgnoreCase));
   public bool HasPosition,HasHorizon,ApproximatePosition;public double RA,Dec,Latitude,Longitude,Altitude,Azimuth;
   public DateTime? Utc;public string TargetLabel,TimeLabel,Summary,Evidence,Key;
-  public SkyOrientation Orientation;
+  public SkyOrientation Orientation;public double? StackSeconds;
+  SkyVector[] stackTrack;
+  public SkyVector[] StackTrack{get{
+   if(stackTrack!=null)return stackTrack;if(!StackSeconds.HasValue||!HasPosition||!HasHorizon)return stackTrack=new SkyVector[0];
+   // Fixed work per capture, never per frame in the stack. Great-circle chords
+   // approximate the diurnal small-circle path, including long integrations.
+   const int segments=32;stackTrack=new SkyVector[segments+1];var target=SkyVector.Equatorial(RA,Dec);
+   for(int i=0;i<=segments;i++)stackTrack[i]=new SkyOrientation(Utc.Value.AddSeconds(-StackSeconds.Value*(segments-i)/segments),true,Latitude,Longitude).Map(target);
+   return stackTrack;
+  }}
+  public static bool IsCalibration(Frame frame){return frame!=null&&(frame.Target=="Calibration"||Regex.IsMatch(frame.Kind??"",@"^(?:Master[ _-]*)?(?:Dark(?:[ _-]*flat)?|Flat|Bias|Offset)$",RegexOptions.IgnoreCase));}
+  static double? StackDuration(Frame frame){
+   if(frame==null||frame.Kind!="Stack")return null;
+   double? duration=frame.SkyStackDurationSeconds;
+   if(!duration.HasValue){
+    var header=new FitsHeader();var image=frame.Images==null?null:frame.Images.FirstOrDefault(i=>i.Key==frame.ImageKey)??frame.Images.FirstOrDefault();
+    if(image!=null&&image.Headers!=null)foreach(var value in image.Headers)header.Values[value.Key]=value.Value;
+    MetadataFact exposure;if(frame.Facts!=null&&frame.Facts.TryGetValue("Exposure",out exposure)&&exposure!=null&&!string.IsNullOrEmpty(exposure.Raw))header.Comments["EXPTIME"]=exposure.Raw;
+    duration=EditedMetadata.Read(frame.OriginalName,header).TotalExposure;
+   }
+   // Integration metadata is an estimate of elapsed time; never multiply an
+   // ambiguous EXPTIME by the stack count or invent acquisition gaps.
+   return duration.HasValue&&Finite(duration.Value)&&duration.Value>0?duration:null;
+  }
   public static bool Finite(double number){return !double.IsNaN(number)&&!double.IsInfinity(number);}
   static bool Position(double ra,double dec){return Finite(ra)&&Finite(dec)&&ra>=0&&ra<=360&&Math.Abs(dec)<=90;}
   public static Frame FromHeader(FitsHeader header,string format,string filename,string fallbackTarget=null){
@@ -59,6 +82,10 @@ namespace AstroArchive {
    string system=header.Get("TIMESYS");if((system.Length==0||system.Equals("UTC",StringComparison.OrdinalIgnoreCase))&&(format=="FITS"||Regex.IsMatch(frame.Observed,@"(?:Z|[+-]\d\d:\d\d)$",RegexOptions.IgnoreCase)))frame.TimeSource="FITS UTC";
    // A non-UTC TIMESYS must not become UTC merely because DATE-OBS has a Z suffix.
    if(system.Length>0&&!system.Equals("UTC",StringComparison.OrdinalIgnoreCase)){frame.Observed="";frame.TimeSource="Capture clock "+system;}
+   string kind=header.Get("IMAGETYP","IMAGETYPE","FRAME","FRAMETYP")+" "+Path.GetFileNameWithoutExtension(filename??"");
+   if(Regex.IsMatch(kind,@"(?:^|[ _-])(?:master[ _-]*)?(?:dark(?:[ _-]*flat)?|flat|bias|offset)(?:[ _-]|$)",RegexOptions.IgnoreCase)||Regex.IsMatch(header.Get("IMAGETYP","IMAGETYPE","FRAME","FRAMETYP"),@"dark|flat|bias|offset",RegexOptions.IgnoreCase)){frame.Kind="Dark";frame.Target="Calibration";}
+   else if((header.Number("NCOMBINE","STACKCNT","NSTACK","STACKNUM","NSUBS","SUBCOUNT")??0)>1||Regex.IsMatch(kind,@"(?:^|[ _-])(?:stack|stacked|restacked)(?:[ _-]|$)|\d+x\d+(?:\.\d+)?s",RegexOptions.IgnoreCase))frame.Kind="Stack";
+   var metadata=EditedMetadata.Read(filename,header);if(metadata.TotalExposure.HasValue&&!IsCalibration(frame)){frame.Kind="Stack";frame.SkyStackDurationSeconds=metadata.TotalExposure;}
    frame.ObservedUtc=CaptureUtc(frame).HasValue?CaptureUtc(frame).Value.ToString("o",CultureInfo.InvariantCulture):null;return frame;
   }
   public static DateTime? CaptureUtc(Frame frame){
@@ -97,7 +124,12 @@ namespace AstroArchive {
    sky.Evidence+=(sky.Evidence.Length>0?"\n":"")+sky.TimeLabel+"\n"+(site?place+" · "+sky.Latitude.ToString("0.###",CultureInfo.InvariantCulture)+"°, "+sky.Longitude.ToString("0.###",CultureInfo.InvariantCulture)+"°":"Choose your observing town / city in Settings for the local horizon.");
    if(sky.HasPosition)sky.Evidence+="\n"+hemisphere+" · RA "+sky.RA.ToString("0.###",CultureInfo.InvariantCulture)+"°, Dec "+sky.Dec.ToString("0.###",CultureInfo.InvariantCulture)+"°.";
    sky.Evidence+="\n"+(sky.HasHorizon?"Sky at the recorded capture time. Solid horizon; faint figures lie below it. Geometric altitude excludes atmospheric refraction.":"Celestial coordinates only. No compass horizon is inferred without a known capture time and observing location.");
-   sky.Key=string.Join("|",new[]{sky.HasPosition.ToString(),sky.HasHorizon.ToString(),sky.RA.ToString("R",CultureInfo.InvariantCulture),sky.Dec.ToString("R",CultureInfo.InvariantCulture),sky.Latitude.ToString("R",CultureInfo.InvariantCulture),sky.Longitude.ToString("R",CultureInfo.InvariantCulture),sky.Utc.HasValue?sky.Utc.Value.Ticks.ToString(CultureInfo.InvariantCulture):""});return sky;
+   sky.StackSeconds=StackDuration(frame);
+   if(sky.StackSeconds.HasValue&&sky.HasPosition&&sky.HasHorizon){
+    if(sky.StackSeconds.Value>(sky.Utc.Value-DateTime.MinValue).TotalSeconds)sky.StackSeconds=null;
+    else sky.Evidence+="\nEstimated stack track: recorded time assumed to be the end; integration "+sky.StackSeconds.Value.ToString("0.#",CultureInfo.InvariantCulture)+" s used as elapsed duration. Acquisition gaps and target proper motion are unknown.";
+   }
+   sky.Key=string.Join("|",new[]{sky.HasPosition.ToString(),sky.HasHorizon.ToString(),sky.StackSeconds.HasValue?sky.StackSeconds.Value.ToString("R",CultureInfo.InvariantCulture):"",sky.RA.ToString("R",CultureInfo.InvariantCulture),sky.Dec.ToString("R",CultureInfo.InvariantCulture),sky.Latitude.ToString("R",CultureInfo.InvariantCulture),sky.Longitude.ToString("R",CultureInfo.InvariantCulture),sky.Utc.HasValue?sky.Utc.Value.Ticks.ToString(CultureInfo.InvariantCulture):""});return sky;
   }
  }
  public sealed class SkyOrientation {

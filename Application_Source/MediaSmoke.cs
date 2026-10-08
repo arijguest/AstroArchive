@@ -31,7 +31,7 @@ namespace AstroArchive {
    }finally{if(motion!=null)motion.Dispose();if(popup!=null)popup.Close();Directory.Delete(directory,true);}
   }
   void SmokeSessionSummaries(){
-   var previous=displayed;string mode=Convert.ToString(C("LibraryViewBox").SelectedItem);var grid=G("FramesGrid");
+   var previous=displayed;var savedSorts=tableSorts["FramesGrid"].ToList();string mode=Convert.ToString(C("LibraryViewBox").SelectedItem);var grid=G("FramesGrid");
    try{
     displayed=new System.Collections.Generic.List<Frame>{new Frame{Target="M31",Kind="Light",Session="fixture",Telescope="Dwarf-3",Camera="Tele",Exposure=60,Filter="Ha",OriginalName="one.fit"},new Frame{Target="M31",Kind="Light",Session="fixture",Telescope="Dwarf-3",Camera="Tele",Exposure=60,Filter="Ha",OriginalName="two.fit"},new Frame{Target="M31",Kind="Stack",OriginalName="stack.fit"}};
     // Set without triggering the regular filter, which uses the real archive.
@@ -48,7 +48,21 @@ namespace AstroArchive {
     displayed.Add(new Frame{Target="M45",Kind="Light",Session="second",Telescope="Dwarf-3",Camera="Tele",OriginalName="three.fit"});displayed.Add(new Frame{Target="M45",Kind="Light",Session="second",Telescope="Dwarf-3",Camera="Tele",OriginalName="four.fit"});DisplayLibrary();SelectSession(subframeSessions[0],System.Windows.Input.ModifierKeys.None);SelectSession(subframeSessions[1],System.Windows.Input.ModifierKeys.Shift);if(SelectedFiles().Count!=4)throw new Exception("Shift selection omitted a session group");SelectSession(subframeSessions[0],System.Windows.Input.ModifierKeys.Control);if(SelectedFiles().Count!=2)throw new Exception("Ctrl selection did not toggle a group");
     displayed=displayed.Take(3).ToList();DisplayLibrary();if(SelectedFiles().Count!=0)throw new Exception("Filtered-out session remained actionable");
     updating=true;C("LibraryViewBox").SelectedItem="Show all files";updating=false;DisplayLibrary();if(((ListCollectionView)grid.ItemsSource).GroupDescriptions.Count!=0||grid.Items.Count!=3)throw new Exception("Show all files did not restore a flat table.");
-   }finally{updating=true;C("LibraryViewBox").SelectedItem=mode;updating=false;displayed=previous;DisplayLibrary();}
+    displayed.Add(new Frame{Target="M31",Kind="Stack",OriginalName="z-stack.fit",Exposure=5});displayed.Add(new Frame{Target="M31",Kind="Light",OriginalName="a-single.fit",Exposure=1});
+    foreach(string layout in new[]{"Session summaries","Show all files","By target","By target and session"})foreach(var direction in new[]{System.ComponentModel.ListSortDirection.Ascending,System.ComponentModel.ListSortDirection.Descending}){
+     updating=true;C("LibraryViewBox").SelectedItem=layout;updating=false;
+     tableSorts["FramesGrid"]=new System.Collections.Generic.List<System.ComponentModel.SortDescription>{new System.ComponentModel.SortDescription("OriginalName",direction)};
+     var source=displayed.ToList();
+     foreach(bool background in new[]{false,true}){
+      var target=Targets.SelectedItem as TargetSummary;bool allTargets=target==null||target.Name=="All targets";
+      displayed=background?RepositoryOrdering.Order(source,SearchSorts("FramesGrid"),System.Globalization.CultureInfo.CurrentCulture,allTargets,layout=="Session summaries",System.Threading.CancellationToken.None):source;
+      DisplayLibrary(presorted:background);PumpPopupLayout();
+      var ordered=grid.Items.Cast<Frame>().ToList();var expected=RepositoryOrdering.Order(source,SearchSorts("FramesGrid"),System.Globalization.CultureInfo.CurrentCulture,allTargets,layout=="Session summaries",System.Threading.CancellationToken.None);
+      if(!ordered.SequenceEqual(expected))throw new Exception("Repository sections differ between sorting paths: "+layout+", background "+background);
+      if(layout=="Session summaries"&&allTargets&&!(((ListCollectionView)grid.ItemsSource).Groups.Cast<CollectionViewGroup>().First().Name is SubframeSession))throw new Exception("Merged subs are not first in All Targets");
+     }
+    }
+   }finally{tableSorts["FramesGrid"]=savedSorts;updating=true;C("LibraryViewBox").SelectedItem=mode;updating=false;displayed=previous;DisplayLibrary();}
   }
  }
 }

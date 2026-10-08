@@ -16,6 +16,8 @@ namespace AstroArchive {
   readonly Button playbackButton;Action togglePlayback;
   readonly Button zoomOutButton,zoomInButton,fitButton;readonly List<Button> panButtons=new List<Button>();
   readonly PreviewZoom zoom=new PreviewZoom();readonly MatrixTransform transform=new MatrixTransform();
+  bool remainderEnabled=true;
+  public void SetRemainderEnabled(bool enabled){remainderEnabled=enabled;Resize();}
   PreviewGeometry geometry;bool fitting=true,dragging,loading;Point previous;
   public PreviewViewport(Grid host,Grid viewport,Image image,FrameworkElement remainder=null){
    this.host=host;this.viewport=viewport;this.image=image;this.remainder=remainder;
@@ -85,7 +87,7 @@ namespace AstroArchive {
    viewport.Width=width;viewport.Height=height;
    // Fit the whole image first. The sky receives only genuinely unused space;
    // it never reserves a fixed height or feeds its own size back into image fit.
-   if(remainder!=null){double top=Math.Min(host.ActualHeight,height+toolbar),space=Math.Max(0,host.ActualHeight-top);remainderOffset.Y=top;remainder.Height=space;remainder.Visibility=(geometry!=null||loading)&&space>=50?Visibility.Visible:Visibility.Collapsed;}
+   if(remainder!=null){double top=Math.Min(host.ActualHeight,height+toolbar),space=Math.Max(0,host.ActualHeight-top);remainderOffset.Y=top;remainder.Height=space;remainder.Visibility=remainderEnabled&&(geometry!=null||loading)&&space>=50?Visibility.Visible:Visibility.Collapsed;}
    // Keep the bitmap's existing measure path, with a separate control area
    // immediately below the image rather than a new auto-sized image row.
    toolbarHost.MaxWidth=Math.Max(0,width-12);toolbarHost.Margin=new Thickness(6,height+6,6,0);

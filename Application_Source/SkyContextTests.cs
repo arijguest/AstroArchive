@@ -61,6 +61,25 @@ namespace AstroArchive {
     Check(SkyFigures.Stars.Length>600&&SkyFigures.Stars.Length<1000,"Unexpected catalogue size");var orientation=new SkyOrientation(new DateTime(2026,10,7,22,0,0,DateTimeKind.Utc),true,-33,151);
     foreach(var star in SkyFigures.Stars){var mapped=orientation.Map(star);Check(Math.Abs(mapped.Dot(mapped)-1)<0.000001,"Precession or horizon transform changed vector length");}
    });
+   Test("Stack tracks use end time and explicit duration with bounded cached work",()=>{
+    var f=SkyFrame(325.46061837,30,51,0);f.Kind="Stack";f.SkyStackDurationSeconds=3600;var sky=CaptureSky.Resolve(f,null);var track=sky.StackTrack;
+    var start=new SkyOrientation(sky.Utc.Value.AddHours(-1),true,51,0).Map(SkyVector.Equatorial(f.RA.Value,f.Dec.Value));var end=sky.Orientation.Map(SkyVector.Equatorial(f.RA.Value,f.Dec.Value));
+    Check(track.Length==33&&track[0].Dot(start)>0.99999999&&track[32].Dot(end)>0.99999999,"Track does not span the integration ending at stack time");
+    Check(track.All(v=>Math.Abs(v.Dot(v)-1)<1e-9)&&ReferenceEquals(track,sky.StackTrack),"Track vectors or snapshot cache changed");
+    f.SkyStackDurationSeconds=7200;Check(CaptureSky.Resolve(f,null).Key!=sky.Key,"Changed duration reused cached track");
+    f.Kind="Light";Check(CaptureSky.Resolve(f,null).StackTrack.Length==0,"Light frame has a stack track");f.Kind="Stack";f.SkyStackDurationSeconds=null;f.Exposure=30;f.StackCount=120;Check(CaptureSky.Resolve(f,null).StackTrack.Length==0,"Ambiguous exposure multiplied by count");
+    f.SkyStackDurationSeconds=3600;f.ObservedUtc=null;Check(CaptureSky.Resolve(f,null).StackTrack.Length==0,"Missing time invented a track");f.ObservedUtc="2000-01-01T12:00:00Z";f.Longitude=null;Check(CaptureSky.Resolve(f,null).StackTrack.Length==0,"Missing site invented a track");
+    f.Longitude=0;f.RA=null;f.Dec=null;Check(CaptureSky.Resolve(f,null).StackTrack.Length==0,"Missing pointing invented a track");
+    foreach(double bad in new[]{0.0,-1,double.NaN,double.PositiveInfinity,double.MaxValue}){f.RA=10;f.Dec=20;f.SkyStackDurationSeconds=bad;Check(CaptureSky.Resolve(f,null).StackTrack.Length==0,"Invalid duration accepted");}
+   });
+   Test("Sky header stack duration retains total and explicit per-sub evidence",()=>{
+    var h=new FitsHeader();h.Values["OBJECT"]="M31";h.Values["DATE-OBS"]="2026-10-07T22:00:00Z";h.Values["NCOMBINE"]="120";h.Values["TOTALEXP"]="3600";
+    var f=CaptureSky.FromHeader(h,"FITS","stack.fit");Check(f.Kind=="Stack"&&f.SkyStackDurationSeconds==3600,"Explicit total missing");
+    h.Values.Remove("TOTALEXP");h.Values["SUBEXP"]="30";Check(CaptureSky.FromHeader(h,"FITS","stack.fit").SkyStackDurationSeconds==3600,"Explicit sub duration and count not combined");
+    h.Values.Remove("SUBEXP");h.Values["EXPTIME"]="30";Check(!CaptureSky.FromHeader(h,"FITS","stack.fit").SkyStackDurationSeconds.HasValue,"Ambiguous EXPTIME treated as duration");
+    foreach(string kind in new[]{"Dark","Master dark","Dark flat","Master flat","Bias","Master bias","Offset"}){f.Kind=kind;Check(CaptureSky.IsCalibration(f),"Calibration not recognised: "+kind);}
+    h.Values["IMAGETYP"]="Master Dark";h.Values["TOTALEXP"]="3600";Check(CaptureSky.IsCalibration(CaptureSky.FromHeader(h,"FITS","calibration.fit")),"Header calibration became stack");
+   });
   }
  }
 }

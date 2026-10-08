@@ -30,6 +30,17 @@ namespace AstroArchive {
     var comet=TargetNavigation.Build(new[]{new Frame{Target="C/2023 A3 (Tsuchinshan-ATLAS)",Kind="Light",Exposure=30}})[1];Check(comet.DisplayName=="Tsuchinshan-ATLAS"&&comet.Subline=="C/2023 A3 · 30s"&&comet.Tooltip.Contains("C/2023 A3 (Tsuchinshan-ATLAS)"),"Short comet label lost its identity");
     Check(TargetNavigation.ShortName("12P/Pons-Brooks")=="Pons-Brooks"&&TargetNavigation.Identifier("12P/Pons-Brooks")=="12P","Numbered comet labels remained verbose");
    });
+   Test("Repository ordering keeps merged subs stacks and calibrations in their sections",()=>{
+    var a=new Frame{Target="M31",Kind="Light",Session="fixture",OriginalName="z-sub.fit"};var b=a.Clone();b.OriginalName="a-sub.fit";
+    var stack=new Frame{Target="M31",Kind="Stack",OriginalName="a-stack.fit"};var single=new Frame{Target="M31",Kind="Light",OriginalName="single.fit"};
+    var dark=new Frame{Target="M31",Kind="Master dark",OriginalName="a-dark.fit"};var flat=new Frame{Target="Calibration",Kind="Master flat",OriginalName="flat.fit"};var rows=new[]{dark,stack,single,a,flat,b};
+    foreach(bool descending in new[]{false,true}){var sorts=new[]{new SearchSort{Property="OriginalName",Descending=descending}};
+     var ordered=RepositoryOrdering.Order(rows,sorts,System.Globalization.CultureInfo.InvariantCulture,true,true,ct);Check(ordered.Take(2).All(f=>f==a||f==b)&&ordered[2]==stack&&ordered[3]==single&&ordered.Skip(4).All(CaptureSky.IsCalibration),"All Targets sections mixed");
+     Check(ordered[0]==(descending?a:b),"Column sort lost within merged subs");
+     var target=RepositoryOrdering.Order(rows,sorts,System.Globalization.CultureInfo.InvariantCulture,false,true,ct);Check(target[0]==stack&&target.Skip(4).All(CaptureSky.IsCalibration),"Single-target stacks or calibration order wrong");
+     var filtered=RepositoryOrdering.Order(rows.Where(f=>f!=b),sorts,System.Globalization.CultureInfo.InvariantCulture,true,true,ct);Check(filtered[0]==stack,"Filtered singleton retained merged-group priority");
+    }
+   });
   }
  }
 }

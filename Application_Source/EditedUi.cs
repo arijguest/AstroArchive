@@ -22,7 +22,7 @@ namespace AstroArchive {
   EditedProject EditedImageProject{get{return ActiveEditedImage==null?ActiveEditedProject:ActiveEditedImage.Project;}}
   MotionPreview editedMotion;PreviewViewport editedPreviewViewport;CancellationTokenSource editedPreviewCancel;int editedPreviewGeneration;PreviewData editedPreviewData;bool editedChoosingStretch;
   void InitializeEditedPreview(){
-   editedPreviewViewport=new PreviewViewport((Grid)Window.FindName("EditedPreviewHost"),(Grid)Window.FindName("EditedPreviewStage"),(Image)Window.FindName("EditedPreviewImage"),(FrameworkElement)Window.FindName("EditedPreviewSky"));InitializeSkyPreview("Edited");C("EditedStretchMode").ItemsSource=PreviewData.StretchModes;C("EditedStretchMode").SelectedItem=settings.PreviewStretch??"Auto per channel";
+   editedPreviewViewport=new PreviewViewport((Grid)Window.FindName("EditedPreviewHost"),(Grid)Window.FindName("EditedPreviewStage"),(Image)Window.FindName("EditedPreviewImage"),(FrameworkElement)Window.FindName("EditedPreviewSkyPanel"));InitializeSkyPreview("Edited");C("EditedStretchMode").ItemsSource=PreviewData.StretchModes;C("EditedStretchMode").SelectedItem=settings.PreviewStretch??"Auto per channel";
    C("EditedStretchMode").SelectionChanged+=(s,e)=>{if(!editedChoosingStretch)LoadEditedPreview(false);};B("EditedOpenPreviewButton").Click+=(s,e)=>PreviewEditedImage();
   }
   void CancelEditedPreview(){ClosePreviewDetails("Edited");if(editedMotion!=null){editedMotion.Dispose();editedMotion=null;}editedPreviewGeneration++;if(editedPreviewCancel!=null){editedPreviewCancel.Cancel();editedPreviewCancel.Dispose();editedPreviewCancel=null;}editedPreviewData=null;UpdateCaptureSky("Edited",null);if(editedPreviewViewport!=null)editedPreviewViewport.SetImage(null,true);}

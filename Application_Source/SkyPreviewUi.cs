@@ -14,6 +14,7 @@ namespace AstroArchive {
   void UpdateCaptureSky(string prefix,Frame frame){
    if(prefix.Length==0)previewSkyFrame=frame;else editedSkyFrame=frame;
    var globe=Window.FindName(prefix+"PreviewSky") as SkyGlobeView;if(globe==null)return;var sky=CaptureSky.Resolve(frame,settings);globe.SetContext(sky);
+   var viewport=prefix.Length==0?previewViewport:editedPreviewViewport;if(viewport!=null)viewport.SetRemainderEnabled(!CaptureSky.IsCalibration(frame));
   }
   void RefreshSkyPreviews(){UpdateCaptureSky("",previewSkyFrame);UpdateCaptureSky("Edited",editedSkyFrame);}
   static Frame ReadSkyFrame(string path,string fallbackTarget=null){

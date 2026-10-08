@@ -11,6 +11,7 @@ using System.Windows.Threading;
 namespace AstroArchive {
     public static class TableSortIndicators {
         public static readonly DependencyProperty MarkProperty = DependencyProperty.RegisterAttached("Mark", typeof(string), typeof(TableSortIndicators), new PropertyMetadata(""));
+        static readonly DependencyProperty PreparedSortsProperty = DependencyProperty.RegisterAttached("PreparedSorts", typeof(System.Collections.Generic.IEnumerable<SortDescription>), typeof(TableSortIndicators), new PropertyMetadata(null));
         static readonly DependencyProperty AttachedProperty = DependencyProperty.RegisterAttached("Attached", typeof(bool), typeof(TableSortIndicators), new PropertyMetadata(false));
         static readonly DependencyProperty BaseMinimumProperty = DependencyProperty.RegisterAttached("BaseMinimum", typeof(double), typeof(TableSortIndicators), new PropertyMetadata(double.NaN));
         public static string GetMark(DependencyObject element) { return (string)element.GetValue(MarkProperty); }
@@ -30,7 +31,8 @@ namespace AstroArchive {
             }
         }
         public static void Update(DataGrid grid,System.Collections.Generic.IEnumerable<SortDescription> preparedSorts=null) {
-            var sorts = (preparedSorts??grid.Items.SortDescriptions).ToList();
+            if(preparedSorts!=null)grid.SetValue(PreparedSortsProperty,preparedSorts.ToList());
+            var sorts = (preparedSorts??(System.Collections.Generic.IEnumerable<SortDescription>)grid.GetValue(PreparedSortsProperty)??grid.Items.SortDescriptions).ToList();
             foreach (var column in grid.Columns) {
                 int index = sorts.FindIndex(sort => sort.PropertyName == column.SortMemberPath);
                 string mark = index < 0 ? "" : (sorts[index].Direction == ListSortDirection.Ascending ? "▲" : "▼") + (sorts.Count > 1 ? " " + (index + 1) : "");
