@@ -22,7 +22,7 @@ in reused target folders. Generic numbered names are folder scoped; names with
 capture dates and other specific names can match across mirrors/drive-letter changes.
 Bookkeeping directories are excluded, and unknown/newer folder trees go first.
 
-**Import > Import options > Robust file matching (slower)** is persisted and off
+**Settings > Import > Robust file matching (slower)** is persisted and off
 by default. It bypasses filename/session/header shortcuts and reads headers and
 content hashes, including archive-copy verification. Use it for same-name edits,
 updated sidecars, additions to omitted sessions, or restoration of missing/damaged

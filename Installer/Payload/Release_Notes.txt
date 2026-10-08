@@ -1,27 +1,18 @@
-AstroArchive 2.1.1
-Package 2.1.1.1
+AstroArchive 2.1.2
+Package 2.1.2.1
 
-- Preferences > Archive safety can protect archived originals from accidental
-  deletion or renaming in File Explorer on local NTFS drives. AstroArchive
-  restores protection after confirmed file operations and interrupted unlocks.
-  Edited files, Dump and archive metadata remain writable. Protection is optional.
-- Back up… creates a recoverable folder or lossless ZIP, including original
-  images, Edited files and the current archive database. Every file is verified
-  with SHA-256 before completion. Backups include restoration instructions and
-  a checksum manifest. Creation warns about time and supports safe cancellation.
-
-- Export to… offers PixInsight, Siril, DeepSkyStacker, GIMP, Photoshop,
-  AutoStakkert! 4, AstroWizard and Stacking Wizard in one compatible chooser.
-  Repository image handoffs use verified Edited working copies. Subframes and
-  recordings use verified export folders. DSS loads typed file lists, with
-  separate lists and a group chooser for incompatible captures. Some stackers
-  need the user to load the exported inputs in their own window.
-- Export destinations settings store defaults per file type and an optional
-  subframe-folder default. Application locations can be detected automatically
-  or configured. Export asks for an unavailable app before creating copies.
-  Existing Siril and StackingWizard preferences are retained.
-- Export menus now offer Export to…, Save files…, Stacking folder… and More.
-  Metadata/folder extras and advanced stacking options expand when needed.
-  Edited uses the same Export to… chooser. Completion keeps its folder action.
-- Original formats and precision are retained; conversions remain explicit.
-  Launch failures retain verified files and offer their location and settings.
+- Settings now opens one Preferences window with General, Import, Export,
+  Sky & solving, Accessibility and Updates sections. Application defaults and
+  locations, archive protection and backup remain available in Preferences.
+- Simplified Import, Export, Repository and Guide menus remove duplicate routes.
+  Secondary Edited actions are on the file context menu; Export to… remains
+  available with the current processing destinations.
+- The target panels keep their themed backgrounds and entries while search is
+  pending, fixing the white, empty panel during typing.
+- Export files and Stacking folder offer Open with… after export for Siril when
+  one eligible FITS stack is selected. Siril opens the verified exported copy,
+  including collision-renamed files, in that copy's actual folder. Failed or
+  canceled exports never launch an application.
+- Preferences stores a default export folder. Optional metadata and advanced
+  stacking controls are collapsed; the new-folder name appears only when needed.
+- Missing or Unknown common names use a dash in Repository and Edited tables.

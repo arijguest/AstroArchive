@@ -121,11 +121,6 @@ namespace AstroArchive {
    dialog.Text("Copy and verify the selected archived images into Edited, then open their folder. Load these copies in your preferred editor and save outputs alongside them.");dialog.Accept("Create working copies",()=>true);if(!dialog.Show())return;
    Run(ct=>repo.CreateEditedWorkingCopies(selected,"Edited working copies","Other editor",ct,Progress).Id,id=>{RefreshEdited(id);GoToPage(2);OpenEditedFolder();});
   }
-  void BuildEditedNavigation(MenuItem menu){
-   menu.Items.Add(ColumnsNavigation("EditedGrid"));menu.Items.Add(MenuAction("Browse edited images",()=>{RefreshEdited();GoToPage(2);},true,false));menu.Items.Add(MenuAction("Add images…",AddEditedImages,repo!=null));menu.Items.Add(MenuAction("Import folder…",ImportEditedFolder,repo!=null));
-   menu.Items.Add(MenuAction("Edit metadata…",EditEditedMetadata,repo!=null&&SelectedEditedImages().Count>0));
-   menu.Items.Add(MenuAction("Open image folder",OpenEditedFolder,repo!=null&&EditedImageProject!=null));menu.Items.Add(MenuAction("Preview selected image…",PreviewEditedImage,ActiveEditedImage!=null));menu.Items.Add(MenuAction("Refresh edited images",()=>RefreshEdited(),repo!=null));
-  }
   void ShowPerformanceTable(){
    var dialog=new FormWindow(Window,"Operation diagnostics",720,520);dialog.Text("Last operation",true);dialog.Text(L("StatusLabel").Text+"\n"+L("RateLabel").Text);
    var grid=new DataGrid{ItemsSource=G("MetricsGrid").ItemsSource,IsReadOnly=true,AutoGenerateColumns=false,MinHeight=160,MaxHeight=320};foreach(var column in G("MetricsGrid").Columns.OfType<DataGridTextColumn>())grid.Columns.Add(new DataGridTextColumn{Header=column.Header,Binding=column.Binding,Width=column.Width});dialog.Add(grid);dialog.CloseOnly();dialog.Show();

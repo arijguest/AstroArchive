@@ -1,8 +1,8 @@
-AstroArchive 2.1.1
+AstroArchive 2.1.2
 Windows 10/11 x64; .NET Framework 4.8.
 
 START HERE
-1. Choose Repository > Choose repository folder.
+1. Click Settings, then General > Choose repository.
 2. On Import, choose a source folder and a unique physical telescope ID.
 3. Scan folder, review the results, then import the eligible files shown.
 4. Browse Repository by target, search or Filters. Expand a session summary to
@@ -14,7 +14,7 @@ Originals are kept by default. Imports verify copies and skip duplicates.
 Stacking and image processing take place in your external software.
 
 GUIDE AND TOOLTIPS
-F1 opens help for the current page. Guide > Search the guide searches titles
+F1 opens help for the current page. Guide > Help searches titles
 and full text; enter several words to narrow results. Ctrl+F focuses help search.
 Hover over controls and headings for concise hints. Help is available offline.
 Guide > Interactive walkthrough shows the main controls without importing files.
@@ -24,7 +24,7 @@ IMPORT WORKFLOW
 2. Select a saved telescope, or enter a unique ID and Browse its source folder.
    Import > Saved telescopes > Save telescope stores the device and association.
 3. Leave model and camera on Auto unless an override is needed. Solving and
-   rotation are Off by default. Import > Import options controls these choices.
+   rotation are Off by default. Settings > Import controls these choices.
 4. Scan folder reviews supported files without copying them. Default filename
    matching skips known captures and completed dated DWARF sessions. Robust import
    matching checks changed same-name files, metadata and missing archive copies.
@@ -40,8 +40,7 @@ Choose a target on the left or All targets. Search filenames, catalogue IDs,
 common names, dates or device details. Filters narrows the view; Clear resets it.
 Repository starts with Session summaries: repeated Light subframes from the same
 session, target and instrument share a collapsed row with dates, count, known
-exposure and filters. Expand it to inspect files. Repository > View > Show all
-files restores a flat table. Stacks and unmatched files remain separate.
+exposure and filters. Expand it to inspect files. Turn off Repository > Group subs by session for a flat table. Stacks and unmatched files remain separate.
 Ctrl-click toggles files; Shift-click selects a range. Right-click for preview,
 metadata, export or deletion. Bulk actions may use all captures in the filtered view, including collapsed
 summaries, when no files are selected; review their count before accepting.
@@ -50,7 +49,7 @@ The path below the table opens the repository folder in File Explorer.
 USB TRANSFER AND SAVED TELESCOPES
 Connect the telescope as local USB storage so Windows exposes its USB volume.
 On Import, select or save a telescope with a unique physical device ID and source
-folder. Import > USB telescopes lists recognised connected devices; choose one
+folder. Import > Connected telescopes lists recognised connected devices; choose one
 for a verified upload. Originals stay on the device and analysis stays off.
 Use Import from telescope for a connected saved device. Reconnect and import
 again for new captures. Enable Robust import matching to restore missing copies.
@@ -61,7 +60,7 @@ Rename saved telescope changes its archive labels and paths, preserving images
 and session identities. Close other writers before renaming.
 
 ARCHIVE SAFETY AND BACKUPS
-Settings > Preferences > Archive safety offers optional Protect originals on
+Settings > General > Archive safety offers optional Protect originals on
 local NTFS drives. This blocks deletion and renaming of archived originals in
 File Explorer for your Windows account. Reading and exporting still work;
 AstroArchive temporarily unlocks affected paths for confirmed operations.
@@ -77,7 +76,7 @@ folder; Compress backup as ZIP preserves every byte, including image resolution,
 quality and metadata. Creation and verification may take a long time. Cancel
 safely removes the incomplete backup and keeps earlier backups.
 To restore, extract the ZIP if needed, then choose its Repository folder in
-Settings > Repository. Restore.txt explains the layout; backup.json contains
+Settings > General > Repository. Restore.txt explains the layout; backup.json contains
 file sizes and SHA-256 checksums. Restored backups use normal permissions;
 enable Protect originals again if wanted. Backups exclude unfinished import
 staging files and Windows protection rules. Close external editors and other
@@ -85,8 +84,8 @@ writers before backing up; changing files during a backup causes it to stop.
 
 IMAGE PREVIEW AND TABLES
 Select a file for Preview. Double-click an Edited image or use the file's
-Preview image action for a larger window. Repository > View opens an external
-image or hides the preview pane; drag the divider to resize it.
+Preview image action for a larger window. Settings > General controls the preview pane; drag the divider to resize it.
+Right-click table headings to choose columns. Open external files from Windows.
 Scroll or pinch to zoom. Drag or use the arrow buttons to pan after zooming.
 Fit or F restores the full image; plus/minus zoom; Escape closes the popup.
 Preview keeps controls and capture sky visible while loading a new image.
@@ -115,8 +114,8 @@ place; unreadable files are excluded.
 Export > Export to… opens supported images in PixInsight, Siril, GIMP,
 Photoshop or AstroWizard using verified Edited working copies. On Edited,
 Export to… opens the selected working images directly. Save outputs there;
-Refresh finds them. Use Open image folder, Enlarge or Image details on Edited.
-Settings > Export destinations stores defaults by file type and optional
+Refresh finds them. Right-click an Edited image for its folder, preview or image details.
+Settings > Export stores defaults by file type and optional
 application locations. Automatic detection runs when needed; if an app cannot
 be found, choose its GUI executable. Cancel keeps your settings unchanged.
 Edited images move with the repository and remain separate from acquisition captures.
@@ -171,7 +170,7 @@ Sun/Solar appears as Sun. Meteor filenames use Meteor and leave object ID blank.
 The word meteor must be in the filename; meteorite and folder names do not match.
 
 STACKING PROJECTS AND SESSIONS
-Select captures and choose Export > Save files for original copies, or
+Select captures and choose Export > Export files for original copies, or
 Stacking folder with Subs, Stacks or Both. Choose an existing destination.
 Export to… sends subframes or recordings to an external app after verifying
 their copies. DSS loads a typed file list; separate capture groups get separate
@@ -181,8 +180,8 @@ stacking automatically. Choose subframes separately from finished stacks.
 Folder exports can include matching calibrations; unknown calibration state
 requires an explicit option. Camera RAW support depends on the receiving app.
 Export to… preserves original formats; it does not silently convert precision.
-More contains CSV catalogues and the manual Create Edited working copies action.
-Advanced stacking and folder/metadata options are expandable.
+Export > Catalogue CSV exports table data. Right-click files to create Edited copies.
+More options keeps metadata and advanced stacking controls out of the way.
 Stacks export as image files; subs retain compatible input folders.
 Add Metadata and Create new folder are both off by default. Add Metadata includes
 a checksum manifest, saved session metadata and readme/workflow notes. Metadata
@@ -212,11 +211,11 @@ Wait for Export complete before using a full set of stacking inputs.
 
 METADATA AND OPTIONAL ANALYSIS
 Right-click Edit metadata to correct indexed labels without rewriting image headers.
-Re-detect metadata and review shows detected values before applying selected fields;
+Right-click > More actions > Review detected metadata shows detected values before applying selected fields;
 recorded user changes retain priority. Choose HDU / page / frame selects a container
 image for supported pixel operations. Movie preview plays the recording.
 Target identification needs ASTAP plus its star database, or an Astrometry.net
-account/API key and an internet connection. Configure them in Settings > Plate solving.
+account/API key and an internet connection. Configure them in Settings > Sky & solving > Plate solver setup.
 Identify target solves one representative for each selected Light session/target
 and instrument group. Selecting a collapsed subgroup includes all its files.
 Crop and header differences do not split that subgroup. If a representative
@@ -237,8 +236,7 @@ observing location/pointing data. Stacks and registered images are unsuitable.
 Mount labels ending in ? are suggestions. Confirm them through Edit metadata.
 
 OBSERVING TOWN / CITY
-Settings > Import and processing > Copy workers and observing site opens the
-observing-site controls. Search the offline town/city picker by name or region,
+Settings > Sky & solving opens the observing-site controls. Search the offline town/city picker by name or region,
 or enter coordinates. Place-centre coordinates approximate your observing site;
 use precise coordinates when needed for rotation analysis.
 Location searches do not send your position to a network service.
@@ -252,12 +250,12 @@ removed; changed, locked or failed inputs stay for retry. Other files stay in pl
 Mixed drops use an Unknown physical device ID; correct it through Edit metadata.
 
 REVIEW, EXCLUSIONS AND DELETION
-Import > Review and recovery separates rejection, integrity and transfer issues.
+Import > Review and repair separates rejection, integrity and transfer issues.
 Flagged captures are skipped by default; inspect them before allowing import.
 Retry failed imports retries the failed transfers in the filtered scan. Changed
 sources need a fresh scan. Completed imports remain available after cancellation.
 Ignore non-raw files (PNG/JPG/JPEG) defaults on; its setting is saved.
-Import options > Ignore failed skips filenames containing failed, regardless of
+Settings > Import > Ignore failed filenames skips filenames containing failed, regardless of
 case, in folder, USB and Dump imports. Rescan after changing this option.
 Repository's Delete failed tool lists matching indexed filenames for confirmation.
 Delete selected files removes archive copies, retaining source files and shared metadata.
@@ -281,7 +279,7 @@ INSTALLATION AND UPDATES
 Run the installer for a fresh installation, update or repair. The default location
 is %LOCALAPPDATA%\Programs\AstroArchive and requires no administrator access.
 The desktop and Start menu launcher checks for releases. Later opens the installed
-version. Settings > Check for and install releases checks from inside the app.
+version. Settings > Updates > Check for updates checks from inside the app.
 Install release downloads and verifies the installer, saves state, and restarts
 the app after setup. Updates retain repositories, settings and local codecs.
 Manual installation works offline. Start.exe --no-updates skips startup checking.
@@ -297,14 +295,15 @@ CR2/CR3/NEF/ARW/DNG: original-file import/export; external RAW previews need a
 compatible Windows image codec. Other Windows image formats may preview externally.
 Tile-compressed FITS (.fz) needs optional CFITSIO for pixel decoding; Zstandard
 XISF needs its optional codec. Missing codecs leave original-file export available.
-Settings > Image compatibility shows support and opens the optional codec folder.
+Settings > General > Image compatibility shows support and opens the optional codec folder.
 Compatible x64 cfitsio.dll/libzstd.dll and dependencies go in
 %LOCALAPPDATA%\AstroArchive\codecs; restart the app after installing them.
 Scientific decoders/conversions have size and pixel-layout limits. Complex XISF
 encodings and unsupported processed data remain original-file exports.
 
 APPEARANCE AND ACCESSIBILITY
-Settings > Preferences changes appearance. Settings > Accessibility controls text
+Settings opens one Preferences window with sections on the left. General changes
+appearance and the repository. Accessibility controls text
 size, comfortable rows, high contrast and reduced progress animation.
 Alt reveals menu access keys; arrows navigate menus and Tab moves between controls.
 Processing shows temporary progress and Cancel; Dump uses its own progress window.
@@ -382,3 +381,21 @@ a track from their capture times through the final exposure. Stacks show an
 estimated track when time,
 site, pointing and total duration are known: recorded time is assumed to be the
 end and integration duration approximates elapsed time without acquisition gaps.
+
+In the export dialog, Open with… after export can open one FITS stack in Siril
+after its copies are verified. Select None to export without opening an app.
+Settings > Export sets siril.exe and the default export working
+directory. You can change the destination for each export; Siril works in the
+exported stack’s folder. Failed or cancelled exports do not launch Siril.
+
+SIMPLIFIED NAVIGATION
+Import and Export contain file operations; Repository contains grouped-session
+view, review, maintenance and diagnostics. Use the page selector to switch pages.
+Right-click files for preview, metadata, exports, working copies and deletion.
+Export > Export files copies originals. Stacking folder adds compatible inputs;
+matching calibrations can be included in that same dialog. More options contains
+metadata, separate sessions and explicit rejected/unknown calibration choices.
+Settings opens Preferences directly: General, Import, Export, Sky & solving,
+Accessibility and Updates. Changes apply with Save preferences; Cancel keeps them.
+The export completion popup only opens the finished folder; use the pre-export
+Siril choice to open one exported stack automatically.

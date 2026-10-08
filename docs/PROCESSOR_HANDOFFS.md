@@ -10,7 +10,7 @@ Already Edited images open from their existing working paths. Save processed
 outputs alongside the working copy, then refresh Edited. Acquisition subframes and
 recordings are copied to an export folder outside the repository. Choose subframes
 separately from finished stacks; combining a stack with its constituent subs would
-count data twice. Rejected/failed inputs remain available through **Save files…**.
+count data twice. Rejected/failed inputs remain available through **Export files…**.
 
 ## Supported handoffs on Windows
 
@@ -28,20 +28,20 @@ count data twice. Rejected/failed inputs remain available through **Save files�
 Format lists are deliberately conservative and are not complete lists of every
 receiving application's abilities. A file extension cannot establish codec,
 precision, Bayer or RAW-camera support. Export preserves original bytes. Use
-**Stacking folder… → Advanced stacking options** for explicit, supported scientific
+**Stacking folder… → More options** for explicit, supported scientific
 FITS conversion. Gzip/tile-compressed FITS are excluded from direct AstroWizard and
 GIMP image handoffs; create an uncompressed copy first.
 
 ## Defaults and application locations
 
-**Settings → Export destinations…** has two tabs:
+**Settings → Export** includes a default export folder and two expandable sections:
 
-- **Defaults:** choose a destination for FITS, TIFF, XISF, PNG, JPEG, BMP, GIF, SER,
+- **Default applications:** choose a destination for FITS, TIFF, XISF, PNG, JPEG, BMP, GIF, SER,
   AVI and camera RAW, plus an optional subframe-folder preference. Aliases such as
   `.fit`/`.fits` and `.tif`/`.tiff` share a preference. Defaults preselect the chooser;
   exporting still requires confirmation. Incompatible defaults are ignored. Mixed
   selections need a common compatible default, otherwise the chooser asks.
-- **Applications:** select an app and browse to its GUI executable, find it
+- **Application locations:** select an app and browse to its GUI executable, find it
   automatically, or clear the override to use automatic detection. Cancellation
   discards pending edits. An unavailable old path does not block unrelated changes.
 
@@ -68,9 +68,20 @@ completed working copies/folder and offers the location and app settings. A star
 process is not confirmation that the receiver has imported its documents; decoding
 and import errors remain visible in that app.
 
-The Export menu contains **Export to…**, **Save files…**, **Stacking folder…** and
-**More** (manual working copies and CSV catalogues). Folder/metadata and advanced
-stacking options expand when needed. Export completion does not duplicate app menus.
+The Export menu contains **Export to…**, **Export files…**, **Stacking folder…** and
+**Catalogue CSV**. Manual working copies are on the file context menu. Optional
+metadata and advanced stacking options expand under More options. Export completion
+keeps Open folder and Close.
+
+## Open an exported stack in Siril
+
+The Export files and Stacking folder popups offer **Open with… after export**
+for a single eligible FITS stack. Choose **Siril** to open the verified exported
+copy, including any filename collision suffix, in its actual working folder.
+Subs-only exports and multiple stacks disable this choice. Conversion stays opt-in.
+Set the default export folder and Siril location in **Settings → Export**; select
+Siril under **Application locations**. Cancellation or an export failure prevents
+launch. A launch failure keeps the completed export and shows its folder.
 
 ## Integration references
 

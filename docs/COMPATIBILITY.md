@@ -29,7 +29,7 @@ GIF preview supports up to 4,096 frames and a 32-million-pixel canvas.
 
 ## Optional codecs
 
-CFITSIO and Zstandard are not included in the installer. **Settings → Image compatibility**
+CFITSIO and Zstandard are not included in the installer. **Settings → General → Image compatibility**
 shows availability and opens `%LOCALAPPDATA%\AstroArchive\codecs`.
 Install compatible x64 `cfitsio.dll` or `libzstd.dll` and their dependencies there,
 then restart AstroArchive. These local codecs survive updates. Missing codecs
