@@ -17,7 +17,7 @@ namespace AstroArchive {
   void InitializeWorkspace(){
    ApplyAppearance();C("StretchMode").ItemsSource=PreviewData.StretchModes;C("StretchMode").SelectedItem=settings.PreviewStretch??"Auto per channel";if(C("StretchMode").SelectedIndex<0)C("StretchMode").SelectedItem="Auto per channel";
    settings.PreviewStretch=Convert.ToString(C("StretchMode").SelectedItem);
-   previewViewport=new PreviewViewport((Grid)Window.FindName("PreviewHost"),(Grid)Window.FindName("PreviewStage"),(Image)Window.FindName("PreviewImage"),(FrameworkElement)Window.FindName("PreviewSky"));InitializeSkyPreview("");
+   previewViewport=new PreviewViewport((Grid)Window.FindName("PreviewHost"),(Grid)Window.FindName("PreviewStage"),(Image)Window.FindName("PreviewImage"),(FrameworkElement)Window.FindName("PreviewSkyPanel"));InitializeSkyPreview("");
    B("CoffeeButton").Click+=(s,e)=>{try{Process.Start(new ProcessStartInfo("https://ko-fi.com/arijguest"){UseShellExecute=true});}catch(Exception error){MessageBox.Show(Window,"Could not open your browser. Visit https://ko-fi.com/arijguest\n\n"+error.Message,"Ko-fi link",MessageBoxButton.OK,MessageBoxImage.Information);}};
    B("ThemeButton").Click+=(s,e)=>{settings.ThemeMode=Theme.IsDark(settings.ThemeMode)?"Light":"Dark";ApplyAppearance();SaveSettings();};
    B("PreviewToggle").Click+=(s,e)=>{settings.ShowPreview=!settings.ShowPreview;SetPreviewVisibility();SaveSettings();if(settings.ShowPreview)PreviewSelected();};

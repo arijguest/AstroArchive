@@ -741,8 +741,10 @@
           <Image x:Name="PreviewImage"/>
           <TextBlock x:Name="PreviewMessage" Text="Select a capture or open an image." Foreground="{DynamicResource Muted}" HorizontalAlignment="Center" VerticalAlignment="Center" TextWrapping="Wrap" TextAlignment="Center" Margin="18"/>
          </Grid>
-         <local:SkyGlobeView x:Name="PreviewSky" VerticalAlignment="Top" Visibility="Collapsed"/>
-         <Button x:Name="PreviewSkyResetButton" Content="↺" Width="26" Height="26" MinHeight="0" FontSize="16" Padding="0" Margin="6,6,6,0" HorizontalAlignment="Right" VerticalAlignment="Top" Visibility="{Binding Visibility, ElementName=PreviewSky}" RenderTransform="{Binding RenderTransform, ElementName=PreviewSky}" AutomationProperties.Name="Reset capture sky view"/>
+         <Grid x:Name="PreviewSkyPanel" VerticalAlignment="Top" Visibility="Collapsed">
+          <local:SkyGlobeView x:Name="PreviewSky" Margin="36,0,0,0"/>
+          <Button x:Name="PreviewSkyResetButton" Content="↺" Width="26" Height="26" MinHeight="0" FontSize="16" Padding="0" Margin="6,0,0,4" HorizontalAlignment="Left" VerticalAlignment="Bottom" AutomationProperties.Name="Reset capture sky view"/>
+         </Grid>
         </Grid>
        </Grid>
       </Border>
@@ -882,7 +884,6 @@
          <DataGridTextColumn Header="OBJECT ID" Binding="{Binding Metadata.ObjectId}" Width="85"/>
          <DataGridTextColumn Header="COMMON NAME / LABEL" Binding="{Binding Metadata.TargetName}" Width="180"/>
          <DataGridTextColumn Header="TOTAL EXPOSURE" Binding="{Binding Metadata.TotalExposureText}" Width="130" Visibility="Collapsed"/>
-         <DataGridTextColumn Header="FILTERS / CHANNELS" Binding="{Binding Metadata.FiltersLabel}" Width="140"/>
          <DataGridTextColumn Header="SUBS" Binding="{Binding Metadata.SubsText}" Width="70" Visibility="Collapsed"/>
          <DataGridTextColumn Header="PER SUB" Binding="{Binding Metadata.SubExposureText}" Width="130" Visibility="Collapsed"/>
          <DataGridTextColumn Header="COPY TYPE" Binding="{Binding Kind}" Width="140" Visibility="Collapsed"/>
@@ -924,8 +925,10 @@
           <Image x:Name="EditedPreviewImage"/>
           <TextBlock x:Name="EditedPreviewMessage" Text="Select a capture or open an image." Foreground="{DynamicResource Muted}" HorizontalAlignment="Center" VerticalAlignment="Center" TextWrapping="Wrap" TextAlignment="Center" Margin="18"/>
          </Grid>
-         <local:SkyGlobeView x:Name="EditedPreviewSky" VerticalAlignment="Top" Visibility="Collapsed"/>
-         <Button x:Name="EditedPreviewSkyResetButton" Content="↺" Width="26" Height="26" MinHeight="0" FontSize="16" Padding="0" Margin="6,6,6,0" HorizontalAlignment="Right" VerticalAlignment="Top" Visibility="{Binding Visibility, ElementName=EditedPreviewSky}" RenderTransform="{Binding RenderTransform, ElementName=EditedPreviewSky}" AutomationProperties.Name="Reset capture sky view"/>
+         <Grid x:Name="EditedPreviewSkyPanel" VerticalAlignment="Top" Visibility="Collapsed">
+          <local:SkyGlobeView x:Name="EditedPreviewSky" Margin="36,0,0,0"/>
+          <Button x:Name="EditedPreviewSkyResetButton" Content="↺" Width="26" Height="26" MinHeight="0" FontSize="16" Padding="0" Margin="6,0,0,4" HorizontalAlignment="Left" VerticalAlignment="Bottom" AutomationProperties.Name="Reset capture sky view"/>
+         </Grid>
         </Grid>
        </Grid>
       </Border>

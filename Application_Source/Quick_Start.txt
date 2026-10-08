@@ -1,4 +1,4 @@
-AstroArchive 1.13.11
+AstroArchive 1.13.12
 Windows 10/11 x64; .NET Framework 4.8.
 
 START HERE
@@ -308,3 +308,12 @@ commercial use requires separate permission from Ari J. Guest. Your images and
 outputs remain yours. See LICENSING.md and the included licence and notices.
 Constellation figures: D3-Celestial by Olaf Frohn, BSD 3-clause licence.
 See Sky_Catalogue_Notice.md.
+
+Sky map: drag to rotate; scroll or pinch to zoom. Reset is beside the map at
+the bottom-left. N/E/S/W appear only with a capture time/site and enough clear
+space outside the globe. Targets include Comets when comet images are present.
+All Targets: merged subs, stacks, ungrouped files, then calibration frames.
+Individual targets: stacks above lights. Column sorts apply within each section.
+Calibration previews hide the map. Stacks show an estimated track when time,
+site, pointing and total duration are known: recorded time is assumed to be the
+end and integration duration approximates elapsed time without acquisition gaps.

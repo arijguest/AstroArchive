@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Windows;
 using System.Windows.Automation;
@@ -17,6 +19,8 @@ namespace AstroArchive {
   CaptureSky context;SkyVector[] stars;DrawingGroup drawing;double lastWidth,lastHeight;object[] palette;
   SkyVector right,up,front;double radius;Point centre;internal int DrawingBuilds;
   internal readonly SkyGlobeCamera Camera=new SkyGlobeCamera();
+  internal readonly Dictionary<string,Rect> CardinalLabels=new Dictionary<string,Rect>();
+  internal Rect GlobeBounds{get{return new Rect(centre.X-radius,centre.Y-radius,2*radius,2*radius);}}
   Point dragPoint;bool dragging;
   public CaptureSky Context{get{return context;}}
   const string NavigationHelp="Drag to rotate; scroll or pinch to zoom.";
@@ -51,8 +55,8 @@ namespace AstroArchive {
    Focusable=true;IsManipulationEnabled=true;Cursor=Cursors.Hand;ClipToBounds=true;IsVisibleChanged+=(s,e)=>{if(!IsVisible&&IsMouseCaptured)ReleaseMouseCapture();};Unloaded+=(s,e)=>{if(IsMouseCaptured)ReleaseMouseCapture();};AutomationProperties.SetHelpText(this,NavigationHelp);SetContext(CaptureSky.Resolve(null,null));
   }
   public void SetContext(CaptureSky value){
-   value=value??CaptureSky.Resolve(null,null);bool changed=context==null||context.Key!=value.Key;context=value;
-   ToolTip=value.TargetLabel+"\n"+value.TimeLabel+" · "+value.Summary+(value.ApproximatePosition?" · approximate":"")+"\n"+NavigationHelp;AutomationProperties.SetName(this,"Capture sky. "+value.TargetLabel+". "+value.TimeLabel+". "+value.Summary);
+   value=value??CaptureSky.Resolve(null,null);bool changed=context==null||context.Key!=value.Key;if(changed)context=value;
+   ToolTip=value.TargetLabel+"\n"+value.TimeLabel+" · "+value.Summary+(value.StackSeconds.HasValue&&value.HasHorizon&&value.HasPosition?"\nEstimated stack track: end time minus integration duration; gaps and proper motion unknown.":"")+(value.ApproximatePosition?" · approximate":"")+"\n"+NavigationHelp;AutomationProperties.SetName(this,"Capture sky. "+value.TargetLabel+". "+value.TimeLabel+". "+value.Summary);
    if(!changed)return;
    var target=value.Orientation.Map(SkyVector.Equatorial(value.RA,value.Dec));Camera.SetHome(value.HasPosition?Math.Atan2(target.X,target.Y)*180/Math.PI:180,value.HasHorizon&&value.Altitude<0?-25:25);
    stars=SkyFigures.Stars.Select(value.Orientation.Map).ToArray();drawing=null;InvalidateVisual();
@@ -70,6 +74,21 @@ namespace AstroArchive {
     lastWidth=ActualWidth;lastHeight=ActualHeight;palette=colours;drawing=Build((Brush)colours[0],(Brush)colours[1],(Brush)colours[2],(Brush)colours[3]);DrawingBuilds++;
    }dc.DrawDrawing(drawing);
   }
+  void DrawCardinals(DrawingContext dc,Brush brush){
+   CardinalLabels.Clear();if(!context.HasHorizon)return;
+   string[] names={"N","E","S","W"};
+   for(int i=0;i<names.Length;i++){
+    var direction=SkyVector.Horizontal(i*90,0);if(direction.Dot(front)<-0.001)continue;
+    var label=new FormattedText(names[i],CultureInfo.CurrentUICulture,FlowDirection.LeftToRight,new Typeface("Segoe UI"),12,brush,VisualTreeHelper.GetDpi(this).PixelsPerDip);
+    // Follow the projected horizon direction, without forcing foreshortened
+    // labels onto the rim where they would misrepresent the camera orientation.
+    var anchor=new Point(centre.X+(radius+18)*direction.Dot(right),centre.Y-(radius+18)*direction.Dot(up));
+    var bounds=new Rect(anchor.X-label.Width/2,anchor.Y-label.Height/2,label.Width,label.Height);
+    double dx=Math.Max(bounds.Left-centre.X,Math.Max(0,centre.X-bounds.Right)),dy=Math.Max(bounds.Top-centre.Y,Math.Max(0,centre.Y-bounds.Bottom));
+    if(!new Rect(RenderSize).Contains(bounds)||dx*dx+dy*dy<(radius+4)*(radius+4)||CardinalLabels.Values.Any(b=>b.IntersectsWith(bounds)))continue;
+    CardinalLabels[names[i]]=bounds;dc.DrawText(label,bounds.TopLeft);
+   }
+  }
   DrawingGroup Build(Brush line,Brush text,Brush accent,Brush surface){
    var group=new DrawingGroup();centre=new Point(ActualWidth/2,ActualHeight/2);radius=Math.Max(5,Math.Min(ActualWidth/2-10,ActualHeight/2-10))*Camera.Zoom;
    var target=context.Orientation.Map(SkyVector.Equatorial(context.RA,context.Dec));double yaw=Camera.Yaw*Math.PI/180,tilt=Camera.Tilt*Math.PI/180;
@@ -85,10 +104,14 @@ namespace AstroArchive {
      dc.DrawLine(pen,points[path[i-1]],points[path[i]]);
     }
     Brush starBrush=Tint(text,0.65),faintStar=Tint(line,0.25);for(int i=0;i<stars.Length;i++)if(stars[i].Dot(front)>0)dc.DrawEllipse(context.HasHorizon&&stars[i].Z<0?faintStar:starBrush,null,points[i],1.05,1.05);
+    var track=context.StackTrack;Pen trackNear=Stroke(accent,0.8,1.6),trackRear=Stroke(accent,0.2,1);
+    for(int i=1;i<track.Length;i++)dc.DrawLine((track[i-1].Dot(front)+track[i].Dot(front))/2>=0?trackNear:trackRear,Project(track[i-1]),Project(track[i]));
+    if(track.Length>0&&track[0].Dot(front)>=0)dc.DrawEllipse(null,trackNear,Project(track[0]),3,3);
     if(context.HasPosition&&target.Dot(front)>=0){
      var point=Project(target);dc.DrawEllipse(Tint(accent,0.12),Stroke(accent,1,1.5),point,6,6);dc.DrawEllipse(accent,null,point,2,2);
      dc.DrawLine(Stroke(accent,0.8,1),new Point(point.X-10,point.Y),new Point(point.X-7,point.Y));dc.DrawLine(Stroke(accent,0.8,1),new Point(point.X+7,point.Y),new Point(point.X+10,point.Y));
     }
+    DrawCardinals(dc,text);
    }group.Freeze();return group;
   }
  }
