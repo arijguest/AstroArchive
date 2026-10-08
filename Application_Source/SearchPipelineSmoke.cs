@@ -35,6 +35,7 @@ namespace AstroArchive {
       ScheduleSearch("SearchBox",false,true);SmokeSearchWait(()=>pulses>=3);
       SetBusy(false); // A progress refresh must not save the temporarily disabled grid.
       if(!state.Pending||clock.Elapsed.TotalSeconds>=4)throw new Exception("Dispatcher blocked behind the held search worker.");
+      if(Targets.IsEnabled)throw new Exception("Pending targets still permit stale selections.");VerifyTargetListAppearance(Targets,"Repository typing");
      }finally{release.Set();}
      WaitForSearches();if(!barrier.IsCanceled||displayed.Count!=1||displayed[0].OriginalName!="Light_00002.fit"||!G("FramesGrid").IsEnabled||!Targets.IsEnabled)throw new Exception("Superseded search replaced the latest query or left its view disabled.");
     }
@@ -55,11 +56,16 @@ namespace AstroArchive {
     var project=new EditedProject{Id=Guid.NewGuid().ToString("N"),Name="Search fixture"};editedImages=all.Select((f,i)=>new EditedImage{Project=project,Filename="edit_"+i.ToString("D5")+".png",RelativePath="fixture/edit_"+i+".png",Kind="Edited image",Metadata=new EditedMetadata{Object=f.Target,ImageClass=i%2==0?"Starless":"Stars only",Filters="Ha"}}).ToList();
     editedFocusProject=project.Id;editedFocusPath="fixture/edit_2.png";GoToPage(2);T("EditedSearchBox").Text="type:Starless file:*00002.png";WaitForSearches();if(G("EditedGrid").Items.Count!=1||ActiveEditedImage==null||ActiveEditedImage.RelativePath!="fixture/edit_2.png")throw new Exception("Edited background search or new-import focus differs from shared syntax.");
     var editedIndex=SearchState("EditedSearchBox").Edited;T("EditedSearchBox").Text="file:*00003.png";WaitForSearches();if(G("EditedGrid").Items.Count!=1||!object.ReferenceEquals(editedIndex,SearchState("EditedSearchBox").Edited))throw new Exception("Edited repeated query lost cache reuse.");
+    foreach(string theme in new[]{"Dark","Light"}){
+     Theme.Apply(Window,theme);PumpPopupLayout();var targets=EditedTargets.ItemsSource;T("EditedSearchBox").Text="edit";
+     if(EditedTargets.IsEnabled||EditedTargets.ItemsSource!=targets)throw new Exception("Edited typing cleared targets or left stale selection enabled.");VerifyTargetListAppearance(EditedTargets,theme+" Edited typing");WaitForSearches();VerifyTargetListAppearance(EditedTargets,theme+" Edited search complete");
+     T("EditedSearchBox").Text="file:*00003.png";WaitForSearches();
+    }
     File.WriteAllText(Path.Combine(output,"search-pipeline-smoke.txt"),"PASS: 6000-row repository/import/edited searches, rapid latest-only typing, responsive dispatcher while worker held, safe pending actions, document reuse/invalidation, numeric sort marks, invalid/clear results and replaced-source cancellation. Dispatcher pulses: "+pulses);
    }finally{
     heartbeat.Stop();foreach(string name in new[]{"SearchBox","ImportSearchBox","EditedSearchBox"})CancelSearch(name);
     if(repo!=savedRepo){repo.Dispose();repo=savedRepo;}all=savedRows;plan=savedPlan;editedImages=savedEdited;tableSorts["FramesGrid"]=savedSorts;libraryFilters.Reset();foreach(var entry in savedFilters.Values)libraryFilters.Values[entry.Key]=entry.Value;foreach(var entry in savedFilters.Ranges)libraryFilters.Ranges[entry.Key]=entry.Value;
-    T("SearchBox").Text=search;T("ImportSearchBox").Text=imports;T("EditedSearchBox").Text=edited;Filter(true);FilterImports();FilterEditedImages();GoToPage(page);WaitForSearches();
+    T("SearchBox").Text=search;T("ImportSearchBox").Text=imports;T("EditedSearchBox").Text=edited;Filter(true);FilterImports();FilterEditedImages();GoToPage(page);WaitForSearches();Theme.Apply(Window,settings.ThemeMode);
    }
   }
  }

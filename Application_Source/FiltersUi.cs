@@ -27,12 +27,6 @@ namespace AstroArchive {
     B("AssignUnknownTargetButton").IsEnabled=cancel==null&&UnknownImportSelection().Count>0;
    };
   }
-  ContextMenu BuildFiltersMenu(bool imports){
-   var criteria=imports?importFilters:libraryFilters;var menu=ThemedMenu();
-   menu.Items.Add(FileAction("Open filters panel…",()=>{Window.Dispatcher.BeginInvoke(new Action(()=>ShowFilters(imports)));},cancel==null));
-   menu.Items.Add(FileAction("Reset filters",()=>{criteria.Reset();ApplyFilters(imports);},cancel==null&&criteria.ActiveCount>0));
-   return menu;
-  }
   void ApplyFilters(bool imports){if(imports)FilterImports();else Filter(true);}
   List<Frame> CurrentImportRows(){return importLive?importRows.ToList():plan==null?new List<Frame>():plan.Frames;}
   void FilterImports(){

@@ -85,7 +85,7 @@ namespace AstroArchive {
    {"RetryImportsButton","Retry visible failed transfers; rescan changed sources."},
    {"SkipFlaggedCheck","Exclude rejected or damaged captures."},
    {"IgnoreFailedCheck","Skip filenames containing “failed”; keep originals."},
-   {"ImportOptionsButton","Set exclusions, capture overrides and optional analysis."},
+   {"ImportOptionsButton","Open Import preferences and options for the current source."},
    {"AssignUnknownTargetButton","Assign selected Unknown lights/stacks, or visible ones if none selected."},
    {"LibraryFiltersButton","Filter repository captures."},
    {"ImportFiltersButton","Filter scan results; only eligible matches are imported."},

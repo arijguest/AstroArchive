@@ -22,6 +22,17 @@ namespace AstroArchive {
    string image=Directory.GetFiles(project,"*",SearchOption.TopDirectoryOnly).Single(Util.IsFits);
    ct.ThrowIfCancellationRequested();return image;
   }
+  public static Frame StackAfterExport(IList<Frame> frames,ExportOptions options){
+   if(options.Mode=="Subs")return null;
+   var stacks=frames.Where(f=>f.Kind=="Stack"&&(options.Mode=="Files"||options.IncludeRejected||!f.Rejected)).ToList();if(stacks.Count!=1)return null;var stack=stacks[0];
+   bool converted=options.Mode!="Files"&&options.ConvertToFits&&Exporter.RequiresConversion(stack);
+   return converted||Util.IsFits(stack.OriginalName)&&!stack.OriginalName.EndsWith(".gz",StringComparison.OrdinalIgnoreCase)?stack:null;
+  }
+  public static ProcessStartInfo ExportLaunchInfo(string executable,ExportResult export){
+   if(export==null||string.IsNullOrEmpty(export.Folder))throw new IOException("The export has not completed.");
+   var stacks=export.Files.Where(f=>f.Source.Kind=="Stack").ToList();if(stacks.Count!=1)throw new IOException("Export one FITS stack to open in Siril.");
+   var start=LaunchInfo(executable,stacks[0].Path);start.Arguments="--directory "+QuoteArgument(start.WorkingDirectory)+" "+QuoteArgument(Path.GetFullPath(stacks[0].Path));return start;
+  }
   // .NET Framework has no ArgumentList: quote using the Windows argv rules.
   public static string QuoteArgument(string value){
    var text=new StringBuilder("\"");int slashes=0;

@@ -117,22 +117,17 @@ namespace AstroArchive {
    if(ActiveEditedImage==null)return;var menu=ThemedMenu();string name=ActiveEditedImage.Filename;
    menu.Items.Add(FileAction("Siril…",OpenEditedEditor,Util.IsFits(name)&&!name.EndsWith(".gz",StringComparison.OrdinalIgnoreCase)));
    menu.Items.Add(FileAction("Default application",()=>Process.Start(new ProcessStartInfo(repo.EditedPath(EditedImageProject,ActiveEditedImage.RelativePath)){UseShellExecute=true})));
-   menu.Items.Add(FileAction("Open folder for another editor",OpenEditedFolder));menu.PlacementTarget=B("EditedEditorButton");menu.IsOpen=true;
+   menu.PlacementTarget=B("EditedEditorButton");menu.IsOpen=true;
   }
   void OpenEditedEditor(){
    if(repo==null||cancel!=null||EditedImageProject==null||ActiveEditedImage==null)return;string executable=settings.SirilExecutable;
-   if(string.IsNullOrEmpty(executable)||!File.Exists(executable)){var picker=new OpenFileDialog{Title="Locate Siril",Filter="Siril GUI|siril.exe"};if(picker.ShowDialog(Window)!=true)return;executable=picker.FileName;settings.SirilExecutable=executable;SaveSettings();}
+   if(string.IsNullOrEmpty(executable)||!File.Exists(executable)){if(!Configure(2))return;executable=settings.SirilExecutable;}
    string path=repo.EditedPath(EditedImageProject,ActiveEditedImage.RelativePath);Run(ct=>{ct.ThrowIfCancellationRequested();using(var process=Process.Start(SirilHandoff.LaunchInfo(executable,path))){if(process==null)throw new IOException("The editor did not start.");}return path;},done=>{});
   }
   void CreateEditedCopies(List<Frame> selected){
    if(repo==null||cancel!=null||selected.Count==0)return;var dialog=new FormWindow(Window,"Create Edited working copies",610,390);dialog.Text("Create working copies for your editor",true);
    dialog.Text("Copy and verify the selected archived images into Edited, then open their folder. Load these copies in your preferred editor and save outputs alongside them.");dialog.Accept("Create working copies",()=>true);if(!dialog.Show())return;
    Run(ct=>repo.CreateEditedWorkingCopies(selected,"Edited working copies","Other editor",ct,Progress).Id,id=>{RefreshEdited(id);GoToPage(2);OpenEditedFolder();});
-  }
-  void BuildEditedNavigation(MenuItem menu){
-   menu.Items.Add(ColumnsNavigation("EditedGrid"));menu.Items.Add(MenuAction("Browse edited images",()=>{RefreshEdited();GoToPage(2);},true,false));menu.Items.Add(MenuAction("Add images…",AddEditedImages,repo!=null));menu.Items.Add(MenuAction("Import folder…",ImportEditedFolder,repo!=null));
-   menu.Items.Add(MenuAction("Edit metadata…",EditEditedMetadata,repo!=null&&SelectedEditedImages().Count>0));
-   menu.Items.Add(MenuAction("Open image folder",OpenEditedFolder,repo!=null&&EditedImageProject!=null));menu.Items.Add(MenuAction("Preview selected image…",PreviewEditedImage,ActiveEditedImage!=null));menu.Items.Add(MenuAction("Refresh edited images",()=>RefreshEdited(),repo!=null));
   }
   void ShowPerformanceTable(){
    var dialog=new FormWindow(Window,"Operation diagnostics",720,520);dialog.Text("Last operation",true);dialog.Text(L("StatusLabel").Text+"\n"+L("RateLabel").Text);

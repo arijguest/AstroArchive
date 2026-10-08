@@ -56,14 +56,6 @@ namespace AstroArchive {
   }
   void CloseDumpProgress(){var window=dumpProgressWindow;dumpProgressWindow=null;dumpProgressStatus=dumpProgressRate=null;dumpProgressBar=null;dumpProgressCancel=null;if(window!=null)window.Close();}
   void UpdateDumpProgress(ProgressInfo progress){if(dumpProgressWindow==null)return;dumpProgressStatus.Text=L("StatusLabel").Text;dumpProgressRate.Text=L("RateLabel").Text;dumpProgressBar.IsIndeterminate=!settings.ReducedMotion&&!progress.TotalKnown&&!progress.Finished;dumpProgressBar.Value=progress.ProgressFraction;}
-  void AddDumpSettings(FormWindow dialog){
-   dialog.Text("Dump folder",true);
-   dialog.Text("Drop FITS files or telescope folders into Dump inside your archive. On opening the archive, AstroArchive sorts them and removes successfully verified inputs, including duplicates. Failed or unsupported files stay. Edit metadata to assign each physical telescope ID.");
-   if(repo==null)return;
-   dialog.Text(repo.DumpFolder);
-   dialog.Button("Open dump folder",()=>{try{repo.EnsureDumpFolder();Process.Start(new ProcessStartInfo(repo.DumpFolder){UseShellExecute=true});}catch(Exception e){MessageBox.Show(dialog.Window,e.Message,"Dump folder unavailable");}});
-   dialog.Button("Process dump folder now",()=>{dialog.Window.Close();ProcessDumpUi();});
-  }
   async void ProcessDumpUi(){
    if(repo==null||cancel!=null||closing||dumpChecking)return;
    var repository=repo;bool ignoreFailed=settings.IgnoreFailed,ignoreRaster=settings.IgnoreRasterImports;

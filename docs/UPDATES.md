@@ -17,7 +17,7 @@ images, settings and local codecs are retained.
 
 The desktop and Start menu launcher checks for stable releases. Choose **Install release**
 or **Later** to open the current version. Inside the app, use
-**Settings → Check for and install releases**.
+**Settings → Updates → Check for updates**.
 
 The installer downloads with progress, is verified, and runs after AstroArchive
 saves state and closes. The app restarts after setup. Wait for active work to finish

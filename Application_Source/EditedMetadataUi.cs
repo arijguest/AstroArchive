@@ -32,7 +32,7 @@ namespace AstroArchive {
   }
   void InitializeEditedFileMenu(){
    var grid=G("EditedGrid");grid.PreviewMouseRightButtonDown+=(sender,args)=>{DependencyObject node=args.OriginalSource as DependencyObject;while(node!=null&&!(node is DataGridRow))node=node is Visual?VisualTreeHelper.GetParent(node):LogicalTreeHelper.GetParent(node);var row=node as DataGridRow;if(row!=null&&!row.IsSelected)grid.SelectedItem=row.Item;};
-   grid.ContextMenu=ThemedMenu();grid.ContextMenuOpening+=(sender,args)=>{var menu=grid.ContextMenu;menu.Items.Clear();menu.Items.Add(FileAction("Edit metadata…",EditEditedMetadata,SelectedEditedImages().Count>0));menu.Items.Add(FileAction("Preview image…",PreviewEditedImage,SelectedEditedImages().Count==1));menu.Items.Add(FileAction("Open image folder",OpenEditedFolder,ActiveEditedImage!=null));};
+   grid.ContextMenu=ThemedMenu();grid.ContextMenuOpening+=(sender,args)=>{var menu=grid.ContextMenu;menu.Items.Clear();menu.Items.Add(FileAction("Edit metadata…",EditEditedMetadata,SelectedEditedImages().Count>0));menu.Items.Add(FileAction("Preview image…",PreviewEditedImage,SelectedEditedImages().Count==1));menu.Items.Add(FileAction("Image details…",ShowEditedDetails,ActiveEditedImage!=null));menu.Items.Add(FileAction("Open image folder",OpenEditedFolder,ActiveEditedImage!=null));};
   }
  }
 }
