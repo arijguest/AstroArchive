@@ -55,12 +55,14 @@ namespace AstroArchive {
    string projectName=name.Text;Run(ct=>repo.AddEditedImages(picker.FileNames,selected,projectName,ct,Progress).Id,id=>{RefreshEdited(id);GoToPage(3);});
   }
   void ImportEditedFolder(){
-   if(repo==null||cancel!=null)return;string folder=Folder("Choose a folder of existing edited images","");if(folder==null)return;
-   var dialog=new FormWindow(Window,"Review an edited image folder",590,360);dialog.Text(folder,true);var recursive=dialog.Check("Include subfolders",true);dialog.Text("Scan images first, then review files and detected acquisition details before copying.");dialog.Accept("Scan folder",()=>true);if(!dialog.Show())return;
-   bool includeSubfolders=recursive.IsChecked==true;EditedImportPlan import=null;Run(ct=>{import=repo.ScanEditedFolder(folder,includeSubfolders,ct,Progress);return "";},done=>ReviewEditedFolder(import));
+   if(repo==null||cancel!=null)return;
+   var dialog=new FormWindow(Window,"Import edited images",650,390);dialog.Text("Import files from a folder",true);dialog.Text("SOURCE FOLDER");var source=new TextBox{MinWidth=200};var browse=new Button{Content="Browse",Margin=new Thickness(8,0,0,0),Padding=new Thickness(12,8,12,8)};var controls=new DockPanel();DockPanel.SetDock(browse,Dock.Right);controls.Children.Add(browse);controls.Children.Add(source);dialog.Add(controls);
+   browse.Click+=(s,e)=>{string selected=Folder("Choose a folder of existing edited images",source.Text);if(selected!=null)source.Text=selected;};var recursive=dialog.Check("Include subfolders",true);dialog.Text("Scan first, then review images before copying. Repository/database folders and files already archived are skipped. Source files are retained.");dialog.Accept("Scan folder",()=>{if(!Directory.Exists(source.Text.Trim())){MessageBox.Show(dialog.Window,"Choose an existing source folder.");return false;}return true;});if(!dialog.Show())return;
+   string folder=source.Text.Trim();bool includeSubfolders=recursive.IsChecked==true;EditedImportPlan import=null;Run(ct=>{import=repo.ScanEditedFolder(folder,includeSubfolders,ct,Progress);return "";},done=>ReviewEditedFolder(import));
   }
   void ReviewEditedFolder(EditedImportPlan import){
    var dialog=new FormWindow(Window,"Import existing edited images",1000,750);dialog.Text(import.Images.Count+" images found",true);var name=dialog.Input("Edited project name",new DirectoryInfo(import.Folder).Name);
+   if(import.SkippedArchived>0||import.SkippedFolders.Count>0)dialog.Text(import.SkippedArchived+" already archived images skipped · "+import.SkippedFolders.Count+" repository/database folders skipped");
    if(import.Errors.Count>0)dialog.Text(import.Errors.Count+" folders could not be scanned. Their images will not be imported.");
    dialog.Text("Select the images to copy. Unreadable files stay excluded; source folders are retained. Detected details can be inspected before import.");
    var table=new DataGrid{ItemsSource=import.Images,IsReadOnly=false,AutoGenerateColumns=false,Height=350};table.Columns.Add(new DataGridCheckBoxColumn{Header="IMPORT",Binding=new System.Windows.Data.Binding("Include"){Mode=System.Windows.Data.BindingMode.TwoWay}});

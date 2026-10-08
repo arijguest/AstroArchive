@@ -852,7 +852,7 @@
     <Grid>
      <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="*"/></Grid.RowDefinitions>
      <DockPanel Margin="0,0,0,10">
-      <StackPanel DockPanel.Dock="Right" Orientation="Horizontal"><Button x:Name="EditedAddButton" Content="Add images…"/><Button x:Name="EditedImportFolderButton" Content="Import folder…" Margin="8,0,0,0"/><Button x:Name="EditedRefreshButton" Content="Refresh" Margin="8,0,0,0"/></StackPanel>
+      <StackPanel DockPanel.Dock="Right" Orientation="Horizontal"><Button x:Name="EditedAddButton" Content="Add images…"/><Button x:Name="EditedImportFolderButton" Content="Import folder…" Background="{DynamicResource Accent}" Foreground="White" BorderBrush="{DynamicResource Accent}" Margin="8,0,0,0"/><Button x:Name="EditedRefreshButton" Content="Refresh" Margin="8,0,0,0"/></StackPanel>
       <TextBlock Text="Edited images" FontSize="{DynamicResource UiFontHeading}" FontWeight="SemiBold" VerticalAlignment="Center"/>
      </DockPanel>
      <DockPanel Grid.Row="1" Margin="0,0,0,10"><ComboBox DockPanel.Dock="Right" x:Name="EditedClassFilter" MinWidth="180" Margin="8,0,0,0" ToolTip="Filter edited image classes"/><TextBlock DockPanel.Dock="Right" x:Name="EditedSummary" Foreground="{DynamicResource Muted}" VerticalAlignment="Center" Margin="12,0,0,0"/><TextBox x:Name="EditedSearchBox" ToolTip="Search images in this project"/></DockPanel>

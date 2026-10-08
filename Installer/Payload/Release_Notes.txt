@@ -7,6 +7,12 @@ Package 1.11.2.1
   window while Dump files are processed. Include status, progress and Cancel;
   close it after success, cancellation or failure. Empty Dump folders stay quiet.
 - Add eight pixels below the Import page so its buttons sit clear of the border.
+- Give Edited folder import a source-folder field with Browse and Scan controls,
+  matching Import. Highlight its import action and show exclusion counts.
+- Allow recursive Edited scans of a parent containing the repository. Skip its
+  repository subtree and .astroarchive database folders, including case variants.
+  Skip archived originals by content hash even when renamed; recheck those hashes
+  before copying so captures archived since review are not imported again.
 
 AstroArchive 1.11.1 — exposure evidence, spacing and catalogue identities
 Package 1.11.1.1
