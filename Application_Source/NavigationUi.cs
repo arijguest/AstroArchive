@@ -162,6 +162,7 @@ namespace AstroArchive {
             menu.Items.Add(MenuAction("Go to Import", () => GoToPage(1), true, false));
             menu.Items.Add(ButtonAction("Choose source folder…", "SourceButton", 1));
             menu.Items.Add(ButtonAction("Scan source folder", "ScanButton", 1));
+            menu.Items.Add(MenuAction("Full rescan of source", () => { GoToPage(1); Scan(true); }, repo != null && cancel == null));
             menu.Items.Add(ButtonAction("Import ready files", "ImportButton", 1));
             var usb = Branch("USB telescopes", ButtonAction("Refresh connected devices", "RefreshUsbButton"));
             foreach (var telescope in usbTelescopes) {
@@ -174,7 +175,7 @@ namespace AstroArchive {
                 ButtonAction("Rename saved telescope…", "RenameTelescopeButton", 1), ButtonAction("Recover profiles from repository", "RebuildTelescopesButton", 1)));
             menu.Items.Add(Branch("Review and recovery", ButtonAction("Review flagged captures…", "ReviewImportsButton", 1),
                 ButtonAction("Screen visible captures", "ScreenImportsButton", 1), ButtonAction("Retry failed imports", "RetryImportsButton", 1),
-                MenuAction("Scan report…", () => ShowReport("Scan report", plan == null ? "Scan a folder first." : plan.Errors.Count == 0 ? "All supported files were read successfully." : string.Join("\r\n\r\n", plan.Errors)))));
+                MenuAction("Scan report…", () => ShowReport("Scan report", plan == null ? "Scan a folder first." : plan.ScanReport))));
             var tools = Branch("Selected files"); MoveMenuItems(tools, BuildImportTools(), item => item is MenuItem && Convert.ToString(((MenuItem)item).Header) != "Scan report…"); menu.Items.Add(tools);
             menu.Items.Add(Branch("Table", FiltersNavigation(true),
                 ColumnsNavigation("ImportGrid"), MenuAction("Clear search and filters", () => B("ImportClearButton").RaiseEvent(new RoutedEventArgs(Button.ClickEvent)), repo != null)));

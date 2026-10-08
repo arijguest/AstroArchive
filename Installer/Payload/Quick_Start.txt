@@ -1,4 +1,4 @@
-AstroArchive 1.13.0
+AstroArchive 1.13.1
 Windows 10/11 x64 desktop app. Built-in .NET Framework 4.8 and Windows SQLite.
 Runs offline. No Python or Google login required.
 
@@ -797,3 +797,22 @@ Select a GIF to animate it. Pause / Play appears in the toolbar below moving
 images. SER plays at a 10 fps preview rate. AVI, MP4, MOV, M4V, WMV and MKV use the
 codecs installed in Windows; install the appropriate codec if Preview reports
 that playback is unavailable. Viewing never modifies source pixels or metadata.
+
+FASTER REPEAT TELESCOPE SCANS
+
+Scan folder and USB uploads use the saved import manifest to match session folder
+names and file paths for the selected physical telescope and storage volume.
+They check file sizes, timestamps and accompanying session metadata, then skip
+unchanged files whose verified archive copies are still intact. Skipped files
+are counted in the scan summary and report rather than added to the review table.
+New files in old folders and newly created subfolders are still discovered.
+Unknown folder trees are visited first, with newer folder names first within
+each group. Filesystem bookkeeping folders are excluded from discovery.
+
+On NTFS/ReFS, file identity and change-time also detect edits with restored
+timestamps. FAT/exFAT storage uses size and timestamps as a quick inventory hint;
+an edit that preserves both may require Import > Full rescan of source. That
+action bypasses the session and header caches and reads/hashes all source files.
+Missing or changed archive copies remain eligible for restoration. New imports
+still receive full checksum verification, and skipped files are never included
+in optional original deletion. No source folders are skipped on name alone.
