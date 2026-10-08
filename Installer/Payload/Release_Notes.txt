@@ -1,27 +1,6 @@
-AstroArchive 2.1.1
-Package 2.1.1.1
+AstroArchive 2.1.2
+Package 2.1.2.1
 
-- Preferences > Archive safety can protect archived originals from accidental
-  deletion or renaming in File Explorer on local NTFS drives. AstroArchive
-  restores protection after confirmed file operations and interrupted unlocks.
-  Edited files, Dump and archive metadata remain writable. Protection is optional.
-- Back up… creates a recoverable folder or lossless ZIP, including original
-  images, Edited files and the current archive database. Every file is verified
-  with SHA-256 before completion. Backups include restoration instructions and
-  a checksum manifest. Creation warns about time and supports safe cancellation.
-
-- Export to… offers PixInsight, Siril, DeepSkyStacker, GIMP, Photoshop,
-  AutoStakkert! 4, AstroWizard and Stacking Wizard in one compatible chooser.
-  Repository image handoffs use verified Edited working copies. Subframes and
-  recordings use verified export folders. DSS loads typed file lists, with
-  separate lists and a group chooser for incompatible captures. Some stackers
-  need the user to load the exported inputs in their own window.
-- Export destinations settings store defaults per file type and an optional
-  subframe-folder default. Application locations can be detected automatically
-  or configured. Export asks for an unavailable app before creating copies.
-  Existing Siril and StackingWizard preferences are retained.
-- Export menus now offer Export to…, Save files…, Stacking folder… and More.
-  Metadata/folder extras and advanced stacking options expand when needed.
-  Edited uses the same Export to… chooser. Completion keeps its folder action.
-- Original formats and precision are retained; conversions remain explicit.
-  Launch failures retain verified files and offer their location and settings.
+- Fixed the white flash in the targets list when clearing filters, selecting a
+  target or refreshing search results. Repository and Edited keep the current
+  theme background while results update, including grouped and scrolling lists.
