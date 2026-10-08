@@ -109,7 +109,7 @@ namespace AstroArchive {
                 StartWalkthrough(); var tour = walkthrough;
                 try {
                     tour.Show(); PumpPopupLayout();
-                    for (int index = 0; index < steps.Length; index++) { tour.SetStep(index); PumpPopupLayout(); if (tour.StepIndex != index || tour.Heading.Text != steps[index].Title) throw new Exception("Walkthrough lost a step."); }
+                    for (int index = 0; index < steps.Length; index++) { tour.SetStep(index); PumpPopupLayout(); if (tour.StepIndex != index || tour.Heading.Text != steps[index].Title) throw new Exception("Walkthrough lost a step.");CheckHelpArticle(tour.Body);if(!tour.Body.Document.Blocks.OfType<System.Windows.Documents.List>().Any()||tour.Heading.FontSize<=tour.Body.Document.FontSize||tour.Count.FontSize>=tour.Body.Document.FontSize)throw new Exception("Walkthrough lost its lists or text hierarchy"); }
                     tour.SetStep(0); tour.Try.RaiseEvent(new RoutedEventArgs(Button.ClickEvent)); PumpPopupLayout();
                     if (!C("PageSelector").IsDropDownOpen || walkthroughHighlight == null || walkthroughHighlight.AdornedElement != C("PageSelector")) throw new Exception("Walkthrough did not highlight and open the page selector.");
                     tour.SetStep(1); tour.Back.RaiseEvent(new RoutedEventArgs(Button.ClickEvent)); if (tour.StepIndex != 0) throw new Exception("Walkthrough Back did not return.");
