@@ -28,8 +28,12 @@ namespace AstroArchive {
      repo.Scan(repo.Root,"Scope-1","Auto",ct,NoProgress,true);Check(repo.All().Count==1,"Reindex imported mutable editor images");repo.ResetArchive(ct,NoProgress);Check(File.Exists(output)&&repo.EditedProjects(out errors).Count==1,"Archive reset deleted Edited project");
     }
    });
-   Test("Unverified editor handoffs create no Edited project",()=>{
-    using(var repo=new Repository(Path.Combine(root,"edited-invalid-app-repo"))){string app=Path.Combine(root,"fake-AstroWizard.exe");File.WriteAllText(app,"invalid build");Expect(()=>AstroWizardHandoff.CreateWorkingCopy(repo,new List<Frame>{new Frame{Kind="Stack",OriginalName="stack.fit"}},"Must not exist",app,ct,NoProgress),"Invalid editor accepted");Check(!Directory.Exists(repo.EditedFolder),"Invalid editor created a project");}
+   Test("Multiple archived selections create independent working copies for other editors",()=>{
+    string source=Path.Combine(root,"edited-multiple-source");Write(Path.Combine(source,"M31_10x60s_Ha.fit"),64,48,(x,y)=>1900,LightHeaders(new DateTime(2026,10,8,21,0,0),"M31"));Write(Path.Combine(source,"M51_20x60s_OIII.fit"),64,48,(x,y)=>2300,LightHeaders(new DateTime(2026,10,8,21,0,0),"M51"));
+    using(var repo=new Repository(Path.Combine(root,"edited-multiple-repo"))){repo.Import(repo.Scan(source,"Scope-1","Auto",ct,NoProgress).Frames,ct,NoProgress);var project=repo.CreateEditedWorkingCopies(repo.All(),"Manual editor","Other editor",ct,NoProgress);Check(project.Sources.Count==2&&project.Sources.All(s=>Util.Hash(repo.EditedPath(project,s.RelativePath),ct)==s.ArchiveHash),"Selection was not copied and verified");string output=Path.Combine(repo.EditedProjectFolder(project),"unnamed_starless.fit");Write(output,64,48,(x,y)=>1200,new Dictionary<string,string>());Check(repo.EditedImages(project).Single(i=>i.Filename=="unnamed_starless.fit").Metadata.TotalExposure==null,"Unrelated multi-input output inherited a guessed exposure");}
+   });
+   Test("Invalid Siril handoffs create no Edited project",()=>{
+    using(var repo=new Repository(Path.Combine(root,"edited-invalid-app-repo"))){string app=Path.Combine(root,"fake-siril.exe");File.WriteAllText(app,"invalid build");Expect(()=>SirilHandoff.CreateWorkingCopy(repo,new List<Frame>{new Frame{Kind="Stack",OriginalName="stack.fit"}},"Must not exist",app,ct,NoProgress),"Invalid editor accepted");Check(!Directory.Exists(repo.EditedFolder),"Invalid editor created a project");}
    });
    Test("Adding edited images preserves filename collisions and survives repository moves",()=>{
     string source=Path.Combine(root,"edited-add-source");string one=Path.Combine(source,"one","M31_starless.fit"),two=Path.Combine(source,"two","M31_starless.fit");Write(one,64,48,(x,y)=>1400,new Dictionary<string,string>());Write(two,64,48,(x,y)=>2200,new Dictionary<string,string>());string destination=Path.Combine(root,"edited-add-repo"),moved=destination+"-moved";

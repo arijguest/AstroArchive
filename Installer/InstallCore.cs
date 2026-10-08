@@ -18,12 +18,16 @@ namespace AstroArchive.Installation {
    }
    return details;
   }
-  public static string Message(Exception error) {
+  public static bool IsPolicyBlock(Exception error) {
    for(Exception current=error;current!=null;current=current.InnerException){
     var native=current as System.ComponentModel.Win32Exception;
     int code=native!=null?native.NativeErrorCode:((current.HResult&unchecked((int)0xffff0000))==unchecked((int)0x80070000)?current.HResult&0xffff:0);
-    if(code==1260||code==4551||code==577)return "Windows blocked an AstroArchive component under Application Control or signature verification. Use a trusted signed release. If this PC is managed, ask your administrator to approve the publisher.\r\n\r\n"+error.Message+"\r\n\r\nDetails: "+Path.Combine(Path.GetTempPath(),"AstroArchive-setup-error.txt");
+    if(code==1260||code==4551||code==577)return true;
    }
+   return false;
+  }
+  public static string Message(Exception error) {
+   if(IsPolicyBlock(error))return "Windows blocked an AstroArchive component under Application Control or signature verification. Use a trusted signed release. If this PC is managed, ask your administrator to approve the publisher.\r\n\r\n"+error.Message+"\r\n\r\nDetails: "+Path.Combine(Path.GetTempPath(),"AstroArchive-setup-error.txt");
    return error.Message;
   }
  }

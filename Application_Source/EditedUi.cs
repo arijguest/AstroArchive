@@ -76,15 +76,20 @@ namespace AstroArchive {
   }
   void ShowEditedEditors(){
    if(ActiveEditedImage==null)return;var menu=ThemedMenu();string name=ActiveEditedImage.Filename;
-   menu.Items.Add(FileAction("Siril…",()=>OpenEditedEditor(false),Util.IsFits(name)&&!name.EndsWith(".gz",StringComparison.OrdinalIgnoreCase)));
-   menu.Items.Add(FileAction("AstroWizard…",()=>OpenEditedEditor(true),new[]{".fit",".fits"}.Contains(Path.GetExtension(name).ToLowerInvariant())));menu.PlacementTarget=B("EditedEditorButton");menu.IsOpen=true;
+   menu.Items.Add(FileAction("Siril…",OpenEditedEditor,Util.IsFits(name)&&!name.EndsWith(".gz",StringComparison.OrdinalIgnoreCase)));
+   menu.Items.Add(FileAction("Default application",()=>Process.Start(new ProcessStartInfo(repo.EditedPath(ActiveEditedProject,ActiveEditedImage.RelativePath)){UseShellExecute=true})));
+   menu.Items.Add(FileAction("Open folder for another editor",OpenEditedFolder));menu.PlacementTarget=B("EditedEditorButton");menu.IsOpen=true;
   }
-  void OpenEditedEditor(bool wizard){
-   if(repo==null||cancel!=null||ActiveEditedProject==null||ActiveEditedImage==null)return;string title=wizard?"AstroWizard":"Siril",executable=wizard?settings.AstroWizardExecutable:settings.SirilExecutable;
-   if(string.IsNullOrEmpty(executable)||!File.Exists(executable)){var picker=new OpenFileDialog{Title="Locate "+title,Filter=wizard?"AstroWizard|*.exe":"Siril GUI|siril.exe"};if(picker.ShowDialog(Window)!=true)return;executable=picker.FileName;if(wizard)settings.AstroWizardExecutable=executable;else settings.SirilExecutable=executable;SaveSettings();}
-   string path=repo.EditedPath(ActiveEditedProject,ActiveEditedImage.RelativePath);Run(ct=>{ct.ThrowIfCancellationRequested();LaunchEditedEditor(executable,path,wizard);return path;},done=>{});
+  void OpenEditedEditor(){
+   if(repo==null||cancel!=null||ActiveEditedProject==null||ActiveEditedImage==null)return;string executable=settings.SirilExecutable;
+   if(string.IsNullOrEmpty(executable)||!File.Exists(executable)){var picker=new OpenFileDialog{Title="Locate Siril",Filter="Siril GUI|siril.exe"};if(picker.ShowDialog(Window)!=true)return;executable=picker.FileName;settings.SirilExecutable=executable;SaveSettings();}
+   string path=repo.EditedPath(ActiveEditedProject,ActiveEditedImage.RelativePath);Run(ct=>{ct.ThrowIfCancellationRequested();using(var process=Process.Start(SirilHandoff.LaunchInfo(executable,path))){if(process==null)throw new IOException("The editor did not start.");}return path;},done=>{});
   }
-  static void LaunchEditedEditor(string executable,string image,bool wizard){using(var process=Process.Start(wizard?AstroWizardHandoff.LaunchInfo(executable,image):SirilHandoff.LaunchInfo(executable,image))){if(process==null)throw new IOException("The editor did not start.");}}
+  void CreateEditedCopies(List<Frame> selected){
+   if(repo==null||cancel!=null||selected.Count==0)return;var dialog=new FormWindow(Window,"Create Edited working copies",610,390);dialog.Text("Create a project for your editor",true);var name=dialog.Input("Edited project name",selected[0].TargetLabel+" · "+DateTime.Now.ToString("yyyyMMdd_HHmmss"));
+   dialog.Text("Copy and verify the selected archived images into Edited, then open the project folder. Load these copies in AstroWizard or your preferred editor, and save outputs alongside them.");dialog.Accept("Create working copies",()=>!string.IsNullOrWhiteSpace(name.Text));if(!dialog.Show())return;
+   string projectName=name.Text;Run(ct=>repo.CreateEditedWorkingCopies(selected,projectName,"Other editor",ct,Progress).Id,id=>{RefreshEdited(id);GoToPage(3);OpenEditedFolder();});
+  }
   void BuildEditedNavigation(MenuItem menu){
    menu.Items.Add(MenuAction("Browse edited images",()=>{RefreshEdited();GoToPage(3);},true,false));menu.Items.Add(MenuAction("Add images…",AddEditedImages,repo!=null));menu.Items.Add(MenuAction("Import folder…",ImportEditedFolder,repo!=null));
    menu.Items.Add(MenuAction("Open project folder",OpenEditedFolder,repo!=null&&ActiveEditedProject!=null));menu.Items.Add(MenuAction("Preview selected image…",PreviewEditedImage,ActiveEditedImage!=null));menu.Items.Add(MenuAction("Refresh projects",()=>RefreshEdited(),repo!=null));

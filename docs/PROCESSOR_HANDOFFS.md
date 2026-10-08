@@ -1,6 +1,6 @@
 # Direct processing handoffs
 
-Verified on 7 October 2026. A handoff must open the supplied inputs in the
+A handoff must open the supplied inputs in the
 receiving application's workspace. Merely launching an application, copying a
 folder, or writing a script that the user still has to load does not qualify.
 
@@ -8,49 +8,39 @@ folder, or writing a script that the user still has to load does not qualify.
 
 | Receiver | Inputs | Method | Reliability boundary |
 | --- | --- | --- | --- |
-| AstroWizard (priority for pre-stacked data) | One non-rejected `.fit` or `.fits` stack | Launch the verified Windows executable with the working copy's absolute path as its one positional argument. | Official signed **Clear Eyes, 7 October 2026** build only; checked by SHA-256 before export and again before launch. |
 | Siril | One non-rejected uncompressed FITS stack | Launch `siril.exe` with the working copy's absolute path as its one positional argument. | Documented GUI image-open contract. `siril-cli.exe`, multiple inputs and gzip are excluded from this route. |
 
-Select a stack in the library, right-click **Export → Send stack to AstroWizard…**
-or **Send stack to Siril…**, locate the executable and choose a working-copy
-destination. The selected capture is copied and SHA-256 verified using the
-existing exporter. The receiving program opens that copy; processing never
-targets the archive copy. Exported metadata and checksums remain in the new
-project. Launch failures retain the copy and report its path.
+Select a stack in the repository, right-click **Export → Send stack to Siril…**,
+locate the executable and name an Edited project. The selected capture is copied
+and SHA-256 verified into the repository's managed Edited workspace. The receiving
+program opens that copy; processing never targets the archive copy. Acquisition
+metadata stays with the project, and outputs saved alongside the copy appear on
+return or refresh. Launch failures retain the copy and report its path.
 
-AstroArchive remembers each executable location. Shell execution is disabled;
+AstroArchive remembers the Siril executable location. Shell execution is disabled;
 paths containing spaces or Unicode remain one argument. It opens a new process,
 rather than injecting files into an existing session. A successful process
 launch is reported as a launch, not as confirmation that a GUI finished loading.
 
-### AstroWizard evidence
+### AstroWizard: export and open manually
 
-The official StackingWizard Windows **Beta 4.7.1** build calls AstroWizard with
-the executable followed by stack paths. The official AstroWizard Windows
-**Clear Eyes** build consumes existing image paths from its startup arguments.
-It schedules its image-loading method for a single path and its stack-set method
-for multiple paths. The single-image receiver was exercised directly from the
-official build's startup dispatch with recording UI methods; spaces and Unicode
-were preserved. `.fts` and gzip paths were ignored by that receiver, so those
-extensions are excluded from the AstroArchive action.
+Direct sending to AstroWizard was removed in package **1.10.4.1**. The previous
+route accepted a single exact executable checksum. That check rejected other
+official releases, and its startup file-loading behavior was verified for only
+one build rather than a supported contract across builds. Removing the checksum
+check alone would not establish compatibility.
 
-Verified vendor downloads and published checksums:
+Use **Export → Create Edited working copies…**, name a project, then open the
+verified copies from within AstroWizard or another editor. The project is registered
+in Edited and its folder opens for manual loading. Default application uses the
+Windows file association to open a selected Edited image. Ordinary file exports
+remain available for destinations outside the repository.
 
-- [AstroWizard Clear Eyes release](https://github.com/lukomaticoYT/astrowizard-releases/releases/tag/2026-10-07)
-  — signed `AstroWizard.exe` SHA-256
-  `200f8eb21079cba4d4de0482e52265d18ca69425bcb49f513e622c7bc504f803`.
-- [StackingWizard Beta 4.7.1 release](https://github.com/lukomaticoYT/astrowizard-releases/releases/tag/stackingwizard-beta-2026-10-07)
-  — signed `StackingWizard.exe` SHA-256
-  `bd1bd470b9946e9155bfa77a5e58ad3b282b05f5250647871fe88dddcaaad501`.
-- [Official Wizard workflow and guide](https://astrowizard.lukomatico.com/stackingwizard.html).
+- [Official AstroWizard downloads](https://github.com/lukomaticoYT/astrowizard-releases)
 - [Siril's GUI/CLI launch contract](https://siril.org/docs/man/).
 
 Vendor executables are downloaded separately from their official sources;
-AstroArchive neither bundles nor redistributes them. The AstroWizard hash gate
-is deliberate because this startup mechanism is verified implementation
-behavior rather than a promised public API. A newer or older build is refused
-before creating the export until its receiving behavior is verified and added.
-Windows GUI execution has not been exercised in this Linux workspace.
+AstroArchive neither bundles nor redistributes them.
 
 ## Remaining plan, in priority order
 
@@ -68,12 +58,7 @@ Windows GUI execution has not been exercised in this Linux workspace.
    against supported Windows versions before enabling this route. Do not pass
    many unrelated FITS paths as though they were a sequence. Script launch with
    `-s` runs headlessly and does not itself satisfy the GUI handoff requirement.
-3. **AstroWizard filter sets.** Its multi-file receiver exists, but combining
-   stacks needs validated filter labels, a common target/canvas and one compatible
-   filter family. Verify those conditions and test its stack-set receiving path
-   before adding multiple-selection handoff. Do not mix live-stack snapshots or
-   constituent subs with independent stacks.
-4. **Other processors, including PixInsight, DeepSkyStacker and AstroPixelProcessor.**
+3. **Other processors, including PixInsight, DeepSkyStacker and AstroPixelProcessor.**
    Verify each program's documented incoming image/project contract and GUI
    behavior first. Supporting FITS alone does not establish direct import.
    Native project/file-list formats may be useful, but are not enabled until
@@ -116,20 +101,10 @@ The inbox is the only permitted nested import source. Ordinary imports retain
 their separate-source requirement, physical cleanup cannot leave `Dump`, linked
 inbox roots are refused, and repository reindexing excludes pending inbox files.
 
-## Validation for this source change
+## Validation
 
-- WPF application compiled against Microsoft .NET Framework 4.8 reference
-  assemblies with C# 5 compatibility.
-- **71 regression tests passed** on Linux/Mono, including the optional test
-  against the official AstroWizard executable. This checks the version gate,
-  working-copy hashes and launch arguments; it does not launch the Windows GUI.
-- **7 Windows-only tests skipped** here. They cover native cleanup/locking,
-  hard-link guards and trusted file identity; `Application_Source/test.ps1`
-  includes them for Windows execution.
-- The official AstroWizard startup dispatch passed four receiver-contract
-  checks: single FITS with spaces/Unicode, a two-file set, ignored `.fts`, and
-  ignored gzip. The recording UI substitutes verify dispatch, not image rendering.
-- XAML syntax, source inclusion and whitespace checks passed. Full Windows
-  GUI smoke tests and interactive receiver loading remain unverified locally.
-
-Repository handoffs now create and register an Edited project automatically. Both editors open its verified working image. Project folders and acquisition metadata remain portable with the repository. Editor outputs saved in the same folder appear on refresh.
+Application and release checks compile the WPF application against .NET Framework
+4.8, run the engine and installer/updater suites, and exercise the Windows UI.
+The Siril regression verifies single-stack eligibility, working-copy hashes,
+launch arguments with spaces/Unicode, rejected inputs and invalid executables.
+It does not launch a separately installed Siril GUI.

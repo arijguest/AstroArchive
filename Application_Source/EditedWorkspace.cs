@@ -19,7 +19,7 @@ namespace AstroArchive {
   public string EditedFolder{get{return Path.Combine(Meta,"edited");}}
   public string EditedProjectFolder(EditedProject project){Guid id;if(project==null||!Guid.TryParseExact(project.Id,"N",out id))throw new InvalidDataException("Invalid edited project identity.");string path=Path.Combine(EditedFolder,project.Id);CheckManagedPath(path,Root);return path;}
   public List<EditedProject> EditedProjects(out List<string> errors){
-   errors=new List<string>();var projects=new List<EditedProject>();CheckManagedPath(EditedFolder,Root);if(!Directory.Exists(EditedFolder))return projects;
+   errors=new List<string>();var projects=new List<EditedProject>();CheckManagedPath(Path.Combine(EditedFolder,"edited-project.json"),Root);if(!Directory.Exists(EditedFolder))return projects;
    foreach(string directory in Directory.EnumerateDirectories(EditedFolder)){
     Guid id;if(!Guid.TryParseExact(Path.GetFileName(directory),"N",out id))continue;
     try{CheckManagedPath(Path.Combine(directory,"edited-project.json"),Root);var project=Util.Deserialize<EditedProject>(File.ReadAllText(Path.Combine(directory,"edited-project.json")));
@@ -36,14 +36,18 @@ namespace AstroArchive {
    CheckManagedPath(path,Root);try{File.WriteAllText(temp,Util.Serialize(project));CommitTemporary(temp,path,CancellationToken.None);}finally{TryRemove(temp);}
   }
   EditedProject NewEditedProject(string name,string processor,string target){
-   if(string.IsNullOrWhiteSpace(name))throw new ArgumentException("Enter a project name.");CheckManagedPath(EditedFolder,Root);Directory.CreateDirectory(EditedFolder);
+   if(string.IsNullOrWhiteSpace(name))throw new ArgumentException("Enter a project name.");CheckManagedPath(Path.Combine(EditedFolder,"edited-project.json"),Root);Directory.CreateDirectory(EditedFolder);
    return new EditedProject{Schema=1,Id=Guid.NewGuid().ToString("N"),Name=name.Trim(),Processor=processor??"",Target=target??"",CreatedUtc=DateTime.UtcNow,Sources=new List<EditedSource>()};
   }
   public EditedProject CreateEditedWorkingCopy(Frame capture,string name,string processor,CancellationToken ct,Action<ProgressInfo> progress){
-   ct.ThrowIfCancellationRequested();var indexed=capture==null?null:Find(capture.Hash);if(indexed==null)throw new IOException("The archived capture is unavailable.");ValidateCapture(indexed,ct);
-   var project=NewEditedProject(name,processor,indexed.TargetLabel);string folder=EditedProjectFolder(project);Directory.CreateDirectory(folder);
-   try{var metadata=EditedMetadata.Read(indexed.OriginalName,Assets.Inspect(FilePath(indexed)).Header);if(string.IsNullOrEmpty(metadata.Object)&&!Catalog.IsAmbiguous(indexed.Target))metadata.Object=indexed.Target;if(string.IsNullOrEmpty(metadata.Filters)&&indexed.Filter!="Unknown")metadata.Filters=indexed.Filter;
-    AddEditedFile(project,FilePath(indexed),indexed.OriginalName,indexed.Hash,indexed.Hash,ct,progress,null,metadata);return project;}
+   return CreateEditedWorkingCopies(new[]{capture},name,processor,ct,progress);
+  }
+  public EditedProject CreateEditedWorkingCopies(IEnumerable<Frame> captures,string name,string processor,CancellationToken ct,Action<ProgressInfo> progress){
+   ct.ThrowIfCancellationRequested();var selected=captures.ToList();if(selected.Count==0)throw new ArgumentException("Choose archived images.");var indexed=new List<Frame>();
+   foreach(var capture in selected){var stored=capture==null?null:Find(capture.Hash);if(stored==null)throw new IOException("The archived capture is unavailable.");ValidateCapture(stored,ct);indexed.Add(stored);}
+   var project=NewEditedProject(name,processor,indexed.Select(f=>f.TargetLabel).Distinct().Count()==1?indexed[0].TargetLabel:"Multiple objects");Directory.CreateDirectory(EditedProjectFolder(project));
+   try{foreach(var capture in indexed){ct.ThrowIfCancellationRequested();var metadata=EditedMetadata.Read(capture.OriginalName,Assets.Inspect(FilePath(capture)).Header);if(string.IsNullOrEmpty(metadata.Object)&&!Catalog.IsAmbiguous(capture.Target))metadata.Object=capture.Target;if(string.IsNullOrEmpty(metadata.Filters)&&capture.Filter!="Unknown")metadata.Filters=capture.Filter;
+    AddEditedFile(project,FilePath(capture),capture.OriginalName,capture.Hash,capture.Hash,ct,progress,null,metadata);}return project;}
    catch{RemoveNewEditedProject(project);throw;}
   }
   public EditedProject AddEditedImages(IEnumerable<string> files,EditedProject project,string name,CancellationToken ct,Action<ProgressInfo> progress){

@@ -26,6 +26,35 @@ namespace AstroArchive {
    }
   }
   static Rect PopupBounds(FrameworkElement child,Visual root){return child.TransformToAncestor(root).TransformBounds(new Rect(child.RenderSize));}
+  static MouseWheelEventArgs MenuWheel(UIElement source,int delta){
+   var wheel=new MouseWheelEventArgs(Mouse.PrimaryDevice,0,delta){RoutedEvent=UIElement.PreviewMouseWheelEvent};source.RaiseEvent(wheel);return wheel;
+  }
+  static void CheckMenuWheel(ScrollViewer viewer){
+   if(!MenuScrolling.GetEnabled(viewer)||viewer.CanContentScroll)throw new Exception("Menu lacks proportional pixel scrolling.");
+   viewer.ScrollToHome();PumpPopupLayout();
+   if(!MenuWheel(viewer,-120).Handled)throw new Exception("Menu did not handle a mouse-wheel notch.");PumpPopupLayout();double notch=viewer.VerticalOffset;
+   if(notch<=0||notch>64)throw new Exception("Mouse-wheel notch scrolls too many menu rows: "+notch);
+   viewer.ScrollToHome();PumpPopupLayout();MenuWheel(viewer,-12);PumpPopupLayout();double small=viewer.VerticalOffset;
+   if(small<=0||small>=notch/2)throw new Exception("Small touchpad delta was treated as a full wheel notch: "+small);
+   viewer.ScrollToHome();PumpPopupLayout();for(int i=0;i<20;i++)MenuWheel(viewer,-6);PumpPopupLayout();
+   if(Math.Abs(viewer.VerticalOffset-notch)>0.5)throw new Exception("Rapid touchpad packets were amplified or lost before layout: "+viewer.VerticalOffset+" versus "+notch);
+   MenuWheel(viewer,12);PumpPopupLayout();if(viewer.VerticalOffset>=notch||viewer.VerticalOffset<notch/2)throw new Exception("Touchpad direction reversal was delayed or too fast.");
+   viewer.ScrollToEnd();PumpPopupLayout();double end=viewer.VerticalOffset;
+   if(!MenuWheel(viewer,-120).Handled)throw new Exception("Menu wheel escaped its lower boundary.");PumpPopupLayout();
+   if(Math.Abs(viewer.VerticalOffset-end)>0.5)throw new Exception("Menu wheel scrolled beyond the final item.");
+   viewer.ScrollToHome();PumpPopupLayout();
+  }
+  void SmokeNestedMenuWheel(){
+   var dialog=new FormWindow(Window,"Menu wheel smoke",480,440);
+   var text=new TextBlock{Text=string.Join("\n",Enumerable.Range(0,40).Select(i=>"Nested line "+i))};
+   var nested=new ScrollViewer{Content=text,Height=100,VerticalScrollBarVisibility=ScrollBarVisibility.Auto};MenuScrolling.SetEnabled(nested,true);dialog.Add(nested);
+   for(int i=0;i<40;i++)dialog.Text("Settings option "+i);
+   try{
+    dialog.Window.Show();PumpPopupLayout();var outer=PopupChildren<ScrollViewer>(dialog.Window).First();CheckMenuWheel(outer);
+    double initial=outer.VerticalOffset;var wheel=MenuWheel(text,-12);PumpPopupLayout();
+    if(!wheel.Handled||nested.VerticalOffset<=0||nested.VerticalOffset>16||outer.VerticalOffset!=initial)throw new Exception("Nested menu wheel scrolled twice or moved its parent.");
+   }finally{dialog.Window.Close();}
+  }
   static void CheckPopupScroll(ScrollViewer viewer,bool vertical,bool horizontal){
    viewer.UpdateLayout();
    var content=viewer.Template.FindName("PART_ScrollContentPresenter",viewer) as ScrollContentPresenter;
@@ -44,6 +73,7 @@ namespace AstroArchive {
     if(viewer.VerticalOffset<=0)throw new Exception("Popup cannot reach its final items.");
     viewer.ScrollToHome();PumpPopupLayout();
     if(viewer.VerticalOffset!=0)throw new Exception("Popup cannot return to its first items.");
+    CheckMenuWheel(viewer);
    }
    if(horizontal){
     ScrollBar.PageRightCommand.Execute(null,across);PumpPopupLayout();
@@ -122,7 +152,8 @@ namespace AstroArchive {
       }
      }finally{dialog.Window.Close();}
     }
-    File.WriteAllText(Path.Combine(output,"dropdown-smoke.txt"),"PASS: light/dark Export and nested file menus; no native gutter; short popups hide scrollbars; constrained long menus, submenus and dialog dropdowns reserve scrollbar space; 100/150/200% popup layout scales; vertical/horizontal page commands; final-item selection; Escape dismissal.");
+    SmokeNestedMenuWheel();
+    File.WriteAllText(Path.Combine(output,"dropdown-smoke.txt"),"PASS: light/dark Export and nested file menus; no native gutter; short popups hide scrollbars; constrained long menus, submenus and dialog dropdowns reserve scrollbar space; 100/150/200% popup layout scales; proportional touchpad/wheel deltas and rapid packet bursts; nested scroll ownership; vertical/horizontal page commands; final-item selection; Escape dismissal.");
    }finally{Theme.Apply(Window,"Dark");Window.Hide();}
   }
  }

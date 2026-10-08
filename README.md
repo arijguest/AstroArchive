@@ -88,7 +88,7 @@ Compare `Hash` with the corresponding `.sha256` file. A checksum checks file int
 | **Filters** | Narrow captures by acquisition session, exposure, gain and review state. Advanced options include mosaic, format, capability and mount. |
 | **Columns** | Show or hide headings; drag to reorder or right-click to move left/right. Import and repository layouts save independently. |
 | **Table headings** | Click to sort; **Shift-click** adds columns. Arrows and priorities show the active sort order. |
-| **Preview toolbar** | Scroll or pinch to zoom; drag or use arrows to pan after zooming. **Fit** or **F** restores the whole image; **Escape** closes the popup. |
+| **Preview toolbar** | Controls sit below the image. Scroll or pinch to zoom; drag the image or use arrows to move the view after zooming. **Fit** or **F** restores the whole image; **Escape** closes the popup. |
 | **Settings → Preferences** | System/light/dark themes, text size, comfortable rows, high contrast and reduced progress animation. |
 | **Guide** | Repeat the first-run walkthrough, search offline help or open About. **F1** opens help for the current tab. |
 
@@ -121,7 +121,7 @@ Import, preview and scientific export have different capabilities:
 - **Derived FITS:** Conversion is explicit, records source/output checksums and leaves originals untouched. Scientific eligibility is shown separately from preview support.
 - **Calibration:** Matching explains accepted, review-needed and rejected candidates. Dark flats match raw-flat exposures in a separate preparation stage.
 - **Optional codecs:** CFITSIO and Zstandard are not bundled. Local codecs in `%LOCALAPPDATA%\AstroArchive\codecs` survive updates.
-- **External processors:** Single-stack AstroWizard/Siril handoffs use verified working copies. AstroWizard requires the specifically verified Windows build.
+- **External processors:** Single-stack Siril handoffs use verified working copies. Export selected stacks for manual loading in AstroWizard.
 - **Analysis:** ASTAP needs a separate installation and star database; Astrometry.net needs an account. The observing town/city picker works offline.
 - **Cloud folders:** Use filesystem-mounted or streamed folders, including Google Drive for desktop. Browser-only folders cannot be used.
 

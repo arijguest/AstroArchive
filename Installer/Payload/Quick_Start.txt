@@ -136,8 +136,8 @@ columns resets visibility and order for just that table. Hiding a sorted heading
 removes it from sorting; row selections and filters are retained.
 
 Select one repository file and choose Preview image… from its context menu.
-Pinch, scroll or use the centred toolbar over the image to zoom. After zooming,
-drag or use the arrows to pan; Fit (or F) restores the whole image. Pan and zoom-out
+Pinch, scroll or use the centred toolbar below the image to zoom. After zooming,
+drag the image or use the arrows to move the view; Fit (or F) restores the whole image. Pan and zoom-out
 buttons are disabled while the whole image is fitted. Escape closes
 the popup preview. The gesture viewer uses the same
 colour decoders and display stretch as the preview pane. Source pixels stay intact.
@@ -442,14 +442,14 @@ Settings offers Open dump folder and Process dump folder now. Finish copying fil
 before processing. The dump flow has progress/cancellation and saves a last-dump.txt
 report in .astroarchive/reports. Normal import cleanup preferences do not affect it.
 
-Select one stack and right-click Export > Send stack to AstroWizard or Siril.
-Choose the executable and an Edited project name. The image is
-copied, verified and passed directly to the receiving GUI. AstroWizard accepts
-.fit/.fits via this route and requires the official signed Clear Eyes Windows build
-of 7 October 2026 (verified by checksum). Other builds are refused pending validation.
-Siril uses siril.exe, not siril-cli.exe. Gzip, multiple stacks and individual subs
-are outside these direct handoffs. StackingWizard incoming handoff and Siril sequence
-preparation remain planned; existing ready-to-stack folders are the manual route.
+Select one stack and right-click Export > Send stack to Siril. Choose siril.exe
+(not siril-cli.exe) and an Edited project name. The image is copied, verified
+and opened in Siril. Gzip, multiple stacks and individual subs are outside this
+single-image route.
+For AstroWizard or another editor, use Export > Create Edited working copies.
+The selected images appear in Edited and their project folder opens. Load those
+copies from your editor and save outputs alongside them. Ready-to-stack exports
+remain available for manual loading in stacking applications.
 
 KEYBOARD SHORTCUTS
 Main window: Ctrl+F focuses search; Ctrl+I opens Import; Ctrl+E opens Export.
@@ -646,7 +646,8 @@ starts it again. Guide also holds searchable help and About AstroArchive,
 including Ari J. Guest's author credit and arijguest.com.
 
 COMPACT FILTERS AND ACQUISITION DATES
-Open Repository > View > Filters > Open filters panel, or the equivalent Import
+Use the Filters button beside Search and Clear, or Repository > View > Filters
+> Open filters panel and the equivalent Import
 menu. Changes apply immediately; Done, Escape or a click outside closes the panel.
 Exposure and gain use inclusive range sliders that snap to recorded values. Select
 Any value, Known values only, Between limits or Unknown only. Between limits can
@@ -671,8 +672,9 @@ Unreadable files are excluded; inaccessible or linked folders are reported. Subf
 structure is retained. Sources are checked again before import and stay in place.
 A changed or cancelled folder import leaves no half-created project.
 
-Sending a repository stack to Siril or the verified AstroWizard build creates a
-verified working copy automatically in Edited. The editor opens that working file.
+Sending a repository stack to Siril creates a verified working copy automatically
+in Edited. Siril opens that working file. For other editors, Export > Create Edited
+working copies creates a project and opens its folder for manual loading.
 Save processed outputs in its project folder; Refresh or returning to AstroArchive
 finds them. Use Open project folder, Preview image or Image details on this page.
 Edited copies and projects remain portable with the repository and survive clearing

@@ -48,21 +48,28 @@ namespace AstroArchive {
    };
    install.Click+=async (sender,args)=>{
     if(busy||available==null||cancel!=null)return;
-    var release=available;bool started=false;
+    var release=available;bool started=false;string verified=null;DateTime attemptedUtc=DateTime.MinValue;Exception failure=null;
     busy=true;downloading=true;progress.Value=0;progress.Maximum=100;status.Text="Downloading and verifying AstroArchive "+release.package_version+"…";refresh();
     try{
      IProgress<UpdateDownloadProgress> reporting=new Progress<UpdateDownloadProgress>(p=>{if(!busy||!downloading)return;progress.Value=p.Percent;status.Text="Downloading package "+release.package_version+": "+p.Percent+"% · "+ImportWorkflow.Size(p.Received)+" / "+ImportWorkflow.Size(p.Total);});
      client.Progress=p=>reporting.Report(p);
-     string verified=await Task.Run(()=>client.Prepare(release,target.Cache));client.Progress=null;downloading=false;refresh();
+     verified=await Task.Run(()=>client.Prepare(release,target.Cache));client.Progress=null;downloading=false;refresh();
      WindowsIntegration.EnsureNoOtherApplications(target.Root,Process.GetCurrentProcess().Id);
      status.Text="Saving settings and archive index before installation…";
      SaveSettings();if(repo!=null)repo.Checkpoint(CancellationToken.None);
      int waitPid=WindowsIntegration.UpdateWaitProcess(target.Root,Process.GetCurrentProcess().Id,Assembly.GetExecutingAssembly().Location);
-     using(var process=Process.Start(UpdateClient.InstallerStartInfo(release,verified,target.Root,waitPid)))
+     var start=UpdateClient.InstallerStartInfo(release,verified,target.Root,waitPid);attemptedUtc=DateTime.UtcNow;
+     using(var process=WindowsIntegration.StartProcess(start))
       if(process==null)throw new IOException("The release installer could not start.");
      started=true;status.Text="Installing the release. AstroArchive will restart automatically.";
-    }catch(Exception e){status.Text="The release could not be installed. AstroArchive remains open.\n"+e.Message;}
-    finally{client.Progress=null;downloading=false;busy=false;refresh();}
+    }catch(Exception e){failure=e;}
+    finally{client.Progress=null;downloading=false;}
+    if(failure!=null){
+     status.Text="The release could not be installed. AstroArchive remains open.\n"+failure.Message;
+     string log=await Task.Run(()=>UpdateDiagnostics.Record(failure,release,verified,attemptedUtc));
+     status.Text="The release could not be installed. AstroArchive remains open.\n"+UpdateDiagnostics.Message(failure,log);
+    }
+    busy=false;refresh();
     // Shutdown closes both modal settings windows and disposes the repository.
     // The installer waits for this app (and its launcher) to exit before replacing files.
     if(started)Application.Current.Shutdown();

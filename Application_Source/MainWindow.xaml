@@ -79,7 +79,8 @@
   <Style x:Key="PopupScrollViewer" TargetType="ScrollViewer">
    <Setter Property="HorizontalScrollBarVisibility" Value="Auto" />
    <Setter Property="VerticalScrollBarVisibility" Value="Auto" />
-   <Setter Property="CanContentScroll" Value="True" />
+   <Setter Property="CanContentScroll" Value="False" />
+   <Setter Property="local:MenuScrolling.Enabled" Value="True" />
    <Setter Property="Focusable" Value="False" />
    <Setter Property="Template">
     <Setter.Value>
@@ -592,6 +593,7 @@
        <TextBox x:Name="SearchBox" ToolTip="Search target, date, device, filter, filename or notes" />
        <TextBlock x:Name="SearchHint" Text="Search captures…" Foreground="{DynamicResource Muted}" Margin="10,0" VerticalAlignment="Center" IsHitTestVisible="False" />
       </Grid>
+      <Button x:Name="LibraryFiltersButton" Grid.Column="1" Content="Filters" Margin="8,0,0,0" />
       <Button Grid.Column="2" x:Name="ClearButton" Content="Clear" Margin="8,0,0,0" />
      </Grid>
      <Grid Grid.Row="2" x:Name="LibraryBody">
@@ -720,7 +722,8 @@
         <TextBox x:Name="ImportSearchBox" ToolTip="Search the scan results. Only ready files in this filtered view are imported." />
         <TextBlock x:Name="ImportSearchHint" Text="Search import results…" Foreground="{DynamicResource Muted}" Margin="10,0" VerticalAlignment="Center" IsHitTestVisible="False" />
        </Grid>
-       <Button Grid.Column="2" x:Name="ImportClearButton" Content="Clear" Margin="8,0,0,0" />
+       <Button Grid.Column="1" x:Name="ImportFiltersButton" Content="Filters" Margin="8,0,0,0" />
+      <Button Grid.Column="2" x:Name="ImportClearButton" Content="Clear" Margin="8,0,0,0" />
       </Grid>
       <StackPanel Grid.Row="1" Margin="2,8,0,0">
        <TextBlock x:Name="ImportSummaryLabel" TextWrapping="Wrap" />
@@ -872,6 +875,7 @@
   <Popup x:Name="OperationPopup" Grid.Row="2" Placement="Center" PlacementTarget="{Binding ElementName=MainTabs}" AllowsTransparency="True" StaysOpen="True" PopupAnimation="None">
    <Border Background="{DynamicResource Surface}" BorderBrush="{DynamicResource Border}" BorderThickness="1" CornerRadius="8" Padding="18">
    <Grid Margin="0,5,0,0" Width="540">
+    <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
     <Grid.ColumnDefinitions>
      <ColumnDefinition Width="*" />
      <ColumnDefinition Width="Auto" />
@@ -880,7 +884,7 @@
      <TextBlock x:Name="StatusLabel" Text="Ready" Foreground="{DynamicResource Muted}" TextWrapping="Wrap" Margin="0,0,12,0" />
      <TextBlock x:Name="RateLabel" Text="" FontSize="{DynamicResource UiFontSmall}" Foreground="{DynamicResource Muted}" Margin="0,4,0,0" Visibility="Collapsed" />
     </StackPanel>
-    <ProgressBar x:Name="ProgressBar" Grid.ColumnSpan="2" Margin="0,80,0,0" Height="6" VerticalAlignment="Center" Foreground="{DynamicResource Accent}" Background="{DynamicResource Border}" BorderThickness="0" Visibility="Collapsed" />
+    <ProgressBar x:Name="ProgressBar" Grid.ColumnSpan="2" Grid.Row="1" Margin="0,14,0,0" Height="6" VerticalAlignment="Center" Foreground="{DynamicResource Accent}" Background="{DynamicResource Border}" BorderThickness="0" Visibility="Collapsed" />
     <StackPanel Grid.Column="1" Orientation="Horizontal">
      <Button x:Name="CancelButton" Content="Cancel" Visibility="Collapsed" Padding="12,5" Margin="8,0,0,0" />
     </StackPanel>
@@ -910,7 +914,6 @@
    <Button x:Name="LibraryColumnsButton" Content="Columns ▾" />
    <Button x:Name="PreviewToggle" Content="Preview" />
    <Button x:Name="MoreButton" Content="Tools ▾" Margin="0" />
-   <Button x:Name="LibraryFiltersButton" Grid.Column="1" Content="Filters" Margin="8,0,0,0" />
    <Button x:Name="ReviewLibraryButton" Content="Review flagged" />
    <Button x:Name="ScreenLibraryButton" Content="Screen for failures" ToolTip="Check selected or visible indexed captures for rejection markers and damaged FITS data." />
    <Button x:Name="RotationButton" Content="Rotation" Padding="10,5" />
@@ -921,7 +924,6 @@
    <Button x:Name="RebuildTelescopesButton" Content="Recover profiles" Padding="10,6" />
    <Button x:Name="RefreshUsbButton" Content="Refresh USB" Padding="10,6" Margin="0" />
    <Button DockPanel.Dock="Right" x:Name="AutoUploadButton" Content="Auto upload from USB" Visibility="Collapsed" Background="{DynamicResource Accent}" Foreground="White" Margin="8,0,0,0" />
-   <Button Grid.Column="1" x:Name="ImportFiltersButton" Content="Filters" Margin="8,0,0,0" />
    <Button Grid.Column="3" x:Name="ScreenImportsButton" Content="Screen for failures" Margin="8,0,0,0" ToolTip="Check the visible captures for telescope failure/rejection markers and unreadable FITS data." />
    <CheckBox x:Name="SkipFlaggedCheck" Content="Skip flagged captures" IsChecked="True" VerticalAlignment="Center" Margin="0,0,16,8" />
    <Button x:Name="ReviewImportsButton" Content="Review flagged captures" Padding="12,6" Margin="0,0,8,8" />

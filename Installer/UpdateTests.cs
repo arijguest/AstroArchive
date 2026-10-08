@@ -24,6 +24,30 @@ static class UpdateTests {
   throw new Exception("Expected update refusal.");
  }
  public static void Run(Action<string, Action> test, string scratch) {
+  test("Update policy diagnostics retain native code, verified bytes and exact launch context",()=>{
+   var manifest=Manifest();manifest.authenticode_signed=false;string setup=Client(manifest).Prepare(manifest,Path.Combine(scratch,"policy-cache"));var attempted=DateTime.UtcNow;
+   var error=new IOException("Could not start "+setup,new System.ComponentModel.Win32Exception(4551));
+   string report=UpdateDiagnostics.Details(error,manifest,setup,attempted,(path,time)=>{Check(path==setup&&time==attempted,"Policy query lost the rejected launch");return "Event 3077; Policy ID: {0283ac0f-fff1-49ae-ada1-8a933130cad6}";});
+   Check(report.Contains("Native Windows error: 4551")&&report.Contains("Installer: "+setup)&&report.Contains("Saved SHA-256: "+manifest.sha256)&&report.Contains("Feed reports Authenticode signed: False")&&report.Contains("Event 3077"),"Policy log lost the native code, file, signature status or policy evidence");
+   Check(File.ReadAllBytes(setup).SequenceEqual(Installer),"Diagnostics changed the rejected installer");
+   string log=Path.Combine(scratch,"last-error.txt");Check(UpdateDiagnostics.Message(error,log).Contains(log)&&!UpdateDiagnostics.Message(error,log).Contains("AstroArchive-setup-error.txt"),"Update error points at the setup log even though setup never ran");
+  });
+  test("Unavailable policy events preserve the original update failure",()=>{
+   var error=new System.ComponentModel.Win32Exception(4551);string report=UpdateDiagnostics.Details(error,null,"missing.exe",DateTime.UtcNow,(path,time)=>{throw new UnauthorizedAccessException("Access denied");});
+   Check(report.Contains("Native Windows error: 4551")&&report.Contains("Policy events unavailable: Access denied"),"Event log permissions concealed the update failure");
+   report=UpdateDiagnostics.Details(new IOException("Disk full"),null,"missing.exe",DateTime.UtcNow,(path,time)=>{throw new Exception("Unrelated errors must not inspect policy events");});
+   Check(!report.Contains("Policy events")&&UpdateDiagnostics.Message(new IOException("Disk full"),null)=="Disk full","Ordinary download failure was relabeled or queried policy events");
+   report=UpdateDiagnostics.Details(error,null,Path.Combine(scratch,"missing-installer.exe"),DateTime.UtcNow);
+   Check(report.Contains("Native Windows error: 4551"),"Native event lookup concealed the original error");
+  });
+  test("Code Integrity evidence matches the rejected file rather than the parent process",()=>{
+   string installer=@"C:\Users\arija\AppData\Local\Programs\AstroArchive\updates\abc\AstroArchive1.10.1.1.exe";
+   string device=@"\Device\HarddiskVolume3\Users\arija\AppData\Local\Programs\AstroArchive\updates\abc\AstroArchive1.10.1.1.exe";
+   Func<string,string,string> xml=(file,parent)=>"<Event xmlns='http://schemas.microsoft.com/win/2004/08/events/event'><EventData><Data Name='FileName'>"+file+"</Data><Data Name='ProcessName'>"+parent+"</Data></EventData></Event>";
+   Check(UpdateDiagnostics.MatchesInstaller(xml(device.ToUpperInvariant(),"Start.exe"),installer),"Native device path did not match the installer");
+   Check(!UpdateDiagnostics.MatchesInstaller(xml(device.Replace("updates\\abc", "updates\\other"),device),installer),"Event from a different cached download was attributed to this launch");
+   Check(!UpdateDiagnostics.MatchesInstaller(xml("other.exe",device),installer),"Parent process was mistaken for the rejected file");
+  });
   test("Release notes use the feed when present and a bounded exact-tag API fallback",()=>{
    var manifest=Manifest();manifest.release_notes="New import and session views.";var client=new UpdateClient{Fetch=(uri,limit)=>{throw new Exception("Embedded notes should not fetch");}};Check(client.ReleaseNotes(manifest)==manifest.release_notes,"Embedded notes changed");
    manifest.release_notes=null;string requested=null;long maximum=0;client.Fetch=(uri,limit)=>{requested=uri.AbsoluteUri;maximum=limit;return Encoding.UTF8.GetBytes("{\"body\":\"Package notes\"}");};Check(client.ReleaseNotes(manifest)=="Package notes"&&requested.EndsWith("/releases/tags/v1.2.0.2")&&maximum==256*1024,"Notes fallback used the wrong package or unbounded response");

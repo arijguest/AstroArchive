@@ -17,7 +17,7 @@ namespace AstroArchive {
   void ShowFilters(bool imports){
    if(filtersPopup!=null&&filtersPopup.IsOpen){filtersPopup.IsOpen=false;return;}
    var criteria=imports?importFilters:libraryFilters;var rows=imports?CurrentImportRows():all;
-   FrameworkElement button=TopMenu(imports?"ImportMenu":"RepositoryMenu");
+   FrameworkElement button=B(imports?"ImportFiltersButton":"LibraryFiltersButton");if(!button.IsVisible)button=TopMenu(imports?"ImportMenu":"RepositoryMenu");
    var popup=new Popup{PlacementTarget=button,Placement=PlacementMode.Bottom,StaysOpen=false,AllowsTransparency=true,PopupAnimation=settings.ReducedMotion?PopupAnimation.None:PopupAnimation.Fade,VerticalOffset=6};filtersPopup=popup;
    double width=Math.Max(380,Math.Min(620,SystemParameters.WorkArea.Width-48)),height=Math.Max(300,Math.Min(650,SystemParameters.WorkArea.Height-80));
    var border=new Border{Width=width,MaxHeight=height,Background=Brushes.White,BorderBrush=new SolidColorBrush(Color.FromRgb(203,213,227)),BorderThickness=new Thickness(1),CornerRadius=new CornerRadius(10),Padding=new Thickness(16)};
@@ -25,7 +25,7 @@ namespace AstroArchive {
    var layout=new Grid();layout.RowDefinitions.Add(new RowDefinition{Height=GridLength.Auto});layout.RowDefinitions.Add(new RowDefinition{Height=new GridLength(1,GridUnitType.Star)});layout.RowDefinitions.Add(new RowDefinition{Height=GridLength.Auto});border.Child=layout;
    var heading=new StackPanel{Margin=new Thickness(0,0,0,12)};heading.Children.Add(new TextBlock{Text="Filters",FontSize=17,FontWeight=FontWeights.SemiBold,Foreground=new SolidColorBrush(Color.FromRgb(36,50,71))});
    var count=new TextBlock{Foreground=Brushes.SlateGray,Margin=new Thickness(0,5,0,0),TextWrapping=TextWrapping.Wrap};heading.Children.Add(count);layout.Children.Add(heading);
-   var body=new StackPanel();var scroll=new ScrollViewer{Content=body,VerticalScrollBarVisibility=ScrollBarVisibility.Auto,HorizontalScrollBarVisibility=ScrollBarVisibility.Disabled,MaxHeight=height-140};Grid.SetRow(scroll,1);layout.Children.Add(scroll);
+   var body=new StackPanel();var scroll=new ScrollViewer{Content=body,VerticalScrollBarVisibility=ScrollBarVisibility.Auto,HorizontalScrollBarVisibility=ScrollBarVisibility.Disabled,MaxHeight=height-140};MenuScrolling.SetEnabled(scroll,true);Grid.SetRow(scroll,1);layout.Children.Add(scroll);
    var footer=new WrapPanel{Margin=new Thickness(0,12,0,0)};Grid.SetRow(footer,2);layout.Children.Add(footer);
    var clear=new Button{Content="Clear filters",Padding=new Thickness(12,6,12,6),Margin=new Thickness(0,0,8,0)};footer.Children.Add(clear);
    var done=new Button{Content="Done",Padding=new Thickness(12,6,12,6),Margin=new Thickness(0),Background=new SolidColorBrush(Color.FromRgb(77,85,199)),Foreground=Brushes.White};footer.Children.Add(done);done.Click+=(s,e)=>popup.IsOpen=false;
