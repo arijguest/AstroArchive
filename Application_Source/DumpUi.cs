@@ -20,7 +20,7 @@ namespace AstroArchive {
    if(!visible){if(filtersPopup!=null)filtersPopup.IsOpen=false;ClosePreviewDetails("");ClosePreviewDetails("Edited");}
   }
   void OpenDumpProgress(){
-   var window=new Window{Owner=Window,ShowInTaskbar=false,Title="Processing Dump folder",Width=580,SizeToContent=SizeToContent.Height,ResizeMode=ResizeMode.NoResize,WindowStartupLocation=WindowStartupLocation.CenterOwner,FontFamily=Window.FontFamily,FontSize=Window.FontSize};window.Resources.MergedDictionaries.Add(Window.Resources);Theme.Bind(window,Control.BackgroundProperty,"Canvas");Theme.Bind(window,Control.ForegroundProperty,"Text");
+   var window=new Window{Owner=Window,Icon=ApplicationIcon.Image,ShowInTaskbar=false,Title="Processing Dump folder",Width=580,SizeToContent=SizeToContent.Height,ResizeMode=ResizeMode.NoResize,WindowStartupLocation=WindowStartupLocation.CenterOwner,FontFamily=Window.FontFamily,FontSize=Window.FontSize};window.Resources.MergedDictionaries.Add(Window.Resources);Theme.Bind(window,Control.BackgroundProperty,"Canvas");Theme.Bind(window,Control.ForegroundProperty,"Text");
    var content=new StackPanel{Margin=new Thickness(24)};content.Children.Add(new TextBlock{Text="Processing Dump folder",FontWeight=FontWeights.SemiBold,Margin=new Thickness(0,0,0,12)});
    dumpProgressStatus=new TextBlock{Text="Checking files…",TextWrapping=TextWrapping.Wrap};content.Children.Add(dumpProgressStatus);
    dumpProgressRate=new TextBlock{TextWrapping=TextWrapping.Wrap,Margin=new Thickness(0,8,0,0)};content.Children.Add(dumpProgressRate);

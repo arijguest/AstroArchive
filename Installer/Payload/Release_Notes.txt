@@ -1,5 +1,5 @@
-AstroArchive 1.12.2 — compact navigation, IC common names and interactive sky
-Package 1.12.2.1
+AstroArchive 1.12.3 — compact navigation, IC common names and interactive sky
+Package 1.12.3.1
 - Capture sky globes in Repository and Edited now support drag rotation,
   scroll/pinch zoom, keyboard navigation and a small reset button. Capture
   coordinates, time and horizon stay fixed while exploring; unchanged captures
@@ -33,6 +33,17 @@ keyboard cycling, popup contrast and six-pixel layout gaps in both themes, at
 previews, Edited workflows and the existing installer/update validation.
 
 Previous release notes
+
+AstroArchive 1.12.2 — Windows application icon
+Package 1.12.2.1
+
+- Use the bundled multi-size Windows ICO for the main window, taskbar and
+  auxiliary windows. Keep the full-resolution PNG for the in-app logo.
+- Set icons explicitly on settings/processing forms, preview, guide, walkthrough
+  and Dump progress windows. Icons load from the executable, independent of
+  the working directory and without requiring external asset files.
+- Verify native small/large icon handles on the main window, forms, guide and
+  preview during Windows UI validation.
 
 AstroArchive 1.12.1 — preview, progress and Edited refinements
 Package 1.12.1.1

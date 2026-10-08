@@ -17,7 +17,7 @@ namespace AstroArchive {
     var message=new TextBox{Text="Copy complete. Verifying checksums…",IsReadOnly=true};dialog.Add(message);var progress=new ProgressBar{Value=65,Maximum=100,Height=8,Margin=new Thickness(0,12,0,12)};dialog.Add(progress);dialog.CloseOnly();
     var help=new HelpWindow(Window,HelpCatalog.Load(),"IMAGE PREVIEW AND TABLES");var tooltip=B("SettingsButton").ToolTip as ToolTip;
     try{
-     dialog.Window.Show();help.Show();PumpPopupLayout();
+     dialog.Window.Show();help.Show();PumpPopupLayout();VerifyWindowIcon(dialog.Window);VerifyWindowIcon(help);
      Readable(dialog.Window.Foreground,dialog.Window.Background,mode+" processing window");Readable(message.Foreground,message.Background,mode+" processing text");Readable(help.Article.Foreground,help.Article.Background,mode+" guide article");Readable(help.TopicList.Foreground,help.TopicList.Background,mode+" guide topics");
      foreach(var label in PopupChildren<TextBlock>(dialog.Window).Where(t=>!string.IsNullOrWhiteSpace(t.Text)))Readable(label.Foreground,dialog.Window.Background,mode+" dialog label: "+label.Text);
      CapturePopup(dialog.Window,Path.Combine(output,"AstroArchive_Processing_"+mode+".png"));

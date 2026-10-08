@@ -1,4 +1,4 @@
-# AstroArchive 1.12.2
+# AstroArchive 1.12.3
 
 The purple page dropdown beside Settings replaces the tab row. Ctrl+1–4 selects Repository, Edited, Mosaic or Import; Ctrl+Tab cycles pages. The interactive guide introduces the selector.
 
