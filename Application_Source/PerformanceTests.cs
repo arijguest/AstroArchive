@@ -6,6 +6,15 @@ using System.Linq;
 
 namespace AstroArchive {
  public partial class Tests {
+  // JSON object member order is not part of the snapshot contract. In particular,
+  // .NET Framework reflection caches can enumerate properties in a different order.
+  static bool SameSnapshotValue(object left,object right){
+   var a=left as IDictionary<string,object>;var b=right as IDictionary<string,object>;
+   if(a!=null||b!=null)return a!=null&&b!=null&&a.Count==b.Count&&a.All(p=>b.ContainsKey(p.Key)&&SameSnapshotValue(p.Value,b[p.Key]));
+   var x=left as System.Collections.IList;var y=right as System.Collections.IList;
+   if(x!=null||y!=null)return x!=null&&y!=null&&x.Count==y.Count&&Enumerable.Range(0,x.Count).All(i=>SameSnapshotValue(x[i],y[i]));
+   return object.Equals(left,right);
+  }
   static void PerformanceTests(){
    Test("ETA advances within the first copy and includes destination verification",()=>{
     double seconds=0;var metrics=new PipelineMetrics(NoProgress,()=>seconds);metrics.Phase(1,100,"Import",true);var item=metrics.Track(100);
@@ -43,7 +52,7 @@ namespace AstroArchive {
     for(int i=0;i<1000;i++)using(var scope=metrics.Begin("Copy + source hash","Fixture")){scope.Bytes(1);seconds+=0.0001;}Check(pulses<=2,"Stage starts flooded progress callbacks");Check(metrics.Snapshot().Single(s=>s.Stage=="Copy + source hash").Bytes==1000,"Coalescing lost counters");
    });
    Test("Fast frame snapshots preserve metadata and isolate mutable stamps",()=>{
-    var frame=new Frame{Hash="abc",Target="M33",Telescope="Unit",Model="Dwarf 3",Camera="Telephoto",Kind="Light",Night="2026-10-06",Calibration="Unknown",SourceStamp=new FileStamp{Identity="id",Size=123},SourceMetadataStamp=new FileStamp{Size=30},RepositoryStamp=new FileStamp{Size=123}};var copy=frame.Clone();Check(Util.Serialize(copy)==Util.Serialize(frame),"Snapshot lost frame fields");copy.SourceStamp.Size++;copy.RepositoryStamp.Size++;copy.SourceMetadataStamp.Size++;Check(frame.SourceStamp.Size==123&&frame.RepositoryStamp.Size==123&&frame.SourceMetadataStamp.Size==30,"Snapshot shares mutable file stamps");
+    var frame=new Frame{Hash="abc",Target="M33",Telescope="Unit",Model="Dwarf 3",Camera="Telephoto",Kind="Light",Night="2026-10-06",Calibration="Unknown",SourceStamp=new FileStamp{Identity="id",Size=123},SourceMetadataStamp=new FileStamp{Size=30},RepositoryStamp=new FileStamp{Size=123}};var copy=frame.Clone();string original=Util.Serialize(frame),snapshot=Util.Serialize(copy);Check(SameSnapshotValue(Util.Json().DeserializeObject(snapshot),Util.Json().DeserializeObject(original)),"Snapshot lost frame fields. Original: "+original+"; snapshot: "+snapshot);copy.SourceStamp.Size++;copy.RepositoryStamp.Size++;copy.SourceMetadataStamp.Size++;Check(frame.SourceStamp.Size==123&&frame.RepositoryStamp.Size==123&&frame.SourceMetadataStamp.Size==30,"Snapshot shares mutable file stamps");
    });
    Test("Indexed filename phrases retain compact names and conflicting targets",()=>{
     Check(Catalog.TargetFromFilename("Light_HeartNebula.fit")=="IC1805","Compact common name lost");Check(Catalog.TargetFromFilename("Light_NorthAmerica_Nebula.fit")!=null,"Partially joined phrase lost");Check(Catalog.TargetFromFilename("Light_Heart_Nebula_M33.fit")==null&&Catalog.HasFilenameConflict("Light_Heart_Nebula_M33.fit"),"Conflicting name hidden");
