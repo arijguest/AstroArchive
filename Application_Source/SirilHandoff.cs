@@ -17,9 +17,9 @@ namespace AstroArchive {
   }
   public static string ExportStack(Repository repo,List<Frame> frames,ExportOptions options,string executable,CancellationToken ct,Action<ProgressInfo> progress){
    ValidateExecutable(executable);if(!CanSend(frames))throw new InvalidOperationException("Select one non-rejected, uncompressed FITS stack to open in Siril.");
-   var export=new ExportOptions{Parent=options.Parent,Name=options.Name,Mode="Files",IncludeCalibration=false};
+   var export=new ExportOptions{Parent=options.Parent,Name=options.Name,Mode="Files",IncludeCalibration=false,CreateNewFolder=true};
    string project=Exporter.Create(repo,frames,export,ct,progress);
-   string image=Directory.GetFiles(Path.Combine(project,"files"),"*",SearchOption.AllDirectories).Single(Util.IsFits);
+   string image=Directory.GetFiles(project,"*",SearchOption.TopDirectoryOnly).Single(Util.IsFits);
    ct.ThrowIfCancellationRequested();return image;
   }
   // .NET Framework has no ArgumentList: quote using the Windows argv rules.

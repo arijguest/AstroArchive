@@ -41,8 +41,9 @@ compatible camera, filter, exposure and calibration groups. Review suggested or
 unresolved membership before exporting. If files belong to several collections,
 choose the intended collection.
 
-Exports contain workflow notes, a manifest and folders for panel results and
-completed outputs. Source bytes remain unchanged. Stack panels and stitch the
+**Add Metadata** optionally includes workflow notes, a manifest and folders for
+processed results. It defaults off, as does **Create new folder**; panel inputs
+remain separate in either case. Source bytes remain unchanged. Stack panels and stitch the
 mosaic in external software; keep completed outputs separate from contributing subs.
 
 Move or back up the entire repository, including `.astroarchive`, to retain

@@ -19,7 +19,8 @@ Save outputs there so they appear in Edited.
 
 From Edited, use **Open in editor** for Siril or the Windows default application,
 or **Open project folder** to load files manually. For acquisition subs, use a
-stacking-project export and follow its workflow notes in your stacking software.
+stacking export. Enable **Add Metadata** to include workflow notes and a manifest.
+By default, exports contain image files only; **Create new folder** is also optional.
 
 Editors are installed separately:
 

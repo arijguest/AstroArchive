@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading;
 namespace AstroArchive {
  public sealed class MosaicExportLayout {
   readonly Dictionary<string,List<MosaicMember>> members;readonly Dictionary<string,MosaicProject> projects;readonly string selected;
@@ -22,9 +23,9 @@ namespace AstroArchive {
   public string ProjectFolder(MosaicProject p){return Path.Combine("mosaics",Util.Safe(p.Name)+"_"+p.Id.Substring(0,8));}
   public string Prefix(Frame f){var m=Member(f);if(m==null)return "";var p=projects[m.ProjectId];if(m.Role=="Output")return Path.Combine(ProjectFolder(p),"outputs","completed");var panel=p.Panels.First(x=>x.Id==m.PanelId);return Path.Combine(ProjectFolder(p),"panels",Util.Safe(panel.Name)+"_"+panel.Id.Substring(0,8));}
   public List<MosaicProject> Collections(IEnumerable<Frame> frames){return frames.Select(Member).Where(m=>m!=null).Select(m=>m.ProjectId).Distinct().Select(id=>projects[id]).ToList();}
-  public void WriteNotes(string destination,IEnumerable<Frame> frames){
-   foreach(var project in Collections(frames)){string folder=Path.Combine(destination,ProjectFolder(project));Directory.CreateDirectory(Path.Combine(folder,"outputs","panel-results"));Directory.CreateDirectory(Path.Combine(folder,"outputs","stitched"));
-    File.WriteAllText(Path.Combine(folder,"MOSAIC_WORKFLOW.txt"),project.Name+"\r\n"+project.Panels.Count+" known panels"+(project.ExpectedPanels.HasValue?" / "+project.ExpectedPanels.Value+" planned":"")+"\r\n\r\nStack each panel's compatible input groups separately. Keep cameras, filters and calibration states separate. Place the resulting panel images in outputs/panel-results, then align and stitch them in your chosen mosaic software into outputs/stitched.\r\nCompleted imported mosaics are in outputs/completed. Do not combine them with their contributing captures as independent exposures.\r\nPanel membership and source hashes are recorded in manifest.json. AstroArchive prepares the inputs; it does not stitch images.\r\n");
+  public void WriteNotes(string destination,IEnumerable<Frame> frames,string manifestName="manifest.json",CancellationToken ct=default(CancellationToken)){
+   foreach(var project in Collections(frames)){string folder=Path.Combine(destination,ProjectFolder(project));Exporter.CheckDestinationPath(Path.Combine(folder,"outputs","panel-results"));Exporter.CheckDestinationPath(Path.Combine(folder,"outputs","stitched"));Directory.CreateDirectory(Path.Combine(folder,"outputs","panel-results"));Directory.CreateDirectory(Path.Combine(folder,"outputs","stitched"));
+    Exporter.WriteMetadataText(Path.Combine(folder,"MOSAIC_WORKFLOW.txt"),project.Name+"\r\n"+project.Panels.Count+" known panels"+(project.ExpectedPanels.HasValue?" / "+project.ExpectedPanels.Value+" planned":"")+"\r\n\r\nStack each panel's compatible input groups separately. Keep cameras, filters and calibration states separate. Place the resulting panel images in outputs/panel-results, then align and stitch them in your chosen mosaic software into outputs/stitched.\r\nCompleted imported mosaics are in outputs/completed. Do not combine them with their contributing captures as independent exposures.\r\nPanel membership and source hashes are recorded in "+manifestName+". AstroArchive prepares the inputs; it does not stitch images.\r\n",ct);
    }
   }
  }

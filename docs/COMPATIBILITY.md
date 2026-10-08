@@ -67,10 +67,14 @@ compatible filter/night; darks need matching exposure and known temperatures wit
 Missing or conflicting evidence requires review. Processed lights receive no extra
 calibration; unknown calibration state is opt-in.
 
-Dark flats match raw-flat exposure in separate sets. Follow the export notes;
+Dark flats match raw-flat exposure in separate sets;
 do not subtract both a bias and a dark flat from the same flat.
 
 **Convert supported images to FITS** is an explicit stacking-export option for
 eligible linear images. Confirm linearity in Edit metadata. Conversion records
-source, image selection and output checksums without applying a preview stretch.
-Originals remain intact. An interrupted project is marked `INCOMPLETE.txt`.
+physical values without applying a preview stretch. **Add Metadata** optionally
+records source, image selection and output checksums in a manifest, alongside
+session metadata and readme/workflow notes. It is off by default, as is
+**Create new folder**. Stacks copy directly to the destination; subs retain
+compatible input folders. Originals remain intact. Cancellation retains verified
+copies and removes unfinished temporary files; wait for completion before processing a full set.
