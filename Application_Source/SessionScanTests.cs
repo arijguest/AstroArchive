@@ -5,6 +5,32 @@ using System.Linq;
 namespace AstroArchive {
  public partial class Tests {
   static void SessionScanTests(){
+   Test("Source history follows DWARF session paths across browse roots",()=>{
+    string parent=Path.Combine(root,"source_history_100%"),session=Path.Combine(parent,"DWARF_RAW_TELE_C 20_EXP_30_GAIN_40_2026-08-15-22-32-43-754");Directory.CreateDirectory(session);
+    string first=Path.Combine(session,"Light_001.fit");Write(first,64,48,(x,y)=>1400,LightHeaders(new DateTime(2026,8,15,22,33,0),"C20"));
+    using(var repo=new Repository(Path.Combine(root,"history-roots-repo"))){
+     repo.Import(repo.Scan(session,"Dwarf-01","Dwarf 3",ct,NoProgress).Frames,ct,NoProgress,new ImportOptions{SourceRoot=session});
+     Check(repo.SourceHistory(parent).Single().Key==first,"Parent selection missed a session import");
+     string second=Path.Combine(session,"Light_002.fit");Write(second,64,48,(x,y)=>1600,LightHeaders(new DateTime(2026,8,15,22,34,0),"C20"));var scan=repo.Scan(parent,"Dwarf-01","Dwarf 3",ct,NoProgress);repo.Import(scan.Frames,ct,NoProgress,new ImportOptions{SourceRoot=parent});
+     Check(repo.SourceHistory(session).Count==2&&repo.SourceHistory(parent).Count==2,"Browse roots duplicated or lost history");
+     string other=Path.Combine(root,"different_source",Path.GetFileName(session));Directory.CreateDirectory(other);File.Copy(first,Path.Combine(other,"Light_001.fit"));Check(repo.SourceHistory(other).Count==0,"Session name alone reused another device's history");
+     var duplicate=repo.Scan(other,"Dwarf-02","Dwarf 3",ct,NoProgress,quickScan:true);Check(duplicate.Frames.Single().Status.StartsWith("Duplicate"),"Source-scoped archive lookup missed a checksum duplicate imported elsewhere");
+    }
+   });
+   WindowsTest("DWARF incremental inventory survives parent and session selection changes",()=>{
+    string parent=Path.Combine(root,"incremental_roots_100%"),session=Path.Combine(parent,"DWARF_RAW_TELE_C 20_EXP_30_GAIN_40_2026-08-15-22-32-43-754");Directory.CreateDirectory(session);
+    Write(Path.Combine(session,"Light_001.fit"),64,48,(x,y)=>1400,LightHeaders(new DateTime(2026,8,15,22,33,0),"C20"));
+    using(var repo=new Repository(Path.Combine(root,"incremental-roots-repo"))){
+     repo.Import(repo.Scan(session,"Dwarf-01","Dwarf 3",ct,NoProgress).Frames,ct,NoProgress,new ImportOptions{SourceRoot=session});
+     int callbacks=0;var scan=repo.Scan(parent,"Dwarf-01","Dwarf 3",ct,NoProgress,onFrame:f=>callbacks++,deferHash:true,quickScan:true);Check(scan.FastSkippedFiles==1&&scan.Frames.Count==0&&callbacks==0&&scan.Metrics.Snapshot().Sum(s=>s.Bytes)==0,"Parent selection reread or rebuilt a completed session");
+     Write(Path.Combine(session,"Light_002.fit"),64,48,(x,y)=>1600,LightHeaders(new DateTime(2026,8,15,22,34,0),"C20"));scan=repo.Scan(parent,"Dwarf-01","Dwarf 3",ct,NoProgress,deferHash:true,quickScan:true);Check(scan.FastSkippedFiles==1&&scan.Frames.Single().OriginalName=="Light_002.fit","Existing session name concealed a new exposure");repo.Import(scan.Frames,ct,NoProgress,new ImportOptions{SourceRoot=parent});
+     scan=repo.Scan(session,"Dwarf-01","Dwarf 3",ct,NoProgress,deferHash:true,quickScan:true);Check(scan.FastSkippedFiles==2&&scan.Frames.Count==0,"Selecting the session missed imports from its parent");
+     // Exercise FAT-style inventory matching using saved stamps without change-time.
+     using(var db=new Database(repo.WorkingIndex)){foreach(string row in db.Query("SELECT data FROM source_manifest")){var m=Util.Deserialize<SourceManifest>(row);m.Source.Reliable=false;db.Exec("UPDATE source_manifest SET data=? WHERE root=? AND path=?",Util.Serialize(m),m.Root,m.Path);}}
+     scan=repo.Scan(session,"Dwarf-01","Dwarf 3",ct,NoProgress,deferHash:true,quickScan:true);Check(scan.FastSkippedFiles==2&&scan.Metrics.Snapshot().Sum(s=>s.Bytes)==0,"Removable-style inventory required payload reads after browse-root change");
+     var full=repo.Scan(session,"Dwarf-01","Dwarf 3",ct,NoProgress,quickScan:true,fullScan:true);Check(full.FastSkippedFiles==0&&full.Frames.Count==2&&full.Frames.All(f=>f.Status.StartsWith("Duplicate")),"Full rescan did not bypass quick inventory");
+    }
+   });
    Test("Session inventory requires a durable import, physical volume and telescope identity",()=>{
     var stamp=new FileStamp{Identity="ABCD1234:0001",Size=100,Created=1,Modified=2};var frame=new Frame{Hash="hash",Telescope="Renamed scope",TelescopeIdentity="stable-scope",Model="Dwarf 3",ClassificationVersion=Assets.ClassificationVersion};var old=new SourceManifest{Status="Complete",Hash=frame.Hash,Source=stamp,Metadata=frame};var entry=new ScanEntry{Enumerated=stamp.Clone()};entry.Enumerated.Identity="";
     Func<bool> matches=()=>SessionScanCache.Matches(old,frame,entry,null,"ABCD1234","stable-scope","Auto");Check(matches(),"FAT inventory did not match imported session");

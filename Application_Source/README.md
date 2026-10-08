@@ -1,4 +1,4 @@
-# AstroArchive 1.13.3
+# AstroArchive 1.13.4
 
 All toolbar actions, including Settings, Guide and Buy Me a Coffee, are grouped on the left. The purple dropdown labelled PAGE centres in the top row when there is room, or in its own compact row below the actions. Ctrl+1–3 selects Repository, Edited or Import; Ctrl+Tab cycles pages. The interactive guide introduces the selector.
 
@@ -12,6 +12,14 @@ view. IC63 is labelled Ghost of Cassiopeia alongside other IC common-name aliase
 Its 757 star vectors and drawing are cached; no sky timer, network or 3D engine is required.
 
 Portable Windows 10/11 x64 WPF app for archiving astronomical image originals and creating verified stacking projects. Open `AstroArchive.exe`; read `Quick_Start.txt` for the complete workflow.
+
+## Changes in 1.13.4
+
+Repeat telescope scans reuse import history across parent/session browse roots,
+including DWARF folder names with spaced catalogue IDs. Quick scans load only
+related archive records and retain duplicate detection for files imported from
+other sources. Nothing new to import is explicit when every discovered capture
+is skipped. Existing SD/USB inventories, new-file discovery and Full rescan remain.
 
 ## Changes in 1.13.3
 

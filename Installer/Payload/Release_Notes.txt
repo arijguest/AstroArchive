@@ -1,3 +1,16 @@
+AstroArchive 1.13.4 — reuse telescope imports across folder selections
+Package 1.13.4.1
+- Reuse completed source-file histories when choosing a DWARF session folder or
+  its parent, instead of tying cached imports to the exact previous browse root.
+  Escape spaced/underscored session names and percent signs in source lookups.
+- Load only related archive records during quick scans, retaining checksum
+  duplicate detection for captures imported from other sources.
+- Say Nothing new to import when all discovered captures are skipped, with
+  file/folder counts. Keep new exposures in old sessions eligible for import.
+- Preserve the existing fast SD/USB session inventory and Full rescan controls.
+  FAT/exFAT inventory uses saved sizes/timestamps; Full rescan reads/hashes all
+  sources when those inventory hints are insufficient. Source originals remain.
+
 AstroArchive 1.13.3 — software licensing and attribution
 Package 1.13.3.1
 - Adopt PolyForm Noncommercial License 1.0.0 for AstroArchive's first-party

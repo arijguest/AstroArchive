@@ -1,4 +1,4 @@
-AstroArchive 1.13.3
+AstroArchive 1.13.4
 Windows 10/11 x64 desktop app. Built-in .NET Framework 4.8 and Windows SQLite.
 Runs offline. No Python or Google login required.
 
@@ -811,9 +811,14 @@ FASTER REPEAT TELESCOPE SCANS
 
 Scan folder and USB uploads use the saved import manifest to match session folder
 names and file paths for the selected physical telescope and storage volume.
+The same history is reused when switching between a session folder and its parent;
+selecting a different browse root does not make imported files unknown again.
+Quick scans load archive lookups only for the selected source's previous imports,
+so unrelated repository captures do not add to this preparation work.
 They check file sizes, timestamps and accompanying session metadata, then skip
 unchanged files whose verified archive copies are still intact. Skipped files
 are counted in the scan summary and report rather than added to the review table.
+A completed scan with no candidates says Nothing new to import.
 New files in old folders and newly created subfolders are still discovered.
 Unknown folder trees are visited first, with newer folder names first within
 each group. Filesystem bookkeeping folders are excluded from discovery.

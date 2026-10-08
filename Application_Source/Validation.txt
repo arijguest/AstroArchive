@@ -1,5 +1,5 @@
-AstroArchive 1.13.2 validation
-Package 1.13.2.1; Windows 10/11 x64; .NET Framework 4.8.
+AstroArchive 1.13.4 validation
+Package 1.13.4.1; Windows 10/11 x64; .NET Framework 4.8.
 
 The Windows release workflow runs application regressions, a separate six-case
 Windows WIC integration suite, installer/updater regressions, x64 compilation,
@@ -113,3 +113,12 @@ Sixteen pixel-rendered image/DPI/resize cases continue to verify full-image fit.
 
 Update-policy diagnostics preserve the native error and saved installer, handle
 event-access failures and match rejected device paths instead of parent processes.
+
+Source-history regressions use DWARF_RAW_TELE_C 20_EXP_30_GAIN_40 plus its full
+millisecond session timestamp, and parent paths with underscores and percent.
+They cover imports made from both parent/session roots, history deduplication,
+other-device folder-name collisions and checksum duplicate lookup outside the
+source-scoped snapshot. Windows checks verify no payload reads or old-row callbacks
+across browse-root changes, discover added exposures, exercise FAT-style saved
+inventory stamps and retain Full rescan bypass. Existing sidecar/change-time,
+restoration, USB, original-cleanup and progressive-preview checks remain in place.

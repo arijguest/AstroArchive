@@ -1,4 +1,4 @@
-AstroArchive 1.13.1
+AstroArchive 1.13.4
 Windows 10/11 x64 desktop app. Built-in .NET Framework 4.8 and Windows SQLite.
 Runs offline. No Python or Google login required.
 
@@ -811,9 +811,14 @@ FASTER REPEAT TELESCOPE SCANS
 
 Scan folder and USB uploads use the saved import manifest to match session folder
 names and file paths for the selected physical telescope and storage volume.
+The same history is reused when switching between a session folder and its parent;
+selecting a different browse root does not make imported files unknown again.
+Quick scans load archive lookups only for the selected source's previous imports,
+so unrelated repository captures do not add to this preparation work.
 They check file sizes, timestamps and accompanying session metadata, then skip
 unchanged files whose verified archive copies are still intact. Skipped files
 are counted in the scan summary and report rather than added to the review table.
+A completed scan with no candidates says Nothing new to import.
 New files in old folders and newly created subfolders are still discovered.
 Unknown folder trees are visited first, with newer folder names first within
 each group. Filesystem bookkeeping folders are excluded from discovery.
@@ -825,3 +830,17 @@ action bypasses the session and header caches and reads/hashes all source files.
 Missing or changed archive copies remain eligible for restoration. New imports
 still receive full checksum verification, and skipped files are never included
 in optional original deletion. No source folders are skipped on name alone.
+
+SOFTWARE LICENCE
+AstroArchive is source-available under PolyForm Noncommercial License 1.0.0.
+Required Notice: Copyright 2026 Ari J. Guest (https://arijguest.com)
+Noncommercial use, modification and sharing are permitted under its terms.
+Commercial use, including resale outside the permitted purposes, requires a
+separate licence from Ari J. Guest. Preserve the Required Notice and include
+the terms or their official URL when sharing copies.
+Guide > About AstroArchive > Read software licence (offline) shows the complete
+terms. LICENSE.txt and LICENSING.md are included in the installed app folder.
+Official terms: https://polyformproject.org/licenses/noncommercial/1.0.0
+Commercial enquiries: https://astroarchive.arijguest.com/#contact
+OpenNGC, GeoNames and D3-Celestial data retain their separate licences. Your
+images and processing outputs are not relicensed by using AstroArchive.
