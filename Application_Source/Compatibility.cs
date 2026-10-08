@@ -151,7 +151,7 @@ namespace AstroArchive {
         }
         public static bool Supported(string path) {
             return readers.ContainsKey(Extension(path))||new[] {
-                ".tif",".tiff",".png",".jpg",".jpeg",".avi",".cr2",".cr3",".nef",".arw",".dng"
+                ".tif",".tiff",".png",".jpg",".jpeg",".gif",".avi",".mp4",".mov",".m4v",".wmv",".mkv",".cr2",".cr3",".nef",".arw",".dng"
             }
             .Contains(Extension(path));
         }
@@ -164,7 +164,7 @@ namespace AstroArchive {
             IAssetReader reader;
             if(readers.TryGetValue(Extension(path),out reader))return reader.Inspect(path,counted);
             if(new[] {
-                ".png",".tif",".tiff",".jpg",".jpeg"
+                ".png",".tif",".tiff",".jpg",".jpeg",".gif"
             }
             .Contains(Extension(path)))return RasterHeaders.Inspect(path);
             return new AssetInfo {

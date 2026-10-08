@@ -1,4 +1,4 @@
-# AstroArchive 1.11.2
+# AstroArchive 1.12.0
 
 Edited projects support reviewed folder import, starless/stars-only classification, acquisition metadata recovery and automatic editor working copies. The repository path sits below the table; operation feedback appears only while busy.
 

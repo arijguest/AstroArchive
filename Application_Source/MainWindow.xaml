@@ -1,5 +1,20 @@
 <Window xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:sys="clr-namespace:System;assembly=mscorlib" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Title="AstroArchive" Width="1380" Height="850" MinWidth="1060" MinHeight="650" WindowStartupLocation="CenterScreen" Background="{DynamicResource Canvas}" FontFamily="Segoe UI" FontSize="{DynamicResource UiFontControl}" Foreground="{DynamicResource Text}" UseLayoutRounding="True" xmlns:local="clr-namespace:AstroArchive;assembly=AstroArchive">
  <Window.Resources>
+  <local:CaptureGroupLabelConverter x:Key="CaptureGroupLabel"/>
+  <local:PlainCaptureGroupConverter x:Key="PlainCaptureGroup"/>
+  <Style x:Key="CaptureSessionGroupStyle" TargetType="GroupItem">
+   <Setter Property="Template"><Setter.Value><ControlTemplate TargetType="GroupItem">
+    <Expander x:Name="SessionExpander" IsExpanded="{Binding Name.Expanded, Mode=TwoWay, FallbackValue=True}" Margin="0,2" ToolTip="Expand to see individual files. Use Repository → View → Show all files for a flat list.">
+     <Expander.Style><Style TargetType="Expander" BasedOn="{StaticResource {x:Type Expander}}"><Style.Triggers>
+      <DataTrigger Binding="{Binding Converter={StaticResource PlainCaptureGroup}}" Value="True">
+       <Setter Property="Margin" Value="0"/><Setter Property="Template"><Setter.Value><ControlTemplate TargetType="Expander"><ContentPresenter ContentSource="Content"/></ControlTemplate></Setter.Value></Setter>
+      </DataTrigger>
+     </Style.Triggers></Style></Expander.Style>
+     <Expander.Header><TextBlock Text="{Binding Converter={StaticResource CaptureGroupLabel}}" TextWrapping="Wrap" Foreground="{DynamicResource Text}" FontSize="{DynamicResource UiFontSmall}" Margin="2,6,8,6"/></Expander.Header>
+     <ItemsPresenter/>
+    </Expander>
+   </ControlTemplate></Setter.Value></Setter>
+  </Style>
   <SolidColorBrush Color="#FBBF24" x:Key="Focus" />
   <sys:Double x:Key="CaptureRowHeight">32</sys:Double>
   <sys:Double x:Key="UiFontBrand">20</sys:Double>
@@ -849,26 +864,34 @@
     </Grid>
    </TabItem>
    <TabItem Header="Edited" x:Name="EditedTab">
-    <Grid>
+    <Grid Margin="0,12,0,8">
      <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="*"/></Grid.RowDefinitions>
      <DockPanel Margin="0,0,0,10">
       <StackPanel DockPanel.Dock="Right" Orientation="Horizontal"><Button x:Name="EditedAddButton" Content="Add images…"/><Button x:Name="EditedImportFolderButton" Content="Import folder…" Background="{DynamicResource Accent}" Foreground="White" BorderBrush="{DynamicResource Accent}" Margin="8,0,0,0"/><Button x:Name="EditedRefreshButton" Content="Refresh" Margin="8,0,0,0"/></StackPanel>
-      <TextBlock Text="Edited images" FontSize="{DynamicResource UiFontHeading}" FontWeight="SemiBold" VerticalAlignment="Center"/>
+      <TextBlock Text="PROJECT" FontSize="{DynamicResource UiFontCaption}" FontWeight="SemiBold" Foreground="{DynamicResource Muted}" VerticalAlignment="Center" Margin="0,0,10,0" DockPanel.Dock="Left"/><ComboBox x:Name="EditedProjectsList" DisplayMemberPath="Name" Width="250" HorizontalAlignment="Left"/>
      </DockPanel>
-     <DockPanel Grid.Row="1" Margin="0,0,0,10"><ComboBox DockPanel.Dock="Right" x:Name="EditedClassFilter" MinWidth="180" Margin="8,0,0,0" ToolTip="Filter edited image classes"/><TextBlock DockPanel.Dock="Right" x:Name="EditedSummary" Foreground="{DynamicResource Muted}" VerticalAlignment="Center" Margin="12,0,0,0"/><TextBox x:Name="EditedSearchBox" ToolTip="Search images in this project"/></DockPanel>
-     <Grid Grid.Row="2">
-      <Grid.ColumnDefinitions><ColumnDefinition Width="220"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
-      <Border Background="{DynamicResource Surface}" BorderBrush="{DynamicResource Border}" BorderThickness="1" CornerRadius="8" Margin="0,0,10,0">
-       <DockPanel><TextBlock DockPanel.Dock="Top" Text="PROJECTS" Foreground="{DynamicResource Muted}" Margin="12" FontWeight="SemiBold"/><ListBox x:Name="EditedProjectsList" DisplayMemberPath="Name" BorderThickness="0" Background="Transparent"/></DockPanel>
-      </Border>
-      <Grid Grid.Column="1">
-       <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="*"/></Grid.RowDefinitions>
-       <StackPanel Margin="0,0,0,8"><TextBlock x:Name="EditedProjectInfo" Foreground="{DynamicResource Muted}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/><WrapPanel Margin="0,6,0,0"><Button x:Name="EditedDetailsButton" Content="Image details…" Margin="0,0,8,0"/><Button x:Name="EditedPreviewButton" Content="Preview image…"/><Button x:Name="EditedEditorButton" Content="Open in editor ▾" Margin="8,0,0,0"/><Button x:Name="EditedFolderButton" Content="Open project folder" Margin="8,0,0,0"/></WrapPanel></StackPanel>
-       <Border Grid.Row="1" Background="{DynamicResource Surface}" BorderBrush="{DynamicResource Border}" BorderThickness="1" CornerRadius="8" ClipToBounds="True">
-        <Grid><DataGrid x:Name="EditedGrid" CanUserSortColumns="True"><DataGrid.RowStyle><Style TargetType="DataGridRow"><Setter Property="ToolTip" Value="{Binding Metadata.Details}"/></Style></DataGrid.RowStyle><DataGrid.Columns>
+     <DockPanel Grid.Row="1" Margin="0,0,0,10"><Button DockPanel.Dock="Right" x:Name="EditedClearButton" Content="Clear" Margin="8,0,0,0"/><Button DockPanel.Dock="Right" x:Name="EditedFiltersButton" Content="Filters" Margin="8,0,0,0"/><TextBlock DockPanel.Dock="Right" x:Name="EditedSummary" Foreground="{DynamicResource Muted}" VerticalAlignment="Center" Margin="12,0,0,0"/><ComboBox x:Name="EditedClassFilter" Visibility="Collapsed"/><Grid><TextBox x:Name="EditedSearchBox" ToolTip="Search edited images, objects, filters or projects"/><TextBlock x:Name="EditedSearchHint" Text="Search edited images…" Foreground="{DynamicResource Muted}" Margin="10,0" VerticalAlignment="Center" IsHitTestVisible="False"/></Grid></DockPanel>
+     <Grid Grid.Row="2" x:Name="EditedBody">
+      <Grid.ColumnDefinitions><ColumnDefinition Width="166"/><ColumnDefinition Width="*" MinWidth="260"/><ColumnDefinition Width="10"/><ColumnDefinition Width="290" MinWidth="0"/></Grid.ColumnDefinitions>
+      <Border Background="{DynamicResource Surface}" BorderBrush="{DynamicResource Border}" BorderThickness="1" CornerRadius="8" Margin="0,0,10,0"><DockPanel><TextBlock DockPanel.Dock="Top" Text="TARGETS" FontSize="{DynamicResource UiFontCaption}" FontWeight="SemiBold" Foreground="{DynamicResource Muted}" Margin="12,13,0,8"/><ListBox x:Name="EditedTargetList" BorderThickness="0" Background="Transparent" ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.CanContentScroll="True" VirtualizingPanel.IsVirtualizingWhenGrouping="True" VirtualizingPanel.VirtualizationMode="Recycling" TextSearch.TextPath="DisplayName" IsTextSearchEnabled="True">
+       <ListBox.ItemContainerStyle><Style TargetType="ListBoxItem" BasedOn="{StaticResource {x:Type ListBoxItem}}"><Setter Property="Padding" Value="7,6"/><Setter Property="Margin" Value="4,1"/><Setter Property="ToolTip" Value="{Binding Tooltip}"/><Setter Property="AutomationProperties.Name" Value="{Binding Label}"/><Setter Property="AutomationProperties.HelpText" Value="{Binding Tooltip}"/><Setter Property="ToolTipService.ShowDuration" Value="20000"/></Style></ListBox.ItemContainerStyle>
+       <ListBox.GroupStyle><GroupStyle><GroupStyle.HeaderTemplate><DataTemplate>
+        <Grid Margin="11,12,11,4"><Grid.Style><Style TargetType="Grid"><Style.Triggers><DataTrigger Binding="{Binding Name}" Value=""><Setter Property="Visibility" Value="Collapsed"/></DataTrigger></Style.Triggers></Style></Grid.Style>
+         <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions><TextBlock Text="{Binding Name}" FontSize="{DynamicResource UiFontCaption}" FontWeight="SemiBold" Foreground="{DynamicResource Muted}"/><Border Grid.Column="1" Height="1" Background="{DynamicResource Border}" Margin="8,0,0,0" VerticalAlignment="Center"/>
+        </Grid>
+       </DataTemplate></GroupStyle.HeaderTemplate></GroupStyle></ListBox.GroupStyle>
+       <ListBox.ItemTemplate><DataTemplate><Grid><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions><Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+        <TextBlock Text="{Binding DisplayName}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" VerticalAlignment="Center"/>
+        <Border Grid.Column="1" Background="{DynamicResource SurfaceAlt}" CornerRadius="3" Padding="4,1" Margin="5,0,0,0" VerticalAlignment="Center"><TextBlock Text="{Binding FileCount}" FontSize="{DynamicResource UiFontCaption}" Foreground="{DynamicResource Muted}"/></Border>
+        <TextBlock Grid.Row="1" Grid.ColumnSpan="2" Text="{Binding Subline}" FontSize="{DynamicResource UiFontCaption}" Foreground="{DynamicResource Muted}" TextTrimming="CharacterEllipsis" Margin="0,3,0,0"><TextBlock.Style><Style TargetType="TextBlock"><Style.Triggers><DataTrigger Binding="{Binding Subline}" Value=""><Setter Property="Visibility" Value="Collapsed"/></DataTrigger></Style.Triggers></Style></TextBlock.Style></TextBlock>
+       </Grid></DataTemplate></ListBox.ItemTemplate>
+      </ListBox></DockPanel></Border>
+      <Grid Grid.Column="1"><Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="*"/></Grid.RowDefinitions>
+       <StackPanel Margin="0,0,0,8"><TextBlock x:Name="EditedProjectInfo" Foreground="{DynamicResource Muted}" TextTrimming="CharacterEllipsis"/><WrapPanel Margin="0,6,0,0"><Button x:Name="EditedDetailsButton" Content="Image details…" Margin="0,0,8,0"/><Button x:Name="EditedPreviewButton" Content="Preview image…"/><Button x:Name="EditedEditorButton" Content="Open in editor ▾" Margin="8,0,0,0"/><Button x:Name="EditedFolderButton" Content="Open project folder" Margin="8,0,0,0"/></WrapPanel></StackPanel>
+       <Border Grid.Row="1" Background="{DynamicResource Surface}" BorderBrush="{DynamicResource Border}" BorderThickness="1" CornerRadius="8" ClipToBounds="True"><Grid><DataGrid x:Name="EditedGrid" CanUserSortColumns="True"><DataGrid.RowStyle><Style TargetType="DataGridRow"><Setter Property="ToolTip" Value="{Binding Metadata.Details}"/></Style></DataGrid.RowStyle><DataGrid.Columns>
          <DataGridTextColumn Header="FILE" Binding="{Binding Filename}" Width="*" MinWidth="200"/>
          <DataGridTextColumn Header="IMAGE CLASS" Binding="{Binding Metadata.ImageClass}" Width="120"/>
-         <DataGridTextColumn Header="OBJECT" Binding="{Binding Metadata.ObjectLabel}" Width="180"/>
+         <DataGridTextColumn Header="OBJECT ID" Binding="{Binding Metadata.ObjectId}" Width="85"/><DataGridTextColumn Header="COMMON NAME / LABEL" Binding="{Binding Metadata.TargetName}" Width="180"/>
          <DataGridTextColumn Header="FILTERS / CHANNELS" Binding="{Binding Metadata.FiltersLabel}" Width="140"/>
          <DataGridTextColumn Header="TOTAL EXPOSURE" Binding="{Binding Metadata.TotalExposureText}" Width="130"/>
          <DataGridTextColumn Header="SUBS" Binding="{Binding Metadata.SubsText}" Width="70"/>
@@ -877,10 +900,39 @@
          <DataGridTextColumn Header="MODIFIED" Binding="{Binding Modified, StringFormat={}{0:g}}" Width="150"/>
          <DataGridTextColumn Header="BYTES" Binding="{Binding Bytes}" Width="100"/>
          <DataGridTextColumn Header="ORIGINAL" Binding="{Binding Source}" Width="180"/>
-         <DataGridTextColumn Header="PROJECT PATH" Binding="{Binding RelativePath}" Width="240"/>
-        </DataGrid.Columns></DataGrid><TextBlock x:Name="EditedEmptyState" Text="Add edited images, or send a repository stack to an editor to create a working copy." Foreground="{DynamicResource Muted}" HorizontalAlignment="Center" VerticalAlignment="Center" TextWrapping="Wrap" TextAlignment="Center" MaxWidth="420" Margin="24" IsHitTestVisible="False"/></Grid>
-       </Border>
+         <DataGridTextColumn Header="PROJECT" Binding="{Binding Project.Name}" Width="150"/><DataGridTextColumn Header="PROJECT PATH" Binding="{Binding RelativePath}" Width="240"/>
+        </DataGrid.Columns></DataGrid><TextBlock x:Name="EditedEmptyState" Text="Add edited images, or send a repository stack to an editor to create a working copy." Foreground="{DynamicResource Muted}" HorizontalAlignment="Center" VerticalAlignment="Center" TextWrapping="Wrap" TextAlignment="Center" MaxWidth="420" Margin="24" IsHitTestVisible="False"/></Grid></Border>
       </Grid>
+      <GridSplitter Grid.Column="2" Width="4" HorizontalAlignment="Center" Background="{DynamicResource Border}" ResizeBehavior="PreviousAndNext"/>
+      <Border Grid.Column="3" x:Name="EditedPreviewPane" Background="{DynamicResource Surface}" CornerRadius="8" BorderBrush="{DynamicResource Border}" BorderThickness="1" Padding="12">
+       <Grid>
+        <Grid.RowDefinitions>
+         <RowDefinition Height="Auto" />
+         <RowDefinition Height="Auto" />
+         <RowDefinition Height="*" />
+         <RowDefinition Height="Auto" />
+         <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        <DockPanel>
+         <Button DockPanel.Dock="Right" x:Name="EditedOpenPreviewButton" Content="Open image…" FontSize="{DynamicResource UiFontSmall}" Padding="8,5" Margin="0" ToolTip="Preview FITS, XISF, TIFF, PNG, JPEG and Windows-codec images" />
+         <TextBlock Text="PREVIEW" FontSize="{DynamicResource UiFontCaption}" FontWeight="SemiBold" Foreground="{DynamicResource Muted}" VerticalAlignment="Center" />
+        </DockPanel>
+        <TextBlock Grid.Row="1" x:Name="EditedPreviewName" Text="Select an edited image" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" Margin="0,10,0,8" />
+      <Grid Grid.Row="2" x:Name="EditedPreviewHost" ClipToBounds="True"><Grid x:Name="EditedPreviewStage" ClipToBounds="True" HorizontalAlignment="Center" VerticalAlignment="Top"><Image x:Name="EditedPreviewImage"/></Grid><TextBlock x:Name="EditedPreviewMessage" Text="Select an edited image or open an image." Foreground="{DynamicResource Muted}" HorizontalAlignment="Center" VerticalAlignment="Center" TextWrapping="Wrap" TextAlignment="Center" Margin="18"/></Grid>
+      <DockPanel Grid.Row="3" Margin="0,10,0,0"><TextBlock Text="Stretch" Foreground="{DynamicResource Muted}" VerticalAlignment="Center" Margin="0,0,8,0"/><ComboBox x:Name="EditedStretchMode" ToolTip="Adjust the preview stretch. Auto preserves colour; Auto per channel balances the background."/></DockPanel>
+        <StackPanel Grid.Row="4">
+         <TextBlock x:Name="EditedPreviewInfo" Foreground="{DynamicResource Muted}" FontSize="{DynamicResource UiFontCaption}" TextTrimming="CharacterEllipsis" Margin="0,8,0,0" />
+         <Expander Header="Image details" Margin="0,8,0,0" Foreground="{DynamicResource Muted}">
+          <ScrollViewer MaxHeight="130">
+           <StackPanel>
+            <TextBlock x:Name="EditedLibrarySummaryLabel" Foreground="{DynamicResource Muted}" FontSize="{DynamicResource UiFontSmall}" TextWrapping="Wrap" Margin="0,0,0,8" />
+            <TextBlock x:Name="EditedDetailsLabel" Text="Select an edited image to view metadata." TextWrapping="Wrap" Foreground="{DynamicResource Muted}" FontSize="{DynamicResource UiFontSmall}" Margin="0,6,0,0" />
+           </StackPanel>
+          </ScrollViewer>
+         </Expander>
+        </StackPanel>
+       </Grid>
+      </Border>
      </Grid>
     </Grid>
    </TabItem>

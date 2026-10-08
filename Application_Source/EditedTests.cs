@@ -6,6 +6,24 @@ using System.Threading;
 namespace AstroArchive {
  public partial class Tests {
   static void EditedRegressions(){
+   Test("GIF import uniquely matches nearby edited images and preserves acquisition details",()=>{
+    string source=Path.Combine(root,"gif-source"),still=Path.Combine(source,"finish.fit"),gif=Path.Combine(source,"finish_processing.gif");
+    Write(still,64,48,(x,y)=>2000,new Dictionary<string,string>{{"OBJECT","'M31'"},{"NCOMBINE","'40'"},{"SUBEXP","'60'"},{"FILTER","'Ha'"}});
+    File.WriteAllBytes(gif,Convert.FromBase64String("R0lGODlhAgACAIEAAP8AAAAAAAAAAAAAACH/C05FVFNDQVBFMi4wAwEAAAAh+QQICgAAACwAAAAAAgACAAAIBgABCAQQEAAh+QQIFAAAACwAAAAAAgACAIEAAP8AAAAAAAAAAAAIBgABCAQQEAA7"));
+    Check(Assets.Supported(gif)&&Assets.Inspect(gif).Format=="GIF"&&Assets.Inspect(gif).Header.Width==2,"GIF import unsupported or canvas incorrect");
+    using(var repo=new Repository(Path.Combine(root,"gif-repo"))){var plan=repo.ScanEditedFolder(source,true,ct,NoProgress);var review=plan.Images.Single(i=>MediaFiles.Gif(i.Path));Check(review.Include&&review.Metadata.Object=="M31"&&review.Metadata.TotalExposure==2400&&review.Metadata.Subs==40,"GIF review lost matching acquisition data");var project=repo.ImportEditedFolder(plan,"Processing",ct,NoProgress);var image=repo.EditedImages(project).Single(i=>MediaFiles.Gif(i.RelativePath));Check(image.RelatedImage!=null&&image.Metadata.TotalExposure==2400&&image.Metadata.Filters=="Ha","Imported GIF lost its association");}
+    Check(MediaFiles.MatchingImage("finish_processing.gif",new[]{"finish.fit","finish.png"})==null,"Ambiguous GIF guessed a source");Check(MediaFiles.MatchingImage("finish.gif",new[]{"nested/finish.fit"})==null,"GIF matched another folder");Check(MediaFiles.MatchingImage("FINISH.gif",new[]{"finish.fit"})=="finish.fit","Case-insensitive exact match missing");
+    var mismatch=new FitsHeader();mismatch.Values["OBJECT"]="M51";Check(!EditedMetadata.Read("finish.gif",mismatch,EditedMetadata.Read("M31_40x60s.fit",null)).TotalExposure.HasValue,"Conflicting GIF metadata inherited exposure");
+   });
+   Test("Moon and Lunar share one target in old archives edited metadata and filenames",()=>{
+    var old=Util.Deserialize<Frame>("{\"Target\":\"Lunar\"}");Check(old.Target=="Moon"&&Catalog.TargetFromFilename("Lunar_001.fit")=="Moon"&&EditedMetadata.Read("Lunar_starless.fit",null).Object=="Moon","Lunar alias remained separate");var targets=TargetNavigation.Build(new[]{old,new Frame{Target="Moon"}});Check(targets.Count==2&&targets.Single(t=>t.Name=="Moon").Files==2,"Moon and Lunar did not merge");
+   });
+   Test("Subframe summaries separate targets sessions devices and unknown acquisition dates",()=>{
+    var a=new Frame{Kind="Light",Target="M31",Session="night1",Telescope="Scope1",Camera="Tele",Exposure=60,Filter="Ha"};var b=a.Clone();b.Exposure=null;
+    var stack=a.Clone();stack.Kind="Stack";stack.Exposure=9999;var target=a.Clone();target.Target="M51";var session=a.Clone();session.Session="night2";var device=a.Clone();device.Telescope="Scope2";
+    var groups=SubframeSessions.Build(new[]{a,b,stack,target,session,device});Check(groups.Count==1&&groups[0].Frames.Count==2&&groups[0].Label.Contains("1 exposure unknown")&&!groups[0].Expanded,"Subframe totals or collapsed state incorrect");
+    a.Session=null;b.Session=null;a.SourcePath="capture/a.fit";b.SourcePath="capture/b.fit";Check(SubframeSessions.Build(new[]{a,b}).Count==0,"Unknown sessions were guessed");a.AcquisitionDate="2026-10-08";b.AcquisitionDate="2026-10-09";Check(SubframeSessions.Build(new[]{a,b}).Count==0,"Different nights were combined by parent folder");
+   });
    Test("Edited filename classes distinguish starless and stars only without guessing star fields",()=>{
     Check(EditedMetadata.Read("M31_starless_120x60s_Ha.fit",null).ImageClass=="Starless","Starless filename missed");Check(EditedMetadata.Read("M31_stars-only.tif",null).ImageClass=="Stars only","Stars-only filename missed");Check(EditedMetadata.Read("M31_stars.fit",null).ImageClass=="Stars only","Stars layer missed");Check(EditedMetadata.Read("M31_starfield.fits",null).ImageClass=="Edited image","Star field misclassified");Check(EditedMetadata.Read("M31_starless_stars.fit",null).ImageClass.Contains("conflicting"),"Conflicting class invented");
    });
