@@ -1,3 +1,11 @@
+AstroArchive 1.10.4 — remove version-specific AstroWizard handoff
+Package 1.10.4.1
+
+- Remove Send stack to AstroWizard and its exact-build checksum restriction.
+  Compatibility across AstroWizard builds cannot be assured; export selected
+  stacks and open the verified copies from within AstroWizard instead.
+- Keep direct sending to Siril and all existing file and stacking exports.
+
 AstroArchive 1.10.3 — header alignment refinement
 Package 1.10.3.2
 
