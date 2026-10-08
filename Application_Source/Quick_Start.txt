@@ -1,4 +1,4 @@
-AstroArchive 2.1.2
+AstroArchive 2.1.3
 Windows 10/11 x64; .NET Framework 4.8.
 
 START HERE
@@ -60,7 +60,9 @@ Rename saved telescope changes its archive labels and paths, preserving images
 and session identities. Close other writers before renaming.
 
 ARCHIVE SAFETY AND BACKUPS
-Settings > General > Archive safety offers optional Protect originals on
+Settings > Backups keeps backup and protection controls visible.
+Repository > Back up archive… opens the folder and ZIP backup options directly.
+Protect originals offers optional deletion protection on
 local NTFS drives. This blocks deletion and renaming of archived originals in
 File Explorer for your Windows account. Reading and exporting still work;
 AstroArchive temporarily unlocks affected paths for confirmed operations.
@@ -70,7 +72,7 @@ protection in the same section to restore the previous deletion permissions.
 Turn protection off before moving or deleting the archive outside AstroArchive.
 The Windows owner can deliberately change permissions; protection is not a backup.
 
-Back up… saves the entire archive and current database outside the repository.
+Back up archive… saves the entire archive and current database outside the repository.
 Choose a separate drive when possible. Without compression it creates a normal
 folder; Compress backup as ZIP preserves every byte, including image resolution,
 quality and metadata. Creation and verification may take a long time. Cancel
@@ -396,6 +398,6 @@ Export > Export files copies originals. Stacking folder adds compatible inputs;
 matching calibrations can be included in that same dialog. More options contains
 metadata, separate sessions and explicit rejected/unknown calibration choices.
 Settings opens Preferences directly: General, Import, Export, Sky & solving,
-Accessibility and Updates. Changes apply with Save preferences; Cancel keeps them.
+Accessibility, Updates and Backups. Changes apply with Save preferences; Cancel keeps them.
 The export completion popup only opens the finished folder; use the pre-export
 Siril choice to open one exported stack automatically.

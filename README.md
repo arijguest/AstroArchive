@@ -68,9 +68,9 @@ Stacking exports keep compatible input groups and calibrations separate. Stackin
 
 ## Archive safety and backups
 
-Settings > General > Archive safety offers optional protection against deleting or renaming archived originals in File Explorer on local NTFS drives. Edited files, Dump and archive metadata remain writable. Protection has no background scan and can be turned off from the same section. The Windows owner can still deliberately change permissions.
+Settings > Backups keeps backup and protection controls visible. Repository > Back up archive… opens folder and lossless ZIP choices directly. Protect originals offers optional protection against deleting or renaming archived originals in File Explorer on local NTFS drives. Edited files, Dump and archive metadata remain writable. Protection has no background scan and can be turned off from the same section. The Windows owner can still deliberately change permissions.
 
-Back up… creates a verified folder or lossless ZIP outside the archive, including images, Edited files and the current database. ZIP compression preserves image resolution and every original byte. Creation and verification can take a long time; cancellation keeps earlier backups. To restore, extract the ZIP if needed and choose its `Repository` folder in AstroArchive. Restoration instructions and SHA-256 checksums are included. A separate drive protects against archive drive failure.
+Back up archive… creates a verified folder or lossless ZIP outside the archive, including images, Edited files and the current database. ZIP compression preserves image resolution and every original byte. Creation and verification can take a long time; cancellation keeps earlier backups. To restore, extract the ZIP if needed and choose its `Repository` folder in AstroArchive. Restoration instructions and SHA-256 checksums are included. A separate drive protects against archive drive failure.
 
 ## Formats
 

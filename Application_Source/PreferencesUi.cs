@@ -27,11 +27,10 @@ namespace AstroArchive {
    });return f;
   }
   FormWindow PreferencesDialog(Window owner,int section,out PreferenceFields fields){
-   var d=new FormWindow(owner,"Preferences",860,710);d.Window.MinWidth=Math.Min(640,d.Window.Width);d.Sections("General","Import","Export","Sky & solving","Accessibility","Updates");var f=fields=new PreferenceFields();
+   var d=new FormWindow(owner,"Preferences",860,710);d.Window.MinWidth=Math.Min(640,d.Window.Width);d.Sections("General","Import","Export","Sky & solving","Accessibility","Updates","Backups");var f=fields=new PreferenceFields();
    d.Text("General",true);f.Theme=d.Select("Theme",new[]{"System","Light","Dark"},settings.ThemeMode??"System");f.Preview=d.Check("Show image preview",settings.ShowPreview);
    f.Repository=d.Input("Repository folder",repo==null?settings.Repository:repo.Root);f.Repository.IsReadOnly=true;var chooseRepository=d.Button("Choose repository…",()=>{string path=Folder("Choose your repository",f.Repository.Text,d.Window);if(path!=null)f.Repository.Text=path;});chooseRepository.IsEnabled=owner==Window;UiHelp.Tip(chooseRepository,owner==Window?"Choose the active repository.":"Close the export dialog before changing repositories.");UiHelp.Tip(f.Repository,"Changes take effect when you save preferences. Click the path on the main page to open the folder.");
    d.Advanced("Image compatibility",()=>{d.Text("Optional codecs: CFITSIO "+(NativeFits.Available?"available":"unavailable")+" · Zstandard "+(PixelCodecs.ZstdAvailable?"available":"unavailable"));d.Button("Supported formats…",()=>ShowReport("Image compatibility",FormatGuide));d.Button("Open codec folder",()=>{Directory.CreateDirectory(NativeCodecs.Folder);OpenFolder(NativeCodecs.Folder);});});
-   d.Advanced("Archive safety",()=>AddArchiveSafetySettings(d));
    d.Tab(1);f.Import=AddImportPreferences(d);
    d.Tab(2);d.Text("Export",true);f.Directory=d.Input("Default export folder",settings.ExportWorkingDirectory??"");d.Button("Choose export folder…",()=>{string path=Folder("Choose the default export folder",f.Directory.Text,d.Window);if(path!=null)f.Directory.Text=path;});
    d.Text("Choose Siril in the export popup to open one exported stack. Application locations and defaults are optional.");f.Exports=AddExportPreferences(d);
@@ -42,6 +41,7 @@ namespace AstroArchive {
    });f.Online.Checked+=(s,e)=>f.Solver.IsExpanded=true;if(settings.UseOnline)f.Solver.IsExpanded=true;
    d.Tab(4);f.Accessibility=AddAccessibilityPreferences(d);
    d.Tab(5);d.Text("Updates",true);d.Text("AstroArchive "+Assembly.GetExecutingAssembly().GetName().Version.ToString(3));d.Button("Check for updates…",()=>Releases(d.Window));d.Text("Updates keep your repositories, images and preferences.");
+   d.Tab(6);AddArchiveSafetySettings(d);
    d.SelectTab(section);if(section==1)f.Import.Current.IsExpanded=true;if(section==3)f.Solver.IsExpanded=true;d.Accept("Save preferences",()=>SavePreferences(d,f));return d;
   }
   static string OptionalPath(string value){return string.IsNullOrWhiteSpace(value)?null:Path.GetFullPath(value.Trim());}
