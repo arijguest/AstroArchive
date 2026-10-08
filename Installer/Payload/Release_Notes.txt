@@ -1,3 +1,15 @@
+AstroArchive 1.12.4 — grouped actions and centred page navigation
+Package 1.12.4.1
+- Group Settings, Guide and Buy Me a Coffee with Import, Export, Repository and
+  Edited on the left of the toolbar, retaining their menu actions and shortcuts.
+- Centre the purple page dropdown at the top when there is enough space. At
+  smaller widths or larger text sizes, use a compact centred row below the
+  actions. A PAGE caption distinguishes navigation from file tools.
+- Scale the selector with text preferences and let left actions wrap if needed;
+  preserve theme contrast, page state, keyboard navigation and the walkthrough.
+- Verify both layouts, action grouping and overlap/clipping at 1060/1380/1800
+  widths, in light/dark modes with 100/150% text sizes.
+
 AstroArchive 1.12.3 — compact navigation, IC common names and interactive sky
 Package 1.12.3.1
 - Capture sky globes in Repository and Edited now support drag rotation,

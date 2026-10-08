@@ -1,5 +1,5 @@
-AstroArchive 1.12.3 validation
-Package 1.12.3.1; Windows 10/11 x64; .NET Framework 4.8.
+AstroArchive 1.12.4 validation
+Package 1.12.4.1; Windows 10/11 x64; .NET Framework 4.8.
 
 The Windows release workflow runs application regressions, a separate six-case
 Windows WIC integration suite, installer/updater regressions, x64 compilation,
@@ -7,11 +7,13 @@ WPF application/installer rendering and disposable install/repair/uninstall chec
 A successful workflow is required before publishing installers and the SHA-256
 update feed. Its logs are authoritative for test counts and package hashes.
 
-Page navigation checks verify the accent dropdown beside Settings, page/content
+Page navigation checks verify grouped left action buttons, the centred accent
+dropdown in both inline and separate rows without clipping/overlaps, page/content
 and selection/filter/import-state retention, synchronization with menu navigation,
 forward/backward keyboard cycling, removal of the old tab strip, six-pixel gaps,
 light/dark popup contrast, high contrast, and narrow/normal window layouts at
-100/150% text sizes. The interactive guide highlights and opens the selector.
+100/150% text sizes at 1060/1380/1800 widths. The interactive guide highlights
+and opens the selector.
 Native window-icon checks verify the bundled ICO retains 16/32-pixel frames,
 uses the shared frozen image and supplies Windows with both small and large icon
 handles for the main window, forms, guide and preview.

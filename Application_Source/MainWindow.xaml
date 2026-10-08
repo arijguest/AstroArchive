@@ -599,34 +599,33 @@
    <RowDefinition Height="*" />
   </Grid.RowDefinitions>
   <Grid x:Name="HeaderBar" Margin="0,0,0,6">
-   <Grid>
+   <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+   <Grid x:Name="NavigationToolbar" VerticalAlignment="Center">
     <Grid.ColumnDefinitions>
      <ColumnDefinition Width="*" />
      <ColumnDefinition Width="Auto" />
     </Grid.ColumnDefinitions>
-    <Grid x:Name="NavigationToolbar" VerticalAlignment="Center">
-     <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
-     <Menu x:Name="MainMenu" Background="Transparent" Foreground="{DynamicResource Text}" VerticalAlignment="Center" KeyboardNavigation.TabNavigation="Once">
+     <Menu x:Name="MainMenu" Background="Transparent" Foreground="{DynamicResource Text}" HorizontalAlignment="Left" VerticalAlignment="Center" KeyboardNavigation.TabNavigation="Once">
       <Menu.ItemsPanel><ItemsPanelTemplate><WrapPanel/></ItemsPanelTemplate></Menu.ItemsPanel>
       <MenuItem x:Name="ImportMenu" Header="_Import" Style="{StaticResource TopNavigationMenu}"/>
       <MenuItem x:Name="ExportMenu" Header="_Export" Style="{StaticResource TopNavigationMenu}"/>
       <MenuItem x:Name="RepositoryMenu" Header="_Repository" Style="{StaticResource TopNavigationMenu}"/>
       <MenuItem x:Name="EditedMenu" Header="E_dited" Style="{StaticResource TopNavigationMenu}"/>
-     </Menu>
-     <ComboBox Grid.Column="1" x:Name="PageSelector" Width="150" Style="{StaticResource PageSelectorStyle}" VerticalAlignment="Center" Margin="6,0,12,4" AutomationProperties.Name="Choose page" IsTextSearchEnabled="True">
-      <ComboBoxItem Content="Repository" Tag="0"/><ComboBoxItem Content="Edited" Tag="3"/><ComboBoxItem Content="Mosaic" Tag="2"/><ComboBoxItem Content="Import" Tag="1"/>
-     </ComboBox>
-     <Menu Grid.Column="2" x:Name="UtilityMenu" Background="Transparent" Foreground="{DynamicResource Text}" VerticalAlignment="Center" KeyboardNavigation.TabNavigation="Once">
       <MenuItem x:Name="SettingsMenu" Header="_Settings" Style="{StaticResource TopNavigationMenu}"/>
       <MenuItem x:Name="GuideMenu" Header="_Guide" Style="{StaticResource TopNavigationMenu}"/>
       <MenuItem x:Name="CoffeeMenu" Header="_Buy Me a Coffee" Style="{StaticResource TopNavigationMenu}" Background="{DynamicResource SupportSurface}" FontWeight="Bold"/>
      </Menu>
-    </Grid>
     <StackPanel x:Name="BrandPanel" Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" Margin="22,0,0,4">
      <Image x:Name="BrandLogo" Width="40" Height="40" Stretch="Uniform" RenderOptions.BitmapScalingMode="HighQuality" />
      <TextBlock x:Name="BrandTitle" Text="AstroArchive" FontSize="{DynamicResource UiFontHeaderBrand}" FontWeight="SemiBold" Margin="10,0,0,0" VerticalAlignment="Center" />
     </StackPanel>
    </Grid>
+   <StackPanel x:Name="PageNavigation" Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,2,0,4">
+    <TextBlock Text="PAGE" FontSize="{DynamicResource UiFontCaption}" FontWeight="SemiBold" Foreground="{DynamicResource Muted}" VerticalAlignment="Center" Margin="0,0,8,0"/>
+    <ComboBox x:Name="PageSelector" Width="150" Style="{StaticResource PageSelectorStyle}" VerticalAlignment="Center" AutomationProperties.Name="Choose page" IsTextSearchEnabled="True">
+     <ComboBoxItem Content="Repository" Tag="0"/><ComboBoxItem Content="Edited" Tag="3"/><ComboBoxItem Content="Mosaic" Tag="2"/><ComboBoxItem Content="Import" Tag="1"/>
+    </ComboBox>
+   </StackPanel>
   </Grid>
   <Border Grid.Row="1" x:Name="UpdateNotice" Visibility="Collapsed" Background="{DynamicResource SurfaceAlt}" Padding="12" Margin="0,8,0,10" CornerRadius="6">
    <DockPanel>

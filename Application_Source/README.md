@@ -1,6 +1,6 @@
-# AstroArchive 1.12.3
+# AstroArchive 1.12.4
 
-The purple page dropdown beside Settings replaces the tab row. Ctrl+1–4 selects Repository, Edited, Mosaic or Import; Ctrl+Tab cycles pages. The interactive guide introduces the selector.
+All toolbar actions, including Settings, Guide and Buy Me a Coffee, are grouped on the left. The purple dropdown labelled PAGE centres in the top row when there is room, or in its own compact row below the actions. Ctrl+1–4 selects Repository, Edited, Mosaic or Import; Ctrl+Tab cycles pages. The interactive guide introduces the selector.
 
 Repository defaults to expandable subframe session summaries. Edited shares its targets/table/Preview layout and supports reviewed mixed-folder import, GIF associations, starless/stars-only classification and acquisition metadata recovery. Animated GIF, SER and Windows video previews have Pause/Play controls. Dump processing shows progress in a separate window.
 

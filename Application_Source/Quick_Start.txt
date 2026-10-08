@@ -1,4 +1,4 @@
-AstroArchive 1.12.3
+AstroArchive 1.12.4
 Windows 10/11 x64 desktop app. Built-in .NET Framework 4.8 and Windows SQLite.
 Runs offline. No Python or Google login required.
 
@@ -633,17 +633,19 @@ codecs leave original-file import/export available. Unsupported complex/subblock
 layouts remain originals. Base64 inline/embedded XISF stays supported.
 
 NAVIGATION, ACCESSIBILITY AND WALKTHROUGH
-The purple page dropdown immediately before Settings shows the active workspace.
+The centred purple page dropdown labelled PAGE shows the active workspace.
 Startup opens Import when the repository is empty or none is configured; otherwise
 it opens Repository. This uses the whole repository, regardless of search/filters.
 Choose Repository, Edited, Mosaic or Import there. Ctrl+1, Ctrl+2, Ctrl+3 and
 Ctrl+4 select those pages; Ctrl+Tab cycles forward and Ctrl+Shift+Tab cycles back.
 Switching retains each page's search, filters, selection and import progress.
 The pages begin six pixels below the toolbar without a separate tab row.
-At narrow widths or larger text sizes, the branding uses its compact logo and
-Buy Me a Coffee is labelled Support, keeping navigation on one line.
+The page selector sits in the top row when there is room beside the left actions
+and right branding. Otherwise it centres on a compact row just below the actions.
+At narrow widths or larger text sizes, branding uses its compact logo and
+Buy Me a Coffee is labelled Support. The action buttons wrap when needed.
 
-Import, Export, Repository, Settings, Guide and Buy Me a Coffee are grouped at
+Import, Export, Repository, Edited, Settings, Guide and Buy Me a Coffee are grouped at
 upper left. The AstroArchive logo and title are at upper right. The concise
 repository path sits below its data table; click it to open the folder in
 File Explorer. Repository > Choose repository folder changes the active archive.

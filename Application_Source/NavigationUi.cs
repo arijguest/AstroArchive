@@ -23,10 +23,22 @@ namespace AstroArchive {
         }
         void UpdateCompactHeader() {
             var header = (FrameworkElement)Window.FindName("HeaderBar");
-            bool compact = (header.ActualWidth > 0 ? header.ActualWidth : Window.Width - 36) < 1200 || settings.TextScalePercent > 100;
+            double width = header.ActualWidth > 0 ? header.ActualWidth : Window.Width - 36;
+            bool compact = width < 1200 || settings.TextScalePercent > 100;
             ((FrameworkElement)Window.FindName("BrandTitle")).Visibility = compact ? Visibility.Collapsed : Visibility.Visible;
             TopMenu("CoffeeMenu").Header = compact ? "_Support" : "_Buy Me a Coffee";
             foreach (var item in TopMenus()) item.Padding = new Thickness(compact ? 6 : 12, 7, compact ? 6 : 12, 7);
+            var menu = (Menu)Window.FindName("MainMenu");
+            var brand = (FrameworkElement)Window.FindName("BrandPanel");
+            var pages = (FrameworkElement)Window.FindName("PageNavigation");
+            C("PageSelector").Width = 150 * Math.Max(1, settings.TextScalePercent / 100.0);
+            // Measure the unwrapped actions so the centred selector never covers a button.
+            var natural = new Size(double.PositiveInfinity, double.PositiveInfinity);
+            menu.Measure(natural); brand.Measure(natural); pages.Measure(natural);
+            double sideSpace = (width - pages.DesiredSize.Width) / 2 - 12;
+            bool sameRow = menu.DesiredSize.Width <= sideSpace && brand.DesiredSize.Width <= sideSpace;
+            Grid.SetRow(pages, sameRow ? 0 : 1);
+            pages.Margin = new Thickness(0, sameRow ? 0 : 2, 0, 4);
         }
         void CyclePage(int direction) {
             var selector = C("PageSelector"); selector.IsDropDownOpen = false;
