@@ -22,6 +22,7 @@ verifying imports and preparing files for external processing.
 
 | Version | Highlights |
 | --- | --- |
+| **1.13.1** | Faster repeat telescope scans using saved session inventories, newer folders first and an explicit full rescan. |
 | **1.13.0** | Shared search, grouped import options, default PNG/JPG/JPEG exclusion, Unknown target assignment, repository purge, owned progress and Windows taskbar repair. Mosaic removed. |
 | **1.12.4** | Settings, Guide and support join the left toolbar actions; a centred page selector adapts to window width and larger text. |
 | **1.10.1** | Restored full-image previews, including resized and high-DPI images. A centred toolbar provides zoom, pan and a labelled **Fit** button. |
@@ -60,7 +61,7 @@ Download the installer, run it and open AstroArchive from its shortcut. Installa
 Each release includes SHA-256 checksums. In PowerShell, substitute your downloaded installer’s filename:
 
 ```powershell
-Get-FileHash .\AstroArchive1.13.0.1.exe -Algorithm SHA256
+Get-FileHash .\AstroArchive1.13.1.1.exe -Algorithm SHA256
 ```
 
 Compare `Hash` with the corresponding `.sha256` file. A checksum checks file integrity; publisher identity depends on code signing.

@@ -1,4 +1,4 @@
-# AstroArchive 1.13.0
+# AstroArchive 1.13.1
 
 All toolbar actions, including Settings, Guide and Buy Me a Coffee, are grouped on the left. The purple dropdown labelled PAGE centres in the top row when there is room, or in its own compact row below the actions. Ctrl+1–3 selects Repository, Edited or Import; Ctrl+Tab cycles pages. The interactive guide introduces the selector.
 
@@ -13,7 +13,7 @@ Its 757 star vectors and drawing are cached; no sky timer, network or 3D engine 
 
 Portable Windows 10/11 x64 WPF app for archiving astronomical image originals and creating verified stacking projects. Open `AstroArchive.exe`; read `Quick_Start.txt` for the complete workflow.
 
-## Changes in 1.13.0
+## Changes in 1.13.1
 
 - Shared search supports phrases, exclusions, OR, fields, filename globs and numeric comparisons, with concise help and safe syntax errors.
 - Import options groups Files, Capture and Analysis; PNG/JPG/JPEG exclusion defaults on with a saved opt-out. Assign Unknown light/stack targets before importing.
@@ -21,6 +21,12 @@ Portable Windows 10/11 x64 WPF app for archiving astronomical image originals an
 - Owned scan/import progress windows follow main-window minimising and hiding.
 - Stable Windows shell identity and logo cache repair version-stale taskbar shortcuts during installation/update.
 - Remove Mosaic navigation, detection, collections and panel export logic. Existing captures remain available for ordinary exports.
+
+## Changes in 1.13.1
+
+- Repeat folder scans and USB uploads match saved session folders and file inventories for the physical device. Unchanged imports skip metadata/hash reads and review rows, while new files in older folders and subfolders remain discoverable.
+- Visit unknown folder trees first and newer names first, exclude filesystem bookkeeping folders, and load archive lookups once for the scan.
+- Show skipped file/folder counts and offer Import → Full rescan of source to bypass caches and read/hash everything. FAT/exFAT inventory uses sizes/timestamps; NTFS/ReFS additionally checks identity/change-time. New copies keep checksum verification and skipped originals stay out of cleanup.
 
 ## Changes in 1.10.1
 

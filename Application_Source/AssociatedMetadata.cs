@@ -6,13 +6,11 @@ using System.Threading;
 namespace AstroArchive {
     public static class AssociatedMetadata {
         // Only recognised adjacent capture/session sidecars; never sweep arbitrary log trees.
+        internal static IEnumerable<string> Names(string path){string stem=Path.GetFileNameWithoutExtension(path);return new[]{stem+".json",stem+".txt","session.json","capture.json","metadata.json","acquisition.log"}.Distinct(StringComparer.OrdinalIgnoreCase);}
         public static List<AssociatedFile> Discover(string path) {
-            string directory=Path.GetDirectoryName(path),stem=Path.GetFileNameWithoutExtension(path);
+            string directory=Path.GetDirectoryName(path);
             var result=new List<AssociatedFile>();
-            foreach(string name in new[] {
-                stem+".json",stem+".txt","session.json","capture.json","metadata.json","acquisition.log"
-            }
-            .Distinct(StringComparer.OrdinalIgnoreCase)) {
+            foreach(string name in Names(path)) {
                 string candidate=Path.Combine(directory,name);
                 if(!File.Exists(candidate))continue;
                 var stamp=FileStamp.Read(candidate);

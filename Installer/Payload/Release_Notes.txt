@@ -1,3 +1,18 @@
+AstroArchive 1.13.1 — faster repeat telescope scans
+Package 1.13.1.1
+- Match source session folders against completed imports for the physical telescope
+  and storage volume. Skip unchanged imported files without rereading their image
+  headers/content or rebuilding thousands of review rows.
+- Still detect new files in existing sessions and new subfolders. Check source
+  inventory, session sidecars and the intact archive copy before skipping.
+- Discover unknown folder trees first, then newer folder names; exclude filesystem
+  bookkeeping and load archive lookups once instead of querying for each file.
+- Show skipped file/folder counts. Import > Full rescan of source bypasses the
+  session/header caches and reads and hashes every source file. FAT/exFAT quick
+  inventory uses sizes/timestamps; NTFS/ReFS also checks identity and change-time.
+- Preserve checksum verification for all new copies and keep skipped originals
+  outside the optional deletion selection. Update the walkthrough and user guide.
+
 AstroArchive 1.13.0 — search, import controls and repository cleanup
 Package 1.13.0.1
 - Search Repository, Import and Edited with phrases, exclusions, OR alternatives,
