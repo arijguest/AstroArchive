@@ -13,7 +13,7 @@ namespace AstroArchive {
   Window dumpProgressWindow;TextBlock dumpProgressStatus,dumpProgressRate;ProgressBar dumpProgressBar;Button dumpProgressCancel;
   Window operationProgressWindow;
   bool OperationProgressVisible{get{return operationProgressWindow!=null&&operationProgressWindow.IsVisible;}}
-  void InitializeProgressVisibility(){Window.StateChanged+=(s,e)=>UpdateProgressVisibility();Window.IsVisibleChanged+=(s,e)=>UpdateProgressVisibility();}
+  void InitializeProgressVisibility(){Window.StateChanged+=(s,e)=>UpdateProgressVisibility();Window.IsVisibleChanged+=(s,e)=>UpdateProgressVisibility();Window.Activated+=(s,e)=>ResumeTargetReview();}
   void EnsureOperationProgress(){
    if(operationProgressWindow!=null)return;
    var popup=(Popup)Window.FindName("OperationPopup");popup.IsOpen=false;var content=popup.Child;popup.Child=null;

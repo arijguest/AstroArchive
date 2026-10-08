@@ -9,13 +9,20 @@ using System.Windows.Data;
 namespace AstroArchive {
  public partial class MainUi {
   volatile IdentificationProgress identificationProgress;
-  Action pendingTargetReview;
+  Action pendingTargetReview;bool targetReviewQueued;
   void ShowTargetReviewWhenReady(Action review){
+   if(closing)return;
    if(Window.IsVisible&&Window.WindowState!=WindowState.Minimized&&cancel==null)review();else pendingTargetReview=review;
   }
   void ResumeTargetReview(){
-   if(pendingTargetReview==null||closing||cancel!=null||!Window.IsVisible||Window.WindowState==WindowState.Minimized)return;
-   var review=pendingTargetReview;pendingTargetReview=null;Window.Dispatcher.BeginInvoke(new Action(()=>ShowTargetReviewWhenReady(review)));
+   if(pendingTargetReview==null||closing||targetReviewQueued)return;
+   // Native restore/visibility events can arrive before WPF finishes updating the owner.
+   // Test readiness on the dispatcher after those events; activation is a second trigger.
+   targetReviewQueued=true;Window.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Background,new Action(()=>{
+    targetReviewQueued=false;
+    if(pendingTargetReview==null||closing||cancel!=null||!Window.IsVisible||Window.WindowState==WindowState.Minimized)return;
+    var review=pendingTargetReview;pendingTargetReview=null;review();
+   }));
   }
   void IdentificationStage(IdentificationProgress value){identificationProgress=value;var metrics=activeMetrics;if(metrics!=null){metrics.Stage=value.Stage;metrics.UpdateLegacy(value.Completed,value.Total,value.Detail);}}
   SolveResult SolveIdentification(Frame sample,bool imported,CancellationToken ct,Action<string> progress){
