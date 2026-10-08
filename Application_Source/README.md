@@ -1,4 +1,4 @@
-# AstroArchive 1.13.1
+# AstroArchive 1.13.2
 
 All toolbar actions, including Settings, Guide and Buy Me a Coffee, are grouped on the left. The purple dropdown labelled PAGE centres in the top row when there is room, or in its own compact row below the actions. Ctrl+1–3 selects Repository, Edited or Import; Ctrl+Tab cycles pages. The interactive guide introduces the selector.
 
@@ -12,6 +12,15 @@ view. IC63 is labelled Ghost of Cassiopeia alongside other IC common-name aliase
 Its 757 star vectors and drawing are cached; no sky timer, network or 3D engine is required.
 
 Portable Windows 10/11 x64 WPF app for archiving astronomical image originals and creating verified stacking projects. Open `AstroArchive.exe`; read `Quick_Start.txt` for the complete workflow.
+
+## Changes in 1.13.2
+
+Only preview image pixels clear during loading; the frame, disabled navigation and
+sky space remain stable. Indexed capture metadata updates the sky immediately.
+Linear pixels paint before the selected stretch, with zoom/pan retained between
+passes. Linear rendering skips stretch statistics; rapid selections cancel older
+work, and a bounded 64 MiB decoded-sample cache speeds revisits without changing
+source files. Repository and Edited share this behaviour.
 
 ## Changes in 1.13.1
 

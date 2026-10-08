@@ -1,5 +1,5 @@
-AstroArchive 1.13.1 validation
-Package 1.13.1.1; Windows 10/11 x64; .NET Framework 4.8.
+AstroArchive 1.13.2 validation
+Package 1.13.2.1; Windows 10/11 x64; .NET Framework 4.8.
 
 The Windows release workflow runs application regressions, a separate six-case
 Windows WIC integration suite, installer/updater regressions, x64 compilation,
@@ -17,6 +17,14 @@ new/changed/deleted sidecars, nearer session metadata, missing archive copies,
 source rewrites with restored timestamps, skipped-original retention and repeated
 USB upload accounting. Real-device speed depends on media and collection size;
 FAT/exFAT inventory does not prove unchanged content when size/time are preserved.
+
+Progressive preview checks exercise Repository/Edited loading in light/dark and
+100/150% text: stable blank-image geometry/sky bounds, immediate capture-time sky,
+disabled empty-image controls, Linear-before-stretch pixels, cancelled display
+passes, slow codec/rapid latest selection, skipped intermediate frames, cache
+revisits and decode failure isolation. Engine checks cover linear ranges/colour,
+invalid pixels/origin/cancellation, cache metadata isolation, file length/time
+invalidation, separate HDUs/sequence frames, eviction and the 64 MiB limit.
 
 Page navigation checks verify grouped left action buttons, the centred accent
 dropdown in both inline and separate rows without clipping/overlaps, page/content
