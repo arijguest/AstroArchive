@@ -42,7 +42,7 @@ namespace AstroArchive {
   }
   public static bool Major(CatalogObject item){
    if(item.Type=="*"||item.Type=="**"||item.Type=="Other"||item.Type=="Dup"||item.Type=="NonEx")return false;
-   return System.Text.RegularExpressions.Regex.IsMatch(item.Name??"",@"^M\d+$")||System.Text.RegularExpressions.Regex.IsMatch(item.Aliases??"",@"(?:^|,)\s*C\d+\s*(?:,|$)")||!string.IsNullOrWhiteSpace(item.Common)||item.Diameter>=10.0/60||item.Magnitude.HasValue&&item.Magnitude<=10;
+   return System.Text.RegularExpressions.Regex.IsMatch(item.Name??"",@"^M\d+$")||System.Text.RegularExpressions.Regex.IsMatch(item.Aliases??"",@"(?:^|,)\s*C\d+\s*(?:,|$)")||!string.IsNullOrWhiteSpace(Catalog.CommonName(item.Name))||!string.IsNullOrWhiteSpace(item.Common)||item.Diameter>=10.0/60||item.Magnitude.HasValue&&item.Magnitude<=10;
   }
   public static void MatchTargets(SolveResult result,IEnumerable<CatalogObject> catalogue=null){
    if(result==null||!SkyWcs.ValidPosition(result.RA,result.Dec))throw new InvalidDataException("Plate solution has invalid sky coordinates.");
@@ -50,7 +50,7 @@ namespace AstroArchive {
    double radius=result.Radius>0&&!double.IsNaN(result.Radius)&&!double.IsInfinity(result.Radius)?Math.Min(90,result.Radius):1;
    var nearby=(catalogue??Catalog.Objects).Where(o=>SkyWcs.ValidPosition(o.RA,o.Dec)).Select(o=>new{Object=o,Distance=Catalog.Distance(result.RA,result.Dec,o.RA,o.Dec)}).Where(o=>o.Distance<=radius&&InField(result,o.Object)).OrderBy(o=>o.Distance).ThenBy(o=>o.Object.Name,StringComparer.Ordinal).GroupBy(o=>o.Object.Name).Select(g=>g.First()).ToList();
    var major=nearby.Where(o=>Major(o.Object)).ToList();result.Suggested=major.Count==0?null:major[0].Object.Name;
-   result.Candidates=major.Concat(nearby.Where(o=>!Major(o.Object))).Take(50).Select(o=>new Candidate{Name=o.Object.Name,Common=o.Object.Common,Separation=o.Distance}).ToList();
+   result.Candidates=major.Concat(nearby.Where(o=>!Major(o.Object))).Take(50).Select(o=>new Candidate{Name=o.Object.Name,Common=string.IsNullOrEmpty(Catalog.CommonName(o.Object.Name))?o.Object.Common:Catalog.CommonName(o.Object.Name),Separation=o.Distance}).ToList();
    result.MatchReason=major.Count==0?"No major target in the solved field; choose a target":"Nearest major target · "+major[0].Distance.ToString("0.000",CultureInfo.InvariantCulture)+"° from centre";
   }
   static bool InField(SolveResult result,CatalogObject item){

@@ -24,8 +24,8 @@ namespace AstroArchive {
     r.ReadLine();string line;while((line=r.ReadLine())!=null){string[] a=line.Split(';');if(a.Length<9)continue;double? ra=Sex(a[2],true),dec=Sex(a[3],false);if(!ra.HasValue||!dec.HasValue)continue;
      string name=CompactId(a[0]);if(!string.IsNullOrEmpty(a[6]))name="M"+a[6].TrimStart('0');
      double d,mag;var o=new CatalogObject{Name=name,Common=a[7].Split(',')[0],Aliases=a[8],Type=a[1],RA=ra.Value,Dec=dec.Value,Diameter=double.TryParse(a[4],NumberStyles.Float,CultureInfo.InvariantCulture,out d)?d/60:0,Magnitude=double.TryParse(a[5],NumberStyles.Float,CultureInfo.InvariantCulture,out mag)?(double?)mag:null};Objects.Add(o);if(!string.IsNullOrWhiteSpace(o.Common))commonNames[name]=o.Common;
-     AddAlias(a[0],name);AddAlias(name,name);// Use NGC2237 for the whole Rosette; retain NGC2238 as a separately addressable component.
-     foreach(string t in a[7].Split(','))if(!(name=="NGC2238"&&t.Trim()=="Rosette Nebula"))AddAlias(t,name);foreach(string t in a[8].Split(','))if(Regex.IsMatch(t.Trim(),@"^(M|NGC|IC|C|SH\s*2|B|UGC|PGC)\s*\d",RegexOptions.IgnoreCase)){AddAlias(t,name);string compact=CompactId(t);if(Regex.IsMatch(compact,@"^C\d+$")){AddAlias(compact,name);AddAlias("Caldwell "+compact.Substring(1),name);}}
+     AddAlias(a[0],name);AddAlias(name,name);
+     foreach(string t in a[7].Split(','))AddAlias(t,name);foreach(string t in a[8].Split(','))if(Regex.IsMatch(t.Trim(),@"^(M|NGC|IC|C|SH\s*2|B|UGC|PGC)\s*\d",RegexOptions.IgnoreCase)){AddAlias(t,name);string compact=CompactId(t);if(Regex.IsMatch(compact,@"^C\d+$")){AddAlias(compact,name);AddAlias("Caldwell "+compact.Substring(1),name);}}
     }
    }
    AddAlias("Sun","Sun");AddAlias("Solar","Sun");
@@ -35,53 +35,65 @@ namespace AstroArchive {
    foreach(var entry in new[]{new[]{"M45","Pleiades"},new[]{"M31","Andromeda Galaxy"},new[]{"M33","Triangulum Galaxy"},new[]{"NGC281","Pacman Nebula"},new[]{"NGC7380","Wizard Nebula"},new[]{"NGC6888","Crescent Nebula"},new[]{"IC342","Hidden Galaxy"}})if(!commonNames.ContainsKey(entry[0]))commonNames[entry[0]]=entry[1];
    commonNames["IC1805"]="Heart Nebula";commonNames["IC1848"]="Soul Nebula";commonNames["IC1396"]="Elephant’s Trunk Nebula";
    foreach(string row in CatalogNames.Entries){var parts=row.Split('|');string id=CanonicalTarget(parts[0]);commonNames[id]=parts[1];AddAlias(id,id);AddAlias(parts[1],id);foreach(string alias in parts[2].Split(';'))AddAlias(alias,id);}
+   foreach(string label in CatalogNames.AmbiguousNames){string key=Key(label);aliases.Remove(key);ambiguous.Add(key);}
+   // A display name must itself resolve to the displayed identity. Qualify
+   // shared component/pair names instead of silently choosing another object.
+   foreach(var entry in commonNames.ToArray())if(KnownName(entry.Value)!=entry.Key){string label=entry.Value+" ("+entry.Key+")";commonNames[entry.Key]=label;AddAlias(label,entry.Key);}
+   IndexCatalogueIds();
    foreach(var item in Objects){string common;if(commonNames.TryGetValue(item.Name,out common))item.Common=common;item.Aliases=Aliases(item.Name);}
    foreach(var phrase in phrases.GroupBy(p=>p.Key).Select(g=>g.First())){if(KnownName(phrase.Key)!=phrase.Value)continue;string pattern=@"\b"+string.Join(@"\s*",phrase.Key.Split(new[]{' '},StringSplitOptions.RemoveEmptyEntries).Select(Regex.Escape))+@"\b";var entry=new KeyValuePair<Regex,string>(new Regex(pattern,RegexOptions.CultureInvariant),phrase.Value);filenamePatterns.Add(entry);string token="";foreach(string word in phrase.Key.Split(' ')){token+=word;List<KeyValuePair<Regex,string>> list;if(!phraseIndex.TryGetValue(token,out list))phraseIndex[token]=list=new List<KeyValuePair<Regex,string>>();list.Add(entry);}}
   }
-  static void AddAlias(string a,string name){if(string.IsNullOrWhiteSpace(a))return;string label;if(!descriptions.TryGetValue(name,out label))label="";descriptions[name]=label+" "+a+" "+CompactId(a);string key=Key(a);if(key.Length==0||ambiguous.Contains(key))return;string existing;if(aliases.TryGetValue(key,out existing)&&existing!=name){aliases.Remove(key);ambiguous.Add(key);}else aliases[key]=name;string words=Regex.Replace(a.ToUpperInvariant(),@"[^A-Z0-9]+"," ").Trim();if(words.Length>=4&&!Regex.IsMatch(key,@"^(M|NGC|IC|C|B|SH2|UGC|PGC)\d+[A-Z]?$")&&words.Any(char.IsLetter))phrases.Add(new KeyValuePair<string,string>(words,name));}
-  public static string KnownName(string name){string value;return aliases.TryGetValue(Key(name),out value)?value:null;}
-  static HashSet<string> FilenameTargets(string filename){
+  static void AddAlias(string a,string name){if(string.IsNullOrWhiteSpace(a))return;string owner;if(CatalogNames.NameOwners.TryGetValue(a.Trim(),out owner)&&owner!=name)return;string label;if(!descriptions.TryGetValue(name,out label))label="";descriptions[name]=label+" "+a+" "+CompactId(a);string key=Key(a);if(key.Length==0||ambiguous.Contains(key))return;string existing;if(aliases.TryGetValue(key,out existing)&&existing!=name){aliases.Remove(key);ambiguous.Add(key);}else aliases[key]=name;string words=FileSearch.Fold(a);if(words.Length>=4&&!Regex.IsMatch(key,@"^(M|NGC|IC|C|B|SH2|UGC|PGC)\d+[A-Z]?$")&&words.Any(char.IsLetter))phrases.Add(new KeyValuePair<string,string>(words,name));}
+  public static string KnownName(string name){string value;string key=Key(name);return savedNames.Aliases.TryGetValue(key,out value)||aliases.TryGetValue(key,out value)?value:null;}
+  static HashSet<string> FilenameTargets(string filename,bool includeUnknown=false){
    string stem=Regex.Replace(Path.GetFileName(filename??""),@"\.(fit|fits|fts)(\.gz)?$","",RegexOptions.IgnoreCase);
-   string text=Regex.Replace(stem.ToUpperInvariant(),@"[^A-Z0-9]+"," ");var found=new HashSet<string>();
-   foreach(Match match in Regex.Matches(text,@"\b(M|NGC|IC|C|CALDWELL|B|UGC|PGC|SH\s*2)\s*0*(\d+)([A-Z]?)\b")){string id=KnownName(Regex.Replace(match.Groups[1].Value,@"\s+","")+match.Groups[2].Value+match.Groups[3].Value);if(id!=null)found.Add(id);}
+   string text=FileSearch.Fold(stem);var found=new HashSet<string>();
+
    // Prefer a complete common name over a shorter name contained inside it:
    // Southern Pleiades is IC2602, while an independent Pleiades mention is M45.
    var matches=new List<Tuple<int,int,string>>();
    foreach(string token in text.Split(new[]{' '},StringSplitOptions.RemoveEmptyEntries).Distinct()){List<KeyValuePair<Regex,string>> list;if(phraseIndex.TryGetValue(token,out list))foreach(var phrase in list)foreach(Match match in phrase.Key.Matches(text))matches.Add(Tuple.Create(match.Index,match.Length,phrase.Value));}
+   foreach(var phrase in savedNames.Phrases)foreach(Match match in phrase.Key.Matches(text))matches.Add(Tuple.Create(match.Index,match.Length,phrase.Value));
    foreach(var match in matches)if(!matches.Any(other=>other.Item2>match.Item2&&other.Item1<=match.Item1&&other.Item1+other.Item2>=match.Item1+match.Item2))found.Add(match.Item3);
+   foreach(Match match in Regex.Matches(text,@"\b(MESSIER|M|NGC|IC|CALDWELL|C|BARNARD|B|UGC|PGC|SHARPLESS|SH\s*2)\s*(?:(?:NO|NUMBER)\s*)?0*(\d+)([A-Z]?)\b")){if(matches.Any(label=>match.Index>=label.Item1&&match.Index<label.Item1+label.Item2))continue;string mentioned=CataloguePrefix(match.Groups[1].Value)+match.Groups[2].Value+match.Groups[3].Value;string id=KnownName(mentioned);if(id!=null||includeUnknown)found.Add(id??mentioned);}
    if(Regex.IsMatch(text,@"\bSUN\b"))found.Add("Sun");
    return found;
   }
-  public static string TargetFromFilename(string filename){var found=FilenameTargets(filename);return found.Count==1?found.First():null;}
-  public static bool HasFilenameConflict(string filename){return FilenameTargets(filename).Count>1;}
-  public static string Aliases(string target){string s;return descriptions.TryGetValue(CanonicalTarget(target),out s)?s:"";}
+  public static string TargetFromFilename(string filename){if(HasFilenameConflict(filename))return null;var found=FilenameTargets(filename);return found.Count==1?found.First():null;}
+  public static bool HasFilenameConflict(string filename){return FilenameTargets(filename,true).Count>1;}
+  public static string Aliases(string target){string s,custom;string id=CanonicalTarget(target);return (descriptions.TryGetValue(id,out s)?s:"")+" "+(savedNames.Descriptions.TryGetValue(id,out custom)?custom:"");}
   // Resolve recognised labels on deserialization too, so old archives share new groups.
   // Preserve custom and conflicting labels rather than inventing an identity.
   public static string CanonicalTarget(string target){
    string text=(target??"").Trim();if(text.Length==0)return "Unknown";
    if(text.Equals("Calibration",StringComparison.OrdinalIgnoreCase))return "Calibration";
    string known=KnownName(text);if(known!=null)return known;
-   var found=FilenameTargets(text);if(found.Count==1)return found.First();
+   if(HasFilenameConflict(text))return text.Replace('_',' ');var found=FilenameTargets(text);if(found.Count==1)return found.First();
    return text.Replace('_',' ');
   }
   public static string ObjectId(string target){string id=CanonicalTarget(target);return !IsAmbiguous(id)&&(KnownName(id)!=null||Regex.IsMatch(id,@"^(M|NGC|IC|C|B|SH2|UGC|PGC)\d+[A-Z]?$",RegexOptions.IgnoreCase))?id:"";}
-  public static string CommonName(string target){string name;return commonNames.TryGetValue(CanonicalTarget(target),out name)?name:"";}
+  public static string CommonName(string target){string name;string id=CanonicalTarget(target);return savedNames.Common.TryGetValue(id,out name)||commonNames.TryGetValue(id,out name)?name:"";}
   public static string Label(string target){string id=CanonicalTarget(target),common=CommonName(id);return id+(common.Length>0?" · "+common:"");}
-  static string Key(string s){return Regex.Replace(CompactId(s??"").ToUpperInvariant(),@"[^A-Z0-9]","");}
-  public static string CompactId(string s){var m=Regex.Match((s??"").Trim(),@"^(NGC|IC|M|C|CALDWELL|B|UGC|PGC)\s*[_-]?\s*0*(\d+)(.*)$",RegexOptions.IgnoreCase);return m.Success?(m.Groups[1].Value.Equals("CALDWELL",StringComparison.OrdinalIgnoreCase)?"C":m.Groups[1].Value.ToUpperInvariant())+m.Groups[2].Value+m.Groups[3].Value:s;}
+  static string Key(string s){return NameKey(s);}
+  public static string CompactId(string s){var m=Regex.Match(FileSearch.Fold(s),@"^(NGC|IC|MESSIER|M|CALDWELL|C|BARNARD|B|UGC|PGC|SHARPLESS|SH\s*2)\s*(?:(?:NO|NUMBER)\s*)?0*(\d+)(.*)$",RegexOptions.IgnoreCase|RegexOptions.CultureInvariant);return m.Success?CataloguePrefix(m.Groups[1].Value)+m.Groups[2].Value+m.Groups[3].Value:s;}
+  static string CataloguePrefix(string prefix){prefix=prefix.ToUpperInvariant().Replace(" ","");return prefix=="MESSIER"?"M":prefix=="CALDWELL"?"C":prefix=="BARNARD"?"B":prefix=="SHARPLESS"?"SH2":prefix;}
   public static double? Sex(string s,bool hours){
    string[] p=Regex.Split((s??"").Trim().Replace("h",":").Replace("m",":").Replace("s",""),@"[:\s]+");double a,b,c;if(p.Length<2||!double.TryParse(p[0],NumberStyles.Float,CultureInfo.InvariantCulture,out a)||!double.TryParse(p[1],NumberStyles.Float,CultureInfo.InvariantCulture,out b))return null;c=0;if(p.Length>2&&!double.TryParse(p[2],NumberStyles.Float,CultureInfo.InvariantCulture,out c))return null;
    double v=(Math.Abs(a)+b/60+c/3600)*(s.TrimStart().StartsWith("-")?-1:1);return hours?v*15:v;
   }
   public static string Normalize(string s){
-   s=(s??"").Trim().Trim('_','-');if(IsAmbiguous(s))return "Unknown";if(FilenameTargets(s).Count>1)return s.Replace('_',' ');s=CanonicalTarget(s);string val;if(aliases.TryGetValue(Key(s),out val))return val;
-   var m=Regex.Match(s,@"\b(M|NGC|IC|C|CALDWELL|B|UGC|PGC)\s*[_-]?\s*0*(\d+)([A-Z]?)\b",RegexOptions.IgnoreCase);if(m.Success){string id=m.Groups[1].Value.ToUpperInvariant()+m.Groups[2].Value+m.Groups[3].Value.ToUpperInvariant();return aliases.TryGetValue(Key(id),out val)?val:id;}
+   s=(s??"").Trim().Trim('_','-');if(IsAmbiguous(s))return "Unknown";if(HasFilenameConflict(s))return s.Replace('_',' ');s=CanonicalTarget(s);string val;if(aliases.TryGetValue(Key(s),out val))return val;
+   var m=Regex.Match(s,@"\b(MESSIER|M|NGC|IC|CALDWELL|C|BARNARD|B|UGC|PGC)\s*[_-]?\s*0*(\d+)([A-Z]?)\b",RegexOptions.IgnoreCase);if(m.Success){string id=CataloguePrefix(m.Groups[1].Value)+m.Groups[2].Value+m.Groups[3].Value.ToUpperInvariant();return aliases.TryGetValue(Key(id),out val)?val:id;}
    return s.Replace('_',' ').Trim();
   }
   public static bool IsAmbiguous(string s){return string.IsNullOrWhiteSpace(s)||ambiguous.Contains(Key(s))||Regex.IsMatch(s.Trim(),@"^(unknown|unnamed|none|n/?a|target|object|sky|test|light|raw|image|frame|manual|custom|calibration|\d+)([_\s-]*\d*)$",RegexOptions.IgnoreCase);}
   public static double Distance(double ra,double dec,double ra2,double dec2){double k=Math.PI/180;double x=Math.Sin((dec2-dec)*k/2),y=Math.Sin((ra2-ra)*k/2);double h=x*x+Math.Cos(dec*k)*Math.Cos(dec2*k)*y*y;return 2*Math.Asin(Math.Sqrt(Math.Min(1,h)))/k;}
-  public static List<Candidate> Nearby(double ra,double dec,double radius){return Objects.Select(o=>new Candidate{Name=o.Name,Common=o.Common,Separation=Distance(ra,dec,o.RA,o.Dec)}).Where(c=>c.Separation<=radius).OrderBy(c=>c.Separation).GroupBy(c=>c.Name).Select(g=>g.First()).Take(30).ToList();}
-  public static List<CatalogObject> Search(string q){string v=Key(q),known=KnownName(q);return Objects.Where(o=>o.Name==known||Key(o.Name+" "+o.Common+" "+o.Aliases).Contains(v)).OrderByDescending(o=>o.Name==known).Take(50).ToList();}
+  public static List<Candidate> Nearby(double ra,double dec,double radius){return Objects.Select(o=>new{Object=o,Separation=Distance(ra,dec,o.RA,o.Dec)}).Where(c=>c.Separation<=radius).OrderBy(c=>c.Separation).GroupBy(c=>c.Object.Name).Select(g=>g.First()).Take(30).Select(c=>new Candidate{Name=c.Object.Name,Common=CommonName(c.Object.Name),Separation=c.Separation}).ToList();}
+  public static List<CatalogObject> Search(string q){
+   string v=Key(q),known=KnownName(q);var custom=savedNames;
+   var matches=known!=null?Objects.Where(o=>o.Name==known):Objects.Where(o=>{string common,extra;return Key(o.Name+" "+(custom.Common.TryGetValue(o.Name,out common)?common:o.Common)+" "+o.Aliases+" "+(custom.Descriptions.TryGetValue(o.Name,out extra)?extra:"")).Contains(v);});
+   return matches.GroupBy(o=>o.Name).Select(g=>g.First()).Take(50).Select(o=>new CatalogObject{Name=o.Name,Common=CommonName(o.Name),Aliases=Aliases(o.Name),Type=o.Type,RA=o.RA,Dec=o.Dec,Diameter=o.Diameter,Magnitude=o.Magnitude}).ToList();
+  }
  }
  public static class Classifier {
   public sealed class ShotsMetadata {public Dictionary<string,object> Raw;public Dictionary<string,string> Values=new Dictionary<string,string>(StringComparer.OrdinalIgnoreCase);public string Path;public string Note;public FileStamp Stamp;}
