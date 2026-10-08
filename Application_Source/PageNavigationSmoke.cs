@@ -9,7 +9,7 @@ namespace AstroArchive {
  public partial class MainUi {
   void SmokePageNavigation(string output){
    var tabs=(TabControl)Window.FindName("MainTabs");var selector=C("PageSelector");var header=(FrameworkElement)Window.FindName("HeaderBar");
-   int page=tabs.SelectedIndex;double originalWidth=Window.Width;int textScale=settings.TextScalePercent;string theme=settings.ThemeMode;bool contrast=settings.HighContrast;
+   int page=tabs.SelectedIndex;double originalWidth=Window.Width,originalHeaderWidth=header.Width;int textScale=settings.TextScalePercent;string theme=settings.ThemeMode;bool contrast=settings.HighContrast;
    string search=T("SearchBox").Text,source=T("SourceBox").Text;var importPlan=plan;var activeCancel=cancel;string filters=Util.Serialize(libraryFilters.Values);
    var selected=G("FramesGrid").SelectedItems.Cast<object>().ToArray();
    var repositoryRows=all;
@@ -30,14 +30,17 @@ namespace AstroArchive {
     var menu=(Menu)Window.FindName("MainMenu");var pages=(FrameworkElement)Window.FindName("PageNavigation");
     if(!menu.Items.Cast<MenuItem>().SequenceEqual(TopMenus()))throw new Exception("Settings, Guide and support are not grouped with the left toolbar actions.");
     bool sawInline=false,sawSeparate=false;
-    foreach(int scale in new[]{100,150})foreach(double width in new[]{1060.0,1380.0,1800.0}){
+    foreach(int scale in new[]{100,150})foreach(double width in new[]{1060.0,1380.0,2400.0}){
      settings.TextScalePercent=scale;Window.Width=width;settings.HighContrast=false;
+     // Windows caps top-level widths on small CI desktops; exercise a wide header directly.
+     header.Width=width==2400?width:originalHeaderWidth;
      foreach(string mode in new[]{"Light","Dark"}){
       settings.ThemeMode=mode;ApplyAppearance();PumpPopupLayout();
       var bounds=PopupBounds(selector,Window);var pageBounds=PopupBounds(pages,Window);var headerBounds=PopupBounds(header,Window);
       if(bounds.Width<149||bounds.Left<headerBounds.Left||bounds.Right>headerBounds.Right||bounds.Bottom>headerBounds.Bottom+1)throw new Exception("Page selector is clipped.");
       if(Math.Abs((pageBounds.Left+pageBounds.Right-headerBounds.Left-headerBounds.Right)/2)>1)throw new Exception("Page navigation is not centred in the header.");
       bool inline=Grid.GetRow(pages)==0;sawInline|=inline;sawSeparate|=!inline;
+      Console.WriteLine("Toolbar layout: "+mode+", text "+scale+"%, header "+header.ActualWidth+", actions "+menu.ActualWidth+", inline "+inline);
       foreach(var item in TopMenus()){
        var actionBounds=PopupBounds(item,Window);
        if(actionBounds.IntersectsWith(pageBounds))throw new Exception("Page navigation overlaps a toolbar action.");
@@ -53,13 +56,13 @@ namespace AstroArchive {
       foreach(var item in choices){item.ApplyTemplate();Readable(item.Foreground,(System.Windows.Media.Brush)Window.FindResource("Surface"),mode+" page choice");}
       if(scale==100&&width==1380)Capture(Path.Combine(output,"AstroArchive_Page_Selector_"+mode+".png"));selector.IsDropDownOpen=false;
       if(width==1060&&scale==150&&mode=="Dark")Capture(Path.Combine(output,"AstroArchive_Toolbar_Compact.png"));
-      if(width==1800&&scale==100&&mode=="Dark")Capture(Path.Combine(output,"AstroArchive_Toolbar_Wide.png"));
+      if(width==2400&&scale==100&&mode=="Dark")SavePopup(header,Path.Combine(output,"AstroArchive_Toolbar_Wide.png"));
      }
     }
     if(!sawInline||!sawSeparate)throw new Exception("Responsive toolbar did not exercise both centred layouts.");
     settings.HighContrast=true;ApplyAppearance();Readable(selector.Foreground,selector.Background,"High contrast page selector");
-   }finally{all=repositoryRows;selector.IsDropDownOpen=false;Window.Width=originalWidth;settings.TextScalePercent=textScale;settings.ThemeMode=theme;settings.HighContrast=contrast;ApplyAppearance();GoToPage(page);PumpPopupLayout();}
-   File.WriteAllText(Path.Combine(output,"page-navigation-smoke.txt"),"PASS: empty/populated repository startup, grouped left toolbar actions, centred inline/separate page navigation without overlaps, page selection, programmatic/keyboard cycling, existing workspace/state retention, no tab row, six-pixel gaps, both themes at 100/150% and 1060/1380/1800 widths, high contrast and popup text contrast.");
+   }finally{all=repositoryRows;selector.IsDropDownOpen=false;header.Width=originalHeaderWidth;Window.Width=originalWidth;settings.TextScalePercent=textScale;settings.ThemeMode=theme;settings.HighContrast=contrast;ApplyAppearance();GoToPage(page);PumpPopupLayout();}
+   File.WriteAllText(Path.Combine(output,"page-navigation-smoke.txt"),"PASS: empty/populated repository startup, grouped left toolbar actions, centred inline/separate page navigation without overlaps, page selection, programmatic/keyboard cycling, existing workspace/state retention, no tab row, six-pixel gaps, both themes at 100/150% and 1060/1380/2400 widths, high contrast and popup text contrast.");
   }
  }
 }

@@ -7,7 +7,7 @@ Package 1.12.4.1
   actions. A PAGE caption distinguishes navigation from file tools.
 - Scale the selector with text preferences and let left actions wrap if needed;
   preserve theme contrast, page state, keyboard navigation and the walkthrough.
-- Verify both layouts, action grouping and overlap/clipping at 1060/1380/1800
+- Verify both layouts, action grouping and overlap/clipping at 1060/1380/2400
   widths, in light/dark modes with 100/150% text sizes.
 
 AstroArchive 1.12.3 — compact navigation, IC common names and interactive sky
