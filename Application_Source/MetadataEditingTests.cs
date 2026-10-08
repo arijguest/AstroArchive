@@ -5,13 +5,6 @@ using System.IO;
 using System.Linq;
 namespace AstroArchive {
  public partial class Tests {
-  // JSON property order can change as .NET's reflection caches warm up.
-  // Compare every recorded value recursively rather than serialization order.
-  static object OrderedMetadata(object value){
-   var map=value as IDictionary<string,object>;if(map!=null)return new SortedDictionary<string,object>(map.ToDictionary(p=>p.Key,p=>OrderedMetadata(p.Value)),StringComparer.Ordinal);
-   var array=value as object[];return array==null?value:array.Select(OrderedMetadata).ToArray();
-  }
-  static string MetadataSnapshot(Frame frame){return Util.Serialize(OrderedMetadata(Util.Json().DeserializeObject(Util.Serialize(frame))));}
   static Frame EditableFixture(){return new Frame{OriginalName="Light_M33.fit",Target="M33",TargetEvidence="FITS OBJECT",Telescope="Unit-01",Model="Custom observatory",Camera="Telephoto",Kind="Light",Mount="Unknown",MountEvidence="Not analyzed",Exposure=30.123456789,Gain=0,Temperature=-12.75,Filter="Broadband",Calibration="Custom calibration",BinX=2,BinY=1,TelescopeModel="Reflector",CameraModel="Camera 1",CameraId="Serial 123",Offset=0,ReadoutMode="Slow",Roi="0,0,128,96",OpticalConfiguration="Reducer",TimeZoneId="UTC",LinearData=false,GainUnit="dB",Bayer="RGGB",RegistrationState="Unregistered",CalibrationSteps="Dark, flat",Notes="Recorded notes",Observed="2026-10-06T22:00:00",ObservedUtc="2026-10-06T22:00:00Z",TimeSource="FITS",Facts=new Dictionary<string,MetadataFact>{{"Exposure",new MetadataFact{Value="30.123456789",Raw="EXPTIME=30.123456789",Source="FITS header",Unit="s"}}}};}
   static void MetadataEditingTests(){
    Test("Single metadata editor populates every editable value, including zero and custom choices",()=>{
@@ -21,8 +14,10 @@ namespace AstroArchive {
     Check(model["Binning"].Initial=="2x1"&&model["LinearData"].Initial=="Processed / stretched"&&model["Model"].Initial=="Custom observatory"&&model["Calibration"].Initial=="Custom calibration","Current custom choices/false state lost");
    });
    Test("Opening and saving unchanged metadata preserves facts, inferred mount, times and units",()=>{
-    var f=EditableFixture();string before=MetadataSnapshot(f);var patch=new MetadataEditing(new[]{f}).Patch();Check(patch.Count==0&&patch.Validate()==null,"Untouched form generated changes");
-    Check(MetadataSnapshot(patch.Apply(f))==before&&MetadataSnapshot(f)==before,"No-op rewrote evidence or metadata");
+    var f=EditableFixture();string before=Util.Serialize(f);var patch=new MetadataEditing(new[]{f}).Patch();Check(patch.Count==0&&patch.Validate()==null,"Untouched form generated changes");
+    // CLR reflection cache order can change JSON member order after sort getters.
+    var expected=Util.Json().DeserializeObject(before);
+    Check(SameSnapshotValue(Util.Json().DeserializeObject(Util.Serialize(patch.Apply(f))),expected)&&SameSnapshotValue(Util.Json().DeserializeObject(Util.Serialize(f)),expected),"No-op rewrote evidence or metadata");
    });
    Test("Batch metadata distinguishes common, missing and mixed values without adopting the first file",()=>{
     var a=EditableFixture();var b=a.Clone();b.Exposure=60;b.Gain=null;b.CameraId=null;b.BinY=2;b.LinearData=true;b.Target="M45";
