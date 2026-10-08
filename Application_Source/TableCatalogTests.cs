@@ -4,6 +4,18 @@ using System.Linq;
 namespace AstroArchive {
  public partial class Tests {
   static void TableCatalogTests(){
+   Test("Repository Gain appears once in older layouts and respects later hiding",()=>{
+    var old=new ColumnLayout{Order=new System.Collections.Generic.List<string>{"OriginalName","ExposureText","Filter","GainText"},Visible=new System.Collections.Generic.List<string>{"OriginalName","ExposureText","Filter"}};
+    var upgraded=ColumnLayout.UpgradeRepository(old);Check(upgraded.Visible.Contains("GainText")&&upgraded.Order.SequenceEqual(new[]{"OriginalName","ExposureText","GainText","Filter"})&&!old.Visible.Contains("GainText"),"Gain upgrade did not preserve headings and insert Gain beside Exposure");
+    upgraded.Visible.Remove("GainText");var restored=Util.Deserialize<ColumnLayout>(Util.Serialize(upgraded));Check(object.ReferenceEquals(restored,ColumnLayout.UpgradeRepository(restored))&&!restored.Visible.Contains("GainText"),"Gain upgrade overwrote a later column choice");
+   });
+   Test("Rosette cluster ID is consolidated into the Rosette Nebula identity",()=>{
+    foreach(string name in new[]{"NGC2244","NGC 02244","NGC2237","Rosette Nebula"}){
+     var frame=Util.Deserialize<Frame>(Util.Serialize(new Frame{Target=name}));Check(frame.ObjectId=="NGC2237"&&frame.TargetName=="Rosette Nebula"&&TargetNavigation.Group(frame.Target)=="Nebulae","Rosette archive identity or section wrong: "+name);
+     Check(Catalog.TargetFromFilename("Light_"+name.Replace(' ','_')+"_001.fit")=="NGC2237"&&EditedMetadata.Read(name+"_starless.fit",null).Object=="NGC2237","Rosette import identity split: "+name);
+    }
+    var targets=TargetNavigation.Build(new[]{new Frame{Target="NGC2244"},new Frame{Target="NGC2237"},new Frame{Target="Rosette Nebula"}});Check(targets.Single(t=>t.Name=="NGC2237").Files==3&&Catalog.Search("NGC2244").First().Name=="NGC2237","Rosette search or grouping remained separate");
+   });
    Test("Older Edited headings adopt File Type once and preserve later column choices",()=>{
     var old=new ColumnLayout{Order=new System.Collections.Generic.List<string>{"Kind","Filename","Metadata.TotalExposureText","Source"},Visible=new System.Collections.Generic.List<string>{"Kind","Filename","Metadata.TotalExposureText","Source"}};
     var upgraded=ColumnLayout.UpgradeEdited(old);Check(upgraded.Order.SequenceEqual(new[]{"Kind","Filename","FileType","Metadata.TotalExposureText","Source"})&&upgraded.Visible.Contains("FileType")&&!upgraded.Visible.Contains("Metadata.TotalExposureText")&&upgraded.Visible.Contains("Source"),"Edited upgrade lost custom order/visibility or retained old headings");

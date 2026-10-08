@@ -6,6 +6,7 @@ using System.Threading;
 namespace AstroArchive {
  public sealed class TargetSolveJob {
   public List<Frame> Frames;public Frame Representative;public SolveResult Result{get;set;}
+  public IEnumerable<Candidate> Choices{get{var choices=Result==null||Result.Candidates==null?new List<Candidate>():Result.Candidates.ToList();if(!string.IsNullOrEmpty(Target)&&!choices.Any(c=>c.Name==Target))choices.Add(new Candidate{Name=Target,Common=Catalog.CommonName(Target)});return choices;}}
   public string Error{get;set;}public string Target{get;set;}public bool Include{get;set;}
   public bool Solved{get{return Result!=null;}}
   public string Filename{get{return Representative.OriginalName;}}
@@ -18,15 +19,9 @@ namespace AstroArchive {
   public int Completed,Total;public string Stage,Detail;public bool Metadata;
  }
  public static class TargetSolving {
-  // Selected Lights follow the session/date subgroup identity used by the table.
-  // Undated unknown sessions, stacks and different sensors/geometry remain independent.
-  static string GroupKey(Frame f,int index){
-   if(f.Kind!="Light")return "file:"+index;
-   var date=string.IsNullOrWhiteSpace(f.Session)?CaptureSessions.Date(f):null;
-   if(string.IsNullOrWhiteSpace(f.Session)&&date==null)return "file:"+index;
-   string target=Catalog.KnownName(f.Target)??Catalog.Normalize(f.Target);
-   return Util.Serialize(new object[]{f.SessionKey,date==null?"":date.Date.ToString("yyyy-MM-dd",CultureInfo.InvariantCulture),target,f.MakeText,f.CameraId,f.CameraModel,f.Width,f.Height,f.BinX,f.BinY,f.Roi,f.OpticalConfiguration,f.ImageIndex});
-  }
+  // Use exactly the same identity as the visible Light subgroup. A crop,
+  // header variation or image index does not change the session's target.
+  static string GroupKey(Frame frame,int index){return SubframeSessions.Key(frame)??"file:"+index;}
   public static List<TargetSolveJob> Plan(IEnumerable<Frame> selected){
    return selected.Select((f,i)=>new{Frame=f,Key=GroupKey(f,i)}).GroupBy(f=>f.Key).Select(g=>{
     var frames=g.Select(f=>f.Frame).ToList();var candidates=frames.Where(f=>!f.Rejected&&!CaptureScreening.FileProblem(f)).ToList();if(candidates.Count==0)candidates=frames;
@@ -36,7 +31,16 @@ namespace AstroArchive {
   public static void Solve(List<TargetSolveJob> jobs,Func<Frame,CancellationToken,Action<string>,SolveResult> solver,CancellationToken ct,Action<IdentificationProgress> progress){
    for(int i=0;i<jobs.Count;i++){
     ct.ThrowIfCancellationRequested();var job=jobs[i];int completed=i;Action<string> stage=message=>{if(progress!=null)progress(new IdentificationProgress{Completed=completed,Total=jobs.Count,Stage=message,Detail="Job "+(completed+1)+" of "+jobs.Count+" · "+job.Filename+"\n"+job.Scope});};
-    stage("Preparing representative image");try{job.Result=solver(job.Representative,ct,stage);ct.ThrowIfCancellationRequested();PlateSolve.MatchTargets(job.Result);job.Target=job.Result.Suggested;job.Include=!string.IsNullOrEmpty(job.Target);job.Error=null;}
+    stage("Preparing representative image");try{
+     var samples=job.Representative.Kind=="Light"?job.Frames.Where(f=>!f.Rejected&&!CaptureScreening.FileProblem(f)).ToList():new List<Frame>();
+     var attempts=new[]{job.Representative,samples.FirstOrDefault(),samples.LastOrDefault()}.Where(f=>f!=null).Distinct().Take(3).ToList();
+     for(int attempt=0;attempt<attempts.Count;attempt++){
+      ct.ThrowIfCancellationRequested();job.Representative=attempts[attempt];stage("Preparing representative "+(attempt+1)+" of "+attempts.Count);
+      try{job.Result=solver(job.Representative,ct,stage);ct.ThrowIfCancellationRequested();PlateSolve.MatchTargets(job.Result);break;}
+      catch(OperationCanceledException){throw;}catch(Exception){if(attempt+1==attempts.Count)throw;stage("Representative failed; trying another group frame");}
+     }
+     job.Target=job.Result.Suggested;job.Include=!string.IsNullOrEmpty(job.Target);job.Error=null;
+    }
     catch(OperationCanceledException){throw;}catch(Exception error){job.Error=error.Message;job.Result=null;job.Include=false;}
     if(progress!=null)progress(new IdentificationProgress{Completed=i+1,Total=jobs.Count,Stage=job.Solved?"Field solved": "Solve failed; continuing",Detail=job.Filename+"\n"+job.Scope});
    }

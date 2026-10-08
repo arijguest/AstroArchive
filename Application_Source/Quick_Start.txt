@@ -1,4 +1,4 @@
-AstroArchive 1.13.13
+AstroArchive 1.13.14
 Windows 10/11 x64; .NET Framework 4.8.
 
 START HERE
@@ -111,6 +111,7 @@ shows the evidence and conflicts. Compatible single-source editor outputs can
 inherit missing acquisition data from their working copy.
 Hover over Exposure in Repository or Import to inspect reported header values.
 Subframe summary totals count acquisition subs only and exclude stack exposures.
+Repository shows Gain beside Exposure; unknown gain displays as a dash.
 
 GIF AND VIDEO PREVIEWS
 GIF, SER, AVI, MP4, MOV, M4V, WMV and MKV can be imported and viewed.
@@ -124,6 +125,7 @@ exposure, sub-count and filter data. Ambiguous matches and conflicting metadata
 are not guessed. Originals are retained.
 
 CATALOGUE IDENTITIES
+NGC2244 and Rosette Nebula labels use NGC2237 in the Nebulae section.
 Search catalogue IDs or common names. Aliases share a target: M106, NGC4258,
 UGC7353 and PGC39600 resolve to M106. Catalogue prefixes matter: M106 and NGC106
 are different objects. Bare numbers and ambiguous aliases do not establish an ID.
@@ -170,6 +172,8 @@ Target identification needs ASTAP plus its star database, or an Astrometry.net
 account/API key and an internet connection. Configure them in Settings > Plate solving.
 Identify target solves one representative for each selected Light session/target
 and instrument group. Selecting a collapsed subgroup includes all its files.
+Crop and header differences do not split that subgroup. If a representative
+fails, at most two other subs are tried; the first success ends the group solve.
 Stacks solve individually. A batch review lists completed fields with the nearest
 major targets selected; change or uncheck each row before applying. A single
 matched group applies automatically. Frames outside the selection stay unchanged.
@@ -326,6 +330,8 @@ the bottom-left. N/E/S/W appear only with a capture time/site and enough clear
 space outside the globe. Targets include Comets when comet images are present.
 All Targets: merged subs, stacks, ungrouped files, then calibration frames.
 Individual targets: stacks above lights. Column sorts apply within each section.
-Calibration previews hide the map. Stacks show an estimated track when time,
+Calibration and below-horizon previews hide the map. Selected Light groups show
+a track from their capture times through the final exposure. Stacks show an
+estimated track when time,
 site, pointing and total duration are known: recorded time is assumed to be the
 end and integration duration approximates elapsed time without acquisition gaps.

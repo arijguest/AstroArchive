@@ -16,7 +16,11 @@ namespace AstroArchive {
     foreach(string mode in new[]{"Dark","Light"})foreach(int textScale in new[]{100,150}){
      settings.ThemeMode=mode;settings.TextScalePercent=textScale;ApplyAppearance();var dialog=IdentificationDialog(jobs);
      try{dialog.Window.Show();PumpPopupLayout();var table=PopupChildren<DataGrid>(dialog.Window).Single();var boxes=PopupChildren<ComboBox>(table).ToList();if(table.Items.Count!=3||boxes.Count!=3||boxes.Count(c=>!c.IsEnabled)!=1)throw new Exception("Batch review lost independent stacks or enabled a failed solve");
-      var combo=boxes.Single(c=>c.DataContext==jobs[0]);combo.Text="Whirlpool Galaxy";PumpPopupLayout();if(Catalog.Normalize(jobs[0].Target)!="M51"||jobs[1].Target!="M45")throw new Exception("Editing one batch target changed another target or lost the alias");combo.SelectedItem=jobs[0].Result.Candidates.First(c=>c.Name=="M45");PumpPopupLayout();if(jobs[0].Target!="M45")throw new Exception("Selecting a nearby candidate did not bind the target");
+      var combo=boxes.Single(c=>c.DataContext==jobs[0]);
+      if(Convert.ToString(combo.SelectedValue)!=jobs[0].Result.Suggested||!PopupChildren<TextBlock>(combo).Any(t=>t.Text.Contains("M45")))throw new Exception("Nearest major target is not selected and visibly displayed");
+      jobs[0].Target=Catalog.Normalize("Whirlpool Galaxy");table.Items.Refresh();PumpPopupLayout();combo=PopupChildren<ComboBox>(table).Single(c=>c.DataContext==jobs[0]);
+      if(Convert.ToString(combo.SelectedValue)!="M51"||!PopupChildren<TextBlock>(combo).Any(t=>t.Text.Contains("M51")&&t.Text.Contains("Whirlpool Galaxy"))||jobs[1].Target!="M45")throw new Exception("Search target does not display both ID/common name or changed another row");
+      combo.SelectedValue="M45";PumpPopupLayout();if(jobs[0].Target!="M45"||!PopupChildren<TextBlock>(combo).Any(t=>t.Text.Contains("M45")))throw new Exception("Selecting a nearby candidate did not bind/display the target");
       if(PopupChildren<CheckBox>(table).Single(c=>c.DataContext==jobs[2]).IsEnabled)throw new Exception("Failed solve can be applied");CapturePopup(dialog.Window,Path.Combine(output,"AstroArchive_Target_Review_"+mode+textScale+".png"));
      }finally{dialog.Window.Close();}
     }

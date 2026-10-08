@@ -13,7 +13,7 @@ namespace AstroArchive {
     var frames=new[]{SolveLight("a","M51"),SolveLight("b","Whirlpool Galaxy"),SolveLight("other-target","M31"),SolveLight("other-session","M51","s2"),SolveLight("other-camera","M51"),SolveLight("no-session-a","M51",""),SolveLight("no-session-b","M51","")};frames[4].Camera="Wide angle";frames[1].Exposure=120;frames[1].Filter="Ha";
     var stack=SolveLight("stack","M51");stack.Kind="Stack";var stack2=stack.Clone();stack2.Hash="stack2";stack2.OriginalName="stack2";
     var jobs=TargetSolving.Plan(frames.Concat(new[]{stack,stack2}));Check(jobs.Count==8&&jobs[0].Frames.Count==2&&jobs[0].Frames.Contains(frames[1]),"Grouping merged unrelated frames or solved compatible filters separately");Check(jobs.Count(j=>j.Representative.Kind=="Stack")==2,"Stacks share a representative");
-    var cropped=frames[0].Clone();cropped.Roi="100,100,64,48";Check(TargetSolving.Plan(new[]{frames[0],cropped}).Count==2,"Different sensor crops shared a solve");
+    var cropped=frames[0].Clone();cropped.Roi="100,100,64,48";cropped.CameraId="header-only-camera-id";cropped.Width=32;cropped.ImageIndex=1;var subgroup=SubframeSessions.Build(new[]{frames[0],cropped}).Single();Check(TargetSolving.Plan(subgroup.Frames).Count==1,"A visible subgroup split by sensor crop or header/image-index differences");
    });
    Test("Recorded-date subgroups without explicit session IDs share one representative",()=>{
     var first=SolveLight("one","M51","");var second=SolveLight("two","M51","");first.AcquisitionDate=second.AcquisitionDate="2026-10-08";first.SourcePath="captures/one.fit";second.SourcePath="captures/two.fit";var jobs=TargetSolving.Plan(new[]{first,second});Check(jobs.Count==1&&jobs[0].Frames.Count==2,"Displayed date subgroup split into individual solves");second.AcquisitionDate="2026-10-09";Check(TargetSolving.Plan(new[]{first,second}).Count==2,"Different acquisition dates combined without a session");
@@ -26,6 +26,11 @@ namespace AstroArchive {
     var result=new SolveResult{RA=10,Dec=0,Radius=1};var objects=new[]{new CatalogObject{Name="PGC1",Type="G",RA=10.001,Dec=0,Magnitude=15},new CatalogObject{Name="M31",Type="G",RA=10.3,Dec=0},new CatalogObject{Name="M33",Type="G",RA=10.2,Dec=0},new CatalogObject{Name="M45",Type="OCl",RA=13,Dec=0}};
     PlateSolve.MatchTargets(result,objects);Check(result.Suggested=="M33"&&result.Candidates[0].Name=="M33"&&result.Candidates.Last().Name=="PGC1","Nearest major preference or field limit wrong");PlateSolve.MatchTargets(result,objects.Take(1));Check(result.Suggested==null&&result.Candidates.Count==1,"Minor-only field assigned automatically");
     Check(PlateSolve.Major(new CatalogObject{Name="NGC1",Type="G",Aliases="C1",Magnitude=13})&&PlateSolve.Major(new CatalogObject{Name="IC1",Type="Neb",Common="Named nebula"})&&!PlateSolve.Major(new CatalogObject{Name="Star",Type="*",Magnitude=1}),"Major catalogue policy wrong");
+   });
+   Test("Light groups stop after one successful sample or at most three failed representatives",()=>{
+    var frames=Enumerable.Range(0,20).Select(i=>SolveLight("sample"+i)).ToList();int calls=0;var jobs=TargetSolving.Plan(frames);
+    TargetSolving.Solve(jobs,(frame,token,stage)=>{calls++;if(calls==1)throw new IOException("Too few stars");return PleiadesSolution();},ct,null);Check(calls==2&&jobs.Single().Include&&jobs.Single().Frames.Count==20,"Group fallback did not stop at the first successful sample");
+    calls=0;jobs=TargetSolving.Plan(frames);TargetSolving.Solve(jobs,(frame,token,stage)=>{calls++;throw new IOException("No solution");},ct,null);Check(calls==3&&!jobs.Single().Include&&!jobs.Single().Solved,"Failed group solved every frame or included unsolved metadata");
    });
    Test("Solved image centre rather than WCS reference point determines target matching",()=>{
     var solution=new SolveResult{RA=10,Dec=0,Radius=1,Sky=new SkyGeometry{RA=20,Dec=0}};PlateSolve.MatchTargets(solution,new[]{new CatalogObject{Name="M31",Type="G",RA=20.1,Dec=0},new CatalogObject{Name="M33",Type="G",RA=10.1,Dec=0}});Check(solution.Suggested=="M31"&&solution.RA==20,"Reference pixel mistaken for field centre");

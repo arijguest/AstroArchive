@@ -12,7 +12,7 @@ namespace AstroArchive {
   public string Name; public string Common; public string Aliases; public string Type; public double RA; public double Dec; public double Diameter; public double? Magnitude;
   public string Label {get{return Name+(string.IsNullOrEmpty(Common)?"":"  ·  "+Common);}}
  }
- public class Candidate {public string Name{get;set;} public string Common{get;set;} public double Separation{get;set;} public string DistanceText{get{return Separation.ToString("0.000",CultureInfo.InvariantCulture)+"° from centre";}} }
+ public class Candidate {public string Name{get;set;} public string Common{get;set;} public double Separation{get;set;} public string Label{get{return Name+(string.IsNullOrWhiteSpace(Common)?"":" · "+Common);}} public string DistanceText{get{return Separation.ToString("0.000",CultureInfo.InvariantCulture)+"° from centre";}} }
  public static partial class Catalog {
   public static List<CatalogObject> Objects=new List<CatalogObject>(); static Dictionary<string,string> aliases=new Dictionary<string,string>(StringComparer.OrdinalIgnoreCase);static Dictionary<string,string> descriptions=new Dictionary<string,string>(StringComparer.OrdinalIgnoreCase);static HashSet<string> ambiguous=new HashSet<string>(StringComparer.OrdinalIgnoreCase);
   static Dictionary<string,string> commonNames=new Dictionary<string,string>(StringComparer.OrdinalIgnoreCase);
@@ -24,7 +24,8 @@ namespace AstroArchive {
     r.ReadLine();string line;while((line=r.ReadLine())!=null){string[] a=line.Split(';');if(a.Length<9)continue;double? ra=Sex(a[2],true),dec=Sex(a[3],false);if(!ra.HasValue||!dec.HasValue)continue;
      string name=CompactId(a[0]);if(!string.IsNullOrEmpty(a[6]))name="M"+a[6].TrimStart('0');
      double d,mag;var o=new CatalogObject{Name=name,Common=a[7].Split(',')[0],Aliases=a[8],Type=a[1],RA=ra.Value,Dec=dec.Value,Diameter=double.TryParse(a[4],NumberStyles.Float,CultureInfo.InvariantCulture,out d)?d/60:0,Magnitude=double.TryParse(a[5],NumberStyles.Float,CultureInfo.InvariantCulture,out mag)?(double?)mag:null};Objects.Add(o);if(!string.IsNullOrWhiteSpace(o.Common))commonNames[name]=o.Common;
-     AddAlias(a[0],name);AddAlias(name,name);foreach(string t in a[7].Split(','))AddAlias(t,name);foreach(string t in a[8].Split(','))if(Regex.IsMatch(t.Trim(),@"^(M|NGC|IC|C|SH\s*2|B|UGC|PGC)\s*\d",RegexOptions.IgnoreCase)){AddAlias(t,name);string compact=CompactId(t);if(Regex.IsMatch(compact,@"^C\d+$")){AddAlias(compact,name);AddAlias("Caldwell "+compact.Substring(1),name);}}
+     AddAlias(a[0],name);AddAlias(name,name);// Use NGC2237 for the whole Rosette; retain NGC2238 as a separately addressable component.
+     foreach(string t in a[7].Split(','))if(!(name=="NGC2238"&&t.Trim()=="Rosette Nebula"))AddAlias(t,name);foreach(string t in a[8].Split(','))if(Regex.IsMatch(t.Trim(),@"^(M|NGC|IC|C|SH\s*2|B|UGC|PGC)\s*\d",RegexOptions.IgnoreCase)){AddAlias(t,name);string compact=CompactId(t);if(Regex.IsMatch(compact,@"^C\d+$")){AddAlias(compact,name);AddAlias("Caldwell "+compact.Substring(1),name);}}
     }
    }
    AddAlias("Sun","Sun");AddAlias("Solar","Sun");

@@ -695,6 +695,7 @@
           <DataGridTextColumn Header="FRAME TYPE" Binding="{Binding Kind}" Width="110" />
           <DataGridTextColumn Header="ACQUIRED" Binding="{Binding AcquisitionDateLabel}" Width="96" />
           <DataGridTextColumn Header="EXPOSURE" Binding="{Binding ExposureText}" Width="76" />
+          <DataGridTextColumn Header="GAIN" Binding="{Binding GainText}" Width="60" />
           <DataGridTextColumn Header="FILTER" Binding="{Binding Filter}" Width="85" />
          </DataGrid.Columns>
         </DataGrid>
@@ -742,8 +743,11 @@
           <TextBlock x:Name="PreviewMessage" Text="Select a capture or open an image." Foreground="{DynamicResource Muted}" HorizontalAlignment="Center" VerticalAlignment="Center" TextWrapping="Wrap" TextAlignment="Center" Margin="18"/>
          </Grid>
          <Grid x:Name="PreviewSkyPanel" VerticalAlignment="Top" Visibility="Collapsed">
-          <local:SkyGlobeView x:Name="PreviewSky" Margin="36,0,0,0"/>
-          <Button x:Name="PreviewSkyResetButton" Content="↺" Width="26" Height="26" MinHeight="0" FontSize="16" Padding="0" Margin="6,0,0,4" HorizontalAlignment="Left" VerticalAlignment="Bottom" AutomationProperties.Name="Reset capture sky view"/>
+          <local:SkyGlobeView x:Name="PreviewSky" Margin="4"/>
+          <Button x:Name="PreviewSkyResetButton" Width="26" Height="26" MinHeight="0" Padding="0" Margin="0" BorderThickness="0" Background="Transparent" HorizontalAlignment="Left" VerticalAlignment="Top" AutomationProperties.Name="Reset capture sky view">
+           <Button.Template><ControlTemplate TargetType="Button"><Grid Background="Transparent"><ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/></Grid></ControlTemplate></Button.Template>
+           <Path Data="M 5,7 A 7,7 0 1 1 5,15 M 5,3 L 5,7 L 9,7" Width="18" Height="18" Stretch="Uniform" Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" StrokeThickness="1.6" StrokeStartLineCap="Round" StrokeEndLineCap="Round"/>
+          </Button>
          </Grid>
         </Grid>
        </Grid>
@@ -926,8 +930,11 @@
           <TextBlock x:Name="EditedPreviewMessage" Text="Select a capture or open an image." Foreground="{DynamicResource Muted}" HorizontalAlignment="Center" VerticalAlignment="Center" TextWrapping="Wrap" TextAlignment="Center" Margin="18"/>
          </Grid>
          <Grid x:Name="EditedPreviewSkyPanel" VerticalAlignment="Top" Visibility="Collapsed">
-          <local:SkyGlobeView x:Name="EditedPreviewSky" Margin="36,0,0,0"/>
-          <Button x:Name="EditedPreviewSkyResetButton" Content="↺" Width="26" Height="26" MinHeight="0" FontSize="16" Padding="0" Margin="6,0,0,4" HorizontalAlignment="Left" VerticalAlignment="Bottom" AutomationProperties.Name="Reset capture sky view"/>
+          <local:SkyGlobeView x:Name="EditedPreviewSky" Margin="4"/>
+          <Button x:Name="EditedPreviewSkyResetButton" Width="26" Height="26" MinHeight="0" Padding="0" Margin="0" BorderThickness="0" Background="Transparent" HorizontalAlignment="Left" VerticalAlignment="Top" AutomationProperties.Name="Reset capture sky view">
+           <Button.Template><ControlTemplate TargetType="Button"><Grid Background="Transparent"><ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/></Grid></ControlTemplate></Button.Template>
+           <Path Data="M 5,7 A 7,7 0 1 1 5,15 M 5,3 L 5,7 L 9,7" Width="18" Height="18" Stretch="Uniform" Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" StrokeThickness="1.6" StrokeStartLineCap="Round" StrokeEndLineCap="Round"/>
+          </Button>
          </Grid>
         </Grid>
        </Grid>

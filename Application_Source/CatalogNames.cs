@@ -31,7 +31,7 @@ namespace AstroArchive {
    "NGC1499|California Nebula|",
    "NGC2024|Flame Nebula|",
    "NGC2174|Monkey Head Nebula|Monkey-Head Nebula",
-   "NGC2237|Rosette Nebula|Rosette A",
+   "NGC2237|Rosette Nebula|Rosette A;NGC2244",
    "NGC2359|Thor's Helmet|Thors Helmet;Thor’s Helmet;Thor's Helmet Nebula",
    "NGC2392|Clown Face Nebula|",
    "NGC4565|Needle Galaxy|",
