@@ -13,7 +13,7 @@ Its 757 star vectors and drawing are cached; no sky timer, network or 3D engine 
 
 Portable Windows 10/11 x64 WPF app for archiving astronomical image originals and creating verified stacking projects. Open `AstroArchive.exe`; read `Quick_Start.txt` for the complete workflow.
 
-## Changes in 1.13.1
+## Changes in 1.13.0
 
 - Shared search supports phrases, exclusions, OR, fields, filename globs and numeric comparisons, with concise help and safe syntax errors.
 - Import options groups Files, Capture and Analysis; PNG/JPG/JPEG exclusion defaults on with a saved opt-out. Assign Unknown light/stack targets before importing.
