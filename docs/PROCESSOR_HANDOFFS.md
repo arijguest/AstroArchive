@@ -22,6 +22,25 @@ paths containing spaces or Unicode remain one argument. It opens a new process,
 rather than injecting files into an existing session. A successful process
 launch is reported as a launch, not as confirmation that a GUI finished loading.
 
+### Completed stacking-folder app launchers
+
+After **Export → Ready-to-stack folder…** (with or without calibrations), the
+completion popup offers **Siril**, **StackingWizard** and **Other…**, alongside
+**Open exported folder**. These start installed applications for manual input
+loading. Siril uses its documented `--directory` option to select the export as
+its working directory; this does not convert subs or create/load a sequence.
+StackingWizard and other apps start without file/folder arguments, with the
+export as their process working directory. Their own folder pickers may choose
+a different initial location.
+
+The first click asks for an installed executable. Siril shares the saved GUI
+location with its single-stack route; StackingWizard saves its own location.
+Other… always opens an executable chooser seeded with the previous choice.
+The popup remains open, missing applications can be relocated, and launch
+failures show the retained export path. No installation/download or changes to
+exported inputs are involved. This launcher feature does not establish new
+direct processing handoffs in the table above.
+
 ### AstroWizard: export and open manually
 
 Direct sending to AstroWizard was removed in package **1.10.4.1**. The previous
