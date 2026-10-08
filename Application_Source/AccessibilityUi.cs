@@ -32,7 +32,6 @@ namespace AstroArchive {
             }
         }
         AccessibilityChoices AddAccessibilityPreferences(FormWindow dialog) {
-            dialog.Tab(4);
             dialog.Text("Accessibility", true);
             dialog.Text("Adjust text and table spacing without scaling images. Settings apply to this Windows user and remain in place after updates.");
             int percent = settings.TextScalePercent == 0 ? 100 : settings.TextScalePercent;
@@ -46,9 +45,10 @@ namespace AstroArchive {
             UiHelp.Tip(choices.Rows, "Use taller table rows.");
             UiHelp.Tip(choices.Contrast, "Use high-contrast colours.");
             UiHelp.Tip(choices.Motion, "Disable progress animation.");
-            dialog.Text("Keyboard access", true);
+            dialog.Advanced("Keyboard shortcuts",()=>{
             dialog.Text("Alt reveals menu access keys. Arrow keys move through dropdowns; Escape closes them. Tab follows the visible controls, with clear focus outlines. The purple page selector switches pages; Ctrl+1–3 selects Repository, Edited or Import, and Ctrl+Tab cycles pages. Ctrl+F focuses search, Ctrl+I opens Import, Ctrl+E opens Export, and F1 opens help for the current page.");
             dialog.Text("Table sorting uses ▲ for ascending and ▼ for descending. Numbers show the order of multi-column sorting. Shift-click a heading adds it to the sort.");
+            });
             return choices;
         }
     }

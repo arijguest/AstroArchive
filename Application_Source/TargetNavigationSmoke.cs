@@ -33,6 +33,14 @@ namespace AstroArchive {
    }System.IO.File.WriteAllText(System.IO.Path.Combine(output,"target-background-smoke.txt"),"PASS: rendered Repository and Edited target surfaces retain light/dark colours during enabled/disabled/enabled refresh states; grouped lists retain virtualized scrolling.");
    }finally{fixture.Close();Theme.Apply(Window,settings.ThemeMode);}
   }
+  void VerifyTargetListAppearance(ListBox list,string context){
+   list.ApplyTemplate();var surface=list.Template.FindName("TargetSurface",list) as Border;var scroll=list.Template.FindName("PART_ScrollViewer",list) as ScrollViewer;
+   if(surface==null||!object.Equals(surface.Background,list.Background)||surface.Opacity!=1||scroll==null||!scroll.CanContentScroll||scroll.HorizontalScrollBarVisibility!=ScrollBarVisibility.Disabled)throw new Exception(context+" changed its target surface or scrolling layout.");
+   var allTargets=list.Items.Cast<TargetSummary>().Single(t=>t.Name=="All targets");list.ScrollIntoView(allTargets);PumpPopupLayout();
+   var row=list.ItemContainerGenerator.ContainerFromItem(allTargets) as ListBoxItem;var label=row==null?null:PopupChildren<TextBlock>(row).FirstOrDefault(t=>t.Text=="All targets");
+   if(label==null||label.ActualWidth<=0||label.ActualHeight<=0||row.ActualWidth>list.ActualWidth+1)throw new Exception(context+" hid target entries or expanded them outside the panel.");
+   var background=Window.TryFindResource("Surface") as System.Windows.Media.Brush;Readable(label.Foreground,background,context+" target label");
+  }
   void SmokeTargetNavigation(string output){
    var previousRows=all;string previousSearch=T("SearchBox").Text;var previousFilters=libraryFilters.Values.ToList();string previousTarget=(Targets.SelectedItem as TargetSummary).Name;
    try{
@@ -54,6 +62,9 @@ namespace AstroArchive {
      var target=Targets.Items.Cast<TargetSummary>().Single(t=>t.Name=="M42");Targets.ScrollIntoView(target);PumpPopupLayout();var container=Targets.ItemContainerGenerator.ContainerFromItem(target) as ListBoxItem;
      if(container==null||!Convert.ToString(container.ToolTip).Contains("2 files")||!PopupChildren<TextBlock>(container).Any(t=>t.Text=="Orion Nebula"&&t.TextWrapping==TextWrapping.Wrap))throw new Exception("Concise row or full-detail tooltip did not render.");
      Capture(System.IO.Path.Combine(output,"AstroArchive_Targets_"+theme+".png"));
+     var source=Targets.ItemsSource;var selection=Targets.SelectedItem;Targets.IsEnabled=false;
+     try{VerifyTargetListAppearance(Targets,theme+" pending targets");if(Targets.ItemsSource!=source||Targets.SelectedItem!=selection)throw new Exception("Pending targets lost entries or selection.");Capture(System.IO.Path.Combine(output,"AstroArchive_Targets_Pending_"+theme+".png"));}
+     finally{Targets.IsEnabled=true;}VerifyTargetListAppearance(Targets,theme+" restored targets");
     }
     var previousEdited=editedImages;string editedSearch=T("EditedSearchBox").Text;object editedClass=C("EditedClassFilter").SelectedItem;string editedTarget=(EditedTargets.SelectedItem as TargetSummary).Name;
     try{

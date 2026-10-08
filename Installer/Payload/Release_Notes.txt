@@ -1,6 +1,18 @@
 AstroArchive 2.1.2
 Package 2.1.2.1
 
-- Fixed the white flash in the targets list when clearing filters, selecting a
-  target or refreshing search results. Repository and Edited keep the current
-  theme background while results update, including grouped and scrolling lists.
+- Settings now opens one Preferences window with General, Import, Export,
+  Sky & solving, Accessibility and Updates sections. Application defaults and
+  locations, archive protection and backup remain available in Preferences.
+- Simplified Import, Export, Repository and Guide menus remove duplicate routes.
+  Secondary Edited actions are on the file context menu; Export to… remains
+  available with the current processing destinations.
+- The target panels keep their themed backgrounds and entries while search is
+  pending, fixing the white, empty panel during typing.
+- Export files and Stacking folder offer Open with… after export for Siril when
+  one eligible FITS stack is selected. Siril opens the verified exported copy,
+  including collision-renamed files, in that copy's actual folder. Failed or
+  canceled exports never launch an application.
+- Preferences stores a default export folder. Optional metadata and advanced
+  stacking controls are collapsed; the new-folder name appears only when needed.
+- Missing or Unknown common names use a dash in Repository and Edited tables.

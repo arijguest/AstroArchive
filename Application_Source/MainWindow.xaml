@@ -405,14 +405,14 @@
    <Setter Property="Background" Value="{DynamicResource Surface}" />
    <Setter Property="BorderBrush" Value="{DynamicResource Border}" />
   </Style>
-  <!-- Pending searches disable target navigation. Keep the same surface instead
-       of the Windows ListBox template's disabled background. -->
-  <Style x:Key="TargetListStyle" TargetType="ListBox" BasedOn="{StaticResource {x:Type ListBox}}">
+  <!-- Keep target rows and their surface unchanged while a search disables
+       selection. The Windows ListBox template paints a native disabled surface. -->
+  <Style x:Key="TargetNavigationListStyle" TargetType="ListBox" BasedOn="{StaticResource {x:Type ListBox}}">
    <Setter Property="Template">
     <Setter.Value>
      <ControlTemplate TargetType="ListBox">
       <Border x:Name="TargetSurface" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" SnapsToDevicePixels="True">
-       <ScrollViewer x:Name="PART_ScrollViewer" Padding="{TemplateBinding Padding}" Focusable="False" CanContentScroll="{TemplateBinding ScrollViewer.CanContentScroll}" HorizontalScrollBarVisibility="{TemplateBinding ScrollViewer.HorizontalScrollBarVisibility}" VerticalScrollBarVisibility="{TemplateBinding ScrollViewer.VerticalScrollBarVisibility}">
+       <ScrollViewer x:Name="PART_ScrollViewer" Focusable="False" Padding="{TemplateBinding Padding}" HorizontalScrollBarVisibility="{TemplateBinding ScrollViewer.HorizontalScrollBarVisibility}" VerticalScrollBarVisibility="{TemplateBinding ScrollViewer.VerticalScrollBarVisibility}" CanContentScroll="{TemplateBinding ScrollViewer.CanContentScroll}">
         <ItemsPresenter SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />
        </ScrollViewer>
       </Border>
@@ -626,7 +626,6 @@
       <MenuItem x:Name="ImportMenu" Header="_Import" Style="{StaticResource TopNavigationMenu}"/>
       <MenuItem x:Name="ExportMenu" Header="_Export" Style="{StaticResource TopNavigationMenu}"/>
       <MenuItem x:Name="RepositoryMenu" Header="_Repository" Style="{StaticResource TopNavigationMenu}"/>
-      <MenuItem x:Name="EditedMenu" Header="E_dited" Style="{StaticResource TopNavigationMenu}"/>
       <MenuItem x:Name="SettingsMenu" Header="_Settings" Style="{StaticResource TopNavigationMenu}"/>
       <MenuItem x:Name="GuideMenu" Header="_Guide" Style="{StaticResource TopNavigationMenu}"/>
       <MenuItem x:Name="CoffeeMenu" Header="_Buy Me a Coffee" Style="{StaticResource TopNavigationMenu}" Background="{DynamicResource SupportSurface}" FontWeight="Bold"/>
@@ -684,7 +683,7 @@
       <Border Background="{DynamicResource Surface}" CornerRadius="8" BorderBrush="{DynamicResource Border}" BorderThickness="1" Margin="0,0,10,0">
        <DockPanel>
         <TextBlock DockPanel.Dock="Top" Text="TARGETS" FontSize="{DynamicResource UiFontCaption}" FontWeight="SemiBold" Foreground="{DynamicResource Muted}" Margin="12,13,0,8" />
-        <ListBox x:Name="TargetList" Style="{StaticResource TargetListStyle}" BorderThickness="0" Background="Transparent" ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.CanContentScroll="True" VirtualizingPanel.IsVirtualizingWhenGrouping="True" VirtualizingPanel.VirtualizationMode="Recycling" TextSearch.TextPath="DisplayName" IsTextSearchEnabled="True">
+        <ListBox x:Name="TargetList" Style="{StaticResource TargetNavigationListStyle}" BorderThickness="0" Background="Transparent" ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.CanContentScroll="True" VirtualizingPanel.IsVirtualizingWhenGrouping="True" VirtualizingPanel.VirtualizationMode="Recycling" TextSearch.TextPath="DisplayName" IsTextSearchEnabled="True">
        <ListBox.ItemContainerStyle><Style TargetType="ListBoxItem" BasedOn="{StaticResource {x:Type ListBoxItem}}"><Setter Property="Padding" Value="7,6"/><Setter Property="Margin" Value="4,1"/><Setter Property="ToolTip" Value="{Binding Tooltip}"/><Setter Property="AutomationProperties.Name" Value="{Binding Label}"/><Setter Property="AutomationProperties.HelpText" Value="{Binding Tooltip}"/><Setter Property="ToolTipService.ShowDuration" Value="20000"/></Style></ListBox.ItemContainerStyle>
        <ListBox.GroupStyle><GroupStyle><GroupStyle.HeaderTemplate><DataTemplate>
         <Grid Margin="11,12,11,4"><Grid.Style><Style TargetType="Grid"><Style.Triggers><DataTrigger Binding="{Binding Name}" Value=""><Setter Property="Visibility" Value="Collapsed"/></DataTrigger></Style.Triggers></Style></Grid.Style>
@@ -806,7 +805,7 @@
          <TextBlock Text="DEVICE ID" FontSize="{DynamicResource UiFontCaption}" Foreground="{DynamicResource Muted}" FontWeight="SemiBold" />
          <TextBox x:Name="TelescopeBox" Margin="0,6,0,0" Text="Telescope-01" ToolTip="Unique ID for this physical telescope." />
         </StackPanel>
-        <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Bottom"><Button x:Name="ImportOptionsButton" Content="Import options…" Margin="0,0,8,0"/><Button x:Name="ScanButton" Content="Scan folder" Margin="0" /></StackPanel>
+        <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Bottom"><Button x:Name="ImportOptionsButton" Content="Import preferences…" Margin="0,0,8,0"/><Button x:Name="ScanButton" Content="Scan folder" Margin="0" /></StackPanel>
        </Grid>
        <TextBlock Text="Originals kept · Analysis off" TextWrapping="Wrap" Margin="0,8,0,0" Foreground="{DynamicResource Muted}" x:Name="ImportPolicyLabel" />
       </StackPanel>
@@ -882,7 +881,7 @@
      <DockPanel Grid.Row="1" Margin="0,0,0,10"><Button DockPanel.Dock="Right" x:Name="EditedClearButton" Content="Clear" Margin="8,0,0,0"/><Button DockPanel.Dock="Right" x:Name="EditedFiltersButton" Content="Filters" Margin="8,0,0,0"/><TextBlock DockPanel.Dock="Right" x:Name="EditedSummary" Foreground="{DynamicResource Muted}" VerticalAlignment="Center" Margin="12,0,0,0"/><ComboBox x:Name="EditedClassFilter" Visibility="Collapsed"/><Grid><TextBox x:Name="EditedSearchBox" ToolTip="Search edited images and metadata. ? shows examples." Padding="9,6,34,6"/><TextBlock x:Name="EditedSearchHint" Text="Search edited images…" Foreground="{DynamicResource Muted}" Margin="10,0" VerticalAlignment="Center" IsHitTestVisible="False"/><Button x:Name="EditedSearchHelpButton" Content="?" Width="24" Height="24" MinHeight="0" Padding="0" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,5,0" AutomationProperties.Name="Search syntax and examples"/></Grid></DockPanel>
      <Grid Grid.Row="2" x:Name="EditedBody">
       <Grid.ColumnDefinitions><ColumnDefinition Width="260"/><ColumnDefinition Width="*" MinWidth="260"/><ColumnDefinition Width="10"/><ColumnDefinition Width="290" MinWidth="0"/></Grid.ColumnDefinitions>
-      <Border Background="{DynamicResource Surface}" BorderBrush="{DynamicResource Border}" BorderThickness="1" CornerRadius="8" Margin="0,0,10,0"><DockPanel><TextBlock DockPanel.Dock="Top" Text="TARGETS" FontSize="{DynamicResource UiFontCaption}" FontWeight="SemiBold" Foreground="{DynamicResource Muted}" Margin="12,13,0,8"/><ListBox x:Name="EditedTargetList" Style="{StaticResource TargetListStyle}" BorderThickness="0" Background="Transparent" ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.CanContentScroll="True" VirtualizingPanel.IsVirtualizingWhenGrouping="True" VirtualizingPanel.VirtualizationMode="Recycling" TextSearch.TextPath="DisplayName" IsTextSearchEnabled="True">
+      <Border Background="{DynamicResource Surface}" BorderBrush="{DynamicResource Border}" BorderThickness="1" CornerRadius="8" Margin="0,0,10,0"><DockPanel><TextBlock DockPanel.Dock="Top" Text="TARGETS" FontSize="{DynamicResource UiFontCaption}" FontWeight="SemiBold" Foreground="{DynamicResource Muted}" Margin="12,13,0,8"/><ListBox x:Name="EditedTargetList" Style="{StaticResource TargetNavigationListStyle}" BorderThickness="0" Background="Transparent" ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.CanContentScroll="True" VirtualizingPanel.IsVirtualizingWhenGrouping="True" VirtualizingPanel.VirtualizationMode="Recycling" TextSearch.TextPath="DisplayName" IsTextSearchEnabled="True">
        <ListBox.ItemContainerStyle><Style TargetType="ListBoxItem" BasedOn="{StaticResource {x:Type ListBoxItem}}"><Setter Property="Padding" Value="7,6"/><Setter Property="Margin" Value="4,1"/><Setter Property="ToolTip" Value="{Binding Tooltip}"/><Setter Property="AutomationProperties.Name" Value="{Binding Label}"/><Setter Property="AutomationProperties.HelpText" Value="{Binding Tooltip}"/><Setter Property="ToolTipService.ShowDuration" Value="20000"/></Style></ListBox.ItemContainerStyle>
        <ListBox.GroupStyle><GroupStyle><GroupStyle.HeaderTemplate><DataTemplate>
         <Grid Margin="11,12,11,4"><Grid.Style><Style TargetType="Grid"><Style.Triggers><DataTrigger Binding="{Binding Name}" Value=""><Setter Property="Visibility" Value="Collapsed"/></DataTrigger></Style.Triggers></Style></Grid.Style>
@@ -896,7 +895,7 @@
        </Grid></DataTemplate></ListBox.ItemTemplate>
       </ListBox></DockPanel></Border>
       <Grid Grid.Column="1"><Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="*"/></Grid.RowDefinitions>
-       <StackPanel Margin="0,0,0,8"><WrapPanel Margin="0,6,0,0"><Button x:Name="EditedEditButton" Content="Edit metadata…" Margin="0,0,8,0"/><Button x:Name="EditedDetailsButton" Content="Image details…" Margin="0,0,8,0"/><Button x:Name="EditedPreviewButton" Content="Preview image…"/><Button x:Name="EditedEditorButton" Content="Export to…" Margin="8,0,0,0"/><Button x:Name="EditedFolderButton" Content="Open image folder" Margin="8,0,0,0"/></WrapPanel></StackPanel>
+       <StackPanel Margin="0,0,0,8"><WrapPanel Margin="0,6,0,0"><Button x:Name="EditedEditButton" Visibility="Collapsed" Content="Edit metadata…" Margin="0,0,8,0"/><Button x:Name="EditedDetailsButton" Visibility="Collapsed" Content="Image details…" Margin="0,0,8,0"/><Button x:Name="EditedPreviewButton" Visibility="Collapsed" Content="Preview image…"/><Button x:Name="EditedEditorButton" Content="Export to…" Margin="8,0,0,0"/><Button x:Name="EditedFolderButton" Visibility="Collapsed" Content="Open image folder" Margin="8,0,0,0"/></WrapPanel></StackPanel>
        <Border Grid.Row="1" Background="{DynamicResource Surface}" BorderBrush="{DynamicResource Border}" BorderThickness="1" CornerRadius="8" ClipToBounds="True"><Grid><DataGrid x:Name="EditedGrid" CanUserSortColumns="True"><DataGrid.RowStyle><Style TargetType="DataGridRow" BasedOn="{StaticResource {x:Type DataGridRow}}"><Setter Property="ToolTip" Value="{Binding Filename}"/></Style></DataGrid.RowStyle><DataGrid.Columns>
          <DataGridTextColumn Header="FILE" Binding="{Binding Filename}" Width="*" MinWidth="200"/>
          <DataGridTextColumn Header="FILE TYPE" Binding="{Binding FileType}" Width="85"/>

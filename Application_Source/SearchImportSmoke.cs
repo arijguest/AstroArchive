@@ -20,12 +20,12 @@ namespace AstroArchive {
     Window.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.ApplicationIdle,new Action(()=>{
      Window dialog=null;
      try{
-     dialog=Window.OwnedWindows.Cast<Window>().Single(w=>w.Title=="Import options");dialog.UpdateLayout();
-     var tabs=PopupChildren<TabControl>(dialog).Single();if(tabs.Items.Count!=3)throw new Exception("Import parameters are not grouped into Files, Capture and Analysis.");
+     dialog=Window.OwnedWindows.Cast<Window>().Single(w=>w.Title=="Preferences");dialog.UpdateLayout();
+     var sections=PopupChildren<ListBox>(dialog).Single(list=>System.Windows.Automation.AutomationProperties.GetName(list)=="Preferences sections");if(sections.Items.Count!=6||sections.SelectedIndex!=1)throw new Exception("Import options did not open the Import preferences section.");
      var raster=PopupChildren<CheckBox>(dialog).Single(c=>c.Content is TextBlock&&((TextBlock)c.Content).Text.Contains("PNG/JPG/JPEG"));if(raster.IsChecked!=settings.IgnoreRasterImports)throw new Exception("Import format choice is not synchronized.");
-     ((TabControl)tabs).SelectedIndex=1;PumpPopupLayout();
+     PumpPopupLayout();
      var choice=PopupChildren<ComboBox>(dialog).Single(c=>c.IsEditable);choice.Text="C27";
-     PopupChildren<Button>(dialog).Single(b=>Convert.ToString(b.Content)=="Apply import options").RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+     PopupChildren<Button>(dialog).Single(b=>Convert.ToString(b.Content)=="Save preferences").RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
      }catch(Exception e){optionsError=e;if(dialog!=null)dialog.DialogResult=false;}
     }));ImportPreferences();if(optionsError!=null)throw new Exception("Import preferences UI validation failed.",optionsError);
     if(plan==null||plan.Frames[0].Target!="NGC6888"||plan.Frames[1].Target!="M45"||plan.Frames[2].Target!="Unknown"||B("AssignUnknownTargetButton").IsEnabled)throw new Exception("Import preferences overwrote known/calibration targets or failed to assign Unknown lights.");
