@@ -4,6 +4,21 @@ using System.Linq;
 namespace AstroArchive {
  public partial class Tests {
   static void TableCatalogTests(){
+   Test("Stack exposure preserves reported FITS values and separates exposure gain and real sub counts",()=>{
+    string directory=Path.Combine(root,"stack-exposure");Directory.CreateDirectory(directory);
+    var names=new[]{"M 101_30s40_Astro_20260522-013922633","Elephant's Trunk Nebula(1)_60s40_Astro_20261003-214231776","Heart Nebula_10s60_Astro_20260909-005516848","Elephant's Trunk Nebula(2)_60s40_Astro_20261003-220509309","M 31_Astro_20260816-004149349","M 31_30s40_Astro_20260815-230831858","NGC 7380_10s60_Duo-Band_20260908-214801527","C 20_30s40_Duo-Band_20260904-214653515","M 101_30s40_Astro_20260522-003541497","M 31_Astro_20260906-174558740","HD 237015_Astro_20260910-214058719","M 101_Astro_20260522-000957161","HD 237015_10s60_Astro_20260909-234054137","Soul Nebula_10s60_Duo-Band_20261006-010341085","M 101_30s40_Astro_20260521-233238543"};
+    var exposures=new[]{7140,5880,5710,5160,4620,3990,3900,3810,2790,2730,2360,2310,2100,1950,1680};
+    for(int i=0;i<names.Length;i++){
+     string path=Path.Combine(directory,"stacked-16_"+names[i]+".fits");Write(path,64,48,(x,y)=>1000,new System.Collections.Generic.Dictionary<string,string>{{"EXPTIME",exposures[i].ToString(System.Globalization.CultureInfo.InvariantCulture)},{"INSTRUME","'DWARF 3'"}});
+     var frame=Classifier.Read(path,directory,"Dwarf-03","Auto");Check(frame.Kind=="Stack"&&frame.Exposure==exposures[i]&&frame.StackCount==0,"Filename numbers replaced header exposure or invented a sub-count: "+names[i]);
+     Check(frame.ExposureTooltip.Contains("EXPTIME = "+exposures[i]),"Saved FITS exposure source missing from tooltip");
+     var legacy=Util.Deserialize<Frame>(Util.Serialize(frame));legacy.Facts=null;Check(legacy.ExposureTooltip.Contains("EXPTIME = "+exposures[i]),"Existing archive image headers lost exposure evidence");
+     double? sub,gain;if(Classifier.FilenameExposureGain(path,out sub,out gain)){Check(frame.Gain==gain&&frame.ExposureTooltip.Contains(Util.Num(sub)+" s per sub"),"Exposure/gain settings not separated from integration");var edited=EditedMetadata.Read(path,Fits.Header(path));Check(edited.SubExposure==sub&&!edited.Subs.HasValue&&!edited.TotalExposure.HasValue&&edited.ReportedExposure==exposures[i],"Edited import guessed a count or multiplied an unspecified header exposure");}
+    }
+    string counted=Path.Combine(directory,"Stacked_M106_16x10s.fits");Write(counted,64,48,(x,y)=>1000,new System.Collections.Generic.Dictionary<string,string>());var countedFrame=Classifier.Read(counted,directory,"Unit-01","Auto");Check(countedFrame.StackCount==16&&countedFrame.Exposure==10,"Explicit count × duration filename lost its sub-count");Check(EditedMetadata.Read(counted,Fits.Header(counted)).TotalExposure==160,"Sixteen confirmed ten-second subs did not total 160 seconds");
+    string headerCount=Path.Combine(directory,"stacked-16_M106_10s60.fits");Write(headerCount,64,48,(x,y)=>1000,new System.Collections.Generic.Dictionary<string,string>{{"EXPTIME","160"},{"NCOMBINE","16"},{"GAIN","45"}});var confirmed=Classifier.Read(headerCount,directory,"Dwarf-03","Auto");Check(confirmed.Exposure==160&&confirmed.StackCount==16&&confirmed.Gain==45&&confirmed.ExposureTooltip.Contains("Combined frames: 16"),"Header count/gain precedence or exposure changed");var confirmedEdit=EditedMetadata.Read(headerCount,Fits.Header(headerCount));Check(confirmedEdit.Subs==16&&confirmedEdit.SubExposure==10&&confirmedEdit.TotalExposure==160,"Confirmed header count and filename duration did not recover edited total");
+    Write(headerCount,64,48,(x,y)=>1000,new System.Collections.Generic.Dictionary<string,string>{{"NCOMBINE","16.5"}});Check(Classifier.Read(headerCount,directory,"Dwarf-03","Auto").StackCount==0,"Fractional stack count was truncated");
+   });
    Test("Saved layouts survive serialization and schema changes without empty tables",()=>{
     var settings=new Settings{TableLayouts=new System.Collections.Generic.Dictionary<string,ColumnLayout>{
      {"FramesGrid",new ColumnLayout{Order=new System.Collections.Generic.List<string>{"GainText","Removed","OriginalName","GainText"},Visible=new System.Collections.Generic.List<string>{"GainText","Removed","GainText"}}}
@@ -31,6 +46,27 @@ namespace AstroArchive {
        string id="C"+int.Parse(match.Groups[1].Value);Check(Catalog.KnownName(id)==Catalog.KnownName(fields[0]),"Bundled Caldwell ID not resolved: "+id);checkedIds++;
      }}Check(checkedIds==109,"Caldwell coverage changed unexpectedly");
     }
+   });
+   Test("Catalogue aliases consolidate one object while keeping catalogue prefixes distinct",()=>{
+    foreach(string label in new[]{"M106","M 106","NGC4258","NGC 04258","UGC7353","UGC 07353","PGC39600","PGC 039600"}){
+     Check(Catalog.KnownName(label)=="M106"&&Catalog.CanonicalTarget(label)=="M106","M106 cross-catalogue alias missed: "+label);
+     var frame=Util.Deserialize<Frame>("{\"Target\":\""+label+"\"}");Check(frame.ObjectId=="M106","Existing archive retained alternate ID: "+label);
+     Check(Catalog.TargetFromFilename("Light_"+label.Replace(' ','_')+"_001.fit")=="M106","Filename alias missed: "+label);
+     Check(new CaptureFilters().Apply(new[]{new Frame{Target="M106"}},label).Count==1,"Search missed alternate ID: "+label);
+    }
+    Check(Catalog.TargetFromFilename("M106_NGC4258_UGC7353_PGC39600.fit")=="M106"&&!Catalog.HasFilenameConflict("M106_NGC4258.fit"),"Equivalent catalogue aliases were treated as different objects");
+    Check(Catalog.CanonicalTarget("NGC106")=="NGC106"&&Catalog.KnownName("NGC106")!="M106"&&Catalog.HasFilenameConflict("M106_NGC106.fit")&&Catalog.TargetFromFilename("M106_NGC106.fit")==null,"Equal numeric IDs across catalogues were merged");
+    Check(Catalog.KnownName("106")==null&&Catalog.TargetFromFilename("capture_106.fit")==null,"Bare numbers gained catalogue identities");
+    var targets=TargetNavigation.Build(new[]{new Frame{Target="M106"},new Frame{Target="NGC4258"},new Frame{Target="UGC7353"},new Frame{Target="NGC106"}});Check(targets.Single(t=>t.Name=="M106").Files==3&&targets.Single(t=>t.Name=="NGC106").Files==1,"Navigation split aliases or combined distinct objects");
+    Check(EditedMetadata.Read("NGC4258_PGC39600_starless.fit",null).Object=="M106","Edited import did not share catalogue identities");
+   });
+   Test("Bundled PGC and UGC aliases resolve only when one astronomical identity owns them",()=>{
+    var ownership=new System.Collections.Generic.Dictionary<string,System.Collections.Generic.HashSet<string>>(StringComparer.OrdinalIgnoreCase);
+    using(var stream=typeof(Catalog).Assembly.GetManifestResourceStream("catalog.csv"))using(var reader=new StreamReader(stream)){reader.ReadLine();string line;while((line=reader.ReadLine())!=null){var fields=line.Split(';');string target=Catalog.CanonicalTarget(fields[0]);foreach(string alias in fields[8].Split(',')){
+     if(!System.Text.RegularExpressions.Regex.IsMatch(alias.Trim(),@"^(PGC|UGC)\s*\d+[A-Z]?$",System.Text.RegularExpressions.RegexOptions.IgnoreCase))continue;
+     string key=Catalog.CompactId(alias.Trim());System.Collections.Generic.HashSet<string> owners;if(!ownership.TryGetValue(key,out owners))ownership[key]=owners=new System.Collections.Generic.HashSet<string>();owners.Add(target);
+    }}}
+    Check(ownership.Count>1000,"Too few catalogue aliases checked");foreach(var alias in ownership){string resolved=Catalog.KnownName(alias.Key);Check(alias.Value.Count==1?resolved==alias.Value.Single():resolved==null,"Ambiguous or missing bundled alias: "+alias.Key);if(alias.Value.Count>1)Check(Catalog.ObjectId(alias.Key)==""&&Catalog.Normalize(alias.Key)=="Unknown","Ambiguous alias acquired an object ID: "+alias.Key);}
    });
    Test("Expanded common names preserve unambiguous astronomical identities",()=>{
     foreach(var pair in new[]{new[]{"M17","Swan Nebula"},new[]{"M45","Seven Sisters"},new[]{"NGC2359","Thor's Helmet"},new[]{"NGC6334","Cat's Paw Nebula"},new[]{"NGC6960","Western Veil Nebula"},new[]{"IC2177","Seagull Nebula"},new[]{"IC443","Jellyfish Nebula"},new[]{"B33","Horsehead Nebula"},new[]{"C9","Cave Nebula"},new[]{"C14","Double Cluster"},new[]{"C41","Hyades"},new[]{"C99","Coalsack Nebula"}}){

@@ -13,6 +13,22 @@ namespace AstroArchive {
         }
     }
     public static class MetadataProfiles {
+        public static string ExposureEvidence(Frame frame) {
+            var lines=new List<string>{"Reported exposure: "+frame.ExposureText};
+            MetadataFact fact;
+            if(frame.Facts!=null&&frame.Facts.TryGetValue("Exposure",out fact)&&fact!=null&&!string.IsNullOrEmpty(fact.Source))lines.Add("Source: "+fact.Source);
+            var image=frame.Images==null?null:frame.Images.FirstOrDefault(i=>i.Key==frame.ImageKey)??frame.Images.FirstOrDefault();
+            if(image!=null&&image.Headers!=null)foreach(string key in new[]{"EXPTIME","EXPOSURE","EXP_TIME","EXPOS","TOTALEXP","TOTEXP","EXPTOTAL","INTTIME","SUBEXP","SUBEXPT","EXPOSUB","EXP_SUB","NCOMBINE","STACKCNT","NSTACK","STACKNUM","NSUBS","SUBCOUNT"}) {
+                string value,comment;
+                if(!image.Headers.TryGetValue(key,out value)||string.IsNullOrWhiteSpace(value))continue;
+                lines.Add(key+" = "+value+(image.Comments!=null&&image.Comments.TryGetValue(key,out comment)&&!string.IsNullOrWhiteSpace(comment)?" / "+comment:""));
+            }
+            if(frame.StackCount>0)lines.Add("Combined frames: "+frame.StackCount);
+            double? sub,gain;if(Classifier.FilenameExposureGain(frame.OriginalName,out sub,out gain))lines.Add("Filename settings: "+Util.Num(sub)+" s per sub; gain "+Util.Num(gain)+". This setting does not specify how many subs were accepted.");
+            if(frame.Kind=="Stack")lines.Add("A stack's exposure may report total integration or one sub, depending on its producer. Verify against the header or accepted-frame count; the reported value is not multiplied automatically.");
+            if(lines.Count==1)lines.Add("No saved exposure-source metadata is available.");
+            return string.Join("\n",lines);
+        }
         static readonly RecognitionProfile[] profiles= {
             new RecognitionProfile {
                 Id="vaonis-1",Pattern=@"\b(Vaonis|Vespera(?:\s*(?:II|Pro))?|Stellina)\b",Make="Vaonis"

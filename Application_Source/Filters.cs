@@ -58,7 +58,7 @@ namespace AstroArchive {
   }
   public static IEnumerable<string> Options(IEnumerable<Frame> frames,string field){return frames.SelectMany(f=>new[]{"Mosaic","Panel","Mosaic state"}.Contains(field)&&f.MosaicLabels!=null&&f.MosaicLabels.Count>0?f.MosaicLabels.Select(m=>field=="Mosaic"?m.Name:field=="Panel"?m.Panel:m.State):new[]{Value(f,field)}).Distinct().OrderBy(v=>v);}
   public List<Frame> Apply(IEnumerable<Frame> frames,string search){
-   var words=Util.Tokens(search);
+   string known=Catalog.KnownName(search);var words=Util.Tokens(known??search).Select(word=>Catalog.KnownName(word)??word).ToArray();
    return frames.Where(f=>Values.All(pair=>Matches(f,pair.Key,pair.Value))&&Ranges.All(pair=>pair.Value.Matches(Number(f,pair.Key)))&&words.All(word=>f.SearchText.IndexOf(word,StringComparison.OrdinalIgnoreCase)>=0)).ToList();
   }
   static bool Matches(Frame frame,string field,string value){

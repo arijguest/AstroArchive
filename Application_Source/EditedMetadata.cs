@@ -34,6 +34,10 @@ namespace AstroArchive {
    result.Subs=Count(header.Number("NCOMBINE","STACKCNT","NSTACK","STACKNUM","NSUBS","SUBCOUNT"));result.SubExposure=Positive(header.Number("SUBEXP","SUBEXPT","EXPOSUB","EXP_SUB","SUBTIME"));result.TotalExposure=Positive(header.Number("TOTALEXP","TOTEXP","EXPTOTAL","INTTIME","INTEGRAT"));result.ReportedExposure=Positive(header.Number("EXPTIME","EXPOSURE","EXP_TIME"));
    string comment;header.Comments.TryGetValue("EXPTIME",out comment);if(result.ReportedExposure.HasValue&&comment!=null){if(Regex.IsMatch(comment,@"total|integrat",RegexOptions.IgnoreCase))result.TotalExposure=result.TotalExposure??result.ReportedExposure;else if(Regex.IsMatch(comment,@"per[ _-]?(sub|frame)|individual|single",RegexOptions.IgnoreCase))result.SubExposure=result.SubExposure??result.ReportedExposure;}
    if(result.Subs.HasValue||result.SubExposure.HasValue||result.TotalExposure.HasValue)notes.Add("Exposure/sub count from image metadata");
+   double? filenameSub,filenameGain;if(Classifier.FilenameExposureGain(leaf,out filenameSub,out filenameGain)){
+    if(result.SubExposure.HasValue&&Math.Abs(result.SubExposure.Value-filenameSub.Value)>0.001)notes.Add("Filename sub exposure disagrees with metadata; metadata retained");
+    else{result.SubExposure=result.SubExposure??filenameSub;notes.Add("Per-sub exposure from filename exposure/gain settings; gain is not a sub-count");}
+   }
    var products=Product.Matches(filename??"").Cast<Match>().Select(m=>new{Count=Count(Number(m.Groups["count"].Value)),Exposure=Number(m.Groups["duration"].Value),Unit=Unit(m.Groups["unit"].Value)}).Where(p=>p.Count.HasValue&&p.Exposure.HasValue).ToList();
    if(products.Count>0){long count=products.Sum(p=>(long)p.Count.Value);double total=products.Sum(p=>p.Count.Value*p.Exposure.Value*p.Unit);var durations=products.Select(p=>p.Exposure.Value*p.Unit).Distinct().ToList();
     bool conflict=result.Subs.HasValue&&result.Subs.Value!=count||result.TotalExposure.HasValue&&Math.Abs(result.TotalExposure.Value-total)>0.001||result.SubExposure.HasValue&&(durations.Count!=1||Math.Abs(result.SubExposure.Value-durations[0])>0.001);
