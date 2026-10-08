@@ -49,9 +49,9 @@ namespace AstroArchive {
    // Closing an active owned tool window must not change the owner's activation/state.
    window.Owner=null;window.Hide();window.Close();
   }
-  void OpenDumpProgress(){
-   var window=new Window{Owner=Window,Icon=ApplicationIcon.Image,ShowInTaskbar=false,ShowActivated=false,Title="Processing Dump folder",Width=580,SizeToContent=SizeToContent.Height,ResizeMode=ResizeMode.NoResize,WindowStartupLocation=WindowStartupLocation.CenterOwner,FontFamily=Window.FontFamily,FontSize=Window.FontSize};window.Resources.MergedDictionaries.Add(Window.Resources);Theme.Bind(window,Control.BackgroundProperty,"Canvas");Theme.Bind(window,Control.ForegroundProperty,"Text");
-   var content=new StackPanel{Margin=new Thickness(24)};content.Children.Add(new TextBlock{Text="Processing Dump folder",FontWeight=FontWeights.SemiBold,Margin=new Thickness(0,0,0,12)});
+  void OpenDumpProgress(string title="Processing Dump folder"){
+   var window=new Window{Owner=Window,Icon=ApplicationIcon.Image,ShowInTaskbar=false,ShowActivated=false,Title=title,Width=580,SizeToContent=SizeToContent.Height,ResizeMode=ResizeMode.NoResize,WindowStartupLocation=WindowStartupLocation.CenterOwner,FontFamily=Window.FontFamily,FontSize=Window.FontSize};window.Resources.MergedDictionaries.Add(Window.Resources);Theme.Bind(window,Control.BackgroundProperty,"Canvas");Theme.Bind(window,Control.ForegroundProperty,"Text");
+   var content=new StackPanel{Margin=new Thickness(24)};content.Children.Add(new TextBlock{Text=title,FontWeight=FontWeights.SemiBold,Margin=new Thickness(0,0,0,12)});
    dumpProgressStatus=new TextBlock{Text="Checking files…",TextWrapping=TextWrapping.Wrap};content.Children.Add(dumpProgressStatus);
    dumpProgressRate=new TextBlock{TextWrapping=TextWrapping.Wrap,Margin=new Thickness(0,8,0,0)};content.Children.Add(dumpProgressRate);
    dumpProgressBar=new ProgressBar{Minimum=0,Maximum=1,Height=8,Margin=new Thickness(0,16,0,0)};content.Children.Add(dumpProgressBar);

@@ -1,4 +1,4 @@
-AstroArchive 1.13.16
+AstroArchive 2.1.1
 Windows 10/11 x64; .NET Framework 4.8.
 
 START HERE
@@ -59,6 +59,28 @@ Recover from repository adds saved device profiles; save a source association
 before using a recovered profile for USB upload.
 Rename saved telescope changes its archive labels and paths, preserving images
 and session identities. Close other writers before renaming.
+
+ARCHIVE SAFETY AND BACKUPS
+Settings > Preferences > Archive safety offers optional Protect originals on
+local NTFS drives. This blocks deletion and renaming of archived originals in
+File Explorer for your Windows account. Reading and exporting still work;
+AstroArchive temporarily unlocks affected paths for confirmed operations.
+Edited files, Dump and archive metadata remain writable. Initial protection
+can take a while; no background permission scan runs afterward. Turn off
+protection in the same section to restore the previous deletion permissions.
+The Windows owner can deliberately change permissions; protection is not a backup.
+
+Back up… saves the entire archive and current database outside the repository.
+Choose a separate drive when possible. Without compression it creates a normal
+folder; Compress backup as ZIP preserves every byte, including image resolution,
+quality and metadata. Creation and verification may take a long time. Cancel
+safely removes the incomplete backup and keeps earlier backups.
+To restore, extract the ZIP if needed, then choose its Repository folder in
+Settings > Repository. Restore.txt explains the layout; backup.json contains
+file sizes and SHA-256 checksums. Restored backups use normal permissions;
+enable Protect originals again if wanted. Backups exclude unfinished import
+staging files and Windows protection rules. Close external editors and other
+writers before backing up; changing files during a backup causes it to stop.
 
 IMAGE PREVIEW AND TABLES
 Select a file for Preview. Double-click an Edited image or use the file's

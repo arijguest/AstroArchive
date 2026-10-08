@@ -1,5 +1,14 @@
-AstroArchive 1.13.16
-Package 1.13.16.1
+AstroArchive 2.1.1
+Package 2.1.1.1
+
+- Preferences > Archive safety can protect archived originals from accidental
+  deletion or renaming in File Explorer on local NTFS drives. AstroArchive
+  restores protection after confirmed file operations and interrupted unlocks.
+  Edited files, Dump and archive metadata remain writable. Protection is optional.
+- Back up… creates a recoverable folder or lossless ZIP, including original
+  images, Edited files and the current archive database. Every file is verified
+  with SHA-256 before completion. Backups include restoration instructions and
+  a checksum manifest. Creation warns about time and supports safe cancellation.
 
 - Export to… offers PixInsight, Siril, DeepSkyStacker, GIMP, Photoshop,
   AutoStakkert! 4, AstroWizard and Stacking Wizard in one compatible chooser.

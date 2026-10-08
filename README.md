@@ -66,6 +66,12 @@ retain compatible input folders. **Add Metadata** and **Create new folder** are 
 by default. Existing files are retained, with numbered suffixes for collisions.
 Stacking exports keep compatible input groups and calibrations separate. Stacking and calibration run in your processing software.
 
+## Archive safety and backups
+
+Settings > Preferences offers optional protection against deleting or renaming archived originals in File Explorer on local NTFS drives. Edited files, Dump and archive metadata remain writable. Protection has no background scan and can be turned off from the same section. The Windows owner can still deliberately change permissions.
+
+Back up… creates a verified folder or lossless ZIP outside the archive, including images, Edited files and the current database. ZIP compression preserves image resolution and every original byte. Creation and verification can take a long time; cancellation keeps earlier backups. To restore, extract the ZIP if needed and choose its `Repository` folder in AstroArchive. Restoration instructions and SHA-256 checksums are included. A separate drive protects against archive drive failure.
+
 ## Formats
 
 | Files | Preview and processing |
