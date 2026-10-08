@@ -4,6 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 namespace AstroArchive {
@@ -29,7 +30,12 @@ namespace AstroArchive {
       var buttons=PopupChildren<Button>(host);foreach(var button in buttons)if(Convert.ToString(button.Content)=="Fit"&&button.IsEnabled)throw new Exception("Blank image kept image navigation enabled");
       CaptureSidebar(host,Path.Combine(output,"AstroArchive_Loading_"+prefix+mode+textScale+".png"));
       var data=ProgressiveFixture();byte[] linear=data.Copy().Render("Linear",CancellationToken.None),final=data.Copy().Render("Auto",CancellationToken.None);int paints=0;
-      var rendering=RenderProgressivePreview(data,"Auto",true,CancellationToken.None,()=>true,(bitmap,provisional)=>{var pixels=new byte[linear.Length];bitmap.CopyPixels(pixels,data.Width*3,0);if(provisional!=(paints==0)||!System.Linq.Enumerable.SequenceEqual(pixels,paints==0?linear:final))throw new Exception("Progressive image did not paint Linear before Auto");preview.SetImage(bitmap,paints==0);L(prefix+"PreviewMessage").Visibility=Visibility.Collapsed;paints++;});
+      Matrix initialView=new Matrix();
+      var rendering=RenderProgressivePreview(data,"Auto",true,CancellationToken.None,()=>true,(bitmap,provisional)=>{
+       var pixels=new byte[linear.Length];bitmap.CopyPixels(pixels,data.Width*3,0);if(provisional!=(paints==0)||!System.Linq.Enumerable.SequenceEqual(pixels,paints==0?linear:final))throw new Exception("Progressive image did not paint Linear before Auto");preview.SetImage(bitmap,paints==0);L(prefix+"PreviewMessage").Visibility=Visibility.Collapsed;
+       if(paints==0){var wheel=new MouseWheelEventArgs(Mouse.PrimaryDevice,0,120){RoutedEvent=UIElement.PreviewMouseWheelEvent};stage.RaiseEvent(wheel);if(!wheel.Handled)throw new Exception("Initial image could not be zoomed");initialView=((MatrixTransform)image.RenderTransform).Matrix;}
+       else if(((MatrixTransform)image.RenderTransform).Matrix!=initialView)throw new Exception("Background stretch reset the user's image view");paints++;
+      });
       WaitPreview(()=>rendering.IsCompleted,"Progressive rendering did not finish");rendering.GetAwaiter().GetResult();if(paints!=2)throw new Exception("Progressive rendering missed a display pass");
       using(var cancellation=new CancellationTokenSource()){
        int stalePaints=0;var cancelled=RenderProgressivePreview(data,"Strong",true,cancellation.Token,()=>true,(bitmap,provisional)=>{stalePaints++;cancellation.Cancel();});WaitPreview(()=>cancelled.IsCompleted,"Cancelled progressive stretch kept running");if(!cancelled.IsCanceled||stalePaints!=1)throw new Exception("Old stretch repainted after cancellation");
