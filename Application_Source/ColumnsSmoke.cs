@@ -14,7 +14,7 @@ namespace AstroArchive {
      var exposure=grid.Columns.First(c=>ColumnId(c)=="ExposureText");var gain=grid.Columns.First(c=>ColumnId(c)=="GainText");
      var mount=grid.Columns.First(c=>ColumnId(c)=="Mount");var oldMountLayout=new ColumnLayout{Visible=new System.Collections.Generic.List<string>{"Mount"},Order=new System.Collections.Generic.List<string>{"Mount"}};ApplyColumnLayout(name,oldMountLayout);if(mount.Visibility!=Visibility.Visible||mount.DisplayIndex!=0)throw new Exception("Saved Mount heading was lost after the display binding changed.");ApplyColumnLayout(name,null);
      var menu=BuildColumnsMenu(name,null);var more=menu.Items.OfType<MenuItem>().Single(m=>Convert.ToString(m.Header)=="More headings");
-     var choice=more.Items.OfType<MenuItem>().Single(m=>m.Tag==gain);choice.IsChecked=true;choice.RaiseEvent(new RoutedEventArgs(MenuItem.ClickEvent));
+     var choice=menu.Items.OfType<MenuItem>().Concat(more.Items.OfType<MenuItem>()).Single(m=>m.Tag==gain);choice.IsChecked=true;choice.RaiseEvent(new RoutedEventArgs(MenuItem.ClickEvent));
      if(gain.Visibility!=Visibility.Visible||gain.SortMemberPath!="Gain")throw new Exception("Extra column chooser lost numeric binding.");
      gain.DisplayIndex=0;typeof(DataGrid).GetMethod("OnColumnReordered",System.Reflection.BindingFlags.Instance|System.Reflection.BindingFlags.NonPublic).Invoke(grid,new object[]{new DataGridColumnEventArgs(gain)});
      var layout=Util.Deserialize<ColumnLayout>(Util.Serialize(SavedColumnLayout(name)));if(layout.Order.First()!="GainText"||!layout.Visible.Contains("GainText"))throw new Exception("Native drag layout was not saved.");

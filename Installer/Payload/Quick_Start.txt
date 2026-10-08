@@ -1,4 +1,4 @@
-AstroArchive 1.13.12
+AstroArchive 2.1.2
 Windows 10/11 x64; .NET Framework 4.8.
 
 START HERE
@@ -59,6 +59,29 @@ before using a recovered profile for USB upload.
 Rename saved telescope changes its archive labels and paths, preserving images
 and session identities. Close other writers before renaming.
 
+ARCHIVE SAFETY AND BACKUPS
+Settings > General > Archive safety offers optional Protect originals on
+local NTFS drives. This blocks deletion and renaming of archived originals in
+File Explorer for your Windows account. Reading and exporting still work;
+AstroArchive temporarily unlocks affected paths for confirmed operations.
+Edited files, Dump and archive metadata remain writable. Initial protection
+can take a while; no background permission scan runs afterward. Turn off
+protection in the same section to restore the previous deletion permissions.
+Turn protection off before moving or deleting the archive outside AstroArchive.
+The Windows owner can deliberately change permissions; protection is not a backup.
+
+Back up… saves the entire archive and current database outside the repository.
+Choose a separate drive when possible. Without compression it creates a normal
+folder; Compress backup as ZIP preserves every byte, including image resolution,
+quality and metadata. Creation and verification may take a long time. Cancel
+safely removes the incomplete backup and keeps earlier backups.
+To restore, extract the ZIP if needed, then choose its Repository folder in
+Settings > General > Repository. Restore.txt explains the layout; backup.json contains
+file sizes and SHA-256 checksums. Restored backups use normal permissions;
+enable Protect originals again if wanted. Backups exclude unfinished import
+staging files and Windows protection rules. Close external editors and other
+writers before backing up; changing files during a backup causes it to stop.
+
 IMAGE PREVIEW AND TABLES
 Select a file for Preview. Double-click an Edited image or use the file's
 Preview image action for a larger window. Settings > General controls the preview pane; drag the divider to resize it.
@@ -88,10 +111,13 @@ are skipped, including renamed byte-identical copies. Identical images already
 in Edited are excluded; changed files with the same name can be added as new
 versions. Unchecked entries leave existing images untouched. Sources stay in
 place; unreadable files are excluded.
-Sending a repository stack to Siril creates a verified Edited working copy.
-For another editor, right-click > Create Edited copies opens a folder for
-manual loading. Save outputs there; Refresh finds them.
-Use Open image folder, Enlarge, Image details or Open in editor on Edited.
+Export > Export to… opens supported images in PixInsight, Siril, GIMP,
+Photoshop or AstroWizard using verified Edited working copies. On Edited,
+Export to… opens the selected working images directly. Save outputs there;
+Refresh finds them. Right-click an Edited image for its folder, preview or image details.
+Settings > Export stores defaults by file type and optional
+application locations. Automatic detection runs when needed; if an app cannot
+be found, choose its GUI executable. Cancel keeps your settings unchanged.
 Edited images move with the repository and remain separate from acquisition captures.
 
 EDITED METADATA AND EXPOSURE
@@ -110,6 +136,7 @@ shows the evidence and conflicts. Compatible single-source editor outputs can
 inherit missing acquisition data from their working copy.
 Hover over Exposure in Repository or Import to inspect reported header values.
 Subframe summary totals count acquisition subs only and exclude stack exposures.
+Repository shows Gain beside Exposure; unknown gain displays as a dash.
 
 GIF AND VIDEO PREVIEWS
 GIF, SER, AVI, MP4, MOV, M4V, WMV and MKV can be imported and viewed.
@@ -123,6 +150,18 @@ exposure, sub-count and filter data. Ambiguous matches and conflicting metadata
 are not guessed. Originals are retained.
 
 CATALOGUE IDENTITIES
+Targets panels show full names and alternate catalogue IDs on Repository and
+Edited. C23, NGC891, UGC1831, PGC9031, Silver Sliver Galaxy and Outer Limits Galaxy
+share NGC891. Full Messier/Caldwell names, spacing, punctuation and accents are
+normalised consistently; different catalogue numbers are never fuzzy matched.
+Right-click a target > Edit name and aliases to save a common name and other
+labels for future imports, searches and Edited matching. Unlisted names need a
+known object ID. Names are saved in your application settings and take effect
+immediately. Use built-in names clears your custom names for that object.
+Conflicting names/IDs remain unresolved. Shared component names include their
+IDs for clarity. For example, specify an ID for Antennae Galaxies or Lobster
+Nebula rather than assuming a particular component or similarly named nebula.
+NGC2244 and Rosette Nebula labels use NGC2237 in the Nebulae section.
 Search catalogue IDs or common names. Aliases share a target: M106, NGC4258,
 UGC7353 and PGC39600 resolve to M106. Catalogue prefixes matter: M106 and NGC106
 are different objects. Bare numbers and ambiguous aliases do not establish an ID.
@@ -131,8 +170,18 @@ Sun/Solar appears as Sun. Meteor filenames use Meteor and leave object ID blank.
 The word meteor must be in the filename; meteorite and folder names do not match.
 
 STACKING PROJECTS AND SESSIONS
-Select captures and choose Export files for original copies, or Stacking folder.
-Mixed selections offer Subs, Stacks or Both. Choose an existing destination.
+Select captures and choose Export > Export files for original copies, or
+Stacking folder with Subs, Stacks or Both. Choose an existing destination.
+Export to… sends subframes or recordings to an external app after verifying
+their copies. DSS loads a typed file list; separate capture groups get separate
+lists. Siril starts in the exported folder. PixInsight, AS!4 and Stacking Wizard
+require you to load the exported inputs in their own window. No app starts
+stacking automatically. Choose subframes separately from finished stacks.
+Folder exports can include matching calibrations; unknown calibration state
+requires an explicit option. Camera RAW support depends on the receiving app.
+Export to… preserves original formats; it does not silently convert precision.
+Export > Catalogue CSV exports table data. Right-click files to create Edited copies.
+More options keeps metadata and advanced stacking controls out of the way.
 Stacks export as image files; subs retain compatible input folders.
 Add Metadata and Create new folder are both off by default. Add Metadata includes
 a checksum manifest, saved session metadata and readme/workflow notes. Metadata
@@ -167,7 +216,21 @@ recorded user changes retain priority. Choose HDU / page / frame selects a conta
 image for supported pixel operations. Movie preview plays the recording.
 Target identification needs ASTAP plus its star database, or an Astrometry.net
 account/API key and an internet connection. Configure them in Settings > Sky & solving > Plate solver setup.
-Online solving sends detected star coordinates. Review ambiguous target suggestions.
+Identify target solves one representative for each selected Light session/target
+and instrument group. Selecting a collapsed subgroup includes all its files.
+Crop and header differences do not split that subgroup. If a representative
+fails, at most two other subs are tried; the first success ends the group solve.
+Stacks solve individually. A batch review lists completed fields with the nearest
+major targets selected; change or uncheck each row before applying. A single
+matched group applies automatically. Frames outside the selection stay unchanged.
+Major means Messier, Caldwell, named deep-sky objects, or objects at magnitude 10
+or brighter / at least 10 arcminutes across. The nearest within the solved field
+wins; a field without a major candidate needs your choice. IDs and common names
+resolve to the same target. Individual capture times and known pointings remain.
+Online solving sends detected star coordinates. Progress shows the current job,
+file, group and solver stage. Cancel stops the current solve; completed metadata
+changes are retained. Local solves time out after five minutes; online after ten.
+When no solver is configured, recognised filenames can identify captures.
 Rotation analysis needs timestamped acquisition subs, adequate time coverage and
 observing location/pointing data. Stacks and registered images are unsuitable.
 Mount labels ending in ? are suggestions. Confirm them through Edit metadata.
@@ -313,7 +376,9 @@ the bottom-left. N/E/S/W appear only with a capture time/site and enough clear
 space outside the globe. Targets include Comets when comet images are present.
 All Targets: merged subs, stacks, ungrouped files, then calibration frames.
 Individual targets: stacks above lights. Column sorts apply within each section.
-Calibration previews hide the map. Stacks show an estimated track when time,
+Calibration and below-horizon previews hide the map. Selected Light groups show
+a track from their capture times through the final exposure. Stacks show an
+estimated track when time,
 site, pointing and total duration are known: recorded time is assumed to be the
 end and integration duration approximates elapsed time without acquisition gaps.
 

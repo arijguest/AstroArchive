@@ -29,10 +29,10 @@ namespace AstroArchive {
    if(editedMotion!=null){editedMotion.Dispose();editedMotion=null;}if(editedPreviewCancel!=null){editedPreviewCancel.Cancel();editedPreviewCancel.Dispose();}editedPreviewCancel=new CancellationTokenSource();var token=editedPreviewCancel.Token;int generation=++editedPreviewGeneration;var previous=reload||editedPreviewData==null?null:editedPreviewData.Copy();var skyContext=reload?null:editedSkyFrame;
    string path;try{path=repo.EditedPath(image.Project,image.RelativePath);}catch(Exception error){L("EditedPreviewMessage").Text=error.Message;L("EditedPreviewMessage").Visibility=Visibility.Visible;return;}
    if(reload){editedPreviewData=null;editedPreviewViewport.BeginLoading();editedChoosingStretch=true;C("EditedStretchMode").SelectedItem=ScientificPreview(path)&&!ObservationTargets.Unstretched(image.Metadata.Object,null)?settings.PreviewStretch??"Auto per channel":"Linear";editedChoosingStretch=false;}
-   UpdateCaptureSky("Edited",skyContext??new Frame{Target=image.Metadata.Object,OriginalName=image.Filename});L("EditedPreviewName").Text=image.Filename;L("EditedPreviewName").ToolTip=path;L("EditedDetailsLabel").Text=image.Metadata.Details;L("EditedLibrarySummaryLabel").Text="Edited image";L("EditedPreviewMessage").Text=previous==null?"Loading image…":"Stretching…";L("EditedPreviewMessage").Visibility=Visibility.Visible;string mode=Convert.ToString(C("EditedStretchMode").SelectedItem);
-   if(MediaFiles.Motion(path)){UpdateCaptureSky("Edited",skyContext??ReadSkyFrame(path,image.Metadata.Object));C("EditedStretchMode").IsEnabled=false;editedMotion=new MotionPreview(editedPreviewViewport,path,info=>{if(generation!=editedPreviewGeneration)return;L("EditedPreviewMessage").Visibility=Visibility.Collapsed;L("EditedPreviewInfo").Text=info;},message=>{if(generation!=editedPreviewGeneration)return;L("EditedPreviewMessage").Text=message;L("EditedPreviewMessage").Visibility=Visibility.Visible;});editedMotion.Start();return;}
+   UpdateCaptureSky("Edited",EditedSky(skyContext??new Frame{Target=image.Metadata.Object,OriginalName=image.Filename},image));L("EditedPreviewName").Text=image.Filename;L("EditedPreviewName").ToolTip=path;L("EditedDetailsLabel").Text=image.Metadata.Details;L("EditedLibrarySummaryLabel").Text="Edited image";L("EditedPreviewMessage").Text=previous==null?"Loading image…":"Stretching…";L("EditedPreviewMessage").Visibility=Visibility.Visible;string mode=Convert.ToString(C("EditedStretchMode").SelectedItem);
+   if(MediaFiles.Motion(path)){UpdateCaptureSky("Edited",EditedSky(skyContext??ReadSkyFrame(path,image.Metadata.Object),image));C("EditedStretchMode").IsEnabled=false;editedMotion=new MotionPreview(editedPreviewViewport,path,info=>{if(generation!=editedPreviewGeneration)return;L("EditedPreviewMessage").Visibility=Visibility.Collapsed;L("EditedPreviewInfo").Text=info;},message=>{if(generation!=editedPreviewGeneration)return;L("EditedPreviewMessage").Text=message;L("EditedPreviewMessage").Visibility=Visibility.Visible;});editedMotion.Start();return;}
    try{Func<bool> current=()=>generation==editedPreviewGeneration&&!Window.Dispatcher.HasShutdownStarted;
-    var data=previous??await LoadPreviewSamples(path,null,skyContext,image.Metadata.Object,token,current,sky=>UpdateCaptureSky("Edited",sky),decode);data.ApplyContext(new Frame{Target=image.Metadata.Object},path);
+    var data=previous??await LoadPreviewSamples(path,null,skyContext,image.Metadata.Object,token,current,sky=>UpdateCaptureSky("Edited",EditedSky(sky,image)),decode);data.ApplyContext(new Frame{Target=image.Metadata.Object},path);
     if(!current()||token.IsCancellationRequested)return;editedPreviewData=data;bool firstPaint=true;
     await RenderProgressivePreview(data,mode,previous==null,token,current,(bitmap,provisional)=>{
      editedPreviewViewport.SetImage(bitmap,reload&&firstPaint);firstPaint=false;L("EditedPreviewMessage").Visibility=Visibility.Collapsed;L("EditedPreviewInfo").Text=data.SourceWidth+" × "+data.SourceHeight+" pixels";L("EditedPreviewInfo").ToolTip=data.Description+" · "+data.DisplayMode+(provisional?" · applying selected stretch":"");C("EditedStretchMode").IsEnabled=!data.SkipStretch;
@@ -114,15 +114,7 @@ namespace AstroArchive {
    Run(ct=>{data=DecodePreview(path,ct);data.ApplyContext(null,path);pixels=data.Render(ScientificPreview(path)?settings.PreviewStretch??"Auto per channel":"Linear",ct);return path;},image=>new ImagePreviewWindow(Window,Path.GetFileName(image),data.Width,data.Height,pixels).ShowDialog());
   }
   void ShowEditedEditors(){
-   if(ActiveEditedImage==null)return;var menu=ThemedMenu();string name=ActiveEditedImage.Filename;
-   menu.Items.Add(FileAction("Siril…",OpenEditedEditor,Util.IsFits(name)&&!name.EndsWith(".gz",StringComparison.OrdinalIgnoreCase)));
-   menu.Items.Add(FileAction("Default application",()=>Process.Start(new ProcessStartInfo(repo.EditedPath(EditedImageProject,ActiveEditedImage.RelativePath)){UseShellExecute=true})));
-   menu.PlacementTarget=B("EditedEditorButton");menu.IsOpen=true;
-  }
-  void OpenEditedEditor(){
-   if(repo==null||cancel!=null||EditedImageProject==null||ActiveEditedImage==null)return;string executable=settings.SirilExecutable;
-   if(string.IsNullOrEmpty(executable)||!File.Exists(executable)){if(!Configure(2))return;executable=settings.SirilExecutable;}
-   string path=repo.EditedPath(EditedImageProject,ActiveEditedImage.RelativePath);Run(ct=>{ct.ThrowIfCancellationRequested();using(var process=Process.Start(SirilHandoff.LaunchInfo(executable,path))){if(process==null)throw new IOException("The editor did not start.");}return path;},done=>{});
+   ExportEditedTo();
   }
   void CreateEditedCopies(List<Frame> selected){
    if(repo==null||cancel!=null||selected.Count==0)return;var dialog=new FormWindow(Window,"Create Edited working copies",610,390);dialog.Text("Create working copies for your editor",true);

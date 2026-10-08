@@ -675,7 +675,7 @@
      </Grid>
      <Grid Grid.Row="2" x:Name="LibraryBody">
       <Grid.ColumnDefinitions>
-       <ColumnDefinition Width="166" />
+       <ColumnDefinition Width="260" />
        <ColumnDefinition Width="*" MinWidth="260" />
        <ColumnDefinition x:Name="PreviewDividerColumn" Width="10" />
        <ColumnDefinition x:Name="PreviewColumn" Width="290" MinWidth="0" />
@@ -691,9 +691,9 @@
         </Grid>
        </DataTemplate></GroupStyle.HeaderTemplate></GroupStyle></ListBox.GroupStyle>
        <ListBox.ItemTemplate><DataTemplate><Grid><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions><Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
-        <TextBlock Text="{Binding DisplayName}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" VerticalAlignment="Center"/>
+        <TextBlock Text="{Binding DisplayName}" FontWeight="SemiBold" TextWrapping="Wrap" VerticalAlignment="Center"/>
         <Border Grid.Column="1" Background="{DynamicResource SurfaceAlt}" CornerRadius="3" Padding="4,1" Margin="5,0,0,0" VerticalAlignment="Center"><TextBlock Text="{Binding FileCount}" FontSize="{DynamicResource UiFontCaption}" Foreground="{DynamicResource Muted}"/></Border>
-        <TextBlock Grid.Row="1" Grid.ColumnSpan="2" Text="{Binding Subline}" FontSize="{DynamicResource UiFontCaption}" Foreground="{DynamicResource Muted}" TextTrimming="CharacterEllipsis" Margin="0,3,0,0"><TextBlock.Style><Style TargetType="TextBlock"><Style.Triggers><DataTrigger Binding="{Binding Subline}" Value=""><Setter Property="Visibility" Value="Collapsed"/></DataTrigger></Style.Triggers></Style></TextBlock.Style></TextBlock>
+        <TextBlock Grid.Row="1" Grid.ColumnSpan="2" Text="{Binding Subline}" FontSize="{DynamicResource UiFontCaption}" Foreground="{DynamicResource Muted}" TextWrapping="Wrap" Margin="0,3,0,0"><TextBlock.Style><Style TargetType="TextBlock"><Style.Triggers><DataTrigger Binding="{Binding Subline}" Value=""><Setter Property="Visibility" Value="Collapsed"/></DataTrigger></Style.Triggers></Style></TextBlock.Style></TextBlock>
        </Grid></DataTemplate></ListBox.ItemTemplate>
       </ListBox>
        </DockPanel>
@@ -709,6 +709,7 @@
           <DataGridTextColumn Header="FRAME TYPE" Binding="{Binding Kind}" Width="110" />
           <DataGridTextColumn Header="ACQUIRED" Binding="{Binding AcquisitionDateLabel}" Width="96" />
           <DataGridTextColumn Header="EXPOSURE" Binding="{Binding ExposureText}" Width="76" />
+          <DataGridTextColumn Header="GAIN" Binding="{Binding GainText}" Width="60" />
           <DataGridTextColumn Header="FILTER" Binding="{Binding Filter}" Width="85" />
          </DataGrid.Columns>
         </DataGrid>
@@ -756,8 +757,11 @@
           <TextBlock x:Name="PreviewMessage" Text="Select a capture or open an image." Foreground="{DynamicResource Muted}" HorizontalAlignment="Center" VerticalAlignment="Center" TextWrapping="Wrap" TextAlignment="Center" Margin="18"/>
          </Grid>
          <Grid x:Name="PreviewSkyPanel" VerticalAlignment="Top" Visibility="Collapsed">
-          <local:SkyGlobeView x:Name="PreviewSky" Margin="36,0,0,0"/>
-          <Button x:Name="PreviewSkyResetButton" Content="↺" Width="26" Height="26" MinHeight="0" FontSize="16" Padding="0" Margin="6,0,0,4" HorizontalAlignment="Left" VerticalAlignment="Bottom" AutomationProperties.Name="Reset capture sky view"/>
+          <local:SkyGlobeView x:Name="PreviewSky" Margin="4"/>
+          <Button x:Name="PreviewSkyResetButton" Width="26" Height="26" MinHeight="0" Padding="0" Margin="0" BorderThickness="0" Background="Transparent" HorizontalAlignment="Left" VerticalAlignment="Top" AutomationProperties.Name="Reset capture sky view">
+           <Button.Template><ControlTemplate TargetType="Button"><Grid Background="Transparent"><ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/></Grid></ControlTemplate></Button.Template>
+           <Path Data="M 5,7 A 7,7 0 1 1 5,15 M 5,3 L 5,7 L 9,7" Width="18" Height="18" Stretch="Uniform" Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" StrokeThickness="1.6" StrokeStartLineCap="Round" StrokeEndLineCap="Round"/>
+          </Button>
          </Grid>
         </Grid>
        </Grid>
@@ -876,7 +880,7 @@
      </StackPanel>
      <DockPanel Grid.Row="1" Margin="0,0,0,10"><Button DockPanel.Dock="Right" x:Name="EditedClearButton" Content="Clear" Margin="8,0,0,0"/><Button DockPanel.Dock="Right" x:Name="EditedFiltersButton" Content="Filters" Margin="8,0,0,0"/><TextBlock DockPanel.Dock="Right" x:Name="EditedSummary" Foreground="{DynamicResource Muted}" VerticalAlignment="Center" Margin="12,0,0,0"/><ComboBox x:Name="EditedClassFilter" Visibility="Collapsed"/><Grid><TextBox x:Name="EditedSearchBox" ToolTip="Search edited images and metadata. ? shows examples." Padding="9,6,34,6"/><TextBlock x:Name="EditedSearchHint" Text="Search edited images…" Foreground="{DynamicResource Muted}" Margin="10,0" VerticalAlignment="Center" IsHitTestVisible="False"/><Button x:Name="EditedSearchHelpButton" Content="?" Width="24" Height="24" MinHeight="0" Padding="0" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,5,0" AutomationProperties.Name="Search syntax and examples"/></Grid></DockPanel>
      <Grid Grid.Row="2" x:Name="EditedBody">
-      <Grid.ColumnDefinitions><ColumnDefinition Width="166"/><ColumnDefinition Width="*" MinWidth="260"/><ColumnDefinition Width="10"/><ColumnDefinition Width="290" MinWidth="0"/></Grid.ColumnDefinitions>
+      <Grid.ColumnDefinitions><ColumnDefinition Width="260"/><ColumnDefinition Width="*" MinWidth="260"/><ColumnDefinition Width="10"/><ColumnDefinition Width="290" MinWidth="0"/></Grid.ColumnDefinitions>
       <Border Background="{DynamicResource Surface}" BorderBrush="{DynamicResource Border}" BorderThickness="1" CornerRadius="8" Margin="0,0,10,0"><DockPanel><TextBlock DockPanel.Dock="Top" Text="TARGETS" FontSize="{DynamicResource UiFontCaption}" FontWeight="SemiBold" Foreground="{DynamicResource Muted}" Margin="12,13,0,8"/><ListBox x:Name="EditedTargetList" Style="{StaticResource TargetNavigationListStyle}" BorderThickness="0" Background="Transparent" ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.CanContentScroll="True" VirtualizingPanel.IsVirtualizingWhenGrouping="True" VirtualizingPanel.VirtualizationMode="Recycling" TextSearch.TextPath="DisplayName" IsTextSearchEnabled="True">
        <ListBox.ItemContainerStyle><Style TargetType="ListBoxItem" BasedOn="{StaticResource {x:Type ListBoxItem}}"><Setter Property="Padding" Value="7,6"/><Setter Property="Margin" Value="4,1"/><Setter Property="ToolTip" Value="{Binding Tooltip}"/><Setter Property="AutomationProperties.Name" Value="{Binding Label}"/><Setter Property="AutomationProperties.HelpText" Value="{Binding Tooltip}"/><Setter Property="ToolTipService.ShowDuration" Value="20000"/></Style></ListBox.ItemContainerStyle>
        <ListBox.GroupStyle><GroupStyle><GroupStyle.HeaderTemplate><DataTemplate>
@@ -885,13 +889,13 @@
         </Grid>
        </DataTemplate></GroupStyle.HeaderTemplate></GroupStyle></ListBox.GroupStyle>
        <ListBox.ItemTemplate><DataTemplate><Grid><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions><Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
-        <TextBlock Text="{Binding DisplayName}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" VerticalAlignment="Center"/>
+        <TextBlock Text="{Binding DisplayName}" FontWeight="SemiBold" TextWrapping="Wrap" VerticalAlignment="Center"/>
         <Border Grid.Column="1" Background="{DynamicResource SurfaceAlt}" CornerRadius="3" Padding="4,1" Margin="5,0,0,0" VerticalAlignment="Center"><TextBlock Text="{Binding FileCount}" FontSize="{DynamicResource UiFontCaption}" Foreground="{DynamicResource Muted}"/></Border>
-        <TextBlock Grid.Row="1" Grid.ColumnSpan="2" Text="{Binding Subline}" FontSize="{DynamicResource UiFontCaption}" Foreground="{DynamicResource Muted}" TextTrimming="CharacterEllipsis" Margin="0,3,0,0"><TextBlock.Style><Style TargetType="TextBlock"><Style.Triggers><DataTrigger Binding="{Binding Subline}" Value=""><Setter Property="Visibility" Value="Collapsed"/></DataTrigger></Style.Triggers></Style></TextBlock.Style></TextBlock>
+        <TextBlock Grid.Row="1" Grid.ColumnSpan="2" Text="{Binding Subline}" FontSize="{DynamicResource UiFontCaption}" Foreground="{DynamicResource Muted}" TextWrapping="Wrap" Margin="0,3,0,0"><TextBlock.Style><Style TargetType="TextBlock"><Style.Triggers><DataTrigger Binding="{Binding Subline}" Value=""><Setter Property="Visibility" Value="Collapsed"/></DataTrigger></Style.Triggers></Style></TextBlock.Style></TextBlock>
        </Grid></DataTemplate></ListBox.ItemTemplate>
       </ListBox></DockPanel></Border>
       <Grid Grid.Column="1"><Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="*"/></Grid.RowDefinitions>
-       <StackPanel Margin="0,0,0,8"><WrapPanel Margin="0,6,0,0"><Button x:Name="EditedEditButton" Visibility="Collapsed" Content="Edit metadata…" Margin="0,0,8,0"/><Button x:Name="EditedDetailsButton" Visibility="Collapsed" Content="Image details…" Margin="0,0,8,0"/><Button x:Name="EditedPreviewButton" Visibility="Collapsed" Content="Preview image…"/><Button x:Name="EditedEditorButton" Content="Open in editor ▾" Margin="8,0,0,0"/><Button x:Name="EditedFolderButton" Visibility="Collapsed" Content="Open image folder" Margin="8,0,0,0"/></WrapPanel></StackPanel>
+       <StackPanel Margin="0,0,0,8"><WrapPanel Margin="0,6,0,0"><Button x:Name="EditedEditButton" Visibility="Collapsed" Content="Edit metadata…" Margin="0,0,8,0"/><Button x:Name="EditedDetailsButton" Visibility="Collapsed" Content="Image details…" Margin="0,0,8,0"/><Button x:Name="EditedPreviewButton" Visibility="Collapsed" Content="Preview image…"/><Button x:Name="EditedEditorButton" Content="Export to…" Margin="8,0,0,0"/><Button x:Name="EditedFolderButton" Visibility="Collapsed" Content="Open image folder" Margin="8,0,0,0"/></WrapPanel></StackPanel>
        <Border Grid.Row="1" Background="{DynamicResource Surface}" BorderBrush="{DynamicResource Border}" BorderThickness="1" CornerRadius="8" ClipToBounds="True"><Grid><DataGrid x:Name="EditedGrid" CanUserSortColumns="True"><DataGrid.RowStyle><Style TargetType="DataGridRow" BasedOn="{StaticResource {x:Type DataGridRow}}"><Setter Property="ToolTip" Value="{Binding Filename}"/></Style></DataGrid.RowStyle><DataGrid.Columns>
          <DataGridTextColumn Header="FILE" Binding="{Binding Filename}" Width="*" MinWidth="200"/>
          <DataGridTextColumn Header="FILE TYPE" Binding="{Binding FileType}" Width="85"/>
@@ -940,8 +944,11 @@
           <TextBlock x:Name="EditedPreviewMessage" Text="Select a capture or open an image." Foreground="{DynamicResource Muted}" HorizontalAlignment="Center" VerticalAlignment="Center" TextWrapping="Wrap" TextAlignment="Center" Margin="18"/>
          </Grid>
          <Grid x:Name="EditedPreviewSkyPanel" VerticalAlignment="Top" Visibility="Collapsed">
-          <local:SkyGlobeView x:Name="EditedPreviewSky" Margin="36,0,0,0"/>
-          <Button x:Name="EditedPreviewSkyResetButton" Content="↺" Width="26" Height="26" MinHeight="0" FontSize="16" Padding="0" Margin="6,0,0,4" HorizontalAlignment="Left" VerticalAlignment="Bottom" AutomationProperties.Name="Reset capture sky view"/>
+          <local:SkyGlobeView x:Name="EditedPreviewSky" Margin="4"/>
+          <Button x:Name="EditedPreviewSkyResetButton" Width="26" Height="26" MinHeight="0" Padding="0" Margin="0" BorderThickness="0" Background="Transparent" HorizontalAlignment="Left" VerticalAlignment="Top" AutomationProperties.Name="Reset capture sky view">
+           <Button.Template><ControlTemplate TargetType="Button"><Grid Background="Transparent"><ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/></Grid></ControlTemplate></Button.Template>
+           <Path Data="M 5,7 A 7,7 0 1 1 5,15 M 5,3 L 5,7 L 9,7" Width="18" Height="18" Stretch="Uniform" Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" StrokeThickness="1.6" StrokeStartLineCap="Round" StrokeEndLineCap="Round"/>
+          </Button>
          </Grid>
         </Grid>
        </Grid>
@@ -959,6 +966,8 @@
      <ColumnDefinition Width="Auto" />
     </Grid.ColumnDefinitions>
     <StackPanel>
+     <TextBlock x:Name="OperationHeading" Text="Processing files" FontWeight="SemiBold" Foreground="{DynamicResource Text}" Margin="0,0,0,10" />
+     <TextBlock x:Name="OperationDetail" TextWrapping="Wrap" Foreground="{DynamicResource Text}" Margin="0,0,12,8" Visibility="Collapsed" />
      <TextBlock x:Name="StatusLabel" Text="Ready" Foreground="{DynamicResource Muted}" TextWrapping="Wrap" Margin="0,0,12,0" />
      <TextBlock x:Name="RateLabel" TextWrapping="Wrap" Text="" FontSize="{DynamicResource UiFontSmall}" Foreground="{DynamicResource Muted}" Margin="0,4,0,0" Visibility="Collapsed" />
     </StackPanel>

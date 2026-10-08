@@ -41,13 +41,13 @@ namespace AstroArchive {
   void SelectContextRow(Frame frame){if(frame==null)return;var grid=G("FramesGrid");if(!SelectedFiles().Contains(frame)){ClearSessionSelection();grid.SelectedItems.Clear();grid.SelectedItems.Add(frame);}}
   MenuItem FileAction(string title,Action action,bool enabled=true){var item=new MenuItem{Header=title,IsEnabled=enabled};UiHelp.For(item,title);item.Click+=(s,e)=>{if(cancel==null&&!ActiveSearchBlocked)action();};return item;}
   MenuItem ExportMenu(List<Frame> selected){
-   var menu=new MenuItem{Header="Export",IsEnabled=selected.Count>0};menu.Items.Add(FileAction("Export files…",()=>ExportFiles(selected)));menu.Items.Add(FileAction("Stacking folder…",()=>ExportProject(selected,false),selected.Any(f=>f.Kind=="Light"||f.Kind=="Stack")));return menu;
+   var menu=new MenuItem{Header="Export",IsEnabled=selected.Count>0};menu.Items.Add(FileAction("Export to…",()=>ExportTo(selected),selected.Count>0));menu.Items.Add(FileAction("Export files…",()=>ExportFiles(selected)));menu.Items.Add(FileAction("Stacking folder…",()=>ExportProject(selected,false),selected.Any(f=>f.Kind=="Light"||f.Kind=="Stack")));return menu;
   }
   void BuildFileMenu(ContextMenu menu,List<Frame> selected){
    menu.Items.Clear();menu.Items.Add(new MenuItem{Header=selected.Count+" selected file"+(selected.Count==1?"":"s"),IsEnabled=false});menu.Items.Add(FileAction("Preview…",()=>PreviewImage(selected[0]),selected.Count==1));menu.Items.Add(FileAction("Edit metadata…",()=>Edit(false)));menu.Items.Add(ExportMenu(selected));menu.Items.Add(FileAction("Create Edited copies…",()=>CreateEditedCopies(selected)));menu.Items.Add(FileAction("Open file location",()=>ShowFile(selected[0]),selected.Count==1));
    var more=Branch("More actions",FileAction("Copy file paths",()=>Clipboard.SetText(string.Join(Environment.NewLine,selected.Select(repo.FilePath)))),FileAction("Identify target…",()=>Identify(false),selected.Any(f=>f.Kind=="Light"||f.Kind=="Stack"||f.Kind=="Unknown")),FileAction("Review detected metadata…",()=>ReviewMetadata(selected)),FileAction("Export catalogue CSV…",()=>ExportSelectionCsv(selected)));
    if(selected.Count==1&&selected[0].Images!=null&&(selected[0].Images.Count>1||selected[0].Images.Any(i=>i.Count>1)))more.Items.Add(FileAction("Choose HDU / page / frame…",()=>PreviewFile(selected[0])));
-   if(SirilHandoff.CanSend(selected))more.Items.Add(FileAction("Edit a copy in Siril…",()=>SendStackToSiril(selected)));menu.Items.Add(more);menu.Items.Add(new Separator());var delete=FileAction("Delete files…",()=>DeleteFiles(selected));delete.Foreground=new SolidColorBrush(Color.FromRgb(183,40,51));menu.Items.Add(delete);
+   menu.Items.Add(more);menu.Items.Add(new Separator());var delete=FileAction("Delete files…",()=>DeleteFiles(selected));delete.Foreground=new SolidColorBrush(Color.FromRgb(183,40,51));menu.Items.Add(delete);
   }
   void ShowExportMenu(){if(repo==null||cancel!=null)return;var menu=ThemedMenu();var choices=new MenuItem();BuildExportNavigation(choices);foreach(var item in choices.Items.Cast<object>().ToList()){choices.Items.Remove(item);menu.Items.Add(item);}menu.PlacementTarget=B("ExportButton");menu.Placement=PlacementMode.Bottom;menu.IsOpen=true;}
   void ExportSelectionCsv(List<Frame> selected){var picker=new Microsoft.Win32.SaveFileDialog{FileName="AstroArchive_selection.csv",Filter="CSV catalogue|*.csv"};if(picker.ShowDialog(Window)==true){repo.ExportIndex(picker.FileName,selected);L("StatusLabel").Text=selected.Count+" catalogue rows exported.";}}
@@ -105,20 +105,6 @@ namespace AstroArchive {
   void ExportComplete(string path,bool stacking){L("StatusLabel").Text="Exported folder: "+path;ExportCompleteDialog(path,stacking).Show();}
   FormWindow ExportCompleteDialog(string path,bool stacking){
    var d=new FormWindow(Window,"Export complete",640,360);d.Text(stacking?"Stacking folder ready":"Files exported",true);d.Text(path);d.Text("Copied and verified.");d.Button("Open folder",()=>{try{Process.Start(new ProcessStartInfo(path){UseShellExecute=true});}catch(Exception error){MessageBox.Show(d.Window,error.Message,"Folder unavailable");}});d.CloseOnly();return d;
-  }
-  void SendStackToSiril(List<Frame> selected){
-   if(!SirilHandoff.CanSend(selected))return;
-   const string title="Siril";try{SirilHandoff.ValidateExecutable(settings.SirilExecutable);}catch{if(!Configure(2))return;try{SirilHandoff.ValidateExecutable(settings.SirilExecutable);}catch(Exception error){MessageBox.Show(Window,error.Message,"Siril unavailable");return;}}
-   string app=settings.SirilExecutable;
-   EditedProject project=null;string projectName=selected[0].TargetLabel+" · "+title+" · "+DateTime.Now.ToString("yyyyMMdd_HHmmss");
-   Run(ct=>{
-    project=SirilHandoff.CreateWorkingCopy(repo,selected,projectName,app,ct,Progress);
-    string image=repo.EditedPath(project,project.Sources[0].RelativePath);
-    ct.ThrowIfCancellationRequested();
-    try{using(var process=Process.Start(SirilHandoff.LaunchInfo(app,image))){if(process==null)throw new IOException(title+" did not start.");}}
-    catch(Exception e){throw new IOException(title+" could not be launched. Your verified working copy is saved at:\n"+image+"\n\n"+e.Message,e);}
-    return image;
-   },image=>{RefreshEdited(project.Id);GoToPage(2);});
   }
   void DeleteFailedFiles(){
    if(repo==null||cancel!=null)return;var matches=repo.FailedFiles();

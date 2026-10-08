@@ -6,16 +6,16 @@ using System.Text;
 using System.Text.RegularExpressions;
 namespace AstroArchive {
  public static partial class Catalog {
-  internal static KeyValuePair<string,string>[] EditedNameAliases(){return aliases.Where(p=>p.Key.Length>=6&&!p.Key.Any(char.IsDigit)).ToArray();}
+  internal static KeyValuePair<string,string>[] EditedNameAliases(){return aliases.Concat(savedNames.Aliases).Where(p=>p.Key.Length>=6&&!p.Key.Any(char.IsDigit)).Distinct().ToArray();}
  }
  // Names tolerate small spelling errors. Catalogue numbers never do: a changed
  // digit can identify a completely different object.
  public sealed class EditedTargetMatcher {
-  static readonly KeyValuePair<string,string>[] CatalogAliases=Catalog.EditedNameAliases();
-  public static readonly EditedTargetMatcher Default=new EditedTargetMatcher(null);
+  static EditedTargetMatcher cachedDefault;static int cachedRevision=-1;static readonly object defaultGate=new object();
+  public static EditedTargetMatcher Default{get{lock(defaultGate){int revision=Catalog.NamesRevision;if(cachedRevision!=revision){cachedDefault=new EditedTargetMatcher(null);cachedRevision=revision;}return cachedDefault;}}}
   readonly KeyValuePair<string,string>[] names;
   public EditedTargetMatcher(IEnumerable<string> targets){
-   var entries=new List<KeyValuePair<string,string>>(CatalogAliases);
+   var entries=new List<KeyValuePair<string,string>>(Catalog.EditedNameAliases());
    foreach(string target in targets??Enumerable.Empty<string>()){if(Catalog.IsAmbiguous(target)||Catalog.HasFilenameConflict(target))continue;string key=Key(target);if(key.Length>=6&&!key.Any(char.IsDigit))entries.Add(new KeyValuePair<string,string>(key,Catalog.CanonicalTarget(target)));}
    names=entries.Distinct().ToArray();
   }
@@ -26,7 +26,7 @@ namespace AstroArchive {
    return previous[b.Length];
   }
   public string Resolve(string text,out string evidence){
-   evidence=null;if(string.IsNullOrWhiteSpace(text)||Catalog.HasFilenameConflict(text)||Regex.IsMatch(text,@"\b(?:M|NGC|IC|C|CALDWELL|B|UGC|PGC|SH\s*2)\s*[_-]?\s*\d",RegexOptions.IgnoreCase))return null;
+   evidence=null;if(Catalog.IsAmbiguous(text)||Catalog.HasFilenameConflict(text)||Regex.IsMatch(text,@"\b(?:MESSIER|M|NGC|IC|CALDWELL|C|BARNARD|B|UGC|PGC|SHARPLESS|SH\s*2)\s*[_-]?\s*\d",RegexOptions.IgnoreCase))return null;
    string[] words=Regex.Split(text,@"[^\p{L}\p{N}]+").Where(w=>w.Length>0).Take(64).ToArray();var probes=new HashSet<string>();
    for(int start=0;start<words.Length;start++){string probe="";for(int count=0;count<6&&start+count<words.Length;count++){probe+=Key(words[start+count]);if(probe.Length>=6&&probe.Length<=64)probes.Add(probe);}}
    var scores=new Dictionary<string,double>(StringComparer.OrdinalIgnoreCase);

@@ -49,13 +49,28 @@ Select images and right-click **Edit metadata** to assign targets, filters, imag
 
 Starless and Stars only filenames are recognised. Object, filter, sub-count and exposure details come from available metadata or explicit filename labels. GIFs inherit missing details from a uniquely matching edited image in the same folder.
 
-Sending a stack to **Siril** creates a verified working copy in Edited.
-For AstroWizard or another editor, right-click **Create Edited copies**, then load the copies from the opened image folder. Save outputs there and refresh Edited to find them.
+Choose **Export → Export to…** for PixInsight, Siril, DSS, GIMP, Photoshop, AS!4,
+AstroWizard or Stacking Wizard. Supported images open from verified working copies
+in Edited; subframes are exported to an input folder. DSS loads prepared file lists;
+some stackers require you to choose the exported inputs in their own window.
+**Settings → Export** stores defaults by file type and optional app
+locations. AstroArchive tries automatic detection, then asks for the executable when
+needed. Save outputs alongside the Edited working copy and refresh Edited to find them.
+
+The compact Export menu also offers **Export files…**, **Stacking folder…** and
+**Catalogue CSV**. Right-click files to create Edited copies. Optional metadata and
+advanced stacking controls live under More options.
 
 Exports default to image files only: stacks copy directly to the destination; subs
 retain compatible input folders. **Add Metadata** and **Create new folder** are off
 by default. Existing files are retained, with numbered suffixes for collisions.
 Stacking exports keep compatible input groups and calibrations separate. Stacking and calibration run in your processing software.
+
+## Archive safety and backups
+
+Settings > General > Archive safety offers optional protection against deleting or renaming archived originals in File Explorer on local NTFS drives. Edited files, Dump and archive metadata remain writable. Protection has no background scan and can be turned off from the same section. The Windows owner can still deliberately change permissions.
+
+Back up… creates a verified folder or lossless ZIP outside the archive, including images, Edited files and the current database. ZIP compression preserves image resolution and every original byte. Creation and verification can take a long time; cancellation keeps earlier backups. To restore, extract the ZIP if needed and choose its `Repository` folder in AstroArchive. Restoration instructions and SHA-256 checksums are included. A separate drive protects against archive drive failure.
 
 ## Formats
 
@@ -76,7 +91,7 @@ See [format and metadata details](docs/COMPATIBILITY.md).
 
 - [Fast repeat telescope imports](docs/FAST_IMPORTS.md)
 - [Complete offline user guide](Application_Source/Quick_Start.txt)
-- [Siril and other editors](docs/PROCESSOR_HANDOFFS.md)
+- [Processor handoffs, formats and application detection](docs/PROCESSOR_HANDOFFS.md)
 - [Installation, updates and troubleshooting](docs/UPDATES.md)
 
 ## Build from source

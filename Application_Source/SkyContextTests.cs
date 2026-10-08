@@ -30,7 +30,7 @@ namespace AstroArchive {
    Test("Sky capture time changes position and below-horizon fields stay explicit",()=>{
     var frame=SkyFrame(325.46061837,0,0,0);var first=CaptureSky.Resolve(frame,null);frame.ObservedUtc="2000-01-01T13:00:00Z";var later=CaptureSky.Resolve(frame,null);
     Check(later.Altitude>first.Altitude+14&&later.Key!=first.Key,"Different acquisition times reused the same sky");
-    var below=CaptureSky.Resolve(SkyFrame(100.46061837,0,51,0),null);Check(below.Altitude<0&&below.Summary.Contains("below horizon"),"Inaccessible target presented above horizon");
+    var below=CaptureSky.Resolve(SkyFrame(100.46061837,0,51,0),null);Check(below.BelowHorizon&&below.Summary.Contains("below horizon"),"Inaccessible target presented above horizon");
    });
    Test("Sky never invents a capture clock from filenames folders dates or machine time",()=>{
     var frame=SkyFrame(280,30,51,0);frame.ObservedUtc=null;frame.Observed="2026-10-07T22:00:00";frame.TimeSource="Filename (timezone unknown)";
@@ -79,6 +79,20 @@ namespace AstroArchive {
     h.Values.Remove("SUBEXP");h.Values["EXPTIME"]="30";Check(!CaptureSky.FromHeader(h,"FITS","stack.fit").SkyStackDurationSeconds.HasValue,"Ambiguous EXPTIME treated as duration");
     foreach(string kind in new[]{"Dark","Master dark","Dark flat","Master flat","Bias","Master bias","Offset"}){f.Kind=kind;Check(CaptureSky.IsCalibration(f),"Calibration not recognised: "+kind);}
     h.Values["IMAGETYP"]="Master Dark";h.Values["TOTALEXP"]="3600";Check(CaptureSky.IsCalibration(CaptureSky.FromHeader(h,"FITS","calibration.fit")),"Header calibration became stack");
+   });
+   Test("Group sky tracks span actual capture times and include final exposure",()=>{
+    var frames=Enumerable.Range(0,3).Select(i=>{var f=SkyFrame(325.46061837,30,51,0);f.Kind="Light";f.Exposure=30;f.ObservedUtc=new DateTime(2000,1,1,12,i*20,0,DateTimeKind.Utc).ToString("o");return f;}).ToArray();
+    var sky=CaptureSky.Resolve(frames[0],null,frames);Check(sky.TrackStartUtc==CaptureSky.CaptureUtc(frames[0])&&sky.TrackEndUtc==CaptureSky.CaptureUtc(frames[2]).Value.AddSeconds(30)&&sky.StackTrack.Length==33,"Group interval collapsed to a single sub or ignored acquisition gaps");
+    var start=new SkyOrientation(sky.TrackStartUtc,true,51,0).Map(SkyVector.Equatorial(sky.RA,sky.Dec));var end=sky.Orientation.Map(SkyVector.Equatorial(sky.RA,sky.Dec));Check(sky.StackTrack[0].Dot(start)>0.99999999&&sky.StackTrack.Last().Dot(end)>0.99999999&&sky.StackTrack[0].Dot(end)<.995,"Group trail did not move across the sky");
+    Check(CaptureSky.Resolve(frames[0],null).StackTrack.Length==0,"Individual sub acquired a group trail");frames[1].ObservedUtc=frames[2].ObservedUtc=null;sky=CaptureSky.Resolve(frames[0],null,frames);Check(sky.TrackEndUtc==sky.TrackStartUtc.Value.AddSeconds(90)&&sky.TrackEvidence.Contains("gaps unknown"),"Missing clocks were not labelled as integration estimate");
+    frames[1].Exposure=null;Check(CaptureSky.Resolve(frames[0],null,frames).StackTrack.Length==0,"Incomplete integration invented a track");frames[0].ObservedUtc=null;Check(CaptureSky.Resolve(frames[0],null,frames).StackTrack.Length==0,"Missing group clock invented a track");
+   });
+   Test("Indexed stack sky preserves comments and labelled integration without multiplying ambiguity",()=>{
+    var h=new FitsHeader();h.Values["EXPTIME"]="3600";h.Comments["EXPTIME"]="Total integration time";
+    var f=SkyFrame(325.46061837,30,51,0);f.Kind="Stack";f.OriginalName="stack.fit";f.ImageKey="hdu:0";f.Images=new System.Collections.Generic.List<ImageDescriptor>{new ImageDescriptor{Key="hdu:0",Headers=h.Values,Comments=h.Comments}};
+    Check(CaptureSky.Resolve(Util.Deserialize<Frame>(Util.Serialize(f)),null).StackTrack.Length==33,"Saved stack exposure comments lost integration duration");h.Comments.Clear();h.Values["EXPTIME"]="5710";f.OriginalName="stacked-16_Heart Nebula_10s60_Astro.fits";Check(CaptureSky.Resolve(f,null).StackSeconds==5710,"Reported stack integration was confused with labelled ten-second subs");
+    var opened=CaptureSky.FromHeader(h,"FITS",f.OriginalName);Check(opened.SkyStackDurationSeconds==5710,"Opened stack and indexed stack use different integration duration");
+    h.Values["NCOMBINE"]="120";h.Values["EXPTIME"]="30";f.OriginalName="stack.fit";Check(!CaptureSky.Resolve(f,null).StackSeconds.HasValue,"Ambiguous per-frame/total exposure multiplied by count");
    });
   }
  }

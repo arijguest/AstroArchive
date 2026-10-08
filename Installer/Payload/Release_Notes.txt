@@ -1,15 +1,18 @@
-AstroArchive 1.13.12
-Package 1.13.12.1
+AstroArchive 2.1.2
+Package 2.1.2.1
 
-- Sky-map reset sits at the bottom-left beside the map on Repository and Edited,
-  without a footer row or extra panel height. Image previews keep their full fit.
-- N/E/S/W indicators follow the capture horizon and current camera orientation.
-  Labels hide when obscured by the globe, clipped by the panel, or missing a
-  reliable capture time/site. Zooming and rotating update them automatically.
-- All Targets lists merged subframe groups first, stacks next, ungrouped files
-  after stacks and every calibration type last. Individual target views keep
-  stacks before lights. Column sorting is retained within each section.
-- Calibration previews hide the sky map. Stacks with known time, location,
-  pointing and integration duration show a cached estimated movement track.
-- Removed the Filters / Channels column from the Edited table.
-- Verified the existing Comets category for Repository and Edited Targets.
+- Settings now opens one Preferences window with General, Import, Export,
+  Sky & solving, Accessibility and Updates sections. Application defaults and
+  locations, archive protection and backup remain available in Preferences.
+- Simplified Import, Export, Repository and Guide menus remove duplicate routes.
+  Secondary Edited actions are on the file context menu; Export to… remains
+  available with the current processing destinations.
+- The target panels keep their themed backgrounds and entries while search is
+  pending, fixing the white, empty panel during typing.
+- Export files and Stacking folder offer Open with… after export for Siril when
+  one eligible FITS stack is selected. Siril opens the verified exported copy,
+  including collision-renamed files, in that copy's actual folder. Failed or
+  canceled exports never launch an application.
+- Preferences stores a default export folder. Optional metadata and advanced
+  stacking controls are collapsed; the new-folder name appears only when needed.
+- Missing or Unknown common names use a dash in Repository and Edited tables.

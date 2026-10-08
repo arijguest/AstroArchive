@@ -37,7 +37,9 @@ namespace AstroArchive {
   }
   ColumnLayout SavedColumnLayout(string name){
    ColumnLayout saved;if(settings.TableLayouts==null||!settings.TableLayouts.TryGetValue(name,out saved))return null;
-   if(name=="EditedGrid"){saved=ColumnLayout.UpgradeEdited(saved);settings.TableLayouts[name]=saved;}return saved;
+   if(name=="EditedGrid")saved=ColumnLayout.UpgradeEdited(saved);
+   if(name=="FramesGrid")saved=ColumnLayout.UpgradeRepository(saved);
+   settings.TableLayouts[name]=saved;return saved;
   }
   void ApplyColumnLayout(string name,ColumnLayout saved){
    var grid=G(name);var layout=ColumnLayout.Resolve(saved,originalColumnOrder[name],defaultColumns[name]);
@@ -45,7 +47,7 @@ namespace AstroArchive {
    foreach(var column in grid.Columns)column.Visibility=layout.Visible.Contains(ColumnId(column))?Visibility.Visible:Visibility.Collapsed;
    tableSorts[name].RemoveAll(s=>!grid.Columns.Any(c=>c.Visibility==Visibility.Visible&&c.SortMemberPath==s.PropertyName));RestoreTableSort(name);
   }
-  ColumnLayout CurrentColumnLayout(string name){var columns=G(name).Columns.OrderBy(c=>c.DisplayIndex).ToList();return new ColumnLayout{Order=columns.Select(ColumnId).ToList(),Visible=columns.Where(c=>c.Visibility==Visibility.Visible).Select(ColumnId).ToList()};}
+  ColumnLayout CurrentColumnLayout(string name){var columns=G(name).Columns.OrderBy(c=>c.DisplayIndex).ToList();return new ColumnLayout{Order=columns.Select(ColumnId).ToList(),Visible=columns.Where(c=>c.Visibility==Visibility.Visible).Select(ColumnId).ToList(),RepositoryGainShown=name=="FramesGrid"};}
   void PersistColumnLayout(string name){
    if(settings.TableLayouts==null)settings.TableLayouts=new Dictionary<string,ColumnLayout>();settings.TableLayouts[name]=CurrentColumnLayout(name);
    if(!testingColumnLayouts)SaveSettings();

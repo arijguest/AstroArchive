@@ -13,11 +13,11 @@ namespace AstroArchive {
   Window dumpProgressWindow;TextBlock dumpProgressStatus,dumpProgressRate;ProgressBar dumpProgressBar;Button dumpProgressCancel;
   Window operationProgressWindow;
   bool OperationProgressVisible{get{return operationProgressWindow!=null&&operationProgressWindow.IsVisible;}}
-  void InitializeProgressVisibility(){Window.StateChanged+=(s,e)=>UpdateProgressVisibility();Window.IsVisibleChanged+=(s,e)=>UpdateProgressVisibility();}
+  void InitializeProgressVisibility(){Window.StateChanged+=(s,e)=>UpdateProgressVisibility();Window.IsVisibleChanged+=(s,e)=>UpdateProgressVisibility();Window.Activated+=(s,e)=>ResumeTargetReview();}
   void EnsureOperationProgress(){
    if(operationProgressWindow!=null)return;
    var popup=(Popup)Window.FindName("OperationPopup");popup.IsOpen=false;var content=popup.Child;popup.Child=null;
-   var window=new Window{Owner=Window,Icon=ApplicationIcon.Image,ShowInTaskbar=false,Title="AstroArchive — file progress",SizeToContent=SizeToContent.WidthAndHeight,ResizeMode=ResizeMode.NoResize,WindowStartupLocation=WindowStartupLocation.CenterOwner,FontFamily=Window.FontFamily};
+   var window=new Window{Owner=Window,Icon=ApplicationIcon.Image,ShowInTaskbar=false,ShowActivated=false,Title="AstroArchive — file progress",SizeToContent=SizeToContent.WidthAndHeight,ResizeMode=ResizeMode.NoResize,WindowStartupLocation=WindowStartupLocation.CenterOwner,FontFamily=Window.FontFamily};
    window.Resources.MergedDictionaries.Add(Window.Resources);window.SetResourceReference(Control.FontSizeProperty,"UiFontControl");Theme.Bind(window,Control.BackgroundProperty,"Surface");Theme.Bind(window,Control.ForegroundProperty,"Text");window.Content=content;
    window.Closing+=(s,e)=>{if(operationProgressWindow==window&&operationBusy&&cancel!=null){e.Cancel=true;B("CancelButton").RaiseEvent(new RoutedEventArgs(Button.ClickEvent));}};
    operationProgressWindow=window;
@@ -31,7 +31,7 @@ namespace AstroArchive {
    if(!operationBusy&&operationProgressWindow!=null){
     var finished=operationProgressWindow;operationProgressWindow=null;
     var content=(UIElement)finished.Content;finished.Content=null;
-    ((Popup)Window.FindName("OperationPopup")).Child=content;finished.Close();
+    ((Popup)Window.FindName("OperationPopup")).Child=content;CloseProgressWindow(finished);
    }
    if(operationBusy&&dumpProgressWindow==null&&visible)EnsureOperationProgress();
    if(operationProgressWindow!=null){
@@ -42,11 +42,16 @@ namespace AstroArchive {
     if(!visible)dumpProgressWindow.Hide();
     else if(operationBusy){if(dumpProgressWindow.WindowState==WindowState.Minimized)dumpProgressWindow.WindowState=WindowState.Normal;if(!dumpProgressWindow.IsVisible)dumpProgressWindow.Show();}
    }
+   ResumeTargetReview();
    if(!visible){if(filtersPopup!=null)filtersPopup.IsOpen=false;ClosePreviewDetails("");ClosePreviewDetails("Edited");}
   }
-  void OpenDumpProgress(){
-   var window=new Window{Owner=Window,Icon=ApplicationIcon.Image,ShowInTaskbar=false,Title="Processing Dump folder",Width=580,SizeToContent=SizeToContent.Height,ResizeMode=ResizeMode.NoResize,WindowStartupLocation=WindowStartupLocation.CenterOwner,FontFamily=Window.FontFamily,FontSize=Window.FontSize};window.Resources.MergedDictionaries.Add(Window.Resources);Theme.Bind(window,Control.BackgroundProperty,"Canvas");Theme.Bind(window,Control.ForegroundProperty,"Text");
-   var content=new StackPanel{Margin=new Thickness(24)};content.Children.Add(new TextBlock{Text="Processing Dump folder",FontWeight=FontWeights.SemiBold,Margin=new Thickness(0,0,0,12)});
+  static void CloseProgressWindow(Window window){
+   // Closing an active owned tool window must not change the owner's activation/state.
+   window.Owner=null;window.Hide();window.Close();
+  }
+  void OpenDumpProgress(string title="Processing Dump folder"){
+   var window=new Window{Owner=Window,Icon=ApplicationIcon.Image,ShowInTaskbar=false,ShowActivated=false,Title=title,Width=580,SizeToContent=SizeToContent.Height,ResizeMode=ResizeMode.NoResize,WindowStartupLocation=WindowStartupLocation.CenterOwner,FontFamily=Window.FontFamily,FontSize=Window.FontSize};window.Resources.MergedDictionaries.Add(Window.Resources);Theme.Bind(window,Control.BackgroundProperty,"Canvas");Theme.Bind(window,Control.ForegroundProperty,"Text");
+   var content=new StackPanel{Margin=new Thickness(24)};content.Children.Add(new TextBlock{Text=title,FontWeight=FontWeights.SemiBold,Margin=new Thickness(0,0,0,12)});
    dumpProgressStatus=new TextBlock{Text="Checking files…",TextWrapping=TextWrapping.Wrap};content.Children.Add(dumpProgressStatus);
    dumpProgressRate=new TextBlock{TextWrapping=TextWrapping.Wrap,Margin=new Thickness(0,8,0,0)};content.Children.Add(dumpProgressRate);
    dumpProgressBar=new ProgressBar{Minimum=0,Maximum=1,Height=8,Margin=new Thickness(0,16,0,0)};content.Children.Add(dumpProgressBar);
@@ -54,7 +59,7 @@ namespace AstroArchive {
    window.Closing+=(s,e)=>{if(dumpProgressWindow==window&&cancel!=null){e.Cancel=true;dumpProgressCancel.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));}};
    window.Content=content;dumpProgressWindow=window;if(Window.WindowState!=WindowState.Minimized)window.Show();
   }
-  void CloseDumpProgress(){var window=dumpProgressWindow;dumpProgressWindow=null;dumpProgressStatus=dumpProgressRate=null;dumpProgressBar=null;dumpProgressCancel=null;if(window!=null)window.Close();}
+  void CloseDumpProgress(){var window=dumpProgressWindow;dumpProgressWindow=null;dumpProgressStatus=dumpProgressRate=null;dumpProgressBar=null;dumpProgressCancel=null;if(window!=null)CloseProgressWindow(window);}
   void UpdateDumpProgress(ProgressInfo progress){if(dumpProgressWindow==null)return;dumpProgressStatus.Text=L("StatusLabel").Text;dumpProgressRate.Text=L("RateLabel").Text;dumpProgressBar.IsIndeterminate=!settings.ReducedMotion&&!progress.TotalKnown&&!progress.Finished;dumpProgressBar.Value=progress.ProgressFraction;}
   async void ProcessDumpUi(){
    if(repo==null||cancel!=null||closing||dumpChecking)return;
