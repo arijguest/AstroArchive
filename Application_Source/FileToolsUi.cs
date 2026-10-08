@@ -61,23 +61,31 @@ namespace AstroArchive {
   void ShowExportMenu(){if(repo==null||cancel!=null)return;var selected=Context();var menu=ThemedMenu();var choices=ExportMenu(selected);foreach(MenuItem item in choices.Items.Cast<MenuItem>().ToList()){choices.Items.Remove(item);menu.Items.Add(item);}menu.PlacementTarget=B("ExportButton");menu.Placement=PlacementMode.Top;menu.IsOpen=true;}
   void ExportSelectionCsv(List<Frame> selected){var picker=new Microsoft.Win32.SaveFileDialog{FileName="AstroArchive_selection.csv",Filter="CSV catalogue|*.csv"};if(picker.ShowDialog(Window)==true){repo.ExportIndex(picker.FileName,selected);L("StatusLabel").Text=selected.Count+" catalogue rows exported.";}}
   void ShowFile(Frame frame){string path=repo.FilePath(frame);if(File.Exists(path))Process.Start(new ProcessStartInfo("explorer.exe","/select,\""+path+"\""){UseShellExecute=true});else MessageBox.Show(Window,"This file is missing from the repository.","File unavailable");}
+  sealed class ExportDestinationFields {
+   public TextBox Parent,Name;public CheckBox Metadata,NewFolder;
+   public ExportOptions Options(){return new ExportOptions{Parent=Parent.Text.Trim(),Name=Name.Text.Trim(),AddMetadata=Metadata.IsChecked==true,CreateNewFolder=NewFolder.IsChecked==true};}
+  }
+  ExportDestinationFields ExportDestination(FormWindow d,string suggestedName){
+   var fields=new ExportDestinationFields();fields.Parent=d.Input("Destination folder","");d.Button("Browse destination",()=>{string p=Folder("Choose an export destination",fields.Parent.Text,d.Window);if(p!=null)fields.Parent.Text=p;});
+   fields.NewFolder=d.Check("Create new folder",false);fields.Name=d.Input("New folder name",suggestedName);fields.Name.IsEnabled=false;
+   fields.NewFolder.Checked+=(sender,args)=>fields.Name.IsEnabled=true;fields.NewFolder.Unchecked+=(sender,args)=>fields.Name.IsEnabled=false;
+   fields.Metadata=d.Check("Add Metadata",false);d.Text("Include a manifest, companion metadata and workflow notes.");return fields;
+  }
+  bool ValidExportDestination(FormWindow d,ExportDestinationFields fields){try{Exporter.Destination(repo,fields.Options());return true;}catch(Exception e){MessageBox.Show(d.Window,e.Message);return false;}}
   void ExportFiles(List<Frame> selected){
-   if(selected.Count==0)return;var d=new FormWindow(Window,"Export selected files",610,440);
-   d.Text(selected.Count+" selected files",true);d.Text("Copy the selected files to a new folder, with their original names and a checksum manifest.");
-   TextBox parent=d.Input("Destination folder","");d.Button("Browse destination",()=>{string p=Folder("Choose an export destination",parent.Text,d.Window);if(p!=null)parent.Text=p;});
-   TextBox name=d.Input("New folder name","AstroArchive_export_"+DateTime.Now.ToString("yyyyMMdd_HHmmss"));
-   d.Accept("Export files",()=>ValidExportDestination(d,parent,name));if(!d.Show())return;
-   var options=new ExportOptions{Parent=parent.Text.Trim(),Name=name.Text.Trim(),Mode="Files",IncludeCalibration=false,IncludeRejected=true};
+   if(selected.Count==0)return;var d=new FormWindow(Window,"Export selected files",610,560);
+   d.Text(selected.Count+" selected files",true);d.Text("Stacks and other images copy directly to the destination. Subs keep their compatible input folders. Existing files are kept; duplicate names receive a numbered suffix.");
+   var destination=ExportDestination(d,"AstroArchive_export_"+DateTime.Now.ToString("yyyyMMdd_HHmmss"));
+   d.Accept("Export files",()=>ValidExportDestination(d,destination));if(!d.Show())return;
+   var options=destination.Options();options.Mode="Files";options.IncludeCalibration=false;options.IncludeRejected=true;
    Run(ct=>Exporter.Create(repo,selected,options,ct,Progress),ExportComplete);
   }
-  bool ValidExportDestination(FormWindow d,TextBox parent,TextBox name){if(!Directory.Exists(parent.Text.Trim())){MessageBox.Show(d.Window,"Choose an existing destination folder.");return false;}if(string.IsNullOrWhiteSpace(name.Text)){MessageBox.Show(d.Window,"Enter a name for the new folder.");return false;}if(Util.Within(parent.Text.Trim(),repo.Root)){MessageBox.Show(d.Window,"Choose a destination outside the repository.");return false;}if(Directory.Exists(Path.Combine(parent.Text.Trim(),Util.Safe(name.Text.Trim())))||File.Exists(Path.Combine(parent.Text.Trim(),Util.Safe(name.Text.Trim())))){MessageBox.Show(d.Window,"This folder name already exists. Choose a new name.");return false;}return true;}
   void ExportProject(List<Frame> selected,bool withCalibration){
    var items=selected.Where(f=>f.Kind=="Light"||f.Kind=="Stack").ToList();if(items.Count==0)return;
    var d=new FormWindow(Window,withCalibration?"Export with calibrations":"Export ready-to-stack folder",630,720);
    string target=items.Select(f=>f.Target).Distinct().Count()==1?items[0].Target:"Multiple targets";
    d.Text(target+"  ·  "+items.Count(f=>f.Kind=="Light")+" subs  ·  "+items.Count(f=>f.Kind=="Stack")+" stacks",true);
-   TextBox parent=d.Input("Destination folder","");d.Button("Browse destination",()=>{string p=Folder("Choose where to create the stacking folder",parent.Text,d.Window);if(p!=null)parent.Text=p;});
-   TextBox name=d.Input("New folder name",Util.Safe(target)+"_"+DateTime.Now.ToString("yyyyMMdd_HHmmss"));
+   var destination=ExportDestination(d,Util.Safe(target)+"_"+DateTime.Now.ToString("yyyyMMdd_HHmmss"));
    ComboBox mode=d.Select("Inputs",new[]{"Subs","Stacks","Both"},items.All(f=>f.Kind=="Light")?"Subs":items.All(f=>f.Kind=="Stack")?"Stacks":"Both");
    CheckBox sessions=d.Check("Separate sessions into their own folders",false),calibration=d.Check("Include matching calibration files",withCalibration),unknown=d.Check("Include calibrations for subs with unknown calibration state",false),rejected=d.Check("Include files marked rejected/reference",false);
    CheckBox convert=d.Check("Convert supported images to FITS (keeps archived originals)",false);d.Text("Non-FITS data and selected containers need explicit conversion. Confirm linearity in metadata; processed previews stay original-file exports.");var availableCalibrations=Exporter.ExistingCalibrations(repo,all);
@@ -85,8 +93,8 @@ namespace AstroArchive {
    Action summary=()=>{try{unknown.IsEnabled=calibration.IsChecked==true&&Convert.ToString(mode.SelectedItem)!="Stacks";var lights=items.Where(f=>f.Kind=="Light"&&(rejected.IsChecked==true||!f.Rejected)).ToList();int count=Convert.ToString(mode.SelectedItem)=="Stacks"||calibration.IsChecked!=true?0:Exporter.AvailableCalibrations(lights,availableCalibrations,sessions.IsChecked==true,unknown.IsChecked==true).Count;availability.Text=calibration.IsChecked!=true?"Selected inputs only. Calibration files are omitted.":Convert.ToString(mode.SelectedItem)=="Stacks"?"Existing stacks receive no additional calibration files.":count>0?count+" matching calibration files available. Already calibrated or registered subs receive no extra calibration.":"No matching calibration files are available for these inputs. You can still export the selected captures.";}catch(Exception e){availability.Text=e.Message;}};
    foreach(var check in new[]{sessions,calibration,unknown,rejected}){check.Checked+=(s,e)=>summary();check.Unchecked+=(s,e)=>summary();}mode.SelectionChanged+=(s,e)=>summary();summary();
    d.Text("Each target, camera and compatible capture group has its own input folder. Masters and raw calibration sets stay separate. Stack the exported inputs in your preferred software.");
-   d.Accept("Export folder",()=>{string selectedMode=Convert.ToString(mode.SelectedItem);if(!items.Any(f=>(rejected.IsChecked==true||!f.Rejected)&&(selectedMode=="Both"||selectedMode=="Subs"&&f.Kind=="Light"||selectedMode=="Stacks"&&f.Kind=="Stack"))){MessageBox.Show(d.Window,"This input choice has no eligible files.");return false;}return ValidExportDestination(d,parent,name);});if(!d.Show())return;
-   var options=new ExportOptions{Parent=parent.Text.Trim(),Name=name.Text.Trim(),Mode=Convert.ToString(mode.SelectedItem),IncludeCalibration=calibration.IsChecked==true,IncludeUnknownCalibration=unknown.IsChecked==true,IncludeRejected=rejected.IsChecked==true,SeparateSessions=sessions.IsChecked==true,ConvertToFits=convert.IsChecked==true};
+   d.Accept("Export folder",()=>{string selectedMode=Convert.ToString(mode.SelectedItem);if(!items.Any(f=>(rejected.IsChecked==true||!f.Rejected)&&(selectedMode=="Both"||selectedMode=="Subs"&&f.Kind=="Light"||selectedMode=="Stacks"&&f.Kind=="Stack"))){MessageBox.Show(d.Window,"This input choice has no eligible files.");return false;}return ValidExportDestination(d,destination);});if(!d.Show())return;
+   var options=destination.Options();options.Mode=Convert.ToString(mode.SelectedItem);options.IncludeCalibration=calibration.IsChecked==true;options.IncludeUnknownCalibration=unknown.IsChecked==true;options.IncludeRejected=rejected.IsChecked==true;options.SeparateSessions=sessions.IsChecked==true;options.ConvertToFits=convert.IsChecked==true;
    Run(ct=>Exporter.Create(repo,items,options,ct,Progress),path=>ExportComplete(path,true));
   }
   void ExportComplete(string path){ExportComplete(path,false);}
@@ -96,7 +104,7 @@ namespace AstroArchive {
    d.Button("Open exported folder",()=>{try{Process.Start(new ProcessStartInfo(path){UseShellExecute=true});}catch(Exception e){MessageBox.Show(d.Window,e.Message,"Folder unavailable");}});
    if(stacking){
     d.Text("Open a stacking app, then load the inputs from this folder.");var apps=new WrapPanel{Margin=new Thickness(0,0,0,8)};
-    foreach(StackingApplication app in Enum.GetValues(typeof(StackingApplication))){var choice=app;var button=new Button{Content=StackingApps.Name(app),Margin=new Thickness(0,0,8,8),MinWidth=100,ToolTip=app==StackingApplication.Siril?"Start Siril with the exported folder as its working directory. Select the inputs in Siril.":app==StackingApplication.StackingWizard?"Start StackingWizard, then load the exported inputs.":"Choose another installed stacking app."};button.Click+=(s,e)=>{if(launch!=null)launch(choice);else OpenStackingApp(d,path,choice);};apps.Children.Add(button);}d.Add(apps);
+    foreach(StackingApplication app in Enum.GetValues(typeof(StackingApplication))){var choice=app;var button=new Button{Content=StackingApps.Name(app),Margin=new Thickness(0,0,8,8),MinWidth=100,ToolTip=app==StackingApplication.Siril?"Open Siril in the exported folder.":app==StackingApplication.StackingWizard?"Open StackingWizard; load the exported inputs.":"Choose another stacking app."};button.Click+=(s,e)=>{if(launch!=null)launch(choice);else OpenStackingApp(d,path,choice);};apps.Children.Add(button);}d.Add(apps);
    }
    d.CloseOnly();return d;
   }

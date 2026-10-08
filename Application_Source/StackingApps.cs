@@ -12,7 +12,7 @@ namespace AstroArchive {
   }
   public static ProcessStartInfo LaunchInfo(string executable,string folder,StackingApplication app){
    ValidateExecutable(executable,app);folder=Path.GetFullPath(folder);
-   if(!Directory.Exists(folder)||!File.Exists(Path.Combine(folder,"manifest.json"))||File.Exists(Path.Combine(folder,"INCOMPLETE.txt")))throw new IOException("The completed exported folder is unavailable. Your application has not been started.");
+   if(!Directory.Exists(folder)||File.Exists(Path.Combine(folder,"INCOMPLETE.txt")))throw new IOException("The completed exported folder is unavailable. Your application has not been started.");
    // Siril documents --directory. Other receivers have no verified folder-open
    // contract: launch the selected app without guessing file/folder arguments.
    return new ProcessStartInfo(Path.GetFullPath(executable),app==StackingApplication.Siril?"--directory "+SirilHandoff.QuoteArgument(folder):""){UseShellExecute=false,WorkingDirectory=folder};

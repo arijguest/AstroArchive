@@ -1,98 +1,80 @@
-# Image and telescope compatibility
+# Image and metadata support
 
-AstroArchive keeps one SHA-256 identity per original file. Existing SQLite records
-remain readable: the additional metadata is optional JSON, without a destructive
-schema migration. Re-detection is an explicit, reviewed action and preserves user
-overrides. Import and ordinary file export retain the original bytes.
+Import and ordinary export preserve original files. Preview support and
+scientific export eligibility are shown separately.
 
 ## Formats
 
-| Format | Archive / original export | Pixel support | Stacking project |
-| --- | --- | --- | --- |
-| FITS, FITS.gz | Yes | Primary/IMAGE HDUs, 8/16/32/64-bit integers and 32/64-bit floats; selected HDUs and cube slices | Linear originals; explicitly convert selected containers/slices |
-| Tile-compressed FITS (.fz) | Yes | Optional CFITSIO backend | Explicit decompression to derived FITS when backend is available |
-| TIFF | Yes | Windows decoder; multiple pages, common mono/RGB integer and float layouts | Confirm linearity; explicit FITS conversion |
-| PNG | Yes | Windows decoder; common 8/16-bit mono/RGB layouts | Confirm linearity; explicit FITS conversion |
-| JPEG | Yes | Display preview | Original export only |
-| XISF | Yes | Attached/base64 UInt8/16/32/64 and Float32/64 images; planar/interleaved; zlib, LZ4, byte shuffle; optional Zstandard | Confirm linearity; explicit FITS conversion |
-| SER | Yes | 8/16-bit mono, RGGB/GRBG/GBRG/BGGR and RGB/BGR frames | Export the recording for planetary processing |
-| AVI; CR2/CR3, NEF, ARW, DNG | Yes | No decoder bundled | Original export only |
+| Format | Preview | Processing export |
+| --- | --- | --- |
+| FITS / gzip FITS | Supported image HDUs, RGB/Bayer data and selected cube slices | Eligible linear originals; explicit conversion for selected slices/containers |
+| Tile-compressed FITS (`.fz`) | Optional CFITSIO codec | Explicit decompression to derived FITS |
+| TIFF / PNG | Windows decoder; supported mono/RGB integer and float layouts, including TIFF pages | Confirm linearity and convert eligible images to FITS |
+| XISF | Supported integer/float, planar/interleaved, attached/base64 and zlib/LZ4/shuffled layouts; optional Zstandard | Confirm linearity and convert eligible images to FITS |
+| JPEG / GIF | Still or animated display | Original-file export |
+| SER | 8/16-bit mono, common Bayer and RGB/BGR recordings; playback and frame selection | Original recording for planetary processing |
+| AVI / MP4 / MOV / M4V / WMV / MKV | Codecs installed in Windows | Original-file export |
+| CR2 / CR3 / NEF / ARW / DNG | External preview needs a compatible Windows image codec | Original-file export |
 
-Full numeric decoding for new formats and conversions is bounded to **32 million samples per image**, four channels,
-256 TIFF/XISF images and the first 64 FITS HDUs. A sample is one channel value. Uncompressed FITS keeps its existing streamed, sampled preview/analysis and original stacking exports above this allocation limit.
-Unlabelled extra FITS axes are slices; RGB axes need an explicit RGB label.
-64-bit integer previews can lose precision, so conversion of those samples is
-refused; an ordinary single-image FITS original can still be exported unchanged.
-XISF base64 inline/embedded layouts also support numeric reading. Complex and subblock layouts are preserved as originals.
-Alpha/indexed or other raster encodings outside the scientific layouts are
-preview-only. Preview stretches never change science pixels. The existing Bayer colour and stretch renderer remains in use.
+Windows image formats outside this import list may still open as external previews.
+Unsupported complex/subblock XISF layouts and non-scientific raster layouts remain
+original-file exports. RGB FITS axes need explicit RGB metadata; other extra axes
+are treated as slices. Conversion of 64-bit integers is refused to avoid precision loss.
 
-The standard installer includes the managed readers and Windows raster integration.
-It **does not bundle CFITSIO or Zstandard**. Optional trusted x64 `cfitsio.dll` and
-`libzstd.dll`, with their required dependencies, can be installed in
-`%LOCALAPPDATA%\AstroArchive\codecs`, outside the versioned app folders. Settings
-opens this folder and reports availability. Restart after provisioning. These
-optional local components survive app updates; updates do not provision them. Missing codecs disable pixel operations,
-while original-file import/export remains available.
+Numeric decoding/conversion is limited to 32 million channel samples per image,
+four channels, 256 TIFF/XISF images and the first 64 FITS HDUs. Uncompressed FITS
+can use sampled previews and original exports above the numeric allocation limit.
+Large still previews are sampled; zoom does not restore discarded display detail.
+GIF preview supports up to 4,096 frames and a 32-million-pixel canvas.
 
-## Instruments and metadata
+## Optional codecs
 
-Existing Seestar and DWARF structure/channel rules remain in use. Additional,
-versioned recognition profiles accept **explicit header identities** for
-Vaonis/Vespera/Stellina and Unistellar/eVscope/eQuinox/Odyssey. These profiles do not
-claim coverage of every vendor mirror layout. Acquisition software signatures
-identify N.I.N.A., ASIAIR, Ekos/KStars/INDI and SharpCap independently of the device.
-Generic FITS/XISF camera and telescope names are retained, without inventing a
-smart-telescope model. A known generic camera gets a Primary channel; ambiguous
-DWARF channels still require review.
+CFITSIO and Zstandard are not included in the installer. **Settings → Image compatibility**
+shows availability and opens `%LOCALAPPDATA%\AstroArchive\codecs`.
+Install compatible x64 `cfitsio.dll` or `libzstd.dll` and their dependencies there,
+then restart AstroArchive. These local codecs survive updates. Missing codecs
+leave original-file import/export available. Windows video and RAW codecs are
+installed separately through their providers.
 
-The physical telescope ID stays independent from telescope model, camera model
-and camera serial/ID. Metadata also retains optical configuration, readout mode,
-ROI, offset, linearity, registration and calibration steps. Provenance records
-raw values, normalized values, units and evidence. Conflicting aliases appear in
-the metadata report. Explicit milliseconds/Kelvin/Fahrenheit comments are normalized.
-`CCDGAIN`/`EGAIN` or an explicitly labelled electrons/ADU value is separate from a
-camera gain setting; it is never silently matched as that setting.
+## Acquisition metadata
 
-FITS capture times follow FITS UTC semantics unless TIMESYS says otherwise. Other
-containers require an explicit UTC offset. Filename times retain an unknown
-timezone until the user assigns a Windows timezone in Edit metadata. Ambiguous or
-invalid daylight-saving times are rejected. Rotation excludes unknown timezones,
-SER recordings and unspecialized cube timestamps.
+Seestar/DWARF folders and explicit instrument headers support classification.
+Vaonis/Unistellar identities and N.I.N.A., ASIAIR, Ekos/KStars/INDI and SharpCap
+software signatures are recognised where supplied. Check uncertain device or
+camera labels; a model name does not identify a physical telescope.
 
-Right-click **Re-detect metadata and review** to see before/after values before
-applying them. Check individual fields to apply detected values; unchecked fields keep indexed values. Older saved settings without clear provenance are retained by default and flagged until explicitly resolved in Edit metadata. Recorded user changes retain priority. Choose **Choose HDU / page / frame** to save an image selection; the existing
-preview pane and full preview window use that selection for display and analysis. Readers run on demand; filtering the library does not decode pixels.
+Right-click **Edit metadata** to correct labels, or **Re-detect metadata and review**
+to compare detected values before applying selected fields. Recorded user edits
+retain priority. **Choose HDU / page / frame** selects an image for supported
+pixel operations. Related capture/session sidecars are preserved as evidence.
 
-Adjacent capture-name JSON/text files and recognized `session.json`, `capture.json`,
-`metadata.json` and `acquisition.log` sidecars up to 16 MB are preserved with hashes.
-These new sidecars are kept as evidence, without guessing their undocumented
-schemas. Existing `shotsInfo.json` parsing and preservation remain supported.
-Shared sidecars are retained when individual captures are deleted.
+Times with known UTC information can support analysis. Filename times retain an
+unknown timezone until assigned in Edit metadata. Unknown exposure, gain, coordinates
+and processing state remain explicit; conflicting values need review.
 
-## Calibration and derived exports
+For Edited images, explicit filename products such as `120x60s` establish sub count
+and total integration. `30s40` means sub exposure/gain, and DWARF's `stacked-16`
+is bit depth. Unspecified `EXPTIME` is not assumed to be per-sub or total.
+GIFs inherit missing acquisition details only from a uniquely matching nearby still
+image. See [the user guide](../Application_Source/Quick_Start.txt) for matching names.
 
-Automatic matching explains **Accepted**, **Needs review** and **Rejected** decisions.
-Known identity, camera channel, dimensions, binning, Bayer pattern and gain must
-match. Serial/model, offset, readout and ROI are compared when supplied; one-sided
-missing metadata requires review. Unresolved relevant alias conflicts prevent
-automatic matching. Flats also require the same filter/night and compatible
-optical configuration. Darks need the same exposure and temperatures within 3 C;
-dark scaling is not assumed. Calibrated/registered lights receive no extra
-calibration. Unknown calibration status remains opt-in.
+## Calibration and conversion
 
-Dark flats are matched to the **raw flats' exposure**, then exported in exposure-specific
-`dark-flats` folders or `masters`. `FlatPreparation` in the manifest maps each set. The manifest distinguishes calibration for lights from calibration
-for flats. Workflow notes explain the two stages and warn against subtracting
-both a bias and a dark flat from the same flat. Existing raw/master preference
-remains in place; stacking and master generation happen in external software.
+Calibration candidates are **Accepted**, **Needs review** or **Rejected**.
+Identity, camera, gain, dimensions, binning and Bayer pattern must be compatible.
+Available offset, readout, ROI and optical data also affect matching. Flats need
+compatible filter/night; darks need matching exposure and known temperatures within 3°C.
+Missing or conflicting evidence requires review. Processed lights receive no extra
+calibration; unknown calibration state is opt-in.
 
-**Convert supported images to FITS** is explicit in the stacking export dialog.
-Derived files contain decoded physical values as Float64 FITS, with normalized
-metadata and without applying BSCALE/BZERO twice. Multidimensional WCS is omitted
-when extracting cube slices. Manifests record original SHA-256, image key/frame,
-conversion description and output SHA-256. Originals remain untouched. Export
-preflight rejects unsupported/processed inputs before creating a project;
-interrupted exports retain `INCOMPLETE.txt`.
+Dark flats match raw-flat exposure in separate sets;
+do not subtract both a bias and a dark flat from the same flat.
 
-Generated fixtures cover these contracts. Windows release validation includes a separate WIC integration suite. Real telescope fixtures still need independent validation; see `Application_Source/Validation.txt`.
+**Convert supported images to FITS** is an explicit stacking-export option for
+eligible linear images. Confirm linearity in Edit metadata. Conversion records
+physical values without applying a preview stretch. **Add Metadata** optionally
+records source, image selection and output checksums in a manifest, alongside
+session metadata and readme/workflow notes. It is off by default, as is
+**Create new folder**. Stacks copy directly to the destination; subs retain
+compatible input folders. Originals remain intact. Cancellation retains verified
+copies and removes unfinished temporary files; wait for completion before processing a full set.

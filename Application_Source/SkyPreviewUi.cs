@@ -8,7 +8,7 @@ namespace AstroArchive {
   Frame previewSkyFrame,editedSkyFrame;
   void InitializeSkyPreview(string prefix){
    InitializePreviewHeader(prefix);
-   var globe=(SkyGlobeView)Window.FindName(prefix+"PreviewSky");var reset=B(prefix+"PreviewSkyResetButton");reset.Click+=(s,e)=>globe.ResetView();UiHelp.Tip(reset,"Restore the capture sky view and zoom. Drag the globe to rotate; scroll or pinch to zoom.");
+   var globe=(SkyGlobeView)Window.FindName(prefix+"PreviewSky");var reset=B(prefix+"PreviewSkyResetButton");reset.Click+=(s,e)=>globe.ResetView();UiHelp.Tip(reset,"Reset sky view.");
    UpdateCaptureSky(prefix,null);
   }
   void UpdateCaptureSky(string prefix,Frame frame){
