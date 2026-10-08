@@ -1,5 +1,5 @@
-AstroArchive 1.13.7 validation
-Package 1.13.7.1; Windows 10/11 x64; .NET Framework 4.8.
+AstroArchive 1.13.8 validation
+Package 1.13.8.1; Windows 10/11 x64; .NET Framework 4.8.
 
 The Windows release workflow runs application regressions, a separate six-case
 Windows WIC integration suite, installer/updater regressions, x64 compilation,
@@ -15,6 +15,15 @@ paths and wrapping without clipping in light/dark at 100/150% text. Ordinary
 file exports do not show stacking-app buttons. Vendor applications are not
 installed or launched by these checks; actual stacking and input loading remain
 in the chosen external software.
+
+Search checks cover shared query/filter semantics, document reuse and metadata
+invalidation, immutable filter snapshots, numeric/nested/stable sort keys,
+cancellation, bounded worker queues, ignored-cancellation stale results, disposal
+and recovery after a failed request. A 12000-row fixture verifies repeated-query
+reuse and import-summary counts. Native WPF checks use 6000 rows across Repository,
+Import and Edited, hold a worker to verify dispatcher responsiveness while typing,
+and verify latest-only results, pending action guards, metadata/source changes,
+invalid/clear results, retained numeric sort directions and heading marks.
 
 Metadata editor checks cover every editable current value, missing/shared/mixed
 fields, zero/false/custom choices, numeric precision and invariant formatting,

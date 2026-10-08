@@ -1,4 +1,4 @@
-AstroArchive 1.13.7
+AstroArchive 1.13.8
 Windows 10/11 x64 desktop app. Built-in .NET Framework 4.8 and Windows SQLite.
 Runs offline. No Python or Google login required.
 
@@ -32,7 +32,14 @@ Choose a topic on the left; guide text can be selected and copied. Save guide sa
 the complete bundled guide as a text file. Help works offline.
 
 SEARCH AND IMPORT OPTIONS
-Repository, Import and Edited share the same search rules. Ordinary words narrow
+Repository, Import and Edited share the same search rules. Results update after
+a short typing pause, with searching done in the background to keep typing smooth.
+Enter searches immediately; Escape clears the search and preserves table filters.
+Searching… indicates pending results. File actions wait until the current query
+finishes, including Import, so an earlier result cannot import unintended files.
+New input cancels older searches; only the latest results are shown. Searchable
+metadata is reused until files or metadata change. Clear also resets table filters.
+Ordinary words narrow
 results together; quotes keep phrases together. OR joins alternatives; a leading
 minus excludes a term. Common names and spaced catalogue IDs work with other terms.
 Examples: target:C27 -type:Stack, "Crescent Nebula" filter:Ha, file:*.fits,

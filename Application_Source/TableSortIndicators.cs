@@ -29,8 +29,8 @@ namespace AstroArchive {
                 column.MinWidth = Math.Max(minimum * scale, caption.DesiredSize.Width + 48);
             }
         }
-        public static void Update(DataGrid grid) {
-            var sorts = grid.Items.SortDescriptions.ToList();
+        public static void Update(DataGrid grid,System.Collections.Generic.IEnumerable<SortDescription> preparedSorts=null) {
+            var sorts = (preparedSorts??grid.Items.SortDescriptions).ToList();
             foreach (var column in grid.Columns) {
                 int index = sorts.FindIndex(sort => sort.PropertyName == column.SortMemberPath);
                 string mark = index < 0 ? "" : (sorts[index].Direction == ListSortDirection.Ascending ? "▲" : "▼") + (sorts.Count > 1 ? " " + (index + 1) : "");

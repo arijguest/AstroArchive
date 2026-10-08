@@ -54,9 +54,9 @@ namespace AstroArchive {
             finally { preparingNavigation = false; }
         }
         MenuItem MenuAction(string label, Action action, bool available = true, bool requiresIdle = true) {
-            var item = new MenuItem { Header = label, IsEnabled = available && (!requiresIdle || cancel == null) };
+            var item = new MenuItem { Header = label, IsEnabled = available && (!requiresIdle || cancel == null&&!ActiveSearchBlocked) };
             UiHelp.For(item, label);
-            item.Click += (s,e) => { if (item.IsEnabled && (!requiresIdle || cancel == null)) action(); };
+            item.Click += (s,e) => { if (item.IsEnabled && (!requiresIdle || cancel == null&&!ActiveSearchBlocked)) action(); };
             return item;
         }
         MenuItem ButtonAction(string label, string control, int page = -1) {
@@ -128,7 +128,7 @@ namespace AstroArchive {
         void UpdateNavigationState() {
             if (!navigationReady) return;
             TopMenu("ImportMenu").IsEnabled = cancel == null;
-            TopMenu("ExportMenu").IsEnabled = cancel == null && repo != null;
+            TopMenu("ExportMenu").IsEnabled = cancel == null && repo != null&&!ActiveSearchBlocked;
             TopMenu("SettingsMenu").IsEnabled = cancel == null;
             TopMenu("EditedMenu").IsEnabled = cancel == null;
             B("ImportExportButton").IsEnabled = TopMenu("ExportMenu").IsEnabled;

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Threading;
 namespace AstroArchive {
  public static class TargetNavigation {
   public static readonly string[] Groups={"Solar system","Comets","Meteors","Nebulae","Galaxies","Star clusters","Stars","Other targets","Calibration","Unidentified"};
@@ -28,14 +29,14 @@ namespace AstroArchive {
    if(Regex.IsMatch(label,@"\b(cluster|clusters)\b",RegexOptions.IgnoreCase))hints.Add("Star clusters");
    return hints.Count==1?hints.First():"Other targets";
   }
-  public static List<TargetSummary> Build(IEnumerable<Frame> frames){
-   var rows=frames.ToList();var result=new List<TargetSummary>{Summarize("All targets",rows)};
-   result.AddRange(rows.GroupBy(f=>f.Target).Select(g=>Summarize(g.Key,g)).OrderBy(t=>Array.IndexOf(Groups,t.Group)).ThenBy(t=>t.DisplayName,StringComparer.OrdinalIgnoreCase).ThenBy(t=>t.Name,StringComparer.OrdinalIgnoreCase));return result;
+  public static List<TargetSummary> Build(IEnumerable<Frame> frames,CancellationToken token=default(CancellationToken)){
+   var rows=frames.ToList();var result=new List<TargetSummary>{Summarize("All targets",rows,token)};
+   result.AddRange(rows.GroupBy(f=>f.Target).Select(g=>Summarize(g.Key,g,token)).OrderBy(t=>Array.IndexOf(Groups,t.Group)).ThenBy(t=>t.DisplayName,StringComparer.OrdinalIgnoreCase).ThenBy(t=>t.Name,StringComparer.OrdinalIgnoreCase));token.ThrowIfCancellationRequested();return result;
   }
   static Match CometName(string name){return Regex.Match(name??"",@"^([CPDXAI]\s*/?\s*\d{4}\s*[A-Z]{1,2}\d{1,3}\b|\d{1,4}\s*[PDI]\b)\s*[/ -]?\s*(.*)$",RegexOptions.IgnoreCase|RegexOptions.CultureInvariant);}
   public static string ShortName(string name){if(name=="All targets")return name;string common=Catalog.CommonName(name);if(common.Length>0)return common;if(Group(name)=="Comets"){var match=CometName(name);if(match.Success&&match.Groups[2].Value.Length>0)return match.Groups[2].Value.Trim('(',')',' ');if(name.StartsWith("Comet ",StringComparison.OrdinalIgnoreCase))return name.Substring(6).Trim();}return name;}
   public static string Identifier(string name){if(name=="All targets")return "";if(Catalog.CommonName(name).Length>0)return Catalog.ObjectId(name);var match=CometName(name);return Group(name)=="Comets"&&match.Success&&match.Groups[2].Value.Length>0?match.Groups[1].Value.Trim():"";}
-  static TargetSummary Summarize(string name,IEnumerable<Frame> frames){var summary=CaptureGroups.Summarize(frames);return new TargetSummary{Name=name,Files=summary.Captures,Subs=summary.Subs,Stacks=summary.Stacks,Sessions=summary.Sessions,ExposureSeconds=summary.ExposureSeconds,UnknownExposure=summary.UnknownExposure};}
+  static TargetSummary Summarize(string name,IEnumerable<Frame> frames,CancellationToken token){var summary=CaptureGroups.Summarize(frames,token);return new TargetSummary{Name=name,Files=summary.Captures,Subs=summary.Subs,Stacks=summary.Stacks,Sessions=summary.Sessions,ExposureSeconds=summary.ExposureSeconds,UnknownExposure=summary.UnknownExposure};}
   public static string Exposure(double seconds){return seconds>=3600?((int)(seconds/3600))+"h"+(seconds%3600>=60?" "+((int)(seconds%3600/60))+"m":""):seconds>=60?((int)(seconds/60))+"m"+(seconds%60>=1?" "+((int)(seconds%60))+"s":""):seconds.ToString("0.#",CultureInfo.InvariantCulture)+"s";}
  }
 }

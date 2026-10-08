@@ -17,7 +17,7 @@ namespace AstroArchive {
   void InitializeFilters(){
    B("LibraryFiltersButton").Click+=(s,e)=>ShowFilters(false);
    B("ImportFiltersButton").Click+=(s,e)=>ShowFilters(true);
-   T("ImportSearchBox").TextChanged+=(s,e)=>{Watermark("ImportSearchBox","Search import results...");FilterImports();};Watermark("ImportSearchBox","Search import results...");
+   T("ImportSearchBox").TextChanged+=(s,e)=>{Watermark("ImportSearchBox","Search import results...");ScheduleSearch("ImportSearchBox");};Watermark("ImportSearchBox","Search import results...");
    B("ImportClearButton").Click+=(s,e)=>{importFilters.Reset();T("ImportSearchBox").Text="";FilterImports();};
    B("ScreenImportsButton").Click+=(s,e)=>ScreenFiles(true);
    B("ScreenLibraryButton").Click+=(s,e)=>ScreenFiles(false);
@@ -36,14 +36,18 @@ namespace AstroArchive {
   void ApplyFilters(bool imports){if(imports)FilterImports();else Filter(true);}
   List<Frame> CurrentImportRows(){return importLive?importRows.ToList():plan==null?new List<Frame>():plan.Frames;}
   void FilterImports(){
-   if(updating)return;var source=CurrentImportRows();ShowSearchError("ImportSearchBox",FileSearch.Parse(T("ImportSearchBox").Text));visibleImports=importFilters.Apply(source,T("ImportSearchBox").Text);
-   var grid=G("ImportGrid");var selection=new HashSet<string>(grid.SelectedItems.Cast<Frame>().Select(f=>f.SourcePath));SetRows("ImportGrid",visibleImports);foreach(var frame in visibleImports.Where(f=>selection.Contains(f.SourcePath)))if(!grid.SelectedItems.Contains(frame))grid.SelectedItems.Add(frame);
+   if(updating)return;var source=CurrentImportRows();if(Window.IsLoaded&&source.Count>2000){ScheduleSearch("ImportSearchBox",true,true);return;}CancelSearch("ImportSearchBox");ShowSearchError("ImportSearchBox",FileSearch.Parse(T("ImportSearchBox").Text));visibleImports=importFilters.Apply(source,T("ImportSearchBox").Text);
+   ApplyImportRows(source,visibleImports,ImportWorkflow.Summarize(source,visibleImports,SkipFlagged),ImportWorkflow.Select(visibleImports,SkipFlagged,true).Count);
+  }
+  void ApplyImportRows(List<Frame> source,List<Frame> rows,ImportSummary summary,int retry,bool presorted=false){
+   visibleImports=rows;
+   var grid=G("ImportGrid");var selection=new HashSet<string>(grid.SelectedItems.Cast<Frame>().Select(f=>f.SourcePath));SetRows("ImportGrid",visibleImports,presorted);foreach(var frame in visibleImports.Where(f=>selection.Contains(f.SourcePath)))if(!grid.SelectedItems.Contains(frame))grid.SelectedItems.Add(frame);
    B("ImportFiltersButton").Content="Filters"+(importFilters.ActiveCount>0?" ("+importFilters.ActiveCount+")":"");
-   var summary=ImportWorkflow.Summarize(source,visibleImports,SkipFlagged);int ready=summary.Ready;L("ImportSummaryLabel").Text=summary.Text;
+   int ready=summary.Ready;L("ImportSummaryLabel").Text=summary.Text;
    B("ImportButton").Content="Import "+ready+" file"+(ready==1?"":"s");B("ImportButton").ToolTip="Imports the ready files in this filtered view.";
    B("ImportButton").IsEnabled=cancel==null&&repo!=null&&plan!=null&&ready>0;
    B("ScreenImportsButton").IsEnabled=cancel==null&&repo!=null&&visibleImports.Any(f=>f.Status!="Deleted");
-   B("ReviewImportsButton").IsEnabled=cancel==null&&repo!=null&&summary.Flagged>0;int retry=plan==null?0:ImportWorkflow.Select(visibleImports,SkipFlagged,true).Count;B("RetryImportsButton").Content="Retry "+retry+" failed import"+(retry==1?"":"s");B("RetryImportsButton").IsEnabled=cancel==null&&repo!=null&&retry>0;
+   B("ReviewImportsButton").IsEnabled=cancel==null&&repo!=null&&summary.Flagged>0;retry=plan==null?0:retry;B("RetryImportsButton").Content="Retry "+retry+" failed import"+(retry==1?"":"s");B("RetryImportsButton").IsEnabled=cancel==null&&repo!=null&&retry>0;
    B("AssignUnknownTargetButton").IsEnabled=cancel==null&&UnknownImportSelection().Count>0;
    B("ImportOptionsButton").IsEnabled=cancel==null;
    L("ScanLabel").Text=source.Count==0&&plan!=null&&plan.FastSkippedFiles>0&&plan.Errors.Count==0?"Nothing new to import · "+plan.FastSkippedFiles+" archived files skipped in "+plan.FastSkippedFolders+" folders":source.Count==0&&plan==null?"Choose a source folder and scan to begin.":summary.Shown+" / "+summary.Total+" shown · "+(summary.Total-summary.Shown)+" hidden by search/filters · "+importFilters.ActiveCount+" active filters"+(SkipFlagged?" · "+summary.SkippedFlagged+" flagged candidates skipped":" · flagged captures included")+(plan!=null&&plan.FastSkippedFiles>0?" · "+plan.FastSkippedFiles+" archived files skipped in "+plan.FastSkippedFolders+" folders":"")+(plan!=null&&plan.IgnoredFailed>0?"  ·  "+plan.IgnoredFailed+" failed filenames ignored":"")+(plan!=null&&plan.IgnoredRaster>0?" · "+plan.IgnoredRaster+" PNG/JPG ignored":"");

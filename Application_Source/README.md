@@ -1,4 +1,4 @@
-# AstroArchive 1.13.7
+# AstroArchive 1.13.8
 
 All toolbar actions, including Settings, Guide and Buy Me a Coffee, are grouped on the left. The purple dropdown labelled PAGE centres in the top row when there is room, or in its own compact row below the actions. Ctrl+1–3 selects Repository, Edited or Import; Ctrl+Tab cycles pages. The interactive guide introduces the selector.
 
@@ -19,6 +19,19 @@ Portable Windows 10/11 x64 WPF app for archiving astronomical image originals an
 - Opt-in robust matching checks same-name edits, changed metadata and missing archive copies.
 - Visible one-click connected import selects a bound, selected matching or unique saved telescope profile.
 - See [repeat-import details](../docs/FAST_IMPORTS.md) for session scoping, skipped-folder semantics and validation.
+
+## Changes in 1.13.8
+
+Repository, Import and Edited search updates after a 220 ms typing pause. Query
+matching, target/session summaries and numeric table ordering run in a background
+worker. Each view keeps one active worker and replaces pending requests, cancels
+obsolete work and checks the current request before publishing results.
+Prepared searchable metadata and normalized text are reused across queries and
+invalidated when files or metadata change. Large data refreshes also use this path.
+Enter searches immediately; Escape clears only the query. Existing query syntax,
+filters, target grouping, sort direction and surviving file selections remain.
+File actions wait while results are pending, so Import cannot use an older view.
+Import summaries use set membership instead of repeated full-list scans.
 
 ## Changes in 1.13.7
 

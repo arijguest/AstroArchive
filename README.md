@@ -22,6 +22,7 @@ verifying imports and preparing files for external processing.
 
 | Version | Highlights |
 | --- | --- |
+| **1.13.8** | Responsive background search with a short typing pause, reusable metadata, latest-result cancellation and safe pending file actions. |
 | **1.13.7** | Filled-in metadata fields, clear mixed values for batch edits, per-file inspection and changes that preserve untouched metadata. |
 | **1.13.6** | Launch Siril, StackingWizard or another installed app from the stacking-folder completion popup; remember app locations and keep verified exports available. |
 | **1.13.5** | Check Dump quietly at startup; show progress only when importable files are being processed. |
@@ -66,7 +67,7 @@ Download the installer, run it and open AstroArchive from its shortcut. Installa
 Each release includes SHA-256 checksums. In PowerShell, substitute your downloaded installer’s filename:
 
 ```powershell
-Get-FileHash .\AstroArchive1.13.7.1.exe -Algorithm SHA256
+Get-FileHash .\AstroArchive1.13.8.1.exe -Algorithm SHA256
 ```
 
 Compare `Hash` with the corresponding `.sha256` file. A checksum checks file integrity; publisher identity depends on code signing.
