@@ -22,7 +22,8 @@ verifying imports and preparing files for external processing.
 
 | Version | Highlights |
 | --- | --- |
-| **1.13.6** | Filled-in metadata fields, clear mixed values for batch edits, per-file inspection and changes that preserve untouched metadata. |
+| **1.13.7** | Filled-in metadata fields, clear mixed values for batch edits, per-file inspection and changes that preserve untouched metadata. |
+| **1.13.6** | Launch Siril, StackingWizard or another installed app from the stacking-folder completion popup; remember app locations and keep verified exports available. |
 | **1.13.5** | Check Dump quietly at startup; show progress only when importable files are being processed. |
 | **1.13.4** | Reuse imported DWARF sessions across parent/session folder selections; load relevant history only and clearly report nothing new to import. |
 | **1.13.2** | Keep the preview frame and sky visible while loading; paint Linear pixels before background stretching, reuse decoded samples and cancel passed-over loads. |
@@ -65,7 +66,7 @@ Download the installer, run it and open AstroArchive from its shortcut. Installa
 Each release includes SHA-256 checksums. In PowerShell, substitute your downloaded installer’s filename:
 
 ```powershell
-Get-FileHash .\AstroArchive1.13.6.1.exe -Algorithm SHA256
+Get-FileHash .\AstroArchive1.13.7.1.exe -Algorithm SHA256
 ```
 
 Compare `Hash` with the corresponding `.sha256` file. A checksum checks file integrity; publisher identity depends on code signing.

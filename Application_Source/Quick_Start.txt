@@ -1,4 +1,4 @@
-AstroArchive 1.13.6
+AstroArchive 1.13.7
 Windows 10/11 x64 desktop app. Built-in .NET Framework 4.8 and Windows SQLite.
 Runs offline. No Python or Google login required.
 
@@ -449,6 +449,16 @@ lights receive no additional calibration; unknown calibration is flagged and opt
 Masters stay separate and require explicit selection in your stacking software.
 Do not combine stacks with constituent subs or overlapping live-stack snapshots.
 Exports include a manifest and workflow notes. Actual stacking uses external software.
+
+After creating a ready-to-stack folder, the Export complete popup offers Siril,
+StackingWizard and Other… alongside Open exported folder. Locate the installed
+application when prompted. Siril and StackingWizard reuse their saved locations;
+Other… opens a chooser starting from your previous app. Siril starts with the
+export as its working directory. Load the appropriate lights/calibrations or
+stacks from within the processor, following the exported workflow notes.
+The popup stays open so you can browse the folder or try another app. Cancelling
+the app chooser or a launch failure retains the completed export. These buttons
+launch separately installed applications; AstroArchive does not install them.
 
 DELETE ALL ARCHIVE DATA
 Settings > Archive has a red Delete all archive data button. It shows the selected archive

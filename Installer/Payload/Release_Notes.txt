@@ -1,5 +1,5 @@
-AstroArchive 1.13.6 — clearer single-file and batch metadata editing
-Package 1.13.6.1
+AstroArchive 1.13.7 — clearer single-file and batch metadata editing
+Package 1.13.7.1
 - Fill in existing editable metadata, including exposure, gain, temperature,
   binning, equipment and processing values. Preserve custom dropdown choices.
 - Use Capture, Equipment and Processing tabs with narrow-window/text-size reflow.
@@ -9,7 +9,20 @@ Package 1.13.6.1
 - Apply only changed, nonblank fields to selected files or entire sessions.
   Preserve untouched evidence, gain units and inferred mount suggestions.
   Reset restores the initial fields; saving unchanged performs no file writes.
-- Retain the quiet startup Dump check from 1.13.5.
+- Include the stacking-app export launchers and quiet startup from 1.13.6/1.13.5.
+
+AstroArchive 1.13.6 — open stacking apps after export
+Package 1.13.6.1
+- Add Siril, StackingWizard and Other… buttons to the completed stacking-folder
+  popup, alongside Open exported folder. Ordinary file exports stay concise.
+- Choose separately installed applications on first use and remember their
+  locations. Other… starts its chooser from the previous app selection.
+- Start Siril with the export as its working directory. Load the exported inputs
+  within the chosen processor; no unverified automatic import commands are used.
+- Keep the popup and verified folder available after app launches or failures.
+  Report launch failures with the export location. Exported data stays unchanged.
+- Include the latest quiet-startup Dump, repeat-USB inventory and completed-session
+  summary fixes.
 
 AstroArchive 1.13.5 — quiet startup Dump check
 Package 1.13.5.1

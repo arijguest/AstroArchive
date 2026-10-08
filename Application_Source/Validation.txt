@@ -1,11 +1,20 @@
-AstroArchive 1.13.6 validation
-Package 1.13.6.1; Windows 10/11 x64; .NET Framework 4.8.
+AstroArchive 1.13.7 validation
+Package 1.13.7.1; Windows 10/11 x64; .NET Framework 4.8.
 
 The Windows release workflow runs application regressions, a separate six-case
 Windows WIC integration suite, installer/updater regressions, x64 compilation,
 WPF application/installer rendering and disposable install/repair/uninstall checks.
 A successful workflow is required before publishing installers and the SHA-256
 update feed. Its logs are authoritative for test counts and package hashes.
+
+Stacking-app checks verify executable/folder validation, incomplete-export guards,
+Unicode/whitespace paths, Siril's documented directory argument, argument-free
+launches for other processors, unchanged exported files and settings migration.
+Native popup checks cover all three button actions, retained popup/owner, long
+paths and wrapping without clipping in light/dark at 100/150% text. Ordinary
+file exports do not show stacking-app buttons. Vendor applications are not
+installed or launched by these checks; actual stacking and input loading remain
+in the chosen external software.
 
 Metadata editor checks cover every editable current value, missing/shared/mixed
 fields, zero/false/custom choices, numeric precision and invariant formatting,
