@@ -5,11 +5,12 @@ using System.Linq;
 using System.Text.RegularExpressions;
 namespace AstroArchive {
  public static class TargetNavigation {
-  public static readonly string[] Groups={"Solar system","Comets","Nebulae","Galaxies","Star clusters","Stars","Other targets","Calibration","Unidentified"};
+  public static readonly string[] Groups={"Solar system","Comets","Meteors","Nebulae","Galaxies","Star clusters","Stars","Other targets","Calibration","Unidentified"};
   static readonly Lazy<Dictionary<string,string>> types=new Lazy<Dictionary<string,string>>(()=>Catalog.Objects.GroupBy(o=>o.Name).ToDictionary(g=>g.Key,g=>g.First().Type,StringComparer.OrdinalIgnoreCase));
   public static string Group(string name){
    if(name=="All targets")return "";string target=Catalog.CanonicalTarget(name);string type;
    if(target.Equals("Unknown",StringComparison.OrdinalIgnoreCase))return "Unidentified";
+   if(target.Equals("Meteor",StringComparison.OrdinalIgnoreCase))return "Meteors";
    if(target=="Calibration")return "Calibration";
    if(Regex.IsMatch(target,@"^(Sun|Solar|Moon|Lunar|Mercury|Venus|Mars|Jupiter|Saturn|Uranus|Neptune|Pluto|Planetary)$",RegexOptions.IgnoreCase))return "Solar system";
    if(types.Value.TryGetValue(target,out type)){

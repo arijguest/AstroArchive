@@ -16,7 +16,7 @@ namespace AstroArchive {
   EditedImage ActiveEditedImage{get{return G("EditedGrid").SelectedItem as EditedImage;}}
   void InitializeEdited(){
    EditedProjectsList.SelectionChanged+=(s,e)=>{if(!refreshingEdited)RefreshEditedImages();};
-   C("EditedClassFilter").ItemsSource=new[]{"All images","Starless","Stars only","Edited image","Unknown (conflicting labels)"};C("EditedClassFilter").SelectedIndex=0;C("EditedClassFilter").SelectionChanged+=(s,e)=>FilterEditedImages();
+   C("EditedClassFilter").ItemsSource=new[]{"All images","Starless","Stars only","Meteor","Edited image","Unknown (conflicting labels)"};C("EditedClassFilter").SelectedIndex=0;C("EditedClassFilter").SelectionChanged+=(s,e)=>FilterEditedImages();
    T("EditedSearchBox").TextChanged+=(s,e)=>FilterEditedImages();G("EditedGrid").SelectionChanged+=(s,e)=>UpdateEditedActions();G("EditedGrid").MouseDoubleClick+=(s,e)=>PreviewEditedImage();
    B("EditedAddButton").Click+=(s,e)=>AddEditedImages();B("EditedImportFolderButton").Click+=(s,e)=>ImportEditedFolder();B("EditedRefreshButton").Click+=(s,e)=>RefreshEdited();
    B("EditedFolderButton").Click+=(s,e)=>OpenEditedFolder();B("EditedPreviewButton").Click+=(s,e)=>PreviewEditedImage();B("EditedEditorButton").Click+=(s,e)=>ShowEditedEditors();B("EditedDetailsButton").Click+=(s,e)=>ShowEditedDetails();

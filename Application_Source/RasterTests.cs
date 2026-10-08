@@ -2,6 +2,7 @@
 using System;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Threading;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
@@ -16,6 +17,15 @@ namespace AstroArchive {
             using(var stream=File.Create(path))encoder.Save(stream);
             return path;
         }
+        // Insert standard PNG tEXt chunks with independent CRCs, as real editors write them.
+        static void AddPngText(string path,string[] fields){
+            byte[] png=File.ReadAllBytes(path);using(var output=new MemoryStream()){output.Write(png,0,33);
+                foreach(string field in fields){int split=field.IndexOf('=');byte[] chunk=Encoding.UTF8.GetBytes("tEXt"+field.Substring(0,split)+"\0"+field.Substring(split+1));int length=chunk.Length-4;
+                    output.WriteByte((byte)(length>>24));output.WriteByte((byte)(length>>16));output.WriteByte((byte)(length>>8));output.WriteByte((byte)length);output.Write(chunk,0,chunk.Length);uint crc=0xffffffff;
+                    foreach(byte value in chunk){crc^=value;for(int bit=0;bit<8;bit++)crc=(crc&1)!=0?(crc>>1)^0xedb88320:crc>>1;}crc^=0xffffffff;
+                    output.WriteByte((byte)(crc>>24));output.WriteByte((byte)(crc>>16));output.WriteByte((byte)(crc>>8));output.WriteByte((byte)crc);
+                }output.Write(png,33,png.Length-33);File.WriteAllBytes(path,output.ToArray());}
+        }
         [STAThread]public static int Main(string[] args) {
             try {
                 string root=args[0];
@@ -25,9 +35,8 @@ namespace AstroArchive {
                     12,0,44,1,0,125,255,255
                 };
                 var gray=BitmapSource.Create(2,2,96,96,PixelFormats.Gray16,null,samples,4);
-                var editedMetadata=new BitmapMetadata("png");editedMetadata.SetQuery("/tEXt/{str=OBJECT}","M51");editedMetadata.SetQuery("/tEXt/{str=FILTER}","Ha");editedMetadata.SetQuery("/tEXt/{str=NCOMBINE}","12");editedMetadata.SetQuery("/tEXt/{str=TOTEXP}","7200");
-                var editedEncoder=new PngBitmapEncoder();editedEncoder.Frames.Add(BitmapFrame.Create(gray,null,editedMetadata,null));string editedPath=Path.Combine(root,"Whirlpool_starless.png");using(var stream=File.Create(editedPath))editedEncoder.Save(stream);
-                var recovered=EditedMetadata.Read(Path.GetFileName(editedPath),Assets.Inspect(editedPath).Header);Check(recovered.ImageClass=="Starless"&&recovered.Object=="M51"&&recovered.Filters=="Ha"&&recovered.Subs==12&&recovered.TotalExposure==7200,"Edited PNG acquisition metadata not recovered");Console.WriteLine("PASS WIC edited PNG object/filter/sub-count/total-exposure metadata");
+                string editedPath=Write(root,"Whirlpool_starless.png",new PngBitmapEncoder(),gray);AddPngText(editedPath,new[]{"OBJECT=M51","FILTER=Ha","NCOMBINE=12","TOTEXP=7200"});
+                var recovered=EditedMetadata.Read(Path.GetFileName(editedPath),Assets.Inspect(editedPath).Header);Check(recovered.ImageClass=="Starless"&&recovered.Object=="M51"&&recovered.Filters=="Ha"&&recovered.Subs==12&&recovered.TotalExposure==7200,"Edited PNG acquisition metadata not recovered: "+recovered.Details);Console.WriteLine("PASS WIC edited PNG object/filter/sub-count/total-exposure metadata");
                 string tiff=Write(root,"gray16.tiff",new TiffBitmapEncoder {
                     Compression=TiffCompressOption.Zip
                 },gray);

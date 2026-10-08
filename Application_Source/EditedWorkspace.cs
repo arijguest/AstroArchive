@@ -46,7 +46,7 @@ namespace AstroArchive {
    ct.ThrowIfCancellationRequested();var selected=captures.ToList();if(selected.Count==0)throw new ArgumentException("Choose archived images.");var indexed=new List<Frame>();
    foreach(var capture in selected){var stored=capture==null?null:Find(capture.Hash);if(stored==null)throw new IOException("The archived capture is unavailable.");ValidateCapture(stored,ct);indexed.Add(stored);}
    var project=NewEditedProject(name,processor,indexed.Select(f=>f.TargetLabel).Distinct().Count()==1?indexed[0].TargetLabel:"Multiple objects");Directory.CreateDirectory(EditedProjectFolder(project));
-   try{foreach(var capture in indexed){ct.ThrowIfCancellationRequested();var metadata=EditedMetadata.Read(capture.OriginalName,Assets.Inspect(FilePath(capture)).Header);if(string.IsNullOrEmpty(metadata.Object)&&!Catalog.IsAmbiguous(capture.Target))metadata.Object=capture.Target;if(string.IsNullOrEmpty(metadata.Filters)&&capture.Filter!="Unknown")metadata.Filters=capture.Filter;
+   try{foreach(var capture in indexed){ct.ThrowIfCancellationRequested();var metadata=EditedMetadata.Read(capture.OriginalName,Assets.Inspect(FilePath(capture)).Header);if(metadata.ImageClass!="Meteor"&&string.IsNullOrEmpty(metadata.Object)&&!Catalog.IsAmbiguous(capture.Target))metadata.Object=capture.Target;if(string.IsNullOrEmpty(metadata.Filters)&&capture.Filter!="Unknown")metadata.Filters=capture.Filter;
     AddEditedFile(project,FilePath(capture),capture.OriginalName,capture.Hash,capture.Hash,ct,progress,null,metadata);}return project;}
    catch{RemoveNewEditedProject(project);throw;}
   }

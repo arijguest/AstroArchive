@@ -11,8 +11,11 @@ namespace AstroArchive {
         static object Query(BitmapMetadata metadata,string query){try{return metadata.GetQuery(query);}catch(NotSupportedException){return null;}catch(ArgumentException){return null;}catch(InvalidOperationException){return null;}catch(IOException){return null;}}
         static void AcquisitionMetadata(BitmapFrame frame,FitsHeader header){
             var metadata=frame.Metadata as BitmapMetadata;if(metadata==null)return;
-            foreach(string key in new[]{"OBJECT","OBJNAME","TARGET","FILTER","FILTERID","NCOMBINE","STACKCNT","NSTACK","NSUBS","SUBEXP","SUBEXPT","TOTEXP","TOTALEXP","EXPTOTAL","EXPTIME","IMAGETYP","OBJCTRA","OBJCTDEC"}){
-                var value=Query(metadata,"/tEXt/{str="+key+"}") as string;if(!string.IsNullOrWhiteSpace(value)&&value.Length<8192)header.Values[key]=value.Trim();
+            for(int blockIndex=0;blockIndex<64;blockIndex++){
+             string blockPath="/["+blockIndex+"]tEXt";if(Query(metadata,blockPath)==null)break;
+             foreach(string key in new[]{"OBJECT","OBJNAME","TARGET","FILTER","FILTERID","NCOMBINE","STACKCNT","NSTACK","NSUBS","SUBEXP","SUBEXPT","TOTEXP","TOTALEXP","EXPTOTAL","EXPTIME","IMAGETYP","OBJCTRA","OBJCTDEC"}){
+                var value=Query(metadata,blockPath+"/{str="+key+"}") as string;if(!string.IsNullOrWhiteSpace(value)&&value.Length<8192)header.Values[key]=value.Trim();
+            }
             }
             foreach(string query in new[]{"/tEXt/{str=Description}","/tEXt/{str=Comment}","/ifd/{ushort=270}","/app1/ifd/{ushort=270}"}){
                 string text=Query(metadata,query) as string;if(string.IsNullOrEmpty(text)||text.Length>65536)continue;

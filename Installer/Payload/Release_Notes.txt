@@ -13,6 +13,9 @@ Package 1.11.0.1
   sub-count, per-sub and total exposure data from recognised filenames and image
   metadata; retain unknown values and explain conflicts or ambiguous exposure.
 - Add visible Filters buttons beside Search and Clear on Repository and Import.
+- Remove the redundant Format heading from both tables and their column choosers.
+- Label meteor filenames as Meteor and omit their object ID, including existing
+  archive rows, imported edits and editor working copies. Retain acquisition data.
 - Retain the current header sizing, branding, navigation and accessibility fixes.
 
 AstroArchive 1.10.4 — menu scrolling and preview navigation

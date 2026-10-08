@@ -692,3 +692,9 @@ Unlabelled EXPTIME/EXPOSURE is retained as reported exposure; a stack count alon
 not prove whether that value is per sub or total. Explicit totals and per-sub fields
 are used when available. Editor outputs from a single-source working project can
 inherit missing acquisition details when their object/filter/sub-count evidence agrees.
+
+METEOR LABELS
+A filename containing the word meteor (case insensitive) uses the Meteor label
+and has no object ID, even when image metadata names a catalogue object. This
+also applies to existing archived rows and Edited images. Exposure, filters and
+other acquisition details are retained. Folder names and meteorite do not match.

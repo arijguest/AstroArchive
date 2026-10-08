@@ -32,6 +32,7 @@ namespace AstroArchive {
   }
   public static bool IsFits(string s) { return Regex.IsMatch(s,@"\.(fit|fits|fts)(\.gz)?$",RegexOptions.IgnoreCase); }
   public static bool IsImageAsset(string path){return Assets.Supported(path);}
+  public static bool MeteorFilename(string path){return Regex.IsMatch(Path.GetFileName(path??""),@"(?:^|[^a-z])meteor(?=$|[^a-z])",RegexOptions.IgnoreCase|RegexOptions.CultureInvariant);}
   public static bool FailedFilename(string path) { return Path.GetFileName(path??"").IndexOf("failed",StringComparison.OrdinalIgnoreCase)>=0; }
   public static bool FailedFilename(Frame frame) { return FailedFilename(!string.IsNullOrEmpty(frame.OriginalName)?frame.OriginalName:frame.SourcePath??frame.RelativePath); }
   public static string SafeFile(string s) {var m=Regex.Match(s??"",@"(\.(fit|fits|fts)(\.gz)?)$",RegexOptions.IgnoreCase);string ext=m.Success?m.Value:Path.GetExtension(s??"");string stem=ext.Length>0?s.Substring(0,s.Length-ext.Length):s;return Safe(stem)+ext;}
@@ -48,7 +49,7 @@ namespace AstroArchive {
  public class Frame {
   public string Hash {get;set;} public string RelativePath {get;set;} public string SourcePath {get;set;} public string SourceRoot {get;set;} public string OriginalName {get;set;}
   public string Telescope {get;set;} public string TelescopeIdentity {get;set;} public string Model {get;set;} public string Camera {get;set;} string target="Unknown";
-  public string Target {get{return target;}set{target=Catalog.CanonicalTarget(value);}}
+  public string Target {get{return Util.MeteorFilename(OriginalName)?"Meteor":target;}set{target=Catalog.CanonicalTarget(value);}}
   public string ObjectId {get{return Catalog.ObjectId(Target);}} public string CommonName {get{return Catalog.CommonName(Target);}}
   public string TargetLabel {get{return Catalog.Label(Target);}}
   public string TargetName {get{return CommonName.Length>0?CommonName:ObjectId.Length==0?Target:"";}}

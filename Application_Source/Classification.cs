@@ -127,6 +127,7 @@ namespace AstroArchive {
    string filenameTarget=Catalog.TargetFromFilename(f.OriginalName);
    f.Target=filenameTarget??Catalog.Normalize(target);f.TargetEvidence=filenameTarget!=null?"Recognised filename target":Catalog.KnownName(target)!=null?"Recognised header/session target":"Unrecognised label; plate solving required";
    if(f.Kind.Contains("dark")||f.Kind.Contains("bias")||f.Kind.Contains("flat")||f.Kind=="Dark"||f.Kind=="Bias"||f.Kind=="Flat"){f.Target="Calibration";f.TargetEvidence="Calibration frame";}
+   if(Util.MeteorFilename(f.OriginalName)){f.Target="Meteor";f.TargetEvidence="Meteor filename label; object identity omitted";}
    string obs=h.Get("DATE-OBS","DATEOBS","DATE_OBS");DateTime? dt=Util.Time(obs);bool frameTime=dt.HasValue&&obs.Length>10;
    if(!dt.HasValue){string pattern=@"(20\d{2})[-_]?(\d{2})[-_]?(\d{2})[-_T ](\d{2})[-_:]?(\d{2})[-_:]?(\d{2})(?:[-_.](\d{3}))?";var m=Regex.Match(stem,pattern);bool fromFile=m.Success;if(!m.Success)m=Regex.Match(text,pattern);if(m.Success) {try{dt=new DateTime(int.Parse(m.Groups[1].Value),int.Parse(m.Groups[2].Value),int.Parse(m.Groups[3].Value),int.Parse(m.Groups[4].Value),int.Parse(m.Groups[5].Value),int.Parse(m.Groups[6].Value),m.Groups[7].Success?int.Parse(m.Groups[7].Value):0,DateTimeKind.Unspecified);frameTime=fromFile;f.TimeSource=fromFile?"Filename (timezone unknown)":"Session folder (not frame time)";}catch{}}}
    else f.TimeSource=frameTime?"FITS UTC":"FITS date only";

@@ -630,7 +630,6 @@
           <DataGridTextColumn Header="OBJECT ID" Binding="{Binding ObjectId}" Width="85" />
           <DataGridTextColumn Header="COMMON NAME / LABEL" Binding="{Binding TargetName}" Width="180" />
           <DataGridTextColumn Header="FRAME TYPE" Binding="{Binding Kind}" Width="110" />
-          <DataGridTextColumn Header="FORMAT" Binding="{Binding Format}" Width="65" />
           <DataGridTextColumn Header="ACQUIRED" Binding="{Binding AcquisitionDateLabel}" Width="96" />
           <DataGridTextColumn Header="EXPOSURE" Binding="{Binding ExposureText}" Width="76" />
           <DataGridTextColumn Header="FILTER" Binding="{Binding Filter}" Width="85" />
@@ -739,7 +738,6 @@
         <DataGridTextColumn Header="COMMON NAME / LABEL" Binding="{Binding TargetName}" Width="220" />
         <DataGridTextColumn Header="DEVICE / MODEL" Binding="{Binding InstrumentText}" Width="150" />
         <DataGridTextColumn Header="FRAME TYPE" Binding="{Binding Kind}" Width="100" />
-        <DataGridTextColumn Header="FORMAT" Binding="{Binding Format}" Width="65" />
         <DataGridTextColumn Header="CAMERA" Binding="{Binding Camera}" Width="90" />
         <DataGridTextColumn Header="ACQUIRED" Binding="{Binding AcquisitionDateLabel}" Width="100" />
         <DataGridTextColumn Header="EXPOSURE" Binding="{Binding ExposureText}" Width="80" />

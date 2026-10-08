@@ -8,7 +8,7 @@ namespace AstroArchive {
  public sealed class EditedMetadata {
   public string ImageClass{get;set;} public string Object{get;set;} public string Filters{get;set;} public string RA{get;set;} public string Dec{get;set;}
   public int? Subs{get;set;} public double? SubExposure{get;set;} public double? TotalExposure{get;set;} public double? ReportedExposure{get;set;} public string Evidence{get;set;}
-  public string ObjectLabel{get{return string.IsNullOrEmpty(Object)?"Unknown":Catalog.Label(Object);}}
+  public string ObjectLabel{get{return ImageClass=="Meteor"?"Meteor":string.IsNullOrEmpty(Object)?"Unknown":Catalog.Label(Object);}}
   public string TotalExposureText{get{return TotalExposure.HasValue?TotalExposure.Value.ToString("0.###",CultureInfo.InvariantCulture)+" s":"Unknown";}}
   public string SubExposureText{get{return SubExposure.HasValue?SubExposure.Value.ToString("0.###",CultureInfo.InvariantCulture)+" s":"Unknown / mixed";}}
   public string SubsText{get{return Subs.HasValue?Subs.Value.ToString(CultureInfo.InvariantCulture):"Unknown";}}
@@ -27,7 +27,7 @@ namespace AstroArchive {
   public static EditedMetadata Read(string filename,FitsHeader header,EditedMetadata original=null){
    header=header??new FitsHeader();string leaf=Path.GetFileName(filename??"");string hint=leaf+" "+header.Get("IMAGETYP","PROCTYPE","PROCESS");var notes=new List<string>();
    bool starless=Regex.IsMatch(hint,@"(?:^|[^a-z])star[_ -]?less(?=$|[^a-z])",RegexOptions.IgnoreCase),stars=Regex.IsMatch(hint,@"(?:^|[^a-z])(?:stars?[_ -]?only|stars?[_ -]?layer|stars)(?=$|[^a-z])",RegexOptions.IgnoreCase);
-   var result=new EditedMetadata{ImageClass=starless&&stars?"Unknown (conflicting labels)":starless?"Starless":stars?"Stars only":"Edited image",RA=header.Get("OBJCTRA","RA","CRVAL1"),Dec=header.Get("OBJCTDEC","DEC","CRVAL2")};
+   var result=new EditedMetadata{ImageClass=Util.MeteorFilename(leaf)?"Meteor":starless&&stars?"Unknown (conflicting labels)":starless?"Starless":stars?"Stars only":"Edited image",RA=header.Get("OBJCTRA","RA","CRVAL1"),Dec=header.Get("OBJCTDEC","DEC","CRVAL2")};
    string target=new[]{"OBJECT","OBJNAME","TARGET"}.Select(k=>header.Get(k)).FirstOrDefault(v=>!Catalog.IsAmbiguous(v)),fileTarget=Catalog.TargetFromFilename(leaf)??(Catalog.HasFilenameConflict(leaf)?null:Catalog.TargetFromFilename(filename));bool named=!Catalog.IsAmbiguous(target);result.Object=named?Catalog.Normalize(target):fileTarget;
    if(!string.IsNullOrEmpty(result.Object))notes.Add(named?"Object from image metadata":"Object from filename");
    result.Filters=header.Get("FILTER","FILTERID","FILTNAME");if(string.IsNullOrEmpty(result.Filters)||result.Filters.Equals("Unknown",StringComparison.OrdinalIgnoreCase)){result.Filters=FilenameFilters(leaf);if(result.Filters.Length==0)result.Filters=FilenameFilters(filename);if(result.Filters.Length>0)notes.Add("Filters/channel labels from filename");}else notes.Add("Filter from image metadata");
@@ -49,6 +49,7 @@ namespace AstroArchive {
    if(!result.TotalExposure.HasValue&&result.Subs.HasValue&&result.SubExposure.HasValue)result.TotalExposure=Positive(result.Subs.Value*result.SubExposure.Value);
    if(!result.SubExposure.HasValue&&result.Subs.HasValue&&result.TotalExposure.HasValue)notes.Add("Sub duration not inferred from a total that may combine different exposures or filters");
    if(result.ReportedExposure.HasValue&&!result.SubExposure.HasValue&&!result.TotalExposure.HasValue)notes.Add("EXPTIME/EXPOSURE meaning is unspecified; it is not assumed to be per sub or total");
+   if(result.ImageClass=="Meteor"){result.Object=null;notes.Add("Meteor filename label; object identity omitted");}
    result.Evidence=string.Join("\n",notes);return result;
   }
  }
