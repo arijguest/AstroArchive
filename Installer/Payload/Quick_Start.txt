@@ -122,8 +122,9 @@ External XISF previews retain their 256 MB limit. Imported image decoding has a
 TIFF, PNG, JPEG, BMP, GIF and Windows photo formats use Windows image codecs,
 including high-depth integer and floating samples when supported by the codec.
 DSLR RAW compatibility depends on an installed Windows codec for that camera.
-Tile-compressed FITS (.fz), video and multi-frame scientific cubes need conversion.
-Archive imports remain FITS-only; previewing other formats does not index them.
+Tile-compressed FITS (.fz) requires its compatible optional decoder.
+GIF and supported videos play in Preview; scientific cubes use selected slices.
+Original supported assets can be archived; external previews do not import them.
 
 IMAGE PREVIEW AND TABLES
 Choose Columns beside the repository tools or import tools to show or hide
@@ -719,8 +720,7 @@ multiplied. Edited imports keep unspecified reported exposure separate from
 per-sub and total integration, and calculate totals only from confirmed counts
 and sub durations or explicitly labelled total-exposure metadata.
 
-Session summaries and Edited media
----------------------------------
+SESSION SUMMARIES AND EDITED MEDIA
 Repository starts with compact session summaries for repeated Light subframes.
 The header names the target and recorded date, then shows sub count, total known
 exposure, filters and device. Use the small expand arrow to inspect individual
