@@ -8,6 +8,9 @@ using System.Text;
 using System.Threading;
 namespace AstroArchive {
  public static class SirilHandoff {
+  public static EditedProject CreateWorkingCopy(Repository repo,List<Frame> frames,string name,string executable,CancellationToken ct,Action<ProgressInfo> progress){
+   ValidateExecutable(executable);if(!CanSend(frames))throw new InvalidOperationException("Select one non-rejected, uncompressed FITS stack to open in Siril.");return repo.CreateEditedWorkingCopy(frames[0],name,"Siril",ct,progress);
+  }
   public static bool CanSend(IList<Frame> frames){return frames.Count==1&&frames[0].Kind=="Stack"&&!frames[0].Rejected&&Util.IsFits(frames[0].OriginalName)&&!frames[0].OriginalName.EndsWith(".gz",StringComparison.OrdinalIgnoreCase);}
   public static void ValidateExecutable(string executable){
    if(string.IsNullOrWhiteSpace(executable)||!File.Exists(executable)||!Path.GetFileName(executable).Equals("siril.exe",StringComparison.OrdinalIgnoreCase))throw new IOException("Choose the installed Siril GUI executable (siril.exe). The command-line executable cannot open the graphical workspace.");

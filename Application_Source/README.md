@@ -1,4 +1,6 @@
-# AstroArchive 1.10.3
+# AstroArchive 1.11.0
+
+Edited projects support reviewed folder import, starless/stars-only classification, acquisition metadata recovery and automatic editor working copies. The repository path sits below the table; operation feedback appears only while busy.
 
 Portable Windows 10/11 x64 WPF app for archiving astronomical image originals and creating verified stacking projects. Open `AstroArchive.exe`; read `Quick_Start.txt` for the complete workflow.
 

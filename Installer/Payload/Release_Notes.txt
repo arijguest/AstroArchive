@@ -1,3 +1,19 @@
+AstroArchive 1.11.0 — Edited workspace and expanded repository layout
+Package 1.11.0.1
+
+- Remove the bottom status bar and expand the workspace into its space. Move the
+  repository path into the grey strip below its data table. Keep progress and
+  Cancel in an active-only operation panel; diagnostics open separately.
+- Add Edited projects with individual-file and reviewed recursive folder import.
+  Preserve subfolders and sources, verify copied bytes, isolate unreadable files,
+  reject changed inputs, and remove unpublished projects after cancellation.
+- Automatically create Edited working copies for Siril and AstroWizard handoffs.
+  Keep originals intact and discover editor outputs when returning or refreshing.
+- Classify Starless and Stars only images from filenames. Recover object/filter,
+  sub-count, per-sub and total exposure data from recognised filenames and image
+  metadata; retain unknown values and explain conflicts or ambiguous exposure.
+- Retain the current header sizing, branding, navigation and accessibility fixes.
+
 AstroArchive 1.10.3 — header alignment refinement
 Package 1.10.3.2
 

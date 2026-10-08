@@ -7,6 +7,9 @@ using System.Linq;
 using System.Threading;
 namespace AstroArchive {
  public static class AstroWizardHandoff {
+  public static EditedProject CreateWorkingCopy(Repository repo,List<Frame> frames,string name,string executable,CancellationToken ct,Action<ProgressInfo> progress){
+   if(!CanSend(frames))throw new InvalidOperationException("Select one non-rejected FITS stack for AstroWizard.");ValidateExecutable(executable,ct);return repo.CreateEditedWorkingCopy(frames[0],name,"AstroWizard",ct,progress);
+  }
   public const string VerifiedBuild="7 October 2026 (Clear Eyes)";
   public const string VerifiedSha256="200f8eb21079cba4d4de0482e52265d18ca69425bcb49f513e622c7bc504f803";
   public static bool CanSend(IList<Frame> frames){return frames.Count==1&&frames[0].Kind=="Stack"&&!frames[0].Rejected&&new[]{".fit",".fits"}.Contains(Path.GetExtension(frames[0].OriginalName??"").ToLowerInvariant());}

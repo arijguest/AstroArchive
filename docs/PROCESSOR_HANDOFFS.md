@@ -131,3 +131,5 @@ inbox roots are refused, and repository reindexing excludes pending inbox files.
   ignored gzip. The recording UI substitutes verify dispatch, not image rendering.
 - XAML syntax, source inclusion and whitespace checks passed. Full Windows
   GUI smoke tests and interactive receiver loading remain unverified locally.
+
+Repository handoffs now create and register an Edited project automatically. Both editors open its verified working image. Project folders and acquisition metadata remain portable with the repository. Editor outputs saved in the same folder appear on refresh.

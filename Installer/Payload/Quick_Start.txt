@@ -1,4 +1,4 @@
-AstroArchive 1.10.3
+AstroArchive 1.11.0
 Windows 10/11 x64 desktop app. Built-in .NET Framework 4.8 and Windows SQLite.
 Runs offline. No Python or Google login required.
 
@@ -85,7 +85,7 @@ repositories and previously exported projects retain their existing labels.
 
 IMAGE PREVIEW AND APPEARANCE
 Settings > Preferences offers System, Light and Dark themes. The active archive
-path stays centered above the menus; click it to open the folder in Explorer.
+path sits in the grey strip below the repository table; click it to open Explorer.
 Choose a different archive in Repository, or Settings > Repository and save.
 
 Select a capture to preview it, or double-click/right-click > Preview image.
@@ -443,7 +443,7 @@ before processing. The dump flow has progress/cancellation and saves a last-dump
 report in .astroarchive/reports. Normal import cleanup preferences do not affect it.
 
 Select one stack and right-click Export > Send stack to AstroWizard or Siril.
-Choose the executable and a working-copy folder outside the archive. The image is
+Choose the executable and an Edited project name. The image is
 copied, verified and passed directly to the receiving GUI. AstroWizard accepts
 .fit/.fits via this route and requires the official signed Clear Eyes Windows build
 of 7 October 2026 (verified by checksum). Other builds are refused pending validation.
@@ -605,7 +605,7 @@ layouts remain originals. Base64 inline/embedded XISF stays supported.
 NAVIGATION, ACCESSIBILITY AND WALKTHROUGH
 Import, Export, Repository, Settings, Guide and Buy Me a Coffee are grouped at
 upper left. The AstroArchive logo and title are at upper right. The concise
-repository path is centered above the menus; click it to open the folder in
+repository path sits below its data table; click it to open the folder in
 File Explorer. Repository > Choose repository folder changes the active archive.
 
 Repository replaces the Library page. Keep browsing/searching in the page;
@@ -621,8 +621,8 @@ optional analysis. Changing model/camera or ignored filenames requires a new
 scan. Originals remain kept by default. Export always uses archived repository
 files, including when opened from the Import page.
 
-The bottom bar shows the current status. Timing, progress and Cancel appear only
-while processing. Repository > Diagnostics opens the performance table and last
+The workspace fills the space previously used by the bottom status bar. Progress
+and Cancel appear in a temporary panel only while processing. Repository > Diagnostics opens the performance table and last
 import report when needed. Table headings show ascending (▲) or descending (▼)
 sorting. Numbers show priority when several headings sort together. Shift-click
 adds a heading; click again to reverse. Saved heading layouts remain independent.
@@ -661,3 +661,32 @@ FITS timestamps use UTC; filename dates retain their calendar date and unknown
 clock basis. Shifted observing nights and file modification times are not used.
 Read missing dates from FITS can recover older date-only metadata without changing
 capture files. Tables show ACQUIRED dates; exports retain the date and its source.
+
+EDITED IMAGES AND WORKING COPIES
+Edited holds mutable images and editor projects separately from archived captures.
+Choose Edited > Add images to copy individual files into a new or existing project.
+Choose Edited > Import folder to crawl an existing collection, optionally including
+subfolders. Review detected image classes, objects and exposure data before copying.
+Unreadable files are excluded; inaccessible or linked folders are reported. Subfolder
+structure is retained. Sources are checked again before import and stay in place.
+A changed or cancelled folder import leaves no half-created project.
+
+Sending a repository stack to Siril or the verified AstroWizard build creates a
+verified working copy automatically in Edited. The editor opens that working file.
+Save processed outputs in its project folder; Refresh or returning to AstroArchive
+finds them. Use Open project folder, Preview image or Image details on this page.
+Edited copies and projects remain portable with the repository and survive clearing
+its capture index. They are not offered as raw stacking inputs during reindexing.
+
+Filename labels classify Starless and Stars only images. Object names, filter/channel
+labels, sub counts and exposure data are recovered from recognised filenames and
+FITS/XISF metadata. Supported raster text metadata and EXIF exposure are read through
+Windows codecs. For example M31_Ha_120x60s_starless identifies 120 exposures of 60 s,
+7200 seconds total, Ha and Andromeda. Mixed exposure products retain their total and
+combined sub count without inventing a uniform sub duration. Unknown values remain
+unknown. Image details records how each value was recovered, includes recorded object
+coordinates, and flags disagreements between metadata and filenames.
+Unlabelled EXPTIME/EXPOSURE is retained as reported exposure; a stack count alone does
+not prove whether that value is per sub or total. Explicit totals and per-sub fields
+are used when available. Editor outputs from a single-source working project can
+inherit missing acquisition details when their object/filter/sub-count evidence agrees.

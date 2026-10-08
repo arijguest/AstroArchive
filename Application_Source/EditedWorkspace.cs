@@ -1,0 +1,81 @@
+// Portable, mutable editor projects live outside the capture index.
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Threading;
+namespace AstroArchive {
+ public sealed class EditedSource {
+  public string RelativePath{get;set;} public string OriginalName{get;set;} public string Hash{get;set;} public string ArchiveHash{get;set;} public EditedMetadata Metadata{get;set;}
+ }
+ public sealed class EditedProject {
+  public int Schema{get;set;} public string Id{get;set;} public string Name{get;set;} public string Processor{get;set;} public string Target{get;set;} public DateTime CreatedUtc{get;set;}
+  public List<EditedSource> Sources{get;set;} public override string ToString(){return Name;}
+ }
+ public sealed class EditedImage {
+  public string Filename{get;set;} public string RelativePath{get;set;} public string Kind{get;set;} public long Bytes{get;set;} public DateTime Modified{get;set;} public string Source{get;set;} public EditedMetadata Metadata{get;set;} public string MetadataProblem{get;set;}
+ }
+ public sealed partial class Repository {
+  public string EditedFolder{get{return Path.Combine(Meta,"edited");}}
+  public string EditedProjectFolder(EditedProject project){Guid id;if(project==null||!Guid.TryParseExact(project.Id,"N",out id))throw new InvalidDataException("Invalid edited project identity.");string path=Path.Combine(EditedFolder,project.Id);CheckManagedPath(path,Root);return path;}
+  public List<EditedProject> EditedProjects(out List<string> errors){
+   errors=new List<string>();var projects=new List<EditedProject>();CheckManagedPath(EditedFolder,Root);if(!Directory.Exists(EditedFolder))return projects;
+   foreach(string directory in Directory.EnumerateDirectories(EditedFolder)){
+    Guid id;if(!Guid.TryParseExact(Path.GetFileName(directory),"N",out id))continue;
+    try{CheckManagedPath(Path.Combine(directory,"edited-project.json"),Root);var project=Util.Deserialize<EditedProject>(File.ReadAllText(Path.Combine(directory,"edited-project.json")));
+     if(project==null||project.Schema!=1||project.Id!=Path.GetFileName(directory)||string.IsNullOrWhiteSpace(project.Name)||project.Sources==null)throw new InvalidDataException("Invalid edited project record.");
+     foreach(var source in project.Sources)EditedPath(project,source.RelativePath);projects.Add(project);
+    }catch(Exception e){if(!(e is IOException||e is InvalidDataException||e is UnauthorizedAccessException||e is ArgumentException||e is InvalidOperationException))throw;errors.Add(Path.GetFileName(directory)+": "+e.Message);}
+   }return projects.OrderByDescending(p=>p.CreatedUtc).ToList();
+  }
+  public string EditedPath(EditedProject project,string relative){
+   string folder=EditedProjectFolder(project);if(string.IsNullOrWhiteSpace(relative)||Path.IsPathRooted(relative))throw new InvalidDataException("Invalid edited image path.");
+   string path=Path.GetFullPath(Path.Combine(folder,relative));if(!Util.Within(path,folder)||path.Equals(folder,StringComparison.OrdinalIgnoreCase))throw new InvalidDataException("Edited image path escapes its project.");CheckManagedPath(path,Root);return path;
+  }
+  void SaveEditedProject(EditedProject project){string folder=EditedProjectFolder(project),path=Path.Combine(folder,"edited-project.json"),temp=path+"."+Guid.NewGuid().ToString("N")+".partial";
+   CheckManagedPath(path,Root);try{File.WriteAllText(temp,Util.Serialize(project));CommitTemporary(temp,path,CancellationToken.None);}finally{TryRemove(temp);}
+  }
+  EditedProject NewEditedProject(string name,string processor,string target){
+   if(string.IsNullOrWhiteSpace(name))throw new ArgumentException("Enter a project name.");CheckManagedPath(EditedFolder,Root);Directory.CreateDirectory(EditedFolder);
+   return new EditedProject{Schema=1,Id=Guid.NewGuid().ToString("N"),Name=name.Trim(),Processor=processor??"",Target=target??"",CreatedUtc=DateTime.UtcNow,Sources=new List<EditedSource>()};
+  }
+  public EditedProject CreateEditedWorkingCopy(Frame capture,string name,string processor,CancellationToken ct,Action<ProgressInfo> progress){
+   ct.ThrowIfCancellationRequested();var indexed=capture==null?null:Find(capture.Hash);if(indexed==null)throw new IOException("The archived capture is unavailable.");ValidateCapture(indexed,ct);
+   var project=NewEditedProject(name,processor,indexed.TargetLabel);string folder=EditedProjectFolder(project);Directory.CreateDirectory(folder);
+   try{var metadata=EditedMetadata.Read(indexed.OriginalName,Assets.Inspect(FilePath(indexed)).Header);if(string.IsNullOrEmpty(metadata.Object)&&!Catalog.IsAmbiguous(indexed.Target))metadata.Object=indexed.Target;if(string.IsNullOrEmpty(metadata.Filters)&&indexed.Filter!="Unknown")metadata.Filters=indexed.Filter;
+    AddEditedFile(project,FilePath(indexed),indexed.OriginalName,indexed.Hash,indexed.Hash,ct,progress,null,metadata);return project;}
+   catch{RemoveNewEditedProject(project);throw;}
+  }
+  public EditedProject AddEditedImages(IEnumerable<string> files,EditedProject project,string name,CancellationToken ct,Action<ProgressInfo> progress){
+   ct.ThrowIfCancellationRequested();var inputs=files.Distinct(StringComparer.OrdinalIgnoreCase).ToList();if(inputs.Count==0)throw new ArgumentException("Choose images to add.");
+   bool created=project==null;if(created){project=NewEditedProject(name,"","");Directory.CreateDirectory(EditedProjectFolder(project));}
+   else{string id=project.Id,path=Path.Combine(EditedProjectFolder(project),"edited-project.json");CheckManagedPath(path,Root);project=Util.Deserialize<EditedProject>(File.ReadAllText(path));if(project==null||project.Id!=id||project.Schema!=1||project.Sources==null)throw new InvalidDataException("Invalid edited project record.");foreach(var record in project.Sources)EditedPath(project,record.RelativePath);}
+   try{foreach(string file in inputs){ct.ThrowIfCancellationRequested();if(!Util.IsImageAsset(file))throw new NotSupportedException("Choose a supported image: "+Path.GetFileName(file));
+     var metadata=EditedMetadata.Read(Path.GetFileName(file),Assets.Inspect(file).Header);string hash=Util.Hash(file,ct);AddEditedFile(project,file,Path.GetFileName(file),hash,null,ct,progress,null,metadata);
+    }return project;
+   }catch{if(created)RemoveNewEditedProject(project);throw;}
+  }
+  void AddEditedFile(EditedProject project,string source,string name,string hash,string archiveHash,CancellationToken ct,Action<ProgressInfo> progress,string importedRelative=null,EditedMetadata metadata=null){
+   string basename=Util.SafeFile(name),relative=Path.Combine("images",importedRelative??basename);EditedPath(project,relative);int suffix=1;string directory=Path.GetDirectoryName(relative);
+   while(File.Exists(EditedPath(project,relative))||Directory.Exists(EditedPath(project,relative)))relative=Path.Combine(directory,Path.GetFileNameWithoutExtension(basename)+"_"+(suffix++)+Path.GetExtension(basename));
+   string destination=EditedPath(project,relative),temp=destination+"."+Guid.NewGuid().ToString("N")+".partial";Directory.CreateDirectory(Path.GetDirectoryName(destination));
+   var metrics=new PipelineMetrics(progress);metrics.Stage="Creating edited working copy";metrics.Current=name;metrics.Pulse(true);
+   bool published=false;try{CopyVerified(source,temp,hash,ct,metrics);ct.ThrowIfCancellationRequested();File.Move(temp,destination);published=true;
+    var record=new EditedSource{RelativePath=relative,OriginalName=name,Hash=hash,ArchiveHash=archiveHash,Metadata=metadata};project.Sources.Add(record);
+    try{SaveEditedProject(project);}catch{project.Sources.Remove(record);throw;}published=false;
+   }finally{TryRemove(temp);if(published)TryRemove(destination);}
+  }
+  void RemoveNewEditedProject(EditedProject project){string path=EditedProjectFolder(project);var errors=new List<string>();if(Directory.Exists(path))RemoveOwnedTree(path,Root,errors,CancellationToken.None);}
+  public List<EditedImage> EditedImages(EditedProject project){
+   var images=new List<EditedImage>();string folder=EditedProjectFolder(project);if(!Directory.Exists(folder))return images;var directories=new Stack<string>();directories.Push(folder);
+   while(directories.Count>0){string directory=directories.Pop();CheckManagedPath(Path.Combine(directory,"edited-project.json"),Root);
+    foreach(string child in Directory.EnumerateDirectories(directory))if(FileStamp.CanTraverse(new DirectoryInfo(child)))directories.Push(child);
+    foreach(string path in Directory.EnumerateFiles(directory).Where(Util.IsImageAsset)){CheckManagedPath(path,Root);string relative=path.Substring(folder.Length+1);var source=project.Sources.FirstOrDefault(s=>s.RelativePath.Equals(relative,StringComparison.OrdinalIgnoreCase));var file=new FileInfo(path);
+     var original=source==null?(project.Sources.Count==1?project.Sources[0].Metadata:null):source.Metadata;EditedMetadata metadata;string problem=null;
+     try{metadata=EditedMetadata.Read(relative,Assets.Inspect(path).Header,original);}catch(Exception e){if(!(e is IOException||e is InvalidDataException||e is UnauthorizedAccessException||e is NotSupportedException||e is ArgumentException||e is OverflowException))throw;metadata=EditedMetadata.Read(relative,null,original);problem=e.Message;}
+     images.Add(new EditedImage{Filename=file.Name,RelativePath=relative,Bytes=file.Length,Modified=file.LastWriteTime,Kind=source==null?"Editor output":string.IsNullOrEmpty(source.ArchiveHash)?"Added image":"Working copy",Source=source==null?"":source.OriginalName,Metadata=metadata,MetadataProblem=problem});
+    }
+   }return images.OrderByDescending(i=>i.Modified).ThenBy(i=>i.Filename).ToList();
+  }
+ }
+}

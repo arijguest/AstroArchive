@@ -46,7 +46,7 @@ namespace AstroArchive {
             }
         }
         void InitializeNavigation(bool firstRun) {
-            foreach (string name in new[] { "ImportMenu", "ExportMenu", "RepositoryMenu", "SettingsMenu", "GuideMenu" }) {
+            foreach (string name in new[] { "ImportMenu", "ExportMenu", "RepositoryMenu", "EditedMenu", "SettingsMenu", "GuideMenu" }) {
                 string captured = name;
                 var menu = TopMenu(name);
                 menu.GotKeyboardFocus += (s,e) => { if (!preparingNavigation && ReferenceEquals(e.NewFocus, menu) && !menu.IsSubmenuOpen) PopulateNavigation(captured); };
@@ -63,7 +63,7 @@ namespace AstroArchive {
             UiHelp.Tip(B("RepositoryImportButton"), "Go to Import to select a source folder and review new captures.");
             UiHelp.Tip(B("MosaicImportButton"), "Go to Import to bring new captures into this repository.");
             UiHelp.Tip(B("ImportExportButton"), "Export archived repository files. Scanned source files must be imported first.");
-            foreach (string name in new[] { "ImportMenu", "ExportMenu", "RepositoryMenu", "SettingsMenu", "GuideMenu" })
+            foreach (string name in new[] { "ImportMenu", "ExportMenu", "RepositoryMenu", "EditedMenu", "SettingsMenu", "GuideMenu" })
                 UiHelp.Tip(TopMenu(name), name.Replace("Menu", "") + " actions. Press Alt to reveal menu access keys; arrow keys navigate the menu.");
             Window.PreviewKeyDown += NavigationKeys;
             navigationReady = true;
@@ -75,8 +75,8 @@ namespace AstroArchive {
         void NavigationKeys(object sender, KeyEventArgs e) {
             if ((Keyboard.Modifiers & ModifierKeys.Control) == 0) return;
             if (e.Key == Key.F) {
-                GoToPage(((TabControl)Window.FindName("MainTabs")).SelectedIndex == 1 ? 1 : 0);
-                var search = T(((TabControl)Window.FindName("MainTabs")).SelectedIndex == 1 ? "ImportSearchBox" : "SearchBox");
+                GoToPage(((TabControl)Window.FindName("MainTabs")).SelectedIndex == 3 ? 3 : ((TabControl)Window.FindName("MainTabs")).SelectedIndex == 1 ? 1 : 0);
+                var search = T(((TabControl)Window.FindName("MainTabs")).SelectedIndex == 3 ? "EditedSearchBox" : ((TabControl)Window.FindName("MainTabs")).SelectedIndex == 1 ? "ImportSearchBox" : "SearchBox");
                 search.Focus(); search.SelectAll(); e.Handled = true;
             } else if (e.Key == Key.I) { GoToPage(1); e.Handled = true; }
             else if (e.Key == Key.E && cancel == null && repo != null) { OpenTopMenu("ExportMenu"); e.Handled = true; }
@@ -86,6 +86,7 @@ namespace AstroArchive {
             TopMenu("ImportMenu").IsEnabled = cancel == null;
             TopMenu("ExportMenu").IsEnabled = cancel == null && repo != null;
             TopMenu("SettingsMenu").IsEnabled = cancel == null;
+            TopMenu("EditedMenu").IsEnabled = cancel == null;
             B("ImportExportButton").IsEnabled = TopMenu("ExportMenu").IsEnabled;
             B("OpenRepositoryFolderButton").IsEnabled = repo != null;
             if (repo != null) {
@@ -100,7 +101,7 @@ namespace AstroArchive {
             L("ImportPolicyLabel").FontWeight = cleanup ? FontWeights.SemiBold : FontWeights.Normal;
             L("RateLabel").Visibility = cancel != null ? Visibility.Visible : Visibility.Collapsed;
             ((ProgressBar)Window.FindName("ProgressBar")).Visibility = cancel != null ? Visibility.Visible : Visibility.Collapsed;
-            ((ColumnDefinition)Window.FindName("StatusProgressColumn")).Width = new GridLength(cancel != null ? 240 : 0);
+
         }
         void PopulateNavigation(string name) {
             var menu = TopMenu(name);
@@ -108,6 +109,7 @@ namespace AstroArchive {
             if (name == "ImportMenu") BuildImportNavigation(menu);
             else if (name == "ExportMenu") BuildExportNavigation(menu);
             else if (name == "RepositoryMenu") BuildRepositoryNavigation(menu);
+            else if (name == "EditedMenu") BuildEditedNavigation(menu);
             else if (name == "SettingsMenu") BuildSettingsNavigation(menu);
             else if (name == "GuideMenu") BuildGuideNavigation(menu);
         }
@@ -181,12 +183,7 @@ namespace AstroArchive {
             var maintenance = Branch("Maintenance");maintenance.IsEnabled=cancel==null&&repo!=null;
             if (repo != null) MoveMenuItems(maintenance, BuildRepositoryTools(), item => !(item is MenuItem) || Convert.ToString(((MenuItem)item).Header) != "Export searchable catalogue CSV");
             maintenance.Items.Add(new Separator()); maintenance.Items.Add(MenuAction("Delete all archive data…", ResetArchive, repo != null)); menu.Items.Add(maintenance);
-            var performance = MenuAction("Show performance table", () => {
-                var panel = (Expander)Window.FindName("PerformanceDetails");
-                panel.Visibility = panel.Visibility == Visibility.Visible ? Visibility.Collapsed : Visibility.Visible;
-                panel.IsExpanded = panel.Visibility == Visibility.Visible;
-            }, true, false);
-            performance.IsCheckable = true; performance.IsChecked = ((Expander)Window.FindName("PerformanceDetails")).Visibility == Visibility.Visible;
+            var performance = MenuAction("Show performance table…", ShowPerformanceTable, true, false);
             menu.Items.Add(Branch("Diagnostics", performance, MenuAction("Last import report…", () => ShowReport("Import performance and errors", repo == null ? "Choose a repository first." : repo.LastReport), true, false)));
         }
         void BuildSettingsNavigation(MenuItem menu) {

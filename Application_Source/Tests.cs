@@ -182,7 +182,7 @@ namespace AstroArchive {
    WindowsTest("Verified unchanged sources skip payload reads on subsequent fast scans",()=>{string source=Path.Combine(root,"cached-source");Directory.CreateDirectory(source);Write(Path.Combine(source,"Light_M33.fit"),64,48,(x,y)=>1100,new Dictionary<string,string>());using(var repo=new Repository(Path.Combine(root,"cached-repo"))){var plan=repo.Scan(source,"Unit-01","Auto",ct,NoProgress,false,null,true);repo.Import(plan.Frames,ct,NoProgress,new ImportOptions{SourceRoot=source});var second=repo.Scan(source,"Unit-01","Auto",ct,NoProgress,false,null,true);Check(second.CacheHits==1&&second.Frames.Single().Status=="Duplicate (cached)"&&second.Metrics.Snapshot().Single(s=>s.Stage=="Metadata").Bytes==0,"Unchanged source reread payload");}});
    PreviewTests();
    PerformanceTests();
-   WorkflowRegressions();FilterRegressions();HelpTests();
+   WorkflowRegressions();FilterRegressions();EditedRegressions();HelpTests();
    CompatibilityCases();Console.WriteLine(passed+" tests passed; "+skipped+" platform/optional-codec tests skipped.");File.WriteAllText(Path.Combine(root,"test-results.txt"),passed+" tests passed; "+skipped+" platform/optional-codec tests skipped. Exit code "+Environment.ExitCode);return Environment.ExitCode;
   }
   [System.Runtime.InteropServices.DllImport("kernel32.dll",EntryPoint="CreateHardLinkW",CharSet=System.Runtime.InteropServices.CharSet.Unicode,SetLastError=true)]static extern bool CreateHardLink(string link,string existing,IntPtr security);

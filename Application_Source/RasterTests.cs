@@ -25,6 +25,9 @@ namespace AstroArchive {
                     12,0,44,1,0,125,255,255
                 };
                 var gray=BitmapSource.Create(2,2,96,96,PixelFormats.Gray16,null,samples,4);
+                var editedMetadata=new BitmapMetadata("png");editedMetadata.SetQuery("/tEXt/{str=OBJECT}","M51");editedMetadata.SetQuery("/tEXt/{str=FILTER}","Ha");editedMetadata.SetQuery("/tEXt/{str=NCOMBINE}","12");editedMetadata.SetQuery("/tEXt/{str=TOTEXP}","7200");
+                var editedEncoder=new PngBitmapEncoder();editedEncoder.Frames.Add(BitmapFrame.Create(gray,null,editedMetadata,null));string editedPath=Path.Combine(root,"Whirlpool_starless.png");using(var stream=File.Create(editedPath))editedEncoder.Save(stream);
+                var recovered=EditedMetadata.Read(Path.GetFileName(editedPath),Assets.Inspect(editedPath).Header);Check(recovered.ImageClass=="Starless"&&recovered.Object=="M51"&&recovered.Filters=="Ha"&&recovered.Subs==12&&recovered.TotalExposure==7200,"Edited PNG acquisition metadata not recovered");Console.WriteLine("PASS WIC edited PNG object/filter/sub-count/total-exposure metadata");
                 string tiff=Write(root,"gray16.tiff",new TiffBitmapEncoder {
                     Compression=TiffCompressOption.Zip
                 },gray);
