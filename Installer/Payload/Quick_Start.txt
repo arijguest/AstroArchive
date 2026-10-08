@@ -74,14 +74,15 @@ IMPORT WORKFLOW
    rotation are Off by default. Keep source originals unless deletion is intended.
 4. Scan folder discovers FITS and reads metadata without copying. Review the
    frame type, target and status; correct uncertain metadata before importing.
-5. Import new files copies and verifies eligible captures. Duplicate records are
-   skipped; missing or changed archive copies can be restored. Use Import >
+5. Import new files copies and verifies eligible captures. Matching filenames are
+   skipped; robust matching restores missing or changed archive copies. Use Import >
    Review and recovery for discovery errors; Repository > Diagnostics opens
    the last import report and performance details.
 6. Completed files remain imported after Cancel or a later failure. Resolve the
    problem, scan again and import to resume.
-For a recognised connected USB scope, Import > USB telescopes screens and imports new
-captures directly, with originals retained and analysis off.
+For connected Seestar/DWARF storage, use the visible Import from button, or
+Import > USB telescopes. A matching saved physical telescope is selected automatically;
+set one if no suitable profile exists. Originals stay and analysis remains off.
 
 LIBRARY WORKFLOW
 Search and use make, device, frame-type and mount filters to narrow the library.
@@ -101,13 +102,18 @@ telescope or enter its unique physical device ID and model. Browse its capture
 folder and press Save telescope. Choose the saved telescope from the dropdown on
 later imports. Existing device IDs are recovered from repository records;
 Recover from repository adds any missing profiles without replacing your choices.
-Recovered profiles need a USB folder association saved before auto upload.
+Connected storage uses its saved USB association, otherwise a compatible selected
+or unique saved profile. Choose a profile when several match, or save a telescope
+when none match. Saving a USB folder association preserves the physical binding.
 
 Import > USB telescopes lists connected telescope storage.
-Choose a device to screen supported FITS files, skip verified duplicates, import missing
-captures and restore missing/damaged archive copies. Originals stay on the USB
+Choose a device to import new captures using fast filename matching. Known DWARF
+sessions are omitted; Seestar folders still discover new filenames. Enable Robust
+file matching in Import options to revisit edits, restore missing/damaged archive
+copies or finish a partially imported DWARF session. Originals stay on the USB
 device. Solving and rotation stay off for this action. Multiple connected sources
-are listed in a menu. Reconnect and click again to resume an interrupted import.
+are listed in a menu. Reconnect to continue; use robust matching when a session
+already contains some archived captures and you need its remaining files.
 The saved association uses volume identity and survives drive-letter changes.
 
 Rename telescope changes the saved name and matching indexed captures, import
@@ -847,29 +853,39 @@ that playback is unavailable. Viewing never modifies source pixels or metadata.
 
 FASTER REPEAT TELESCOPE SCANS
 
-Scan folder and USB uploads use the saved import manifest to match session folder
-names and file paths for the selected physical telescope and storage volume.
-The same history is reused when switching between a session folder and its parent;
-selecting a different browse root does not make imported files unknown again.
-A checksum-proven duplicate found at a new telescope/card path is also remembered,
-including that source's sidecars, so subsequent scans reuse its inventory.
-Quick scans load archive lookups only for the selected source's previous imports,
-so unrelated repository captures do not add to this preparation work.
-They check file sizes, timestamps and accompanying session metadata, then skip
-unchanged files whose verified archive copies are still intact. Skipped files
-are counted in the scan summary and report rather than added to the review table.
-A completed scan with no candidates says Nothing new to import.
-New files in old folders and newly created subfolders are still discovered.
-Unknown folder trees are visited first, with newer folder names first within
-each group. Filesystem bookkeeping folders are excluded from discovery.
+Folder scans and one-click connected imports use fast filename matching by default.
+No image headers, pixel data, timestamps, sidecars or archive-copy checks are read
+for matching names. The compact name inventory is scoped to the saved physical
+telescope and survives changes to drive letters and mirrored source roots.
+Sequential names such as raw_001.fit are scoped to their capture session/folder;
+a new DWARF session with the same numbered filename is still imported.
 
-On NTFS/ReFS, file identity and change-time also detect edits with restored
-timestamps. FAT/exFAT storage uses size and timestamps as a quick inventory hint;
-an edit that preserves both may require Import > Full rescan of source. That
-action bypasses the session and header caches and reads/hashes all source files.
-Missing or changed archive copies remain eligible for restoration. New imports
-still receive full checksum verification, and skipped files are never included
-in optional original deletion. No source folders are skipped on name alone.
+A dated DWARF_RAW session folder is omitted entirely once one of its archived
+filenames exists there. The rest of that folder, including nested contents and
+later additions, is intentionally ignored. Reports count known archived names,
+not a newly enumerated inventory of the omitted folder. Choose robust matching
+or Full rescan when you want new additions inside a previously imported session.
+
+Seestar target/sub folders and other layouts continue to enumerate filenames,
+skip matching names and discover new exposures. Unknown folder trees and newer
+folder names are visited first. Filesystem bookkeeping folders are excluded.
+A compact SQLite name index avoids repeated archive lookups and is rebuilt from
+older indexes once; no archived images need to be opened for that rebuild.
+
+Import > Import options > Robust file matching (slower) is saved and off by
+default. Enable it to read headers and checksums, detect same-name edits or changed
+sidecars/folders, and restore missing or damaged archive copies. Import > Full
+rescan of source performs the same complete check for one scan. Fast matching
+trusts the indexed names and does not establish whether their bytes changed.
+Newly copied files still receive checksum verification. Skipped originals never
+enter optional source cleanup; Dump processing retains its verified cleanup path.
+
+When Seestar/DWARF USB storage is detected, Import shows an Import from button.
+An existing volume binding takes priority, then the selected matching saved
+telescope, then a unique compatible profile. If several profiles fit, select the
+physical telescope; if none fit, create/save one before importing. One click scans
+and imports new eligible captures, keeps originals, and leaves optional analysis
+off. Several connected sources remain available through the device menu.
 
 SOFTWARE LICENCE
 AstroArchive is source-available under PolyForm Noncommercial License 1.0.0.

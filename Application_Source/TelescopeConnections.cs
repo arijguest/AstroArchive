@@ -67,6 +67,11 @@ namespace AstroArchive {
   [DllImport("kernel32.dll",SetLastError=true)]static extern bool DeviceIoControl(SafeFileHandle handle,uint code,byte[] input,int inputLength,byte[] output,int outputLength,out int returned,IntPtr overlapped);
  }
  public static class UsbTelescopeDiscovery {
+  public static TelescopeProfile MatchProfile(UsbTelescope device,IEnumerable<TelescopeProfile> profiles,string preferred=null){
+   var saved=profiles.Where(p=>!string.IsNullOrEmpty(p.Id)).ToList();var bound=saved.FirstOrDefault(p=>string.Equals(p.Id,device.ProfileId,StringComparison.OrdinalIgnoreCase));if(bound!=null)return bound;
+   var candidates=saved.Where(p=>InstrumentDetection.MakeOf(p.Model)==device.Make).ToList();
+   var selected=candidates.FirstOrDefault(p=>string.Equals(p.Id,preferred,StringComparison.OrdinalIgnoreCase));return selected??(candidates.Count==1?candidates[0]:null);
+  }
   static bool Allowed(string source,string archive){return string.IsNullOrEmpty(archive)||(!Util.Within(source,archive)&&!Util.Within(archive,source));}
   static bool Readable(string path){try{if(!Directory.Exists(path)||!FileStamp.CanTraverse(new DirectoryInfo(path)))return false;using(var entries=Directory.EnumerateFileSystemEntries(path).GetEnumerator())entries.MoveNext();return true;}catch(IOException){return false;}catch(UnauthorizedAccessException){return false;}}
   public static string Resolve(UsbVolume volume,TelescopeProfile profile){

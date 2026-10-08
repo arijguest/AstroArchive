@@ -26,7 +26,7 @@ namespace AstroArchive {
      var first=UsbAutoUpload.Run(repo,profile,source,1,ct,NoProgress);Check(first.Import.Imported==0&&first.Import.Duplicates==1&&repo.All().Single().Target=="M45","Initial match changed archived metadata or imported twice");
      var remembered=repo.SourceHistory(source).Single().Value;Check(remembered.Status=="Complete"&&remembered.Metadata.SourceMetadataPath==sidecar,"Verified match lost current card sidecars");
      var again=UsbAutoUpload.Run(repo,profile,source,1,ct,NoProgress);Check(again.Plan.FastSkippedFiles==1&&again.Plan.Frames.Count==0&&again.Import.Imported==0&&again.Import.Duplicates==1&&again.Plan.Metrics.Snapshot().Where(s=>s.Stage=="Header open/read"||s.Stage=="Duplicate checking").Sum(s=>s.Bytes)==0,"Repeat USB upload reread a remembered checksum match");
-     File.WriteAllText(sidecar,"{\"targetName\":\"M33\",\"cameraId\":0}");again=UsbAutoUpload.Run(repo,profile,source,1,ct,NoProgress);Check(again.Plan.FastSkippedFiles==0&&again.Import.Duplicates==1&&repo.All().Single().Target=="M45","Changed card metadata was skipped or overwrote user metadata");
+     File.WriteAllText(sidecar,"{\"targetName\":\"M33\",\"cameraId\":0}");again=UsbAutoUpload.Run(repo,profile,source,1,ct,NoProgress,robustMatching:true);Check(again.Plan.FastSkippedFiles==0&&again.Import.Duplicates==1&&repo.All().Single().Target=="M45","Changed card metadata was skipped or overwrote user metadata");
     }
    });
    WindowsTest("DWARF incremental inventory survives parent and session selection changes",()=>{
@@ -89,7 +89,7 @@ namespace AstroArchive {
    });
    WindowsTest("USB repeat upload reports skipped imports without transferring them",()=>{
     string source=Path.Combine(root,"incremental-usb"),session=Path.Combine(source,"DWARF_RAW_20261008");Directory.CreateDirectory(session);Write(Path.Combine(session,"Light_M33.fit"),64,48,(x,y)=>1700,new Dictionary<string,string>());
-    using(var repo=new Repository(Path.Combine(root,"incremental-usb-repo"))){var profile=new TelescopeProfile{Id="USB Scope",Model="Dwarf 3"};repo.Import(repo.Scan(source,profile.Id,profile.Model,ct,NoProgress).Frames,ct,NoProgress);var result=UsbAutoUpload.Run(repo,profile,source,1,ct,NoProgress);Check(result.Plan.FastSkippedFiles==1&&result.Plan.Frames.Count==0&&result.Import.Imported==0&&result.Import.Duplicates==1&&result.Import.FastSkipped==1&&repo.LastReport.Contains("0 verified duplicates; 1 unchanged archived inventory skipped")&&result.Summary.Contains("1 skipped by session inventory")&&Directory.GetFiles(session,"*.fit").Length==1,"Repeated USB upload did unnecessary work or lost accounting");}
+    using(var repo=new Repository(Path.Combine(root,"incremental-usb-repo"))){var profile=new TelescopeProfile{Id="USB Scope",Model="Dwarf 3"};repo.Import(repo.Scan(source,profile.Id,profile.Model,ct,NoProgress).Frames,ct,NoProgress);var result=UsbAutoUpload.Run(repo,profile,source,1,ct,NoProgress);Check(result.Plan.FastSkippedFiles==1&&result.Plan.Frames.Count==0&&result.Import.Imported==0&&result.Import.Duplicates==1&&result.Import.FastSkipped==1&&repo.LastReport.Contains("0 verified duplicates; 1 archived names skipped (filename matching)")&&result.Summary.Contains("1 skipped by filename/session matching")&&Directory.GetFiles(session,"*.fit").Length==1,"Repeated USB upload did unnecessary work or lost accounting");}
    });
   }
  }

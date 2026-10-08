@@ -765,6 +765,7 @@
         <ComboBox x:Name="SavedTelescopeBox" Width="220" Margin="0,0,10,0" ToolTip="Reuse a saved telescope." />
        </WrapPanel>
        <DockPanel Margin="0,0,0,8">
+        <Button DockPanel.Dock="Right" x:Name="AutoUploadButton" Content="Import connected telescope" Visibility="Collapsed" Background="{DynamicResource Accent}" Foreground="White" Margin="8,0,0,0"/>
         <TextBlock x:Name="UsbStatusLabel" Text="Connect a telescope by USB, or browse its capture folder and save the telescope." Foreground="{DynamicResource Muted}" FontSize="{DynamicResource UiFontSmall}" TextWrapping="Wrap" VerticalAlignment="Center" />
        </DockPanel>
        <Grid>
@@ -985,7 +986,6 @@
    <Button x:Name="RenameTelescopeButton" Content="Rename" Padding="10,6" />
    <Button x:Name="RebuildTelescopesButton" Content="Recover profiles" Padding="10,6" />
    <Button x:Name="RefreshUsbButton" Content="Refresh USB" Padding="10,6" Margin="0" />
-   <Button DockPanel.Dock="Right" x:Name="AutoUploadButton" Content="Auto upload from USB" Visibility="Collapsed" Background="{DynamicResource Accent}" Foreground="White" Margin="8,0,0,0" />
    <Button Grid.Column="3" x:Name="ScreenImportsButton" Content="Screen for failures" Margin="8,0,0,0" ToolTip="Check visible captures for rejection or damaged FITS data." />
    <CheckBox x:Name="SkipFlaggedCheck" Content="Skip flagged captures" IsChecked="True" VerticalAlignment="Center" Margin="0,0,16,8" />
    <Button x:Name="ReviewImportsButton" Content="Review flagged captures" Padding="12,6" Margin="0,0,8,8" />
