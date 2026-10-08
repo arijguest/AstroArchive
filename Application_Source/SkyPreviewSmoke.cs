@@ -18,9 +18,9 @@ namespace AstroArchive {
    var encoder=new PngBitmapEncoder();encoder.Frames.Add(BitmapFrame.Create(bitmap));using(var stream=File.Create(path))encoder.Save(stream);return bitmap;
   }
   static bool SkyHasText(Drawing drawing){var group=drawing as DrawingGroup;return drawing is GlyphRunDrawing||group!=null&&group.Children.Any(SkyHasText);}
-  void CheckSkyFit(string prefix,PreviewViewport preview){
+  void CheckSkyFit(string prefix,PreviewViewport preview,int imageWidth=720,int imageHeight=1280){
    var host=(Grid)Window.FindName(prefix+"PreviewHost");var stage=(Grid)Window.FindName(prefix+"PreviewStage");var globe=(SkyGlobeView)Window.FindName(prefix+"PreviewSky");
-   double width,height;new PreviewGeometry(720,1280).Frame(host.ActualWidth,Math.Max(0,host.ActualHeight-PreviewViewport.ToolbarSpace),out width,out height);
+   double width,height;new PreviewGeometry(imageWidth,imageHeight).Frame(host.ActualWidth,Math.Max(0,host.ActualHeight-PreviewViewport.ToolbarSpace),out width,out height);
    if(Math.Abs(stage.ActualWidth-width)>1||Math.Abs(stage.ActualHeight-height)>1)throw new Exception("Sky reduced maximum image fit: "+prefix+", "+stage.RenderSize+" vs "+width+"x"+height);
    double top=height+PreviewViewport.ToolbarSpace,remaining=Math.Max(0,host.ActualHeight-top);
    if(remaining>=50){var bounds=globe.TransformToAncestor(host).TransformBounds(new Rect(globe.RenderSize));if(globe.Visibility!=Visibility.Visible||Math.Abs(bounds.Top-top)>1||Math.Abs(bounds.Height-remaining)>1||bounds.Bottom>host.ActualHeight+1)throw new Exception("Sky does not fill only the remaining space: "+bounds+", host "+host.RenderSize);}
@@ -50,7 +50,9 @@ namespace AstroArchive {
        popup.Child.RaiseEvent(new KeyEventArgs(Keyboard.PrimaryDevice,PresentationSource.FromVisual((Visual)popup.Child),0,Key.Escape){RoutedEvent=Keyboard.PreviewKeyDownEvent});PumpPopupLayout();if(popup.IsOpen)throw new Exception("Escape did not close capture details");
        Window.Height=650;PumpPopupLayout();preview.Resize();PumpPopupLayout();CheckSkyFit(prefix,preview);if(globe.Visibility!=Visibility.Collapsed)throw new Exception("Height-limited image still reserves a sky map");cases+=2;
       }
-      Window.Height=1000;PumpPopupLayout();preview.SetImage(image,true);PumpPopupLayout();double first=globe.ActualHeight;preview.SetImage(BitmapSource.Create(1200,1280,96,96,PixelFormats.Rgb24,null,new byte[1200*1280*3],1200*3),true);PumpPopupLayout();if(globe.ActualHeight<=first)throw new Exception("Sky did not grow when image aspect left more space");
+      Window.Height=1000;PumpPopupLayout();preview.SetImage(image,true);PumpPopupLayout();// Collapsed WPF elements can retain their previous RenderSize. Compare the
+      // allocated height, and verify the newly visible drawing bounds separately.
+      double first=globe.Height;preview.SetImage(BitmapSource.Create(1200,1280,96,96,PixelFormats.Rgb24,null,new byte[1200*1280*3],1200*3),true);PumpPopupLayout();preview.Resize();PumpPopupLayout();CheckSkyFit(prefix,preview,1200,1280);if(globe.Height<=first)throw new Exception("Sky did not grow when image aspect left more space: "+prefix+", old "+first+", new "+globe.Height+", host "+host.RenderSize+", stage "+stage.RenderSize);
       frame.Dec=-60;frame.RA=160;frame.Latitude=-33.9;frame.Longitude=151.2;UpdateCaptureSky(prefix,frame);PumpPopupLayout();if(!globe.Context.Evidence.Contains("Southern celestial sky"))throw new Exception("Southern capture hemisphere lost");frame.ObservedUtc=null;UpdateCaptureSky(prefix,frame);if(globe.Context.HasHorizon)throw new Exception("Missing capture clock produced a horizon");
      }finally{popup.IsOpen=false;preview.SetImage(original,true);UpdateCaptureSky(prefix,null);}
     }
