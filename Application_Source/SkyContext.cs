@@ -65,7 +65,7 @@ namespace AstroArchive {
     var header=new FitsHeader();var image=frame.Images==null?null:frame.Images.FirstOrDefault(i=>i.Key==frame.ImageKey)??frame.Images.FirstOrDefault();
     if(image!=null&&image.Headers!=null)foreach(var value in image.Headers)header.Values[value.Key]=value.Value;
     MetadataFact exposure;if(frame.Facts!=null&&frame.Facts.TryGetValue("Exposure",out exposure)&&exposure!=null&&!string.IsNullOrEmpty(exposure.Raw))header.Comments["EXPTIME"]=exposure.Raw;
-    duration=EditedMetadata.Read(frame.OriginalName,header).TotalExposure;
+    duration=EditedMetadata.Read(string.IsNullOrWhiteSpace(frame.OriginalName)?"capture.fit":frame.OriginalName,header).TotalExposure;
    }
    // Integration metadata is an estimate of elapsed time; never multiply an
    // ambiguous EXPTIME by the stack count or invent acquisition gaps.
