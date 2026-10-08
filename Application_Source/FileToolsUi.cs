@@ -106,11 +106,10 @@ namespace AstroArchive {
    d.Text("Creates a verified working copy and opens it in "+title+". Select one uncompressed FITS stack.");
    TextBox executable=d.Input(title+" executable",settings.SirilExecutable??"");
    d.Button("Locate "+title,()=>{var picker=new OpenFileDialog{Filter="Siril GUI|siril.exe",Title="Choose the "+title+" executable"};if(picker.ShowDialog(d.Window)==true)executable.Text=picker.FileName;});
-   TextBox name=d.Input("Edited project name",selected[0].TargetLabel+" · "+title+" · "+DateTime.Now.ToString("yyyyMMdd_HHmmss"));
-   d.Text("The working copy appears automatically in Edited. Save your processed outputs in its project folder.");
-   d.Accept("Send to "+title,()=>{try{SirilHandoff.ValidateExecutable(executable.Text.Trim());}catch(Exception e){MessageBox.Show(d.Window,e.Message,title+" unavailable");return false;}return !string.IsNullOrWhiteSpace(name.Text);});if(!d.Show())return;
+   d.Text("The working copy appears automatically in Edited. Save processed outputs alongside it.");
+   d.Accept("Send to "+title,()=>{try{SirilHandoff.ValidateExecutable(executable.Text.Trim());}catch(Exception e){MessageBox.Show(d.Window,e.Message,title+" unavailable");return false;}return true;});if(!d.Show())return;
    string app=executable.Text.Trim();settings.SirilExecutable=app;SaveSettings();
-   EditedProject project=null;string projectName=name.Text;
+   EditedProject project=null;string projectName=selected[0].TargetLabel+" · "+title+" · "+DateTime.Now.ToString("yyyyMMdd_HHmmss");
    Run(ct=>{
     project=SirilHandoff.CreateWorkingCopy(repo,selected,projectName,app,ct,Progress);
     string image=repo.EditedPath(project,project.Sources[0].RelativePath);

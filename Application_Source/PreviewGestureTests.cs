@@ -5,6 +5,9 @@ using System.Linq;
 namespace AstroArchive {
  public partial class Tests {
   static void PreviewGestureTests(){
+   Test("Large previews retain source orientation and fit every quarter turn",()=>{
+    foreach(var size in new[]{new[]{640.0,480.0},new[]{480.0,640.0}})foreach(int turn in new[]{-1,0,1,2,3,4,5}){var geometry=new PreviewGeometry(size[0],size[1],turn);int normalized=(turn%4+4)%4;Check(geometry.QuarterTurns==normalized&&geometry.Width==size[normalized%2]&&geometry.Height==size[1-normalized%2],"Rotation geometry changed aspect/orientation");double width,height;geometry.Frame(900,700,out width,out height);Check(width<=900&&height<=700&&Math.Abs(width/height-geometry.Width/geometry.Height)<0.000001,"Rotated preview did not fit source aspect");}
+   });
    Test("Portrait previews keep the whole image without letterboxing across frame sizes",()=>{
     foreach(var dimensions in new[]{new[]{420.0,320.0},new[]{320.0,420.0},new[]{320.0,320.0},new[]{1400.0,200.0}}){
      var geometry=new PreviewGeometry(dimensions[0],dimensions[1]);Check(geometry.Width<=geometry.Height&&geometry.Rotated==(dimensions[0]>dimensions[1]),"Preview orientation is not portrait");

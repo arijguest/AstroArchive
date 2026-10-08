@@ -3,15 +3,19 @@ Package 1.12.0.1
 
 - Repository uses expandable subframe session summaries with dates, file count,
   exposure and filters. Show all files restores a flat view; stacks stay separate.
-- Edited has targets, a compact table and Preview, with All projects browsing,
-  saved column layouts and numeric exposure sorting.
+- Edited shows all imports and working copies together, with targets, a compact
+  table and Preview. Imports no longer ask for a project.
 - Edited folder imports offer Browse, Scan and review, skipping repository/database
-  folders and archived originals, including renamed identical copies.
+  folders and archived originals, including renamed identical copies. Existing
+  Edited images start unchecked and remain intact when importing selected files.
 - GIFs match uniquely named edited images and retain available acquisition details.
   GIF and SER playback has Pause / Play; common videos use Windows codecs.
 - Exports default to images only: stacks copy directly to the destination and
   subs retain compatible input folders. Add Metadata and Create new folder are
   optional and off by default; filename collisions receive numbered suffixes.
+- Edited supports saved metadata assignments for selected images. Image Class
+  is hidden from the table. Large previews open in source orientation and offer
+  rotate buttons that leave source files unchanged.
 - Preview shows original capture filenames. Moon and Lunar share the Moon target.
 - Dump processing has a cancellable progress window. Import buttons have more
   space below them.
