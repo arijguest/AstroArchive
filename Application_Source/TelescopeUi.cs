@@ -56,19 +56,24 @@ namespace AstroArchive {
   void UpdateTelescopeState(bool busy){
    C("SavedTelescopeBox").IsEnabled=!busy;B("SaveTelescopeButton").IsEnabled=!busy;B("RenameTelescopeButton").IsEnabled=!busy&&SelectedScope!=null&&!string.IsNullOrEmpty(SelectedScope.Id);B("RebuildTelescopesButton").IsEnabled=!busy&&repo!=null;B("RefreshUsbButton").IsEnabled=!usbChecking&&!busy;
    var button=B("AutoUploadButton");button.Visibility=usbTelescopes.Count>0||activeUsb!=null?Visibility.Visible:Visibility.Collapsed;button.IsEnabled=!busy&&repo!=null&&usbTelescopes.Count>0;
-   button.Content=usbTelescopes.Count==1?"Auto upload from "+(usbTelescopes[0].ProfileId??(usbTelescopes[0].Make=="DWARFLAB"?"DWARF":usbTelescopes[0].Make)):"Auto upload from...";
-   button.ToolTip=repo==null?"Choose a repository in Settings first.":"Screen supported USB FITS captures, import missing files and retain originals.";
+   button.Content=usbTelescopes.Count==1?"Import from "+(usbTelescopes[0].ProfileId??(usbTelescopes[0].Make=="DWARFLAB"?"DWARF":usbTelescopes[0].Make)):"Import connected telescope…";
+   button.ToolTip=repo==null?"Choose a repository in Settings first.":"Import new captures using the saved matching telescope. Filename matching is fast; robust matching is available in Import options. Originals stay.";
   }
   async void RefreshUsb(){
    if(usbChecking||telescopesDisposed||!Window.IsLoaded)return;usbChecking=true;UpdateTelescopeState(cancel!=null);int generation=usbGeneration;string archive=repo==null?null:repo.Root;
    var profiles=settings.Telescopes.Select(p=>Util.Deserialize<TelescopeProfile>(Util.Serialize(p))).ToList();var token=usbDiscoveryCancel.Token;
    try{var result=await Task.Run(()=>{var volumes=UsbStorage.Volumes();return Tuple.Create(volumes,UsbTelescopeDiscovery.Discover(volumes,profiles,archive,token));});
     if(telescopesDisposed||generation!=usbGeneration)return;usbVolumes=result.Item1;usbTelescopes=result.Item2;
+    SelectConnectedTelescope();
     L("UsbStatusLabel").Text=usbTelescopes.Count==0?"Connect a telescope by USB, or browse its capture folder and save the telescope.":usbTelescopes.Count+" USB telescope source"+(usbTelescopes.Count==1?"":"s")+" available.";
     if(activeUsb!=null&&cancel!=null&&!usbVolumes.Any(v=>string.Equals(v.Id,activeUsb.Volume.Id,StringComparison.OrdinalIgnoreCase))){cancellationMessage="USB telescope disconnected. Completed imports are retained; reconnect and resume.";cancel.Cancel();L("StatusLabel").Text="USB telescope disconnected. Canceling; completed imports are retained.";}
     var selected=SelectedScope;if(cancel==null&&selected!=null&&!string.IsNullOrEmpty(selected.VolumeId)&&string.IsNullOrEmpty(T("SourceBox").Text)){var connected=usbTelescopes.FirstOrDefault(t=>string.Equals(t.ProfileId,selected.Id,StringComparison.OrdinalIgnoreCase));if(connected!=null)T("SourceBox").Text=connected.Source;}
    }catch(OperationCanceledException){}catch(Exception e){if(!telescopesDisposed)L("UsbStatusLabel").Text="USB detection could not finish: "+e.Message;}
    finally{usbChecking=false;if(!telescopesDisposed){UpdateTelescopeState(cancel!=null);if(generation!=usbGeneration)QueueUsbRefresh();}}
+  }
+  void SelectConnectedTelescope(){
+   if(cancel!=null||usbTelescopes.Count!=1)return;var device=usbTelescopes[0];var matching=UsbTelescopeDiscovery.MatchProfile(device,settings.Telescopes,settings.SelectedTelescope);
+   if(matching!=null){device.ProfileId=matching.Id;if(SelectedScope==null||SelectedScope.Id!=matching.Id)ReloadScopes(matching.Id,true);}
   }
   void UploadUsbMenu(){
    if(cancel!=null||repo==null)return;if(usbTelescopes.Count==1){UploadUsb(usbTelescopes[0]);return;}
@@ -76,11 +81,12 @@ namespace AstroArchive {
   }
   void UploadUsb(UsbTelescope telescope){
    if(cancel!=null||repo==null)return;((TabControl)Window.FindName("MainTabs")).SelectedIndex=1;
-   var profile=TelescopeProfiles.Find(settings,telescope.ProfileId);
-   if(profile==null){pendingUsb=telescope;T("SourceBox").Text=telescope.Source;InvalidateImportPlan();L("StatusLabel").Text="USB folder selected. Select a saved telescope or enter a physical device ID, then Save telescope and click Auto upload.";C("SavedTelescopeBox").Focus();return;}
+   var profile=UsbTelescopeDiscovery.MatchProfile(telescope,settings.Telescopes,settings.SelectedTelescope);
+   if(profile!=null)telescope.ProfileId=profile.Id;
+   if(profile==null){pendingUsb=telescope;T("SourceBox").Text=telescope.Source;InvalidateImportPlan();L("StatusLabel").Text="USB folder selected. Select a saved telescope or enter a physical device ID, then Save telescope and click Import connected telescope.";C("SavedTelescopeBox").Focus();return;}
    pendingUsb=null;ReloadScopes(profile.Id,true);T("SourceBox").Text=telescope.Source;((CheckBox)Window.FindName("DeleteOriginalsCheck")).IsChecked=false;C("ImportSolveMode").SelectedItem="Off";C("ImportRotationMode").SelectedItem="Off";SaveSettings();BeginLive(true);activeUsb=telescope;
-   var selectedProfile=Util.Deserialize<TelescopeProfile>(Util.Serialize(profile));var repository=repo;int workers=settings.CopyWorkers;bool ignoreFailed=settings.IgnoreFailed,ignoreRaster=settings.IgnoreRasterImports;AutoUploadResult result=null;
-   Run(ct=>{result=UsbAutoUpload.Run(repository,selectedProfile,telescope.Source,workers,ct,Progress,LiveFrame,p=>{plan=p;},()=>Directory.Exists(telescope.Source)&&string.Equals(UsbStorage.Identity(telescope.Volume.Root),telescope.Volume.Id,StringComparison.OrdinalIgnoreCase),ignoreFailed:ignoreFailed,ignoreRaster:ignoreRaster);return result.Import.Imported==0&&result.Import.Failed==0&&result.Plan.Errors.Count==0?"Repository is up to date. "+result.Summary:result.Summary;},r=>{FilterImports();L("ScanLabel").Text=result.Summary;L("StatusLabel").Text=r;if(result.Import.Errors.Count+result.Import.Warnings.Count>0)ShowReport("USB import report",repo.LastReport);});
+   var selectedProfile=Util.Deserialize<TelescopeProfile>(Util.Serialize(profile));var repository=repo;int workers=settings.CopyWorkers;bool ignoreFailed=settings.IgnoreFailed,ignoreRaster=settings.IgnoreRasterImports,robust=settings.RobustImportMatching;AutoUploadResult result=null;
+   Run(ct=>{result=UsbAutoUpload.Run(repository,selectedProfile,telescope.Source,workers,ct,Progress,LiveFrame,p=>{plan=p;},()=>Directory.Exists(telescope.Source)&&string.Equals(UsbStorage.Identity(telescope.Volume.Root),telescope.Volume.Id,StringComparison.OrdinalIgnoreCase),ignoreFailed:ignoreFailed,ignoreRaster:ignoreRaster,robustMatching:robust);return result.Import.Imported==0&&result.Import.Failed==0&&result.Plan.Errors.Count==0?"Repository is up to date. "+result.Summary:result.Summary;},r=>{FilterImports();L("ScanLabel").Text=result.Summary;L("StatusLabel").Text=r;if(result.Import.Errors.Count+result.Import.Warnings.Count>0)ShowReport("USB import report",repo.LastReport);});
   }
   void RenameScope(){
    var profile=SelectedScope;if(cancel!=null||profile==null||string.IsNullOrEmpty(profile.Id))return;

@@ -13,6 +13,13 @@ Its 757 star vectors and drawing are cached; no sky timer, network or 3D engine 
 
 Portable Windows 10/11 x64 WPF app for archiving astronomical image originals and creating verified stacking projects. Open `AstroArchive.exe`; read `Quick_Start.txt` for the complete workflow.
 
+## Unreleased: fast repeat imports
+
+- Default filename matching and bounded DWARF session-folder shortcuts avoid reads of already indexed captures.
+- Opt-in robust matching checks same-name edits, changed metadata and missing archive copies.
+- Visible one-click connected import selects a bound, selected matching or unique saved telescope profile.
+- See [repeat-import details](../docs/FAST_IMPORTS.md) for session scoping, skipped-folder semantics and validation.
+
 ## Changes in 1.13.5
 
 Check Dump quietly in the background at startup. Empty folders, metadata and
@@ -170,7 +177,7 @@ The UI smoke option creates synthetic rows, checks filtering/defaults, renders l
 
 Stage seconds are active wall time with overlapping worker scopes merged per stage; stage times are not additive. Byte counters describe consumed app data, not physical disk or network traffic. Gzip header/pixel parsing counts decoded bytes. External ASTAP/star-database reads are not observable. Cloud availability includes provider opens/reads and can include cached reads, not solely downloads. ETA applies to the active phase and becomes available after measurable progress.
 
-Manifest shortcuts require verified content plus unchanged trusted identity/change metadata on both source and archive copy. Name, size and mtime alone are insufficient. New source files are fully hashed during copying. Destination bytes are read back before the record is committed. Original deletion adds durable indexing, final stamp checks and locked-handle physical-boundary/hash checks. Originals remain on failed cleanup, and duplicate originals are retained.
+Normal folder/USB imports trust matching filenames. Known dated DWARF sessions are omitted after an archived filename matches; later additions in that folder require robust matching or Full rescan. Robust matching bypasses these shortcuts and checks headers/content and archive copies. New source files are fully hashed during copying. Destination bytes are read back before the record is committed. Original deletion adds durable indexing, final stamp checks and locked-handle physical-boundary/hash checks. Originals remain on failed cleanup, and duplicate originals are retained.
 
 The previous user's time-dependent import failure could not be reproduced against their actual PC or diagnosed without its error. The code remedies batch-wide aborts, transient lock handling, cloud hydration state checks and provider-backed active SQLite. It logs remaining failures for diagnosis instead of silently reporting success.
 

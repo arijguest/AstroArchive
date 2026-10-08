@@ -25,6 +25,10 @@ namespace AstroArchive {
    dialog.Accept("Assign target",()=>ValidImportTarget(target.Text,error,false));if(!dialog.Show())return;
    int count=ImportPolicy.AssignUnknown(rows,target.Text);FilterImports();UpdateNavigationState();L("StatusLabel").Text=count+" Unknown capture targets assigned for import.";
   }
+  CheckBox ImportMatchingChoice(FormWindow dialog){
+   var choice=dialog.Check("Robust file matching (slower)",settings.RobustImportMatching);
+   UiHelp.Tip(choice,"Read headers and checksums to detect edited files, changed metadata and missing archive copies. Off by default: matching filenames are enough, and known DWARF session folders are skipped.");return choice;
+  }
   void AddImportPolicyControls(FormWindow dialog,out CheckBox flagged,out CheckBox failed,out CheckBox raster,out CheckBox originals){
    flagged=dialog.Check("Skip flagged captures",SkipFlagged);
    failed=dialog.Check("Ignore failed filenames",settings.IgnoreFailed);

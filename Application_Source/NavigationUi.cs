@@ -142,7 +142,7 @@ namespace AstroArchive {
             L("ImportPolicyLabel").Text = (cleanup ? "Originals will be deleted after verified import" : "Originals kept") +
                 " · " + (analysis ? "Optional analysis enabled" : "Analysis off") + " · " + (SkipFlagged ? "Flagged captures excluded" : "Flagged captures included") +
                 (settings.IgnoreFailed ? " · Failed filenames ignored" : " · Failed filenames included") +
-                (settings.IgnoreRasterImports ? " · PNG/JPG ignored" : "") + (unknownImportTarget.Length>0?" · Unknown → "+Catalog.Label(unknownImportTarget):"") + (importFilters.ActiveCount>0?" · "+importFilters.ActiveCount+" active filters":"");
+                (settings.RobustImportMatching ? " · Robust matching" : " · Filename matching") + (settings.IgnoreRasterImports ? " · PNG/JPG ignored" : "") + (unknownImportTarget.Length>0?" · Unknown → "+Catalog.Label(unknownImportTarget):"") + (importFilters.ActiveCount>0?" · "+importFilters.ActiveCount+" active filters":"");
             L("ImportPolicyLabel").FontWeight = cleanup ? FontWeights.SemiBold : FontWeights.Normal;
             L("RateLabel").Visibility = cancel != null ? Visibility.Visible : Visibility.Collapsed;
             ((ProgressBar)Window.FindName("ProgressBar")).Visibility = cancel != null ? Visibility.Visible : Visibility.Collapsed;
@@ -274,6 +274,7 @@ namespace AstroArchive {
             dialog.Text("Options for the next import", true);
             dialog.Text("Review the policy summary before copying. Filename and format exclusions are saved for folder, USB and Dump imports; changing them requires a new scan.");
             CheckBox flagged,failed,raster,originals;AddImportPolicyControls(dialog,out flagged,out failed,out raster,out originals);
+            var robust=ImportMatchingChoice(dialog);
             dialog.Text("Original removal applies only to newly imported, verified files. Scanning another source resets it. Cloud-synced source deletions propagate.");
             dialog.Tab(1);
             var model = dialog.Select("Instrument model", TelescopeProfiles.Models.ToArray(), Convert.ToString(C("ModelBox").SelectedItem));
@@ -288,9 +289,9 @@ namespace AstroArchive {
             dialog.SelectTab(0);
             dialog.Accept("Apply import options", () => {bool valid=ValidImportTarget(target.Text,targetError,true);if(!valid)dialog.SelectTab(1);return valid;});
             if (!dialog.Show()) return;
-            bool rescan = !Equals(model.SelectedItem, C("ModelBox").SelectedItem) || !Equals(camera.SelectedItem, C("CameraBox").SelectedItem) || failed.IsChecked != ((CheckBox)Window.FindName("IgnoreFailedCheck")).IsChecked || settings.IgnoreRasterImports != (raster.IsChecked==true);
+            bool rescan = !Equals(model.SelectedItem, C("ModelBox").SelectedItem) || !Equals(camera.SelectedItem, C("CameraBox").SelectedItem) || failed.IsChecked != ((CheckBox)Window.FindName("IgnoreFailedCheck")).IsChecked || settings.IgnoreRasterImports != (raster.IsChecked==true) || settings.RobustImportMatching != (robust.IsChecked==true);
             unknownImportTarget=string.IsNullOrWhiteSpace(target.Text)?"":ImportPolicy.Target(target.Text);
-            settings.IgnoreRasterImports=raster.IsChecked==true;SaveSettings();
+            settings.IgnoreRasterImports=raster.IsChecked==true;settings.RobustImportMatching=robust.IsChecked==true;SaveSettings();
             C("ModelBox").SelectedItem = model.SelectedItem; C("CameraBox").SelectedItem = camera.SelectedItem;
             C("ImportSolveMode").SelectedItem = solve.SelectedItem; C("ImportRotationMode").SelectedItem = rotation.SelectedItem;
             ((CheckBox)Window.FindName("SkipFlaggedCheck")).IsChecked = flagged.IsChecked;
