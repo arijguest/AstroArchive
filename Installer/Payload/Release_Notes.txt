@@ -1,3 +1,9 @@
+AstroArchive 1.11.2 — original preview filenames
+Package 1.11.2.1
+
+- Show the original capture filename in Preview, including after changing its
+  stretch, rather than the stored archive filename with its session prefix.
+
 AstroArchive 1.11.1 — exposure evidence, spacing and catalogue identities
 Package 1.11.1.1
 
