@@ -61,38 +61,20 @@ namespace AstroArchive {
     Check(SkyFigures.Stars.Length>600&&SkyFigures.Stars.Length<1000,"Unexpected catalogue size");var orientation=new SkyOrientation(new DateTime(2026,10,7,22,0,0,DateTimeKind.Utc),true,-33,151);
     foreach(var star in SkyFigures.Stars){var mapped=orientation.Map(star);Check(Math.Abs(mapped.Dot(mapped)-1)<0.000001,"Precession or horizon transform changed vector length");}
    });
-   Test("Stack tracks use end time and explicit duration with bounded cached work",()=>{
-    var f=SkyFrame(325.46061837,30,51,0);f.Kind="Stack";f.SkyStackDurationSeconds=3600;var sky=CaptureSky.Resolve(f,null);var track=sky.StackTrack;
-    var start=new SkyOrientation(sky.Utc.Value.AddHours(-1),true,51,0).Map(SkyVector.Equatorial(f.RA.Value,f.Dec.Value));var end=sky.Orientation.Map(SkyVector.Equatorial(f.RA.Value,f.Dec.Value));
-    Check(track.Length==33&&track[0].Dot(start)>0.99999999&&track[32].Dot(end)>0.99999999,"Track does not span the integration ending at stack time");
-    Check(track.All(v=>Math.Abs(v.Dot(v)-1)<1e-9)&&ReferenceEquals(track,sky.StackTrack),"Track vectors or snapshot cache changed");
-    f.SkyStackDurationSeconds=7200;Check(CaptureSky.Resolve(f,null).Key!=sky.Key,"Changed duration reused cached track");
-    f.Kind="Light";Check(CaptureSky.Resolve(f,null).StackTrack.Length==0,"Light frame has a stack track");f.Kind="Stack";f.SkyStackDurationSeconds=null;f.Exposure=30;f.StackCount=120;Check(CaptureSky.Resolve(f,null).StackTrack.Length==0,"Ambiguous exposure multiplied by count");
-    f.SkyStackDurationSeconds=3600;f.ObservedUtc=null;Check(CaptureSky.Resolve(f,null).StackTrack.Length==0,"Missing time invented a track");f.ObservedUtc="2000-01-01T12:00:00Z";f.Longitude=null;Check(CaptureSky.Resolve(f,null).StackTrack.Length==0,"Missing site invented a track");
-    f.Longitude=0;f.RA=null;f.Dec=null;Check(CaptureSky.Resolve(f,null).StackTrack.Length==0,"Missing pointing invented a track");
-    foreach(double bad in new[]{0.0,-1,double.NaN,double.PositiveInfinity,double.MaxValue}){f.RA=10;f.Dec=20;f.SkyStackDurationSeconds=bad;Check(CaptureSky.Resolve(f,null).StackTrack.Length==0,"Invalid duration accepted");}
+   Test("Stack sky uses recorded capture time independently of exposure totals",()=>{
+    var frame=SkyFrame(325.46061837,30,51,0);var single=CaptureSky.Resolve(frame,null);frame.Kind="Stack";frame.Exposure=3600;frame.StackCount=120;
+    var stack=CaptureSky.Resolve(frame,null);Check(stack.Utc==single.Utc&&stack.Key==single.Key&&stack.Altitude==single.Altitude&&stack.Azimuth==single.Azimuth&&stack.TimeLabel==single.TimeLabel,"Stack metadata moved the capture indicator or created an interval");
+    frame.Exposure=7200;Check(CaptureSky.Resolve(frame,null).Key==stack.Key,"Exposure total changed the sky at a fixed capture time");
+    frame.ObservedUtc=null;Check(!CaptureSky.Resolve(frame,null).HasHorizon,"Stack duration invented a capture clock");
    });
-   Test("Sky header stack duration retains total and explicit per-sub evidence",()=>{
-    var h=new FitsHeader();h.Values["OBJECT"]="M31";h.Values["DATE-OBS"]="2026-10-07T22:00:00Z";h.Values["NCOMBINE"]="120";h.Values["TOTALEXP"]="3600";
-    var f=CaptureSky.FromHeader(h,"FITS","stack.fit");Check(f.Kind=="Stack"&&f.SkyStackDurationSeconds==3600,"Explicit total missing");
-    h.Values.Remove("TOTALEXP");h.Values["SUBEXP"]="30";Check(CaptureSky.FromHeader(h,"FITS","stack.fit").SkyStackDurationSeconds==3600,"Explicit sub duration and count not combined");
-    h.Values.Remove("SUBEXP");h.Values["EXPTIME"]="30";Check(!CaptureSky.FromHeader(h,"FITS","stack.fit").SkyStackDurationSeconds.HasValue,"Ambiguous EXPTIME treated as duration");
-    foreach(string kind in new[]{"Dark","Master dark","Dark flat","Master flat","Bias","Master bias","Offset"}){f.Kind=kind;Check(CaptureSky.IsCalibration(f),"Calibration not recognised: "+kind);}
+   Test("Sky stack headers retain pointing and clock without interpreting integration as a path",()=>{
+    var h=new FitsHeader();h.Values["OBJECT"]="M31";h.Values["DATE-OBS"]="2026-10-07T22:00:00Z";h.Values["OBJCTRA"]="00:42:00";h.Values["OBJCTDEC"]="41:00:00";h.Values["SITELAT"]="51";h.Values["SITELONG"]="0";h.Values["NCOMBINE"]="120";h.Values["TOTALEXP"]="3600";
+    var frame=CaptureSky.FromHeader(h,"FITS","stack.fit");var sky=CaptureSky.Resolve(frame,null);Check(frame.Kind=="Stack"&&sky.HasHorizon&&sky.RA==10.5&&sky.Dec==41&&sky.Utc==new DateTime(2026,10,7,22,0,0,DateTimeKind.Utc),"Stack clock or pointing changed");
+    h.Values["TOTALEXP"]="7200";Check(CaptureSky.Resolve(CaptureSky.FromHeader(h,"FITS","stack.fit"),null).Key==sky.Key,"Integration total changed the indicator");
+    h.Values.Remove("TOTALEXP");h.Values["SUBEXP"]="30";Check(CaptureSky.Resolve(CaptureSky.FromHeader(h,"FITS","stack.fit"),null).Key==sky.Key,"Sub-exposure metadata changed the indicator");
+    Check(CaptureSky.Resolve(Util.Deserialize<Frame>(Util.Serialize(frame)),null).Key==sky.Key,"Saved stack lost the capture indicator");
+    foreach(string kind in new[]{"Dark","Master dark","Dark flat","Master flat","Bias","Master bias","Offset"}){frame.Kind=kind;Check(CaptureSky.IsCalibration(frame),"Calibration not recognised: "+kind);}
     h.Values["IMAGETYP"]="Master Dark";h.Values["TOTALEXP"]="3600";Check(CaptureSky.IsCalibration(CaptureSky.FromHeader(h,"FITS","calibration.fit")),"Header calibration became stack");
-   });
-   Test("Group sky tracks span actual capture times and include final exposure",()=>{
-    var frames=Enumerable.Range(0,3).Select(i=>{var f=SkyFrame(325.46061837,30,51,0);f.Kind="Light";f.Exposure=30;f.ObservedUtc=new DateTime(2000,1,1,12,i*20,0,DateTimeKind.Utc).ToString("o");return f;}).ToArray();
-    var sky=CaptureSky.Resolve(frames[0],null,frames);Check(sky.TrackStartUtc==CaptureSky.CaptureUtc(frames[0])&&sky.TrackEndUtc==CaptureSky.CaptureUtc(frames[2]).Value.AddSeconds(30)&&sky.StackTrack.Length==33,"Group interval collapsed to a single sub or ignored acquisition gaps");
-    var start=new SkyOrientation(sky.TrackStartUtc,true,51,0).Map(SkyVector.Equatorial(sky.RA,sky.Dec));var end=sky.Orientation.Map(SkyVector.Equatorial(sky.RA,sky.Dec));Check(sky.StackTrack[0].Dot(start)>0.99999999&&sky.StackTrack.Last().Dot(end)>0.99999999&&sky.StackTrack[0].Dot(end)<.995,"Group trail did not move across the sky");
-    Check(CaptureSky.Resolve(frames[0],null).StackTrack.Length==0,"Individual sub acquired a group trail");frames[1].ObservedUtc=frames[2].ObservedUtc=null;sky=CaptureSky.Resolve(frames[0],null,frames);Check(sky.TrackEndUtc==sky.TrackStartUtc.Value.AddSeconds(90)&&sky.TrackEvidence.Contains("gaps unknown"),"Missing clocks were not labelled as integration estimate");
-    frames[1].Exposure=null;Check(CaptureSky.Resolve(frames[0],null,frames).StackTrack.Length==0,"Incomplete integration invented a track");frames[0].ObservedUtc=null;Check(CaptureSky.Resolve(frames[0],null,frames).StackTrack.Length==0,"Missing group clock invented a track");
-   });
-   Test("Indexed stack sky preserves comments and labelled integration without multiplying ambiguity",()=>{
-    var h=new FitsHeader();h.Values["EXPTIME"]="3600";h.Comments["EXPTIME"]="Total integration time";
-    var f=SkyFrame(325.46061837,30,51,0);f.Kind="Stack";f.OriginalName="stack.fit";f.ImageKey="hdu:0";f.Images=new System.Collections.Generic.List<ImageDescriptor>{new ImageDescriptor{Key="hdu:0",Headers=h.Values,Comments=h.Comments}};
-    Check(CaptureSky.Resolve(Util.Deserialize<Frame>(Util.Serialize(f)),null).StackTrack.Length==33,"Saved stack exposure comments lost integration duration");h.Comments.Clear();h.Values["EXPTIME"]="5710";f.OriginalName="stacked-16_Heart Nebula_10s60_Astro.fits";Check(CaptureSky.Resolve(f,null).StackSeconds==5710,"Reported stack integration was confused with labelled ten-second subs");
-    var opened=CaptureSky.FromHeader(h,"FITS",f.OriginalName);Check(opened.SkyStackDurationSeconds==5710,"Opened stack and indexed stack use different integration duration");
-    h.Values["NCOMBINE"]="120";h.Values["EXPTIME"]="30";f.OriginalName="stack.fit";Check(!CaptureSky.Resolve(f,null).StackSeconds.HasValue,"Ambiguous per-frame/total exposure multiplied by count");
    });
   }
  }
