@@ -7,6 +7,8 @@ Package 1.10.4.1
 - Reverse all four preview navigation directions, with matching keyboard arrows.
 - Put the zoom/navigation toolbar directly below the image in sidebar and popup
   previews. Reserve its space while retaining the full image, zoom, drag and Fit.
+- Log the rejected installer path, native Windows error, package checksum and
+  matching Code Integrity policy events from both startup and in-app updates.
 
 AstroArchive 1.10.3 — header alignment refinement
 Package 1.10.3.2

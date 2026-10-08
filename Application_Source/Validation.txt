@@ -47,3 +47,6 @@ and nested scroll ownership. Popup checks retain both themes and 100/150/200%
 layout scales. Preview checks exercise reversed button/keyboard directions and
 verify the toolbar fits directly below the image in both preview surfaces.
 Sixteen pixel-rendered image/DPI/resize cases continue to verify full-image fit.
+
+Update-policy diagnostics preserve the native error and saved installer, handle
+event-access failures and match rejected device paths instead of parent processes.
