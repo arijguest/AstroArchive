@@ -81,8 +81,9 @@ namespace AstroArchive {
   public sealed class ShotsMetadata {public Dictionary<string,object> Raw;public Dictionary<string,string> Values=new Dictionary<string,string>(StringComparer.OrdinalIgnoreCase);public string Path;public string Note;public FileStamp Stamp;}
   static double? MatchNumber(string text,string pattern){var m=Regex.Match(text,pattern,RegexOptions.IgnoreCase);double d;return m.Success&&double.TryParse(m.Groups[1].Value,NumberStyles.Float,CultureInfo.InvariantCulture,out d)?(double?)d:null;}
   public static bool FilenameExposureGain(string filename,out double? exposure,out double? gain){
-   exposure=gain=null;var match=Regex.Match(Path.GetFileName(filename??""),@"(?:^|[_ -])(\d+(?:\.\d+)?)s(\d+)(?=[_. -]|$)",RegexOptions.IgnoreCase);double seconds,value;
-   if(!match.Success||!double.TryParse(match.Groups[1].Value,NumberStyles.Float,CultureInfo.InvariantCulture,out seconds)||seconds<=0||double.IsInfinity(seconds)||!double.TryParse(match.Groups[2].Value,NumberStyles.Float,CultureInfo.InvariantCulture,out value)||double.IsInfinity(value))return false;
+   exposure=gain=null;var matches=Regex.Matches(Path.GetFileName(filename??""),@"(?:^|[_ -])(\d+(?:\.\d+)?)s(\d+)(?=[_. -]|$)",RegexOptions.IgnoreCase);double seconds,value;
+   if(matches.Count!=1)return false;var match=matches[0];
+   if(!double.TryParse(match.Groups[1].Value,NumberStyles.Float,CultureInfo.InvariantCulture,out seconds)||seconds<=0||double.IsInfinity(seconds)||!double.TryParse(match.Groups[2].Value,NumberStyles.Float,CultureInfo.InvariantCulture,out value)||double.IsInfinity(value))return false;
    exposure=seconds;gain=value;return true;
   }
   static string CleanStem(string s){return Regex.Replace(s,@"\.(fit|fits|fts)(\.gz)?$","",RegexOptions.IgnoreCase);}
@@ -114,7 +115,7 @@ namespace AstroArchive {
    if(!stackCount.HasValue)stackCount=MatchNumber(name,@"(?:^|[_ -])(\d+)x\d+(?:\.\d+)?(?:sec|s)(?=[_ .-]|$)")??MatchNumber(name,@"(?:stack[_-]?|^)(\d+)(?:x|$|_)");
    if(stackCount.HasValue&&stackCount.Value>0&&stackCount.Value<=int.MaxValue&&stackCount.Value==Math.Floor(stackCount.Value))f.StackCount=(int)stackCount.Value;
    if(f.Kind=="Light"&&f.StackCount>1){f.Kind="Stack";f.Notes+="Header indicates multiple combined exposures. ";}
-   if(f.Kind=="Unknown"&&(h.Number("NCOMBINE","STACKCNT","NSTACK")??0)>1)f.Kind="Stack";
+   if(f.Kind=="Unknown"&&f.StackCount>1)f.Kind="Stack";
    string filter=h.Get("FILTER","FILTERID","FILTNAME");if(!string.IsNullOrEmpty(filter))f.Filter=filter;
    else {double? ir=MatchNumber(text,@"(?:^|_)IR[_-]?(\d)");if(ir.HasValue)f.Filter=ir==0?"Standard":ir==1?"Astro":ir==2?"Dual band":"IR "+ir;else if(Regex.IsMatch(low,@"(?:^|[_/ -])ir[_ -]*cut(?:[_/ .-]|$)"))f.Filter="IRCUT";else if(Regex.IsMatch(low,@"(?:^|[_/ -])(duo|dual|lp)[_-]?(band|filter)?(?:[_/ -]|$)"))f.Filter="Dual band";}
    f.ObservationMode=h.Get("OBSMODE","CAPMODE","SHOOTMOD","MODE");
