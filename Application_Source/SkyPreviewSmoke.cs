@@ -7,6 +7,13 @@ using System.Windows.Media.Imaging;
 
 namespace AstroArchive {
  public partial class MainUi {
+  BitmapSource CaptureSidebar(FrameworkElement host,string path){
+   // Render the window root: rendering a nested visual alone retains its parent
+   // layout offset, so its pixels no longer match coordinates relative to itself.
+   var full=PopupBitmap(Window);var origin=host.TranslatePoint(new Point(),Window);
+   var bitmap=new CroppedBitmap(full,new Int32Rect((int)Math.Round(origin.X),(int)Math.Round(origin.Y),(int)Math.Ceiling(host.ActualWidth),(int)Math.Ceiling(host.ActualHeight)));
+   var encoder=new PngBitmapEncoder();encoder.Frames.Add(BitmapFrame.Create(bitmap));using(var stream=File.Create(path))encoder.Save(stream);return bitmap;
+  }
   void SmokeCaptureSky(string output){
    double width=Window.Width,height=Window.Height;int scale=settings.TextScalePercent;string theme=settings.ThemeMode;var original=((Image)Window.FindName("PreviewImage")).Source as BitmapSource;
    var stage=(Grid)Window.FindName("PreviewStage");var host=(Grid)Window.FindName("PreviewHost");var footer=(FrameworkElement)Window.FindName("PreviewFooter");var globe=(SkyGlobeView)Window.FindName("PreviewSky");var details=(Expander)Window.FindName("PreviewDetails");
@@ -19,13 +26,13 @@ namespace AstroArchive {
      var imageArea=stage.TransformToAncestor(host).TransformBounds(new Rect(stage.RenderSize));var lower=footer.TransformToAncestor(host).TransformBounds(new Rect(footer.RenderSize));
      if(imageArea.Width<50||imageArea.Height<80||lower.Top<imageArea.Bottom+PreviewViewport.ToolbarSpace-0.5||lower.Top-imageArea.Bottom-PreviewViewport.ToolbarSpace>6||lower.Bottom>host.ActualHeight+1)throw new Exception("Compact preview footer overlaps/clips image or leaves a gap: "+imageArea+", "+lower+", host "+host.RenderSize);
      // Verify the bitmap through the real sidebar with the globe present.
-     var full=new RenderTargetBitmap((int)Math.Ceiling(host.ActualWidth),(int)Math.Ceiling(host.ActualHeight),96,96,PixelFormats.Pbgra32);full.Render(host);var pixels=new byte[full.PixelWidth*full.PixelHeight*4];full.CopyPixels(pixels,full.PixelWidth*4,0);
-     for(int quadrant=0;quadrant<4;quadrant++){int x=(int)(imageArea.X+imageArea.Width*(quadrant%2==0?0.2:0.8)),y=(int)(imageArea.Y+imageArea.Height*(quadrant<2?0.2:0.8)),offset=(y*full.PixelWidth+x)*4;var expected=colours[quadrant];if(Math.Abs(pixels[offset+2]-expected[0])>12||Math.Abs(pixels[offset+1]-expected[1])>12||Math.Abs(pixels[offset]-expected[2])>12||pixels[offset+3]<250)throw new Exception("Sidebar sky layout clipped preview quadrant "+quadrant);}
+     var full=CaptureSidebar(host,Path.Combine(output,"AstroArchive_Capture_Sky_"+mode+"_"+textScale+".png"));var pixels=new byte[full.PixelWidth*full.PixelHeight*4];full.CopyPixels(pixels,full.PixelWidth*4,0);
+     for(int quadrant=0;quadrant<4;quadrant++){int x=(int)(imageArea.X+imageArea.Width*(quadrant%2==0?0.2:0.8)),y=(int)(imageArea.Y+imageArea.Height*(quadrant<2?0.2:0.8)),offset=(y*full.PixelWidth+x)*4;var expected=colours[quadrant];if(Math.Abs(pixels[offset+2]-expected[0])>12||Math.Abs(pixels[offset+1]-expected[1])>12||Math.Abs(pixels[offset]-expected[2])>12||pixels[offset+3]<250)throw new Exception("Sidebar sky layout clipped preview quadrant "+quadrant+", "+mode+" "+textScale+", actual RGBA "+pixels[offset+2]+","+pixels[offset+1]+","+pixels[offset]+","+pixels[offset+3]+", stage "+imageArea+", host "+host.RenderSize);}
      if(!globe.Context.HasHorizon||globe.ActualHeight<90||globe.ActualWidth<100)throw new Exception("Capture sky did not render with frame time and site");
-     SavePopup(host,Path.Combine(output,"AstroArchive_Capture_Sky_"+mode+"_"+textScale+".png"));int builds=globe.DrawingBuilds;globe.InvalidateVisual();PumpPopupLayout();if(globe.DrawingBuilds!=builds)throw new Exception("Unchanged sky rebuilt its cached drawing");
+     int builds=globe.DrawingBuilds;globe.InvalidateVisual();PumpPopupLayout();if(globe.DrawingBuilds!=builds)throw new Exception("Unchanged sky rebuilt its cached drawing");
      details.IsExpanded=true;PumpPopupLayout();previewViewport.Resize();PumpPopupLayout();lower=footer.TransformToAncestor(host).TransformBounds(new Rect(footer.RenderSize));if(lower.Bottom>host.ActualHeight+1)throw new Exception("Expanded capture details pushed sky outside preview");details.IsExpanded=false;cases++;
     }
-    frame.Dec=-60;frame.RA=160;frame.Latitude=-33.9;frame.Longitude=151.2;UpdateCaptureSky("",frame);PumpPopupLayout();if(!globe.Context.Evidence.Contains("Southern celestial sky"))throw new Exception("Southern capture hemisphere lost");SavePopup(host,Path.Combine(output,"AstroArchive_Capture_Sky_South.png"));
+    frame.Dec=-60;frame.RA=160;frame.Latitude=-33.9;frame.Longitude=151.2;UpdateCaptureSky("",frame);PumpPopupLayout();if(!globe.Context.Evidence.Contains("Southern celestial sky"))throw new Exception("Southern capture hemisphere lost");CaptureSidebar(host,Path.Combine(output,"AstroArchive_Capture_Sky_South.png"));
     frame.ObservedUtc=null;UpdateCaptureSky("",frame);PumpPopupLayout();if(globe.Context.HasHorizon||!globe.Context.Summary.Contains("capture time unknown"))throw new Exception("Missing capture clock produced a compass horizon");
    }finally{details.IsExpanded=false;settings.ThemeMode=theme;settings.TextScalePercent=scale;ApplyAppearance();Window.Width=width;Window.Height=height;previewViewport.SetImage(original,true);UpdateCaptureSky("",previewFrame);PumpPopupLayout();}
    File.WriteAllText(Path.Combine(output,"capture-sky-smoke.txt"),"PASS: "+cases+" real sidebar image/sky layouts in light/dark and 100/150% text; compact footer bounds, expanded details, full-image quadrant pixels, cached redraws, northern/southern captures and unknown-clock fallback.");
