@@ -1,3 +1,10 @@
+AstroArchive 1.13.5 — quiet startup Dump check
+Package 1.13.5.1
+- Check Dump in the background without opening a progress dialog for empty
+  folders, metadata-only leftovers or files excluded by import preferences.
+- Show the dedicated Dump dialog only when importable files are processed.
+  Keep cancellation, live progress and retained-file review for actual imports.
+
 AstroArchive 1.13.4 — reuse telescope imports across folder selections
 Package 1.13.4.2
 - Reuse completed source-file histories when choosing a DWARF session folder or
