@@ -1,5 +1,5 @@
 AstroArchive 1.13.4 validation
-Package 1.13.4.1; Windows 10/11 x64; .NET Framework 4.8.
+Package 1.13.4.2; Windows 10/11 x64; .NET Framework 4.8.
 
 The Windows release workflow runs application regressions, a separate six-case
 Windows WIC integration suite, installer/updater regressions, x64 compilation,
@@ -122,3 +122,7 @@ source-scoped snapshot. Windows checks verify no payload reads or old-row callba
 across browse-root changes, discover added exposures, exercise FAT-style saved
 inventory stamps and retain Full rescan bypass. Existing sidecar/change-time,
 restoration, USB, original-cleanup and progressive-preview checks remain in place.
+Windows USB regression also starts with a capture imported from a PC mirror,
+recognizes the card copy by checksum, remembers its current sidecars and skips
+later payload reads. It retains user metadata, checks changed sidecars and handles
+a verified identical rewrite of the archived copy without trusting its old stamp.

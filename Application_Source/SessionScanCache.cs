@@ -46,7 +46,7 @@ namespace AstroArchive {
    SourceManifest old;Frame indexed;if(!manifests.TryGetValue(entry.Path,out old)||string.IsNullOrEmpty(old.Hash)||!archive.TryGetValue(old.Hash,out indexed))return false;
    try{FileStamp current=old.Source!=null&&old.Source.Reliable?FileStamp.Read(new FileInfo(entry.Path),entry.Enumerated):null;
     if(!Matches(old,indexed,entry,current,volume,identity,model)||!MetadataUnchanged(old,entry))return false;
-    string copy=repository.FilePath(indexed);return File.Exists(copy)&&FileStamp.Read(copy).VerifiedUnchanged(indexed.RepositoryStamp??old.Copy);
+    string copy=repository.FilePath(indexed);if(!File.Exists(copy))return false;var stamp=FileStamp.Read(copy);return stamp.VerifiedUnchanged(indexed.RepositoryStamp)||stamp.VerifiedUnchanged(old.Copy);
    }catch{return false;}
   }
   public static bool SystemFolder(string name){return new[]{".astroarchive","$RECYCLE.BIN","System Volume Information",".Spotlight-V100",".Trashes"}.Contains(name,StringComparer.OrdinalIgnoreCase);}

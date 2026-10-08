@@ -18,7 +18,9 @@ Portable Windows 10/11 x64 WPF app for archiving astronomical image originals an
 Repeat telescope scans reuse import history across parent/session browse roots,
 including DWARF folder names with spaced catalogue IDs. Quick scans load only
 related archive records and retain duplicate detection for files imported from
-other sources. Nothing new to import is explicit when every discovered capture
+other sources. Verified matches from new USB/card paths are remembered with
+their sidecars for later scans, including captures first imported via a mirror.
+Nothing new to import is explicit when every discovered capture
 is skipped. Existing SD/USB inventories, new-file discovery and Full rescan remain.
 
 ## Changes in 1.13.3

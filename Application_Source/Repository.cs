@@ -84,7 +84,15 @@ namespace AstroArchive {
      }
      if(!deferHash||reindex||deleted.Count>0){using(var check=metrics.Begin("Duplicate checking",name)){
       string hash=Util.Hash(entry.Path,ct,n=>check.Bytes(n));if(!stamp.ContentSame(FileStamp.Read(entry.Path)))throw new InvalidDataException("Source changed during scanning.");
-      Frame existing;if(!archive.TryGetValue(hash,out existing))existing=scopedArchive?Find(hash):null;if(deleted.Contains(hash)){f.Hash=hash;MarkDeleted(f);}else if(existing!=null){f=existing.Clone();f.SourcePath=entry.Path;f.SourceStamp=stamp;f.Status=File.Exists(FilePath(existing))&&Util.Hash(FilePath(existing),ct)==hash?"Duplicate":"Restore";}else f.Hash=hash;check.Complete();
+      Frame existing;if(!archive.TryGetValue(hash,out existing))existing=scopedArchive?Find(hash):null;if(deleted.Contains(hash)){f.Hash=hash;MarkDeleted(f);}else if(existing!=null){
+       var detected=f;string copy=FilePath(existing);FileStamp before=null,after=null;bool present=false;
+       if(File.Exists(copy)){before=FileStamp.Read(copy);present=Util.Hash(copy,ct,n=>check.Bytes(n))==hash;after=FileStamp.Read(copy);present=present&&before.ContentSame(after);}
+       if(present&&!stamp.ContentSame(FileStamp.Read(entry.Path)))throw new InvalidDataException("Source changed during duplicate verification. Scan again.");
+       f=existing.Clone();f.SourcePath=entry.Path;f.SourceStamp=stamp;f.Status=present?"Duplicate":"Restore";
+       // A mirror/card path can be new even when its content is already archived.
+       // Remember checksum-proven matches with this source's metadata context.
+       if(present&&!reindex&&!source.Equals(DumpFolder,StringComparison.OrdinalIgnoreCase)){detected.Hash=hash;detected.SourceRoot=source;detected.RelativePath=existing.RelativePath;detected.RepositoryStamp=after;detected.Status="Duplicate";Manifest(new SourceManifest{Root=source,Path=entry.Path,Hash=hash,Destination=existing.RelativePath,Status="Complete",Source=stamp,Copy=after,Metadata=detected});}
+      }else f.Hash=hash;check.Complete();
      }}
     }
     f.SourceRoot=source;item.Frame=f;

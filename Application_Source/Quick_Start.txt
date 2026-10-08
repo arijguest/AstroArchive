@@ -813,6 +813,8 @@ Scan folder and USB uploads use the saved import manifest to match session folde
 names and file paths for the selected physical telescope and storage volume.
 The same history is reused when switching between a session folder and its parent;
 selecting a different browse root does not make imported files unknown again.
+A checksum-proven duplicate found at a new telescope/card path is also remembered,
+including that source's sidecars, so subsequent scans reuse its inventory.
 Quick scans load archive lookups only for the selected source's previous imports,
 so unrelated repository captures do not add to this preparation work.
 They check file sizes, timestamps and accompanying session metadata, then skip

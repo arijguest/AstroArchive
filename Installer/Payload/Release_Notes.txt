@@ -1,8 +1,11 @@
 AstroArchive 1.13.4 — reuse telescope imports across folder selections
-Package 1.13.4.1
+Package 1.13.4.2
 - Reuse completed source-file histories when choosing a DWARF session folder or
   its parent, instead of tying cached imports to the exact previous browse root.
   Escape spaced/underscored session names and percent signs in source lookups.
+- Remember checksum-proven duplicates discovered at a new telescope/card source,
+  including their current sidecars, so later USB scans reuse that inventory even
+  when the capture was originally imported from a PC mirror.
 - Load only related archive records during quick scans, retaining checksum
   duplicate detection for captures imported from other sources.
 - Say Nothing new to import when all discovered captures are skipped, with

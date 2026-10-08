@@ -14,7 +14,19 @@ namespace AstroArchive {
      string second=Path.Combine(session,"Light_002.fit");Write(second,64,48,(x,y)=>1600,LightHeaders(new DateTime(2026,8,15,22,34,0),"C20"));var scan=repo.Scan(parent,"Dwarf-01","Dwarf 3",ct,NoProgress);repo.Import(scan.Frames,ct,NoProgress,new ImportOptions{SourceRoot=parent});
      Check(repo.SourceHistory(session).Count==2&&repo.SourceHistory(parent).Count==2,"Browse roots duplicated or lost history");
      string other=Path.Combine(root,"different_source",Path.GetFileName(session));Directory.CreateDirectory(other);File.Copy(first,Path.Combine(other,"Light_001.fit"));Check(repo.SourceHistory(other).Count==0,"Session name alone reused another device's history");
-     var duplicate=repo.Scan(other,"Dwarf-02","Dwarf 3",ct,NoProgress,quickScan:true);Check(duplicate.Frames.Single().Status.StartsWith("Duplicate"),"Source-scoped archive lookup missed a checksum duplicate imported elsewhere");
+     var duplicate=repo.Scan(other,"Dwarf-02","Dwarf 3",ct,NoProgress,quickScan:true);Check(duplicate.Frames.Single().Status.StartsWith("Duplicate"),"Source-scoped archive lookup missed a checksum duplicate imported elsewhere");Check(repo.SourceHistory(other).Single().Value.Hash==duplicate.Frames.Single().Hash,"Verified duplicate at a new source was not remembered");
+    }
+   });
+   WindowsTest("USB inventory learns checksum matches originally imported from a PC mirror",()=>{
+    string mirror=Path.Combine(root,"warm-mirror"),source=Path.Combine(root,"warm-card","DWARF_RAW_TELE_C 20_EXP_30_GAIN_40_2026-08-15-22-32-43-754");Directory.CreateDirectory(mirror);Directory.CreateDirectory(source);
+    string original=Path.Combine(mirror,"Light_001.fit"),card=Path.Combine(source,"raw_001.fit"),sidecar=Path.Combine(source,"shotsInfo.json");Write(original,64,48,(x,y)=>1800,LightHeaders(new DateTime(2026,8,15,22,33,0),"C20"));File.Copy(original,card);File.WriteAllText(sidecar,"{\"targetName\":\"C20\",\"cameraId\":0}");
+    using(var repo=new Repository(Path.Combine(root,"warm-card-repo"))){var profile=new TelescopeProfile{Id="Dwarf-01",Model="Dwarf 3"};repo.Import(repo.Scan(mirror,profile.Id,profile.Model,ct,NoProgress).Frames,ct,NoProgress);var indexed=repo.All().Single();indexed.Target="M45";repo.Save(indexed);
+     // Identical rewritten archive content makes its old cached stamp obsolete.
+     byte[] bytes=File.ReadAllBytes(repo.FilePath(indexed));System.Threading.Thread.Sleep(40);File.WriteAllBytes(repo.FilePath(indexed),bytes);
+     var first=UsbAutoUpload.Run(repo,profile,source,1,ct,NoProgress);Check(first.Import.Imported==0&&first.Import.Duplicates==1&&repo.All().Single().Target=="M45","Initial match changed archived metadata or imported twice");
+     var remembered=repo.SourceHistory(source).Single().Value;Check(remembered.Status=="Complete"&&remembered.Metadata.SourceMetadataPath==sidecar,"Verified match lost current card sidecars");
+     var again=UsbAutoUpload.Run(repo,profile,source,1,ct,NoProgress);Check(again.Plan.FastSkippedFiles==1&&again.Plan.Frames.Count==0&&again.Import.Imported==0&&again.Import.Duplicates==1&&again.Plan.Metrics.Snapshot().Where(s=>s.Stage=="Header open/read"||s.Stage=="Duplicate checking").Sum(s=>s.Bytes)==0,"Repeat USB upload reread a remembered checksum match");
+     File.WriteAllText(sidecar,"{\"targetName\":\"M33\",\"cameraId\":0}");again=UsbAutoUpload.Run(repo,profile,source,1,ct,NoProgress);Check(again.Plan.FastSkippedFiles==0&&again.Import.Duplicates==1&&repo.All().Single().Target=="M45","Changed card metadata was skipped or overwrote user metadata");
     }
    });
    WindowsTest("DWARF incremental inventory survives parent and session selection changes",()=>{
