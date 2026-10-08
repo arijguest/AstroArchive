@@ -662,7 +662,22 @@
         </DockPanel>
         <TextBlock Grid.Row="1" x:Name="PreviewName" Text="Select a capture" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" Margin="0,10,0,8" />
       <Grid Grid.Row="2" x:Name="PreviewHost" ClipToBounds="True"><Grid x:Name="PreviewStage" ClipToBounds="True" HorizontalAlignment="Center" VerticalAlignment="Top"><Image x:Name="PreviewImage"/></Grid><TextBlock x:Name="PreviewMessage" Text="Select a capture or open an image." Foreground="{DynamicResource Muted}" HorizontalAlignment="Center" VerticalAlignment="Center" TextWrapping="Wrap" TextAlignment="Center" Margin="18"/></Grid>
+      <DockPanel Grid.Row="3" Margin="0,10,0,0"><TextBlock Text="Stretch" Foreground="{DynamicResource Muted}" VerticalAlignment="Center" Margin="0,0,8,0"/><ComboBox x:Name="StretchMode" ToolTip="Adjust the preview stretch. Auto preserves colour; Auto per channel balances the background."/></DockPanel>
+        <StackPanel Grid.Row="4">
+         <TextBlock x:Name="PreviewInfo" Foreground="{DynamicResource Muted}" FontSize="{DynamicResource UiFontCaption}" TextTrimming="CharacterEllipsis" Margin="0,8,0,0" />
+         <Expander Header="Capture details" Margin="0,8,0,0" Foreground="{DynamicResource Muted}">
+          <ScrollViewer MaxHeight="130">
+           <StackPanel>
+            <TextBlock x:Name="LibrarySummaryLabel" Foreground="{DynamicResource Muted}" FontSize="{DynamicResource UiFontSmall}" TextWrapping="Wrap" Margin="0,0,0,8" />
+            <TextBlock x:Name="DetailsLabel" Text="Select a capture to view metadata." TextWrapping="Wrap" Foreground="{DynamicResource Muted}" FontSize="{DynamicResource UiFontSmall}" Margin="0,6,0,0" />
+           </StackPanel>
+          </ScrollViewer>
+         </Expander>
+        </StackPanel>
+       </Grid>
+      </Border>
      </Grid>
+    </Grid>
    </TabItem>
    <TabItem Header="Import">
     <Grid Margin="0,14,0,0">
