@@ -6,12 +6,16 @@ using System.Windows.Controls;
 namespace AstroArchive {
  public partial class MainUi {
   void AddArchiveSafetySettings(FormWindow dialog){
-   dialog.Text("Archive safety",true);
+   dialog.Text("Backups",true);
+   dialog.Text("Create a verified copy of the whole archive, including originals, Edited files and the current database. Choose a normal folder or lossless ZIP in the backup dialog.");
+   var backup=dialog.Button("Back up archive…",()=>{dialog.Window.Close();BackUpArchive();});backup.IsEnabled=repo!=null;
+   if(repo==null)dialog.Text("Choose a repository in General to enable backups.");
+   dialog.Text("Restore a backup",true);dialog.Text("Extract the ZIP if needed, then choose its Repository folder in Settings > General. Backup files include restoration instructions and checksums.");
+   dialog.Text("Originals protection",true);
    dialog.Text(repo==null?"Open an archive to protect originals or create a backup.":"Originals: "+(repo.OriginalsProtected?"protected":"not protected"));
    dialog.Text("Optional Windows protection helps prevent deleting or renaming archived originals in File Explorer. Edited files, Dump and archive metadata remain writable. Protection is separate from a backup.");
    var protect=dialog.Button(repo!=null&&repo.OriginalsProtected?"Turn off protection…":"Protect originals…",()=>{dialog.Window.Close();ChangeArchiveProtection();});protect.IsEnabled=repo!=null&&(repo.OriginalsProtected||repo.ProtectionAvailability==null);
    if(repo!=null&&repo.ProtectionAvailability!=null)dialog.Text(repo.ProtectionAvailability);
-   var backup=dialog.Button("Back up…",()=>{dialog.Window.Close();BackUpArchive();});backup.IsEnabled=repo!=null;
   }
   void ChangeArchiveProtection(){
    if(repo==null||cancel!=null)return;bool enable=!repo.OriginalsProtected;
