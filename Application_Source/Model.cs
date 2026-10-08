@@ -58,6 +58,7 @@ namespace AstroArchive {
   public string AcquisitionDateLabel {get{var date=CaptureSessions.Date(this);return date==null?"Unknown":date.Text;}}
   public string SessionGroup {get{return SessionKey;}}
   public string Make {get;set;} public string MakeEvidence {get;set;} public string TargetEvidence {get;set;} public string SourceDisposition {get;set;}
+  [ScriptIgnore]public double? SkyStackDurationSeconds{get;set;}
   public string ObservationMode {get;set;} public string Kind {get;set;} public string Calibration {get;set;} public string Filter {get;set;} public string Bayer {get;set;}
   public string Mount {get;set;} public string MountEvidence {get;set;} public string Observed {get;set;} public string TimeSource {get;set;}
   [ScriptIgnore]public string MountText{get{return MountLabels.Display(this);}}

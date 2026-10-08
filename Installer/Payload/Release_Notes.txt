@@ -1,5 +1,5 @@
-AstroArchive 1.13.12
-Package 1.13.12.1
+AstroArchive 1.13.13
+Package 1.13.13.1
 
 - Target identification solves one representative per selected Light session,
   target and compatible instrument group, updating the selected group together.

@@ -27,6 +27,17 @@ namespace AstroArchive {
      if(container==null||!Convert.ToString(container.ToolTip).Contains("2 files")||!PopupChildren<TextBlock>(container).Any(t=>t.Text=="Orion Nebula"&&t.TextTrimming==TextTrimming.CharacterEllipsis))throw new Exception("Concise row or full-detail tooltip did not render.");
      Capture(System.IO.Path.Combine(output,"AstroArchive_Targets_"+theme+".png"));
     }
+    var previousEdited=editedImages;string editedSearch=T("EditedSearchBox").Text;object editedClass=C("EditedClassFilter").SelectedItem;string editedTarget=(EditedTargets.SelectedItem as TargetSummary).Name;
+    try{
+     var project=new EditedProject{Id=Guid.NewGuid().ToString("N"),Name="Comet navigation fixture"};
+     editedImages=new System.Collections.Generic.List<EditedImage>{
+      new EditedImage{Project=project,Filename="comet.png",RelativePath="comet.png",Metadata=new EditedMetadata{Object="C/2023 A3 (Tsuchinshan-ATLAS)",ImageClass="Starless"}},
+      new EditedImage{Project=project,Filename="comet-stack.png",RelativePath="comet-stack.png",Metadata=new EditedMetadata{Object="12P/Pons-Brooks",ImageClass="Starless"}},
+      new EditedImage{Project=project,Filename="nebula.png",RelativePath="nebula.png",Metadata=new EditedMetadata{Object="M42",ImageClass="Starless"}}
+     };C("EditedClassFilter").SelectedItem="All images";T("EditedSearchBox").Text="";FilterEditedImages();WaitForSearches();
+     var editedView=EditedTargets.ItemsSource as ListCollectionView;if(editedView==null||!editedView.Groups.Cast<CollectionViewGroup>().Any(g=>Convert.ToString(g.Name)=="Comets"&&g.ItemCount==2))throw new Exception("Edited comet section is missing");
+     EditedTargets.SelectedItem=EditedTargets.Items.Cast<TargetSummary>().Single(t=>t.Name=="12P/Pons-Brooks");WaitForSearches();if(G("EditedGrid").Items.Count!=1)throw new Exception("Edited comet selection did not filter images");
+    }finally{editedImages=previousEdited;C("EditedClassFilter").SelectedItem=editedClass;T("EditedSearchBox").Text=editedSearch;FilterEditedImages();WaitForSearches();EditedTargets.SelectedItem=EditedTargets.Items.Cast<TargetSummary>().FirstOrDefault(t=>t.Name==editedTarget)??EditedTargets.Items.Cast<TargetSummary>().First();}
    }finally{all=previousRows;libraryFilters.Values.Clear();foreach(var filter in previousFilters)libraryFilters.Values[filter.Key]=filter.Value;T("SearchBox").Text=previousSearch;WaitForSearches();Filter(true);Targets.SelectedItem=Targets.Items.Cast<TargetSummary>().FirstOrDefault(t=>t.Name==previousTarget)??Targets.Items.Cast<TargetSummary>().First();Theme.Apply(Window,settings.ThemeMode);}
   }
  }
