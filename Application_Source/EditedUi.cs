@@ -72,7 +72,7 @@ namespace AstroArchive {
   }
   void PreviewEditedImage(){
    if(repo==null||cancel!=null||ActiveEditedProject==null||ActiveEditedImage==null)return;string path=repo.EditedPath(ActiveEditedProject,ActiveEditedImage.RelativePath);PreviewData data=null;byte[] pixels=null;
-   Run(ct=>{data=DecodePreview(path,ct);data.ApplyContext(null,path);pixels=data.Render(ScientificPreview(path)?settings.PreviewStretch??"Auto":"Linear",ct);return path;},image=>new ImagePreviewWindow(Window,Path.GetFileName(image),data.Width,data.Height,pixels).ShowDialog());
+   Run(ct=>{data=DecodePreview(path,ct);data.ApplyContext(null,path);pixels=data.Render(ScientificPreview(path)?settings.PreviewStretch??"Auto per channel":"Linear",ct);return path;},image=>new ImagePreviewWindow(Window,Path.GetFileName(image),data.Width,data.Height,pixels).ShowDialog());
   }
   void ShowEditedEditors(){
    if(ActiveEditedImage==null)return;var menu=ThemedMenu();string name=ActiveEditedImage.Filename;

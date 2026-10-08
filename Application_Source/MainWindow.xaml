@@ -658,7 +658,7 @@
         </Grid.RowDefinitions>
         <DockPanel>
          <Button DockPanel.Dock="Right" x:Name="OpenPreviewButton" Content="Open image…" FontSize="{DynamicResource UiFontSmall}" Padding="8,5" Margin="0" ToolTip="Preview FITS, XISF, TIFF, PNG, JPEG and Windows-codec images" />
-         <TextBlock Text="IMAGE PREVIEW" FontSize="{DynamicResource UiFontCaption}" FontWeight="SemiBold" Foreground="{DynamicResource Muted}" VerticalAlignment="Center" />
+         <TextBlock Text="PREVIEW" FontSize="{DynamicResource UiFontCaption}" FontWeight="SemiBold" Foreground="{DynamicResource Muted}" VerticalAlignment="Center" />
         </DockPanel>
         <TextBlock Grid.Row="1" x:Name="PreviewName" Text="Select a capture" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" Margin="0,10,0,8" />
       <Grid Grid.Row="2" x:Name="PreviewHost" ClipToBounds="True"><Grid x:Name="PreviewStage" ClipToBounds="True" HorizontalAlignment="Center" VerticalAlignment="Top"><Image x:Name="PreviewImage"/></Grid><TextBlock x:Name="PreviewMessage" Text="Select a capture or open an image." Foreground="{DynamicResource Muted}" HorizontalAlignment="Center" VerticalAlignment="Center" TextWrapping="Wrap" TextAlignment="Center" Margin="18"/></Grid>
@@ -855,7 +855,7 @@
       <StackPanel DockPanel.Dock="Right" Orientation="Horizontal"><Button x:Name="EditedAddButton" Content="Add images…"/><Button x:Name="EditedImportFolderButton" Content="Import folder…" Margin="8,0,0,0"/><Button x:Name="EditedRefreshButton" Content="Refresh" Margin="8,0,0,0"/></StackPanel>
       <TextBlock Text="Edited images" FontSize="{DynamicResource UiFontHeading}" FontWeight="SemiBold" VerticalAlignment="Center"/>
      </DockPanel>
-     <DockPanel Grid.Row="1" Margin="0,0,0,10"><ComboBox DockPanel.Dock="Right" x:Name="EditedClassFilter" MinWidth="180" Margin="8,0,0,0" ToolTip="Filter edited image classes"/><TextBox x:Name="EditedSearchBox" ToolTip="Search images in this project"/><TextBlock x:Name="EditedSummary" Foreground="{DynamicResource Muted}" VerticalAlignment="Center" Margin="12,0,0,0"/></DockPanel>
+     <DockPanel Grid.Row="1" Margin="0,0,0,10"><ComboBox DockPanel.Dock="Right" x:Name="EditedClassFilter" MinWidth="180" Margin="8,0,0,0" ToolTip="Filter edited image classes"/><TextBlock DockPanel.Dock="Right" x:Name="EditedSummary" Foreground="{DynamicResource Muted}" VerticalAlignment="Center" Margin="12,0,0,0"/><TextBox x:Name="EditedSearchBox" ToolTip="Search images in this project"/></DockPanel>
      <Grid Grid.Row="2">
       <Grid.ColumnDefinitions><ColumnDefinition Width="220"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
       <Border Background="{DynamicResource Surface}" BorderBrush="{DynamicResource Border}" BorderThickness="1" CornerRadius="8" Margin="0,0,10,0">
@@ -895,7 +895,7 @@
     </Grid.ColumnDefinitions>
     <StackPanel>
      <TextBlock x:Name="StatusLabel" Text="Ready" Foreground="{DynamicResource Muted}" TextWrapping="Wrap" Margin="0,0,12,0" />
-     <TextBlock x:Name="RateLabel" Text="" FontSize="{DynamicResource UiFontSmall}" Foreground="{DynamicResource Muted}" Margin="0,4,0,0" Visibility="Collapsed" />
+     <TextBlock x:Name="RateLabel" TextWrapping="Wrap" Text="" FontSize="{DynamicResource UiFontSmall}" Foreground="{DynamicResource Muted}" Margin="0,4,0,0" Visibility="Collapsed" />
     </StackPanel>
     <ProgressBar x:Name="ProgressBar" Grid.ColumnSpan="2" Grid.Row="1" Margin="0,14,0,0" Height="6" VerticalAlignment="Center" Foreground="{DynamicResource Accent}" Background="{DynamicResource Border}" BorderThickness="0" Visibility="Collapsed" />
     <StackPanel Grid.Column="1" Orientation="Horizontal">

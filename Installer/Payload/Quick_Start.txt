@@ -698,3 +698,6 @@ A filename containing the word meteor (case insensitive) uses the Meteor label
 and has no object ID, even when image metadata names a catalogue object. This
 also applies to existing archived rows and Edited images. Exposure, filters and
 other acquisition details are retained. Folder names and meteorite do not match.
+
+Preview defaults to Auto per channel for scientific images. Saved stretch choices
+are retained. Solar/planetary images and processed raster previews stay linear.

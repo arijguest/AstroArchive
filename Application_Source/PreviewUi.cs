@@ -14,7 +14,7 @@ namespace AstroArchive {
   PreviewViewport previewViewport;CancellationTokenSource previewCancel;int previewGeneration;PreviewData previewData;Frame previewFrame;string previewPath;bool previewReady,choosingStretch;
   public static string CompactPath(string path){if(string.IsNullOrEmpty(path))return "Set an archive folder in Settings";if(path.Length<=75)return path;return Path.GetPathRoot(path)+"…"+Path.DirectorySeparatorChar+new DirectoryInfo(path).Name;}
   void InitializeWorkspace(){
-   ApplyAppearance();C("StretchMode").ItemsSource=PreviewData.StretchModes;C("StretchMode").SelectedItem=settings.PreviewStretch??"Auto";if(C("StretchMode").SelectedIndex<0)C("StretchMode").SelectedItem="Auto";
+   ApplyAppearance();C("StretchMode").ItemsSource=PreviewData.StretchModes;C("StretchMode").SelectedItem=settings.PreviewStretch??"Auto per channel";if(C("StretchMode").SelectedIndex<0)C("StretchMode").SelectedItem="Auto per channel";
    settings.PreviewStretch=Convert.ToString(C("StretchMode").SelectedItem);
    previewViewport=new PreviewViewport((Grid)Window.FindName("PreviewHost"),(Grid)Window.FindName("PreviewStage"),(Image)Window.FindName("PreviewImage"));
    B("CoffeeButton").Click+=(s,e)=>{try{Process.Start(new ProcessStartInfo("https://ko-fi.com/arijguest"){UseShellExecute=true});}catch(Exception error){MessageBox.Show(Window,"Could not open your browser. Visit https://ko-fi.com/arijguest\n\n"+error.Message,"Ko-fi link",MessageBoxButton.OK,MessageBoxImage.Information);}};
@@ -38,7 +38,7 @@ namespace AstroArchive {
    if(previewCancel!=null){previewCancel.Cancel();previewCancel.Dispose();}previewCancel=new CancellationTokenSource();CancellationToken token=previewCancel.Token;int generation=++previewGeneration;
    if(reload){previewFrame=frame==null?null:frame.Clone();C("StretchMode").IsEnabled=true;}Frame context=previewFrame;
    PreviewData previous=reload?null:previewData;previewPath=path;if(reload){previewData=null;previewViewport.SetImage(null,true);L("PreviewInfo").Text="";}
-   if(reload){choosingStretch=true;C("StretchMode").SelectedItem=ScientificPreview(path)&&!(context!=null&&ObservationTargets.Unstretched(context.Target,context.ObservationMode))?settings.PreviewStretch??"Auto":"Linear";choosingStretch=false;}
+   if(reload){choosingStretch=true;C("StretchMode").SelectedItem=ScientificPreview(path)&&!(context!=null&&ObservationTargets.Unstretched(context.Target,context.ObservationMode))?settings.PreviewStretch??"Auto per channel":"Linear";choosingStretch=false;}
    L("PreviewName").Text=Path.GetFileName(path);L("PreviewName").ToolTip=path;PreviewMessage(previous==null?"Loading image…":"Stretching…");string mode=Convert.ToString(C("StretchMode").SelectedItem);
    try{
     var result=await Task.Run(()=>{PreviewData data=previous??DecodePreview(path,token,context);data.ApplyContext(context,path);byte[] rgb=data.Render(mode,token);var bitmap=BitmapSource.Create(data.Width,data.Height,96,96,PixelFormats.Rgb24,null,rgb,data.Width*3);bitmap.Freeze();return Tuple.Create(data,bitmap);},token);
@@ -55,7 +55,7 @@ namespace AstroArchive {
    settings.ShowPreview=true;SetPreviewVisibility();var data=new PreviewData{Width=420,Height=320,SourceWidth=420,SourceHeight=320,Channels=3,Pixels=new double[420*320*3],Description="Generated colour preview"};
    for(int y=0;y<data.Height;y++)for(int x=0;x<data.Width;x++){double a=Math.Exp(-((x-190)*(x-190)/9500.0+(y-150)*(y-150)/4500.0)),b=Math.Exp(-((x-220)*(x-220)+(y-160)*(y-160))/40.0);int i=(y*data.Width+x)*3;data.Pixels[i]=0.008+0.002*a+0.6*b;data.Pixels[i+1]=0.008+0.004*a+0.7*b;data.Pixels[i+2]=0.008+0.009*a+0.8*b;}
    var gesture=new ImagePreviewWindow(Window,"Generated colour preview",data.Width,data.Height,data.Render("Auto",CancellationToken.None));try{gesture.Show();PumpPopupLayout();gesture.SmokeGestures();SavePopup((FrameworkElement)gesture.Content,Path.Combine(output,"AstroArchive_Gesture_Preview.png"));}finally{gesture.Close();}
-   previewData=data;byte[] pixels=data.Render("Auto",CancellationToken.None);previewViewport.SetImage(BitmapSource.Create(data.Width,data.Height,96,96,PixelFormats.Rgb24,null,pixels,data.Width*3),true);L("PreviewMessage").Visibility=Visibility.Collapsed;L("PreviewName").Text="Generated test image";L("PreviewInfo").Text="420 × 320 pixels";C("StretchMode").SelectedItem="Auto";
+   previewData=data;byte[] pixels=data.Render("Auto",CancellationToken.None);previewViewport.SetImage(BitmapSource.Create(data.Width,data.Height,96,96,PixelFormats.Rgb24,null,pixels,data.Width*3),true);L("PreviewMessage").Visibility=Visibility.Collapsed;L("PreviewName").Text="Generated test image";L("PreviewInfo").Text="420 × 320 pixels";C("StretchMode").SelectedItem="Auto per channel";
    Theme.Apply(Window,"Dark");Window.UpdateLayout();PreviewSize();previewViewport.SmokeGestures();Capture(Path.Combine(output,"AstroArchive_Dark_UI.png"));
    Theme.Apply(Window,"Light");Window.UpdateLayout();Capture(Path.Combine(output,"AstroArchive_Light_UI.png"));
    settings.ShowPreview=false;SetPreviewVisibility();Window.UpdateLayout();if(((ColumnDefinition)Window.FindName("PreviewColumn")).Width.Value!=0)throw new Exception("Preview did not collapse");Capture(Path.Combine(output,"AstroArchive_Compact_UI.png"));settings.ShowPreview=true;SetPreviewVisibility();Theme.Apply(Window,"Dark");Window.UpdateLayout();
