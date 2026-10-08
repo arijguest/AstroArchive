@@ -33,9 +33,10 @@ namespace AstroArchive {
       var clock=Stopwatch.StartNew();foreach(string text in new[]{"M","M4","target:M45","file:*00002.fit"})T("SearchBox").Text=text;
       if(!object.ReferenceEquals(displayed,before)||!state.Pending||G("FramesGrid").IsEnabled||B("ExportButton").IsEnabled)throw new Exception("Typing synchronously refreshed results or left stale file actions enabled.");
       ScheduleSearch("SearchBox",false,true);SmokeSearchWait(()=>pulses>=3);
+      SetBusy(false); // A progress refresh must not save the temporarily disabled grid.
       if(!state.Pending||clock.Elapsed.TotalSeconds>=4)throw new Exception("Dispatcher blocked behind the held search worker.");
      }finally{release.Set();}
-     WaitForSearches();if(!barrier.IsCanceled||displayed.Count!=1||displayed[0].OriginalName!="Light_00002.fit")throw new Exception("Superseded search replaced the latest file query.");
+     WaitForSearches();if(!barrier.IsCanceled||displayed.Count!=1||displayed[0].OriginalName!="Light_00002.fit"||!G("FramesGrid").IsEnabled||!Targets.IsEnabled)throw new Exception("Superseded search replaced the latest query or left its view disabled.");
     }
     var index=state.Captures;T("SearchBox").Text="target:M45 exposure:>=60";WaitForSearches();if(!object.ReferenceEquals(index,state.Captures)||displayed.Count!=all.Count(f=>f.Target=="M45"&&f.Exposure>=60))throw new Exception("Repeated query lost cache reuse or filter semantics.");
     // Metadata updates must invalidate cached search text on the same row object.

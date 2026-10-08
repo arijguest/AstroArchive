@@ -36,7 +36,7 @@ namespace AstroArchive {
     name=="ImportSearchBox"?new[]{"ImportGrid","ImportButton","ScreenImportsButton","ReviewImportsButton","RetryImportsButton","AssignUnknownTargetButton","ImportToolsButton"}:
     new[]{"EditedGrid","EditedTargetList","EditedPreviewButton","EditedDetailsButton","EditedEditorButton","EditedOpenPreviewButton"};
   }
-  void BlockSearchControls(string name,SearchPanel state,bool capture=false){foreach(string control in SearchControls(name)){var element=Window.FindName(control) as UIElement;if(element==null)continue;if(capture||!state.Enabled.ContainsKey(control))state.Enabled[control]=element.IsEnabled;element.IsEnabled=false;}}
+  void BlockSearchControls(string name,SearchPanel state,bool capture=false){foreach(string control in SearchControls(name)){var element=Window.FindName(control) as UIElement;if(element==null)continue;if(capture&&!(element is DataGrid)&&!(element is ListBox)||!state.Enabled.ContainsKey(control))state.Enabled[control]=element.IsEnabled;element.IsEnabled=false;}}
   void RestoreSearchControls(SearchPanel state){foreach(var item in state.Enabled){var element=Window.FindName(item.Key) as UIElement;if(element!=null)element.IsEnabled=item.Value;}state.Enabled.Clear();}
   void ApplyPendingSearchControls(){foreach(var entry in searchPanels.Where(p=>p.Value.Blocked))BlockSearchControls(entry.Key,entry.Value,true);UpdateNavigationState();}
   void CancelSearch(string name,bool invalidate=true){
