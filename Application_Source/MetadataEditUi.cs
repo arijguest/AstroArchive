@@ -29,7 +29,7 @@ namespace AstroArchive {
    Form.Tab(3);Form.Text("Inspect the recorded values and their sources for any selected file. This view does not change the batch edit fields.");
    var picker=Form.Select("File",selected.Select((f,i)=>(i+1)+" · "+f.OriginalName).ToArray(),"1 · "+selected[0].OriginalName);
    var details=new DataGrid{IsReadOnly=true,AutoGenerateColumns=false,CanUserAddRows=false,Height=360,SelectionMode=DataGridSelectionMode.Single};
-   foreach(string name in new[]{"Field","Value","Source"})details.Columns.Add(new DataGridTextColumn{Header=name,Binding=new System.Windows.Data.Binding(name),Width=new DataGridLength(name=="Value"?2:1,DataGridLengthUnitType.Star)});
+   foreach(string name in new[]{"Field","Value","Source"}){var style=new Style(typeof(TextBlock));style.Setters.Add(new Setter(FrameworkElement.ToolTipProperty,new System.Windows.Data.Binding(name)));details.Columns.Add(new DataGridTextColumn{Header=name,Binding=new System.Windows.Data.Binding(name),ElementStyle=style,Width=new DataGridLength(name=="Value"?2:1,DataGridLengthUnitType.Star)});}
    details.ItemsSource=MetadataDetail.For(selected[0]);picker.SelectionChanged+=(s,e)=>{if(picker.SelectedIndex>=0)details.ItemsSource=MetadataDetail.For(selected[picker.SelectedIndex]);};Form.Add(details);
    Form.SelectTab(0);UpdateSummary();
    Form.Accept("Save metadata",()=>{string error=Model.Patch().Validate();if(error==null)return true;MessageBox.Show(Form.Window,error,"Check metadata",MessageBoxButton.OK,MessageBoxImage.Information);return false;});

@@ -1,11 +1,18 @@
-AstroArchive 1.13.5 validation
-Package 1.13.5.1; Windows 10/11 x64; .NET Framework 4.8.
+AstroArchive 1.13.6 validation
+Package 1.13.6.1; Windows 10/11 x64; .NET Framework 4.8.
 
 The Windows release workflow runs application regressions, a separate six-case
 Windows WIC integration suite, installer/updater regressions, x64 compilation,
 WPF application/installer rendering and disposable install/repair/uninstall checks.
 A successful workflow is required before publishing installers and the SHA-256
 update feed. Its logs are authoritative for test counts and package hashes.
+
+Metadata editor checks cover every editable current value, missing/shared/mixed
+fields, zero/false/custom choices, numeric precision and invariant formatting,
+no-op/reset/blank edits, untouched provenance, inferred mount confirmation, gain
+units, timezone conversion and verified refile with original bytes retained.
+Native WPF checks cover single/batch forms, all tabs, light/dark contrast, current
+file inspection, reset and narrow reflow at 100/150% text.
 
 Incremental-scan checks cover durable completed manifests, physical volume and
 stable telescope identity, obsolete classification/model changes, cloud exclusion,

@@ -1,3 +1,16 @@
+AstroArchive 1.13.6 — clearer single-file and batch metadata editing
+Package 1.13.6.1
+- Fill in existing editable metadata, including exposure, gain, temperature,
+  binning, equipment and processing values. Preserve custom dropdown choices.
+- Use Capture, Equipment and Processing tabs with narrow-window/text-size reflow.
+  Show shared values and mark mixed values explicitly for multi-file edits.
+- Inspect all recorded scalar metadata and its sources in Current metadata,
+  selecting any individual file without changing the batch edit fields.
+- Apply only changed, nonblank fields to selected files or entire sessions.
+  Preserve untouched evidence, gain units and inferred mount suggestions.
+  Reset restores the initial fields; saving unchanged performs no file writes.
+- Retain the quiet startup Dump check from 1.13.5.
+
 AstroArchive 1.13.5 — quiet startup Dump check
 Package 1.13.5.1
 - Check Dump in the background without opening a progress dialog for empty
