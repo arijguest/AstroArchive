@@ -6,6 +6,8 @@ opens, header/pixel reads, timestamps, companion metadata, destination stats and
 hashing. Existing names are indexed in a compact SQLite table; older archives
 backfill it once from their saved records without reading archived image files.
 Archive deletion/explicit reimport decisions remain authoritative.
+Explicit reimport permission revisits the affected DWARF session rather than
+omitting the file along with its already archived neighbours.
 
 A dated DWARF_RAW session folder with a matching archived filename is skipped as
 a whole. Up to eight saved filename probes locate an anchor; after a match the
