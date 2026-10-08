@@ -17,7 +17,7 @@ namespace AstroArchive {
             try {
                 GoToPage(0); Window.UpdateLayout();
                 var menu = (Menu)Window.FindName("MainMenu");
-                string[] expected = { "Import", "Export", "Repository", "Settings", "Guide", "Buy Me a Coffee" };
+                string[] expected = { "Import", "Export", "Repository", "Edited", "Settings", "Guide", "Buy Me a Coffee" };
                 if (!menu.Items.Cast<MenuItem>().Select(item => Convert.ToString(item.Header).Replace("_", "")).SequenceEqual(expected)) throw new Exception("Top-level menu order changed.");
                 if (Convert.ToString(((TabItem)tabs.Items[0]).Header) != "Repository") throw new Exception("Repository tab retains the Library label.");
                 if (B("ThemeButton").IsVisible || B("MoreButton").IsVisible || B("PerformanceButton").IsVisible || B("RotationButton").IsVisible) throw new Exception("Secondary action buttons remain visible.");
@@ -25,7 +25,9 @@ namespace AstroArchive {
                 var brand = (FrameworkElement)Window.FindName("BrandPanel");
                 var path = B("OpenRepositoryFolderButton");
                 var position = brand.TranslatePoint(new Point(), Window);
-                if (position.X < Window.ActualWidth / 2 || path.TranslatePoint(new Point(), Window).Y >= menu.TranslatePoint(new Point(), Window).Y) throw new Exception("Brand/path layout did not move to the right and above navigation.");
+                var repositoryGrid=G("FramesGrid");
+                if(position.X<Window.ActualWidth/2||path.TranslatePoint(new Point(),Window).Y+1<repositoryGrid.TranslatePoint(new Point(0,repositoryGrid.ActualHeight),Window).Y)throw new Exception("Repository path is not below its data table.");
+                var workspace=(Grid)Window.FindName("WorkspaceRoot");if(workspace.RowDefinitions.Count!=3||((Popup)Window.FindName("OperationPopup")).IsOpen)throw new Exception("Idle workspace retains a bottom status row.");
                 foreach (string mode in new[] { "Light", "Dark" }) {
                     settings.ThemeMode = mode; ApplyAppearance();
                     foreach (var item in menu.Items.Cast<MenuItem>()) {

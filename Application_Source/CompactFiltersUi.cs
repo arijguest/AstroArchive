@@ -17,7 +17,7 @@ namespace AstroArchive {
   void ShowFilters(bool imports){
    if(filtersPopup!=null&&filtersPopup.IsOpen){filtersPopup.IsOpen=false;return;}
    var criteria=imports?importFilters:libraryFilters;var rows=imports?CurrentImportRows():all;
-   FrameworkElement button=TopMenu(imports?"ImportMenu":"RepositoryMenu");
+   FrameworkElement button=B(imports?"ImportFiltersButton":"LibraryFiltersButton");if(!button.IsVisible)button=TopMenu(imports?"ImportMenu":"RepositoryMenu");
    var popup=new Popup{PlacementTarget=button,Placement=PlacementMode.Bottom,StaysOpen=false,AllowsTransparency=true,PopupAnimation=settings.ReducedMotion?PopupAnimation.None:PopupAnimation.Fade,VerticalOffset=6};filtersPopup=popup;
    double width=Math.Max(380,Math.Min(620,SystemParameters.WorkArea.Width-48)),height=Math.Max(300,Math.Min(650,SystemParameters.WorkArea.Height-80));
    var border=new Border{Width=width,MaxHeight=height,Background=Brushes.White,BorderBrush=new SolidColorBrush(Color.FromRgb(203,213,227)),BorderThickness=new Thickness(1),CornerRadius=new CornerRadius(10),Padding=new Thickness(16)};

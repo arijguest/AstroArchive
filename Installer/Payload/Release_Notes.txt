@@ -1,3 +1,25 @@
+AstroArchive 1.11.0 — Edited workspace and expanded repository layout
+Package 1.11.0.1
+
+- Remove the bottom status bar and expand the workspace into its space. Move the
+  repository path into the grey strip below its data table. Keep progress and
+  Cancel in an active-only operation panel; diagnostics open separately.
+- Add Edited projects with individual-file and reviewed recursive folder import.
+  Preserve subfolders and sources, verify copied bytes, isolate unreadable files,
+  reject changed inputs, and remove unpublished projects after cancellation.
+- Automatically create Edited working copies for Siril handoffs; add a managed
+  working-copy action for other editors. Discover outputs on return or refresh.
+- Classify Starless and Stars only images from filenames. Recover object/filter,
+  sub-count, per-sub and total exposure data from recognised filenames and image
+  metadata; retain unknown values and explain conflicts or ambiguous exposure.
+- Add visible Filters buttons beside Search and Clear on Repository and Import.
+- Remove the redundant Format heading from both tables and their column choosers.
+- Label meteor filenames as Meteor and omit their object ID, including existing
+  archive rows, imported edits and editor working copies. Retain acquisition data.
+- Default supported scientific previews to Auto per channel and rename the panel
+  Preview. Retain saved stretch choices and linear solar/planetary previews.
+- Retain the current header sizing, branding, navigation and accessibility fixes.
+
 AstroArchive 1.10.4 — menu scrolling and preview navigation
 Package 1.10.4.2
 

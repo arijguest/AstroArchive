@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
@@ -44,6 +45,7 @@ namespace AstroArchive {
    bool stackable=selected.Any(f=>f.Kind=="Light"||f.Kind=="Stack");
    menu.Items.Add(FileAction("Ready-to-stack folder…",()=>ExportProject(selected,false),stackable));
    menu.Items.Add(FileAction("Ready-to-stack with calibrations…",()=>ExportProject(selected,true),stackable));
+   menu.Items.Add(FileAction("Create Edited working copies…",()=>CreateEditedCopies(selected)));
    menu.Items.Add(FileAction("Send stack to Siril…",()=>SendStackToSiril(selected),SirilHandoff.CanSend(selected)));
    return menu;
   }
@@ -96,18 +98,19 @@ namespace AstroArchive {
    d.Text("Creates a verified working copy and opens it in "+title+". Select one uncompressed FITS stack.");
    TextBox executable=d.Input(title+" executable",settings.SirilExecutable??"");
    d.Button("Locate "+title,()=>{var picker=new OpenFileDialog{Filter="Siril GUI|siril.exe",Title="Choose the "+title+" executable"};if(picker.ShowDialog(d.Window)==true)executable.Text=picker.FileName;});
-   TextBox parent=d.Input("Working-copy destination folder","");d.Button("Browse destination",()=>{string p=Folder("Choose a "+title+" working-copy destination",parent.Text,d.Window);if(p!=null)parent.Text=p;});
-   TextBox name=d.Input("New folder name",Util.Safe(selected[0].Target)+"_"+title+"_"+DateTime.Now.ToString("yyyyMMdd_HHmmss"));
-   d.Accept("Send to "+title,()=>{try{SirilHandoff.ValidateExecutable(executable.Text.Trim());}catch(Exception e){MessageBox.Show(d.Window,e.Message,title+" unavailable");return false;}return ValidExportDestination(d,parent,name);});if(!d.Show())return;
+   TextBox name=d.Input("Edited project name",selected[0].TargetLabel+" · "+title+" · "+DateTime.Now.ToString("yyyyMMdd_HHmmss"));
+   d.Text("The working copy appears automatically in Edited. Save your processed outputs in its project folder.");
+   d.Accept("Send to "+title,()=>{try{SirilHandoff.ValidateExecutable(executable.Text.Trim());}catch(Exception e){MessageBox.Show(d.Window,e.Message,title+" unavailable");return false;}return !string.IsNullOrWhiteSpace(name.Text);});if(!d.Show())return;
    string app=executable.Text.Trim();settings.SirilExecutable=app;SaveSettings();
-   var options=new ExportOptions{Parent=parent.Text.Trim(),Name=name.Text.Trim()};
+   EditedProject project=null;string projectName=name.Text;
    Run(ct=>{
-    string image=SirilHandoff.ExportStack(repo,selected,options,app,ct,Progress);
+    project=SirilHandoff.CreateWorkingCopy(repo,selected,projectName,app,ct,Progress);
+    string image=repo.EditedPath(project,project.Sources[0].RelativePath);
     ct.ThrowIfCancellationRequested();
     try{using(var process=Process.Start(SirilHandoff.LaunchInfo(app,image))){if(process==null)throw new IOException(title+" did not start.");}}
     catch(Exception e){throw new IOException(title+" could not be launched. Your verified working copy is saved at:\n"+image+"\n\n"+e.Message,e);}
     return image;
-   },image=>L("StatusLabel").Text=title+" launched with stack: "+image);
+   },image=>{RefreshEdited(project.Id);GoToPage(3);});
   }
   void DeleteFailedFiles(){
    if(repo==null||cancel!=null)return;var matches=repo.FailedFiles();

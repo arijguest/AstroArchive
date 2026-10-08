@@ -9,7 +9,7 @@ namespace AstroArchive {
  public partial class MainUi {
   void PreviewImage(Frame frame){
    if(repo==null||cancel!=null||frame==null)return;var capture=frame.Clone();PreviewData pixels=null;byte[] rendered=null;
-   Run(ct=>{Progress(new ProgressInfo{Stage="Loading image preview",Text=capture.OriginalName});repo.ValidateCapture(capture,ct);string path=repo.FilePath(capture);pixels=DecodePreview(path,ct,capture);pixels.ApplyContext(capture,path);ct.ThrowIfCancellationRequested();rendered=pixels.Render(ScientificPreview(path)?settings.PreviewStretch??"Auto":"Linear",ct);ct.ThrowIfCancellationRequested();return "";},r=>new ImagePreviewWindow(Window,capture.OriginalName,pixels.Width,pixels.Height,rendered).ShowDialog());
+   Run(ct=>{Progress(new ProgressInfo{Stage="Loading image preview",Text=capture.OriginalName});repo.ValidateCapture(capture,ct);string path=repo.FilePath(capture);pixels=DecodePreview(path,ct,capture);pixels.ApplyContext(capture,path);ct.ThrowIfCancellationRequested();rendered=pixels.Render(ScientificPreview(path)?settings.PreviewStretch??"Auto per channel":"Linear",ct);ct.ThrowIfCancellationRequested();return "";},r=>new ImagePreviewWindow(Window,capture.OriginalName,pixels.Width,pixels.Height,rendered).ShowDialog());
   }
  }
  public class ImagePreviewWindow:Window {

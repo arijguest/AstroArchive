@@ -1,11 +1,32 @@
 // Windows Imaging Component decodes raster pages without converting the archived original.
 using System;
 using System.IO;
+using System.Globalization;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 namespace AstroArchive {
     public sealed class RasterReader:IAssetReader {
+        static object Query(BitmapMetadata metadata,string query){try{return metadata.GetQuery(query);}catch(NotSupportedException){return null;}catch(ArgumentException){return null;}catch(InvalidOperationException){return null;}catch(IOException){return null;}}
+        static void AcquisitionMetadata(BitmapFrame frame,FitsHeader header){
+            var metadata=frame.Metadata as BitmapMetadata;if(metadata==null)return;
+            for(int blockIndex=0;blockIndex<64;blockIndex++){
+             string blockPath="/["+blockIndex+"]tEXt";if(Query(metadata,blockPath)==null)break;
+             foreach(string key in new[]{"OBJECT","OBJNAME","TARGET","FILTER","FILTERID","NCOMBINE","STACKCNT","NSTACK","NSUBS","SUBEXP","SUBEXPT","TOTEXP","TOTALEXP","EXPTOTAL","EXPTIME","IMAGETYP","OBJCTRA","OBJCTDEC"}){
+                var value=Query(metadata,blockPath+"/{str="+key+"}") as string;if(!string.IsNullOrWhiteSpace(value)&&value.Length<8192)header.Values[key]=value.Trim();
+            }
+            }
+            foreach(string query in new[]{"/tEXt/{str=Description}","/tEXt/{str=Comment}","/ifd/{ushort=270}","/app1/ifd/{ushort=270}"}){
+                string text=Query(metadata,query) as string;if(string.IsNullOrEmpty(text)||text.Length>65536)continue;
+                foreach(Match match in Regex.Matches(text,@"(?:^|[\r\n;])\s*(OBJECT|OBJNAME|TARGET|FILTER|NCOMBINE|STACKCNT|NSUBS|SUBEXP|SUBEXPT|TOTEXP|TOTALEXP|EXPTOTAL|EXPTIME|IMAGETYP|OBJCTRA|OBJCTDEC)\s*[:=]\s*([^\r\n;]+)",RegexOptions.IgnoreCase)){
+                    string key=match.Groups[1].Value.ToUpperInvariant();if(!header.Values.ContainsKey(key))header.Values[key]=match.Groups[2].Value.Trim().Trim('\'', '"');
+                }
+            }
+            if(!header.Values.ContainsKey("EXPTIME"))foreach(string query in new[]{"/ifd/exif/{ushort=33434}","/app1/ifd/exif/{ushort=33434}"}){
+                object value=Query(metadata,query);if(!(value is ulong))continue;ulong rational=(ulong)value;uint numerator=(uint)rational,denominator=(uint)(rational>>32);if(denominator>0)header.Values["EXPTIME"]=((double)numerator/denominator).ToString("R",CultureInfo.InvariantCulture);
+            }
+        }
         public string Name {
             get {
                 return "Raster";
@@ -39,6 +60,7 @@ namespace AstroArchive {
                     result.Header.Width=first.Width;
                     result.Header.Height=first.Height;
                     result.Header.Channels=first.Channels;
+                    AcquisitionMetadata(decoder.Frames[0],result.Header);
                 }
                 if(counted!=null)counted((int)Math.Min(int.MaxValue,stream.Position));
                 return result;

@@ -15,7 +15,7 @@ namespace AstroArchive {
    add("Getting started","START HERE");add("USB and saved telescopes","USB TRANSFER AND SAVED TELESCOPES");add("Image preview and tables","IMAGE PREVIEW AND TABLES");add("Stacking projects","STACKING PROJECTS AND SESSIONS");add("Mosaic collections","MOSAIC COLLECTIONS AND PANELS");add("Troubleshooting","TROUBLESHOOTING");add("Keyboard shortcuts","KEYBOARD SHORTCUTS");add("Frame types and glossary","FRAME TYPES AND GLOSSARY");
    menu.PlacementTarget=TopMenu("GuideMenu");menu.IsOpen=true;
   }
-  string CurrentHelpTopic(){return ((TabControl)Window.FindName("MainTabs")).SelectedIndex==2?"MOSAIC COLLECTIONS AND PANELS":((TabControl)Window.FindName("MainTabs")).SelectedIndex==1?"IMPORT WORKFLOW":"LIBRARY WORKFLOW";}
+  string CurrentHelpTopic(){return ((TabControl)Window.FindName("MainTabs")).SelectedIndex==3?"EDITED IMAGES AND WORKING COPIES":((TabControl)Window.FindName("MainTabs")).SelectedIndex==2?"MOSAIC COLLECTIONS AND PANELS":((TabControl)Window.FindName("MainTabs")).SelectedIndex==1?"IMPORT WORKFLOW":"LIBRARY WORKFLOW";}
   void OpenGuide(string key){new HelpWindow(Window,HelpCatalog.Load(),key).ShowDialog();}
   void InitializeHelp(){InitializeTooltips();Window.PreviewKeyDown+=(s,e)=>{if(e.Key!=Key.F1)return;e.Handled=true;OpenGuide(CurrentHelpTopic());};}
   void SmokeHelp(){

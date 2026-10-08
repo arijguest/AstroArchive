@@ -1,4 +1,6 @@
-# AstroArchive 1.10.4
+# AstroArchive 1.11.0
+
+Edited projects support reviewed folder import, starless/stars-only classification, acquisition metadata recovery and automatic editor working copies. The repository path sits below the table; operation feedback appears only while busy.
 
 Portable Windows 10/11 x64 WPF app for archiving astronomical image originals and creating verified stacking projects. Open `AstroArchive.exe`; read `Quick_Start.txt` for the complete workflow.
 
@@ -16,7 +18,7 @@ Portable Windows 10/11 x64 WPF app for archiving astronomical image originals an
 
 ## Changes in 1.9.0
 
-- Grouped top-left navigation and a clickable repository path, with essential page actions and a quieter status bar.
+- Grouped top-left navigation and a clickable repository path, with essential page actions and operation feedback shown while busy.
 - Visible table sort direction/priority, repeatable first-run walkthrough and an About page for Ari J. Guest.
 - Accessibility preferences for larger text, comfortable rows, high contrast and reduced motion.
 - Windows UI smoke tests render both themes and exercise menus, sorting, walkthrough and preferences.

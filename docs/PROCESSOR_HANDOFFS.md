@@ -11,11 +11,11 @@ folder, or writing a script that the user still has to load does not qualify.
 | Siril | One non-rejected uncompressed FITS stack | Launch `siril.exe` with the working copy's absolute path as its one positional argument. | Documented GUI image-open contract. `siril-cli.exe`, multiple inputs and gzip are excluded from this route. |
 
 Select a stack in the repository, right-click **Export → Send stack to Siril…**,
-locate the executable and choose a working-copy
-destination. The selected capture is copied and SHA-256 verified using the
-existing exporter. The receiving program opens that copy; processing never
-targets the archive copy. Exported metadata and checksums remain in the new
-project. Launch failures retain the copy and report its path.
+locate the executable and name an Edited project. The selected capture is copied
+and SHA-256 verified into the repository's managed Edited workspace. The receiving
+program opens that copy; processing never targets the archive copy. Acquisition
+metadata stays with the project, and outputs saved alongside the copy appear on
+return or refresh. Launch failures retain the copy and report its path.
 
 AstroArchive remembers the Siril executable location. Shell execution is disabled;
 paths containing spaces or Unicode remain one argument. It opens a new process,
@@ -30,9 +30,11 @@ official releases, and its startup file-loading behavior was verified for only
 one build rather than a supported contract across builds. Removing the checksum
 check alone would not establish compatibility.
 
-Use **Export → Export selected files…**, choose a working-copy destination outside
-the archive, then open the exported stack from within AstroWizard. The exporter
-copies and verifies the selected files; processing uses these working copies.
+Use **Export → Create Edited working copies…**, name a project, then open the
+verified copies from within AstroWizard or another editor. The project is registered
+in Edited and its folder opens for manual loading. Default application uses the
+Windows file association to open a selected Edited image. Ordinary file exports
+remain available for destinations outside the repository.
 
 - [Official AstroWizard downloads](https://github.com/lukomaticoYT/astrowizard-releases)
 - [Siril's GUI/CLI launch contract](https://siril.org/docs/man/).
