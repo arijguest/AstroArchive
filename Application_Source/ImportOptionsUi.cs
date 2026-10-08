@@ -10,7 +10,7 @@ namespace AstroArchive {
    dialog.Text("Target for Unknown light/stack captures",true);
    var choice=new ComboBox{IsEditable=true,IsTextSearchEnabled=false,Text=value,Margin=new Thickness(0,6,0,8)};
    choice.DropDownOpened+=(s,e)=>{string text=choice.Text;choice.ItemsSource=Catalog.Search(text).Select(o=>Catalog.Label(o.Name)).ToList();choice.Text=text;};
-   UiHelp.Tip(choice,"Enter an object ID, common name, comet or custom label. Open the dropdown to find catalogue matches. Leave blank to keep Unknown.");dialog.Add(choice);return choice;
+   UiHelp.Tip(choice,"Enter an object ID or name. Blank keeps Unknown.");dialog.Add(choice);return choice;
   }
   static bool ValidImportTarget(string value,TextBlock error,bool optional){
    error.Text="";if(optional&&string.IsNullOrWhiteSpace(value))return true;
@@ -29,8 +29,8 @@ namespace AstroArchive {
    flagged=dialog.Check("Skip flagged captures",SkipFlagged);
    failed=dialog.Check("Ignore failed filenames",settings.IgnoreFailed);
    raster=dialog.Check("Ignore non-raw files (PNG/JPG/JPEG)",settings.IgnoreRasterImports);
-   UiHelp.Tip(failed,"Ignore every filename containing failed, including failed stacks. This applies to folder scans, USB uploads and Dump; originals stay in place.");
-   UiHelp.Tip(raster,"Ignore .png, .jpg and .jpeg files in folder scans, USB uploads and Dump. Other formats and original files stay available.");
+   UiHelp.Tip(failed,"Skip filenames containing “failed”; keep originals.");
+   UiHelp.Tip(raster,"Skip PNG/JPG/JPEG files; keep originals.");
    originals=dialog.Check("Delete originals after verified import",((CheckBox)Window.FindName("DeleteOriginalsCheck")).IsChecked==true);
    originals.IsEnabled=((CheckBox)Window.FindName("DeleteOriginalsCheck")).IsEnabled;
   }

@@ -50,9 +50,9 @@ namespace AstroArchive {
             DockPanel.SetDock(navigation, Dock.Right); buttons.Children.Add(navigation); navigation.Children.Add(Back); navigation.Children.Add(Next);
             Back.Click += (s,e) => SetStep(StepIndex - 1);
             Next.Click += (s,e) => { if (StepIndex == steps.Length - 1) { finished = true; Close(); } else SetStep(StepIndex + 1); };
-            UiHelp.Tip(Back, "Return to the previous step."); UiHelp.Tip(Next, "Advance through the walkthrough. Enter activates this button.");
-            UiHelp.Tip(Try, "Open the relevant menu or settings. Steps never import or delete files automatically.");
-            UiHelp.Tip(close, "Close the walkthrough. Run it again from Guide whenever you need it.");
+            UiHelp.Tip(Back, "Previous step."); UiHelp.Tip(Next, "Next step (Enter).");
+            UiHelp.Tip(Try, "Open this step’s menu or settings.");
+            UiHelp.Tip(close, "Close walkthrough.");
             Loaded += (s,e) => SetStep(0);
             PreviewKeyDown += (s,e) => { if (e.Key == System.Windows.Input.Key.Escape) { e.Handled = true; Close(); } };
             Closed += (s,e) => this.complete(finished);

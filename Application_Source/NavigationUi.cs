@@ -84,7 +84,7 @@ namespace AstroArchive {
             var selector = C("PageSelector");
             selector.SelectionChanged += (s,e) => { if (!updatingPageSelector && selector.SelectedItem != null) GoToPage(Convert.ToInt32(((ComboBoxItem)selector.SelectedItem).Tag)); };
             SyncPageSelector();
-            UiHelp.Tip(selector, "Choose Repository, Edited or Import. Ctrl+1–3 selects a page; Ctrl+Tab cycles pages. Switching retains search, selection and progress.");
+            UiHelp.Tip(selector, "Switch page (Ctrl+1–3).");
             ((FrameworkElement)Window.FindName("HeaderBar")).SizeChanged += (s,e) => UpdateCompactHeader();
             UpdateCompactHeader();
             foreach (string name in new[] { "ImportMenu", "ExportMenu", "RepositoryMenu", "EditedMenu", "SettingsMenu", "GuideMenu" }) {
@@ -95,17 +95,15 @@ namespace AstroArchive {
                 PopulateNavigation(name);
             }
             TopMenu("CoffeeMenu").Click += (s,e) => OpenWebsite("https://ko-fi.com/arijguest");
-            UiHelp.Tip(TopMenu("CoffeeMenu"), "Support AstroArchive and Ari J. Guest on Ko-fi. Opens your browser.");
+            UiHelp.Tip(TopMenu("CoffeeMenu"), "Support AstroArchive on Ko-fi.");
             B("OpenRepositoryFolderButton").Click += (s,e) => OpenRepositoryFolder();
             B("RepositoryImportButton").Click += (s,e) => GoToPage(1);
             B("ImportExportButton").Click += (s,e) => OpenTopMenu("ExportMenu");
             B("ImportOptionsButton").Click += (s,e) => ImportPreferences();
             B("AssignUnknownTargetButton").Click += (s,e) => AssignUnknownImportTargets();
-            UiHelp.Tip(B("OpenRepositoryFolderButton"), "Open the active repository in File Explorer. The full path is shown in its tooltip.");
-            UiHelp.Tip(B("RepositoryImportButton"), "Go to Import to select a source folder and review new captures.");
-            UiHelp.Tip(B("ImportExportButton"), "Export archived repository files. Scanned source files must be imported first.");
-            foreach (string name in new[] { "ImportMenu", "ExportMenu", "RepositoryMenu", "EditedMenu", "SettingsMenu", "GuideMenu" })
-                UiHelp.Tip(TopMenu(name), name.Replace("Menu", "") + " actions. Press Alt to reveal menu access keys; arrow keys navigate the menu.");
+            UiHelp.Tip(B("OpenRepositoryFolderButton"), "Open repository folder.");
+            UiHelp.Tip(B("RepositoryImportButton"), "Choose a source and review imports.");
+            UiHelp.Tip(B("ImportExportButton"), "Export archived files; import scanned files first.");
             Window.PreviewKeyDown += NavigationKeys;
             navigationReady = true;
             UpdateNavigationState();
@@ -134,7 +132,7 @@ namespace AstroArchive {
             B("ImportExportButton").IsEnabled = TopMenu("ExportMenu").IsEnabled;
             B("OpenRepositoryFolderButton").IsEnabled = repo != null;
             if (repo != null) {
-                B("OpenRepositoryFolderButton").ToolTip = "Open repository in File Explorer\n" + repo.Root;
+                B("OpenRepositoryFolderButton").ToolTip = "Open repository folder\n" + repo.Root;
                 AutomationProperties.SetName(B("OpenRepositoryFolderButton"), "Open active repository: " + repo.Root);
             }
             var analysis = Convert.ToString(C("ImportSolveMode").SelectedItem) != "Off" || Convert.ToString(C("ImportRotationMode").SelectedItem) != "Off";

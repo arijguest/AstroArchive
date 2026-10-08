@@ -51,7 +51,7 @@ namespace AstroArchive {
    int missing=rows.Count-dated.Count;bool mixed=dated.Any(d=>d.Basis=="FITS UTC")&&dated.Any(d=>d.Basis.IndexOf("timezone unknown",StringComparison.OrdinalIgnoreCase)>=0);
    string dates=range+(missing>0&&dated.Count>0?" · partial dates":"")+(mixed?" · mixed clocks":"");
    string context=string.Join(" · ",rows.Select(f=>f.Telescope??"Unknown device").Distinct())+" · "+string.Join(", ",rows.Select(f=>f.TargetLabel).Distinct())+" · "+string.Join(", ",rows.Select(f=>f.Camera??"Unknown camera").Distinct());
-   return new CaptureSessionChoice{Key=rows.Count==0?"":Key(rows[0]),Dates=dates,Label=dates,First=first,Last=last,Count=rows.Count,MissingDates=missing,Description=context+"\n"+rows.Count+" captures; "+dated.Count+" with recorded acquisition dates; "+missing+" dates unknown.\n"+string.Join(", ",dated.Select(d=>d.Basis).Distinct())+(mixed?"\nMixed clock bases: UTC timestamps and unzoned filename dates are kept in their recorded calendar dates.":"")+"\nShifted night and file modification times are not used."};
+   return new CaptureSessionChoice{Key=rows.Count==0?"":Key(rows[0]),Dates=dates,Label=dates,First=first,Last=last,Count=rows.Count,MissingDates=missing,Description=context+"\n"+rows.Count+" captures"+(missing>0?" · "+missing+" dates unknown":"")+"\n"+string.Join(", ",dated.Select(d=>d.Basis).Distinct())+(mixed?"\nUTC and unzoned dates; no timezone conversion.":"")};
   }
   public static List<CaptureSessionChoice> Choices(IEnumerable<Frame> frames){
    var choices=frames.GroupBy(Key).Select(Describe).OrderByDescending(c=>c.Last).ThenBy(c=>c.Key).ToList();

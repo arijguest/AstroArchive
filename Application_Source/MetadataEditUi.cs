@@ -50,9 +50,8 @@ namespace AstroArchive {
    input.Name="Metadata"+value.Field.Key;Inputs[value.Field.Key]=input;panel.Children.Add(input);
    string hint=value.Mixed?"Mixed · "+string.Join(" / ",value.Values.Take(3).Select(v=>v.Length==0?"not recorded":v))+(value.Values.Length>3?" / …":""):value.Initial.Length==0?"Not recorded":"";
    if(value.Field.Key=="Mount"&&!value.Mixed&&value.Initial.EndsWith("?"))hint="Suggested / inferred · select EQ or Alt-Az to confirm";
-   string evidence="";if(selected.Count==1){MetadataFact fact;if(selected[0].Facts!=null&&selected[0].Facts.TryGetValue(value.Field.Key,out fact))evidence="\nSource: "+fact.Source+(string.IsNullOrEmpty(fact.Raw)?"":"\nRecorded: "+fact.Raw);if(value.Field.Key=="Mount")evidence="\n"+selected[0].MountEvidenceText;}
-   UiHelp.Tip(input,value.Field.Label+". Only changed, nonblank values are applied. Use Reset changes to restore the original selection."+(hint.Length>0?"\n"+hint:"")+evidence);
-   if(hint.Length>0){var label=new TextBlock{Text=hint,TextTrimming=TextTrimming.CharacterEllipsis,Margin=new Thickness(0,4,0,0)};Theme.Bind(label,TextBlock.ForegroundProperty,"Muted");UiHelp.Tip(label,string.Join("\n",value.Values.Select(v=>v.Length==0?"Not recorded":v)));panel.Children.Add(label);}
+   UiHelp.Tip(input,value.Mixed?"Mixed values stay unchanged until replaced.":value.Field.Key=="Mount"?"A ? marks an inference. Blank keeps existing values.":"Blank keeps existing values.");
+   if(hint.Length>0){var label=new TextBlock{Text=hint,TextTrimming=TextTrimming.CharacterEllipsis,Margin=new Thickness(0,4,0,0)};Theme.Bind(label,TextBlock.ForegroundProperty,"Muted");if(value.Mixed)UiHelp.Tip(label,value.Values.Length+" different values. See Current metadata.");panel.Children.Add(label);}
    return panel;
   }
   void UpdateSummary(){if(summary==null)return;int count=Model.Values.Count(v=>v.Changed);summary.Text=count==0?"No changes yet":count+" changed field"+(count==1?"":"s")+" · "+(Sessions.IsChecked==true?"all files in the selected sessions":selectedCount+" selected file"+(selectedCount==1?"":"s"));}

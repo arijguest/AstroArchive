@@ -4,12 +4,12 @@ using System.Windows.Controls;
 using System.Windows.Input;
 namespace AstroArchive {
  public partial class MainUi {
-  const string SearchTip="Search names, filenames and metadata. Use quotes for phrases, - to exclude, OR for alternatives, and fields such as target:, file:, filter:, date: or exposure:>20. Click ? for examples.";
+  const string SearchTip="Search files and metadata. ? shows syntax and examples.";
   void InitializeSearch(){
    foreach(string name in new[]{"SearchBox","ImportSearchBox","EditedSearchBox"}){string field=name;UiHelp.Tip(T(name),SearchTip);T(name).PreviewKeyDown+=(s,e)=>{if(e.Key==Key.Enter){e.Handled=true;ScheduleSearch(field,false,true);}else if(e.Key==Key.Escape){e.Handled=true;T(field).Clear();ScheduleSearch(field,false,true);}};}
    foreach(string name in new[]{"SearchHelpButton","ImportSearchHelpButton","EditedSearchHelpButton"}){B(name).Click+=(s,e)=>ShowSearchGuide();UiHelp.Tip(B(name),"Search syntax and examples");}
   }
-  void ShowSearchError(string name,FileSearch query){T(name).ToolTip=query.Error==null?SearchTip:query.Error+" No files match until the query is complete.";System.Windows.Automation.AutomationProperties.SetHelpText(T(name),query.Error??SearchTip);}
+  void ShowSearchError(string name,FileSearch query){T(name).ToolTip=query.Error==null?SearchTip:query.Error+" No results until corrected.";System.Windows.Automation.AutomationProperties.SetHelpText(T(name),query.Error??SearchTip);}
   void ShowSearchGuide(){
    var dialog=new FormWindow(Window,"Find files",660,600);
    dialog.Text("Search across your files",true);dialog.Text("Results update after a short typing pause. Enter searches immediately; Escape clears the search while keeping table filters. Searching runs in the background; file actions wait for the current results. Words combine to narrow results. Catalogue IDs and common names resolve to the same target, including spaced IDs such as NGC 6888. Case, accents and filename separators are handled consistently.");

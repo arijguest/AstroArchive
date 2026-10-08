@@ -96,7 +96,7 @@ namespace AstroArchive {
    d.Button("Open exported folder",()=>{try{Process.Start(new ProcessStartInfo(path){UseShellExecute=true});}catch(Exception e){MessageBox.Show(d.Window,e.Message,"Folder unavailable");}});
    if(stacking){
     d.Text("Open a stacking app, then load the inputs from this folder.");var apps=new WrapPanel{Margin=new Thickness(0,0,0,8)};
-    foreach(StackingApplication app in Enum.GetValues(typeof(StackingApplication))){var choice=app;var button=new Button{Content=StackingApps.Name(app),Margin=new Thickness(0,0,8,8),MinWidth=100,ToolTip=app==StackingApplication.Siril?"Start Siril with the exported folder as its working directory. Select the inputs in Siril.":app==StackingApplication.StackingWizard?"Start StackingWizard, then load the exported inputs.":"Choose another installed stacking app."};button.Click+=(s,e)=>{if(launch!=null)launch(choice);else OpenStackingApp(d,path,choice);};apps.Children.Add(button);}d.Add(apps);
+    foreach(StackingApplication app in Enum.GetValues(typeof(StackingApplication))){var choice=app;var button=new Button{Content=StackingApps.Name(app),Margin=new Thickness(0,0,8,8),MinWidth=100,ToolTip=app==StackingApplication.Siril?"Open Siril in the exported folder.":app==StackingApplication.StackingWizard?"Open StackingWizard; load the exported inputs.":"Choose another stacking app."};button.Click+=(s,e)=>{if(launch!=null)launch(choice);else OpenStackingApp(d,path,choice);};apps.Children.Add(button);}d.Add(apps);
    }
    d.CloseOnly();return d;
   }

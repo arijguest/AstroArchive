@@ -19,7 +19,7 @@ namespace AstroArchive {
   internal readonly SkyGlobeCamera Camera=new SkyGlobeCamera();
   Point dragPoint;bool dragging;
   public CaptureSky Context{get{return context;}}
-  const string NavigationHelp="Drag to rotate. Scroll or pinch to zoom. Arrow keys rotate; plus/minus zoom. Double-click, Home or the reset button restores the capture view.";
+  const string NavigationHelp="Drag to rotate; scroll or pinch to zoom.";
   void ViewChanged(){drawing=null;InvalidateVisual();}
   public void ResetView(){Camera.Reset();ViewChanged();}
   internal void RotateView(double dx,double dy){double scale=180/(Math.PI*Math.Max(25,radius));Camera.Orbit(-dx*scale,dy*scale);ViewChanged();}
@@ -52,7 +52,7 @@ namespace AstroArchive {
   }
   public void SetContext(CaptureSky value){
    value=value??CaptureSky.Resolve(null,null);bool changed=context==null||context.Key!=value.Key;context=value;
-   ToolTip=value.TargetLabel+"\n"+value.Summary+"\n"+value.Evidence+"\n"+NavigationHelp;AutomationProperties.SetName(this,"Capture sky. "+value.TargetLabel+". "+value.TimeLabel+". "+value.Summary);
+   ToolTip=value.TargetLabel+"\n"+value.TimeLabel+" · "+value.Summary+(value.ApproximatePosition?" · approximate":"")+"\n"+NavigationHelp;AutomationProperties.SetName(this,"Capture sky. "+value.TargetLabel+". "+value.TimeLabel+". "+value.Summary);
    if(!changed)return;
    var target=value.Orientation.Map(SkyVector.Equatorial(value.RA,value.Dec));Camera.SetHome(value.HasPosition?Math.Atan2(target.X,target.Y)*180/Math.PI:180,value.HasHorizon&&value.Altitude<0?-25:25);
    stars=SkyFigures.Stars.Select(value.Orientation.Map).ToArray();drawing=null;InvalidateVisual();

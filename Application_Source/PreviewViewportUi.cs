@@ -42,12 +42,12 @@ namespace AstroArchive {
    viewport.MouseMove+=(s,e)=>{if(!dragging)return;if(e.LeftButton!=MouseButtonState.Pressed){viewport.ReleaseMouseCapture();return;}var point=e.GetPosition(viewport);Pan(point.X-previous.X,point.Y-previous.Y);previous=point;e.Handled=true;};
    viewport.MouseLeftButtonUp+=(s,e)=>{if(dragging){viewport.ReleaseMouseCapture();e.Handled=true;}};viewport.LostMouseCapture+=(s,e)=>{dragging=false;viewport.Cursor=Cursors.Arrow;};
    viewport.KeyDown+=(s,e)=>{if(geometry==null)return;if(e.Key==Key.F)Fit();else if(e.Key==Key.Add||e.Key==Key.OemPlus)ZoomAt(1.25,Center);else if(e.Key==Key.Subtract||e.Key==Key.OemMinus)ZoomAt(1/1.25,Center);else if(e.Key==Key.Left)Navigate(-40,0);else if(e.Key==Key.Right)Navigate(40,0);else if(e.Key==Key.Up)Navigate(0,-40);else if(e.Key==Key.Down)Navigate(0,40);else return;e.Handled=true;};
-   UiHelp.Tip(viewport,"Scroll or pinch to zoom. After zooming, drag the image or use the arrows to move the view. Fit restores the whole image. Landscape previews rotate into portrait.");
+   UiHelp.Tip(viewport,"Scroll or pinch to zoom; drag to pan.");
   }
   bool FromControl(object source){var element=source as DependencyObject;while(element!=null&&element!=viewport){if(element is ButtonBase)return true;element=VisualTreeHelper.GetParent(element);}return false;}
   Button AddButton(Panel panel,string symbol,string label,Action action){
    var button=new Button{Content=symbol,Width=28,Height=28,Padding=new Thickness(0),Margin=new Thickness(1,0,1,0),FontSize=16,Background=new SolidColorBrush(Color.FromArgb(220,20,29,46)),Foreground=Brushes.White,BorderBrush=new SolidColorBrush(Color.FromArgb(150,148,165,192)),BorderThickness=new Thickness(1)};
-   AutomationProperties.SetName(button,label);UiHelp.Tip(button,label=="Recenter image"?"Show the whole image and reset panning (F).":label.StartsWith("View")?label+" after zooming.":label);ToolTipService.SetShowOnDisabled(button,true);button.Click+=(s,e)=>{action();e.Handled=true;};panel.Children.Add(button);return button;
+   AutomationProperties.SetName(button,label);UiHelp.Tip(button,label=="Recenter image"?"Fit image (F).":label.StartsWith("View")?label+" (when zoomed).":label);ToolTipService.SetShowOnDisabled(button,true);button.Click+=(s,e)=>{action();e.Handled=true;};panel.Children.Add(button);return button;
   }
   public void SetImage(BitmapSource source,bool reset){
    loading=false;

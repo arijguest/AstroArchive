@@ -31,7 +31,7 @@ namespace AstroArchive {
     };
     if(table=="EditedGrid")continue;
     var button=B(table=="FramesGrid"?"LibraryColumnsButton":"ImportColumnsButton");
-    UiHelp.Tip(button,"Choose the headings shown in this table. Drag headings left or right to rearrange them. Each table remembers its own layout; Restore default columns resets it.");
+    UiHelp.Tip(button,"Choose columns; drag headers to reorder.");
     button.Click+=(s,e)=>{var menu=BuildColumnsMenu(table,null);menu.PlacementTarget=button;menu.Placement=PlacementMode.Bottom;menu.IsOpen=true;};
    }
   }

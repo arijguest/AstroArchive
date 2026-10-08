@@ -57,7 +57,7 @@ namespace AstroArchive {
    C("SavedTelescopeBox").IsEnabled=!busy;B("SaveTelescopeButton").IsEnabled=!busy;B("RenameTelescopeButton").IsEnabled=!busy&&SelectedScope!=null&&!string.IsNullOrEmpty(SelectedScope.Id);B("RebuildTelescopesButton").IsEnabled=!busy&&repo!=null;B("RefreshUsbButton").IsEnabled=!usbChecking&&!busy;
    var button=B("AutoUploadButton");button.Visibility=usbTelescopes.Count>0||activeUsb!=null?Visibility.Visible:Visibility.Collapsed;button.IsEnabled=!busy&&repo!=null&&usbTelescopes.Count>0;
    button.Content=usbTelescopes.Count==1?"Auto upload from "+(usbTelescopes[0].ProfileId??(usbTelescopes[0].Make=="DWARFLAB"?"DWARF":usbTelescopes[0].Make)):"Auto upload from...";
-   button.ToolTip=repo==null?"Choose a repository in Settings first.":"Screen supported USB FITS captures, import missing files and retain originals.";
+   button.ToolTip=repo==null?"Choose a repository first.":"Import missing USB captures; keep originals.";
   }
   async void RefreshUsb(){
    if(usbChecking||telescopesDisposed||!Window.IsLoaded)return;usbChecking=true;UpdateTelescopeState(cancel!=null);int generation=usbGeneration;string archive=repo==null?null:repo.Root;
