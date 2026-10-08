@@ -18,9 +18,9 @@ namespace AstroArchive {
  public sealed class CaptureFilters {
   public readonly Dictionary<string,string> Values=new Dictionary<string,string>();
   public readonly Dictionary<string,CaptureRange> Ranges=new Dictionary<string,CaptureRange>();
-  public static readonly string[] Fields={"Target","Session","Device","Frame type","Optical filter","Review","Camera","Mount","Calibration","Dimensions","Status","Mosaic","Panel","Mosaic state","Format","Capabilities"};
+  public static readonly string[] Fields={"Target","Session","Device","Frame type","Optical filter","Review","Camera","Mount","Calibration","Dimensions","Status","Format","Capabilities"};
   public static readonly string[] Primary={"Target","Session","Device","Frame type","Optical filter","Review"};
-  public static readonly string[] Advanced={"Camera","Mount","Calibration","Dimensions","Status","Mosaic","Panel","Mosaic state","Format","Capabilities"};
+  public static readonly string[] Advanced={"Camera","Mount","Calibration","Dimensions","Status","Format","Capabilities"};
   public static readonly string[] ReviewChoices={"Needs review","No issues flagged","Passed","Not screened","Telescope rejected / reference","File integrity problem","Transfer failure"};
   public int ActiveCount {get{return Values.Count+Ranges.Count(p=>p.Value.Active);}}
   public void Reset(){Values.Clear();Ranges.Clear();}
@@ -29,9 +29,6 @@ namespace AstroArchive {
    string value;
    switch(field){
     case "Target":value=frame.Target;break;
-    case "Mosaic":value=frame.MosaicText;break;
-    case "Panel":value=frame.PanelText;break;
-    case "Mosaic state":value=frame.MosaicLabels!=null&&frame.MosaicLabels.Count>0?string.Join("; ",frame.MosaicLabels.Select(m=>m.State).Distinct()):frame.Mosaic==null||frame.MosaicDismissed?"-":frame.Mosaic.Conflict!=null||!frame.Mosaic.Declared||frame.Mosaic.PanelKey==null&&!frame.Mosaic.Output?"Suggested":"Declared";break;
     case "Device":value=frame.Telescope;break;
     case "Frame type":value=frame.Kind;break;
     case "Mount":value=MountLabels.Type(frame.MountText);if(value.Length==0)value=frame.MountText;break;
@@ -56,14 +53,13 @@ namespace AstroArchive {
    if(active||field=="Target"||field=="Session"||field=="Review"||field=="Frame type")return true;
    return field=="Exposure"||field=="Gain"?frames.Select(f=>Number(f,field)).Distinct().Take(2).Count()>1:Options(frames,field).Take(2).Count()>1;
   }
-  public static IEnumerable<string> Options(IEnumerable<Frame> frames,string field){return frames.SelectMany(f=>new[]{"Mosaic","Panel","Mosaic state"}.Contains(field)&&f.MosaicLabels!=null&&f.MosaicLabels.Count>0?f.MosaicLabels.Select(m=>field=="Mosaic"?m.Name:field=="Panel"?m.Panel:m.State):new[]{Value(f,field)}).Distinct().OrderBy(v=>v);}
+  public static IEnumerable<string> Options(IEnumerable<Frame> frames,string field){return frames.Select(f=>Value(f,field)).Distinct().OrderBy(v=>v); }
   public List<Frame> Apply(IEnumerable<Frame> frames,string search){
-   string known=Catalog.KnownName(search);var words=Util.Tokens(known??search).Select(word=>Catalog.KnownName(word)??word).ToArray();
-   return frames.Where(f=>Values.All(pair=>Matches(f,pair.Key,pair.Value))&&Ranges.All(pair=>pair.Value.Matches(Number(f,pair.Key)))&&words.All(word=>f.SearchText.IndexOf(word,StringComparison.OrdinalIgnoreCase)>=0)).ToList();
+   var query=FileSearch.Parse(search);
+   return frames.Where(f=>Values.All(pair=>Matches(f,pair.Key,pair.Value))&&Ranges.All(pair=>pair.Value.Matches(Number(f,pair.Key)))&&query.Matches(f)).ToList();
   }
   static bool Matches(Frame frame,string field,string value){
    if(field=="Target")return frame.Target==Catalog.CanonicalTarget(value);
-   if(frame.MosaicLabels!=null&&frame.MosaicLabels.Count>0){if(field=="Mosaic")return frame.MosaicLabels.Any(m=>m.Name==value);if(field=="Panel")return frame.MosaicLabels.Any(m=>m.Panel==value);if(field=="Mosaic state")return frame.MosaicLabels.Any(m=>m.State==value);}
    if(field=="Review"||field=="Review type"){
     if(value=="No issues flagged")return !CaptureScreening.NeedsReview(frame);
     if(value=="Needs review")return CaptureScreening.NeedsReview(frame);

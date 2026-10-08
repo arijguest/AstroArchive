@@ -1,4 +1,4 @@
-AstroArchive 1.12.4
+AstroArchive 1.13.0
 Windows 10/11 x64 desktop app. Built-in .NET Framework 4.8 and Windows SQLite.
 Runs offline. No Python or Google login required.
 
@@ -30,6 +30,33 @@ F1 in the main window opens help for the current page. In the guide, search matc
 every entered word across topic titles and complete text. Clear restores all topics.
 Choose a topic on the left; guide text can be selected and copied. Save guide saves
 the complete bundled guide as a text file. Help works offline.
+
+SEARCH AND IMPORT OPTIONS
+Repository, Import and Edited share the same search rules. Ordinary words narrow
+results together; quotes keep phrases together. OR joins alternatives; a leading
+minus excludes a term. Common names and spaced catalogue IDs work with other terms.
+Examples: target:C27 -type:Stack, "Crescent Nebula" filter:Ha, file:*.fits,
+exposure:>=20 gain:80, or target:M45 OR target:M42. Search and table filters apply
+together. The ? button beside each search explains fields and syntax. Incomplete
+queries show guidance and no results so filtered imports cannot broaden silently.
+
+Open Import options beside Scan before scanning. Files groups skipped/failed
+captures, PNG/JPG/JPEG exclusion and source cleanup. Capture groups device overrides
+and an optional target for Unknown science captures. Analysis contains optional
+solving and rotation. Ignore non-raw files (PNG/JPG/JPEG) is ON by default; turn it
+off to import those formats and your choice is saved for folder, USB and Dump flows.
+Other supported scientific and camera formats remain available. Ignored originals
+stay in place. Changing ignored formats or filenames rescans the selected source.
+
+After scanning, Set Unknown targets assigns a chosen catalogue or custom target
+to selected Unknown lights/stacks, or visible Unknown lights/stacks if nothing is
+selected. Known targets and calibrations retain their values. Changing source
+clears this assignment; it is not a global USB/Dump target override.
+
+Repository > Purge non-raw files lists only indexed PNG/JPG/JPEG captures from the
+whole Repository, independent of filters, and asks for deletion confirmation.
+Edited files, FITS, TIFF, XISF, SER and camera RAW are excluded. Source originals
+remain; deletion history prevents an accidental reimport of purged copies.
 
 IMPORT WORKFLOW
 1. Choose your archive in Repository, then open the Import page.
@@ -130,8 +157,8 @@ Original supported assets can be archived; external previews do not import them.
 IMAGE PREVIEW AND TABLES
 Choose Columns beside the repository tools or import tools to show or hide
 headings. The current headings and their order are the defaults. More headings
-contains device, camera, gain, temperature, dimensions, calibration, mosaic,
-panel, session and other metadata. Drag a heading left/right to rearrange it, or
+contains device, camera, gain, temperature, dimensions, calibration,
+session and other metadata. Drag a heading left/right to rearrange it, or
 right-click a heading and choose Move heading left/right. At least one heading
 stays visible. Each table saves its own choices across restarts. Restore default
 columns resets visibility and order for just that table. Hiding a sorted heading
@@ -183,42 +210,6 @@ include Thor's Helmet, Cat's Paw, Seagull, Jellyfish, Horsehead, Seven Sisters a
 common galaxy names. Western and Eastern Veil stay distinct. Conflicting names
 are retained for review; unrecognised labels are not guessed. Existing archive
 pixels, catalogue coordinates and file paths are preserved.
-
-MOSAIC COLLECTIONS AND PANELS
-New imports preserve mosaic/project and panel metadata during their existing
-header/session reads. Mosaic markers with missing panel information stay
-Suggested. Normal mosaic detection does not plate-solve or decode images.
-
-Open Mosaics to review collections, panels, evidence and completed outputs.
-Detect from metadata uses selected Repository captures, or the visible Repository
-captures when none are selected. For older archives, Tools > Read headers/session
-metadata reads archived headers and preserved session JSON. Existing sky mappings
-can suggest adjacent panels and show their outlines; coordinate suggestions need
-confirmation. Ordinary target-centre coordinates cannot establish panel membership.
-
-Select captures in Repository, right-click > Mosaics > Assign to panel or completed
-output. Choose/create a collection and panel, or attach a stitched output.
-Collections can span targets, nights, cameras and filters while archive paths and
-capture types remain intact. Confirm selected reviews known panel assignments;
-assign unresolved captures first. Remove selected retains the decision for later
-scans without deleting captures. Tools can edit names, create planned panels or
-dismiss a collection. Filters/search include mosaic and panel labels.
-
-Plate solving is optional: select representatives in Mosaics, then Tools > Solve
-selected representatives. Cached solutions are reused, and unassigned captures
-are solved separately. Complete WCS provides footprints; configured field height
-can provide approximate outlines, which are labelled. Target labels are retained.
-
-Export collection creates separate stacking inputs for every panel and compatible
-capture group. Completed images go in outputs/completed in Stacks/Both mode.
-Choose a collection explicitly when a capture belongs to several mosaics.
-Stack each panel first, then stitch the panel results in external software.
-Suggested or unresolved assignments must be reviewed before stacking exports.
-
-Keep .astroarchive/index.sqlite and .astroarchive/mosaics/manifest.json with the
-archive. The manifest restores stable collection/panel IDs after index loss;
-reindexing reconnects captures by hash. Deleted captures remain missing records
-in the collection. Archive reset retains collection definitions/deletion history.
 
 WINDOWS FOLDER SELECTION AND GOOGLE DRIVE
 All folder selectors use native Windows Explorer dialogs, with This PC, mounted
@@ -480,7 +471,7 @@ copies from your editor and save outputs alongside them. Ready-to-stack exports
 remain available for manual loading in stacking applications.
 
 KEYBOARD SHORTCUTS
-Main window: Ctrl+1–4 selects Repository, Edited, Mosaic or Import; Ctrl+Tab
+Main window: Ctrl+1–3 selects Repository, Edited or Import; Ctrl+Tab
 cycles pages (Shift reverses). Ctrl+F focuses search; Ctrl+I opens Import;
 Ctrl+E opens Export.
 Alt activates menu access keys. F1 opens help for the current page.
@@ -620,7 +611,7 @@ configuration. Dark flats match raw-flat exposure, in separate exposure folders.
 The manifest maps flat sets to their dark flats. Never subtract both a dark flat
 and a bias from the same flat. Stacking/master generation remain external.
 
-Existing Seestar/DWARF structure/channel rules and processor/mosaic workflows stay
+Existing Seestar/DWARF structure/channel rules and processor workflows stay
 in use. Explicit-header profiles recognize Vaonis/Unistellar identities and common
 acquisition software independently. Adjacent capture/session sidecars up to 16 MB
 are preserved as evidence without inventing undocumented schemas.
@@ -636,8 +627,8 @@ NAVIGATION, ACCESSIBILITY AND WALKTHROUGH
 The centred purple page dropdown labelled PAGE shows the active workspace.
 Startup opens Import when the repository is empty or none is configured; otherwise
 it opens Repository. This uses the whole repository, regardless of search/filters.
-Choose Repository, Edited, Mosaic or Import there. Ctrl+1, Ctrl+2, Ctrl+3 and
-Ctrl+4 select those pages; Ctrl+Tab cycles forward and Ctrl+Shift+Tab cycles back.
+Choose Repository, Edited or Import there. Ctrl+1, Ctrl+2 and Ctrl+3
+select those pages; Ctrl+Tab cycles forward and Ctrl+Shift+Tab cycles back.
 Switching retains each page's search, filters, selection and import progress.
 The pages begin six pixels below the toolbar without a separate tab row.
 The page selector sits in the top row when there is room beside the left actions
@@ -652,7 +643,7 @@ File Explorer. Repository > Choose repository folder changes the active archive.
 
 Repository replaces the Library page. Keep browsing/searching in the page;
 Repository > View has filters, columns, grouping and the preview pane. Selected
-files retain their right-click tools. Review, analysis, mosaics and maintenance
+files retain their right-click tools. Review, analysis and maintenance
 are grouped under Repository. Destructive maintenance still uses its existing
 confirmation. Active filter counts remain visible beside the capture counts.
 
@@ -699,7 +690,7 @@ Exposure and gain use inclusive range sliders that snap to recorded values. Sele
 Any value, Known values only, Between limits or Unknown only. Between limits can
 explicitly include unknown values. Clear filters preserves the search; the main
 Clear action resets both search and filters. Constant fields hide automatically;
-less-used settings, including mosaic, format and mount filters, sit under Advanced.
+less-used settings, including format and mount filters, sit under Advanced.
 
 One Session selector replaces separate Night and Session filters. Entries show
 recorded acquisition dates, e.g. 26/09/24-27/09/24. Same-date sessions stay distinct

@@ -60,8 +60,8 @@ namespace AstroArchive {
    FilterEditedImages();
   }
   void FilterEditedImages(bool rebuildTargets=true){
-   if(!editedReady)return;var selected=ActiveEditedImage;var words=Util.Tokens(T("EditedSearchBox").Text);L("EditedSearchHint").Visibility=words.Length==0?Visibility.Visible:Visibility.Collapsed;
-   string imageClass=Convert.ToString(C("EditedClassFilter").SelectedItem);var rows=editedImages.Where(i=>(imageClass=="All images"||i.Metadata.ImageClass==imageClass)&&words.All(w=>(i.Filename+" "+i.FileType+" "+i.Kind+" "+i.Source+" "+i.Metadata.ImageClass+" "+i.Metadata.ObjectLabel+" "+Catalog.Aliases(i.Metadata.Object)+" "+i.Metadata.Filters+" "+i.Project.Name).IndexOf(w,StringComparison.OrdinalIgnoreCase)>=0)).ToList();
+   if(!editedReady)return;var selected=ActiveEditedImage;var query=FileSearch.Parse(T("EditedSearchBox").Text);ShowSearchError("EditedSearchBox",query);L("EditedSearchHint").Visibility=query.IsEmpty?Visibility.Visible:Visibility.Collapsed;
+   string imageClass=Convert.ToString(C("EditedClassFilter").SelectedItem);var rows=editedImages.Where(i=>(imageClass=="All images"||i.Metadata.ImageClass==imageClass)&&query.Matches(EditedSearchDocument(i))).ToList();
    if(rebuildTargets){string target=EditedTargets.SelectedItem is TargetSummary?((TargetSummary)EditedTargets.SelectedItem).Name:"All targets";var summaries=TargetNavigation.Build(rows.Select(i=>new Frame{Target=i.Metadata.ImageClass=="Meteor"?"Meteor":i.Metadata.Object,Kind="Edited image"})).Select(t=>new EditedTargetSummary{Name=t.Name,Files=t.Files}).ToList();var view=new ListCollectionView(summaries);view.GroupDescriptions.Add(new PropertyGroupDescription("Group"));refreshingEditedTargets=true;try{EditedTargets.ItemsSource=view;EditedTargets.SelectedItem=summaries.FirstOrDefault(t=>t.Name==target)??summaries.First();}finally{refreshingEditedTargets=false;}}
    var active=EditedTargets.SelectedItem as TargetSummary;if(active!=null&&active.Name!="All targets")rows=rows.Where(i=>Catalog.CanonicalTarget(i.Metadata.ImageClass=="Meteor"?"Meteor":i.Metadata.Object)==active.Name).ToList();SetRows("EditedGrid",rows);G("EditedGrid").SelectedItem=rows.FirstOrDefault(i=>selected!=null&&i.Project.Id==selected.Project.Id&&i.RelativePath==selected.RelativePath);
    L("EditedSummary").Text=rows.Count+" images";L("EditedEmptyState").Visibility=rows.Count==0?Visibility.Visible:Visibility.Collapsed;UpdateEditedActions();
@@ -80,7 +80,7 @@ namespace AstroArchive {
    var name=dialog.Input("New project name",Path.GetFileNameWithoutExtension(picker.FileNames[0]));Action update=()=>name.IsEnabled=ReferenceEquals(projectBox.SelectedItem,create);projectBox.SelectionChanged+=(s,e)=>update();update();
    dialog.Text("Images are copied into Edited. Save further edits and outputs in the project folder to keep them together.");dialog.Accept("Add images",()=>{if(name.IsEnabled&&string.IsNullOrWhiteSpace(name.Text)){MessageBox.Show(dialog.Window,"Enter a project name.");return false;}if(!picker.FileNames.All(Util.IsImageAsset)){MessageBox.Show(dialog.Window,"Choose supported image files.");return false;}return true;});if(!dialog.Show())return;
    var selected=ReferenceEquals(projectBox.SelectedItem,create)?null:projectBox.SelectedItem as EditedProject;
-   string projectName=name.Text;Run(ct=>repo.AddEditedImages(picker.FileNames,selected,projectName,ct,Progress).Id,id=>{RefreshEdited(id);GoToPage(3);});
+   string projectName=name.Text;Run(ct=>repo.AddEditedImages(picker.FileNames,selected,projectName,ct,Progress).Id,id=>{RefreshEdited(id);GoToPage(2);});
   }
   void ImportEditedFolder(){
    if(repo==null||cancel!=null)return;
@@ -98,7 +98,7 @@ namespace AstroArchive {
    var rowStyle=new Style(typeof(DataGridRow),Window.TryFindResource(typeof(DataGridRow)) as Style);rowStyle.Setters.Add(new Setter(FrameworkElement.ToolTipProperty,new System.Windows.Data.Binding("Metadata.Evidence")));table.RowStyle=rowStyle;dialog.Add(table);
    if(import.Errors.Count>0){var problems=new TextBox{Text=string.Join("\n",import.Errors),IsReadOnly=true,TextWrapping=TextWrapping.Wrap,MaxHeight=90,VerticalScrollBarVisibility=ScrollBarVisibility.Auto};dialog.Add(problems);}
    dialog.Accept("Import selected images",()=>{table.CommitEdit(DataGridEditingUnit.Cell,true);table.CommitEdit(DataGridEditingUnit.Row,true);if(string.IsNullOrWhiteSpace(name.Text)||!import.Images.Any(i=>i.Include)){MessageBox.Show(dialog.Window,"Enter a project name and select readable images.");return false;}if(import.Images.Any(i=>i.Include&&!string.IsNullOrEmpty(i.Problem))){MessageBox.Show(dialog.Window,"Exclude images with a reported problem before importing.");return false;}return true;});if(!dialog.Show())return;
-   string projectName=name.Text;Run(ct=>repo.ImportEditedFolder(import,projectName,ct,Progress).Id,id=>{RefreshEdited(id);GoToPage(3);});
+   string projectName=name.Text;Run(ct=>repo.ImportEditedFolder(import,projectName,ct,Progress).Id,id=>{RefreshEdited(id);GoToPage(2);});
   }
   void PreviewEditedImage(){
    if(repo==null||cancel!=null||EditedImageProject==null||ActiveEditedImage==null)return;string path=repo.EditedPath(EditedImageProject,ActiveEditedImage.RelativePath);if(MediaFiles.Motion(path)){new ImagePreviewWindow(Window,ActiveEditedImage.Filename,path).ShowDialog();return;}PreviewData data=null;byte[] pixels=null;
@@ -118,10 +118,10 @@ namespace AstroArchive {
   void CreateEditedCopies(List<Frame> selected){
    if(repo==null||cancel!=null||selected.Count==0)return;var dialog=new FormWindow(Window,"Create Edited working copies",610,390);dialog.Text("Create a project for your editor",true);var name=dialog.Input("Edited project name",selected[0].TargetLabel+" · "+DateTime.Now.ToString("yyyyMMdd_HHmmss"));
    dialog.Text("Copy and verify the selected archived images into Edited, then open the project folder. Load these copies in AstroWizard or your preferred editor, and save outputs alongside them.");dialog.Accept("Create working copies",()=>!string.IsNullOrWhiteSpace(name.Text));if(!dialog.Show())return;
-   string projectName=name.Text;Run(ct=>repo.CreateEditedWorkingCopies(selected,projectName,"Other editor",ct,Progress).Id,id=>{RefreshEdited(id);GoToPage(3);OpenEditedFolder();});
+   string projectName=name.Text;Run(ct=>repo.CreateEditedWorkingCopies(selected,projectName,"Other editor",ct,Progress).Id,id=>{RefreshEdited(id);GoToPage(2);OpenEditedFolder();});
   }
   void BuildEditedNavigation(MenuItem menu){
-   menu.Items.Add(ColumnsNavigation("EditedGrid"));menu.Items.Add(MenuAction("Browse edited images",()=>{RefreshEdited();GoToPage(3);},true,false));menu.Items.Add(MenuAction("Add images…",AddEditedImages,repo!=null));menu.Items.Add(MenuAction("Import folder…",ImportEditedFolder,repo!=null));
+   menu.Items.Add(ColumnsNavigation("EditedGrid"));menu.Items.Add(MenuAction("Browse edited images",()=>{RefreshEdited();GoToPage(2);},true,false));menu.Items.Add(MenuAction("Add images…",AddEditedImages,repo!=null));menu.Items.Add(MenuAction("Import folder…",ImportEditedFolder,repo!=null));
    menu.Items.Add(MenuAction("Open project folder",OpenEditedFolder,repo!=null&&EditedImageProject!=null));menu.Items.Add(MenuAction("Preview selected image…",PreviewEditedImage,ActiveEditedImage!=null));menu.Items.Add(MenuAction("Refresh projects",()=>RefreshEdited(),repo!=null));
   }
   void ShowPerformanceTable(){

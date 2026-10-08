@@ -22,6 +22,7 @@ verifying imports and preparing files for external processing.
 
 | Version | Highlights |
 | --- | --- |
+| **1.13.0** | Shared search, grouped import options, default PNG/JPG/JPEG exclusion, Unknown target assignment, repository purge, owned progress and Windows taskbar repair. Mosaic removed. |
 | **1.12.4** | Settings, Guide and support join the left toolbar actions; a centred page selector adapts to window width and larger text. |
 | **1.10.1** | Restored full-image previews, including resized and high-DPI images. A centred toolbar provides zoom, pan and a labelled **Fit** button. |
 | **1.10.0** | Compact filters with exposure/gain sliders, acquisition-session labels and live result counts. Portrait preview layout, Windows policy diagnostics and optional publisher-signing support. |
@@ -38,10 +39,9 @@ verifying imports and preparing files for external processing.
 | **Manage telescopes** | Saved profiles, local USB storage detection and device renaming. Seestar/DWARF layouts plus explicit-header recognition for additional instruments. |
 | **Find captures** | Browse files, targets or observing sessions. Search common names and catalogue IDs, including all 109 Caldwell objects. |
 | **Review images** | Zoom, pan, display stretch and selected HDU/page/frame previews where supported. Display adjustments preserve original pixels. |
-| **Organise mosaics** | Named collections, reviewable panel assignments and separate completed-output roles. Prepare stacking inputs per panel. |
 | **Prepare processing** | Verified file exports, calibration matching, dark-flat recipes and explicit derived FITS conversion for eligible images. |
 
-Imports retain original bytes. Stacking and mosaic stitching take place in external software.
+Imports retain original bytes. Stacking take place in external software.
 
 ## Install on Windows
 
@@ -60,7 +60,7 @@ Download the installer, run it and open AstroArchive from its shortcut. Installa
 Each release includes SHA-256 checksums. In PowerShell, substitute your downloaded installer’s filename:
 
 ```powershell
-Get-FileHash .\AstroArchive1.12.4.1.exe -Algorithm SHA256
+Get-FileHash .\AstroArchive1.13.0.1.exe -Algorithm SHA256
 ```
 
 Compare `Hash` with the corresponding `.sha256` file. A checksum checks file integrity; publisher identity depends on code signing.
@@ -86,26 +86,27 @@ Compare `Hash` with the corresponding `.sha256` file. A checksum checks file int
 | Control | Use |
 | --- | --- |
 | **Import / Export / Repository / Settings / Guide** | Top menus group workflow actions, tools, diagnostics and help. The repository path above them opens its folder. |
-| **Filters** | Narrow captures by acquisition session, exposure, gain and review state. Advanced options include mosaic, format, capability and mount. |
+| **Filters** | Narrow captures by acquisition session, exposure, gain and review state. Advanced options include format, capability and mount. |
 | **Columns** | Show or hide headings; drag to reorder or right-click to move left/right. Import and repository layouts save independently. |
 | **Table headings** | Click to sort; **Shift-click** adds columns. Arrows and priorities show the active sort order. |
 | **Preview toolbar** | Controls sit below the image. Scroll or pinch to zoom; drag the image or use arrows to move the view after zooming. **Fit** or **F** restores the whole image; **Escape** closes the popup. |
 | **Capture sky** | A cached, text-free constellation globe uses only the space left after fitting the image. Hover for recorded capture time, direction and altitude. Uses capture location or your saved observing place; missing time/site shows celestial coordinates. |
-| **Purple page dropdown** | Switch Repository, Edited, Mosaic and Import in the centre of the header without losing state. It gets a compact row when space is limited. Ctrl+1–4 selects a page; Ctrl+Tab cycles pages. |
+| **Purple page dropdown** | Switch Repository, Edited and Import in the centre of the header without losing state. It gets a compact row when space is limited. Ctrl+1–3 selects a page; Ctrl+Tab cycles pages. |
 | **Settings → Preferences** | System/light/dark themes, text size, comfortable rows, high contrast and reduced progress animation. |
 | **Guide** | Repeat the first-run walkthrough, search offline help or open About. **F1** opens help for the current page. |
 
 Target groups show file counts and known sub-exposure totals. Stacks are counted separately and excluded from those exposure totals; unknown exposure remains explicit.
 
-## Import review and mosaics
+## Import review and cleanup
 
 - **Review and recovery:** Distinguish rejected captures, integrity problems and transfer failures. Review metadata evidence and conflicts before applying re-detected values; recorded user overrides retain priority.
 - **Ignore failed:** Enable **Import options → Ignore failed** to skip filenames containing `failed`, regardless of case. It applies to folder, USB and Dump imports; rescan after changing it. Ignored originals remain in place.
+- **Import options:** Files, Capture and Analysis tabs expose import choices beside Scan. **Ignore non-raw files (PNG/JPG/JPEG)** defaults on with a saved opt-out. Assign a target to Unknown lights/stacks before import.
+- **Purge non-raw files:** Confirm removal of repository PNG/JPG/JPEG captures; Edited and scientific originals are excluded.
 - **Delete failed:** The repository’s **Delete failed** tool lists matches across the active archive for confirmation, regardless of filters. Source copies and shared metadata remain; recorded checksums prevent reimport.
 - **Dump inbox:** Drop FITS into the archive’s `Dump` folder before startup, or process it manually. Verified imports and duplicates are removed; failed inputs remain. Finish copying before processing.
-- **Mosaic collections:** Review metadata-derived suggestions, assign captures to panels and keep completed outputs separate. Normal import detection does not invoke a plate solver.
 
-[Mosaic workflow and limits](docs/MOSAICS.md) · [Complete user guide](Application_Source/Quick_Start.txt)
+[Complete user guide](Application_Source/Quick_Start.txt)
 
 ## Formats and processing
 
@@ -169,7 +170,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\build-release.ps1
 | --- | --- |
 | [`Application_Source/`](Application_Source/README.md) | Application, assets, data readers and tests. |
 | [`Installer/`](Installer/README.md) | Installer, launcher, Windows integration and update tests. |
-| [`docs/`](docs) | Compatibility, mosaics, processing, updates and release instructions. |
+| [`docs/`](docs) | Compatibility, processing, updates and release instructions. |
 | [`scripts/`](scripts/build-release.ps1) | Build and release validation. |
 
 [Release and signing guide](docs/RELEASING.md)

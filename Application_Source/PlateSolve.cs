@@ -46,12 +46,12 @@ namespace AstroArchive {
    }finally{foreach(string f in Directory.GetFiles(temp)){try{File.Delete(f);}catch{}}try{Directory.Delete(temp);}catch{}}
   }
   static SkyGeometry LocalGeometry(FitsHeader ini,string directory,string input,int width,int height){
-   var sky=MosaicGeometry.FromHeader(ini,width,height,"ASTAP WCS");if(sky!=null)return sky;
-   foreach(string path in new[]{Path.Combine(directory,"solution.wcs"),Path.Combine(directory,"frame.wcs")})try{if(File.Exists(path))using(var stream=File.OpenRead(path)){sky=MosaicGeometry.FromHeader(MosaicGeometry.WcsCards(stream),width,height,"ASTAP WCS");if(sky!=null)return sky;}}catch{}
-   try{return MosaicGeometry.FromHeader(Fits.Header(input),width,height,"ASTAP temporary FITS WCS");}catch{return null;}
+   var sky=SkyWcs.FromHeader(ini,width,height,"ASTAP WCS");if(sky!=null)return sky;
+   foreach(string path in new[]{Path.Combine(directory,"solution.wcs"),Path.Combine(directory,"frame.wcs")})try{if(File.Exists(path))using(var stream=File.OpenRead(path)){sky=SkyWcs.FromHeader(SkyWcs.WcsCards(stream),width,height,"ASTAP WCS");if(sky!=null)return sky;}}catch{}
+   try{return SkyWcs.FromHeader(Fits.Header(input),width,height,"ASTAP temporary FITS WCS");}catch{return null;}
   }
   static SkyGeometry OnlineGeometry(long job,int width,int height,CancellationToken ct){
-   try{var request=(HttpWebRequest)WebRequest.Create("https://nova.astrometry.net/wcs_file/"+job);request.Timeout=30000;request.ReadWriteTimeout=30000;using(ct.Register(()=>request.Abort()))using(var response=request.GetResponse())using(var stream=response.GetResponseStream())return MosaicGeometry.FromHeader(MosaicGeometry.WcsCards(stream),width,height,"Astrometry.net WCS");}catch{ct.ThrowIfCancellationRequested();return null;}
+   try{var request=(HttpWebRequest)WebRequest.Create("https://nova.astrometry.net/wcs_file/"+job);request.Timeout=30000;request.ReadWriteTimeout=30000;using(ct.Register(()=>request.Abort()))using(var response=request.GetResponse())using(var stream=response.GetResponseStream())return SkyWcs.FromHeader(SkyWcs.WcsCards(stream),width,height,"Astrometry.net WCS");}catch{ct.ThrowIfCancellationRequested();return null;}
   }
   public static FitsHeader ParseIni(string text){var h=new FitsHeader();foreach(string line in text.Split(new[]{'\r','\n'},StringSplitOptions.RemoveEmptyEntries)){int i=line.IndexOf('=');if(i<1)continue;string k=line.Substring(0,i).Trim(),v=line.Substring(i+1).Trim();int comment=v.IndexOf("//",StringComparison.Ordinal);if(comment>=0)v=v.Substring(0,comment).Trim();h.Values[k]=v;}return h;}
   static Dictionary<string,object> Request(string url,string form,byte[] multipart,string boundary,CancellationToken ct){

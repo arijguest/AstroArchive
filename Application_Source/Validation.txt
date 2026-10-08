@@ -1,5 +1,5 @@
-AstroArchive 1.12.4 validation
-Package 1.12.4.1; Windows 10/11 x64; .NET Framework 4.8.
+AstroArchive 1.13.0 validation
+Package 1.13.0.1; Windows 10/11 x64; .NET Framework 4.8.
 
 The Windows release workflow runs application regressions, a separate six-case
 Windows WIC integration suite, installer/updater regressions, x64 compilation,
@@ -14,9 +14,19 @@ forward/backward keyboard cycling, removal of the old tab strip, six-pixel gaps,
 light/dark popup contrast, high contrast, and narrow/normal window layouts at
 100/150% text sizes at 1060/1380/2400 widths. The interactive guide highlights
 and opens the selector.
+Shared search regressions cover phrases, exclusions, OR, scoped fields, numeric
+comparisons, catalogue aliases, wildcards and malformed queries. Import checks
+cover default/migrated exclusions, saved opt-outs, pre-metadata filtering,
+import rechecks, USB/Dump policy and Unknown-only target assignment. Purge checks
+retain Edited and scientific originals. Legacy Mosaic metadata does not prevent
+ordinary stacking exports; WCS remains available for sky/plate-solve workflows.
+Native UI checks exercise import parameter tabs, search guidance and Unknown
+target assignment, plus theme/scale layouts. Progress is an owned window and
+follows minimising, restoring and hiding the application.
 Native window-icon checks verify the bundled ICO retains 16/32-pixel frames,
 uses the shared frozen image and supplies Windows with both small and large icon
-handles for the main window, forms, guide and preview.
+handles for the main window, forms, guide and preview. Shell checks verify stable process/window/shortcut AppUserModelIDs,
+a hash-matched logo cache and repaired pins targeting removed version folders.
 
 Capture sky regressions check sidereal time, longitude signs, northern/southern
 and polar horizons, acquisition clocks and offsets, missing/ambiguous clocks,
@@ -63,7 +73,7 @@ selection, explicit vendor/software recognition, normalized metadata units,
 gain/electrons-per-ADU separation, timezone uncertainty, retained user and legacy
 edits, reviewed re-detection, calibration conflicts, mixed-exposure dark-flat
 recipes, verified sidecars and derived FITS source/output identities. Existing
-mosaic, USB upload, import review/recovery, progress and processor-handoff tests
+USB upload, import review/recovery, progress and processor-handoff tests
 remain in the suite. Windows WIC cases exercise 16-bit TIFF/PNG preservation,
 multi-page selection, RGB order/derived FITS and JPEG scientific-export exclusion.
 

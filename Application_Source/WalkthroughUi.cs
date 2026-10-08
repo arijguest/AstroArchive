@@ -81,7 +81,7 @@ namespace AstroArchive {
         int walkthroughOriginalPage;
         static WalkthroughStep[] WalkthroughSteps() {
             return new[] {
-                new WalkthroughStep { Title = "Switch pages from the toolbar", Page = 0, Target = "PageSelector", Action = "Try the page selector", Body = "The centred purple dropdown labelled PAGE shows your current page. It sits beside the toolbar actions when there is room, or just below them in smaller windows. Open it to choose Repository, Edited, Mosaic or Import. Search, filters, selections and import progress stay in place when you switch. Ctrl+1–4 selects those pages; Ctrl+Tab cycles them." },
+                new WalkthroughStep { Title = "Switch pages from the toolbar", Page = 0, Target = "PageSelector", Action = "Try the page selector", Body = "The centred purple dropdown labelled PAGE shows your current page. It sits beside the toolbar actions when there is room, or just below them in smaller windows. Open it to choose Repository, Edited, Import. Search, filters, selections and import progress stay in place when you switch. Ctrl+1–3 selects those pages; Ctrl+Tab cycles them." },
                 new WalkthroughStep { Title = "Choose your repository", Page = 0, Target = "OpenRepositoryFolderButton", Action = "Open Repository menu", Body = "Your repository is the folder where AstroArchive keeps verified capture copies and its portable index. Choose it from Repository → Choose repository folder. The path in the grey strip below the repository table opens that folder in Explorer." },
                 new WalkthroughStep { Title = "Select a telescope or source folder", Page = 1, Target = "ImportSourceCard", Action = "Open Import menu", Body = "Select a saved physical telescope or Browse its capture folder. Each telescope gets a distinct device ID. Import → USB telescopes finds connected storage; Saved telescopes manages profiles. Scan folder reads metadata before any copies are made." },
                 new WalkthroughStep { Title = "Review before importing", Page = 1, Target = "ImportGrid", Action = "Open review and import options", Body = "The scan table shows status and review reasons. Use Import → Review and recovery to inspect flagged files or retry transfers. Import options controls analysis and original removal. The policy summary stays visible; originals are kept by default." },
@@ -139,7 +139,7 @@ namespace AstroArchive {
             var logo = new Image { Source = ((Image)Window.FindName("BrandLogo")).Source, Width = 64, Height = 64, HorizontalAlignment = HorizontalAlignment.Left, Margin = new Thickness(0,0,0,12) };
             dialog.Add(logo); dialog.Text("AstroArchive", true);
             dialog.Text("Version " + Assembly.GetExecutingAssembly().GetName().Version.ToString(3));
-            dialog.Text("A desktop archive for astronomical images: verified imports, searchable capture metadata, image previews, mosaic collections and export projects for your processing tools.");
+            dialog.Text("A desktop archive for astronomical images: verified imports, searchable capture metadata, image previews and export projects for your processing tools.");
             dialog.Text("Ari J. Guest", true);
             dialog.Text("Created by Ari J. Guest. Learn more about the author and their work at arijguest.com.");
             dialog.Button("Visit arijguest.com", () => OpenWebsite("https://arijguest.com"));

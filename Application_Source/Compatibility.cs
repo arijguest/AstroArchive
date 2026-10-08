@@ -302,9 +302,8 @@ namespace AstroArchive {
             candidate.RejectionReason=previous.RejectionReason;
             candidate.IntegrityIssue=previous.IntegrityIssue;
             candidate.TransferIssue=previous.TransferIssue;
-            candidate.Mosaic=previous.Mosaic;
             if(!imageChanged)candidate.Sky=previous.Sky;
-            else candidate.Notes+="Image selection changed; review existing mosaic/panel assignments. ";
+
             candidate.ObservationMode=previous.ObservationMode;
             candidate.Hash=previous.Hash;
             candidate.RelativePath=previous.RelativePath;

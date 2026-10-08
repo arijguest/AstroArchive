@@ -8,6 +8,7 @@ namespace AstroArchive {
  public sealed class FileDeletionResult {public int Deleted;public List<string> Errors=new List<string>();}
  public sealed partial class Repository {
   public List<Frame> FailedFiles(){return All().Where(Util.FailedFilename).ToList();}
+  public List<Frame> NonRawFiles(){return All().Where(f=>(ImportPolicy.RasterFilename(f.OriginalName)||ImportPolicy.RasterFilename(f.RelativePath))&&!Util.Within(FilePath(f),EditedFolder)&&!Util.Within(FilePath(f),Path.Combine(Root,"Edited"))).ToList();}
   public FileDeletionResult DeleteFrames(IEnumerable<Frame> selection,CancellationToken ct,Action<ProgressInfo> progress){
    var indexed=All().ToDictionary(f=>f.Hash);var frames=new List<Frame>();
    foreach(var requested in selection.GroupBy(f=>f.Hash).Select(g=>g.First())){Frame actual;if(string.IsNullOrEmpty(requested.Hash)||!indexed.TryGetValue(requested.Hash,out actual))throw new IOException("A selected file is no longer in the repository. Refresh and select it again.");frames.Add(actual);}

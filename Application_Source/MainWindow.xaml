@@ -623,7 +623,7 @@
    <StackPanel x:Name="PageNavigation" Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,2,0,4">
     <TextBlock Text="PAGE" FontSize="{DynamicResource UiFontCaption}" FontWeight="SemiBold" Foreground="{DynamicResource Muted}" VerticalAlignment="Center" Margin="0,0,8,0"/>
     <ComboBox x:Name="PageSelector" Width="150" Style="{StaticResource PageSelectorStyle}" VerticalAlignment="Center" AutomationProperties.Name="Choose page" IsTextSearchEnabled="True">
-     <ComboBoxItem Content="Repository" Tag="0"/><ComboBoxItem Content="Edited" Tag="3"/><ComboBoxItem Content="Mosaic" Tag="2"/><ComboBoxItem Content="Import" Tag="1"/>
+     <ComboBoxItem Content="Repository" Tag="0"/><ComboBoxItem Content="Edited" Tag="2"/><ComboBoxItem Content="Import" Tag="1"/>
     </ComboBox>
    </StackPanel>
   </Grid>
@@ -651,8 +651,8 @@
        <ColumnDefinition Width="Auto" />
       </Grid.ColumnDefinitions>
       <Grid>
-       <TextBox x:Name="SearchBox" ToolTip="Search target, date, device, filter, filename or notes" />
-       <TextBlock x:Name="SearchHint" Text="Search captures…" Foreground="{DynamicResource Muted}" Margin="10,0" VerticalAlignment="Center" IsHitTestVisible="False" />
+       <TextBox x:Name="SearchBox" ToolTip="Search target, date, device, filter, filename or notes"  Padding="9,6,34,6"/>
+       <TextBlock x:Name="SearchHint" Text="Search captures…" Foreground="{DynamicResource Muted}" Margin="10,0" VerticalAlignment="Center" IsHitTestVisible="False" /><Button x:Name="SearchHelpButton" Content="?" Width="24" Height="24" MinHeight="0" Padding="0" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,5,0" AutomationProperties.Name="Search syntax and examples"/>
       </Grid>
       <Button x:Name="LibraryFiltersButton" Grid.Column="1" Content="Filters" Margin="8,0,0,0" />
       <Button Grid.Column="2" x:Name="ClearButton" Content="Clear" Margin="8,0,0,0" />
@@ -783,7 +783,7 @@
          <TextBlock Text="DEVICE ID" FontSize="{DynamicResource UiFontCaption}" Foreground="{DynamicResource Muted}" FontWeight="SemiBold" />
          <TextBox x:Name="TelescopeBox" Margin="0,6,0,0" Text="Telescope-01" ToolTip="Use a unique ID for each physical telescope." />
         </StackPanel>
-        <Button Grid.Column="2" x:Name="ScanButton" Content="Scan folder" VerticalAlignment="Bottom" Margin="0" />
+        <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Bottom"><Button x:Name="ImportOptionsButton" Content="Import options…" Margin="0,0,8,0"/><Button x:Name="ScanButton" Content="Scan folder" Margin="0" /></StackPanel>
        </Grid>
        <TextBlock Text="Originals kept · Analysis off" TextWrapping="Wrap" Margin="0,8,0,0" Foreground="{DynamicResource Muted}" x:Name="ImportPolicyLabel" />
       </StackPanel>
@@ -802,11 +802,12 @@
         <ColumnDefinition Width="Auto" />
        </Grid.ColumnDefinitions>
        <Grid>
-        <TextBox x:Name="ImportSearchBox" ToolTip="Search the scan results. Only ready files in this filtered view are imported." />
-        <TextBlock x:Name="ImportSearchHint" Text="Search import results…" Foreground="{DynamicResource Muted}" Margin="10,0" VerticalAlignment="Center" IsHitTestVisible="False" />
+        <TextBox x:Name="ImportSearchBox" ToolTip="Search the scan results. Only ready files in this filtered view are imported."  Padding="9,6,34,6"/>
+        <TextBlock x:Name="ImportSearchHint" Text="Search import results…" Foreground="{DynamicResource Muted}" Margin="10,0" VerticalAlignment="Center" IsHitTestVisible="False" /><Button x:Name="ImportSearchHelpButton" Content="?" Width="24" Height="24" MinHeight="0" Padding="0" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,5,0" AutomationProperties.Name="Search syntax and examples"/>
        </Grid>
        <Button Grid.Column="1" x:Name="ImportFiltersButton" Content="Filters" Margin="8,0,0,0" />
       <Button Grid.Column="2" x:Name="ImportClearButton" Content="Clear" Margin="8,0,0,0" />
+       <Button Grid.Column="3" x:Name="AssignUnknownTargetButton" Content="Set Unknown targets…" Margin="8,0,0,0"/>
       </Grid>
       <StackPanel Grid.Row="1" Margin="2,8,0,0">
        <TextBlock x:Name="ImportSummaryLabel" TextWrapping="Wrap" />
@@ -843,80 +844,6 @@
      </Grid>
     </Grid>
    </TabItem>
-   <TabItem Header="Mosaics">
-    <Grid Margin="0">
-     <Grid.RowDefinitions>
-      <RowDefinition Height="Auto" />
-      <RowDefinition Height="Auto" />
-      <RowDefinition Height="*" />
-      <RowDefinition Height="Auto" />
-     </Grid.RowDefinitions>
-     <DockPanel>
-      <Button Content="Import" Margin="0,0,8,0" x:Name="MosaicImportButton" />
-      <Button x:Name="MosaicExportButton" Content="Export collection…" />
-     </DockPanel>
-     <WrapPanel />
-     <TextBlock Grid.Row="1" x:Name="MosaicSummaryLabel" Text="Collections link captures across targets and nights. Detection reuses metadata; plate solving is optional." TextWrapping="Wrap" Foreground="{DynamicResource Muted}" Margin="0,4,0,12" />
-     <Grid Grid.Row="2">
-      <Grid.ColumnDefinitions>
-       <ColumnDefinition Width="240" />
-       <ColumnDefinition Width="180" />
-       <ColumnDefinition Width="*" />
-      </Grid.ColumnDefinitions>
-      <Grid Margin="0,0,10,0">
-       <Grid.RowDefinitions>
-        <RowDefinition Height="Auto" />
-        <RowDefinition Height="*" />
-        <RowDefinition Height="190" />
-       </Grid.RowDefinitions>
-       <TextBlock Text="COLLECTIONS" FontSize="{DynamicResource UiFontSmall}" FontWeight="SemiBold" Foreground="{DynamicResource Muted}" Margin="0,0,0,8" />
-       <ListBox Grid.Row="1" x:Name="MosaicCollectionsList" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
-        <ListBox.ItemTemplate>
-         <DataTemplate>
-          <TextBlock Text="{Binding Label}" ToolTip="{Binding Label}" TextWrapping="Wrap" />
-         </DataTemplate>
-        </ListBox.ItemTemplate>
-       </ListBox>
-       <Border Grid.Row="2" Background="{DynamicResource Surface}" CornerRadius="8" Margin="0,10,0,0" ClipToBounds="True">
-        <Canvas x:Name="MosaicMap" Width="230" Height="180" HorizontalAlignment="Center" />
-       </Border>
-      </Grid>
-      <Grid Grid.Column="1" Margin="0,0,10,0">
-       <Grid.RowDefinitions>
-        <RowDefinition Height="Auto" />
-        <RowDefinition Height="*" />
-       </Grid.RowDefinitions>
-       <TextBlock Text="PANELS" FontSize="{DynamicResource UiFontSmall}" FontWeight="SemiBold" Foreground="{DynamicResource Muted}" Margin="0,0,0,8" />
-       <ListBox Grid.Row="1" x:Name="MosaicPanelsList" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
-        <ListBox.ItemTemplate>
-         <DataTemplate>
-          <TextBlock Text="{Binding Label}" ToolTip="{Binding Label}" TextWrapping="Wrap" />
-         </DataTemplate>
-        </ListBox.ItemTemplate>
-       </ListBox>
-      </Grid>
-      <Border Grid.Column="2" Background="{DynamicResource Surface}" BorderBrush="{DynamicResource Border}" BorderThickness="1" CornerRadius="8" ClipToBounds="True">
-       <DataGrid x:Name="MosaicGrid">
-        <DataGrid.Columns>
-         <DataGridTextColumn Header="FILE" Binding="{Binding Filename}" Width="*" MinWidth="200" />
-         <DataGridTextColumn Header="PANEL / ROLE" Binding="{Binding Panel}" Width="Auto" MinWidth="160" />
-         <DataGridTextColumn Header="MEMBERSHIP" Binding="{Binding State}" Width="Auto" MinWidth="120" />
-         <DataGridTextColumn Header="TARGET" Binding="{Binding Target}" Width="Auto" MinWidth="90" />
-         <DataGridTextColumn Header="ACQUIRED" Binding="{Binding AcquisitionDateLabel}" Width="Auto" MinWidth="115" />
-         <DataGridTextColumn Header="FILTER" Binding="{Binding Filter}" Width="Auto" MinWidth="110" />
-        </DataGrid.Columns>
-       </DataGrid>
-      </Border>
-     </Grid>
-     <Grid Grid.Row="3" Margin="0,12,0,0">
-      <Grid.ColumnDefinitions>
-       <ColumnDefinition Width="*" />
-       <ColumnDefinition Width="Auto" />
-      </Grid.ColumnDefinitions>
-      <TextBlock x:Name="MosaicDetailsLabel" Text="Select a collection to review its panels and evidence." Foreground="{DynamicResource Muted}" TextWrapping="Wrap" VerticalAlignment="Center" Margin="0,0,12,0" />
-     </Grid>
-    </Grid>
-   </TabItem>
    <TabItem Header="Edited" x:Name="EditedTab">
     <Grid Margin="0,0,0,8">
      <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="*"/></Grid.RowDefinitions>
@@ -924,7 +851,7 @@
       <StackPanel DockPanel.Dock="Right" Orientation="Horizontal"><Button x:Name="EditedAddButton" Content="Add images…"/><Button x:Name="EditedImportFolderButton" Content="Import folder…" Background="{DynamicResource Accent}" Foreground="White" BorderBrush="{DynamicResource Accent}" Margin="8,0,0,0"/><Button x:Name="EditedRefreshButton" Content="Refresh" Margin="8,0,0,0"/></StackPanel>
       <TextBlock Text="PROJECT" FontSize="{DynamicResource UiFontCaption}" FontWeight="SemiBold" Foreground="{DynamicResource Muted}" VerticalAlignment="Center" Margin="0,0,10,0" DockPanel.Dock="Left"/><ComboBox x:Name="EditedProjectsList" DisplayMemberPath="Name" Width="250" HorizontalAlignment="Left"/>
      </DockPanel>
-     <DockPanel Grid.Row="1" Margin="0,0,0,10"><Button DockPanel.Dock="Right" x:Name="EditedClearButton" Content="Clear" Margin="8,0,0,0"/><Button DockPanel.Dock="Right" x:Name="EditedFiltersButton" Content="Filters" Margin="8,0,0,0"/><TextBlock DockPanel.Dock="Right" x:Name="EditedSummary" Foreground="{DynamicResource Muted}" VerticalAlignment="Center" Margin="12,0,0,0"/><ComboBox x:Name="EditedClassFilter" Visibility="Collapsed"/><Grid><TextBox x:Name="EditedSearchBox" ToolTip="Search edited images, objects, filters or projects"/><TextBlock x:Name="EditedSearchHint" Text="Search edited images…" Foreground="{DynamicResource Muted}" Margin="10,0" VerticalAlignment="Center" IsHitTestVisible="False"/></Grid></DockPanel>
+     <DockPanel Grid.Row="1" Margin="0,0,0,10"><Button DockPanel.Dock="Right" x:Name="EditedClearButton" Content="Clear" Margin="8,0,0,0"/><Button DockPanel.Dock="Right" x:Name="EditedFiltersButton" Content="Filters" Margin="8,0,0,0"/><TextBlock DockPanel.Dock="Right" x:Name="EditedSummary" Foreground="{DynamicResource Muted}" VerticalAlignment="Center" Margin="12,0,0,0"/><ComboBox x:Name="EditedClassFilter" Visibility="Collapsed"/><Grid><TextBox x:Name="EditedSearchBox" ToolTip="Search edited images, objects, filters or projects" Padding="9,6,34,6"/><TextBlock x:Name="EditedSearchHint" Text="Search edited images…" Foreground="{DynamicResource Muted}" Margin="10,0" VerticalAlignment="Center" IsHitTestVisible="False"/><Button x:Name="EditedSearchHelpButton" Content="?" Width="24" Height="24" MinHeight="0" Padding="0" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,5,0" AutomationProperties.Name="Search syntax and examples"/></Grid></DockPanel>
      <Grid Grid.Row="2" x:Name="EditedBody">
       <Grid.ColumnDefinitions><ColumnDefinition Width="166"/><ColumnDefinition Width="*" MinWidth="260"/><ColumnDefinition Width="10"/><ColumnDefinition Width="290" MinWidth="0"/></Grid.ColumnDefinitions>
       <Border Background="{DynamicResource Surface}" BorderBrush="{DynamicResource Border}" BorderThickness="1" CornerRadius="8" Margin="0,0,10,0"><DockPanel><TextBlock DockPanel.Dock="Top" Text="TARGETS" FontSize="{DynamicResource UiFontCaption}" FontWeight="SemiBold" Foreground="{DynamicResource Muted}" Margin="12,13,0,8"/><ListBox x:Name="EditedTargetList" BorderThickness="0" Background="Transparent" ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.CanContentScroll="True" VirtualizingPanel.IsVirtualizingWhenGrouping="True" VirtualizingPanel.VirtualizationMode="Recycling" TextSearch.TextPath="DisplayName" IsTextSearchEnabled="True">
@@ -1059,12 +986,6 @@
    <Button x:Name="RetryImportsButton" Content="Retry failed imports" Padding="12,6" Margin="0,0,0,8" />
    <Button DockPanel.Dock="Right" x:Name="ImportColumnsButton" Content="Columns ▾" Margin="8,0,0,0" />
    <Button DockPanel.Dock="Right" x:Name="ImportToolsButton" Content="Import tools ▾" Margin="0" />
-   <Button x:Name="NewMosaicButton" Content="New mosaic…" />
-   <Button x:Name="DetectMosaicsButton" Content="Detect from metadata" />
-   <Button x:Name="AssignMosaicButton" Content="Assign repository selection…" />
-   <Button x:Name="MosaicToolsButton" Content="Tools ▾" />
-   <Button x:Name="MosaicConfirmButton" Content="Confirm selected" />
-   <Button x:Name="MosaicRemoveButton" Content="Remove selected" />
    <Button x:Name="PerformanceButton" Content="Report" Padding="12,5" Margin="12,0,0,0" />
    <Expander Grid.Row="1" Header="Import options" Margin="4,10,4,10" Foreground="{DynamicResource Muted}" x:Name="ImportOptionsControls">
     <Border Background="{DynamicResource Surface}" BorderBrush="{DynamicResource Border}" BorderThickness="1" CornerRadius="8" Padding="14" Margin="0,8,0,0">

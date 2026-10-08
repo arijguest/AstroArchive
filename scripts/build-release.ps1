@@ -62,6 +62,7 @@ Copy-Item (Join-Path $root 'Installer\Payload\Release_Notes.txt') (Join-Path $Ou
 # The runner uses a disposable account; no real captures are imported.
 $smokeRoot = Join-Path ([IO.Path]::GetTempPath()) ('AstroArchive-smoke-' + [Guid]::NewGuid().ToString('N'))
 $installed = $false
+$pinnedFixture = Join-Path ([Environment]::GetFolderPath('ApplicationData')) ('Microsoft\Internet Explorer\Quick Launch\User Pinned\TaskBar\AstroArchive-smoke-' + [Guid]::NewGuid().ToString('N') + '.lnk')
 function Run-Checked([string]$File, [string[]]$Arguments) {
     $process = Start-Process -FilePath $File -ArgumentList $Arguments -PassThru
     # Wait for setup itself; PowerShell -Wait also waits for the restarted app.
@@ -78,6 +79,18 @@ function Run-Checked([string]$File, [string[]]$Arguments) {
     }
 }
 try {
+    # Simulate a pin whose versioned executable/icon disappeared during an update.
+    [IO.Directory]::CreateDirectory([IO.Path]::GetDirectoryName($pinnedFixture)) | Out-Null
+    $shell = New-Object -ComObject WScript.Shell
+    $shortcut = $shell.CreateShortcut($pinnedFixture)
+    try {
+        $shortcut.TargetPath = Join-Path $smokeRoot 'app-0.0.0-r1\Start.exe'
+        $shortcut.IconLocation = $shortcut.TargetPath + ',0'
+        $shortcut.Save()
+    } finally {
+        [Runtime.InteropServices.Marshal]::FinalReleaseComObject($shortcut) | Out-Null
+        [Runtime.InteropServices.Marshal]::FinalReleaseComObject($shell) | Out-Null
+    }
     Run-Checked $installer @('--silent', '--root', ('"' + $smokeRoot + '"'))
     $installed = $true
     $record = Get-Content (Join-Path $smokeRoot 'install.json') -Raw | ConvertFrom-Json
@@ -88,6 +101,8 @@ try {
     }
     $preview = Join-Path $OutputDirectory 'ui-preview'
     Run-Checked $installedApp @('--ui-test', ('"' + $preview + '"'))
+    if (-not (Test-Path $pinnedFixture)) { throw 'Installer removed the existing taskbar pin.' }
+    Write-Output 'PASS taskbar pin repair, stable shell identity and bundled logo cache'
     Run-Checked $installer @('--ui-test', ('"' + $preview + '"'), '--root', ('"' + $smokeRoot + '"'))
     if (-not (Test-Path (Join-Path $preview 'AstroArchive_Installer_UI.png'))) { throw 'Installer UI smoke did not render.' }
     if (-not (Get-ChildItem $preview -Filter '*.png')) { throw 'UI smoke did not render images.' }
@@ -123,6 +138,7 @@ try {
     $installed = $false
     if ((Test-Path (Join-Path $smokeRoot 'install.json')) -or -not (Test-Path $fixture)) { throw 'Uninstall smoke failed.' }
 } finally {
+    if (Test-Path $pinnedFixture) { Remove-Item $pinnedFixture -Force }
     if ($installed) { Run-Checked $installer @('--uninstall', '--silent', '--root', ('"' + $smokeRoot + '"')) }
     if (Test-Path $smokeRoot) { Remove-Item $smokeRoot -Recurse -Force }
 }

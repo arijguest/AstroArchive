@@ -26,7 +26,7 @@ namespace AstroArchive {
             Window.Resources["PreferHighContrast"] = settings.HighContrast;
             Theme.Apply(Window, settings.ThemeMode);
             if (navigationReady) UpdateCompactHeader();
-            foreach (string name in new[] { "FramesGrid", "ImportGrid", "MetricsGrid", "MosaicGrid" }) {
+            foreach (string name in new[] { "FramesGrid", "ImportGrid", "MetricsGrid" }) {
                 var table = Window.FindName(name) as DataGrid;
                 if (table != null) TableSortIndicators.SizeColumns(table, scale);
             }
@@ -47,7 +47,7 @@ namespace AstroArchive {
             UiHelp.Tip(choices.Contrast, "Use clear monochrome surfaces in your chosen light or dark theme. Windows high contrast is also respected automatically.");
             UiHelp.Tip(choices.Motion, "Keep progress updates readable while stopping the indeterminate progress animation. Operations continue normally.");
             dialog.Text("Keyboard access", true);
-            dialog.Text("Alt reveals menu access keys. Arrow keys move through dropdowns; Escape closes them. Tab follows the visible controls, with clear focus outlines. The purple page selector switches pages; Ctrl+1–4 selects Repository, Edited, Mosaic or Import, and Ctrl+Tab cycles pages. Ctrl+F focuses search, Ctrl+I opens Import, Ctrl+E opens Export, and F1 opens help for the current page.");
+            dialog.Text("Alt reveals menu access keys. Arrow keys move through dropdowns; Escape closes them. Tab follows the visible controls, with clear focus outlines. The purple page selector switches pages; Ctrl+1–3 selects Repository, Edited or Import, and Ctrl+Tab cycles pages. Ctrl+F focuses search, Ctrl+I opens Import, Ctrl+E opens Export, and F1 opens help for the current page.");
             dialog.Text("Table sorting uses ▲ for ascending and ▼ for descending. Numbers show the order of multi-column sorting. Shift-click a heading adds it to the sort.");
             return choices;
         }

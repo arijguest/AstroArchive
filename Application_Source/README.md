@@ -1,6 +1,6 @@
-# AstroArchive 1.12.4
+# AstroArchive 1.13.0
 
-All toolbar actions, including Settings, Guide and Buy Me a Coffee, are grouped on the left. The purple dropdown labelled PAGE centres in the top row when there is room, or in its own compact row below the actions. Ctrl+1–4 selects Repository, Edited, Mosaic or Import; Ctrl+Tab cycles pages. The interactive guide introduces the selector.
+All toolbar actions, including Settings, Guide and Buy Me a Coffee, are grouped on the left. The purple dropdown labelled PAGE centres in the top row when there is room, or in its own compact row below the actions. Ctrl+1–3 selects Repository, Edited or Import; Ctrl+Tab cycles pages. The interactive guide introduces the selector.
 
 Repository defaults to expandable subframe session summaries. Edited shares its targets/table/Preview layout and supports reviewed mixed-folder import, GIF associations, starless/stars-only classification and acquisition metadata recovery. Animated GIF, SER and Windows video previews have Pause/Play controls. Dump processing shows progress in a separate window.
 
@@ -13,6 +13,15 @@ Its 757 star vectors and drawing are cached; no sky timer, network or 3D engine 
 
 Portable Windows 10/11 x64 WPF app for archiving astronomical image originals and creating verified stacking projects. Open `AstroArchive.exe`; read `Quick_Start.txt` for the complete workflow.
 
+## Changes in 1.13.0
+
+- Shared search supports phrases, exclusions, OR, fields, filename globs and numeric comparisons, with concise help and safe syntax errors.
+- Import options groups Files, Capture and Analysis; PNG/JPG/JPEG exclusion defaults on with a saved opt-out. Assign Unknown light/stack targets before importing.
+- Purge indexed PNG/JPG/JPEG captures with confirmation, preserving Edited and scientific files.
+- Owned scan/import progress windows follow main-window minimising and hiding.
+- Stable Windows shell identity and logo cache repair version-stale taskbar shortcuts during installation/update.
+- Remove Mosaic navigation, detection, collections and panel export logic. Existing captures remain available for ordinary exports.
+
 ## Changes in 1.10.1
 
 - Fix WPF clipping the bitmap before the portrait fit transform, restoring the whole image in sidebar and popup previews, including resized and high-DPI bitmaps.
@@ -21,7 +30,7 @@ Portable Windows 10/11 x64 WPF app for archiving astronomical image originals an
 
 ## Changes in 1.10.0
 
-- Compact acquisition-session filters with exposure/gain range sliders, combined review choices and retained mosaic/format/mount options.
+- Compact acquisition-session filters with exposure/gain range sliders, combined review choices and retained format/mount options.
 - Portrait sidebar and popup previews with controls directly below the image and scroll/pinch/keyboard input. Source pixels are unchanged.
 - Windows policy diagnostics and optional publisher-signing integration.
 
@@ -38,13 +47,6 @@ Portable Windows 10/11 x64 WPF app for archiving astronomical image originals an
 - Versioned instrument/software profiles, evidence and field-level metadata review.
 - Conservative calibration matching and exposure-specific dark-flat recipes.
 - See [compatibility guide](../docs/COMPATIBILITY.md) for pixel layouts, optional codecs and validation limits.
-
-## Changes in 1.7.0
-
-- Metadata-first mosaic collections, stable panel assignments, explicit review states and completed-output roles across targets and sessions.
-- Existing-WCS footprints and conservative pointing suggestions, with optional cached representative solving.
-- Portable collection manifests and panel-aware stacking exports that preserve capture/calibration separation.
-- See [mosaic guide](../docs/MOSAICS.md) for supported metadata, recovery, uncertainty and validation limits.
 
 ## Changes in 1.6.1
 
@@ -170,14 +172,14 @@ OpenNGC by Mattia Verga is licensed CC-BY-SA-4.0. See `Catalogue_Notice.md` and 
 
 ## Release 1.7.2 / package 1.7.2.1
 
-Mosaic collections and panel exports, canonical object IDs/common names, grouped
+Canonical object IDs/common names, grouped
 library exposure summaries, import review and filtered retries, audited reimport
 permissions, searchable offline help and package notes/progress during updates.
 
 
 ## Release 1.8.0 / package 1.8.0.1
 
-- Extends the existing preview/import/processor/mosaic setup with format readers and explicit HDU/page/frame selection.
+- Extends the existing preview/import/processor setup with format readers and explicit HDU/page/frame selection.
 - Adds scientific raster/XISF conversion, SER frame previews and optional compressed-image backends, while preserving byte-for-byte original exports.
 - Separates camera identity, gain units, readout/ROI/offset and optical configuration; retains provenance, normalization, reviewed re-detection and overrides.
 - Explains calibration decisions and prepares exposure-specific dark-flat recipes.

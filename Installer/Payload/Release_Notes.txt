@@ -1,3 +1,24 @@
+AstroArchive 1.13.0 — search, import controls and repository cleanup
+Package 1.13.0.1
+- Search Repository, Import and Edited with phrases, exclusions, OR alternatives,
+  scoped fields, filename wildcards and numeric exposure/gain/temperature filters.
+  Common-name/catalogue aliases combine with other terms. Help explains syntax;
+  incomplete queries show guidance and no matches.
+- Put Import options beside Scan with Files, Capture and Analysis tabs. Ignore
+  failed filenames remains optional. Ignore non-raw files (PNG/JPG/JPEG) defaults
+  ON, including older settings, and preserves an explicit saved opt-out. Manual,
+  USB and Dump import flows use the same exclusions and retain skipped originals.
+- Assign catalogue/custom targets to Unknown lights/stacks during import review,
+  preserving known targets, calibrations and existing user metadata decisions.
+- Add Repository > Purge non-raw files, limited to indexed PNG/JPG/JPEG with
+  confirmation. Edited, scientific files and source originals are preserved.
+- Use owned progress windows that follow main-window minimising and hiding.
+- Give Windows a stable taskbar identity and persistent bundled logo cache;
+  repair existing version-stale taskbar shortcuts during install/update.
+- Remove Mosaic UI, detection, collection tools and panel-aware export logic.
+  Existing captures and ordinary stacking/calibration exports remain available.
+  Ctrl+1–3 now selects Repository, Edited and Import.
+
 AstroArchive 1.12.4 — grouped actions and centred page navigation
 Package 1.12.4.1
 - Group Settings, Guide and Buy Me a Coffee with Import, Export, Repository and

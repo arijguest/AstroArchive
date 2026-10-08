@@ -62,6 +62,7 @@ namespace AstroArchive.Installation {
   [STAThread] static int Main(string[] args) {
    try {
     Application.EnableVisualStyles();
+    ShellIdentity.InitializeProcess();
     string root = InstallCore.Root(Path.GetDirectoryName(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)));
     var record = InstallCore.Read(root);
     if (record == null) throw new IOException("Installation record is missing. Run the installer again to repair it.");

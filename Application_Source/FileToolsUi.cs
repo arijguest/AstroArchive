@@ -56,7 +56,6 @@ namespace AstroArchive {
    menu.Items.Add(FileAction("Choose HDU / page / frame…",()=>PreviewFile(selected[0]),selected.Count==1));menu.Items.Add(FileAction("Edit metadata…",()=>Edit(false)));menu.Items.Add(FileAction("Re-detect metadata and review…",()=>ReviewMetadata(selected)));
    menu.Items.Add(FileAction("Identify target…",()=>Identify(false),selected.Any(f=>f.Kind=="Light"||f.Kind=="Stack"||f.Kind=="Unknown")));
    menu.Items.Add(FileAction("Show file in Explorer",()=>ShowFile(selected[0]),selected.Count==1));
-   var mosaics=new MenuItem{Header="Mosaics",IsEnabled=selected.Any(Repository.MosaicScience)};mosaics.Items.Add(FileAction("Assign to panel or completed output…",()=>AssignToMosaic(selected)));mosaics.Items.Add(FileAction("Detect from existing metadata",()=>DiscoverMosaics(selected)));menu.Items.Add(mosaics);
    menu.Items.Add(new Separator());var delete=FileAction("Delete selected files…",()=>DeleteFiles(selected));delete.Foreground=new SolidColorBrush(Color.FromRgb(183,40,51));menu.Items.Add(delete);
   }
   void ShowExportMenu(){if(repo==null||cancel!=null)return;var selected=Context();var menu=ThemedMenu();var choices=ExportMenu(selected);foreach(MenuItem item in choices.Items.Cast<MenuItem>().ToList()){choices.Items.Remove(item);menu.Items.Add(item);}menu.PlacementTarget=B("ExportButton");menu.Placement=PlacementMode.Top;menu.IsOpen=true;}
@@ -72,23 +71,22 @@ namespace AstroArchive {
    Run(ct=>Exporter.Create(repo,selected,options,ct,Progress),ExportComplete);
   }
   bool ValidExportDestination(FormWindow d,TextBox parent,TextBox name){if(!Directory.Exists(parent.Text.Trim())){MessageBox.Show(d.Window,"Choose an existing destination folder.");return false;}if(string.IsNullOrWhiteSpace(name.Text)){MessageBox.Show(d.Window,"Enter a name for the new folder.");return false;}if(Util.Within(parent.Text.Trim(),repo.Root)){MessageBox.Show(d.Window,"Choose a destination outside the repository.");return false;}if(Directory.Exists(Path.Combine(parent.Text.Trim(),Util.Safe(name.Text.Trim())))||File.Exists(Path.Combine(parent.Text.Trim(),Util.Safe(name.Text.Trim())))){MessageBox.Show(d.Window,"This folder name already exists. Choose a new name.");return false;}return true;}
-  void ExportProject(List<Frame> selected,bool withCalibration,string mosaicId=null){
+  void ExportProject(List<Frame> selected,bool withCalibration){
    var items=selected.Where(f=>f.Kind=="Light"||f.Kind=="Stack").ToList();if(items.Count==0)return;
    var d=new FormWindow(Window,withCalibration?"Export with calibrations":"Export ready-to-stack folder",630,720);
    string target=items.Select(f=>f.Target).Distinct().Count()==1?items[0].Target:"Multiple targets";
    d.Text(target+"  ·  "+items.Count(f=>f.Kind=="Light")+" subs  ·  "+items.Count(f=>f.Kind=="Stack")+" stacks",true);
    TextBox parent=d.Input("Destination folder","");d.Button("Browse destination",()=>{string p=Folder("Choose where to create the stacking folder",parent.Text,d.Window);if(p!=null)parent.Text=p;});
    TextBox name=d.Input("New folder name",Util.Safe(target)+"_"+DateTime.Now.ToString("yyyyMMdd_HHmmss"));
-   var initialLayout=new MosaicExportLayout(repo,mosaicId);Func<Frame,bool> isOutput=f=>{try{return initialLayout.Output(f);}catch{return false;}};ComboBox mode=d.Select("Inputs",new[]{"Subs","Stacks","Both"},items.All(f=>f.Kind=="Light"&&!isOutput(f))?"Subs":items.All(f=>f.Kind=="Stack"||isOutput(f))?"Stacks":"Both");
-   var mosaicProjects=repo.Mosaics().Where(p=>!p.IgnoreDiscovery).ToList();var automatic=new MosaicProject{Name="Automatic (single collection per capture)"};mosaicProjects.Insert(0,automatic);d.Text("Mosaic collection");var mosaicBox=new ComboBox{ItemsSource=mosaicProjects,DisplayMemberPath="Name",SelectedItem=mosaicProjects.FirstOrDefault(p=>p.Id==mosaicId)??automatic};d.Add(mosaicBox);
+   ComboBox mode=d.Select("Inputs",new[]{"Subs","Stacks","Both"},items.All(f=>f.Kind=="Light")?"Subs":items.All(f=>f.Kind=="Stack")?"Stacks":"Both");
    CheckBox sessions=d.Check("Separate sessions into their own folders",false),calibration=d.Check("Include matching calibration files",withCalibration),unknown=d.Check("Include calibrations for subs with unknown calibration state",false),rejected=d.Check("Include files marked rejected/reference",false);
    CheckBox convert=d.Check("Convert supported images to FITS (keeps archived originals)",false);d.Text("Non-FITS data and selected containers need explicit conversion. Confirm linearity in metadata; processed previews stay original-file exports.");var availableCalibrations=Exporter.ExistingCalibrations(repo,all);
    d.Button("Review calibration matches and reasons",()=>ShowReport("Calibration matching",CalibrationReport(items.Where(f=>f.Kind=="Light").ToList(),availableCalibrations)));var availability=new TextBlock{TextWrapping=TextWrapping.Wrap,Margin=new Thickness(0,12,0,8)};Theme.Bind(availability,TextBlock.ForegroundProperty,"Muted");d.Add(availability);
-   Action summary=()=>{try{unknown.IsEnabled=calibration.IsChecked==true&&Convert.ToString(mode.SelectedItem)!="Stacks";var lights=items.Where(f=>f.Kind=="Light"&&(rejected.IsChecked==true||!f.Rejected)).ToList();int count=Convert.ToString(mode.SelectedItem)=="Stacks"||calibration.IsChecked!=true?0:Exporter.AvailableCalibrations(lights,availableCalibrations,sessions.IsChecked==true,unknown.IsChecked==true,repo,((MosaicProject)mosaicBox.SelectedItem).Id).Count;availability.Text=calibration.IsChecked!=true?"Selected inputs only. Calibration files are omitted.":Convert.ToString(mode.SelectedItem)=="Stacks"?"Existing stacks receive no additional calibration files.":count>0?count+" matching calibration files available. Already calibrated or registered subs receive no extra calibration.":"No matching calibration files are available for these inputs. You can still export the selected captures.";}catch(Exception e){availability.Text=e.Message;}};
-   foreach(var check in new[]{sessions,calibration,unknown,rejected}){check.Checked+=(s,e)=>summary();check.Unchecked+=(s,e)=>summary();}mode.SelectionChanged+=(s,e)=>summary();mosaicBox.SelectionChanged+=(s,e)=>summary();summary();
-   d.Text("Each mosaic panel, target, camera and compatible capture group has its own input folder. Masters and raw calibration sets stay separate. Stack the exported inputs in your preferred software.");
-   d.Accept("Export folder",()=>{try{var layout=new MosaicExportLayout(repo,((MosaicProject)mosaicBox.SelectedItem).Id);foreach(var frame in items)layout.Member(frame);if(!items.Any(f=>layout.Includes(f,Convert.ToString(mode.SelectedItem),rejected.IsChecked==true))){MessageBox.Show(d.Window,"This input choice has no eligible files.");return false;}}catch(Exception e){MessageBox.Show(d.Window,e.Message);return false;}return ValidExportDestination(d,parent,name);});if(!d.Show())return;
-   var options=new ExportOptions{MosaicId=((MosaicProject)mosaicBox.SelectedItem).Id,Parent=parent.Text.Trim(),Name=name.Text.Trim(),Mode=Convert.ToString(mode.SelectedItem),IncludeCalibration=calibration.IsChecked==true,IncludeUnknownCalibration=unknown.IsChecked==true,IncludeRejected=rejected.IsChecked==true,SeparateSessions=sessions.IsChecked==true,ConvertToFits=convert.IsChecked==true};
+   Action summary=()=>{try{unknown.IsEnabled=calibration.IsChecked==true&&Convert.ToString(mode.SelectedItem)!="Stacks";var lights=items.Where(f=>f.Kind=="Light"&&(rejected.IsChecked==true||!f.Rejected)).ToList();int count=Convert.ToString(mode.SelectedItem)=="Stacks"||calibration.IsChecked!=true?0:Exporter.AvailableCalibrations(lights,availableCalibrations,sessions.IsChecked==true,unknown.IsChecked==true).Count;availability.Text=calibration.IsChecked!=true?"Selected inputs only. Calibration files are omitted.":Convert.ToString(mode.SelectedItem)=="Stacks"?"Existing stacks receive no additional calibration files.":count>0?count+" matching calibration files available. Already calibrated or registered subs receive no extra calibration.":"No matching calibration files are available for these inputs. You can still export the selected captures.";}catch(Exception e){availability.Text=e.Message;}};
+   foreach(var check in new[]{sessions,calibration,unknown,rejected}){check.Checked+=(s,e)=>summary();check.Unchecked+=(s,e)=>summary();}mode.SelectionChanged+=(s,e)=>summary();summary();
+   d.Text("Each target, camera and compatible capture group has its own input folder. Masters and raw calibration sets stay separate. Stack the exported inputs in your preferred software.");
+   d.Accept("Export folder",()=>{string selectedMode=Convert.ToString(mode.SelectedItem);if(!items.Any(f=>(rejected.IsChecked==true||!f.Rejected)&&(selectedMode=="Both"||selectedMode=="Subs"&&f.Kind=="Light"||selectedMode=="Stacks"&&f.Kind=="Stack"))){MessageBox.Show(d.Window,"This input choice has no eligible files.");return false;}return ValidExportDestination(d,parent,name);});if(!d.Show())return;
+   var options=new ExportOptions{Parent=parent.Text.Trim(),Name=name.Text.Trim(),Mode=Convert.ToString(mode.SelectedItem),IncludeCalibration=calibration.IsChecked==true,IncludeUnknownCalibration=unknown.IsChecked==true,IncludeRejected=rejected.IsChecked==true,SeparateSessions=sessions.IsChecked==true,ConvertToFits=convert.IsChecked==true};
    Run(ct=>Exporter.Create(repo,items,options,ct,Progress),ExportComplete);
   }
   void ExportComplete(string path){L("StatusLabel").Text="Exported folder: "+path;var d=new FormWindow(Window,"Export complete",600,400);d.Text("Your exported folder is ready",true);d.Text(path);d.Text("Files have been copied and verified. Stacking folders include workflow notes and a manifest.");d.Button("Open exported folder",()=>Process.Start(new ProcessStartInfo(path){UseShellExecute=true}));d.CloseOnly();d.Show();}
@@ -111,20 +109,26 @@ namespace AstroArchive {
     try{using(var process=Process.Start(SirilHandoff.LaunchInfo(app,image))){if(process==null)throw new IOException(title+" did not start.");}}
     catch(Exception e){throw new IOException(title+" could not be launched. Your verified working copy is saved at:\n"+image+"\n\n"+e.Message,e);}
     return image;
-   },image=>{RefreshEdited(project.Id);GoToPage(3);});
+   },image=>{RefreshEdited(project.Id);GoToPage(2);});
   }
   void DeleteFailedFiles(){
    if(repo==null||cancel!=null)return;var matches=repo.FailedFiles();
    if(matches.Count==0){L("StatusLabel").Text="No repository filenames contain 'failed'.";return;}
    DeleteFiles(matches,true);
   }
-  void DeleteFiles(List<Frame> selected,bool failedNames=false){
+  void PurgeNonRawFiles(){
+   if(repo==null||cancel!=null)return;var matches=repo.NonRawFiles();
+   if(matches.Count==0){L("StatusLabel").Text="No PNG/JPG/JPEG files are indexed in this repository.";return;}
+   DeleteFiles(matches,false,true);
+  }
+  void DeleteFiles(List<Frame> selected,bool failedNames=false,bool nonRawFiles=false){
    if(repo==null||cancel!=null||selected.Count==0)return;
-   var d=new FormWindow(Window,failedNames?"Delete failed":"Delete selected files",640,520);d.Text("Delete "+selected.Count+" "+(failedNames?"matching":"selected")+" file"+(selected.Count==1?"":"s")+"?",true);d.Text(repo.Root);
+   var d=new FormWindow(Window,nonRawFiles?"Purge non-raw files":failedNames?"Delete failed":"Delete selected files",640,520);d.Text("Delete "+selected.Count+" "+(failedNames||nonRawFiles?"matching":"selected")+" file"+(selected.Count==1?"":"s")+"?",true);d.Text(repo.Root);
    if(failedNames)d.Text("Searches the entire active repository for filenames containing 'failed', regardless of case. Current filters and telescope selection do not limit this action.");
+   if(nonRawFiles)d.Text("Finds indexed PNG/JPG/JPEG files in the entire active repository, regardless of case or current filters. Edited images, FITS, TIFF, XISF, SER and camera RAW files are excluded from this purge.");
    d.Text("This permanently removes the selected repository copies. Deletion history is retained so future telescope imports skip the same captures. Source copies, other archive files and shared session metadata stay. Cloud-synced deletions propagate to the cloud.");
    d.Add(new TextBox{Text=string.Join("\r\n",selected.Select(f=>f.RelativePath)),IsReadOnly=true,Height=170,VerticalScrollBarVisibility=ScrollBarVisibility.Auto,HorizontalScrollBarVisibility=ScrollBarVisibility.Auto});
-   d.Accept(failedNames?"Delete failed files":"Delete selected files",()=>true,true);if(!d.Show())return;CancelPreview();
+   d.Accept(nonRawFiles?"Purge non-raw files":failedNames?"Delete failed files":"Delete selected files",()=>true,true);if(!d.Show())return;CancelPreview();
    Run(ct=>{var result=repo.DeleteFrames(selected,ct,Progress);return result.Deleted+" selected files deleted."+(result.Errors.Count==0?"":"\r\n\r\n"+string.Join("\r\n",result.Errors));},message=>{plan=null;FilterImports();L("StatusLabel").Text=message.Split('\n')[0];if(message.Contains("\n"))ShowReport("File deletion report",message);});
   }
  }

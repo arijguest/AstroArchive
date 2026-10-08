@@ -74,11 +74,11 @@ $manifest.assembly.assemblyIdentity.version = $packageVersion
 $manifest.Save((Join-Path $build 'app.manifest'))
 $shared = @('/nologo', '/langversion:5', '/target:winexe', '/platform:x64', '/optimize+',
     '/r:System.Core.dll', '/r:System.Web.Extensions.dll', '/r:System.Windows.Forms.dll', '/r:System.Drawing.dll',
-    "/win32icon:$PSScriptRoot\Assets\AstroArchive.ico", "/win32manifest:$build\app.manifest")
+    "/win32icon:$PSScriptRoot\Assets\AstroArchive.ico", "/resource:$PSScriptRoot\Assets\AstroArchive.ico,AstroArchive.ico", "/win32manifest:$build\app.manifest")
 if (-not $UsePreparedPayload) {
     $launcherArgs = $shared + @('/define:LAUNCHER', "/out:$payload\Start.exe",
         "$PSScriptRoot\InstallCore.cs", "$PSScriptRoot\Launcher.cs", "$PSScriptRoot\Updates.cs",
-        "$PSScriptRoot\WindowsIntegration.cs", "$build\GeneratedVersion.cs")
+        "$PSScriptRoot\WindowsIntegration.cs", "$PSScriptRoot\ShellIdentity.cs", "$build\GeneratedVersion.cs")
     & $compiler @launcherArgs
     if ($LASTEXITCODE -ne 0) { throw 'Launcher compilation failed.' }
 }
@@ -118,7 +118,7 @@ $setupPath = Join-Path $OutputDirectory "AstroArchive$packageVersion.exe"
 $setupArgs = $shared + @("/out:$setupPath", '/r:System.Drawing.dll', '/r:System.IO.Compression.dll',
     "/resource:$build\payload.zip,payload.zip", "/resource:$build\payload.json,payload.json",
     "/resource:$PSScriptRoot\Assets\AstroArchive_Logo.png,logo.png",
-    "$PSScriptRoot\InstallCore.cs", "$PSScriptRoot\WindowsIntegration.cs", "$PSScriptRoot\NativeFolderPicker.cs",
+    "$PSScriptRoot\InstallCore.cs", "$PSScriptRoot\WindowsIntegration.cs", "$PSScriptRoot\ShellIdentity.cs", "$PSScriptRoot\NativeFolderPicker.cs",
     "$PSScriptRoot\Setup.cs", "$PSScriptRoot\Updates.cs", "$build\GeneratedVersion.cs")
 & $compiler @setupArgs
 if ($LASTEXITCODE -ne 0) { throw 'Installer compilation failed.' }

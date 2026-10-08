@@ -9,10 +9,25 @@ namespace AstroArchive {
  public partial class MainUi {
   bool dumpStartupChecked,operationBusy;
   Window dumpProgressWindow;TextBlock dumpProgressStatus,dumpProgressRate;ProgressBar dumpProgressBar;Button dumpProgressCancel;
-  void InitializeProgressVisibility(){Window.StateChanged+=(s,e)=>UpdateProgressVisibility();}
+  Window operationProgressWindow;
+  void InitializeProgressVisibility(){Window.StateChanged+=(s,e)=>UpdateProgressVisibility();Window.IsVisibleChanged+=(s,e)=>UpdateProgressVisibility();}
+  void EnsureOperationProgress(){
+   if(operationProgressWindow!=null)return;
+   var popup=(Popup)Window.FindName("OperationPopup");popup.IsOpen=false;var content=popup.Child;popup.Child=null;
+   var window=new Window{Owner=Window,Icon=ApplicationIcon.Image,ShowInTaskbar=false,Title="AstroArchive — file progress",SizeToContent=SizeToContent.WidthAndHeight,ResizeMode=ResizeMode.NoResize,WindowStartupLocation=WindowStartupLocation.CenterOwner,FontFamily=Window.FontFamily};
+   window.Resources.MergedDictionaries.Add(Window.Resources);window.SetResourceReference(Control.FontSizeProperty,"UiFontControl");Theme.Bind(window,Control.BackgroundProperty,"Surface");Theme.Bind(window,Control.ForegroundProperty,"Text");window.Content=content;
+   window.Closing+=(s,e)=>{if(cancel!=null){e.Cancel=true;B("CancelButton").RaiseEvent(new RoutedEventArgs(Button.ClickEvent));}};
+   operationProgressWindow=window;
+  }
   void UpdateProgressVisibility(){
-   bool visible=Window.WindowState!=WindowState.Minimized;
-   ((Popup)Window.FindName("OperationPopup")).IsOpen=visible&&operationBusy&&dumpProgressWindow==null;
+   bool visible=Window.IsVisible&&Window.WindowState!=WindowState.Minimized;
+   // A WPF Popup is an independent native window; use an owned window instead.
+   ((Popup)Window.FindName("OperationPopup")).IsOpen=false;
+   if(operationBusy&&dumpProgressWindow==null&&visible)EnsureOperationProgress();
+   if(operationProgressWindow!=null){
+    if(!visible||!operationBusy||dumpProgressWindow!=null)operationProgressWindow.Hide();
+    else{if(operationProgressWindow.WindowState==WindowState.Minimized)operationProgressWindow.WindowState=WindowState.Normal;if(!operationProgressWindow.IsVisible)operationProgressWindow.Show();}
+   }
    if(dumpProgressWindow!=null){
     if(!visible)dumpProgressWindow.Hide();
     else if(operationBusy){if(dumpProgressWindow.WindowState==WindowState.Minimized)dumpProgressWindow.WindowState=WindowState.Normal;if(!dumpProgressWindow.IsVisible)dumpProgressWindow.Show();}
@@ -43,8 +58,8 @@ namespace AstroArchive {
    if(repo==null||cancel!=null||closing)return;
    try{repo.EnsureDumpFolder();if(!Directory.EnumerateFileSystemEntries(repo.DumpFolder).Any())return;}catch(Exception error){MessageBox.Show(Window,error.Message,"Dump folder unavailable",MessageBoxButton.OK,MessageBoxImage.Warning);return;}
    OpenDumpProgress();
-   ((CheckBox)Window.FindName("DeleteOriginalsCheck")).IsChecked=false;plan=null;BeginLive(true);DumpResult result=null;bool ignoreFailed=settings.IgnoreFailed;
-   Run(ct=>{result=repo.ProcessDump(ct,Progress,settings.CopyWorkers,LiveFrame,ignoreFailed);return result.Summary;},summary=>{
+   ((CheckBox)Window.FindName("DeleteOriginalsCheck")).IsChecked=false;plan=null;BeginLive(true);DumpResult result=null;bool ignoreFailed=settings.IgnoreFailed,ignoreRaster=settings.IgnoreRasterImports;
+   Run(ct=>{result=repo.ProcessDump(ct,Progress,settings.CopyWorkers,LiveFrame,ignoreFailed,ignoreRaster);return result.Summary;},summary=>{
     plan=result.Plan;FilterImports();
     L("StatusLabel").Text=summary;
     if(result.NeedsReview)ShowReport("Dump folder: files retained for review",repo.LastReport);

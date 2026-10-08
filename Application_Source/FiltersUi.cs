@@ -24,6 +24,7 @@ namespace AstroArchive {
    G("ImportGrid").SelectionChanged+=(s,e)=>{
     var frame=G("ImportGrid").SelectedItem as Frame;
     L("ImportDetailsLabel").Text=frame==null?"Select a capture to see screening or import details.":frame.OriginalName+"  ·  "+frame.Status+"  ·  "+(CaptureScreening.NeedsReview(frame)?frame.ReviewCategory+" · "+frame.ReviewReason:frame.SourceDisposition??frame.Notes);
+    B("AssignUnknownTargetButton").IsEnabled=cancel==null&&UnknownImportSelection().Count>0;
    };
   }
   ContextMenu BuildFiltersMenu(bool imports){
@@ -35,7 +36,7 @@ namespace AstroArchive {
   void ApplyFilters(bool imports){if(imports)FilterImports();else Filter(true);}
   List<Frame> CurrentImportRows(){return importLive?importRows.ToList():plan==null?new List<Frame>():plan.Frames;}
   void FilterImports(){
-   if(updating)return;var source=CurrentImportRows();visibleImports=importFilters.Apply(source,T("ImportSearchBox").Text);
+   if(updating)return;var source=CurrentImportRows();ShowSearchError("ImportSearchBox",FileSearch.Parse(T("ImportSearchBox").Text));visibleImports=importFilters.Apply(source,T("ImportSearchBox").Text);
    var grid=G("ImportGrid");var selection=new HashSet<string>(grid.SelectedItems.Cast<Frame>().Select(f=>f.SourcePath));SetRows("ImportGrid",visibleImports);foreach(var frame in visibleImports.Where(f=>selection.Contains(f.SourcePath)))if(!grid.SelectedItems.Contains(frame))grid.SelectedItems.Add(frame);
    B("ImportFiltersButton").Content="Filters"+(importFilters.ActiveCount>0?" ("+importFilters.ActiveCount+")":"");
    var summary=ImportWorkflow.Summarize(source,visibleImports,SkipFlagged);int ready=summary.Ready;L("ImportSummaryLabel").Text=summary.Text;
@@ -43,7 +44,9 @@ namespace AstroArchive {
    B("ImportButton").IsEnabled=cancel==null&&repo!=null&&plan!=null&&ready>0;
    B("ScreenImportsButton").IsEnabled=cancel==null&&repo!=null&&visibleImports.Any(f=>f.Status!="Deleted");
    B("ReviewImportsButton").IsEnabled=cancel==null&&repo!=null&&summary.Flagged>0;int retry=plan==null?0:ImportWorkflow.Select(visibleImports,SkipFlagged,true).Count;B("RetryImportsButton").Content="Retry "+retry+" failed import"+(retry==1?"":"s");B("RetryImportsButton").IsEnabled=cancel==null&&repo!=null&&retry>0;
-   L("ScanLabel").Text=source.Count==0&&plan==null?"Choose a source folder and scan to begin.":summary.Shown+" / "+summary.Total+" shown · "+(summary.Total-summary.Shown)+" hidden by search/filters · "+importFilters.ActiveCount+" active filters"+(SkipFlagged?" · "+summary.SkippedFlagged+" flagged candidates skipped":" · flagged captures included")+(plan!=null&&plan.IgnoredFailed>0?"  ·  "+plan.IgnoredFailed+" failed filenames ignored":"");
+   B("AssignUnknownTargetButton").IsEnabled=cancel==null&&UnknownImportSelection().Count>0;
+   B("ImportOptionsButton").IsEnabled=cancel==null;
+   L("ScanLabel").Text=source.Count==0&&plan==null?"Choose a source folder and scan to begin.":summary.Shown+" / "+summary.Total+" shown · "+(summary.Total-summary.Shown)+" hidden by search/filters · "+importFilters.ActiveCount+" active filters"+(SkipFlagged?" · "+summary.SkippedFlagged+" flagged candidates skipped":" · flagged captures included")+(plan!=null&&plan.IgnoredFailed>0?"  ·  "+plan.IgnoredFailed+" failed filenames ignored":"")+(plan!=null&&plan.IgnoredRaster>0?" · "+plan.IgnoredRaster+" PNG/JPG ignored":"");
   }
   void ScreenFiles(bool imports){
    if(repo==null||cancel!=null)return;
@@ -54,6 +57,7 @@ namespace AstroArchive {
    var menu=ThemedMenu();var selection=G("ImportGrid").SelectedItems.Cast<Frame>().Where(f=>f.Status!="Deleted").ToList();
    menu.Items.Add(FileAction("Edit selected metadata…",()=>Edit(true),selection.Count>0));
    menu.Items.Add(FileAction("Identify selected targets…",()=>Identify(true),selection.Count>0));
+   menu.Items.Add(FileAction("Set Unknown targets…",AssignUnknownImportTargets,UnknownImportSelection().Count>0));
    menu.Items.Add(new Separator());menu.Items.Add(FileAction("Scan report…",()=>ShowReport("Scan report",plan==null?"Scan a folder first.":plan.Errors.Count==0?"All supported files were read successfully.":string.Join("\r\n\r\n",plan.Errors))));
    return menu;
   }

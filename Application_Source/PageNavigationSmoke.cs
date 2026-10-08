@@ -14,16 +14,16 @@ namespace AstroArchive {
    var selected=G("FramesGrid").SelectedItems.Cast<object>().ToArray();
    var repositoryRows=all;
    try{
-    all=new System.Collections.Generic.List<Frame>();SelectInitialPage();if(tabs.SelectedIndex!=1||selector.SelectedIndex!=3)throw new Exception("Empty repository does not start on Import.");
+    all=new System.Collections.Generic.List<Frame>();SelectInitialPage();if(tabs.SelectedIndex!=1||selector.SelectedIndex!=2)throw new Exception("Empty repository does not start on Import.");
     all.Add(new Frame{Target="M45"});SelectInitialPage();if(tabs.SelectedIndex!=0||selector.SelectedIndex!=0)throw new Exception("Populated repository does not start on Repository.");all=repositoryRows;
     var choices=selector.Items.Cast<ComboBoxItem>().ToArray();
-    if(!choices.Select(item=>Convert.ToString(item.Content)).SequenceEqual(new[]{"Repository","Edited","Mosaic","Import"})||!choices.Select(item=>Convert.ToInt32(item.Tag)).SequenceEqual(new[]{0,3,2,1}))throw new Exception("Page choices do not match their existing workspaces.");
+    if(!choices.Select(item=>Convert.ToString(item.Content)).SequenceEqual(new[]{"Repository","Edited","Import"})||!choices.Select(item=>Convert.ToInt32(item.Tag)).SequenceEqual(new[]{0,2,1}))throw new Exception("Page choices do not match their existing workspaces.");
     foreach(var choice in choices){
      selector.SelectedItem=choice;PumpPopupLayout();int index=Convert.ToInt32(choice.Tag);
      if(tabs.SelectedIndex!=index||!ReferenceEquals(tabs.SelectedContent,((TabItem)tabs.Items[index]).Content))throw new Exception("Page dropdown replaced or opened the wrong workspace.");
-     GoToPage((index+1)%4);if(Convert.ToInt32(((ComboBoxItem)selector.SelectedItem).Tag)!=tabs.SelectedIndex)throw new Exception("Programmatic navigation did not synchronize the dropdown.");
+     GoToPage((index+1)%3);if(Convert.ToInt32(((ComboBoxItem)selector.SelectedItem).Tag)!=tabs.SelectedIndex)throw new Exception("Programmatic navigation did not synchronize the dropdown.");
     }
-    selector.SelectedIndex=3;CyclePage(1);if(selector.SelectedIndex!=0||tabs.SelectedIndex!=0)throw new Exception("Ctrl+Tab does not wrap forward.");CyclePage(-1);if(selector.SelectedIndex!=3||tabs.SelectedIndex!=1)throw new Exception("Ctrl+Shift+Tab does not wrap backward.");
+    selector.SelectedIndex=2;CyclePage(1);if(selector.SelectedIndex!=0||tabs.SelectedIndex!=0)throw new Exception("Ctrl+Tab does not wrap forward.");CyclePage(-1);if(selector.SelectedIndex!=2||tabs.SelectedIndex!=1)throw new Exception("Ctrl+Shift+Tab does not wrap backward.");
     GoToPage(0);PumpPopupLayout();
     if(T("SearchBox").Text!=search||T("SourceBox").Text!=source||plan!=importPlan||cancel!=activeCancel||Util.Serialize(libraryFilters.Values)!=filters||!G("FramesGrid").SelectedItems.Cast<object>().SequenceEqual(selected))throw new Exception("Page switching reset search, selection, filters or import state.");
     if(PopupChildren<TabPanel>(tabs).Any())throw new Exception("Hidden page navigation still reserves a tab row.");
