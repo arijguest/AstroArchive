@@ -40,7 +40,10 @@ if (-not $UsePreparedPayload) {
     Copy-Item (Join-Path $PSScriptRoot '..\Application_Source\Quick_Start.txt') (Join-Path $payload 'Quick_Start.txt') -Force
     Copy-Item (Join-Path $PSScriptRoot '..\Application_Source\Validation.txt') (Join-Path $payload 'Validation.txt') -Force
     Copy-Item (Join-Path $PSScriptRoot '..\Application_Source\City_Catalogue_Notice.md') (Join-Path $payload 'City_Catalogue_Notice.md') -Force
-    Copy-Item (Join-Path $PSScriptRoot '..\Application_Source\Sky_Catalogue_Notice.md') (Join-Path $payload 'Sky_Catalogue_Notice.md') -Force
+    # Keep licence material in the existing managed notice for older launchers.
+    $noticePath = Join-Path $payload 'Catalogue_Notice.md'
+    $skyNoticePath = Join-Path $PSScriptRoot '..\Application_Source\Sky_Catalogue_Notice.md'
+    [IO.File]::WriteAllText($noticePath, ([IO.File]::ReadAllText($noticePath) + "`r`n`r`n" + [IO.File]::ReadAllText($skyNoticePath)), (New-Object Text.UTF8Encoding($false)))
     Copy-Item $AppExecutable (Join-Path $payload 'AstroArchive.exe') -Force
 }
 $generatedVersion = @"
@@ -91,7 +94,7 @@ if ($PreparePayloadOnly) { Write-Output $payload; return }
 # Hash and embed them only after signing.
 Add-Type -AssemblyName System.IO.Compression
 $names = @('AstroArchive.exe', 'Start.exe', 'Quick_Start.txt', 'Validation.txt',
-    'Catalogue_Notice.md', 'City_Catalogue_Notice.md', 'Sky_Catalogue_Notice.md', 'OpenNGC_README.md', 'Release_Notes.txt')
+    'Catalogue_Notice.md', 'City_Catalogue_Notice.md', 'OpenNGC_README.md', 'Release_Notes.txt')
 $hashes = [ordered]@{}
 $zipPath = Join-Path $build 'payload.zip'
 if (Test-Path $zipPath) { Remove-Item $zipPath }

@@ -158,7 +158,8 @@ with NCP/SCP pole labels instead of inferring compass directions. Unknown moving
 targets need recorded pointing or a plate solution. Altitudes are geometric and
 do not include atmospheric refraction. The view is illustrative sky context;
 constellation figures are not official boundaries. All sky data is available
-offline. See Sky_Catalogue_Notice.md for source and licence details.
+offline. See the constellation section of Catalogue_Notice.md for source and
+licence details.
 
 Click a column header to sort, click again to reverse, or Shift-click to add
 another column. Sorting survives filtering and import/progress refreshes.
