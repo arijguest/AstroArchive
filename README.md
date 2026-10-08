@@ -59,7 +59,7 @@ Download the installer, run it and open AstroArchive from its shortcut. Installa
 Each release includes SHA-256 checksums. In PowerShell, substitute your downloaded installer’s filename:
 
 ```powershell
-Get-FileHash .\AstroArchive1.10.3.2.exe -Algorithm SHA256
+Get-FileHash .\AstroArchive1.10.4.1.exe -Algorithm SHA256
 ```
 
 Compare `Hash` with the corresponding `.sha256` file. A checksum checks file integrity; publisher identity depends on code signing.
@@ -121,7 +121,7 @@ Import, preview and scientific export have different capabilities:
 - **Derived FITS:** Conversion is explicit, records source/output checksums and leaves originals untouched. Scientific eligibility is shown separately from preview support.
 - **Calibration:** Matching explains accepted, review-needed and rejected candidates. Dark flats match raw-flat exposures in a separate preparation stage.
 - **Optional codecs:** CFITSIO and Zstandard are not bundled. Local codecs in `%LOCALAPPDATA%\AstroArchive\codecs` survive updates.
-- **External processors:** Single-stack AstroWizard/Siril handoffs use verified working copies. AstroWizard requires the specifically verified Windows build.
+- **External processors:** Single-stack Siril handoffs use verified working copies. Export selected stacks for manual loading in AstroWizard.
 - **Analysis:** ASTAP needs a separate installation and star database; Astrometry.net needs an account. The observing town/city picker works offline.
 - **Cloud folders:** Use filesystem-mounted or streamed folders, including Google Drive for desktop. Browser-only folders cannot be used.
 
