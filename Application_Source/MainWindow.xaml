@@ -848,10 +848,15 @@
    <TabItem Header="Edited" x:Name="EditedTab">
     <Grid Margin="0,0,0,8">
      <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="*"/></Grid.RowDefinitions>
+     <StackPanel>
      <DockPanel Margin="0,0,0,10">
       <StackPanel DockPanel.Dock="Right" Orientation="Horizontal"><Button x:Name="EditedAddButton" Content="Add images…"/><Button x:Name="EditedImportFolderButton" Content="Import folder…" Background="{DynamicResource Accent}" Foreground="White" BorderBrush="{DynamicResource Accent}" Margin="8,0,0,0"/><Button x:Name="EditedRefreshButton" Content="Refresh" Margin="8,0,0,0"/></StackPanel>
       <TextBlock Text="PROJECT" FontSize="{DynamicResource UiFontCaption}" FontWeight="SemiBold" Foreground="{DynamicResource Muted}" VerticalAlignment="Center" Margin="0,0,10,0" DockPanel.Dock="Left"/><ComboBox x:Name="EditedProjectsList" DisplayMemberPath="Name" Width="250" HorizontalAlignment="Left"/>
      </DockPanel>
+      <Border x:Name="EditedImportNotice" Visibility="Collapsed" Background="{DynamicResource SurfaceAlt}" CornerRadius="6" Padding="10,6" Margin="0,0,0,10">
+       <DockPanel><Button x:Name="DismissEditedImportNotice" DockPanel.Dock="Right" Content="×" Padding="6,0" MinHeight="0" Margin="10,0,0,0" AutomationProperties.Name="Dismiss last Edited import summary"/><TextBlock x:Name="EditedImportNoticeText" Foreground="{DynamicResource Muted}" TextWrapping="Wrap" VerticalAlignment="Center" AutomationProperties.LiveSetting="Polite"/></DockPanel>
+      </Border>
+     </StackPanel>
      <DockPanel Grid.Row="1" Margin="0,0,0,10"><Button DockPanel.Dock="Right" x:Name="EditedClearButton" Content="Clear" Margin="8,0,0,0"/><Button DockPanel.Dock="Right" x:Name="EditedFiltersButton" Content="Filters" Margin="8,0,0,0"/><TextBlock DockPanel.Dock="Right" x:Name="EditedSummary" Foreground="{DynamicResource Muted}" VerticalAlignment="Center" Margin="12,0,0,0"/><ComboBox x:Name="EditedClassFilter" Visibility="Collapsed"/><Grid><TextBox x:Name="EditedSearchBox" ToolTip="Search edited images, objects, filters or projects" Padding="9,6,34,6"/><TextBlock x:Name="EditedSearchHint" Text="Search edited images…" Foreground="{DynamicResource Muted}" Margin="10,0" VerticalAlignment="Center" IsHitTestVisible="False"/><Button x:Name="EditedSearchHelpButton" Content="?" Width="24" Height="24" MinHeight="0" Padding="0" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,5,0" AutomationProperties.Name="Search syntax and examples"/></Grid></DockPanel>
      <Grid Grid.Row="2" x:Name="EditedBody">
       <Grid.ColumnDefinitions><ColumnDefinition Width="166"/><ColumnDefinition Width="*" MinWidth="260"/><ColumnDefinition Width="10"/><ColumnDefinition Width="290" MinWidth="0"/></Grid.ColumnDefinitions>
