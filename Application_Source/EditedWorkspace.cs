@@ -15,6 +15,7 @@ namespace AstroArchive {
  public sealed class EditedImage {
   [System.Web.Script.Serialization.ScriptIgnore]public EditedProject Project{get;set;}
   public string RelatedImage{get;set;} public string Filename{get;set;} public string RelativePath{get;set;} public string Kind{get;set;} public long Bytes{get;set;} public DateTime Modified{get;set;} public string Source{get;set;} public EditedMetadata Metadata{get;set;} public string MetadataProblem{get;set;}
+  public string FileType{get{return MediaFiles.FileType(Filename??RelativePath);}}
  }
  public sealed partial class Repository {
   public string EditedFolder{get{return Path.Combine(Meta,"edited");}}
@@ -53,10 +54,11 @@ namespace AstroArchive {
   }
   public EditedProject AddEditedImages(IEnumerable<string> files,EditedProject project,string name,CancellationToken ct,Action<ProgressInfo> progress){
    ct.ThrowIfCancellationRequested();var inputs=files.Distinct(StringComparer.OrdinalIgnoreCase).ToList();if(inputs.Count==0)throw new ArgumentException("Choose images to add.");
+   var matcher=new EditedTargetMatcher(All().Select(f=>f.Target));
    bool created=project==null;if(created){project=NewEditedProject(name,"","");Directory.CreateDirectory(EditedProjectFolder(project));}
    else{string id=project.Id,path=Path.Combine(EditedProjectFolder(project),"edited-project.json");CheckManagedPath(path,Root);project=Util.Deserialize<EditedProject>(File.ReadAllText(path));if(project==null||project.Id!=id||project.Schema!=1||project.Sources==null)throw new InvalidDataException("Invalid edited project record.");foreach(var record in project.Sources)EditedPath(project,record.RelativePath);}
    try{foreach(string file in inputs){ct.ThrowIfCancellationRequested();if(!Util.IsImageAsset(file))throw new NotSupportedException("Choose a supported image: "+Path.GetFileName(file));
-     var metadata=EditedMetadata.Read(Path.GetFileName(file),Assets.Inspect(file).Header);string hash=Util.Hash(file,ct);AddEditedFile(project,file,Path.GetFileName(file),hash,null,ct,progress,null,metadata);
+     var metadata=EditedMetadata.Read(Path.GetFileName(file),Assets.Inspect(file).Header,null,matcher);string hash=Util.Hash(file,ct);AddEditedFile(project,file,Path.GetFileName(file),hash,null,ct,progress,null,metadata);
     }return project;
    }catch{if(created)RemoveNewEditedProject(project);throw;}
   }
@@ -72,17 +74,17 @@ namespace AstroArchive {
   }
   void RemoveNewEditedProject(EditedProject project){string path=EditedProjectFolder(project);var errors=new List<string>();if(Directory.Exists(path))RemoveOwnedTree(path,Root,errors,CancellationToken.None);}
   public List<EditedImage> EditedImages(EditedProject project){
-   var images=new List<EditedImage>();string folder=EditedProjectFolder(project);if(!Directory.Exists(folder))return images;var directories=new Stack<string>();directories.Push(folder);
+   var images=new List<EditedImage>();string folder=EditedProjectFolder(project);if(!Directory.Exists(folder))return images;var matcher=new EditedTargetMatcher(All().Select(f=>f.Target).Concat(project.Sources.Where(s=>s.Metadata!=null).Select(s=>s.Metadata.Object)));var directories=new Stack<string>();directories.Push(folder);
    while(directories.Count>0){string directory=directories.Pop();CheckManagedPath(Path.Combine(directory,"edited-project.json"),Root);
     foreach(string child in Directory.EnumerateDirectories(directory))if(FileStamp.CanTraverse(new DirectoryInfo(child)))directories.Push(child);
     foreach(string path in Directory.EnumerateFiles(directory).Where(Util.IsImageAsset)){CheckManagedPath(path,Root);string relative=path.Substring(folder.Length+1);var source=project.Sources.FirstOrDefault(s=>s.RelativePath.Equals(relative,StringComparison.OrdinalIgnoreCase));var file=new FileInfo(path);
      var original=source==null?(project.Sources.Count==1?project.Sources[0].Metadata:null):source.Metadata;EditedMetadata metadata;string problem=null;
-     try{metadata=EditedMetadata.Read(relative,Assets.Inspect(path).Header,original);}catch(Exception e){if(!(e is IOException||e is InvalidDataException||e is UnauthorizedAccessException||e is NotSupportedException||e is ArgumentException||e is OverflowException))throw;metadata=EditedMetadata.Read(relative,null,original);problem=e.Message;}
+     try{metadata=EditedMetadata.Read(relative,Assets.Inspect(path).Header,original,matcher);}catch(Exception e){if(!(e is IOException||e is InvalidDataException||e is UnauthorizedAccessException||e is NotSupportedException||e is ArgumentException||e is OverflowException))throw;metadata=EditedMetadata.Read(relative,null,original,matcher);problem=e.Message;}
      images.Add(new EditedImage{Filename=file.Name,RelativePath=relative,Bytes=file.Length,Modified=file.LastWriteTime,Kind=source==null?"Editor output":string.IsNullOrEmpty(source.ArchiveHash)?"Added image":"Working copy",Source=source==null?"":source.OriginalName,Metadata=metadata,MetadataProblem=problem});
     }
    }
    foreach(var gif in images.Where(i=>MediaFiles.Gif(i.RelativePath))){string match=MediaFiles.MatchingImage(gif.RelativePath,images.Where(i=>i.MetadataProblem==null).Select(i=>i.RelativePath));if(match==null)continue;var still=images.Single(i=>i.RelativePath==match);gif.RelatedImage=match;
-    try{gif.Metadata=EditedMetadata.Read(gif.RelativePath,Assets.Inspect(EditedPath(project,gif.RelativePath)).Header,still.Metadata);gif.Metadata.Evidence+="\nRelated edited image: "+still.Filename;}catch(IOException){}
+    try{gif.Metadata=EditedMetadata.Read(gif.RelativePath,Assets.Inspect(EditedPath(project,gif.RelativePath)).Header,still.Metadata,matcher);gif.Metadata.Evidence+="\nRelated edited image: "+still.Filename;}catch(IOException){}
    }
    return images.OrderByDescending(i=>i.Modified).ThenBy(i=>i.Filename).ToList();
   }

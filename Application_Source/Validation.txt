@@ -1,7 +1,7 @@
-AstroArchive 1.12.0 validation
-Package 1.12.0.1; Windows 10/11 x64; .NET Framework 4.8.
+AstroArchive 1.12.1 validation
+Package 1.12.1.1; Windows 10/11 x64; .NET Framework 4.8.
 
-The Windows release workflow runs application regressions, a separate five-case
+The Windows release workflow runs application regressions, a separate six-case
 Windows WIC integration suite, installer/updater regressions, x64 compilation,
 WPF application/installer rendering and disposable install/repair/uninstall checks.
 A successful workflow is required before publishing installers and the SHA-256
@@ -11,9 +11,20 @@ Capture sky regressions check sidereal time, longitude signs, northern/southern
 and polar horizons, acquisition clocks and offsets, missing/ambiguous clocks,
 capture-site precedence, pointing/catalogue provenance, non-UTC header standards,
 full constellation coverage and vector normalization. Native WPF checks verify
-the compact sidebar with the globe in both themes and at 100/150% text sizes,
-expanded details bounds, all four image quadrant pixels, cached redraws and
-unknown-clock fallback. The combined release retains session summaries, Edited
+both preview surfaces in light/dark and 100/150% text: maximum image fit, remaining
+space and height-limited hiding, aspect changes, all four image quadrant pixels,
+text-free cached drawings, accessible header icons and details popup/Escape.
+Session checks cover group selection, individual files, Ctrl/Shift, deduplication,
+right-click membership, expansion/refresh retention, filtered-out groups, matching
+row typography, roomy chevrons and default Frame Type sorting. Edited regressions
+check fuzzy catalogue/common names, custom archive targets, header/ID precedence,
+ambiguous matches, acquisition inheritance and add/import/refresh integration.
+Native WPF checks cover GIF class filtering and the visible sortable File Type
+column with Total Exposure hidden by default. Layout regression checks cover the
+one-time older Edited layout upgrade, custom headings and later saved user choices.
+Progress tests minimise/restore active operations and Dump windows,
+start/update/finish them while minimised, and retain safe cancellation behavior.
+The combined release retains session summaries, Edited
 browsing, GIF/SER/video playback and the existing Windows installation tests.
 
 Windows navigation checks exercise ordered menus in both themes, source and file

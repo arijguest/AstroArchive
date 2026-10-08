@@ -1,6 +1,7 @@
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -16,7 +17,7 @@ namespace AstroArchive {
   void InitializeWorkspace(){
    ApplyAppearance();C("StretchMode").ItemsSource=PreviewData.StretchModes;C("StretchMode").SelectedItem=settings.PreviewStretch??"Auto per channel";if(C("StretchMode").SelectedIndex<0)C("StretchMode").SelectedItem="Auto per channel";
    settings.PreviewStretch=Convert.ToString(C("StretchMode").SelectedItem);
-   previewViewport=new PreviewViewport((Grid)Window.FindName("PreviewHost"),(Grid)Window.FindName("PreviewStage"),(Image)Window.FindName("PreviewImage"),(FrameworkElement)Window.FindName("PreviewFooter"));InitializeSkyPreview("");
+   previewViewport=new PreviewViewport((Grid)Window.FindName("PreviewHost"),(Grid)Window.FindName("PreviewStage"),(Image)Window.FindName("PreviewImage"),(FrameworkElement)Window.FindName("PreviewSky"));InitializeSkyPreview("");
    B("CoffeeButton").Click+=(s,e)=>{try{Process.Start(new ProcessStartInfo("https://ko-fi.com/arijguest"){UseShellExecute=true});}catch(Exception error){MessageBox.Show(Window,"Could not open your browser. Visit https://ko-fi.com/arijguest\n\n"+error.Message,"Ko-fi link",MessageBoxButton.OK,MessageBoxImage.Information);}};
    B("ThemeButton").Click+=(s,e)=>{settings.ThemeMode=Theme.IsDark(settings.ThemeMode)?"Light":"Dark";ApplyAppearance();SaveSettings();};
    B("PreviewToggle").Click+=(s,e)=>{settings.ShowPreview=!settings.ShowPreview;SetPreviewVisibility();SaveSettings();if(settings.ShowPreview)PreviewSelected();};
@@ -25,11 +26,11 @@ namespace AstroArchive {
    SystemEvents.UserPreferenceChanged+=AppearanceChanged;previewReady=true;SetPreviewVisibility();
   }
   void SetPreviewVisibility(){((FrameworkElement)Window.FindName("PreviewPane")).Visibility=settings.ShowPreview?Visibility.Visible:Visibility.Collapsed;((FrameworkElement)Window.FindName("PreviewDivider")).Visibility=settings.ShowPreview?Visibility.Visible:Visibility.Collapsed;((ColumnDefinition)Window.FindName("PreviewColumn")).Width=new GridLength(settings.ShowPreview?290:0);((ColumnDefinition)Window.FindName("PreviewDividerColumn")).Width=new GridLength(settings.ShowPreview?10:0);B("PreviewToggle").Content=settings.ShowPreview?"Hide preview":"Preview";if(!settings.ShowPreview)CancelPreview();}
-  void CancelPreview(){if(previewMotion!=null){previewMotion.Dispose();previewMotion=null;}previewGeneration++;if(previewCancel!=null){previewCancel.Cancel();previewCancel.Dispose();previewCancel=null;}previewData=null;previewFrame=null;previewPath=null;UpdateCaptureSky("",null);C("StretchMode").IsEnabled=true;if(previewViewport!=null)previewViewport.SetImage(null,true);}
+  void CancelPreview(){ClosePreviewDetails("");if(previewMotion!=null){previewMotion.Dispose();previewMotion=null;}previewGeneration++;if(previewCancel!=null){previewCancel.Cancel();previewCancel.Dispose();previewCancel=null;}previewData=null;previewFrame=null;previewPath=null;UpdateCaptureSky("",null);C("StretchMode").IsEnabled=true;if(previewViewport!=null)previewViewport.SetImage(null,true);}
   void AppearanceChanged(object sender,UserPreferenceChangedEventArgs args){if(Window.Dispatcher.HasShutdownStarted)return;Window.Dispatcher.BeginInvoke(new Action(()=>{ApplyAppearance();}));}
   void DisposePreview(){SystemEvents.UserPreferenceChanged-=AppearanceChanged;CancelPreview();CancelEditedPreview();}
-  void UpdateSelection(){if(!previewReady)return;int count=G("FramesGrid").SelectedItems.Count;L("SelectionLabel").Text=count==0?"Ctrl / Shift to select · Right-click for file actions":count+" selected · Right-click for file actions";if(settings.ShowPreview)PreviewSelected();}
-  void PreviewSelected(){if(!previewReady)return;Frame f=G("FramesGrid").SelectedItem as Frame;if(f==null){CancelPreview();L("PreviewName").Text="Select a capture";L("PreviewInfo").Text="";PreviewMessage("Select a capture or open an image.");return;}if(repo==null)return;UpdateCaptureSky("",f);
+  void UpdateSelection(){if(!previewReady)return;int count=SelectedFiles().Count;int groups=subframeSessions.Count(g=>g.IsSelected);L("SelectionLabel").Text=count==0?"Ctrl / Shift to select · Right-click for file actions":(groups>0?groups+" group"+(groups==1?"":"s")+" · ":"")+count+" files selected · Right-click for file actions";if(settings.ShowPreview)PreviewSelected();}
+  void PreviewSelected(){if(!previewReady)return;Frame f=G("FramesGrid").SelectedItem as Frame??(ActiveSelectedSession==null?null:ActiveSelectedSession.Frames.FirstOrDefault());if(f==null){CancelPreview();L("PreviewName").Text="Select a capture";L("PreviewInfo").Text="";PreviewMessage("Select a capture or open an image.");return;}if(repo==null)return;UpdateCaptureSky("",f);
    if(!settings.ShowPreview){settings.ShowPreview=true;SetPreviewVisibility();SaveSettings();}try{string path=repo.FilePath(f);if(path!=previewPath||previewFrame==null||previewFrame.Target!=f.Target||previewFrame.ObservationMode!=f.ObservationMode||previewFrame.Filter!=f.Filter)LoadPreview(path,true,f);}catch(Exception error){PreviewMessage(error.Message);}
   }
   void OpenPreviewFile(){var picker=new OpenFileDialog{Title="Preview an astrophotography image",Filter="Astrophotography images|*.fit;*.fits;*.fts;*.fit.gz;*.fits.gz;*.fts.gz;*.xisf;*.fz;*.ser;*.tif;*.tiff;*.png;*.jpg;*.jpeg;*.bmp;*.gif;*.avi;*.mp4;*.mov;*.m4v;*.wmv;*.mkv;*.wdp;*.hdp;*.jxr;*.dng;*.cr2;*.cr3;*.nef;*.arw;*.raf;*.orf;*.rw2|All files|*.*"};if(picker.ShowDialog(Window)!=true)return;settings.ShowPreview=true;SetPreviewVisibility();SaveSettings();LoadPreview(picker.FileName,true);}

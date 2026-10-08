@@ -8,6 +8,7 @@ namespace AstroArchive {
   public static bool Gif(string path){return Assets.Extension(path)==".gif";}
   public static bool Video(string path){return new[]{".avi",".mp4",".mov",".m4v",".wmv",".mkv",".ser"}.Contains(Assets.Extension(path));}
   public static bool Motion(string path){return Gif(path)||Video(path);}
+  public static string FileType(string path){string extension=Assets.Extension(path??"");return new[]{".fit",".fits",".fts"}.Contains(extension)?"FITS":new[]{".tif",".tiff"}.Contains(extension)?"TIFF":new[]{".jpg",".jpeg"}.Contains(extension)?"JPEG":extension.TrimStart('.').ToUpperInvariant();}
   static string Stem(string path){string leaf=path.EndsWith(".gz",StringComparison.OrdinalIgnoreCase)?path.Substring(0,path.Length-3):path;return Path.GetFileNameWithoutExtension(leaf).ToLowerInvariant();}
   public static string MatchingImage(string animation,IEnumerable<string> images){
    string stem=Stem(animation),shortStem=Regex.Replace(stem,@"(?:[_ -]+(?:animation|animated|processing|process|progress|timelapse|before[_ -]?after|edit[_ -]?history))+$","");

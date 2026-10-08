@@ -6,12 +6,37 @@ using System.Threading;
 namespace AstroArchive {
  public partial class Tests {
   static void EditedRegressions(){
+   Test("Edited fuzzy names resolve catalogue aliases and spelling errors",()=>{
+    foreach(var sample in new[]{new[]{"WhirlpolGalaxy_Ha_20x60s_starless.fit","M51"},new[]{"Andromdea_Galaxy_final.tif","M31"},new[]{"Heart_Neblua_SHO.png","IC1805"},new[]{"ElephntsTrunkNebula_stars.fit","IC1396"},new[]{"Sevn_Sisters_edit.tif","M45"}}){var metadata=EditedMetadata.Read(sample[0],null);Check(metadata.Object==sample[1]&&metadata.Evidence.Contains("fuzzy name matching"),"Fuzzy target missed: "+sample[0]+" -> "+metadata.Object);}
+    Check(EditedMetadata.Read(Path.Combine("Whirlpol_Galaxy","final.fit"),null).Object=="M51","Target folder spelling did not identify unnamed export");
+    var header=new FitsHeader();header.Values["OBJECT"]="Whirlpol Galaxy";Check(EditedMetadata.Read("final.fit",header).Object=="M51","Misspelled metadata name not resolved");
+   });
+   Test("Edited fuzzy matching preserves exact IDs metadata and unknown targets",()=>{
+    var header=new FitsHeader();header.Values["OBJECT"]="M31";Check(EditedMetadata.Read("Whirlpol_Galaxy.fit",header).Object=="M31","Fuzzy filename replaced explicit metadata");
+    Check(EditedMetadata.Read("M51_Heart_Neblua.fit",null).Object=="M51","Fuzzy name replaced exact catalogue ID");
+    Check(EditedMetadata.Read("M330_final.fit",null).Object==null&&EditedMetadata.Read("NGC999999_Whirlpol.fit",null).Object==null,"Fuzzy matching changed catalogue digits");
+    Check(EditedMetadata.Read("holiday_starless.tif",null).Object==null&&EditedMetadata.Read("nebula_final.fit",null).Object==null,"Generic filename invented target");
+    Check(EditedMetadata.Read("M31_meteor_Whirlpol.fit",null).Object==null,"Fuzzy name restored Meteor identity");
+   });
+   Test("Edited fuzzy ties and conflicting names remain unresolved without inheritance",()=>{
+    var matcher=new EditedTargetMatcher(new[]{"SilverCloud","SilverClond"});var original=new EditedMetadata{Object="M31",TotalExposure=600};
+    var result=EditedMetadata.Read("SilverClod_starless.fit",null,original,matcher);Check(result.Object==null&&!result.TotalExposure.HasValue&&result.Evidence.Contains("multiple objects"),"Close fuzzy matches guessed a target or inherited unrelated acquisition data");
+    Check(EditedMetadata.Read("Heart_Neblua_Soul_Neblua.fit",null).Object==null,"Multiple misspelled target names guessed an identity");
+    Check(EditedMetadata.Read("M31_M51.fit",null,original).Object==null,"Conflicting exact targets inherited a source object");
+   });
+   Test("Edited database target matching survives add folder import and existing output refresh",()=>{
+    string source=Path.Combine(root,"edited-fuzzy-source"),capture=Path.Combine(source,"capture.fit"),edited=Path.Combine(source,"Barnads_Loop_Ha_starless.fit");Write(capture,64,48,(x,y)=>1000,LightHeaders(new DateTime(2026,10,8,21,0,0),"Barnards Loop"));Write(edited,64,48,(x,y)=>2200,new Dictionary<string,string>());
+    using(var repo=new Repository(Path.Combine(root,"edited-fuzzy-repo"))){repo.Import(repo.Scan(source,"Scope-1","Auto",ct,NoProgress).Frames.Where(f=>f.SourcePath==capture).ToList(),ct,NoProgress);var project=repo.AddEditedImages(new[]{edited},null,"Loop edits",ct,NoProgress);Check(project.Sources.Single().Metadata.Object=="Barnards Loop","Adding ignored database target names");
+     var row=repo.EditedImages(project).Single();Check(row.Metadata.Object=="Barnards Loop"&&row.Metadata.Evidence.Contains("fuzzy name matching"),"Existing Edited output did not resolve database target");
+     var plan=repo.ScanEditedFolder(source,true,ct,NoProgress);Check(plan.Images.Single(i=>i.Path==edited).Metadata.Object=="Barnards Loop","Folder review ignored database names");var imported=repo.ImportEditedFolder(plan,"Loop folder",ct,NoProgress);Check(repo.EditedImages(imported).Single().Metadata.Object=="Barnards Loop"&&repo.All().Count==1,"Folder import lost target or altered capture index");}
+   });
    Test("GIF import uniquely matches nearby edited images and preserves acquisition details",()=>{
     string source=Path.Combine(root,"gif-source"),still=Path.Combine(source,"finish.fit"),gif=Path.Combine(source,"finish_processing.gif");
     Write(still,64,48,(x,y)=>2000,new Dictionary<string,string>{{"OBJECT","'M31'"},{"NCOMBINE","'40'"},{"SUBEXP","'60'"},{"FILTER","'Ha'"}});
     File.WriteAllBytes(gif,Convert.FromBase64String("R0lGODlhAgACAIEAAP8AAAAAAAAAAAAAACH/C05FVFNDQVBFMi4wAwEAAAAh+QQICgAAACwAAAAAAgACAAAIBgABCAQQEAAh+QQIFAAAACwAAAAAAgACAIEAAP8AAAAAAAAAAAAIBgABCAQQEAA7"));
     Check(Assets.Supported(gif)&&Assets.Inspect(gif).Format=="GIF"&&Assets.Inspect(gif).Header.Width==2,"GIF import unsupported or canvas incorrect");
-    using(var repo=new Repository(Path.Combine(root,"gif-repo"))){var plan=repo.ScanEditedFolder(source,true,ct,NoProgress);var review=plan.Images.Single(i=>MediaFiles.Gif(i.Path));Check(review.Include&&review.Metadata.Object=="M31"&&review.Metadata.TotalExposure==2400&&review.Metadata.Subs==40,"GIF review lost matching acquisition data");var project=repo.ImportEditedFolder(plan,"Processing",ct,NoProgress);var image=repo.EditedImages(project).Single(i=>MediaFiles.Gif(i.RelativePath));Check(image.RelatedImage!=null&&image.Metadata.TotalExposure==2400&&image.Metadata.Filters=="Ha","Imported GIF lost its association");}
+    using(var repo=new Repository(Path.Combine(root,"gif-repo"))){var plan=repo.ScanEditedFolder(source,true,ct,NoProgress);var review=plan.Images.Single(i=>MediaFiles.Gif(i.Path));Check(review.Include&&review.Metadata.Object=="M31"&&review.Metadata.TotalExposure==2400&&review.Metadata.Subs==40&&review.ImageClass=="GIF"&&review.FileType=="GIF","GIF review lost class/type or matching acquisition data");var project=repo.ImportEditedFolder(plan,"Processing",ct,NoProgress);var image=repo.EditedImages(project).Single(i=>MediaFiles.Gif(i.RelativePath));Check(image.RelatedImage!=null&&image.Metadata.TotalExposure==2400&&image.Metadata.Filters=="Ha"&&image.Metadata.ImageClass=="GIF"&&image.FileType=="GIF","Imported GIF lost its class/type or association");}
+    Check(new EditedImage{Filename="capture.fit.gz"}.FileType=="FITS"&&new EditedImage{Filename="finished.tif"}.FileType=="TIFF"&&new EditedImage{Filename="finished.jpg"}.FileType=="JPEG","Edited file type labels inconsistent");
     Check(MediaFiles.MatchingImage("finish_processing.gif",new[]{"finish.fit","finish.png"})==null,"Ambiguous GIF guessed a source");Check(MediaFiles.MatchingImage("finish.gif",new[]{"nested/finish.fit"})==null,"GIF matched another folder");Check(MediaFiles.MatchingImage("FINISH.gif",new[]{"finish.fit"})=="finish.fit","Case-insensitive exact match missing");
     var mismatch=new FitsHeader();mismatch.Values["OBJECT"]="M51";Check(!EditedMetadata.Read("finish.gif",mismatch,EditedMetadata.Read("M31_40x60s.fit",null)).TotalExposure.HasValue,"Conflicting GIF metadata inherited exposure");
    });

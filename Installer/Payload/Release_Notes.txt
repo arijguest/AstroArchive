@@ -1,3 +1,37 @@
+AstroArchive 1.12.1 — preview, progress and Edited refinements
+Package 1.12.1.1
+
+- Remove all visible sky captions, constellation names and compass/pole text.
+  Keep capture time, location, direction and pointing evidence in the map tooltip.
+- Place compact Stretch, a capture-details information icon and an Open image
+  icon together in the preview header. Show Auto per channel as Auto RGB; keep
+  saved stretch settings and image rendering unchanged. Edited uses an enlarge
+  icon. Dimensions and metadata appear in the themed details popup, closed by Esc.
+- Fit the image as large as possible first, with navigation directly below it.
+  Let the sky fill only the remaining space, scaling with window size and image
+  aspect; hide it when no useful space remains. Keep cached offline rendering.
+- Select collapsed session groups as independent entities, or select files inside
+  expanded groups. Ctrl toggles groups, Shift selects a range. Resolve group
+  actions to visible members and deduplicate overlapping file/group selections.
+  Preserve group selection when expanding or refreshing; remove filtered-out
+  groups from action scope. Preview shows the first group capture.
+- Use a roomy, minimalist V-shaped group expand/collapse button, separate from
+  selection. Match group labels to file-row text and selection colours.
+- Sort Repository and Import by Frame Type by default; retain header controls
+  for choosing another sort and reversing it.
+- Hide operation panels and Dump progress when the main window is minimised.
+  Restore live progress with the application, keeping imports running in the
+  background. Finished operations stay closed when the application is restored.
+- Match edited target names against catalogue aliases and archive targets with
+  bounded fuzzy spelling matching, including target folders for unnamed exports.
+  Keep exact IDs and explicit metadata authoritative; leave close ties unresolved
+  and show match evidence in image details. Re-evaluate existing outputs on refresh.
+- Add GIF to Edited image classes and its filter menu. Show a sortable File Type
+  column in the Edited viewer and folder-import review; include type in search.
+- Hide Total Exposure from the default Edited headings, retaining acquisition
+  values in image details and the optional column list. Update older saved Edited
+  layouts once to adopt File Type and hide Total Exposure, preserving other columns.
+
 AstroArchive 1.12.0 — capture sky, compact previews and session browsing
 Package 1.12.0.1
 

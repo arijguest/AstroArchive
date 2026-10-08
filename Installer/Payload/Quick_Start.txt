@@ -1,4 +1,4 @@
-AstroArchive 1.12.0
+AstroArchive 1.12.1
 Windows 10/11 x64 desktop app. Built-in .NET Framework 4.8 and Windows SQLite.
 Runs offline. No Python or Google login required.
 
@@ -92,13 +92,14 @@ Select a capture to preview it, or double-click/right-click > Preview image.
 Repository > View can hide the preview pane to give the table more room; drag the divider
 to resize it. Open image previews a file outside the archive without importing it.
 The compact table shows filename, target, type, acquisition date, exposure and filter.
-Expand Capture details for device, camera, gain, temperature and classification.
+Use the information icon beside Stretch and Open image in the preview header for
+dimensions, device, camera, gain, temperature and classification. Escape closes it.
 
 Stretch changes the display only; source pixels and FITS headers stay unchanged.
 - Linear: no nonlinear stretch; the initial choice for normal raster images.
 - Auto: reveals faint data with linked RGB unless colour compensation is needed.
 - Strong: a brighter background, with the same automatic colour compensation.
-- Auto per channel: independently balance each channel's background.
+- Auto RGB (Auto per channel): independently balance each channel's background.
 Auto/Strong compensate for recognised IRCUT/LP filters or a severe RGB cast.
 This balances the preview background; it is not a scientific colour calibration.
 Solar, lunar and planetary captures use Linear automatically, preserving their
@@ -143,25 +144,25 @@ buttons are disabled while the whole image is fitted. Escape closes
 the popup preview. The gesture viewer uses the same
 colour decoders and display stretch as the preview pane. Source pixels stay intact.
 
-The compact Stretch and expandable details follow the image directly. Beneath
-them, Capture sky shows a minimalist constellation globe with the selected field
-marked in the accent colour. Its horizon has clear N/E/S/W compass labels. A field
-below the recorded horizon is explicitly labelled; its figures are shown faintly.
-The view includes northern and southern constellations and matches your theme.
+The preview header contains compact Stretch options, an information icon for capture
+details and a folder icon for opening an external image (an enlarge icon in Edited).
+The image fits as large as possible above its navigation controls. The text-free
+sky globe fills any remaining space, resizes with the window and image aspect, and
+hides when the image uses all available height. It does not reserve image space.
+Constellation names, compass/pole labels and sky captions are omitted; hover over
+the map for capture time, pointing, altitude, direction and below-horizon context.
 
-Frame pointing takes precedence over a catalogue target centre; catalogue positions
-are marked approximate. The globe uses the recorded UTC capture time, never the
-current clock, shifted Night, file modification time or a session-folder timestamp.
-Capture location takes precedence over the observing town/city saved in Settings.
-If a known time or observing location is missing, it shows celestial coordinates
-with NCP/SCP pole labels instead of inferring compass directions. Unknown moving
-targets need recorded pointing or a plate solution. Altitudes are geometric and
-do not include atmospheric refraction. The view is illustrative sky context;
-constellation figures are not official boundaries. All sky data is available
-offline. See the constellation section of Catalogue_Notice.md for source and
-licence details.
+The globe includes both celestial hemispheres and matches your theme. Frame
+pointing takes precedence over an approximate catalogue target centre. Recorded
+UTC capture time and capture location (saved observing location as fallback) set
+the horizon. Current time, shifted Night, file modification time and session-folder
+timestamps are never substituted. Missing time/site uses celestial coordinates;
+unknown moving targets need recorded pointing or a plate solution. The tooltip
+explains these limits. Altitudes exclude atmospheric refraction. Constellation
+figures are illustrative, not official boundaries. The sky is offline and cached;
+see the constellation section of Catalogue_Notice.md for source and licence details.
 
-Click a column header to sort, click again to reverse, or Shift-click to add
+Repository and Import initially sort by Frame Type. Click a column header to sort, click again to reverse, or Shift-click to add
 another column. Sorting survives filtering and import/progress refreshes.
 Exposure, gain, temperature, dimensions and performance fields sort numerically.
 Missing metadata appears as a dash; unknown targets retain Unknown. Bias and
@@ -641,7 +642,10 @@ scan. Originals remain kept by default. Export always uses archived repository
 files, including when opened from the Import page.
 
 The workspace fills the space previously used by the bottom status bar. Progress
-and Cancel appear in a temporary panel only while processing. Repository > Diagnostics opens the performance table and last
+and Cancel appear in a temporary panel only while processing. Progress panels,
+including Dump progress, hide with the minimised application. Imports continue
+in the background; restoring the application shows progress only if it is still
+running. Repository > Diagnostics opens the performance table and last
 import report when needed. Table headings show ascending (▲) or descending (▼)
 sorting. Numbers show priority when several headings sort together. Shift-click
 adds a heading; click again to reverse. Saved heading layouts remain independent.
@@ -741,8 +745,14 @@ and sub durations or explicitly labelled total-exposure metadata.
 SESSION SUMMARIES AND EDITED MEDIA
 Repository starts with compact session summaries for repeated Light subframes.
 The header names the target and recorded date, then shows sub count, total known
-exposure, filters and device. Use the small expand arrow to inspect individual
-files. Stacks remain visible. Repository > View > Show all files gives a flat list.
+exposure, filters and device. Click a group label to select that group as one
+entity; its actions apply to the visible files inside it. Ctrl toggles groups and
+Shift selects a range. The roomy V-shaped button only expands or collapses it.
+Select an individual file inside an expanded group normally; Ctrl can add it to
+other selections. Overlapping group/file selections do not repeat the file. Group
+labels use the same text style as file rows. Preview uses the first group capture.
+Filtering limits group membership, and groups no longer in view cannot be acted on.
+Stacks remain visible. Repository > View > Show all files gives a flat list.
 Unknown session dates are not guessed; summaries follow the current filters.
 
 Edited has the same targets, file table and Preview arrangement as Repository.
@@ -751,6 +761,19 @@ folder offers Browse and Scan, then a review before copying. Parent folders may
 include the repository: its subtree, .astroarchive folders and archived originals
 (including renamed byte-identical copies) are excluded. Originals remain intact.
 Moon and Lunar appear together as Moon.
+
+Edited matches names against catalogue aliases and targets in the archive.
+Small spelling errors such as Whirlpol Galaxy resolve to M51 / Whirlpool Galaxy.
+Exact IDs and recognised image metadata take priority. Close competing matches
+stay unresolved; image details show the matched target and name similarity.
+Unnamed exports can use their target folder name. Refresh rechecks existing
+edited images. Catalogue numbers are never corrected by fuzzy spelling matching.
+File Type shows formats such as FITS, TIFF, JPEG, PNG and GIF; its heading sorts
+the files and search includes the type. GIF is also an image class in Filters.
+Total Exposure is kept in image details and hidden from the default headings;
+enable it from the column list when needed.
+Older saved Edited layouts adopt these two heading changes once, preserving the
+rest of their arrangement. Later column choices remain yours.
 
 GIFs can show processing history. A GIF matches a still image in the same folder
 when their stems are identical, or the GIF adds _processing, _progress, _animation,

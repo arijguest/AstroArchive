@@ -35,7 +35,10 @@ namespace AstroArchive {
     button.Click+=(s,e)=>{var menu=BuildColumnsMenu(table,null);menu.PlacementTarget=button;menu.Placement=PlacementMode.Bottom;menu.IsOpen=true;};
    }
   }
-  ColumnLayout SavedColumnLayout(string name){ColumnLayout saved;return settings.TableLayouts!=null&&settings.TableLayouts.TryGetValue(name,out saved)?saved:null;}
+  ColumnLayout SavedColumnLayout(string name){
+   ColumnLayout saved;if(settings.TableLayouts==null||!settings.TableLayouts.TryGetValue(name,out saved))return null;
+   if(name=="EditedGrid"){saved=ColumnLayout.UpgradeEdited(saved);settings.TableLayouts[name]=saved;}return saved;
+  }
   void ApplyColumnLayout(string name,ColumnLayout saved){
    var grid=G(name);var layout=ColumnLayout.Resolve(saved,originalColumnOrder[name],defaultColumns[name]);
    for(int i=0;i<layout.Order.Count;i++)grid.Columns.First(c=>ColumnId(c)==layout.Order[i]).DisplayIndex=i;

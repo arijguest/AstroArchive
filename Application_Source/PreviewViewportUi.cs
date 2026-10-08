@@ -12,14 +12,14 @@ namespace AstroArchive {
  // Shared portrait display and input handling for the sidebar and popup.
  public class PreviewViewport {
   public const double ToolbarSpace=46;
-  readonly Grid host,viewport;readonly Image image;readonly Canvas imageLayer;readonly StackPanel controls;readonly Viewbox toolbarHost;readonly FrameworkElement footer;readonly TranslateTransform footerOffset=new TranslateTransform();MediaElement media;
+  readonly Grid host,viewport;readonly Image image;readonly Canvas imageLayer;readonly StackPanel controls;readonly Viewbox toolbarHost;readonly FrameworkElement remainder;readonly TranslateTransform remainderOffset=new TranslateTransform();MediaElement media;
   readonly Button playbackButton;Action togglePlayback;
   readonly Button zoomOutButton,zoomInButton,fitButton;readonly List<Button> panButtons=new List<Button>();
   readonly PreviewZoom zoom=new PreviewZoom();readonly MatrixTransform transform=new MatrixTransform();
   PreviewGeometry geometry;bool fitting=true,dragging;Point previous;
-  public PreviewViewport(Grid host,Grid viewport,Image image,FrameworkElement footer=null){
-   this.host=host;this.viewport=viewport;this.image=image;this.footer=footer;
-   if(footer!=null){footer.VerticalAlignment=VerticalAlignment.Top;footer.RenderTransform=footerOffset;footer.SizeChanged+=(s,e)=>Resize();}
+  public PreviewViewport(Grid host,Grid viewport,Image image,FrameworkElement remainder=null){
+   this.host=host;this.viewport=viewport;this.image=image;this.remainder=remainder;
+   if(remainder!=null){remainder.VerticalAlignment=VerticalAlignment.Top;remainder.RenderTransform=remainderOffset;}
    viewport.Background=Brushes.Black;viewport.ClipToBounds=true;viewport.IsManipulationEnabled=true;viewport.Focusable=true;
    viewport.HorizontalAlignment=HorizontalAlignment.Center;viewport.VerticalAlignment=VerticalAlignment.Top;
    // Grid gives oversized children a layout clip before their render transform.
@@ -68,11 +68,13 @@ namespace AstroArchive {
   public bool HasPlaybackControl{get{return playbackButton.Visibility==Visibility.Visible;}}
   public void TogglePlayback(){playbackButton.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));}
   public void Resize(){
-   double extra=0;if(footer!=null){footer.Measure(new Size(Math.Max(0,host.ActualWidth),double.PositiveInfinity));extra=footer.DesiredSize.Height;}
    double width,height,toolbar=geometry==null?0:ToolbarSpace;
-   if(geometry==null){width=host.ActualWidth;height=Math.Min(130,Math.Max(0,host.ActualHeight-extra));}
-   else geometry.Frame(host.ActualWidth,Math.Max(0,host.ActualHeight-toolbar-extra),out width,out height);
-   viewport.Width=width;viewport.Height=height;if(footer!=null)footerOffset.Y=height+toolbar;
+   if(geometry==null){width=host.ActualWidth;height=Math.Min(130,Math.Max(0,host.ActualHeight));}
+   else geometry.Frame(host.ActualWidth,Math.Max(0,host.ActualHeight-toolbar),out width,out height);
+   viewport.Width=width;viewport.Height=height;
+   // Fit the whole image first. The sky receives only genuinely unused space;
+   // it never reserves a fixed height or feeds its own size back into image fit.
+   if(remainder!=null){double top=Math.Min(host.ActualHeight,height+toolbar),space=Math.Max(0,host.ActualHeight-top);remainderOffset.Y=top;remainder.Height=space;remainder.Visibility=geometry!=null&&space>=50?Visibility.Visible:Visibility.Collapsed;}
    // Keep the bitmap's existing measure path, with a separate control area
    // immediately below the image rather than a new auto-sized image row.
    toolbarHost.MaxWidth=Math.Max(0,width-12);toolbarHost.Margin=new Thickness(6,height+6,6,0);

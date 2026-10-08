@@ -22,7 +22,8 @@ namespace AstroArchive {
      if((name=="FramesGrid"||name=="ImportGrid")&&path!="OriginalName"){column.Binding=new Binding(path){Mode=BindingMode.OneWay,Converter=converter,ConverterParameter=path,StringFormat=binding.StringFormat};}
      if(path=="ExposureText"){var cell=new Style(typeof(TextBlock),column.ElementStyle);cell.Setters.Add(new Setter(FrameworkElement.ToolTipProperty,new Binding("ExposureTooltip")));cell.Setters.Add(new Setter(ToolTipService.ShowDurationProperty,30000));column.ElementStyle=cell;}
     }
-    string table=name;TableSortIndicators.Attach(grid);grid.Sorting+=(s,e)=>{e.Handled=true;SortTable(table,e.Column,(Keyboard.Modifiers&ModifierKeys.Shift)!=0);};
+    if(name=="FramesGrid"||name=="ImportGrid")tableSorts[name].Add(new SortDescription("Kind",ListSortDirection.Ascending));
+    string table=name;TableSortIndicators.Attach(grid);grid.Sorting+=(s,e)=>{e.Handled=true;SortTable(table,e.Column,(Keyboard.Modifiers&ModifierKeys.Shift)!=0);};RestoreTableSort(name);
    }
    InitializeColumnLayouts();
   }
@@ -32,6 +33,7 @@ namespace AstroArchive {
    foreach(var column in grid.Columns){var sort=sorts.FirstOrDefault(d=>d.PropertyName==column.SortMemberPath);column.SortDirection=string.IsNullOrEmpty(sort.PropertyName)?(ListSortDirection?)null:sort.Direction;}TableSortIndicators.Update(grid);
   }
   void SmokeTablesAndPreview(){
+   foreach(string name in new[]{"FramesGrid","ImportGrid"}){var sorts=tableSorts[name];if(sorts.Count==0||sorts[0].PropertyName!="Kind"||sorts[0].Direction!=ListSortDirection.Ascending)throw new Exception("Frame Type is not the default capture sort");}
    var rows=new[]{new Frame{Kind="Light",Target="Unknown",Exposure=10},new Frame{Kind="Light",Exposure=2},new Frame{Kind="Bias",Target="Calibration",Exposure=0},new Frame{Kind="Unknown"}};
    foreach(string name in new[]{"FramesGrid","ImportGrid"}){var grid=G(name);var original=grid.ItemsSource;var saved=tableSorts[name].ToList();try{
      SetRows(name,rows);var exposure=grid.Columns.First(c=>c.SortMemberPath=="Exposure");SortTable(name,exposure,false);if(!grid.Items.Cast<Frame>().Where(f=>f.Exposure.HasValue).Select(f=>f.Exposure.Value).SequenceEqual(new[]{0.0,2,10}))throw new InvalidOperationException("Exposure column did not sort numerically.");

@@ -59,7 +59,7 @@ Download the installer, run it and open AstroArchive from its shortcut. Installa
 Each release includes SHA-256 checksums. In PowerShell, substitute your downloaded installer’s filename:
 
 ```powershell
-Get-FileHash .\AstroArchive1.12.0.1.exe -Algorithm SHA256
+Get-FileHash .\AstroArchive1.12.1.1.exe -Algorithm SHA256
 ```
 
 Compare `Hash` with the corresponding `.sha256` file. A checksum checks file integrity; publisher identity depends on code signing.
@@ -89,7 +89,7 @@ Compare `Hash` with the corresponding `.sha256` file. A checksum checks file int
 | **Columns** | Show or hide headings; drag to reorder or right-click to move left/right. Import and repository layouts save independently. |
 | **Table headings** | Click to sort; **Shift-click** adds columns. Arrows and priorities show the active sort order. |
 | **Preview toolbar** | Controls sit below the image. Scroll or pinch to zoom; drag the image or use arrows to move the view after zooming. **Fit** or **F** restores the whole image; **Escape** closes the popup. |
-| **Capture sky** | A compact constellation globe locates the field at its recorded capture time, with compass directions, altitude and a clear below-horizon state. Uses capture location or your saved observing place; missing time/site shows celestial coordinates. |
+| **Capture sky** | A cached, text-free constellation globe uses only the space left after fitting the image. Hover for recorded capture time, direction and altitude. Uses capture location or your saved observing place; missing time/site shows celestial coordinates. |
 | **Settings → Preferences** | System/light/dark themes, text size, comfortable rows, high contrast and reduced progress animation. |
 | **Guide** | Repeat the first-run walkthrough, search offline help or open About. **F1** opens help for the current tab. |
 

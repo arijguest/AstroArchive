@@ -7,6 +7,7 @@ namespace AstroArchive {
  public sealed class EditedImportCandidate {
   public string Path{get;set;} public string RelativePath{get;set;} public long Bytes{get;set;} public string Hash{get;set;} public FileStamp Stamp{get;set;} public EditedMetadata Metadata{get;set;} public bool Include{get;set;} public string Problem{get;set;}
   public string Filename{get{return RelativePath;}}public string ImageClass{get{return Metadata==null?"Unknown":Metadata.ImageClass;}} public string Object{get{return Metadata==null?"Unknown":Metadata.ObjectLabel;}}public string TotalExposure{get{return Metadata==null?"Unknown":Metadata.TotalExposureText;}}
+  public string FileType{get{return MediaFiles.FileType(Path??RelativePath);}}
  }
  public sealed class EditedImportPlan {
   public string Folder;public List<EditedImportCandidate> Images=new List<EditedImportCandidate>();public List<string> Errors=new List<string>();public List<string> SkippedFolders=new List<string>();public int SkippedArchived;
@@ -14,7 +15,7 @@ namespace AstroArchive {
  public sealed partial class Repository {
   public EditedImportPlan ScanEditedFolder(string folder,bool recursive,CancellationToken ct,Action<ProgressInfo> progress){
    folder=System.IO.Path.GetFullPath(folder);if(!Directory.Exists(folder))throw new DirectoryNotFoundException(folder);if(Util.Within(folder,Root))throw new IOException("Choose a folder outside the repository.");
-   var archived=new HashSet<string>(All().Select(f=>f.Hash).Where(h=>!string.IsNullOrEmpty(h)),StringComparer.OrdinalIgnoreCase);
+   var captures=All();var matcher=new EditedTargetMatcher(captures.Select(f=>f.Target));var archived=new HashSet<string>(captures.Select(f=>f.Hash).Where(h=>!string.IsNullOrEmpty(h)),StringComparer.OrdinalIgnoreCase);
    var plan=new EditedImportPlan{Folder=folder};var directories=new Stack<string>();directories.Push(folder);
    while(directories.Count>0){ct.ThrowIfCancellationRequested();string directory=directories.Pop();
     try{if(!FileStamp.CanTraverse(new DirectoryInfo(directory))){plan.Errors.Add("Linked folder skipped: "+directory);continue;}
@@ -24,13 +25,13 @@ namespace AstroArchive {
        if(progress!=null)progress(new ProgressInfo{Stage="Reviewing edited images",Text=row.RelativePath});row.Hash=Util.Hash(path,ct);
        if(!row.Stamp.ContentSame(FileStamp.Read(path)))throw new IOException("Image changed during review. Scan again.");
        if(archived.Contains(row.Hash)){plan.SkippedArchived++;continue;}
-       var header=Assets.Inspect(path).Header;row.Metadata=EditedMetadata.Read(row.RelativePath,header);
+       var header=Assets.Inspect(path).Header;row.Metadata=EditedMetadata.Read(row.RelativePath,header,null,matcher);
        if(!row.Stamp.ContentSame(FileStamp.Read(path)))throw new IOException("Image changed during review. Scan again.");row.Include=true;
       }catch(OperationCanceledException){throw;}catch(Exception e){if(!(e is IOException||e is InvalidDataException||e is UnauthorizedAccessException||e is NotSupportedException||e is ArgumentException||e is OverflowException))throw;row.Problem=e.Message;row.Include=false;}plan.Images.Add(row);
      }
     }catch(OperationCanceledException){throw;}catch(IOException e){plan.Errors.Add(directory+": "+e.Message);}catch(UnauthorizedAccessException e){plan.Errors.Add(directory+": "+e.Message);}
    }
-   foreach(var gif in plan.Images.Where(i=>i.Include&&MediaFiles.Gif(i.Path))){string match=MediaFiles.MatchingImage(gif.RelativePath,plan.Images.Where(i=>i.Include).Select(i=>i.RelativePath));if(match!=null){var still=plan.Images.Single(i=>i.RelativePath==match);gif.Metadata=EditedMetadata.Read(gif.RelativePath,Assets.Inspect(gif.Path).Header,still.Metadata);gif.Metadata.Evidence+="\nRelated edited image: "+still.RelativePath;}}
+   foreach(var gif in plan.Images.Where(i=>i.Include&&MediaFiles.Gif(i.Path))){string match=MediaFiles.MatchingImage(gif.RelativePath,plan.Images.Where(i=>i.Include).Select(i=>i.RelativePath));if(match!=null){var still=plan.Images.Single(i=>i.RelativePath==match);gif.Metadata=EditedMetadata.Read(gif.RelativePath,Assets.Inspect(gif.Path).Header,still.Metadata,matcher);gif.Metadata.Evidence+="\nRelated edited image: "+still.RelativePath;}}
    return plan;
   }
   public EditedProject ImportEditedFolder(EditedImportPlan plan,string name,CancellationToken ct,Action<ProgressInfo> progress){
