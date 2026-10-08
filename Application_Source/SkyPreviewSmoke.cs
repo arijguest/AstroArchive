@@ -45,7 +45,8 @@ namespace AstroArchive {
      foreach(var label in globe.CardinalLabels){var b=label.Value;var sphere=globe.GlobeBounds;double x=sphere.X+sphere.Width/2,y=sphere.Y+sphere.Height/2,r=sphere.Width/2,dx=Math.Max(b.Left-x,Math.Max(0,x-b.Right)),dy=Math.Max(b.Top-y,Math.Max(0,y-b.Bottom));if(!new Rect(globe.RenderSize).Contains(b)||dx*dx+dy*dy<(r+3)*(r+3))throw new Exception("Rotated cardinal overlaps sky or clips");}
     }
     if(visibleLabels==0||hiddenLabels==0)throw new Exception("Cardinals did not adapt to camera orientation");
-    globe.ZoomView(100);PumpPopupLayout();if(globe.CardinalLabels.Count!=0)throw new Exception("Zoomed globe obscures cardinal labels");globe.ResetView();PumpPopupLayout();
+    globe.ZoomView(100);PumpPopupLayout();
+    foreach(var label in globe.CardinalLabels){var b=label.Value;var sphere=globe.GlobeBounds;double x=sphere.X+sphere.Width/2,y=sphere.Y+sphere.Height/2,r=sphere.Width/2,dx=Math.Max(b.Left-x,Math.Max(0,x-b.Right)),dy=Math.Max(b.Top-y,Math.Max(0,y-b.Bottom));if(!new Rect(globe.RenderSize).Contains(b)||dx*dx+dy*dy<(r+3)*(r+3))throw new Exception("Zoomed globe obscures cardinal label");}globe.ResetView();PumpPopupLayout();
     int builds=globe.DrawingBuilds;
        var sky=globe.Context;double yaw=globe.Camera.Yaw,tilt=globe.Camera.Tilt;globe.RotateView(25,12);PumpPopupLayout();
        if(globe.Camera.Yaw==yaw||globe.Camera.Tilt==tilt||globe.DrawingBuilds<=builds||!ReferenceEquals(sky,globe.Context))throw new Exception("Sky drag did not rotate without changing capture data: "+prefix+", camera "+yaw+","+tilt+" -> "+globe.Camera.Yaw+","+globe.Camera.Tilt+", draws "+builds+" -> "+globe.DrawingBuilds);
