@@ -41,7 +41,10 @@ namespace AstroArchive {
     // Metadata updates must invalidate cached search text on the same row object.
     all[2].Filter="Ha";T("SearchBox").Text="filter:Ha";Filter(true);WaitForSearches();if(object.ReferenceEquals(index,state.Captures)||displayed.Count!=1||displayed[0]!=all[2])throw new Exception("Metadata correction retained stale search documents.");
     var exposure=G("FramesGrid").Columns.First(c=>c.SortMemberPath=="Exposure");SortTable("FramesGrid",exposure,false);SortTable("FramesGrid",exposure,false);
-    T("SearchBox").Text="exposure:>=100";WaitForSearches();if(!G("FramesGrid").Items.Cast<Frame>().Select(f=>f.Exposure).SequenceEqual(displayed.Select(f=>f.Exposure).OrderByDescending(v=>v))||exposure.SortDirection!=System.ComponentModel.ListSortDirection.Descending||TableSortIndicators.GetMark(exposure)!="▼")throw new Exception("Prepared result lost numeric sorting or its heading mark.");
+    T("SearchBox").Text="exposure:>=100";WaitForSearches();
+    // A grouped view enumerates one session at a time, not a global exposure list.
+    if(!displayed.Select(f=>f.Exposure).SequenceEqual(displayed.Select(f=>f.Exposure).OrderByDescending(v=>v))||subframeSessions.Any(g=>!g.Frames.Select(f=>f.Exposure).SequenceEqual(g.Frames.Select(f=>f.Exposure).OrderByDescending(v=>v))))throw new Exception("Prepared result lost numeric ordering within session groups.");
+    if(exposure.SortDirection!=System.ComponentModel.ListSortDirection.Descending||TableSortIndicators.GetMark(exposure)!="▼")throw new Exception("Prepared sort heading differs: "+exposure.SortDirection+" / "+TableSortIndicators.GetMark(exposure));
     T("SearchBox").Text="\"unfinished";WaitForSearches();if(displayed.Count!=0)throw new Exception("Invalid query retained actionable previous rows.");
     B("ClearButton").RaiseEvent(new RoutedEventArgs(Button.ClickEvent));WaitForSearches();if(displayed.Count!=6000||!G("FramesGrid").IsEnabled)throw new Exception("Clear did not restore current repository rows.");
     if(repo==null)repo=new Repository(Path.Combine(output,"search-smoke-repository"));

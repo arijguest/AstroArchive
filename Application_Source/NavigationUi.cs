@@ -128,7 +128,7 @@ namespace AstroArchive {
         void UpdateNavigationState() {
             if (!navigationReady) return;
             TopMenu("ImportMenu").IsEnabled = cancel == null;
-            TopMenu("ExportMenu").IsEnabled = cancel == null && repo != null&&!ActiveSearchBlocked;
+            TopMenu("ExportMenu").IsEnabled = cancel == null && repo != null&&!ActiveSearchBlocked&&!SearchBlocked("SearchBox");
             TopMenu("SettingsMenu").IsEnabled = cancel == null;
             TopMenu("EditedMenu").IsEnabled = cancel == null;
             B("ImportExportButton").IsEnabled = TopMenu("ExportMenu").IsEnabled;
@@ -176,7 +176,7 @@ namespace AstroArchive {
             menu.Items.Add(Branch("Review and recovery", ButtonAction("Review flagged captures…", "ReviewImportsButton", 1),
                 ButtonAction("Screen visible captures", "ScreenImportsButton", 1), ButtonAction("Retry failed imports", "RetryImportsButton", 1),
                 MenuAction("Scan report…", () => ShowReport("Scan report", plan == null ? "Scan a folder first." : plan.ScanReport))));
-            var tools = Branch("Selected files"); MoveMenuItems(tools, BuildImportTools(), item => item is MenuItem && Convert.ToString(((MenuItem)item).Header) != "Scan report…"); menu.Items.Add(tools);
+            var tools = Branch("Selected files");tools.IsEnabled=!SearchBlocked("ImportSearchBox"); MoveMenuItems(tools, BuildImportTools(), item => item is MenuItem && Convert.ToString(((MenuItem)item).Header) != "Scan report…"); menu.Items.Add(tools);
             menu.Items.Add(Branch("Table", FiltersNavigation(true),
                 ColumnsNavigation("ImportGrid"), MenuAction("Clear search and filters", () => B("ImportClearButton").RaiseEvent(new RoutedEventArgs(Button.ClickEvent)), repo != null)));
             menu.Items.Add(new Separator());
@@ -212,7 +212,7 @@ namespace AstroArchive {
             preview.IsCheckable = true; preview.IsChecked = settings.ShowPreview; view.Items.Add(preview);
             view.Items.Add(MenuAction("Open an external image…", OpenPreviewFile, true, false));
             view.Items.Add(MenuAction("Clear search and filters", () => B("ClearButton").RaiseEvent(new RoutedEventArgs(Button.ClickEvent)))); menu.Items.Add(view);
-            var selection = Branch("Selected files");selection.IsEnabled=cancel==null;
+            var selection = Branch("Selected files");selection.IsEnabled=cancel==null&&!SearchBlocked("SearchBox");
             var files = SelectedFiles();
             if (files.Count > 0) { var context = ThemedMenu(); BuildFileMenu(context, files); MoveMenuItems(selection, context); }
             else selection.Items.Add(new MenuItem { Header = "Select files in the repository table", IsEnabled = false });
