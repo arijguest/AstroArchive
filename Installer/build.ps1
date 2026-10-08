@@ -40,6 +40,10 @@ if (-not $UsePreparedPayload) {
     Copy-Item (Join-Path $PSScriptRoot '..\Application_Source\Quick_Start.txt') (Join-Path $payload 'Quick_Start.txt') -Force
     Copy-Item (Join-Path $PSScriptRoot '..\Application_Source\Validation.txt') (Join-Path $payload 'Validation.txt') -Force
     Copy-Item (Join-Path $PSScriptRoot '..\Application_Source\City_Catalogue_Notice.md') (Join-Path $payload 'City_Catalogue_Notice.md') -Force
+    # Keep licence material in the existing managed notice for older launchers.
+    $noticePath = Join-Path $payload 'Catalogue_Notice.md'
+    $skyNoticePath = Join-Path $PSScriptRoot '..\Application_Source\Sky_Catalogue_Notice.md'
+    [IO.File]::WriteAllText($noticePath, ([IO.File]::ReadAllText($noticePath) + "`r`n`r`n" + [IO.File]::ReadAllText($skyNoticePath)), (New-Object Text.UTF8Encoding($false)))
     Copy-Item $AppExecutable (Join-Path $payload 'AstroArchive.exe') -Force
 }
 $generatedVersion = @"

@@ -46,6 +46,7 @@ namespace AstroArchive {
             }
         }
         void InitializeNavigation(bool firstRun) {
+            var tabs=(TabControl)Window.FindName("MainTabs");tabs.SelectionChanged+=(s,e)=>{if(e.OriginalSource!=tabs)return;if(tabs.SelectedIndex!=0&&previewMotion!=null)previewMotion.Pause();if(tabs.SelectedIndex!=3&&editedMotion!=null)editedMotion.Pause();};
             foreach (string name in new[] { "ImportMenu", "ExportMenu", "RepositoryMenu", "EditedMenu", "SettingsMenu", "GuideMenu" }) {
                 string captured = name;
                 var menu = TopMenu(name);
@@ -159,7 +160,7 @@ namespace AstroArchive {
             menu.Items.Add(MenuAction("Choose repository folder…", ChooseRepository));
             menu.Items.Add(MenuAction("Open repository in Explorer", OpenRepositoryFolder, repo != null, false));
             var view = Branch("View", FiltersNavigation(false), ColumnsNavigation("FramesGrid"));
-            foreach (string label in new[] { "Files", "By target", "By target and session" }) {
+            foreach (string label in new[] { "Session summaries", "Show all files", "By target", "By target and session" }) {
                 string mode = label; var choice = MenuAction(mode, () => { GoToPage(0); C("LibraryViewBox").SelectedItem = mode; }, repo != null);
                 choice.IsCheckable = true; choice.IsChecked = Convert.ToString(C("LibraryViewBox").SelectedItem) == mode; view.Items.Add(choice);
             }

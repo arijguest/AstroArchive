@@ -12,17 +12,19 @@ namespace AstroArchive {
  // Shared portrait display and input handling for the sidebar and popup.
  public class PreviewViewport {
   public const double ToolbarSpace=46;
-  readonly Grid host,viewport;readonly Image image;readonly StackPanel controls;readonly Viewbox toolbarHost;
+  readonly Grid host,viewport;readonly Image image;readonly Canvas imageLayer;readonly StackPanel controls;readonly Viewbox toolbarHost;readonly FrameworkElement footer;readonly TranslateTransform footerOffset=new TranslateTransform();MediaElement media;
+  readonly Button playbackButton;Action togglePlayback;
   readonly Button zoomOutButton,zoomInButton,fitButton;readonly List<Button> panButtons=new List<Button>();
   readonly PreviewZoom zoom=new PreviewZoom();readonly MatrixTransform transform=new MatrixTransform();
   PreviewGeometry geometry;bool fitting=true,dragging;Point previous;
-  public PreviewViewport(Grid host,Grid viewport,Image image){
-   this.host=host;this.viewport=viewport;this.image=image;
+  public PreviewViewport(Grid host,Grid viewport,Image image,FrameworkElement footer=null){
+   this.host=host;this.viewport=viewport;this.image=image;this.footer=footer;
+   if(footer!=null){footer.VerticalAlignment=VerticalAlignment.Top;footer.RenderTransform=footerOffset;footer.SizeChanged+=(s,e)=>Resize();}
    viewport.Background=Brushes.Black;viewport.ClipToBounds=true;viewport.IsManipulationEnabled=true;viewport.Focusable=true;
    viewport.HorizontalAlignment=HorizontalAlignment.Center;viewport.VerticalAlignment=VerticalAlignment.Top;
    // Grid gives oversized children a layout clip before their render transform.
    // Canvas measures the full bitmap, so only the final viewport clips zoom/pan.
-   viewport.Children.Remove(image);var imageLayer=new Canvas{IsHitTestVisible=false};imageLayer.Children.Add(image);viewport.Children.Insert(0,imageLayer);
+   viewport.Children.Remove(image);imageLayer=new Canvas{IsHitTestVisible=false};imageLayer.Children.Add(image);viewport.Children.Insert(0,imageLayer);
    image.Stretch=Stretch.Fill;image.HorizontalAlignment=HorizontalAlignment.Left;image.VerticalAlignment=VerticalAlignment.Top;image.IsHitTestVisible=false;image.RenderTransform=transform;
    RenderOptions.SetBitmapScalingMode(image,BitmapScalingMode.HighQuality);
    controls=new StackPanel{Orientation=Orientation.Horizontal,IsEnabled=false};var toolbar=new Border{Child=controls,Padding=new Thickness(4),CornerRadius=new CornerRadius(7),Background=new SolidColorBrush(Color.FromArgb(230,20,29,46)),BorderBrush=new SolidColorBrush(Color.FromArgb(150,148,165,192)),BorderThickness=new Thickness(1)};
@@ -30,6 +32,7 @@ namespace AstroArchive {
    zoomOutButton=AddButton(controls,"−","Zoom out",()=>ZoomAt(1/1.25,Center));fitButton=AddButton(controls,"Fit","Recenter image",Fit);fitButton.Width=38;fitButton.FontSize=12;zoomInButton=AddButton(controls,"+","Zoom in",()=>ZoomAt(1.25,Center));
    controls.Children.Add(new Border{Width=1,Height=20,Background=new SolidColorBrush(Color.FromArgb(150,148,165,192)),Margin=new Thickness(5,0,5,0)});
    panButtons.Add(AddButton(controls,"←","View left",()=>Navigate(-40,0)));panButtons.Add(AddButton(controls,"↑","View up",()=>Navigate(0,-40)));panButtons.Add(AddButton(controls,"↓","View down",()=>Navigate(0,40)));panButtons.Add(AddButton(controls,"→","View right",()=>Navigate(40,0)));
+   playbackButton=AddButton(controls,"Ⅱ","Pause playback",()=>{if(togglePlayback!=null)togglePlayback();});playbackButton.Visibility=Visibility.Collapsed;
    host.Children.Add(toolbarHost);host.SizeChanged+=(s,e)=>Resize();
    viewport.PreviewMouseWheel+=(s,e)=>{if(geometry==null)return;ZoomAt(Math.Pow(1.2,e.Delta/120.0),e.GetPosition(viewport));e.Handled=true;};
    viewport.ManipulationStarting+=(s,e)=>{if(geometry==null||FromControl(e.OriginalSource)){e.Cancel();return;}e.ManipulationContainer=viewport;e.Mode=ManipulationModes.Scale|ManipulationModes.Translate;fitting=false;e.Handled=true;};
@@ -47,19 +50,33 @@ namespace AstroArchive {
    AutomationProperties.SetName(button,label);UiHelp.Tip(button,label=="Recenter image"?"Show the whole image and reset panning (F).":label.StartsWith("View")?label+" after zooming.":label);ToolTipService.SetShowOnDisabled(button,true);button.Click+=(s,e)=>{action();e.Handled=true;};panel.Children.Add(button);return button;
   }
   public void SetImage(BitmapSource source,bool reset){
+   if(media!=null){imageLayer.Children.Remove(media);media=null;}image.Visibility=Visibility.Visible;
+   if(source==null)SetPlayback(null,false);
    if(viewport.IsMouseCaptured)viewport.ReleaseMouseCapture();
    image.Source=source;controls.IsEnabled=source!=null;toolbarHost.Visibility=source==null?Visibility.Collapsed:Visibility.Visible;
-   viewport.Background=source==null?Brushes.Transparent:Brushes.Black;if(source==null){geometry=null;return;}
+   viewport.Background=source==null?Brushes.Transparent:Brushes.Black;if(source==null){geometry=null;Resize();return;}
    bool changed=geometry==null||image.Width!=source.PixelWidth||image.Height!=source.PixelHeight;
    image.Width=source.PixelWidth;image.Height=source.PixelHeight;geometry=new PreviewGeometry(source.PixelWidth,source.PixelHeight);
    if(reset||changed)fitting=true;Resize();
   }
+  public void SetMedia(MediaElement element,int width,int height){
+   if(media!=null&&media!=element)imageLayer.Children.Remove(media);media=element;if(!imageLayer.Children.Contains(element))imageLayer.Children.Add(element);
+   image.Visibility=Visibility.Collapsed;image.Width=width;image.Height=height;element.Width=width;element.Height=height;element.Stretch=Stretch.Fill;element.RenderTransform=transform;
+   geometry=new PreviewGeometry(width,height);controls.IsEnabled=true;toolbarHost.Visibility=Visibility.Visible;viewport.Background=Brushes.Black;fitting=true;Resize();
+  }
+  public void SetPlayback(Action toggle,bool playing){togglePlayback=toggle;playbackButton.Visibility=toggle==null?Visibility.Collapsed:Visibility.Visible;playbackButton.Content=playing?"Ⅱ":"▶";AutomationProperties.SetName(playbackButton,playing?"Pause playback":"Play playback");UiHelp.Tip(playbackButton,playing?"Pause playback":"Play playback");}
+  public bool HasPlaybackControl{get{return playbackButton.Visibility==Visibility.Visible;}}
+  public void TogglePlayback(){playbackButton.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));}
   public void Resize(){
-   if(geometry==null)return;double width,height;geometry.Frame(host.ActualWidth,Math.Max(0,host.ActualHeight-ToolbarSpace),out width,out height);viewport.Width=width;viewport.Height=height;
+   double extra=0;if(footer!=null){footer.Measure(new Size(Math.Max(0,host.ActualWidth),double.PositiveInfinity));extra=footer.DesiredSize.Height;}
+   double width,height,toolbar=geometry==null?0:ToolbarSpace;
+   if(geometry==null){width=host.ActualWidth;height=Math.Min(130,Math.Max(0,host.ActualHeight-extra));}
+   else geometry.Frame(host.ActualWidth,Math.Max(0,host.ActualHeight-toolbar-extra),out width,out height);
+   viewport.Width=width;viewport.Height=height;if(footer!=null)footerOffset.Y=height+toolbar;
    // Keep the bitmap's existing measure path, with a separate control area
    // immediately below the image rather than a new auto-sized image row.
    toolbarHost.MaxWidth=Math.Max(0,width-12);toolbarHost.Margin=new Thickness(6,height+6,6,0);
-   if(fitting)Fit();else Apply();
+   if(geometry!=null){if(fitting)Fit();else Apply();}
   }
   Point Center{get{return new Point(viewport.Width/2,viewport.Height/2);}}
   public void Fit(){if(geometry==null)return;fitting=true;zoom.Fit(viewport.Width,viewport.Height,geometry.Width,geometry.Height);Apply();}

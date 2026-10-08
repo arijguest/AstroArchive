@@ -1,4 +1,4 @@
-AstroArchive 1.11.1
+AstroArchive 1.12.0
 Windows 10/11 x64 desktop app. Built-in .NET Framework 4.8 and Windows SQLite.
 Runs offline. No Python or Google login required.
 
@@ -104,7 +104,7 @@ This balances the preview background; it is not a scientific colour calibration.
 Solar, lunar and planetary captures use Linear automatically, preserving their
 colour. Identification uses the target, observation mode or clear file/folder
 names. Correct an unknown target if an unlabelled capture needs this behaviour.
-FITS and XISF otherwise start with the saved stretch, defaulting to Auto. Viewing
+FITS and XISF otherwise start with the saved stretch, defaulting to Auto per channel. Viewing
 a solar/planetary image does not change that saved preference. Landscape previews
 rotate into portrait and the frame follows the image aspect ratio. Zoom scales
 the sampled display. Large images are sampled
@@ -122,8 +122,9 @@ External XISF previews retain their 256 MB limit. Imported image decoding has a
 TIFF, PNG, JPEG, BMP, GIF and Windows photo formats use Windows image codecs,
 including high-depth integer and floating samples when supported by the codec.
 DSLR RAW compatibility depends on an installed Windows codec for that camera.
-Tile-compressed FITS (.fz), video and multi-frame scientific cubes need conversion.
-Archive imports remain FITS-only; previewing other formats does not index them.
+Tile-compressed FITS (.fz) requires its compatible optional decoder.
+GIF and supported videos play in Preview; scientific cubes use selected slices.
+Original supported assets can be archived; external previews do not import them.
 
 IMAGE PREVIEW AND TABLES
 Choose Columns beside the repository tools or import tools to show or hide
@@ -141,6 +142,24 @@ drag the image or use the arrows to move the view; Fit (or F) restores the whole
 buttons are disabled while the whole image is fitted. Escape closes
 the popup preview. The gesture viewer uses the same
 colour decoders and display stretch as the preview pane. Source pixels stay intact.
+
+The compact Stretch and expandable details follow the image directly. Beneath
+them, Capture sky shows a minimalist constellation globe with the selected field
+marked in the accent colour. Its horizon has clear N/E/S/W compass labels. A field
+below the recorded horizon is explicitly labelled; its figures are shown faintly.
+The view includes northern and southern constellations and matches your theme.
+
+Frame pointing takes precedence over a catalogue target centre; catalogue positions
+are marked approximate. The globe uses the recorded UTC capture time, never the
+current clock, shifted Night, file modification time or a session-folder timestamp.
+Capture location takes precedence over the observing town/city saved in Settings.
+If a known time or observing location is missing, it shows celestial coordinates
+with NCP/SCP pole labels instead of inferring compass directions. Unknown moving
+targets need recorded pointing or a plate solution. Altitudes are geometric and
+do not include atmospheric refraction. The view is illustrative sky context;
+constellation figures are not official boundaries. All sky data is available
+offline. See the constellation section of Catalogue_Notice.md for source and
+licence details.
 
 Click a column header to sort, click again to reverse, or Shift-click to add
 another column. Sorting survives filtering and import/progress refreshes.
@@ -718,3 +737,26 @@ The displayed exposure preserves the reported value; it is not automatically
 multiplied. Edited imports keep unspecified reported exposure separate from
 per-sub and total integration, and calculate totals only from confirmed counts
 and sub durations or explicitly labelled total-exposure metadata.
+
+SESSION SUMMARIES AND EDITED MEDIA
+Repository starts with compact session summaries for repeated Light subframes.
+The header names the target and recorded date, then shows sub count, total known
+exposure, filters and device. Use the small expand arrow to inspect individual
+files. Stacks remain visible. Repository > View > Show all files gives a flat list.
+Unknown session dates are not guessed; summaries follow the current filters.
+
+Edited has the same targets, file table and Preview arrangement as Repository.
+All projects browses every project; select a project to narrow the list. Import
+folder offers Browse and Scan, then a review before copying. Parent folders may
+include the repository: its subtree, .astroarchive folders and archived originals
+(including renamed byte-identical copies) are excluded. Originals remain intact.
+Moon and Lunar appear together as Moon.
+
+GIFs can show processing history. A GIF matches a still image in the same folder
+when their stems are identical, or the GIF adds _processing, _progress, _animation,
+_timelapse, _before-after or _edit-history. Only unique matches inherit missing
+object, exposure, sub count and filter details; conflicting metadata is retained.
+Select a GIF to animate it. Pause / Play appears in the toolbar below moving
+images. SER plays at a 10 fps preview rate. AVI, MP4, MOV, M4V, WMV and MKV use the
+codecs installed in Windows; install the appropriate codec if Preview reports
+that playback is unavailable. Viewing never modifies source pixels or metadata.

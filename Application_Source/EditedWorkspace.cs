@@ -13,7 +13,8 @@ namespace AstroArchive {
   public List<EditedSource> Sources{get;set;} public override string ToString(){return Name;}
  }
  public sealed class EditedImage {
-  public string Filename{get;set;} public string RelativePath{get;set;} public string Kind{get;set;} public long Bytes{get;set;} public DateTime Modified{get;set;} public string Source{get;set;} public EditedMetadata Metadata{get;set;} public string MetadataProblem{get;set;}
+  [System.Web.Script.Serialization.ScriptIgnore]public EditedProject Project{get;set;}
+  public string RelatedImage{get;set;} public string Filename{get;set;} public string RelativePath{get;set;} public string Kind{get;set;} public long Bytes{get;set;} public DateTime Modified{get;set;} public string Source{get;set;} public EditedMetadata Metadata{get;set;} public string MetadataProblem{get;set;}
  }
  public sealed partial class Repository {
   public string EditedFolder{get{return Path.Combine(Meta,"edited");}}
@@ -79,7 +80,11 @@ namespace AstroArchive {
      try{metadata=EditedMetadata.Read(relative,Assets.Inspect(path).Header,original);}catch(Exception e){if(!(e is IOException||e is InvalidDataException||e is UnauthorizedAccessException||e is NotSupportedException||e is ArgumentException||e is OverflowException))throw;metadata=EditedMetadata.Read(relative,null,original);problem=e.Message;}
      images.Add(new EditedImage{Filename=file.Name,RelativePath=relative,Bytes=file.Length,Modified=file.LastWriteTime,Kind=source==null?"Editor output":string.IsNullOrEmpty(source.ArchiveHash)?"Added image":"Working copy",Source=source==null?"":source.OriginalName,Metadata=metadata,MetadataProblem=problem});
     }
-   }return images.OrderByDescending(i=>i.Modified).ThenBy(i=>i.Filename).ToList();
+   }
+   foreach(var gif in images.Where(i=>MediaFiles.Gif(i.RelativePath))){string match=MediaFiles.MatchingImage(gif.RelativePath,images.Where(i=>i.MetadataProblem==null).Select(i=>i.RelativePath));if(match==null)continue;var still=images.Single(i=>i.RelativePath==match);gif.RelatedImage=match;
+    try{gif.Metadata=EditedMetadata.Read(gif.RelativePath,Assets.Inspect(EditedPath(project,gif.RelativePath)).Header,still.Metadata);gif.Metadata.Evidence+="\nRelated edited image: "+still.Filename;}catch(IOException){}
+   }
+   return images.OrderByDescending(i=>i.Modified).ThenBy(i=>i.Filename).ToList();
   }
  }
 }

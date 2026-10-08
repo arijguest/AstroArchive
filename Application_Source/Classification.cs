@@ -28,6 +28,7 @@ namespace AstroArchive {
     }
    }
    AddAlias("Sun","Sun");AddAlias("Solar","Sun");
+   AddAlias("Moon","Moon");AddAlias("Lunar","Moon");
    AddAlias("Pleiades","M45");AddAlias("Andromeda","M31");AddAlias("Triangulum","M33");AddAlias("Pacman","NGC281");AddAlias("Pacman Nebula","NGC281");AddAlias("Wizard","NGC7380");AddAlias("Wizard Nebula","NGC7380");AddAlias("Crescent","NGC6888");AddAlias("Crescent Nebula","NGC6888");AddAlias("Hidden Galaxy","IC342");AddAlias("Orion Nebula","M42");
    AddAlias("Heart Nebula","IC1805");AddAlias("Soul Nebula","IC1848");AddAlias("Elephant's Trunk Nebula","IC1396");AddAlias("Elephant Trunk Nebula","IC1396");
    foreach(var entry in new[]{new[]{"M45","Pleiades"},new[]{"M31","Andromeda Galaxy"},new[]{"M33","Triangulum Galaxy"},new[]{"NGC281","Pacman Nebula"},new[]{"NGC7380","Wizard Nebula"},new[]{"NGC6888","Crescent Nebula"},new[]{"IC342","Hidden Galaxy"}})if(!commonNames.ContainsKey(entry[0]))commonNames[entry[0]]=entry[1];
@@ -131,7 +132,7 @@ namespace AstroArchive {
    if(!f.Gain.HasValue)f.Gain=ShotNumber(shots,"gain","cameraGain");if(!f.Exposure.HasValue)f.Exposure=ShotNumber(shots,"exposure_s","exposureSeconds","exposureTimeSec");
    if(f.Filter=="Unknown"){double? ir=ShotNumber(shots,"ir","irCut");if(ir.HasValue&&ir>=0&&ir<=2)f.Filter=ir==0?"Standard":ir==1?"Astro":"Dual band";}
    if(f.BinX==0){string b=Shot(shots,"binning","bin");var m=Regex.Match(b,@"^(\d+)(?:\s*[x*]\s*(\d+))?$");if(m.Success){f.BinX=int.Parse(m.Groups[1].Value);f.BinY=m.Groups[2].Success?int.Parse(m.Groups[2].Value):f.BinX;}}
-   if(Catalog.IsAmbiguous(target)){string hint=ObservationTargets.ModeFromPath(text);if(ObservationTargets.CanonicalSolar(hint)=="Sun")target="Sun";if(string.IsNullOrEmpty(f.ObservationMode))f.ObservationMode=hint;}
+   if(Catalog.IsAmbiguous(target)){string hint=ObservationTargets.ModeFromPath(text),body=ObservationTargets.CanonicalSolar(hint);if(body=="Sun"||body=="Moon")target=body;if(string.IsNullOrEmpty(f.ObservationMode))f.ObservationMode=hint;}
    string filenameTarget=Catalog.TargetFromFilename(f.OriginalName);
    f.Target=filenameTarget??Catalog.Normalize(target);f.TargetEvidence=filenameTarget!=null?"Recognised filename target":Catalog.KnownName(target)!=null?"Recognised header/session target":"Unrecognised label; plate solving required";
    if(f.Kind.Contains("dark")||f.Kind.Contains("bias")||f.Kind.Contains("flat")||f.Kind=="Dark"||f.Kind=="Bias"||f.Kind=="Flat"){f.Target="Calibration";f.TargetEvidence="Calibration frame";}
