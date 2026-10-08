@@ -1,13 +1,16 @@
-AstroArchive 2.1.4
-Package 2.1.4.1
+AstroArchive 2.1.5
+Package 2.1.5.1
 
-- Restoring or focusing the application no longer scans Edited folders on the
-  interface thread. Automatic scans run in the background when Edited is visible,
-  keeping navigation responsive and combining repeated restore/focus events.
-- Unchanged Edited scans preserve selection, sorting and the current preview.
-  Cancelled or stale scans cannot replace newer results or a different repository.
-- The sky map returns to a single capture indicator for individual files, groups
-  and stacks, using the recorded capture time. Observing paths are removed.
-  Below-horizon blanking and sky-view navigation remain available.
-- Includes the visible backup controls: Repository > Back up archive… and
-  Settings > Backups, with folder/ZIP backups and restoration instructions.
+- Edited gives images a larger preview with a compact filename/open-image row.
+  Its panel adapts to the width needed for a full-height 3:4 portrait and remembers
+  manual divider adjustments during the session. Zoom, pan and Fit remain below
+  the image.
+- Removed the sky map, stretch selector and capture-details icon from Edited to
+  maximise image space. File details remain available in the context menu.
+- Help now uses consistent headings, bullet and numbered lists, highlighted
+  actions and keyboard shortcuts. Search, selectable text and guide export remain
+  available in both themes and at larger text sizes.
+- The interactive walkthrough has shorter, structured instructions, a roomier
+  dialogue and clearer Next/Finish buttons.
+- Includes all changes from earlier releases, including the backup controls and
+  responsive background scanning of Edited folders.
