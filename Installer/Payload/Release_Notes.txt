@@ -1,21 +1,18 @@
-AstroArchive 1.13.15
-Package 1.13.15.1
+AstroArchive 1.13.16
+Package 1.13.16.1
 
-- C23, NGC891, UGC1831, PGC9031, Silver Sliver Galaxy and Outer Limits Galaxy
-  resolve to one target, with the common name displayed across the programme.
-- Expanded established common-name coverage, including Skull, Blue Snowball,
-  Silver Needle, Little Sombrero, Splinter and Hubble's Variable Nebula.
-- Common names, catalogue prefixes, accents and punctuation share one matching
-  method. Explicitly conflicting IDs, including unknown IDs, are not ignored.
-  Catalogue numbers are never corrected using fuzzy name matching.
-- Right-click a target on Repository or Edited to edit its common name and aliases.
-  Saved names take effect immediately in existing entries, imports, searches,
-  target choices and Edited fuzzy matching. Conflicting aliases are rejected;
-  catalogue identities and image files stay unchanged.
-- Whole-region names such as Eagle, Flame, Rosette and Eastern Veil have declared
-  owners. Shared component names include their IDs. Ambiguous names such as
-  Antennae Galaxies and Lobster Nebula require an ID rather than an automatic guess.
-- Both Targets panels are wider. Long names and alternate catalogue IDs wrap
-  fully instead of being truncated, including at larger text sizes.
-- Catalogue audits test every supplementary name and alias, all display names,
-  numeric-ID ownership, existing archives and real telescope import grouping.
+- Export to… offers PixInsight, Siril, DeepSkyStacker, GIMP, Photoshop,
+  AutoStakkert! 4, AstroWizard and Stacking Wizard in one compatible chooser.
+  Repository image handoffs use verified Edited working copies. Subframes and
+  recordings use verified export folders. DSS loads typed file lists, with
+  separate lists and a group chooser for incompatible captures. Some stackers
+  need the user to load the exported inputs in their own window.
+- Export destinations settings store defaults per file type and an optional
+  subframe-folder default. Application locations can be detected automatically
+  or configured. Export asks for an unavailable app before creating copies.
+  Existing Siril and StackingWizard preferences are retained.
+- Export menus now offer Export to…, Save files…, Stacking folder… and More.
+  Metadata/folder extras and advanced stacking options expand when needed.
+  Edited uses the same Export to… chooser. Completion keeps its folder action.
+- Original formats and precision are retained; conversions remain explicit.
+  Launch failures retain verified files and offer their location and settings.

@@ -80,7 +80,7 @@ namespace AstroArchive {
         void InitializeNavigation(bool firstRun) {
             InitializeSearch();
             T("SourceBox").TextChanged+=(s,e)=>{unknownImportTarget="";if(navigationReady)UpdateNavigationState();};
-            var tabs=(TabControl)Window.FindName("MainTabs");SelectInitialPage();tabs.SelectionChanged+=(s,e)=>{if(e.OriginalSource!=tabs)return;SyncPageSelector();if(tabs.SelectedIndex!=0&&previewMotion!=null)previewMotion.Pause();if(tabs.SelectedIndex!=2&&editedMotion!=null)editedMotion.Pause();};
+            var tabs=(TabControl)Window.FindName("MainTabs");SelectInitialPage();tabs.SelectionChanged+=(s,e)=>{if(e.OriginalSource!=tabs)return;SyncPageSelector();if(tabs.SelectedIndex!=0&&previewMotion!=null)previewMotion.Pause();if(tabs.SelectedIndex!=2&&editedMotion!=null)editedMotion.Pause();UpdateNavigationState();};
             var selector = C("PageSelector");
             selector.SelectionChanged += (s,e) => { if (!updatingPageSelector && selector.SelectedItem != null) GoToPage(Convert.ToInt32(((ComboBoxItem)selector.SelectedItem).Tag)); };
             SyncPageSelector();
@@ -126,7 +126,7 @@ namespace AstroArchive {
         void UpdateNavigationState() {
             if (!navigationReady) return;
             TopMenu("ImportMenu").IsEnabled = cancel == null;
-            TopMenu("ExportMenu").IsEnabled = cancel == null && repo != null&&!ActiveSearchBlocked&&!SearchBlocked("SearchBox");
+            TopMenu("ExportMenu").IsEnabled = cancel == null && repo != null&&!ActiveSearchBlocked&&!SearchBlocked(((TabControl)Window.FindName("MainTabs")).SelectedIndex==2?"EditedSearchBox":"SearchBox");
             TopMenu("SettingsMenu").IsEnabled = cancel == null;
             TopMenu("EditedMenu").IsEnabled = cancel == null;
             B("ImportExportButton").IsEnabled = TopMenu("ExportMenu").IsEnabled;
@@ -189,13 +189,11 @@ namespace AstroArchive {
             var item = Branch("Filters"); MoveMenuItems(item, BuildFiltersMenu(imports)); return item;
         }
         void BuildExportNavigation(MenuItem menu) {
+            if(((TabControl)Window.FindName("MainTabs")).SelectedIndex==2){menu.Items.Add(MenuAction("Export to…",ExportEditedTo,SelectedEditedImages().Count>0));menu.Items.Add(MenuAction("Open image folder",OpenEditedFolder,ActiveEditedImage!=null));return;}
             var selected = Context();
             menu.Items.Add(new MenuItem { Header = selected.Count + " repository files" + (SelectedFiles().Count == 0 ? " in view" : " selected"), IsEnabled = false });
             var choices = ExportMenu(selected);
             foreach (var child in choices.Items.Cast<object>().ToList()) { choices.Items.Remove(child); menu.Items.Add(child); }
-            menu.Items.Add(new Separator());
-            menu.Items.Add(MenuAction("Selection catalogue CSV…", () => ExportSelectionCsv(selected), selected.Count > 0));
-            menu.Items.Add(MenuAction("Complete repository catalogue CSV…", ExportCatalogue, repo != null));
         }
         void BuildRepositoryNavigation(MenuItem menu) {
             menu.Items.Add(MenuAction("Browse repository", () => GoToPage(0), true, false));
@@ -225,6 +223,7 @@ namespace AstroArchive {
             menu.Items.Add(Branch("Diagnostics", performance, MenuAction("Last import report…", () => ShowReport("Import performance and errors", repo == null ? "Choose a repository first." : repo.LastReport), true, false)));
         }
         void BuildSettingsNavigation(MenuItem menu) {
+            menu.Items.Add(MenuAction("Export destinations…", () => ExportDestinationSettings()));
             menu.Items.Add(MenuAction("Preferences…", () => Configure(0)));
             menu.Items.Add(MenuAction("Accessibility…", () => Configure(4)));
             menu.Items.Add(Branch("Import and processing", MenuAction("Copy workers and observing site…", () => Configure(1)), MenuAction("Import options…", ImportPreferences)));

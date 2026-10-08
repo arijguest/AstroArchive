@@ -49,8 +49,17 @@ Select images and choose **Edit metadata** to assign targets, filters, image cla
 
 Starless and Stars only filenames are recognised. Object, filter, sub-count and exposure details come from available metadata or explicit filename labels. GIFs inherit missing details from a uniquely matching edited image in the same folder.
 
-Sending a stack to **Siril** creates a verified working copy in Edited.
-For AstroWizard or another editor, choose **Export → Create Edited working copies**, then load the copies from the opened image folder. Save outputs there and refresh Edited to find them.
+Choose **Export → Export to…** for PixInsight, Siril, DSS, GIMP, Photoshop, AS!4,
+AstroWizard or Stacking Wizard. Supported images open from verified working copies
+in Edited; subframes are exported to an input folder. DSS loads prepared file lists;
+some stackers require you to choose the exported inputs in their own window.
+**Settings → Export destinations…** stores defaults by file type and optional app
+locations. AstroArchive tries automatic detection, then asks for the executable when
+needed. Save outputs alongside the Edited working copy and refresh Edited to find them.
+
+The compact Export menu also offers **Save files…**, **Stacking folder…** and
+**More** for working copies and CSV catalogues. Folder/metadata options and advanced
+stacking controls are expandable.
 
 Exports default to image files only: stacks copy directly to the destination; subs
 retain compatible input folders. **Add Metadata** and **Create new folder** are off
@@ -76,7 +85,7 @@ See [format and metadata details](docs/COMPATIBILITY.md).
 
 - [Fast repeat telescope imports](docs/FAST_IMPORTS.md)
 - [Complete offline user guide](Application_Source/Quick_Start.txt)
-- [Siril and other editors](docs/PROCESSOR_HANDOFFS.md)
+- [Processor handoffs, formats and application detection](docs/PROCESSOR_HANDOFFS.md)
 - [Installation, updates and troubleshooting](docs/UPDATES.md)
 
 ## Build from source

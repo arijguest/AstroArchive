@@ -1,4 +1,4 @@
-AstroArchive 1.13.15
+AstroArchive 1.13.16
 Windows 10/11 x64; .NET Framework 4.8.
 
 START HERE
@@ -89,10 +89,13 @@ are skipped, including renamed byte-identical copies. Identical images already
 in Edited are excluded; changed files with the same name can be added as new
 versions. Unchecked entries leave existing images untouched. Sources stay in
 place; unreadable files are excluded.
-Sending a repository stack to Siril creates a verified Edited working copy.
-For another editor, Export > Create Edited working copies opens a folder for
-manual loading. Save outputs there; Refresh finds them.
-Use Open image folder, Enlarge, Image details or Open in editor on Edited.
+Export > Export to… opens supported images in PixInsight, Siril, GIMP,
+Photoshop or AstroWizard using verified Edited working copies. On Edited,
+Export to… opens the selected working images directly. Save outputs there;
+Refresh finds them. Use Open image folder, Enlarge or Image details on Edited.
+Settings > Export destinations stores defaults by file type and optional
+application locations. Automatic detection runs when needed; if an app cannot
+be found, choose its GUI executable. Cancel keeps your settings unchanged.
 Edited images move with the repository and remain separate from acquisition captures.
 
 EDITED METADATA AND EXPOSURE
@@ -145,8 +148,18 @@ Sun/Solar appears as Sun. Meteor filenames use Meteor and leave object ID blank.
 The word meteor must be in the filename; meteorite and folder names do not match.
 
 STACKING PROJECTS AND SESSIONS
-Select captures and choose Export selected files for original copies, or a
-stacking export with Subs, Stacks or Both. Choose an existing destination.
+Select captures and choose Export > Save files for original copies, or
+Stacking folder with Subs, Stacks or Both. Choose an existing destination.
+Export to… sends subframes or recordings to an external app after verifying
+their copies. DSS loads a typed file list; separate capture groups get separate
+lists. Siril starts in the exported folder. PixInsight, AS!4 and Stacking Wizard
+require you to load the exported inputs in their own window. No app starts
+stacking automatically. Choose subframes separately from finished stacks.
+Folder exports can include matching calibrations; unknown calibration state
+requires an explicit option. Camera RAW support depends on the receiving app.
+Export to… preserves original formats; it does not silently convert precision.
+More contains CSV catalogues and the manual Create Edited working copies action.
+Advanced stacking and folder/metadata options are expandable.
 Stacks export as image files; subs retain compatible input folders.
 Add Metadata and Create new folder are both off by default. Add Metadata includes
 a checksum manifest, saved session metadata and readme/workflow notes. Metadata
