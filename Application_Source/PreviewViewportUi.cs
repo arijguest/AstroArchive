@@ -9,7 +9,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 
 namespace AstroArchive {
- // Shared portrait display and input handling for the sidebar and popup.
+ // Shared fitting, display rotation and input handling for sidebars and large previews.
  public class PreviewViewport {
   public const double ToolbarSpace=46;
   readonly Grid host,viewport;readonly Image image;readonly Canvas imageLayer;readonly StackPanel controls;readonly Viewbox toolbarHost;readonly FrameworkElement remainder;readonly TranslateTransform remainderOffset=new TranslateTransform();MediaElement media;
@@ -18,9 +18,9 @@ namespace AstroArchive {
   readonly PreviewZoom zoom=new PreviewZoom();readonly MatrixTransform transform=new MatrixTransform();
   bool remainderEnabled=true;
   public void SetRemainderEnabled(bool enabled){remainderEnabled=enabled;Resize();}
-  PreviewGeometry geometry;bool fitting=true,dragging,loading;Point previous;
-  public PreviewViewport(Grid host,Grid viewport,Image image,FrameworkElement remainder=null){
-   this.host=host;this.viewport=viewport;this.image=image;this.remainder=remainder;
+  PreviewGeometry geometry;bool fitting=true,dragging,loading;Point previous;readonly bool portrait;int quarterTurns;readonly Button rotateLeftButton,rotateRightButton;
+  public PreviewViewport(Grid host,Grid viewport,Image image,FrameworkElement remainder=null,bool portrait=true,bool allowRotation=false){
+   this.host=host;this.viewport=viewport;this.image=image;this.remainder=remainder;this.portrait=portrait;
    if(remainder!=null){remainder.VerticalAlignment=VerticalAlignment.Top;remainder.RenderTransform=remainderOffset;}
    viewport.Background=Brushes.Black;viewport.ClipToBounds=true;viewport.IsManipulationEnabled=true;viewport.Focusable=true;
    viewport.HorizontalAlignment=HorizontalAlignment.Center;viewport.VerticalAlignment=VerticalAlignment.Top;
@@ -34,6 +34,7 @@ namespace AstroArchive {
    zoomOutButton=AddButton(controls,"−","Zoom out",()=>ZoomAt(1/1.25,Center));fitButton=AddButton(controls,"Fit","Recenter image",Fit);fitButton.Width=38;fitButton.FontSize=12;zoomInButton=AddButton(controls,"+","Zoom in",()=>ZoomAt(1.25,Center));
    controls.Children.Add(new Border{Width=1,Height=20,Background=new SolidColorBrush(Color.FromArgb(150,148,165,192)),Margin=new Thickness(5,0,5,0)});
    panButtons.Add(AddButton(controls,"←","View left",()=>Navigate(-40,0)));panButtons.Add(AddButton(controls,"↑","View up",()=>Navigate(0,-40)));panButtons.Add(AddButton(controls,"↓","View down",()=>Navigate(0,40)));panButtons.Add(AddButton(controls,"→","View right",()=>Navigate(40,0)));
+   if(allowRotation){controls.Children.Add(new Border{Width=1,Height=20,Background=new SolidColorBrush(Color.FromArgb(150,148,165,192)),Margin=new Thickness(5,0,5,0)});rotateLeftButton=AddButton(controls,"↶","Rotate left 90°",()=>Rotate(-1));rotateRightButton=AddButton(controls,"↷","Rotate right 90°",()=>Rotate(1));}
    playbackButton=AddButton(controls,"Ⅱ","Pause playback",()=>{if(togglePlayback!=null)togglePlayback();});playbackButton.Visibility=Visibility.Collapsed;
    host.Children.Add(toolbarHost);host.SizeChanged+=(s,e)=>Resize();
    viewport.PreviewMouseWheel+=(s,e)=>{if(geometry==null)return;ZoomAt(Math.Pow(1.2,e.Delta/120.0),e.GetPosition(viewport));e.Handled=true;};
@@ -59,7 +60,8 @@ namespace AstroArchive {
    image.Source=source;controls.IsEnabled=source!=null;toolbarHost.Visibility=source==null?Visibility.Collapsed:Visibility.Visible;
    viewport.Background=source==null?Brushes.Transparent:Brushes.Black;if(source==null){geometry=null;Resize();return;}
    bool changed=geometry==null||image.Width!=source.PixelWidth||image.Height!=source.PixelHeight;
-   image.Width=source.PixelWidth;image.Height=source.PixelHeight;geometry=new PreviewGeometry(source.PixelWidth,source.PixelHeight);
+   if(reset||geometry==null||changed&&portrait)quarterTurns=portrait&&source.PixelWidth>source.PixelHeight?1:0;
+   image.Width=source.PixelWidth;image.Height=source.PixelHeight;geometry=new PreviewGeometry(source.PixelWidth,source.PixelHeight,quarterTurns);
    if(reset||changed)fitting=true;Resize();
   }
   public void BeginLoading(int width=0,int height=0){
@@ -68,14 +70,14 @@ namespace AstroArchive {
    image.Visibility=Visibility.Visible;image.Source=null;controls.IsEnabled=false;loading=true;
    // Keep the last frame until the new pixels arrive. On a first load, indexed
    // dimensions can establish its frame without opening/decoding the file.
-   if(geometry==null&&width>0&&height>0){geometry=new PreviewGeometry(width,height);image.Width=width;image.Height=height;fitting=true;}
+   if(geometry==null&&width>0&&height>0){quarterTurns=portrait&&width>height?1:0;geometry=new PreviewGeometry(width,height,quarterTurns);image.Width=width;image.Height=height;fitting=true;}
    toolbarHost.Visibility=geometry==null?Visibility.Collapsed:Visibility.Visible;viewport.Background=Brushes.Black;Resize();
   }
   public void SetMedia(MediaElement element,int width,int height){
    loading=false;
    if(media!=null&&media!=element)imageLayer.Children.Remove(media);media=element;if(!imageLayer.Children.Contains(element))imageLayer.Children.Add(element);
    image.Visibility=Visibility.Collapsed;image.Width=width;image.Height=height;element.Width=width;element.Height=height;element.Stretch=Stretch.Fill;element.RenderTransform=transform;
-   geometry=new PreviewGeometry(width,height);controls.IsEnabled=true;toolbarHost.Visibility=Visibility.Visible;viewport.Background=Brushes.Black;fitting=true;Resize();
+   if(geometry==null||portrait)quarterTurns=portrait&&width>height?1:0;geometry=new PreviewGeometry(width,height,quarterTurns);controls.IsEnabled=true;toolbarHost.Visibility=Visibility.Visible;viewport.Background=Brushes.Black;fitting=true;Resize();
   }
   public void SetPlayback(Action toggle,bool playing){togglePlayback=toggle;playbackButton.Visibility=toggle==null?Visibility.Collapsed:Visibility.Visible;playbackButton.Content=playing?"Ⅱ":"▶";AutomationProperties.SetName(playbackButton,playing?"Pause playback":"Play playback");UiHelp.Tip(playbackButton,playing?"Pause playback":"Play playback");}
   public bool HasPlaybackControl{get{return playbackButton.Visibility==Visibility.Visible;}}
@@ -94,20 +96,30 @@ namespace AstroArchive {
    if(geometry!=null){if(fitting)Fit();else Apply();}
   }
   Point Center{get{return new Point(viewport.Width/2,viewport.Height/2);}}
+  public int RotationQuarterTurns{get{return quarterTurns;}}
+  public bool HasRotationControls{get{return rotateLeftButton!=null&&rotateRightButton!=null;}}
+  public void Rotate(int direction){if(geometry==null)return;quarterTurns=((quarterTurns+direction)%4+4)%4;geometry=new PreviewGeometry(image.Width,image.Height,quarterTurns);fitting=true;Resize();}
   public void Fit(){if(geometry==null)return;fitting=true;zoom.Fit(viewport.Width,viewport.Height,geometry.Width,geometry.Height);Apply();}
   void ZoomAt(double factor,Point origin){if(geometry==null)return;fitting=false;zoom.Zoom(factor,origin.X,origin.Y);Apply();}
   void Pan(double x,double y){if(geometry==null)return;fitting=false;zoom.Pan(x,y);Apply();}
   void Navigate(double x,double y){Pan(-x,-y);}
   void Manipulate(double factor,Point origin,double x,double y){fitting=false;zoom.Zoom(factor,origin.X,origin.Y);zoom.Pan(x,y);Apply();}
-  void Apply(){if(geometry==null)return;zoom.Constrain(viewport.Width,viewport.Height,geometry.Width,geometry.Height);double scale=zoom.Scale;transform.Matrix=geometry.Rotated?new Matrix(0,scale,-scale,0,zoom.X+image.Height*scale,zoom.Y):new Matrix(scale,0,0,scale,zoom.X,zoom.Y);
+  void Apply(){if(geometry==null)return;zoom.Constrain(viewport.Width,viewport.Height,geometry.Width,geometry.Height);double scale=zoom.Scale;switch(quarterTurns){case 1:transform.Matrix=new Matrix(0,scale,-scale,0,zoom.X+image.Height*scale,zoom.Y);break;case 2:transform.Matrix=new Matrix(-scale,0,0,-scale,zoom.X+image.Width*scale,zoom.Y+image.Height*scale);break;case 3:transform.Matrix=new Matrix(0,-scale,scale,0,zoom.X,zoom.Y+image.Width*scale);break;default:transform.Matrix=new Matrix(scale,0,0,scale,zoom.X,zoom.Y);break;}
    double fitted=Math.Min(viewport.Width/geometry.Width,viewport.Height/geometry.Height);bool enlarged=scale>fitted+0.000001;zoomOutButton.IsEnabled=enlarged;zoomInButton.IsEnabled=scale<32;foreach(var button in panButtons)button.IsEnabled=enlarged;
   }
+  public void SmokeRotation(){
+   if(!HasRotationControls||geometry==null||portrait||quarterTurns!=0)throw new InvalidOperationException("Large preview did not start in source orientation with rotation controls.");
+   for(int turn=1;turn<=4;turn++){rotateRightButton.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));if(quarterTurns!=turn%4)throw new InvalidOperationException("Clockwise preview rotation did not advance.");var corners=new[]{new Point(0,0),new Point(image.Width,0),new Point(0,image.Height),new Point(image.Width,image.Height)};foreach(var corner in corners){Point displayed=transform.Transform(corner);if(displayed.X< -0.001||displayed.Y< -0.001||displayed.X>viewport.Width+0.001||displayed.Y>viewport.Height+0.001)throw new InvalidOperationException("Rotation clipped a source corner.");}}
+   rotateLeftButton.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));if(quarterTurns!=3)throw new InvalidOperationException("Counterclockwise preview rotation failed.");Fit();if(quarterTurns!=3)throw new InvalidOperationException("Fit discarded the user's rotation.");rotateRightButton.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));if(quarterTurns!=0)throw new InvalidOperationException("Rotation did not return to the source orientation.");
+   BitmapSource original=image.Source as BitmapSource;if(original!=null){rotateRightButton.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));SetImage(original,false);if(quarterTurns!=1)throw new InvalidOperationException("Animated refresh discarded the user's rotation.");SetImage(original,true);if(quarterTurns!=0)throw new InvalidOperationException("New image did not reset to source orientation.");}
+  }
+
   public void SmokeGestures(){
    Fit();double fitted=zoom.Scale;if(geometry==null||viewport.Width<=0||viewport.Height<=0)throw new InvalidOperationException("Preview frame has no image area.");
    host.UpdateLayout();Rect imageArea=viewport.TransformToAncestor(host).TransformBounds(new Rect(viewport.RenderSize)),toolbarArea=toolbarHost.TransformToAncestor(host).TransformBounds(new Rect(toolbarHost.RenderSize));
    if(toolbarHost.Parent!=host||toolbarArea.Top<imageArea.Bottom||toolbarArea.Top-imageArea.Bottom>7||toolbarArea.Bottom>host.ActualHeight+0.5)throw new InvalidOperationException("Preview toolbar does not fit directly below the image.");
    if(Math.Abs(viewport.Width/viewport.Height-geometry.Width/geometry.Height)>0.000001||Math.Abs(zoom.X)>0.000001||Math.Abs(zoom.Y)>0.000001)throw new InvalidOperationException("Preview frame does not match the portrait image.");
-   if(geometry.Rotated&&(transform.Matrix.M11!=0||transform.Matrix.M12!=fitted||transform.Matrix.M21!=-fitted))throw new InvalidOperationException("Landscape preview did not rotate into portrait.");
+   if(quarterTurns==1&&(transform.Matrix.M11!=0||transform.Matrix.M12!=fitted||transform.Matrix.M21!=-fitted))throw new InvalidOperationException("Landscape preview did not rotate into portrait.");
    if(zoomOutButton.IsEnabled||panButtons.Exists(b=>b.IsEnabled))throw new InvalidOperationException("Fitted preview offers pan/zoom-out actions that cannot move the image.");
    zoomInButton.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));if(zoom.Scale<=fitted||!zoomOutButton.IsEnabled||panButtons.Exists(b=>!b.IsEnabled))throw new InvalidOperationException("Zoom button did not enable image navigation.");zoomOutButton.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));if(Math.Abs(zoom.Scale-fitted)>0.000001||zoomOutButton.IsEnabled)throw new InvalidOperationException("Zoom-out button did not restore the fitted image.");fitButton.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
    var wheel=new MouseWheelEventArgs(Mouse.PrimaryDevice,0,120){RoutedEvent=UIElement.PreviewMouseWheelEvent};viewport.RaiseEvent(wheel);if(!wheel.Handled||zoom.Scale<=fitted)throw new InvalidOperationException("Preview wheel zoom did not update the image transform.");
