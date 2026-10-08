@@ -1,4 +1,4 @@
-AstroArchive 2.1.5
+AstroArchive 2.1.6
 Windows 10/11 x64; .NET Framework 4.8.
 
 START HERE
@@ -260,7 +260,8 @@ stacking automatically. Choose subframes separately from finished stacks.
 
 ## Formats and calibration choices
 Folder exports can include matching calibrations; unknown calibration state
-requires an explicit option. Camera RAW support depends on the receiving app.
+requires confirmation that those subs are uncalibrated. This option appears
+in the stacking-folder dialogue. Camera RAW support depends on the receiving app.
 Export to… preserves original formats; it does not silently convert precision.
 Export > Catalogue CSV exports table data. Right-click files to create Edited copies.
 
@@ -276,7 +277,9 @@ acquisition session apart.
 
 ## Keep compatible inputs together
 Inputs are separated by target, physical device, camera, filter, dimensions,
-binning, Bayer pattern, exposure, gain and calibration state.
+binning, Bayer pattern, exposure, gain and calibration state. When calibrations
+are included, differing temperature/night calibration sets get separate input
+folders automatically. Compatible subs using the same set stay together.
 Do not combine stacks with their constituent subs or overlapping live-stack snapshots.
 Copies are verified and originals remain unchanged.
 Stacking runs in the external program of your choice.
@@ -518,7 +521,8 @@ view, review, maintenance and diagnostics. Use the page selector to switch pages
 Right-click files for preview, metadata, exports, working copies and deletion.
 Export > Export files copies originals. Stacking folder adds compatible inputs;
 matching calibrations can be included in that same dialog. More options contains
-metadata, separate sessions and explicit rejected/unknown calibration choices.
+metadata, separate sessions and explicit rejected-file choices. Unknown-state
+calibration confirmation appears beside the main calibration options.
 
 ## Preferences sections
 Settings opens Preferences directly: General, Import, Export, Sky & solving,

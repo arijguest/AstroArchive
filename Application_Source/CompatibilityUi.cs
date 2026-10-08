@@ -125,7 +125,7 @@ namespace AstroArchive {
             var lines=new List<string> {
                 "Only accepted candidates are supplied automatically. Missing settings require metadata review.","Dark flats are evaluated against raw flats after matching those flats to lights.",""
             };
-            foreach(var light in lights.GroupBy(f=>f.Target+"|"+f.Group).Select(g=>g.First()).Take(20)) {
+            foreach(var light in Exporter.StackingGroups(lights,calibrations,false,true,true).Select(g=>g.Inputs.First()).Take(20)) {
                 lines.Add(light.OriginalName+" · "+light.Telescope+" / "+light.Camera);
                 var candidates=calibrations.Where(c=>c.Telescope==light.Telescope&&c.Camera==light.Camera).Take(200).ToList();
                 foreach(var cal in candidates) {

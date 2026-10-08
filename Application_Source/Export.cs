@@ -10,6 +10,7 @@ namespace AstroArchive {
  public class ExportOptions {public List<ExportedFile> ExportedFiles=new List<ExportedFile>();public string Parent;public string Name;public string Mode="Subs";public bool AddMetadata=false;public bool CreateNewFolder=false;public bool SeparateSessions=false;public bool IncludeCalibration=true;public bool IncludeRejected=false;public bool IncludeUnknownCalibration=false;public bool ConvertToFits=false;}
  public sealed class ExportedFile {public Frame Frame;public Frame Source{get{return Frame;}set{Frame=value;}}public string Path;}
  public sealed class ExportResult {public string Folder;public readonly List<ExportedFile> Files=new List<ExportedFile>();}
+ public sealed class StackingInputGroup {public List<Frame> Inputs=new List<Frame>();public List<Frame> Calibrations=new List<Frame>();}
  public static class Exporter {
   public static bool MatchesCalibration(Frame light,Frame cal){return CalibrationMatching.Evaluate(light,cal).Accepted;}
   public static List<Frame> ExistingCalibrations(Repository repo,IEnumerable<Frame> frames){return frames.Where(f=>Assets.IsCalibration(f.Kind)&&!f.Rejected&&!CaptureScreening.FileProblem(f)&&f.Status!="Failed"&&File.Exists(repo.FilePath(f))).ToList();}
@@ -20,7 +21,20 @@ namespace AstroArchive {
    foreach(string kind in new[]{"Dark","Flat","Bias"}){var raw=cals.Where(c=>c.Kind==kind).ToList();var masters=cals.Where(c=>c.Kind=="Master "+kind.ToLowerInvariant()).OrderBy(c=>Math.Abs((c.Temperature??0)-(light.Temperature??0))).ThenByDescending(c=>c.StackCount).ToList();if(raw.Count>0)cals.RemoveAll(c=>c.Kind=="Master "+kind.ToLowerInvariant());else if(masters.Count>1){var keep=masters.First();cals.RemoveAll(c=>c.Kind==keep.Kind&&c.Hash!=keep.Hash);}}
    var flatInputs=cals.Where(c=>c.Kind=="Flat").ToList();foreach(var flatGroup in flatInputs.GroupBy(f=>f.Group)){var darkFlats=all.Where(c=>(c.Kind=="Dark flat"||c.Kind=="Master dark flat")&&flatGroup.All(flat=>MatchesCalibration(flat,c))).ToList();if(darkFlats.Any(c=>c.Kind=="Dark flat"))darkFlats.RemoveAll(c=>c.Kind=="Master dark flat");else darkFlats=darkFlats.OrderByDescending(c=>c.StackCount).Take(1).ToList();foreach(var darkFlat in darkFlats)if(!cals.Any(c=>c.Hash==darkFlat.Hash))cals.Add(darkFlat);}return cals;
   }
-  public static List<Frame> AvailableCalibrations(IEnumerable<Frame> selection,List<Frame> all,bool separateSessions,bool allowUnknown){return selection.Where(f=>f.Kind=="Light").GroupBy(f=>f.Target+"|"+f.Group+(separateSessions?"|"+f.Session:"")).SelectMany(g=>CalibrationFor(g,all,allowUnknown)).GroupBy(f=>f.Hash).Select(g=>g.First()).ToList();}
+  public static List<StackingInputGroup> StackingGroups(IEnumerable<Frame> selection,List<Frame> all,bool separateSessions,bool allowUnknown,bool includeCalibration){
+   var result=new List<StackingInputGroup>();
+   foreach(var group in selection.Where(f=>f.Kind=="Light").GroupBy(f=>Util.Serialize(new[]{f.Target,f.Group,separateSessions?f.Session:""})).OrderBy(g=>g.Key)){
+    if(!includeCalibration){result.Add(new StackingInputGroup{Inputs=group.ToList()});continue;}
+    // Night and sensor temperature are absent from Frame.Group. Match these
+    // subsets separately, then recombine only those with the same chosen set.
+    var matched=new Dictionary<string,StackingInputGroup>();
+    foreach(var subset in group.GroupBy(f=>Util.Serialize(new[]{f.Night,f.Temperature.HasValue?f.Temperature.Value.ToString("R",System.Globalization.CultureInfo.InvariantCulture):""}))){
+     var inputs=subset.ToList();var calibrations=CalibrationFor(inputs,all,allowUnknown);string key=Util.Serialize(calibrations.Select(f=>f.Hash).OrderBy(h=>h).ToArray());StackingInputGroup planned;
+     if(!matched.TryGetValue(key,out planned)){planned=new StackingInputGroup{Calibrations=calibrations};matched[key]=planned;result.Add(planned);}planned.Inputs.AddRange(inputs);
+    }
+   }return result;
+  }
+  public static List<Frame> AvailableCalibrations(IEnumerable<Frame> selection,List<Frame> all,bool separateSessions,bool allowUnknown){return StackingGroups(selection,all,separateSessions,allowUnknown,true).SelectMany(g=>g.Calibrations).GroupBy(f=>f.Hash).Select(g=>g.First()).ToList();}
   static string FlatBucket(Frame frame){return Util.Safe("exp"+Util.Num(frame.Exposure)+"s_"+Util.HashText(frame.Group).Substring(0,8));}
   public static bool RequiresConversion(Frame f){var image=Assets.Selected(f);return !string.IsNullOrEmpty(f.Format)&&(f.Format!="FITS"||image!=null&&(image.Compression=="cfitsio"||image.Count>1||f.Images.Count>1));}
   static string SubFolder(Frame light,int index){return Path.Combine("subs",index.ToString("00")+"_"+Util.Safe(light.MakeText)+"_"+Util.Safe(light.Telescope)+"_"+Util.Safe(light.Camera)+"_"+Util.Safe(light.Filter)+"_"+Util.Safe(Util.Num(light.Exposure)+"s"));}
@@ -54,12 +68,12 @@ namespace AstroArchive {
    var manifest=new List<object>();var recipes=new List<object>();var warnings=new List<string>();var all=ExistingCalibrations(repo,repo.All());var copy=new List<Tuple<Frame,string>>();var workflows=new List<Tuple<string,string>>();bool subs=options.Mode=="Subs"||options.Mode=="Both",stacks=options.Mode=="Stacks"||options.Mode=="Both";
    bool multipleTargets=selection.Where(f=>f.Kind=="Light"||f.Kind=="Stack").Select(f=>f.Target).Distinct().Count()>1;
    if(options.Mode=="Files"){int index=0;foreach(var group in selection.Where(f=>f.Kind=="Light").GroupBy(f=>f.Target+"|"+f.Group).OrderBy(g=>g.Key)){Frame light=group.First();string directory=Path.Combine(SubFolder(light,++index),"lights");if(multipleTargets)directory=Path.Combine("targets",Util.Safe(light.Target),directory);foreach(var f in group.GroupBy(f=>f.Hash).Select(g=>g.First()))copy.Add(Tuple.Create(f,directory));}foreach(var f in selection.Where(f=>f.Kind!="Light").GroupBy(f=>f.Hash).Select(g=>g.First()))copy.Add(Tuple.Create(f,""));}
-   if(subs){var groups=selection.Where(f=>f.Kind=="Light"&&(options.IncludeRejected||!f.Rejected)).GroupBy(f=>f.Target+"|"+f.Group+(options.SeparateSessions?"|"+f.Session:"")).OrderBy(g=>g.Key).ToList();int index=0;
-    foreach(var g in groups){Frame light=g.First();string group=Path.Combine(options.SeparateSessions?Path.Combine("sessions",Util.Safe(light.Night)+"_"+Util.Safe(light.Session),"subs"):"subs",Path.GetFileName(SubFolder(light,++index)));
+   if(subs){var groups=StackingGroups(selection.Where(f=>options.IncludeRejected||!f.Rejected),all,options.SeparateSessions,options.IncludeUnknownCalibration,options.IncludeCalibration);int index=0;
+    foreach(var planned in groups){var g=planned.Inputs;Frame light=g.First();string group=Path.Combine(options.SeparateSessions?Path.Combine("sessions",Util.Safe(light.Night)+"_"+Util.Safe(light.Session),"subs"):"subs",Path.GetFileName(SubFolder(light,++index)));
      if(multipleTargets)group=Path.Combine("targets",Util.Safe(light.Target),group);
      foreach(var f in g)copy.Add(Tuple.Create(f,Path.Combine(group,"lights")));
      var cals=new List<Frame>();if(options.IncludeCalibration&&(light.Calibration=="Uncalibrated"||(light.Calibration=="Unknown"&&options.IncludeUnknownCalibration))) {
-      cals=CalibrationFor(g,all,options.IncludeUnknownCalibration);
+      cals=planned.Calibrations;
       foreach(var c in cals){if(c.Kind=="Dark flat")foreach(var flats in cals.Where(f=>f.Kind=="Flat").GroupBy(f=>f.Group).Where(flatSet=>flatSet.All(f=>MatchesCalibration(f,c))))copy.Add(Tuple.Create(c,Path.Combine(group,"dark-flats",FlatBucket(flats.First()))));else copy.Add(Tuple.Create(c,Path.Combine(group,c.Kind.StartsWith("Master")?"masters":c.Kind=="Dark"?"darks":c.Kind=="Flat"?Path.Combine("flats",FlatBucket(c)):"biases")));}
      }
      if(light.Calibration=="Unknown")warnings.Add(group+": calibration status is unknown. Confirm before applying darks/flats/biases.");if(light.Calibration=="Calibrated")warnings.Add(group+": already calibrated; additional calibration files were not supplied.");
