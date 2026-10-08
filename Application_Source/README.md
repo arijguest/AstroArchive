@@ -2,6 +2,12 @@
 
 Repository defaults to expandable subframe session summaries. Edited shares its targets/table/Preview layout and supports reviewed mixed-folder import, GIF associations, starless/stars-only classification and acquisition metadata recovery. Animated GIF, SER and Windows video previews have Pause/Play controls. Dump processing shows progress in a separate window.
 
+Compact preview controls now follow the image directly. Repository and Edited
+include a theme-aware, offline constellation globe using recorded pointing, UTC
+capture time and capture location (saved observing place as fallback). Missing
+time/site uses celestial coordinates without an inferred horizon. Its 757 star
+vectors and drawing are cached; no sky timer, network or 3D engine is required.
+
 Portable Windows 10/11 x64 WPF app for archiving astronomical image originals and creating verified stacking projects. Open `AstroArchive.exe`; read `Quick_Start.txt` for the complete workflow.
 
 ## Changes in 1.10.1
@@ -144,6 +150,7 @@ Metadata corrections may move archived copies without modifying FITS pixels/head
 - `Rotation.cs`, `PlateSolve.cs`: star matching, mount inference, ASTAP/Astrometry.net and candidate matching.
 - `Export.cs`: session-aware verified projects and calibration safeguards.
 - `PreviewData.cs`, `Xisf.cs`, `PreviewUi.cs`, `Theme.cs`: bounded image samples, stretch, native XISF decoding, preview pane and appearance.
+- `SkyContext.cs`, `SkyGlobeUi.cs`, `SkyPreviewUi.cs`, `sky-constellations.txt`: capture context, coordinate transforms and cached constellation drawing; `Sky_Catalogue_Notice.md` retains the data licence.
 - `App.cs`, `FileToolsUi.cs`, `ReleasesUi.cs`, `MainWindow.xaml`, `NativeFolderPicker.cs`, `Assets/`: WPF interface, native selectors and embedded branding.
 - `Tests.cs`, `PreviewTests.cs`, `MockAstap.cs.txt`, `test.ps1`, `build.ps1`: generated-data checks and Windows build.
 

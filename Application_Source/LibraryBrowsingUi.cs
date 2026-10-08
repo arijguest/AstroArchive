@@ -22,7 +22,7 @@ namespace AstroArchive {
     var previous=subframeSessions.ToDictionary(g=>g.Key,g=>g.Expanded);subframeSessions=SubframeSessions.Build(displayed);foreach(var session in subframeSessions){bool expanded;if(previous.TryGetValue(session.Key,out expanded))session.Expanded=expanded;}
     view.GroupDescriptions.Add(new SubframeSessionDescription(subframeSessions));
    }else if(mode!="Files"&&mode!="Show all files"){view.GroupDescriptions.Add(new PropertyGroupDescription("TargetLabel"));if(mode=="By target and session")view.GroupDescriptions.Add(new PropertyGroupDescription("SessionKey"));}
-   SetRows("FramesGrid",view);L("LibraryCount").Text=displayed.Count+" files"+(libraryFilters.ActiveCount>0?" · "+libraryFilters.ActiveCount+" active filters":"");
+   SetRows("FramesGrid",view);
    var summary=CaptureGroups.Summarize(displayed);L("LibrarySummaryLabel").Text=summary.Detail;
   }
  }

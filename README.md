@@ -89,6 +89,7 @@ Compare `Hash` with the corresponding `.sha256` file. A checksum checks file int
 | **Columns** | Show or hide headings; drag to reorder or right-click to move left/right. Import and repository layouts save independently. |
 | **Table headings** | Click to sort; **Shift-click** adds columns. Arrows and priorities show the active sort order. |
 | **Preview toolbar** | Controls sit below the image. Scroll or pinch to zoom; drag the image or use arrows to move the view after zooming. **Fit** or **F** restores the whole image; **Escape** closes the popup. |
+| **Capture sky** | A compact constellation globe locates the field at its recorded capture time, with compass directions, altitude and a clear below-horizon state. Uses capture location or your saved observing place; missing time/site shows celestial coordinates. |
 | **Settings → Preferences** | System/light/dark themes, text size, comfortable rows, high contrast and reduced progress animation. |
 | **Guide** | Repeat the first-run walkthrough, search offline help or open About. **F1** opens help for the current tab. |
 
@@ -176,5 +177,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\build-release.ps1
 The bundled catalogue derives from **OpenNGC by Mattia Verga and contributors**, licensed **CC BY-SA 4.0**.
 
 [Catalogue attribution](Application_Source/Catalogue_Notice.md) · [OpenNGC provenance](Application_Source/OpenNGC_README.md)
+
+The offline constellation figures derive from **D3-Celestial by Olaf Frohn**, under
+the BSD 3-clause licence. [Constellation attribution](Application_Source/Sky_Catalogue_Notice.md).
 
 The repository does not currently specify a licence for the application source.

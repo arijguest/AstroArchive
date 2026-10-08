@@ -1,11 +1,20 @@
-AstroArchive 1.10.4 validation
-Package 1.10.4.2; Windows 10/11 x64; .NET Framework 4.8.
+AstroArchive 1.12.0 validation
+Package 1.12.0.1; Windows 10/11 x64; .NET Framework 4.8.
 
 The Windows release workflow runs application regressions, a separate five-case
 Windows WIC integration suite, installer/updater regressions, x64 compilation,
 WPF application/installer rendering and disposable install/repair/uninstall checks.
 A successful workflow is required before publishing installers and the SHA-256
 update feed. Its logs are authoritative for test counts and package hashes.
+
+Capture sky regressions check sidereal time, longitude signs, northern/southern
+and polar horizons, acquisition clocks and offsets, missing/ambiguous clocks,
+capture-site precedence, pointing/catalogue provenance, non-UTC header standards,
+full constellation coverage and vector normalization. Native WPF checks verify
+the compact sidebar with the globe in both themes and at 100/150% text sizes,
+expanded details bounds, all four image quadrant pixels, cached redraws and
+unknown-clock fallback. The combined release retains session summaries, Edited
+browsing, GIF/SER/video playback and the existing Windows installation tests.
 
 Windows navigation checks exercise ordered menus in both themes, source and file
 action availability, repository path/branding placement, rendered ascending and

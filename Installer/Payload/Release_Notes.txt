@@ -1,5 +1,19 @@
-AstroArchive 1.12.0 — session summaries, Edited browser and animated previews
+AstroArchive 1.12.0 — capture sky, compact previews and session browsing
 Package 1.12.0.1
+
+- Place compact Stretch, dimensions and expandable details directly below the
+  preview controls. Use the remaining area for a minimalist constellation globe
+  in both Repository and Edited, matching the selected light/dark theme.
+- Locate the capture using recorded pointing, or an explicitly approximate
+  catalogue target centre. Use the recorded UTC capture time and capture location
+  (saved observing town/city as fallback) for compass directions and altitude.
+  Show below-horizon fields clearly and include both celestial hemispheres.
+- Keep the sky offline and fast: 757 shared stars, 89 constellation figures,
+  precomputed vectors and a cached drawing, with no sky animation or web view.
+  Unknown capture time/location uses celestial coordinates without an inferred
+  local horizon; unsupported moving targets require recorded pointing.
+- Remove the repeated Repository heading/count, combine its primary actions
+  with search/filter controls, and use six-pixel top/navigation gaps.
 
 - Show the original capture filename in Preview, including after changing its
   stretch, rather than the stored archive filename with its session prefix.

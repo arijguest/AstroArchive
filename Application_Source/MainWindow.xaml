@@ -363,7 +363,7 @@
     <Setter.Value>
      <ControlTemplate TargetType="TabControl">
       <DockPanel>
-       <TabPanel DockPanel.Dock="Top" IsItemsHost="True" Margin="0,0,0,8" />
+       <TabPanel DockPanel.Dock="Top" IsItemsHost="True" Margin="0,0,0,6" />
        <ContentPresenter ContentSource="SelectedContent" />
       </DockPanel>
      </ControlTemplate>
@@ -536,13 +536,13 @@
    </ControlTemplate></Setter.Value></Setter>
   </Style>
  </Window.Resources>
- <Grid Margin="18,8,18,4" x:Name="WorkspaceRoot">
+ <Grid Margin="18,6,18,4" x:Name="WorkspaceRoot">
   <Grid.RowDefinitions>
    <RowDefinition Height="Auto" />
    <RowDefinition Height="Auto" />
    <RowDefinition Height="*" />
   </Grid.RowDefinitions>
-  <Grid x:Name="HeaderBar" Margin="0,0,0,14">
+  <Grid x:Name="HeaderBar" Margin="0,0,0,6">
    <Grid>
     <Grid.ColumnDefinitions>
      <ColumnDefinition Width="*" />
@@ -583,21 +583,7 @@
       <RowDefinition Height="*" />
       <RowDefinition Height="Auto" />
      </Grid.RowDefinitions>
-     <Grid Margin="0,0,0,10">
-      <Grid.ColumnDefinitions>
-       <ColumnDefinition Width="*" />
-       <ColumnDefinition Width="Auto" />
-      </Grid.ColumnDefinitions>
-      <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-       <TextBlock Text="Repository" FontWeight="SemiBold" FontSize="{DynamicResource UiFontHeading}" />
-       <TextBlock x:Name="LibraryCount" Foreground="{DynamicResource Muted}" Margin="12,4,0,0" />
-      </StackPanel>
-      <StackPanel Grid.Column="1" Orientation="Horizontal">
-       <Button Content="Import" Margin="0,0,8,0" x:Name="RepositoryImportButton" />
-       <Button x:Name="ExportButton" Content="Export ▾" Background="{DynamicResource Accent}" BorderBrush="{DynamicResource Accent}" Foreground="White" />
-      </StackPanel>
-     </Grid>
-     <Grid Grid.Row="1" Margin="0,0,0,10">
+     <Grid Grid.Row="1" x:Name="LibraryToolbar" Margin="0,0,0,6">
       <Grid.ColumnDefinitions>
        <ColumnDefinition Width="*" />
        <ColumnDefinition Width="Auto" />
@@ -610,6 +596,7 @@
       </Grid>
       <Button x:Name="LibraryFiltersButton" Grid.Column="1" Content="Filters" Margin="8,0,0,0" />
       <Button Grid.Column="2" x:Name="ClearButton" Content="Clear" Margin="8,0,0,0" />
+      <StackPanel Grid.Column="3" Orientation="Horizontal" Margin="8,0,0,0"><Button Content="Import" x:Name="RepositoryImportButton" Margin="0,0,8,0"/><Button x:Name="ExportButton" Content="Export ▾" Background="{DynamicResource Accent}" BorderBrush="{DynamicResource Accent}" Foreground="White"/></StackPanel>
      </Grid>
      <Grid Grid.Row="2" x:Name="LibraryBody">
       <Grid.ColumnDefinitions>
@@ -664,31 +651,35 @@
       <GridSplitter x:Name="PreviewDivider" Grid.Column="2" Width="4" HorizontalAlignment="Center" Background="{DynamicResource Border}" ResizeBehavior="PreviousAndNext" />
       <Border Grid.Column="3" x:Name="PreviewPane" Background="{DynamicResource Surface}" CornerRadius="8" BorderBrush="{DynamicResource Border}" BorderThickness="1" Padding="12">
        <Grid>
-        <Grid.RowDefinitions>
-         <RowDefinition Height="Auto" />
-         <RowDefinition Height="Auto" />
-         <RowDefinition Height="*" />
-         <RowDefinition Height="Auto" />
-         <RowDefinition Height="Auto" />
-        </Grid.RowDefinitions>
+        <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="*"/></Grid.RowDefinitions>
         <DockPanel>
-         <Button DockPanel.Dock="Right" x:Name="OpenPreviewButton" Content="Open image…" FontSize="{DynamicResource UiFontSmall}" Padding="8,5" Margin="0" ToolTip="Preview FITS, XISF, TIFF, PNG, JPEG and Windows-codec images" />
-         <TextBlock Text="PREVIEW" FontSize="{DynamicResource UiFontCaption}" FontWeight="SemiBold" Foreground="{DynamicResource Muted}" VerticalAlignment="Center" />
+         <Button DockPanel.Dock="Right" x:Name="OpenPreviewButton" Content="Open image…" FontSize="{DynamicResource UiFontSmall}" Padding="8,5" Margin="0"/>
+         <TextBlock Text="PREVIEW" FontSize="{DynamicResource UiFontCaption}" FontWeight="SemiBold" Foreground="{DynamicResource Muted}" VerticalAlignment="Center"/>
         </DockPanel>
-        <TextBlock Grid.Row="1" x:Name="PreviewName" Text="Select a capture" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" Margin="0,10,0,8" />
-      <Grid Grid.Row="2" x:Name="PreviewHost" ClipToBounds="True"><Grid x:Name="PreviewStage" ClipToBounds="True" HorizontalAlignment="Center" VerticalAlignment="Top"><Image x:Name="PreviewImage"/></Grid><TextBlock x:Name="PreviewMessage" Text="Select a capture or open an image." Foreground="{DynamicResource Muted}" HorizontalAlignment="Center" VerticalAlignment="Center" TextWrapping="Wrap" TextAlignment="Center" Margin="18"/></Grid>
-      <DockPanel Grid.Row="3" Margin="0,10,0,0"><TextBlock Text="Stretch" Foreground="{DynamicResource Muted}" VerticalAlignment="Center" Margin="0,0,8,0"/><ComboBox x:Name="StretchMode" ToolTip="Adjust the preview stretch. Auto preserves colour; Auto per channel balances the background."/></DockPanel>
-        <StackPanel Grid.Row="4">
-         <TextBlock x:Name="PreviewInfo" Foreground="{DynamicResource Muted}" FontSize="{DynamicResource UiFontCaption}" TextTrimming="CharacterEllipsis" Margin="0,8,0,0" />
-         <Expander Header="Capture details" Margin="0,8,0,0" Foreground="{DynamicResource Muted}">
-          <ScrollViewer MaxHeight="130">
+        <TextBlock Grid.Row="1" x:Name="PreviewName" Text="Select a capture" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" Margin="0,8,0,6"/>
+        <Grid Grid.Row="2" x:Name="PreviewHost" ClipToBounds="True">
+         <Grid x:Name="PreviewStage" ClipToBounds="True" HorizontalAlignment="Center" VerticalAlignment="Top">
+          <Image x:Name="PreviewImage"/>
+          <TextBlock x:Name="PreviewMessage" Text="Select a capture or open an image." Foreground="{DynamicResource Muted}" HorizontalAlignment="Center" VerticalAlignment="Center" TextWrapping="Wrap" TextAlignment="Center" Margin="18"/>
+         </Grid>
+         <StackPanel x:Name="PreviewFooter" VerticalAlignment="Top" Margin="0,4,0,0">
+          <DockPanel><TextBlock Text="Stretch" FontSize="{DynamicResource UiFontSmall}" Foreground="{DynamicResource Muted}" VerticalAlignment="Center" Margin="0,0,6,0"/><ComboBox x:Name="StretchMode" FontSize="{DynamicResource UiFontSmall}" Padding="6,3" MinHeight="0" ToolTip="Adjust the preview stretch without changing image data."/></DockPanel>
+          <TextBlock x:Name="PreviewInfo" Foreground="{DynamicResource Muted}" FontSize="{DynamicResource UiFontCaption}" TextTrimming="CharacterEllipsis" Margin="0,3,0,0"/>
+          <Expander x:Name="PreviewDetails" Header="Capture details" FontSize="{DynamicResource UiFontSmall}" Margin="0,3,0,0" Foreground="{DynamicResource Muted}">
+           <ScrollViewer MaxHeight="85" VerticalScrollBarVisibility="Auto" local:MenuScrolling.Enabled="True">
+            <StackPanel><TextBlock x:Name="LibrarySummaryLabel" Foreground="{DynamicResource Muted}" FontSize="{DynamicResource UiFontSmall}" TextWrapping="Wrap"/><TextBlock x:Name="DetailsLabel" Text="Select a capture to view metadata." Foreground="{DynamicResource Muted}" FontSize="{DynamicResource UiFontSmall}" TextWrapping="Wrap" Margin="0,3,0,0"/></StackPanel>
+           </ScrollViewer>
+          </Expander>
+          <Border BorderBrush="{DynamicResource Border}" BorderThickness="0,1,0,0" Padding="0,6,0,0" Margin="0,6,0,0">
            <StackPanel>
-            <TextBlock x:Name="LibrarySummaryLabel" Foreground="{DynamicResource Muted}" FontSize="{DynamicResource UiFontSmall}" TextWrapping="Wrap" Margin="0,0,0,8" />
-            <TextBlock x:Name="DetailsLabel" Text="Select a capture to view metadata." TextWrapping="Wrap" Foreground="{DynamicResource Muted}" FontSize="{DynamicResource UiFontSmall}" Margin="0,6,0,0" />
+            <TextBlock x:Name="PreviewSkyTitle" Text="CAPTURE SKY" FontSize="{DynamicResource UiFontCaption}" FontWeight="SemiBold" Foreground="{DynamicResource Muted}" TextTrimming="CharacterEllipsis"/>
+            <TextBlock x:Name="PreviewSkyTime" Text="Capture time unknown" FontSize="{DynamicResource UiFontCaption}" Foreground="{DynamicResource Muted}" Margin="0,3,0,0" TextTrimming="CharacterEllipsis"/>
+            <local:SkyGlobeView x:Name="PreviewSky" Height="140" FontSize="{DynamicResource UiFontCaption}"/>
+            <TextBlock x:Name="PreviewSkySummary" Text="Select a capture to locate its field." FontSize="{DynamicResource UiFontCaption}" Foreground="{DynamicResource Muted}" TextTrimming="CharacterEllipsis"/>
            </StackPanel>
-          </ScrollViewer>
-         </Expander>
-        </StackPanel>
+          </Border>
+         </StackPanel>
+        </Grid>
        </Grid>
       </Border>
      </Grid>
@@ -908,31 +899,35 @@
       <GridSplitter Grid.Column="2" Width="4" HorizontalAlignment="Center" Background="{DynamicResource Border}" ResizeBehavior="PreviousAndNext"/>
       <Border Grid.Column="3" x:Name="EditedPreviewPane" Background="{DynamicResource Surface}" CornerRadius="8" BorderBrush="{DynamicResource Border}" BorderThickness="1" Padding="12">
        <Grid>
-        <Grid.RowDefinitions>
-         <RowDefinition Height="Auto" />
-         <RowDefinition Height="Auto" />
-         <RowDefinition Height="*" />
-         <RowDefinition Height="Auto" />
-         <RowDefinition Height="Auto" />
-        </Grid.RowDefinitions>
+        <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="*"/></Grid.RowDefinitions>
         <DockPanel>
-         <Button DockPanel.Dock="Right" x:Name="EditedOpenPreviewButton" Content="Enlarge…" FontSize="{DynamicResource UiFontSmall}" Padding="8,5" Margin="0" ToolTip="Preview FITS, XISF, TIFF, PNG, JPEG and Windows-codec images" />
-         <TextBlock Text="PREVIEW" FontSize="{DynamicResource UiFontCaption}" FontWeight="SemiBold" Foreground="{DynamicResource Muted}" VerticalAlignment="Center" />
+         <Button DockPanel.Dock="Right" x:Name="EditedOpenPreviewButton" Content="Enlarge…" FontSize="{DynamicResource UiFontSmall}" Padding="8,5" Margin="0"/>
+         <TextBlock Text="PREVIEW" FontSize="{DynamicResource UiFontCaption}" FontWeight="SemiBold" Foreground="{DynamicResource Muted}" VerticalAlignment="Center"/>
         </DockPanel>
-        <TextBlock Grid.Row="1" x:Name="EditedPreviewName" Text="Select an edited image" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" Margin="0,10,0,8" />
-      <Grid Grid.Row="2" x:Name="EditedPreviewHost" ClipToBounds="True"><Grid x:Name="EditedPreviewStage" ClipToBounds="True" HorizontalAlignment="Center" VerticalAlignment="Top"><Image x:Name="EditedPreviewImage"/></Grid><TextBlock x:Name="EditedPreviewMessage" Text="Select an edited image or open an image." Foreground="{DynamicResource Muted}" HorizontalAlignment="Center" VerticalAlignment="Center" TextWrapping="Wrap" TextAlignment="Center" Margin="18"/></Grid>
-      <DockPanel Grid.Row="3" Margin="0,10,0,0"><TextBlock Text="Stretch" Foreground="{DynamicResource Muted}" VerticalAlignment="Center" Margin="0,0,8,0"/><ComboBox x:Name="EditedStretchMode" ToolTip="Adjust the preview stretch. Auto preserves colour; Auto per channel balances the background."/></DockPanel>
-        <StackPanel Grid.Row="4">
-         <TextBlock x:Name="EditedPreviewInfo" Foreground="{DynamicResource Muted}" FontSize="{DynamicResource UiFontCaption}" TextTrimming="CharacterEllipsis" Margin="0,8,0,0" />
-         <Expander Header="Image details" Margin="0,8,0,0" Foreground="{DynamicResource Muted}">
-          <ScrollViewer MaxHeight="130">
+        <TextBlock Grid.Row="1" x:Name="EditedPreviewName" Text="Select a capture" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" Margin="0,8,0,6"/>
+        <Grid Grid.Row="2" x:Name="EditedPreviewHost" ClipToBounds="True">
+         <Grid x:Name="EditedPreviewStage" ClipToBounds="True" HorizontalAlignment="Center" VerticalAlignment="Top">
+          <Image x:Name="EditedPreviewImage"/>
+          <TextBlock x:Name="EditedPreviewMessage" Text="Select a capture or open an image." Foreground="{DynamicResource Muted}" HorizontalAlignment="Center" VerticalAlignment="Center" TextWrapping="Wrap" TextAlignment="Center" Margin="18"/>
+         </Grid>
+         <StackPanel x:Name="EditedPreviewFooter" VerticalAlignment="Top" Margin="0,4,0,0">
+          <DockPanel><TextBlock Text="Stretch" FontSize="{DynamicResource UiFontSmall}" Foreground="{DynamicResource Muted}" VerticalAlignment="Center" Margin="0,0,6,0"/><ComboBox x:Name="EditedStretchMode" FontSize="{DynamicResource UiFontSmall}" Padding="6,3" MinHeight="0" ToolTip="Adjust the preview stretch without changing image data."/></DockPanel>
+          <TextBlock x:Name="EditedPreviewInfo" Foreground="{DynamicResource Muted}" FontSize="{DynamicResource UiFontCaption}" TextTrimming="CharacterEllipsis" Margin="0,3,0,0"/>
+          <Expander x:Name="EditedPreviewDetails" Header="Image details" FontSize="{DynamicResource UiFontSmall}" Margin="0,3,0,0" Foreground="{DynamicResource Muted}">
+           <ScrollViewer MaxHeight="85" VerticalScrollBarVisibility="Auto" local:MenuScrolling.Enabled="True">
+            <StackPanel><TextBlock x:Name="EditedLibrarySummaryLabel" Foreground="{DynamicResource Muted}" FontSize="{DynamicResource UiFontSmall}" TextWrapping="Wrap"/><TextBlock x:Name="EditedDetailsLabel" Text="Select a capture to view metadata." Foreground="{DynamicResource Muted}" FontSize="{DynamicResource UiFontSmall}" TextWrapping="Wrap" Margin="0,3,0,0"/></StackPanel>
+           </ScrollViewer>
+          </Expander>
+          <Border BorderBrush="{DynamicResource Border}" BorderThickness="0,1,0,0" Padding="0,6,0,0" Margin="0,6,0,0">
            <StackPanel>
-            <TextBlock x:Name="EditedLibrarySummaryLabel" Foreground="{DynamicResource Muted}" FontSize="{DynamicResource UiFontSmall}" TextWrapping="Wrap" Margin="0,0,0,8" />
-            <TextBlock x:Name="EditedDetailsLabel" Text="Select an edited image to view metadata." TextWrapping="Wrap" Foreground="{DynamicResource Muted}" FontSize="{DynamicResource UiFontSmall}" Margin="0,6,0,0" />
+            <TextBlock x:Name="EditedPreviewSkyTitle" Text="CAPTURE SKY" FontSize="{DynamicResource UiFontCaption}" FontWeight="SemiBold" Foreground="{DynamicResource Muted}" TextTrimming="CharacterEllipsis"/>
+            <TextBlock x:Name="EditedPreviewSkyTime" Text="Capture time unknown" FontSize="{DynamicResource UiFontCaption}" Foreground="{DynamicResource Muted}" Margin="0,3,0,0" TextTrimming="CharacterEllipsis"/>
+            <local:SkyGlobeView x:Name="EditedPreviewSky" Height="140" FontSize="{DynamicResource UiFontCaption}"/>
+            <TextBlock x:Name="EditedPreviewSkySummary" Text="Select a capture to locate its field." FontSize="{DynamicResource UiFontCaption}" Foreground="{DynamicResource Muted}" TextTrimming="CharacterEllipsis"/>
            </StackPanel>
-          </ScrollViewer>
-         </Expander>
-        </StackPanel>
+          </Border>
+         </StackPanel>
+        </Grid>
        </Grid>
       </Border>
      </Grid>
