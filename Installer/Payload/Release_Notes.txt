@@ -1,3 +1,21 @@
+AstroArchive 1.13.2 — responsive progressive previews
+Package 1.13.2.1
+- Clear only image pixels while a new capture loads. Keep the last image frame,
+  navigation area and remaining sky space stable; disable image navigation until
+  pixels arrive. Update sky pointing and capture time immediately from indexed
+  metadata, or read external/Edited metadata before decoding image pixels.
+- Paint a fast Linear display first, then apply the selected stretch in the
+  background. Linear/solar/planetary previews use one pass. Preserve zoom and pan
+  between the initial and stretched display, and keep source files unchanged.
+- Skip stretch statistics for Linear rendering. Coalesce rapid selections, cancel
+  superseded work and serialize decoding so uncancellable codecs cannot flood the
+  worker pool. Reject stale images and sky results at each display stage.
+- Reuse decoded display samples in a 64 MiB memory cache. Keep metadata/display
+  state separate; invalidate changed file length/time and distinguish HDUs,
+  sequence frames and Bayer choices. Clear the cache when closing the application.
+- Retain the current frame and sky if an image cannot be decoded. Apply the same
+  loading behaviour to Repository and Edited.
+
 AstroArchive 1.13.1 — faster repeat telescope scans
 Package 1.13.1.1
 - Match source session folders against completed imports for the physical telescope

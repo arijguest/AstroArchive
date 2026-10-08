@@ -16,7 +16,7 @@ namespace AstroArchive {
   readonly Button playbackButton;Action togglePlayback;
   readonly Button zoomOutButton,zoomInButton,fitButton;readonly List<Button> panButtons=new List<Button>();
   readonly PreviewZoom zoom=new PreviewZoom();readonly MatrixTransform transform=new MatrixTransform();
-  PreviewGeometry geometry;bool fitting=true,dragging;Point previous;
+  PreviewGeometry geometry;bool fitting=true,dragging,loading;Point previous;
   public PreviewViewport(Grid host,Grid viewport,Image image,FrameworkElement remainder=null){
    this.host=host;this.viewport=viewport;this.image=image;this.remainder=remainder;
    if(remainder!=null){remainder.VerticalAlignment=VerticalAlignment.Top;remainder.RenderTransform=remainderOffset;}
@@ -50,6 +50,7 @@ namespace AstroArchive {
    AutomationProperties.SetName(button,label);UiHelp.Tip(button,label=="Recenter image"?"Show the whole image and reset panning (F).":label.StartsWith("View")?label+" after zooming.":label);ToolTipService.SetShowOnDisabled(button,true);button.Click+=(s,e)=>{action();e.Handled=true;};panel.Children.Add(button);return button;
   }
   public void SetImage(BitmapSource source,bool reset){
+   loading=false;
    if(media!=null){imageLayer.Children.Remove(media);media=null;}image.Visibility=Visibility.Visible;
    if(source==null)SetPlayback(null,false);
    if(viewport.IsMouseCaptured)viewport.ReleaseMouseCapture();
@@ -59,7 +60,17 @@ namespace AstroArchive {
    image.Width=source.PixelWidth;image.Height=source.PixelHeight;geometry=new PreviewGeometry(source.PixelWidth,source.PixelHeight);
    if(reset||changed)fitting=true;Resize();
   }
+  public void BeginLoading(int width=0,int height=0){
+   if(media!=null){imageLayer.Children.Remove(media);media=null;}SetPlayback(null,false);
+   if(viewport.IsMouseCaptured)viewport.ReleaseMouseCapture();
+   image.Visibility=Visibility.Visible;image.Source=null;controls.IsEnabled=false;loading=true;
+   // Keep the last frame until the new pixels arrive. On a first load, indexed
+   // dimensions can establish its frame without opening/decoding the file.
+   if(geometry==null&&width>0&&height>0){geometry=new PreviewGeometry(width,height);image.Width=width;image.Height=height;fitting=true;}
+   toolbarHost.Visibility=geometry==null?Visibility.Collapsed:Visibility.Visible;viewport.Background=Brushes.Black;Resize();
+  }
   public void SetMedia(MediaElement element,int width,int height){
+   loading=false;
    if(media!=null&&media!=element)imageLayer.Children.Remove(media);media=element;if(!imageLayer.Children.Contains(element))imageLayer.Children.Add(element);
    image.Visibility=Visibility.Collapsed;image.Width=width;image.Height=height;element.Width=width;element.Height=height;element.Stretch=Stretch.Fill;element.RenderTransform=transform;
    geometry=new PreviewGeometry(width,height);controls.IsEnabled=true;toolbarHost.Visibility=Visibility.Visible;viewport.Background=Brushes.Black;fitting=true;Resize();
@@ -74,7 +85,7 @@ namespace AstroArchive {
    viewport.Width=width;viewport.Height=height;
    // Fit the whole image first. The sky receives only genuinely unused space;
    // it never reserves a fixed height or feeds its own size back into image fit.
-   if(remainder!=null){double top=Math.Min(host.ActualHeight,height+toolbar),space=Math.Max(0,host.ActualHeight-top);remainderOffset.Y=top;remainder.Height=space;remainder.Visibility=geometry!=null&&space>=50?Visibility.Visible:Visibility.Collapsed;}
+   if(remainder!=null){double top=Math.Min(host.ActualHeight,height+toolbar),space=Math.Max(0,host.ActualHeight-top);remainderOffset.Y=top;remainder.Height=space;remainder.Visibility=(geometry!=null||loading)&&space>=50?Visibility.Visible:Visibility.Collapsed;}
    // Keep the bitmap's existing measure path, with a separate control area
    // immediately below the image rather than a new auto-sized image row.
    toolbarHost.MaxWidth=Math.Max(0,width-12);toolbarHost.Margin=new Thickness(6,height+6,6,0);

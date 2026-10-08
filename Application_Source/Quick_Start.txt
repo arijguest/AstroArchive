@@ -122,6 +122,15 @@ The compact table shows filename, target, type, acquisition date, exposure and f
 Use the information icon beside Stretch and Open image in the preview header for
 dimensions, device, camera, gain, temperature and classification. Escape closes it.
 
+While a capture loads, only its image pixels clear. The image frame and sky area
+stay in place; the sky updates immediately using the selected capture's metadata.
+Image navigation is disabled until pixels arrive. A fast Linear image appears
+first, then the selected stretch is applied in the background. Very faint data may
+look dark briefly. Zoom/pan applied to the initial image are retained when its
+stretch finishes. Linear and solar/planetary views do not need a second pass.
+Rapid selections cancel passed-over work. Recently decoded previews use a bounded
+64 MiB memory cache, checked against source size/time and image/HDU identity.
+
 Stretch changes the display only; source pixels and FITS headers stay unchanged.
 - Linear: no nonlinear stretch; the initial choice for normal raster images.
 - Auto: reveals faint data with linked RGB unless colour compensation is needed.
