@@ -15,6 +15,16 @@ namespace AstroArchive {
   public static SkyVector Horizontal(double azimuth,double altitude){double a=azimuth*Math.PI/180,d=altitude*Math.PI/180,c=Math.Cos(d);return new SkyVector(c*Math.Sin(a),c*Math.Cos(a),Math.Sin(d));}
   public double Dot(SkyVector other){return X*other.X+Y*other.Y+Z*other.Z;}
  }
+ // Only the viewing camera moves; capture coordinates, epoch and horizon stay fixed.
+ public sealed class SkyGlobeCamera {
+  double homeYaw,homeTilt;
+  public double Yaw{get;private set;}public double Tilt{get;private set;}public double Zoom{get;private set;}
+  public SkyGlobeCamera(){SetHome(180,25);}
+  public void SetHome(double yaw,double tilt){if(!CaptureSky.Finite(yaw)||!CaptureSky.Finite(tilt))return;homeYaw=SkyOrientation.Wrap(yaw);homeTilt=Math.Max(-89,Math.Min(89,tilt));Reset();}
+  public void Reset(){Yaw=homeYaw;Tilt=homeTilt;Zoom=1;}
+  public void Orbit(double yaw,double tilt){if(!CaptureSky.Finite(yaw)||!CaptureSky.Finite(tilt))return;Yaw=SkyOrientation.Wrap(Yaw+yaw%360);Tilt=Math.Max(-89,Math.Min(89,Tilt+tilt));}
+  public void Magnify(double factor){if(!CaptureSky.Finite(factor)||factor<=0)return;Zoom=Math.Max(0.6,Math.Min(3,Zoom*factor));}
+ }
  public sealed class SkyFigure {
   public string Name;public SkyVector Label;public int[][] Paths;
  }

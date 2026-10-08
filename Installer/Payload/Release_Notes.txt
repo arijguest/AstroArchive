@@ -1,3 +1,39 @@
+AstroArchive 1.12.3 — compact navigation, IC common names and interactive sky
+Package 1.12.3.1
+- Capture sky globes in Repository and Edited now support drag rotation,
+  scroll/pinch zoom, keyboard navigation and a small reset button. Capture
+  coordinates, time and horizon stay fixed while exploring; unchanged captures
+  retain the view and new sky contexts restore it. The guide includes this step.
+
+- Replace the separate Repository/Import/Mosaic/Edited selector row with a purple
+  page dropdown immediately before Settings. Show the active page and reclaim
+  the row's height on every page, with a six-pixel gap below the toolbar.
+- Start on Import when the repository is empty or no repository is configured;
+  otherwise open Repository, regardless of search/filters.
+- Preserve page contents, search, filters, selection and import progress when
+  switching. Menu actions and the walkthrough keep the dropdown synchronized.
+- Add Ctrl+1–4 for Repository, Edited, Mosaic and Import, plus Ctrl+Tab and
+  Ctrl+Shift+Tab to cycle pages. Existing search, Import and Export shortcuts stay.
+- Update the interactive guide with a first step that highlights and opens the
+  dropdown. Document the new navigation in the bundled searchable guide.
+- Keep navigation in one row at narrow widths and larger text sizes, using
+  compact branding and a Support label for Buy Me a Coffee where needed.
+
+- Recognize IC63 as the Ghost of Cassiopeia and add missing IC common names,
+  including Tadpole, Spirograph, Running Chicken, Lemon Slice, Retina, Blue
+  Horsehead, Southern Pleiades, Summer Beehive and Graff's Cluster. Keep existing
+  names and recognize IC2118 as the Witch Head Nebula's alternate catalogue ID.
+- Prefer full colloquial names in filenames over shorter names contained inside
+  them, while keeping explicitly mixed targets ambiguous. Existing capture labels
+  and search gain the names without modifying image files or sky positions.
+
+Windows checks exercise page/state retention, selector/menu synchronization,
+keyboard cycling, popup contrast and six-pixel layout gaps in both themes, at
+100/150% text sizes and 1060/1380 window widths. The release retains capture sky
+previews, Edited workflows and the existing installer/update validation.
+
+Previous release notes
+
 AstroArchive 1.12.2 — Windows application icon
 Package 1.12.2.1
 

@@ -1,12 +1,15 @@
-# AstroArchive 1.12.2
+# AstroArchive 1.12.3
+
+The purple page dropdown beside Settings replaces the tab row. Ctrl+1–4 selects Repository, Edited, Mosaic or Import; Ctrl+Tab cycles pages. The interactive guide introduces the selector.
 
 Repository defaults to expandable subframe session summaries. Edited shares its targets/table/Preview layout and supports reviewed mixed-folder import, GIF associations, starless/stars-only classification and acquisition metadata recovery. Animated GIF, SER and Windows video previews have Pause/Play controls. Dump processing shows progress in a separate window.
 
 Compact preview controls now follow the image directly. Repository and Edited
 include a theme-aware, offline constellation globe using recorded pointing, UTC
 capture time and capture location (saved observing place as fallback). Missing
-time/site uses celestial coordinates without an inferred horizon. Its 757 star
-vectors and drawing are cached; no sky timer, network or 3D engine is required.
+time/site uses celestial coordinates without an inferred horizon. Drag rotates the globe, scroll/pinch zooms and the reset button restores its capture
+view. IC63 is labelled Ghost of Cassiopeia alongside other IC common-name aliases.
+Its 757 star vectors and drawing are cached; no sky timer, network or 3D engine is required.
 
 Portable Windows 10/11 x64 WPF app for archiving astronomical image originals and creating verified stacking projects. Open `AstroArchive.exe`; read `Quick_Start.txt` for the complete workflow.
 
@@ -84,7 +87,7 @@ Portable Windows 10/11 x64 WPF app for archiving astronomical image originals an
 
 Hover over controls and table headers for explanations. **Guide** offers common
 help topics, full-text search, troubleshooting, shortcuts and a frame glossary.
-**F1** opens help for the current tab; **Ctrl+F** searches within the help window.
+**F1** opens help for the current page; **Ctrl+F** searches within the help window.
 The guide is bundled for offline use and can be saved as text. The import tab is
 labelled **Import**.
 

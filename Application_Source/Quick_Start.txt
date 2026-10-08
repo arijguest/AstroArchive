@@ -1,4 +1,4 @@
-AstroArchive 1.12.2
+AstroArchive 1.12.3
 Windows 10/11 x64 desktop app. Built-in .NET Framework 4.8 and Windows SQLite.
 Runs offline. No Python or Google login required.
 
@@ -26,7 +26,7 @@ START HERE
 GUIDE AND TOOLTIPS
 Hover over controls or table headers for explanations, including disabled controls.
 Guide opens a help menu with common topics, troubleshooting and Search the guide.
-F1 in the main window opens help for the current tab. In the guide, search matches
+F1 in the main window opens help for the current page. In the guide, search matches
 every entered word across topic titles and complete text. Clear restores all topics.
 Choose a topic on the left; guide text can be selected and copied. Save guide saves
 the complete bundled guide as a text file. Help works offline.
@@ -151,6 +151,11 @@ sky globe fills any remaining space, resizes with the window and image aspect, a
 hides when the image uses all available height. It does not reserve image space.
 Constellation names, compass/pole labels and sky captions are omitted; hover over
 the map for capture time, pointing, altitude, direction and below-horizon context.
+
+Drag the globe to rotate it; scroll or pinch to zoom. With the globe focused,
+arrow keys rotate and plus/minus zoom. The small ↺ button, double-click or Home
+restores the capture view. Changing the view never edits capture coordinates,
+time or location. A new sky context resets the view; refreshing it preserves it.
 
 The globe includes both celestial hemispheres and matches your theme. Frame
 pointing takes precedence over an approximate catalogue target centre. Recorded
@@ -353,6 +358,9 @@ The left target list groups objects under small, always-visible type headings:
 Solar system, Comets, Nebulae, Galaxies, Star clusters and Stars. Custom targets
 without a recognised type appear under Other targets; Calibration and Unidentified
 stay separate. Only populated groups are shown. All targets remains at the top.
+IC63 also appears as Ghost of Cassiopeia. The bundled common-name aliases include
+other IC objects such as Tadpole, Spirograph, Witch Head, Running Chicken, Retina
+and Blue Horsehead nebulae; search accepts either the name or catalogue number.
 Catalogue types determine known deep-sky groups, including planetary nebulae and
 supernova remnants under Nebulae. Standard comet designations are recognised.
 Each row shows its common name (or target label) and a badge counting all files.
@@ -472,8 +480,10 @@ copies from your editor and save outputs alongside them. Ready-to-stack exports
 remain available for manual loading in stacking applications.
 
 KEYBOARD SHORTCUTS
-Main window: Ctrl+F focuses search; Ctrl+I opens Import; Ctrl+E opens Export.
-Alt activates menu access keys. F1 opens help for the current tab.
+Main window: Ctrl+1–4 selects Repository, Edited, Mosaic or Import; Ctrl+Tab
+cycles pages (Shift reverses). Ctrl+F focuses search; Ctrl+I opens Import;
+Ctrl+E opens Export.
+Alt activates menu access keys. F1 opens help for the current page.
 Guide: Ctrl+F or F1 focuses search; Up/Down browses topics when the topic list has
 focus. Ctrl+C copies selected guide text. Escape closes the guide.
 Library/import: Ctrl-click toggles rows; Shift-click selects a range. Shift-click
@@ -623,6 +633,16 @@ codecs leave original-file import/export available. Unsupported complex/subblock
 layouts remain originals. Base64 inline/embedded XISF stays supported.
 
 NAVIGATION, ACCESSIBILITY AND WALKTHROUGH
+The purple page dropdown immediately before Settings shows the active workspace.
+Startup opens Import when the repository is empty or none is configured; otherwise
+it opens Repository. This uses the whole repository, regardless of search/filters.
+Choose Repository, Edited, Mosaic or Import there. Ctrl+1, Ctrl+2, Ctrl+3 and
+Ctrl+4 select those pages; Ctrl+Tab cycles forward and Ctrl+Shift+Tab cycles back.
+Switching retains each page's search, filters, selection and import progress.
+The pages begin six pixels below the toolbar without a separate tab row.
+At narrow widths or larger text sizes, the branding uses its compact logo and
+Buy Me a Coffee is labelled Support, keeping navigation on one line.
+
 Import, Export, Repository, Settings, Guide and Buy Me a Coffee are grouped at
 upper left. The AstroArchive logo and title are at upper right. The concise
 repository path sits below its data table; click it to open the folder in
@@ -661,7 +681,8 @@ selected in Appearance. Alt reveals menu access keys; arrow keys navigate menus,
 Escape closes them, and Tab follows visible controls with a clear focus outline.
 Ctrl+F focuses search; Ctrl+I opens Import; Ctrl+E opens Export; F1 opens page help.
 
-New installations show an optional interactive walkthrough. Next and Back move
+New installations show an optional interactive walkthrough. Its first step
+highlights the purple page dropdown; Try the page selector opens it. Next and Back move
 between steps and highlight the relevant controls; action buttons open the
 corresponding menu or preferences. The walkthrough never imports or deletes
 files automatically. Skip/close dismisses it, and Guide > Interactive walkthrough
