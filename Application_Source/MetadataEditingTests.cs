@@ -15,7 +15,9 @@ namespace AstroArchive {
    });
    Test("Opening and saving unchanged metadata preserves facts, inferred mount, times and units",()=>{
     var f=EditableFixture();string before=Util.Serialize(f);var patch=new MetadataEditing(new[]{f}).Patch();Check(patch.Count==0&&patch.Validate()==null,"Untouched form generated changes");
-    Check(Util.Serialize(patch.Apply(f))==before&&Util.Serialize(f)==before,"No-op rewrote evidence or metadata");
+    // CLR reflection cache order can change JSON member order after sort getters.
+    var expected=Util.Json().DeserializeObject(before);
+    Check(SameSnapshotValue(Util.Json().DeserializeObject(Util.Serialize(patch.Apply(f))),expected)&&SameSnapshotValue(Util.Json().DeserializeObject(Util.Serialize(f)),expected),"No-op rewrote evidence or metadata");
    });
    Test("Batch metadata distinguishes common, missing and mixed values without adopting the first file",()=>{
     var a=EditableFixture();var b=a.Clone();b.Exposure=60;b.Gain=null;b.CameraId=null;b.BinY=2;b.LinearData=true;b.Target="M45";
