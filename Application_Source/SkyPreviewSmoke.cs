@@ -28,6 +28,24 @@ namespace AstroArchive {
    if(SkyHasText(VisualTreeHelper.GetDrawing(globe)))throw new Exception("Sky still draws labels");
    preview.SmokeGestures();
   }
+  void SmokeSkyNavigation(string prefix,PreviewViewport preview,Frame frame){
+   var globe=(SkyGlobeView)Window.FindName(prefix+"PreviewSky");var host=(Grid)Window.FindName(prefix+"PreviewHost");var original=((Image)Window.FindName(prefix+"PreviewImage")).Source as BitmapSource;
+   try{
+    // Runners can constrain window height to their desktop. A wider portrait
+    // fixture guarantees genuine remaining sky space before exercising inputs.
+    if(!globe.IsVisible){preview.SetImage(BitmapSource.Create(1200,1280,96,96,PixelFormats.Rgb24,null,new byte[1200*1280*3],1200*3),true);PumpPopupLayout();preview.Resize();PumpPopupLayout();}
+    if(!globe.IsVisible||globe.ActualHeight<50)throw new Exception("Sky gesture fixture has no visible globe: "+prefix+", host "+host.RenderSize);
+    int builds=globe.DrawingBuilds;
+       var sky=globe.Context;double yaw=globe.Camera.Yaw,tilt=globe.Camera.Tilt;globe.RotateView(25,12);PumpPopupLayout();
+       if(globe.Camera.Yaw==yaw||globe.Camera.Tilt==tilt||globe.DrawingBuilds<=builds||!ReferenceEquals(sky,globe.Context))throw new Exception("Sky drag did not rotate without changing capture data: "+prefix+", camera "+yaw+","+tilt+" -> "+globe.Camera.Yaw+","+globe.Camera.Tilt+", draws "+builds+" -> "+globe.DrawingBuilds);
+       var wheel=new MouseWheelEventArgs(Mouse.PrimaryDevice,Environment.TickCount,120){RoutedEvent=Mouse.MouseWheelEvent};globe.RaiseEvent(wheel);PumpPopupLayout();if(!wheel.Handled||globe.Camera.Zoom<=1)throw new Exception("Sky scroll did not zoom");
+       UpdateCaptureSky(prefix,frame);PumpPopupLayout();if(globe.Camera.Zoom<=1)throw new Exception("Refreshing unchanged capture reset sky exploration");
+       var key=new KeyEventArgs(Keyboard.PrimaryDevice,PresentationSource.FromVisual(globe),0,Key.Left){RoutedEvent=Keyboard.KeyDownEvent};double rotated=globe.Camera.Yaw;globe.RaiseEvent(key);if(!key.Handled||globe.Camera.Yaw==rotated)throw new Exception("Sky keyboard navigation did not rotate");
+       B(prefix+"PreviewSkyResetButton").RaiseEvent(new RoutedEventArgs(Button.ClickEvent));PumpPopupLayout();if(globe.Camera.Yaw!=yaw||globe.Camera.Tilt!=tilt||globe.Camera.Zoom!=1)throw new Exception("Sky reset button did not restore capture view");
+       if(!globe.Focusable||!globe.IsManipulationEnabled)throw new Exception("Sky touch or keyboard navigation is disabled");
+       var reset=B(prefix+"PreviewSkyResetButton");var resetBounds=reset.TransformToAncestor(host).TransformBounds(new Rect(reset.RenderSize));var skyBounds=globe.TransformToAncestor(host).TransformBounds(new Rect(globe.RenderSize));if(resetBounds.Top<skyBounds.Top||resetBounds.Bottom>skyBounds.Bottom||resetBounds.Right>host.ActualWidth)throw new Exception("Sky reset is outside the globe area");
+   }finally{preview.SetImage(original,true);PumpPopupLayout();preview.Resize();PumpPopupLayout();}
+  }
   void SmokeCaptureSky(string output){
    double width=Window.Width,height=Window.Height;int scale=settings.TextScalePercent,page=((TabControl)Window.FindName("MainTabs")).SelectedIndex;string theme=settings.ThemeMode;int cases=0;
    var frame=new Frame{Target="M45",ObservedUtc="2026-10-07T23:00:00Z",Latitude=51.5,Longitude=0};var rgb=new byte[720*1280*3];var colours=new[]{new byte[]{220,40,40},new byte[]{40,220,40},new byte[]{40,40,220},new byte[]{220,220,40}};
@@ -44,14 +62,7 @@ namespace AstroArchive {
        var imageArea=stage.TransformToAncestor(host).TransformBounds(new Rect(stage.RenderSize));var full=CaptureSidebar(host,Path.Combine(output,"AstroArchive_Capture_Sky_"+prefix+mode+"_"+textScale+".png"));var pixels=new byte[full.PixelWidth*full.PixelHeight*4];full.CopyPixels(pixels,full.PixelWidth*4,0);
        for(int quadrant=0;quadrant<4;quadrant++){int x=(int)(imageArea.X+imageArea.Width*(quadrant%2==0?0.2:0.8)),y=(int)(imageArea.Y+imageArea.Height*(quadrant<2?0.2:0.8)),offset=(y*full.PixelWidth+x)*4;var expected=colours[quadrant];if(Math.Abs(pixels[offset+2]-expected[0])>12||Math.Abs(pixels[offset+1]-expected[1])>12||Math.Abs(pixels[offset]-expected[2])>12||pixels[offset+3]<250)throw new Exception("Sidebar image quadrant clipped: "+prefix+mode+textScale+" quadrant "+quadrant);}
        if(!globe.Context.HasHorizon)throw new Exception("Capture sky did not use frame time/site: "+prefix+mode+textScale+"; "+globe.Context.Evidence);int builds=globe.DrawingBuilds;globe.InvalidateVisual();PumpPopupLayout();if(globe.DrawingBuilds!=builds)throw new Exception("Unchanged sky rebuilt cached drawing");
-       var sky=globe.Context;double yaw=globe.Camera.Yaw,tilt=globe.Camera.Tilt;globe.RotateView(25,12);PumpPopupLayout();
-       if(globe.Camera.Yaw==yaw||globe.Camera.Tilt==tilt||globe.DrawingBuilds<=builds||!ReferenceEquals(sky,globe.Context))throw new Exception("Sky drag did not rotate without changing capture data");
-       var wheel=new MouseWheelEventArgs(Mouse.PrimaryDevice,Environment.TickCount,120){RoutedEvent=Mouse.MouseWheelEvent};globe.RaiseEvent(wheel);PumpPopupLayout();if(!wheel.Handled||globe.Camera.Zoom<=1)throw new Exception("Sky scroll did not zoom");
-       UpdateCaptureSky(prefix,frame);PumpPopupLayout();if(globe.Camera.Zoom<=1)throw new Exception("Refreshing unchanged capture reset sky exploration");
-       var key=new KeyEventArgs(Keyboard.PrimaryDevice,PresentationSource.FromVisual(globe),0,Key.Left){RoutedEvent=Keyboard.KeyDownEvent};double rotated=globe.Camera.Yaw;globe.RaiseEvent(key);if(!key.Handled||globe.Camera.Yaw==rotated)throw new Exception("Sky keyboard navigation did not rotate");
-       B(prefix+"PreviewSkyResetButton").RaiseEvent(new RoutedEventArgs(Button.ClickEvent));PumpPopupLayout();if(globe.Camera.Yaw!=yaw||globe.Camera.Tilt!=tilt||globe.Camera.Zoom!=1)throw new Exception("Sky reset button did not restore capture view");
-       if(!globe.Focusable||!globe.IsManipulationEnabled)throw new Exception("Sky touch or keyboard navigation is disabled");
-       var reset=B(prefix+"PreviewSkyResetButton");var resetBounds=reset.TransformToAncestor(host).TransformBounds(new Rect(reset.RenderSize));var skyBounds=globe.TransformToAncestor(host).TransformBounds(new Rect(globe.RenderSize));if(resetBounds.Top<skyBounds.Top||resetBounds.Bottom>skyBounds.Bottom||resetBounds.Right>host.ActualWidth)throw new Exception("Sky reset is outside the globe area");
+       SmokeSkyNavigation(prefix,preview,frame);
        foreach(string control in new[]{prefix+"PreviewDetailsButton",prefix+"OpenPreviewButton",prefix.Length==0?"StretchMode":"EditedStretchMode"}){var item=(FrameworkElement)Window.FindName(control);var bounds=item.TransformToAncestor(header).TransformBounds(new Rect(item.RenderSize));if(bounds.Right>header.ActualWidth+1||bounds.Left<0||string.IsNullOrEmpty(AutomationProperties.GetName(item)))throw new Exception("Preview header control clipped or unnamed: "+control);}
        if(object.Equals(B(prefix+"OpenPreviewButton").Content,"Open image…"))throw new Exception("Open image button is not an icon");
        L(prefix+"PreviewInfo").Text="720 × 1280 pixels";B(prefix+"PreviewDetailsButton").RaiseEvent(new RoutedEventArgs(Button.ClickEvent));PumpPopupLayout();if(!popup.IsOpen||!L(prefix+"PreviewInfo").IsVisible)throw new Exception("Details icon did not expose capture information");CheckSkyFit(prefix,preview);SavePopup((FrameworkElement)popup.Child,Path.Combine(output,"AstroArchive_Capture_Details_"+prefix+mode+textScale+".png"));

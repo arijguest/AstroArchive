@@ -12,7 +12,10 @@ namespace AstroArchive {
    int page=tabs.SelectedIndex;double originalWidth=Window.Width;int textScale=settings.TextScalePercent;string theme=settings.ThemeMode;bool contrast=settings.HighContrast;
    string search=T("SearchBox").Text,source=T("SourceBox").Text;var importPlan=plan;var activeCancel=cancel;string filters=Util.Serialize(libraryFilters.Values);
    var selected=G("FramesGrid").SelectedItems.Cast<object>().ToArray();
+   var repositoryRows=all;
    try{
+    all=new System.Collections.Generic.List<Frame>();SelectInitialPage();if(tabs.SelectedIndex!=1||selector.SelectedIndex!=3)throw new Exception("Empty repository does not start on Import.");
+    all.Add(new Frame{Target="M45"});SelectInitialPage();if(tabs.SelectedIndex!=0||selector.SelectedIndex!=0)throw new Exception("Populated repository does not start on Repository.");all=repositoryRows;
     var choices=selector.Items.Cast<ComboBoxItem>().ToArray();
     if(!choices.Select(item=>Convert.ToString(item.Content)).SequenceEqual(new[]{"Repository","Edited","Mosaic","Import"})||!choices.Select(item=>Convert.ToInt32(item.Tag)).SequenceEqual(new[]{0,3,2,1}))throw new Exception("Page choices do not match their existing workspaces.");
     foreach(var choice in choices){
@@ -41,8 +44,8 @@ namespace AstroArchive {
      }
     }
     settings.HighContrast=true;ApplyAppearance();Readable(selector.Foreground,selector.Background,"High contrast page selector");
-   }finally{selector.IsDropDownOpen=false;Window.Width=originalWidth;settings.TextScalePercent=textScale;settings.ThemeMode=theme;settings.HighContrast=contrast;ApplyAppearance();GoToPage(page);PumpPopupLayout();}
-   File.WriteAllText(Path.Combine(output,"page-navigation-smoke.txt"),"PASS: toolbar page selection, programmatic/keyboard cycling, existing workspace/state retention, no tab row, six-pixel gaps, both themes at 100/150% and 1060/1380 widths, high contrast and popup text contrast.");
+   }finally{all=repositoryRows;selector.IsDropDownOpen=false;Window.Width=originalWidth;settings.TextScalePercent=textScale;settings.ThemeMode=theme;settings.HighContrast=contrast;ApplyAppearance();GoToPage(page);PumpPopupLayout();}
+   File.WriteAllText(Path.Combine(output,"page-navigation-smoke.txt"),"PASS: empty/populated repository startup, toolbar page selection, programmatic/keyboard cycling, existing workspace/state retention, no tab row, six-pixel gaps, both themes at 100/150% and 1060/1380 widths, high contrast and popup text contrast.");
   }
  }
 }

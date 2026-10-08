@@ -8,6 +8,8 @@ Package 1.12.2.1
 - Replace the separate Repository/Import/Mosaic/Edited selector row with a purple
   page dropdown immediately before Settings. Show the active page and reclaim
   the row's height on every page, with a six-pixel gap below the toolbar.
+- Start on Import when the repository is empty or no repository is configured;
+  otherwise open Repository, regardless of search/filters.
 - Preserve page contents, search, filters, selection and import progress when
   switching. Menu actions and the walkthrough keep the dropdown synchronized.
 - Add Ctrl+1–4 for Repository, Edited, Mosaic and Import, plus Ctrl+Tab and

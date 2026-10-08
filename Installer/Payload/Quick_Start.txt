@@ -634,6 +634,8 @@ layouts remain originals. Base64 inline/embedded XISF stays supported.
 
 NAVIGATION, ACCESSIBILITY AND WALKTHROUGH
 The purple page dropdown immediately before Settings shows the active workspace.
+Startup opens Import when the repository is empty or none is configured; otherwise
+it opens Repository. This uses the whole repository, regardless of search/filters.
 Choose Repository, Edited, Mosaic or Import there. Ctrl+1, Ctrl+2, Ctrl+3 and
 Ctrl+4 select those pages; Ctrl+Tab cycles forward and Ctrl+Shift+Tab cycles back.
 Switching retains each page's search, filters, selection and import progress.
