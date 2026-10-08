@@ -121,7 +121,7 @@ namespace AstroArchive {
         }
         void SelectWalkthroughStep(WalkthroughStep step) {
             C("PageSelector").IsDropDownOpen = false;
-            RemoveWalkthroughHighlight(); GoToPage(step.Page); Window.UpdateLayout();
+            RemoveWalkthroughHighlight(); GoToPage(step.Target == "PageSelector" ? walkthroughOriginalPage : step.Page); Window.UpdateLayout();
             var target = Window.FindName(step.Target) as UIElement;
             if (target == null) return;
             var layer = AdornerLayer.GetAdornerLayer(target);
