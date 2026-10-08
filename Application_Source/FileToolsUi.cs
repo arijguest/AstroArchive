@@ -44,7 +44,6 @@ namespace AstroArchive {
    bool stackable=selected.Any(f=>f.Kind=="Light"||f.Kind=="Stack");
    menu.Items.Add(FileAction("Ready-to-stack folder…",()=>ExportProject(selected,false),stackable));
    menu.Items.Add(FileAction("Ready-to-stack with calibrations…",()=>ExportProject(selected,true),stackable));
-   menu.Items.Add(FileAction("Send stack to AstroWizard…",()=>SendStackToProcessor(selected,true),AstroWizardHandoff.CanSend(selected)));
    menu.Items.Add(FileAction("Send stack to Siril…",()=>SendStackToSiril(selected),SirilHandoff.CanSend(selected)));
    return menu;
   }
@@ -90,24 +89,22 @@ namespace AstroArchive {
    Run(ct=>Exporter.Create(repo,items,options,ct,Progress),ExportComplete);
   }
   void ExportComplete(string path){L("StatusLabel").Text="Exported folder: "+path;var d=new FormWindow(Window,"Export complete",600,400);d.Text("Your exported folder is ready",true);d.Text(path);d.Text("Files have been copied and verified. Stacking folders include workflow notes and a manifest.");d.Button("Open exported folder",()=>Process.Start(new ProcessStartInfo(path){UseShellExecute=true}));d.CloseOnly();d.Show();}
-  void SendStackToSiril(List<Frame> selected){SendStackToProcessor(selected,false);}
-  void SendStackToProcessor(List<Frame> selected,bool wizard){
-   if(wizard?!AstroWizardHandoff.CanSend(selected):!SirilHandoff.CanSend(selected))return;
-   string title=wizard?"AstroWizard":"Siril";
+  void SendStackToSiril(List<Frame> selected){
+   if(!SirilHandoff.CanSend(selected))return;
+   const string title="Siril";
    var d=new FormWindow(Window,"Send stack to "+title,630,660);d.Text("Open this stack in "+title,true);
    d.Text("Creates a verified working copy and opens it in "+title+". Select one uncompressed FITS stack.");
-   if(wizard)d.Text("Verified AstroWizard build: "+AstroWizardHandoff.VerifiedBuild+". The official executable is checked before export. Other builds require verification. Uses the same handoff as StackingWizard.");
-   TextBox executable=d.Input(title+" executable",(wizard?settings.AstroWizardExecutable:settings.SirilExecutable)??"");
-   d.Button("Locate "+title,()=>{var picker=new OpenFileDialog{Filter=wizard?"AstroWizard executable|*.exe":"Siril GUI|siril.exe",Title="Choose the "+title+" executable"};if(picker.ShowDialog(d.Window)==true)executable.Text=picker.FileName;});
+   TextBox executable=d.Input(title+" executable",settings.SirilExecutable??"");
+   d.Button("Locate "+title,()=>{var picker=new OpenFileDialog{Filter="Siril GUI|siril.exe",Title="Choose the "+title+" executable"};if(picker.ShowDialog(d.Window)==true)executable.Text=picker.FileName;});
    TextBox parent=d.Input("Working-copy destination folder","");d.Button("Browse destination",()=>{string p=Folder("Choose a "+title+" working-copy destination",parent.Text,d.Window);if(p!=null)parent.Text=p;});
    TextBox name=d.Input("New folder name",Util.Safe(selected[0].Target)+"_"+title+"_"+DateTime.Now.ToString("yyyyMMdd_HHmmss"));
-   d.Accept("Send to "+title,()=>{try{if(wizard){if(!File.Exists(executable.Text.Trim()))throw new IOException("Locate AstroWizard first.");}else SirilHandoff.ValidateExecutable(executable.Text.Trim());}catch(Exception e){MessageBox.Show(d.Window,e.Message,title+" unavailable");return false;}return ValidExportDestination(d,parent,name);});if(!d.Show())return;
-   string app=executable.Text.Trim();if(wizard)settings.AstroWizardExecutable=app;else settings.SirilExecutable=app;SaveSettings();
+   d.Accept("Send to "+title,()=>{try{SirilHandoff.ValidateExecutable(executable.Text.Trim());}catch(Exception e){MessageBox.Show(d.Window,e.Message,title+" unavailable");return false;}return ValidExportDestination(d,parent,name);});if(!d.Show())return;
+   string app=executable.Text.Trim();settings.SirilExecutable=app;SaveSettings();
    var options=new ExportOptions{Parent=parent.Text.Trim(),Name=name.Text.Trim()};
    Run(ct=>{
-    string image=wizard?AstroWizardHandoff.ExportStack(repo,selected,options,app,ct,Progress):SirilHandoff.ExportStack(repo,selected,options,app,ct,Progress);
+    string image=SirilHandoff.ExportStack(repo,selected,options,app,ct,Progress);
     ct.ThrowIfCancellationRequested();
-    try{using(var process=Process.Start(wizard?AstroWizardHandoff.LaunchInfo(app,image):SirilHandoff.LaunchInfo(app,image))){if(process==null)throw new IOException(title+" did not start.");}}
+    try{using(var process=Process.Start(SirilHandoff.LaunchInfo(app,image))){if(process==null)throw new IOException(title+" did not start.");}}
     catch(Exception e){throw new IOException(title+" could not be launched. Your verified working copy is saved at:\n"+image+"\n\n"+e.Message,e);}
     return image;
    },image=>L("StatusLabel").Text=title+" launched with stack: "+image);

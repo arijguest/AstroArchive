@@ -1,4 +1,4 @@
-# AstroArchive 1.10.3
+# AstroArchive 1.10.4
 
 Portable Windows 10/11 x64 WPF app for archiving astronomical image originals and creating verified stacking projects. Open `AstroArchive.exe`; read `Quick_Start.txt` for the complete workflow.
 
@@ -42,7 +42,7 @@ Portable Windows 10/11 x64 WPF app for archiving astronomical image originals an
 - Larger installer and update dialogues with wrapping text and a scrollable setup body.
 
 - Startup Dump inbox imports and verified duplicate cleanup, with retry controls in Settings.
-- Direct single-stack handoff to the verified AstroWizard build and Siril. [Supported handoffs](../docs/PROCESSOR_HANDOFFS.md).
+- Direct single-stack handoff to Siril; verified file export for manual loading in AstroWizard. [Supported handoffs](../docs/PROCESSOR_HANDOFFS.md).
 
 ## Changes in 1.6.0
 

@@ -1,4 +1,4 @@
-AstroArchive 1.10.3
+AstroArchive 1.10.4
 Windows 10/11 x64 desktop app. Built-in .NET Framework 4.8 and Windows SQLite.
 Runs offline. No Python or Google login required.
 
@@ -442,14 +442,14 @@ Settings offers Open dump folder and Process dump folder now. Finish copying fil
 before processing. The dump flow has progress/cancellation and saves a last-dump.txt
 report in .astroarchive/reports. Normal import cleanup preferences do not affect it.
 
-Select one stack and right-click Export > Send stack to AstroWizard or Siril.
-Choose the executable and a working-copy folder outside the archive. The image is
-copied, verified and passed directly to the receiving GUI. AstroWizard accepts
-.fit/.fits via this route and requires the official signed Clear Eyes Windows build
-of 7 October 2026 (verified by checksum). Other builds are refused pending validation.
-Siril uses siril.exe, not siril-cli.exe. Gzip, multiple stacks and individual subs
-are outside these direct handoffs. StackingWizard incoming handoff and Siril sequence
-preparation remain planned; existing ready-to-stack folders are the manual route.
+Select one stack and right-click Export > Send stack to Siril. Choose siril.exe
+(not siril-cli.exe) and a working-copy folder outside the archive. The image is
+copied, verified and passed directly to the receiving GUI. Gzip, multiple stacks
+and individual subs are outside this direct handoff.
+For AstroWizard, use Export > Export selected files and open the exported stack
+from within AstroWizard. Direct sending is unavailable because compatibility
+across AstroWizard builds cannot be assured. Ready-to-stack folders remain
+available for manual loading in stacking applications.
 
 KEYBOARD SHORTCUTS
 Main window: Ctrl+F focuses search; Ctrl+I opens Import; Ctrl+E opens Export.
