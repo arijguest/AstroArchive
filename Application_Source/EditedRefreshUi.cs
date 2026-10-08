@@ -28,7 +28,7 @@ namespace AstroArchive {
    var repository=repo;var targets=editedCaptureTargets;var previous=editedImages;int version=++editedRefreshVersion;bool changed=false;
    try{
     var gallery=await editedRefreshWorker.Submit(token=>{var result=(read??EditedGallery.Read)(repository,targets,token);changed=!result.SameImages(previous);return result;});
-    if(version!=editedRefreshVersion||repo!=repository||!CanRefreshEditedAutomatically)return false;
+    if(version!=editedRefreshVersion||repo!=repository||editedImages!=previous||!CanRefreshEditedAutomatically)return false;
     L("EditedSummary").ToolTip=gallery.Errors.Count==0?null:string.Join("\n",gallery.Errors);
     // Unchanged restores retain row objects, multiple selection, sorting and the live preview.
     if(!changed)return false;editedImages=gallery.Images;FilterEditedImages();return true;
