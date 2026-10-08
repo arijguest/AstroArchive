@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media;
 namespace AstroArchive {
  public partial class MainUi {
   void SmokeMetadataEditor(string output){
@@ -26,7 +27,14 @@ namespace AstroArchive {
        for(int tab=0;tab<4;tab++){
         tabs.SelectedIndex=tab;PumpPopupLayout();
         foreach(var control in editor.Inputs.Values.Where(c=>c.IsVisible)){if(control.ActualWidth<120||control.ActualHeight<=0)throw new Exception("Metadata input clipped: "+control.Name);}
-        foreach(var label in PopupChildren<TextBlock>(editor.Form.Window).Where(t=>t.IsVisible&&!string.IsNullOrWhiteSpace(t.Text)))Readable(label.Foreground,editor.Form.Window.Background,mode+" metadata label");
+        foreach(var label in PopupChildren<TextBlock>(editor.Form.Window).Where(t=>t.IsVisible&&!string.IsNullOrWhiteSpace(t.Text))){
+         Brush background=editor.Form.Window.Background;
+         for(DependencyObject parent=VisualTreeHelper.GetParent(label);parent!=null;parent=VisualTreeHelper.GetParent(parent)){
+          var border=parent as Border;var control=parent as Control;Brush surface=border!=null?border.Background:control!=null?control.Background:null;var solid=surface as SolidColorBrush;
+          if(solid!=null&&solid.Color.A==255){background=surface;break;}
+         }
+         Readable(label.Foreground,background,mode+" metadata label: "+label.Text);
+        }
         if(scale==1.0&&!batch)CapturePopup(editor.Form.Window,Path.Combine(output,"AstroArchive_Metadata_"+mode+"_"+tab+".png"));
        }
        var picker=PopupChildren<ComboBox>(tabs).Single();picker.SelectedIndex=batch?1:0;PumpPopupLayout();var table=PopupChildren<DataGrid>(tabs).Single();if(!table.Items.Cast<MetadataDetail>().Any(r=>r.Field=="Original Name"&&r.Value==(batch?second:first).OriginalName))throw new Exception("Current metadata viewer did not follow selected file.");
