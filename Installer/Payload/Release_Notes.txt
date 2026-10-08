@@ -1,3 +1,12 @@
+AstroArchive 1.13.9 — Edited duplicate and version handling
+Package 1.13.9.1
+- Skip identical edited imports, including renamed copies, within the selection
+  and across projects. Check current working copies and editor output contents.
+- Search matching filenames and flag changed contents as new versions. Folder
+  review shows their existing locations; keep both or exclude the new version.
+- Recheck duplicates before importing, preserve existing files, avoid empty
+  duplicate-only projects and report imported/skipped/version counts.
+
 AstroArchive 1.13.8 — responsive search across Repository, Import and Edited
 Package 1.13.8.1
 - Wait briefly for a typing pause and run query matching, grouping, summaries

@@ -1,5 +1,5 @@
-AstroArchive 1.13.8 validation
-Package 1.13.8.1; Windows 10/11 x64; .NET Framework 4.8.
+AstroArchive 1.13.9 validation
+Package 1.13.9.1; Windows 10/11 x64; .NET Framework 4.8.
 
 The Windows release workflow runs application regressions, a separate six-case
 Windows WIC integration suite, installer/updater regressions, x64 compilation,

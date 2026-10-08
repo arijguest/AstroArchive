@@ -1,4 +1,4 @@
-AstroArchive 1.13.8
+AstroArchive 1.13.9
 Windows 10/11 x64 desktop app. Built-in .NET Framework 4.8 and Windows SQLite.
 Runs offline. No Python or Google login required.
 
@@ -744,6 +744,12 @@ capture files. Tables show ACQUIRED dates; exports retain the date and its sourc
 EDITED IMAGES AND WORKING COPIES
 Edited holds mutable images and editor projects separately from archived captures.
 Choose Edited > Add images to copy individual files into a new or existing project.
+Edited imports check current file contents across all projects and editor outputs,
+including renamed copies. Exact duplicates are skipped. Matching filenames with
+different contents are new versions: folder review shows the matching files and
+lets you exclude the version, or keep both. Existing images are never overwritten.
+The completion summary reports imports, skipped duplicates and same-name versions.
+An import containing only duplicates creates no empty project.
 Choose Edited > Import folder to crawl an existing collection, optionally including
 subfolders. Review detected image classes, objects and exposure data before copying.
 Unreadable files are excluded; inaccessible or linked folders are reported. Subfolder
