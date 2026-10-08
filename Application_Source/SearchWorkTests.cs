@@ -44,6 +44,7 @@ namespace AstroArchive {
    Test("Background sorting preserves numeric nulls stable ties multi-column priority and nested fields",()=>{
     var rows=new[]{new Frame{Kind="Light",Exposure=10,OriginalName="a"},new Frame{Kind="Light",Exposure=2,OriginalName="b"},new Frame{Kind="Bias",Exposure=null,OriginalName="c"},new Frame{Kind="Light",Exposure=10,OriginalName="d"}};
     var sorts=new[]{new SearchSort{Property="Kind"},new SearchSort{Property="Exposure",Descending=true}};Check(SearchOrdering.Order(rows,sorts,CultureInfo.InvariantCulture,ct).Select(f=>f.OriginalName).SequenceEqual(new[]{"c","a","d","b"}),"Sort priority/direction/ties lost");
+    Check(SearchOrdering.Order(rows,sorts,null,ct).Select(f=>f.OriginalName).SequenceEqual(new[]{"c","a","d","b"}),"Unset table culture prevented startup sorting");
     var images=new[]{new EditedImage{Metadata=new EditedMetadata{TotalExposure=100}},new EditedImage{Metadata=new EditedMetadata{TotalExposure=2}}};Check(SearchOrdering.Order(images,new[]{new SearchSort{Property="Metadata.TotalExposure"}},CultureInfo.InvariantCulture,ct).First()==images[1],"Nested scientific values sorted as strings");
    });
    Test("Large prepared searches reuse all documents and summary accounting remains exact",()=>{
