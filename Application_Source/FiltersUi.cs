@@ -53,7 +53,7 @@ namespace AstroArchive {
    L("ScanLabel").Text=source.Count==0&&plan!=null&&plan.FastSkippedFiles>0&&plan.Errors.Count==0?"Nothing new to import · "+plan.FastSkippedFiles+" archived files skipped in "+plan.FastSkippedFolders+" folders":source.Count==0&&plan==null?"Choose a source folder and scan to begin.":summary.Shown+" / "+summary.Total+" shown · "+(summary.Total-summary.Shown)+" hidden by search/filters · "+importFilters.ActiveCount+" active filters"+(SkipFlagged?" · "+summary.SkippedFlagged+" flagged candidates skipped":" · flagged captures included")+(plan!=null&&plan.FastSkippedFiles>0?" · "+plan.FastSkippedFiles+" archived files skipped in "+plan.FastSkippedFolders+" folders":"")+(plan!=null&&plan.IgnoredFailed>0?"  ·  "+plan.IgnoredFailed+" failed filenames ignored":"")+(plan!=null&&plan.IgnoredRaster>0?" · "+plan.IgnoredRaster+" PNG/JPG ignored":"");
   }
   void ScreenFiles(bool imports){
-   if(repo==null||cancel!=null)return;
+   if(repo==null||cancel!=null||SearchBlocked(imports?"ImportSearchBox":"SearchBox"))return;
    var rows=imports?visibleImports.Where(f=>f.Status!="Deleted").ToList():Context();if(rows.Count==0)return;
    ScreenSelection(rows,imports);
   }
