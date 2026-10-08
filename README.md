@@ -50,6 +50,9 @@ Starless and Stars only filenames are recognised. Object, filter, sub-count and 
 Sending a stack to **Siril** creates a verified working copy in Edited.
 For AstroWizard or another editor, choose **Export → Create Edited working copies**, then load the copies from the opened project folder. Save outputs there and refresh Edited to find them.
 
+Exports default to image files only: stacks copy directly to the destination; subs
+retain compatible input folders. **Add Metadata** and **Create new folder** are off
+by default. Existing files are retained, with numbered suffixes for collisions.
 Stacking exports keep compatible input groups and calibrations separate. Stacking and calibration run in your processing software.
 
 ## Formats

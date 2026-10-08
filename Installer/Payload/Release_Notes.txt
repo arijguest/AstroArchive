@@ -9,6 +9,9 @@ Package 1.12.0.1
   folders and archived originals, including renamed identical copies.
 - GIFs match uniquely named edited images and retain available acquisition details.
   GIF and SER playback has Pause / Play; common videos use Windows codecs.
+- Exports default to images only: stacks copy directly to the destination and
+  subs retain compatible input folders. Add Metadata and Create new folder are
+  optional and off by default; filename collisions receive numbered suffixes.
 - Preview shows original capture filenames. Moon and Lunar share the Moon target.
 - Dump processing has a cancellable progress window. Import buttons have more
   space below them.

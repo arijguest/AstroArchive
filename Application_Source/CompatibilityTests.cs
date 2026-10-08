@@ -75,7 +75,7 @@ namespace AstroArchive {
                     frame.Hash=new string('a',64);
                     Expect(()=>Exporter.Create(repo,new List<Frame> {
                         frame
-                    },new ExportOptions {
+                    },new ExportOptions {CreateNewFolder=true,AddMetadata=true,
                         Parent=root,Name="processed-project"
                     },ct,NoProgress),"Processed image accepted");
                     Check(!Directory.Exists(Path.Combine(root,"processed-project")),"Failed preflight created a project");
@@ -449,7 +449,7 @@ namespace AstroArchive {
                     var plan=repo.Scan(source,"Rig","Auto",ct,NoProgress);
                     repo.Import(plan.Frames,ct,NoProgress);
                     var selection=repo.All();
-                    var options=new ExportOptions {
+                    var options=new ExportOptions {CreateNewFolder=true,AddMetadata=true,
                         Parent=root,Name="converted-project",IncludeCalibration=false,ConvertToFits=true
                     };
                     string folder=Exporter.Create(repo,selection,options,ct,NoProgress);
@@ -477,7 +477,7 @@ namespace AstroArchive {
                     Directory.Delete(source,true);
                     string folder=Exporter.Create(repo,new List<Frame> {
                         frame
-                    },new ExportOptions {
+                    },new ExportOptions {CreateNewFolder=true,AddMetadata=true,
                         Parent=root,Name="associated-export",Mode="Files"
                     },ct,NoProgress);
                     Check(Directory.GetFiles(Path.Combine(folder,"session-metadata")).Length==1,"Sidecar not exported");

@@ -20,7 +20,7 @@ namespace AstroArchive {
      var frames=repo.All();Check(frames.All(f=>f.RelativePath.StartsWith(Path.Combine("Targets","IC1805"))),"Target folders split by common name");
      using(var db=new Database(repo.WorkingIndex)){var f=frames.First();db.Exec("UPDATE files SET data=? WHERE hash=?",Util.Serialize(f).Replace("\"Target\":\"IC1805\"","\"Target\":\"Heart Nebula\""),f.Hash);}
      frames=repo.All();Check(frames.Select(f=>f.Target).Distinct().Count()==1&&frames.All(f=>File.Exists(repo.FilePath(f))),"Legacy categories or file paths changed incorrectly");
-     string dest=Exporter.Create(repo,frames,new ExportOptions{Parent=root,Name="canonical-export",Mode="Subs",IncludeCalibration=false},ct,NoProgress);Check(Directory.GetDirectories(Path.Combine(dest,"subs")).Length==1&&!Directory.Exists(Path.Combine(dest,"targets")),"Alias labels split export inputs");
+     string dest=Exporter.Create(repo,frames,new ExportOptions{CreateNewFolder=true,AddMetadata=true,Parent=root,Name="canonical-export",Mode="Subs",IncludeCalibration=false},ct,NoProgress);Check(Directory.GetDirectories(Path.Combine(dest,"subs")).Length==1&&!Directory.Exists(Path.Combine(dest,"targets")),"Alias labels split export inputs");
     }
    });
    Test("Import summary counts the actual filtered and unflagged payload",()=>{

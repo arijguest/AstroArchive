@@ -24,7 +24,7 @@ namespace AstroArchive {
                 lines.Add(key+" = "+value);
             }
             if(frame.StackCount>0)lines.Add("Combined frames: "+frame.StackCount);
-            double? sub,gain;if(Classifier.FilenameExposureGain(frame.OriginalName,out sub,out gain))lines.Add("Filename: "+Util.Num(sub)+" s per sub; gain "+Util.Num(gain)+"");
+            double? sub,gain;if(Classifier.FilenameExposureGain(frame.OriginalName,out sub,out gain))lines.Add("Filename: "+Util.Num(sub)+" s per sub; gain "+Util.Num(gain));
             if(frame.Kind=="Stack")lines.Add("Stack exposure may be per-sub or total.");
             if(lines.Count==1)lines.Add("Exposure source unknown.");
             return string.Join("\n",lines);

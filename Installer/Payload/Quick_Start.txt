@@ -126,12 +126,19 @@ Sun/Solar appears as Sun. Meteor filenames use Meteor and leave object ID blank.
 The word meteor must be in the filename; meteorite and folder names do not match.
 
 STACKING PROJECTS AND SESSIONS
-Select captures and choose a stacking export. Choose Subs, Stacks or Both;
-Separate sessions is off by default and can keep each acquisition session apart.
+Select captures and choose Export selected files for original copies, or a
+stacking export with Subs, Stacks or Both. Choose an existing destination.
+Stacks export as image files; subs retain compatible input folders.
+Add Metadata and Create new folder are both off by default. Add Metadata includes
+a checksum manifest, saved session metadata and readme/workflow notes. Metadata
+already inside an image is preserved. Create new folder adds an enclosing folder.
+Existing files are kept; duplicate filenames receive a numbered suffix.
+For stacking exports, Separate sessions is off by default and can keep each
+acquisition session apart.
 Inputs are separated by target, physical device, camera, filter, dimensions,
 binning, Bayer pattern, exposure, gain and calibration state.
 Do not combine stacks with their constituent subs or overlapping live-stack snapshots.
-Exports include workflow notes and a manifest; originals remain unchanged.
+Copies are verified and originals remain unchanged.
 Stacking runs in the external program of your choice.
 
 CALIBRATION AND FITS CONVERSION
@@ -140,12 +147,13 @@ Review missing/conflicting identity, camera, gain, geometry or processing detail
 Flats also need compatible filter, night and optics. Darks match exposure and known
 temperatures within 3 degrees C. Processed lights receive no extra calibration.
 Unknown calibration status requires explicit inclusion.
-Dark flats match raw-flat exposure in separate sets. Follow the exported notes;
+Dark flats match raw-flat exposure in separate sets;
 do not subtract both a bias and a dark flat from the same flat.
 Convert supported images to FITS is an explicit export option for eligible linear
 images. Confirm linearity in Edit metadata. Selected pages/slices are converted
-without a display stretch, and originals are retained. An interrupted export is
-marked INCOMPLETE.txt; inspect it before using that project.
+without a display stretch, and originals are retained. Cancelled or failed exports
+keep completed, verified copies and remove unfinished temporary copies.
+Wait for Export complete before using a full set of stacking inputs.
 
 METADATA AND OPTIONAL ANALYSIS
 Right-click Edit metadata to correct indexed labels without rewriting image headers.
