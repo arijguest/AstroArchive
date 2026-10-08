@@ -88,6 +88,7 @@ namespace AstroArchive {
        var calibration=frame.Clone();calibration.Kind=kind;var imageSize=stage.RenderSize;UpdateCaptureSky(prefix,calibration);PumpPopupLayout();preview.Resize();PumpPopupLayout();if(panel.IsVisible||stage.RenderSize!=imageSize)throw new Exception("Calibration sky is visible or changed image fit: "+kind);
       }
       frame.Kind="Stack";frame.SkyStackDurationSeconds=3600;UpdateCaptureSky(prefix,frame);PumpPopupLayout();if(!panel.IsVisible||globe.Context.StackTrack.Length!=33)throw new Exception("Stack sky track did not render");
+      CaptureSidebar(host,Path.Combine(output,"AstroArchive_Visible_Stack_Sky_"+prefix+settings.ThemeMode+".png"));
       var cachedTrack=globe.Context.StackTrack;int trackBuilds=globe.DrawingBuilds;UpdateCaptureSky(prefix,frame);globe.InvalidateVisual();PumpPopupLayout();if(!ReferenceEquals(cachedTrack,globe.Context.StackTrack)||globe.DrawingBuilds!=trackBuilds)throw new Exception("Unchanged stack track rebuilt");
       frame.Kind="Light";frame.SkyStackDurationSeconds=null;UpdateCaptureSky(prefix,frame);PumpPopupLayout();
       frame.Dec=-60;frame.RA=160;frame.Latitude=-33.9;frame.Longitude=151.2;UpdateCaptureSky(prefix,frame);PumpPopupLayout();if(!globe.Context.Evidence.Contains("Southern celestial sky"))throw new Exception("Southern capture hemisphere lost");frame.ObservedUtc=null;UpdateCaptureSky(prefix,frame);PumpPopupLayout();if(globe.Context.HasHorizon||globe.CardinalLabels.Count!=0)throw new Exception("Missing capture clock produced a horizon or compass directions");
