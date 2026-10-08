@@ -95,13 +95,18 @@ telescope or enter its unique physical device ID and model. Browse its capture
 folder and press Save telescope. Choose the saved telescope from the dropdown on
 later imports. Existing device IDs are recovered from repository records;
 Recover from repository adds any missing profiles without replacing your choices.
-Recovered profiles need a USB folder association saved before auto upload.
+Connected storage uses its saved USB association, otherwise a compatible selected
+or unique saved profile. Choose a profile when several match, or save a telescope
+when none match. Saving a USB folder association preserves the physical binding.
 
 Import > USB telescopes lists connected telescope storage.
-Choose a device to screen supported FITS files, skip verified duplicates, import missing
-captures and restore missing/damaged archive copies. Originals stay on the USB
+Choose a device to import new captures using fast filename matching. Known DWARF
+sessions are omitted; Seestar folders still discover new filenames. Enable Robust
+file matching in Import options to revisit edits, restore missing/damaged archive
+copies or finish a partially imported DWARF session. Originals stay on the USB
 device. Solving and rotation stay off for this action. Multiple connected sources
-are listed in a menu. Reconnect and click again to resume an interrupted import.
+are listed in a menu. Reconnect to continue; use robust matching when a session
+already contains some archived captures and you need its remaining files.
 The saved association uses volume identity and survives drive-letter changes.
 
 Rename telescope changes the saved name and matching indexed captures, import
