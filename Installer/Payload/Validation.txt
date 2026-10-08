@@ -1,52 +1,13 @@
-AstroArchive 1.10.4 validation
-Package 1.10.4.2; Windows 10/11 x64; .NET Framework 4.8.
+AstroArchive support and diagnostics
 
-The Windows release workflow runs application regressions, a separate five-case
-Windows WIC integration suite, installer/updater regressions, x64 compilation,
-WPF application/installer rendering and disposable install/repair/uninstall checks.
-A successful workflow is required before publishing installers and the SHA-256
-update feed. Its logs are authoritative for test counts and package hashes.
+User guide: Quick_Start.txt, or Guide in the application.
+Report an issue: https://github.com/arijguest/AstroArchive/issues
 
-Windows navigation checks exercise ordered menus in both themes, source and file
-action availability, repository path/branding placement, rendered ascending and
-descending sort indicators and multi-column priorities, accessible header names,
-larger text and comfortable rows, high contrast, reduced progress animation,
-walkthrough navigation, author attribution and the idle status bar. The preview regression additionally checks rendered quadrant pixels in 16
-portrait/landscape/square/upscale, resize and bitmap-DPI cases, and exercises
-zoom/pan/Fit button availability and actions. Rendered
-previews are retained in the workflow artifact for visual review.
+Include the app/package version, exact error and relevant filename.
+Repository > Diagnostics shows the last import report and performance details.
+Setup log: %TEMP%\AstroArchive-setup-error.txt
+Update log: %LOCALAPPDATA%\AstroArchive\updates\last-error.txt
 
-Supplementary validation in Linux compiles the application, installer, launcher,
-engine and raster test executables against official .NET Framework 4.8 references.
-Engine regressions run under Mono/system SQLite; platform/optional-codec cases
-are reported separately. CFITSIO tile compression and Zstandard fixtures pass
-with independent system codecs. WIC tests compile here but execute only in the
-Windows workflow; Linux does not establish WPF or Windows-native behavior.
-
-Compatibility fixtures cover FITS HDUs/cubes/gzip/scaling, numeric XISF attachment
-and base64 layouts, zlib/LZ4/shuffle/Zstandard, CFA metadata, SER byte order/frame
-selection, explicit vendor/software recognition, normalized metadata units,
-gain/electrons-per-ADU separation, timezone uncertainty, retained user and legacy
-edits, reviewed re-detection, calibration conflicts, mixed-exposure dark-flat
-recipes, verified sidecars and derived FITS source/output identities. Existing
-mosaic, USB upload, import review/recovery, progress and processor-handoff tests
-remain in the suite. Windows WIC cases exercise 16-bit TIFF/PNG preservation,
-multi-page selection, RGB order/derived FITS and JPEG scientific-export exclusion.
-
-Optional CFITSIO/Zstandard DLLs are not shipped; Windows provisioning of specific
-third-party builds needs independent validation. Live telescope collections,
-undocumented vendor mirrors, provider/storage delays and actual ASTAP catalogues
-or authenticated online solves were unavailable. The ASTAP protocol test uses a
-test double. AVI/camera RAW archive support does not claim a bundled pixel decoder.
-SER recordings are planetary inputs, not automatic deep-sky stacking inputs.
-Stacking, calibration/master generation and stitching use external software.
-
-Menu input checks compare small touchpad deltas with full wheel notches, accumulate
-rapid packets before layout, reverse direction immediately and check menu limits
-and nested scroll ownership. Popup checks retain both themes and 100/150/200%
-layout scales. Preview checks exercise reversed button/keyboard directions and
-verify the toolbar fits directly below the image in both preview surfaces.
-Sixteen pixel-rendered image/DPI/resize cases continue to verify full-image fit.
-
-Update-policy diagnostics preserve the native error and saved installer, handle
-event-access failures and match rejected device paths instead of parent processes.
+Preview/codec support: Settings > Image compatibility.
+Windows policy blocks: check the package's signing status and Windows Security;
+managed policies may require publisher approval from your administrator.
