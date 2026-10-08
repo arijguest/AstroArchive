@@ -1,6 +1,6 @@
-# AstroArchive 1.11.1
+# AstroArchive 1.12.0
 
-Edited projects support reviewed folder import, starless/stars-only classification, acquisition metadata recovery and automatic editor working copies. The repository path sits below the table; operation feedback appears only while busy.
+Repository defaults to expandable subframe session summaries. Edited shares its targets/table/Preview layout and supports reviewed mixed-folder import, GIF associations, starless/stars-only classification and acquisition metadata recovery. Animated GIF, SER and Windows video previews have Pause/Play controls. Dump processing shows progress in a separate window.
 
 Portable Windows 10/11 x64 WPF app for archiving astronomical image originals and creating verified stacking projects. Open `AstroArchive.exe`; read `Quick_Start.txt` for the complete workflow.
 

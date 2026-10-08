@@ -4,10 +4,15 @@ using System.IO;
 namespace AstroArchive {
     public static class RasterHeaders {
         public static AssetInfo Inspect(string path) {
-            string extension=Assets.Extension(path),format=extension==".png"?"PNG":extension==".jpg"||extension==".jpeg"?"JPEG":"TIFF";
+            string extension=Assets.Extension(path),format=extension==".gif"?"GIF":extension==".png"?"PNG":extension==".jpg"||extension==".jpeg"?"JPEG":"TIFF";
             using(var stream=File.OpenRead(path)) {
                 byte[] header=new byte[33];
                 int read=stream.Read(header,0,header.Length);
+                if(format=="GIF") {
+                    if(read<13||(System.Text.Encoding.ASCII.GetString(header,0,6)!="GIF87a"&&System.Text.Encoding.ASCII.GetString(header,0,6)!="GIF89a"))throw new InvalidDataException("Not a GIF image.");
+                    int w=header[6]|header[7]<<8,h=header[8]|header[9]<<8;if(w<1||h<1||(long)w*h>Assets.MaxSamples)throw new InvalidDataException("Invalid or oversized GIF canvas.");
+                    return new AssetInfo{Format="GIF",Header=new FitsHeader{Width=w,Height=h,Channels=3},Images={new ImageDescriptor{Key="page:0",Label="Animation",Width=w,Height=h,Channels=3,Count=1,Bitpix=8,Encoding="preview only",Numeric=false}},Note="Animated preview; acquisition metadata is retained from a uniquely matching edited image."};
+                }
                 if(format=="PNG") {
                     byte[] magic= {
                         137,80,78,71,13,10,26,10

@@ -9,6 +9,8 @@ namespace AstroArchive {
   public string ImageClass{get;set;} public string Object{get;set;} public string Filters{get;set;} public string RA{get;set;} public string Dec{get;set;}
   public int? Subs{get;set;} public double? SubExposure{get;set;} public double? TotalExposure{get;set;} public double? ReportedExposure{get;set;} public string Evidence{get;set;}
   public string ObjectLabel{get{return ImageClass=="Meteor"?"Meteor":string.IsNullOrEmpty(Object)?"Unknown":Catalog.Label(Object);}}
+  public string ObjectId{get{return ImageClass=="Meteor"?"":Catalog.ObjectId(Object);}}
+  public string TargetName{get{string common=Catalog.CommonName(Object);return ImageClass=="Meteor"?"Meteor":common.Length>0?common:ObjectId.Length==0?ObjectLabel:"";}}
   public string TotalExposureText{get{return TotalExposure.HasValue?TotalExposure.Value.ToString("0.###",CultureInfo.InvariantCulture)+" s":"Unknown";}}
   public string SubExposureText{get{return SubExposure.HasValue?SubExposure.Value.ToString("0.###",CultureInfo.InvariantCulture)+" s":"Unknown / mixed";}}
   public string SubsText{get{return Subs.HasValue?Subs.Value.ToString(CultureInfo.InvariantCulture):"Unknown";}}

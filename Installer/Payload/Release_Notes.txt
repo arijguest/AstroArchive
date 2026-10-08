@@ -1,3 +1,36 @@
+AstroArchive 1.12.0 — session summaries, Edited browser and animated previews
+Package 1.12.0.1
+
+- Show the original capture filename in Preview, including after changing its
+  stretch, rather than the stored archive filename with its session prefix.
+- Replace the lingering Dump summary line on Import with a dedicated progress
+  window while Dump files are processed. Include status, progress and Cancel;
+  close it after success, cancellation or failure. Empty Dump folders stay quiet.
+- Add eight pixels below the Import page so its buttons sit clear of the border.
+- Give Edited folder import a source-folder field with Browse and Scan controls,
+  matching Import. Highlight its import action and show exclusion counts.
+- Allow recursive Edited scans of a parent containing the repository. Skip its
+  repository subtree and .astroarchive database folders, including case variants.
+  Skip archived originals by content hash even when renamed; recheck those hashes
+  before copying so captures archived since review are not imported again.
+
+- Make Session summaries the default repository view: collapse acquisition subs
+  from the same target, session and instrument into one row with dates, count,
+  exposure and filters. Expand to inspect files; Repository > View > Show all
+  files restores a flat table. Stacks and individual unmatched files stay visible.
+- Give Edited the repository's targets / table / Preview layout, searchable across
+  all projects, with project selection and actions on the selected image. Keep
+  six default headings; optional details and saved layouts use the Columns menu.
+- Merge Moon and Lunar into Moon, including existing records and Edited labels.
+- Import animated GIFs and associate them with uniquely matching still images in
+  the same folder. Retain missing acquisition details from the matching image;
+  ambiguous associations and conflicting metadata remain unguessed.
+- Play GIFs and SER recordings in sidebar and popup previews. Add Pause / Play
+  below moving images, and stop playback when leaving a page or closing a preview.
+  SER uses a 10 fps preview rate; it does not assume this is the acquisition rate.
+- Add AVI, MP4, MOV, M4V, WMV and MKV importing and Windows codec playback. A
+  missing codec is reported in Preview. Video acquisition data is not invented.
+
 AstroArchive 1.11.1 — exposure evidence, spacing and catalogue identities
 Package 1.11.1.1
 

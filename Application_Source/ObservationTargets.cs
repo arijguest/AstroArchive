@@ -5,7 +5,7 @@ using System.Text.RegularExpressions;
 namespace AstroArchive {
  public static class ObservationTargets {
   static readonly string[] Bodies={"Sun","Solar","Moon","Lunar","Mercury","Venus","Mars","Jupiter","Saturn","Uranus","Neptune","Pluto","Planetary"};
-  public static string CanonicalSolar(string target){return string.Equals((target??"").Trim(),"Solar",StringComparison.OrdinalIgnoreCase)||string.Equals((target??"").Trim(),"Sun",StringComparison.OrdinalIgnoreCase)?"Sun":target;}
+  public static string CanonicalSolar(string target){string text=(target??"").Trim();return text.Equals("Solar",StringComparison.OrdinalIgnoreCase)||text.Equals("Sun",StringComparison.OrdinalIgnoreCase)?"Sun":text.Equals("Lunar",StringComparison.OrdinalIgnoreCase)||text.Equals("Moon",StringComparison.OrdinalIgnoreCase)?"Moon":target;}
   public static bool Unstretched(string target,string observationMode){
    return Bodies.Any(body=>string.Equals((target??"").Trim(),body,StringComparison.OrdinalIgnoreCase))||Regex.IsMatch(observationMode??"",@"^\s*(solar|sun|planetary|planet|lunar|moon)(?:[ _-]+(?:mode|capture|imaging|light))?\s*$",RegexOptions.IgnoreCase);
   }

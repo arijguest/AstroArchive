@@ -1,4 +1,4 @@
-// AstroArchive 1.11.1. C# 5, .NET Framework 4.8, Windows 10/11 x64.
+// AstroArchive 1.12.0. C# 5, .NET Framework 4.8, Windows 10/11 x64.
 using System;
 using System.Collections.Generic;
 using System.Globalization;
