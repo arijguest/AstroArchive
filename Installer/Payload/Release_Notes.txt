@@ -17,3 +17,4 @@ Package 1.13.13.1
   the main window's state intact. Error messages appear after progress has closed.
 - Cancellation terminates unresponsive local solver processes. Local and online
   solving have five- and ten-minute deadlines; failed fields do not stop the batch.
+- Unknown Common name values display as a dash in Repository, Import and Edited.
