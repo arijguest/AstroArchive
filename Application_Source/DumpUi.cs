@@ -2,12 +2,14 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 namespace AstroArchive {
  public partial class MainUi {
-  bool dumpStartupChecked,operationBusy;
+  bool dumpStartupChecked,operationBusy,dumpChecking;
   Window dumpProgressWindow;TextBlock dumpProgressStatus,dumpProgressRate;ProgressBar dumpProgressBar;Button dumpProgressCancel;
   Window operationProgressWindow;
   bool OperationProgressVisible{get{return operationProgressWindow!=null&&operationProgressWindow.IsVisible;}}
@@ -62,12 +64,19 @@ namespace AstroArchive {
    dialog.Button("Open dump folder",()=>{try{repo.EnsureDumpFolder();Process.Start(new ProcessStartInfo(repo.DumpFolder){UseShellExecute=true});}catch(Exception e){MessageBox.Show(dialog.Window,e.Message,"Dump folder unavailable");}});
    dialog.Button("Process dump folder now",()=>{dialog.Window.Close();ProcessDumpUi();});
   }
-  void ProcessDumpUi(){
-   if(repo==null||cancel!=null||closing)return;
-   try{repo.EnsureDumpFolder();if(!Directory.EnumerateFileSystemEntries(repo.DumpFolder).Any())return;}catch(Exception error){MessageBox.Show(Window,error.Message,"Dump folder unavailable",MessageBoxButton.OK,MessageBoxImage.Warning);return;}
+  async void ProcessDumpUi(){
+   if(repo==null||cancel!=null||closing||dumpChecking)return;
+   var repository=repo;bool ignoreFailed=settings.IgnoreFailed,ignoreRaster=settings.IgnoreRasterImports;
+   bool pending=false;dumpChecking=true;
+   try{pending=await Task.Run(()=>repository.HasPendingDumpFiles(CancellationToken.None,ignoreFailed,ignoreRaster));}
+   catch(Exception error){if(repo==repository&&!closing)L("StatusLabel").Text="Dump folder check could not finish: "+error.Message;}
+   finally{dumpChecking=false;}
+   if(closing||!Window.IsVisible)return;
+   if(repo!=repository){ProcessDumpUi();return;}
+   if(!pending||cancel!=null)return;
    OpenDumpProgress();
-   ((CheckBox)Window.FindName("DeleteOriginalsCheck")).IsChecked=false;plan=null;BeginLive(true);DumpResult result=null;bool ignoreFailed=settings.IgnoreFailed,ignoreRaster=settings.IgnoreRasterImports;
-   Run(ct=>{result=repo.ProcessDump(ct,Progress,settings.CopyWorkers,LiveFrame,ignoreFailed,ignoreRaster);return result.Summary;},summary=>{
+   ((CheckBox)Window.FindName("DeleteOriginalsCheck")).IsChecked=false;plan=null;BeginLive(true);DumpResult result=null;
+   Run(ct=>{result=repository.ProcessDump(ct,Progress,settings.CopyWorkers,LiveFrame,ignoreFailed,ignoreRaster);return result.Summary;},summary=>{
     plan=result.Plan;FilterImports();
     L("StatusLabel").Text=summary;
     if(result.NeedsReview)ShowReport("Dump folder: files retained for review",repo.LastReport);

@@ -1,5 +1,6 @@
 // The only nested import source: the archive's dedicated Dump inbox.
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -16,6 +17,20 @@ namespace AstroArchive {
    if(!FileStamp.CanTraverse(new DirectoryInfo(DumpFolder)))throw new IOException("Dump must be an ordinary folder inside the archive; linked folders are not supported.");
   }
   public void EnsureDumpFolder(){ValidateDumpFolder();}
+  public bool HasPendingDumpFiles(CancellationToken ct,bool ignoreFailed=false,bool ignoreRaster=false){
+   ct.ThrowIfCancellationRequested();ValidateDumpFolder();
+   var folders=new Stack<DirectoryInfo>();folders.Push(new DirectoryInfo(DumpFolder));
+   while(folders.Count>0){
+    ct.ThrowIfCancellationRequested();
+    foreach(var entry in folders.Pop().EnumerateFileSystemInfos()){
+     ct.ThrowIfCancellationRequested();
+     var folder=entry as DirectoryInfo;
+     if(folder!=null){if(!SessionScanCache.SystemFolder(folder.Name)&&FileStamp.CanTraverse(folder))folders.Push(folder);}
+     else if(Util.IsImageAsset(entry.Name)&&!(ignoreFailed&&Util.FailedFilename(entry.Name))&&!(ignoreRaster&&ImportPolicy.RasterFilename(entry.Name)))return true;
+    }
+   }
+   return false;
+  }
   public DumpResult ProcessDump(CancellationToken ct,Action<ProgressInfo> progress,int workers=0,Action<Frame> onFrame=null,bool ignoreFailed=false,bool ignoreRaster=false){
    ct.ThrowIfCancellationRequested();ValidateDumpFolder();
    // Auto detection stays per file; no remembered model/camera override applies to mixed drops.

@@ -22,6 +22,7 @@ verifying imports and preparing files for external processing.
 
 | Version | Highlights |
 | --- | --- |
+| **1.13.5** | Check Dump quietly at startup; show progress only when importable files are being processed. |
 | **1.13.4** | Reuse imported DWARF sessions across parent/session folder selections; load relevant history only and clearly report nothing new to import. |
 | **1.13.2** | Keep the preview frame and sky visible while loading; paint Linear pixels before background stretching, reuse decoded samples and cancel passed-over loads. |
 | **1.13.1** | Faster repeat telescope scans using saved session inventories, newer folders first and an explicit full rescan. |
@@ -63,7 +64,7 @@ Download the installer, run it and open AstroArchive from its shortcut. Installa
 Each release includes SHA-256 checksums. In PowerShell, substitute your downloaded installer’s filename:
 
 ```powershell
-Get-FileHash .\AstroArchive1.13.4.2.exe -Algorithm SHA256
+Get-FileHash .\AstroArchive1.13.5.1.exe -Algorithm SHA256
 ```
 
 Compare `Hash` with the corresponding `.sha256` file. A checksum checks file integrity; publisher identity depends on code signing.

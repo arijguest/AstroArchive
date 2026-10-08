@@ -26,6 +26,26 @@ namespace AstroArchive {
      Expect(()=>repo.Scan(repo.DumpFolder,"X","Auto",ct,NoProgress),"Normal import allowed nested dump source");Expect(()=>repo.Import(new List<Frame>(),ct,NoProgress,new ImportOptions{DumpInbox=true,DeleteOriginals=true,SourceRoot=repo.Root}),"Forged dump root accepted");Expect(()=>SourceCleanup.DeleteDumpVerified(Path.Combine(root,"outside.fit"),repo.FilePath(capture),hash,repo.Root,ct),"Dump cleanup escaped source boundary");
     }
    });
+   Test("Dump preflight ignores empty folders and metadata but finds nested importable files",()=>{
+    using(var repo=new Repository(Path.Combine(root,"dump-preflight-repo"))){
+     repo.EnsureDumpFolder();Check(!repo.HasPendingDumpFiles(ct),"Empty Dump reported work");
+     string nested=Path.Combine(repo.DumpFolder,"session","empty");Directory.CreateDirectory(nested);
+     File.WriteAllText(Path.Combine(repo.DumpFolder,"session","shotsInfo.json"),"{}");
+     Check(!repo.HasPendingDumpFiles(ct),"Folders or metadata reported work");
+     File.WriteAllText(Path.Combine(nested,"capture.fit"),"input");Check(repo.HasPendingDumpFiles(ct),"Nested FITS was missed");
+     using(var canceled=new CancellationTokenSource()){canceled.Cancel();Expect(()=>repo.HasPendingDumpFiles(canceled.Token),"Preflight ignored cancellation");}
+    }
+   });
+   Test("Dump preflight respects ignored files and excluded system folders",()=>{
+    using(var repo=new Repository(Path.Combine(root,"dump-preflight-policy-repo"))){
+     repo.EnsureDumpFolder();File.WriteAllText(Path.Combine(repo.DumpFolder,"failed_capture.fit"),"input");
+     File.WriteAllText(Path.Combine(repo.DumpFolder,"preview.png"),"input");
+     Check(repo.HasPendingDumpFiles(ct),"Eligible image was missed");
+     Check(!repo.HasPendingDumpFiles(ct,true,true),"Ignored files reported work");
+     string system=Path.Combine(repo.DumpFolder,".astroarchive");Directory.CreateDirectory(system);File.WriteAllText(Path.Combine(system,"hidden.fit"),"input");
+     Check(!repo.HasPendingDumpFiles(ct,true,true),"Excluded folder reported work");
+    }
+   });
    Test("Dump duplicate cleanup preserves edited archive metadata and recovers missing copies",()=>{
     using(var repo=new Repository(Path.Combine(root,"dump-duplicate-repo"))){repo.EnsureDumpFolder();string file=Path.Combine(repo.DumpFolder,"Light_M45.fit");Write(file,64,48,(x,y)=>1750,LightHeaders(new DateTime(2026,10,6,21,0,0),"M45"));byte[] original=File.ReadAllBytes(file);repo.ProcessDump(ct,NoProgress);var capture=repo.All().Single();capture.Target="M33";capture.Telescope="UserScope";repo.Refile(capture,ct);File.WriteAllBytes(file,original);
      var duplicate=repo.ProcessDump(ct,NoProgress);Check(duplicate.Import.Imported==0&&duplicate.Import.Duplicates==1&&repo.All().Single().Target=="M33"&&repo.All().Single().Telescope=="UserScope","Duplicate replaced archive metadata");if(Environment.OSVersion.Platform==PlatformID.Win32NT)Check(!File.Exists(file)&&duplicate.Import.OriginalsDeleted==1,"Duplicate remained in Dump");else Check(File.Exists(file)&&duplicate.Import.OriginalsKept==1,"Duplicate removed without native verification");

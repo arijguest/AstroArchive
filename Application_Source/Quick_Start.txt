@@ -1,4 +1,4 @@
-AstroArchive 1.13.4
+AstroArchive 1.13.5
 Windows 10/11 x64 desktop app. Built-in .NET Framework 4.8 and Windows SQLite.
 Runs offline. No Python or Google login required.
 
@@ -662,6 +662,10 @@ Import buttons. Import policy stays visible, including original removal and
 optional analysis. Changing model/camera or ignored filenames requires a new
 scan. Originals remain kept by default. Export always uses archived repository
 files, including when opened from the Import page.
+
+At startup, the Dump folder is checked in the background. Empty folders, metadata
+and ignored files do not open a dialog. The Dump progress dialog appears only
+when importable files are being processed.
 
 The workspace fills the space previously used by the bottom status bar. Progress
 and Cancel appear in a temporary panel only while processing. Progress panels,
