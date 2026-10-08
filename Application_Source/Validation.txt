@@ -20,7 +20,9 @@ row typography, roomy chevrons and default Frame Type sorting. Edited regression
 check fuzzy catalogue/common names, custom archive targets, header/ID precedence,
 ambiguous matches, acquisition inheritance and add/import/refresh integration.
 Native WPF checks cover GIF class filtering and the visible sortable File Type
-column with Total Exposure hidden by default. Progress tests minimise/restore active operations and Dump windows,
+column with Total Exposure hidden by default. Layout regression checks cover the
+one-time older Edited layout upgrade, custom headings and later saved user choices.
+Progress tests minimise/restore active operations and Dump windows,
 start/update/finish them while minimised, and retain safe cancellation behavior.
 The combined release retains session summaries, Edited
 browsing, GIF/SER/video playback and the existing Windows installation tests.

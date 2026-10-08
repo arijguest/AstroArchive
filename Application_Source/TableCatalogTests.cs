@@ -4,6 +4,12 @@ using System.Linq;
 namespace AstroArchive {
  public partial class Tests {
   static void TableCatalogTests(){
+   Test("Older Edited headings adopt File Type once and preserve later column choices",()=>{
+    var old=new ColumnLayout{Order=new System.Collections.Generic.List<string>{"Kind","Filename","Metadata.TotalExposureText","Source"},Visible=new System.Collections.Generic.List<string>{"Kind","Filename","Metadata.TotalExposureText","Source"}};
+    var upgraded=ColumnLayout.UpgradeEdited(old);Check(upgraded.Order.SequenceEqual(new[]{"Kind","Filename","FileType","Metadata.TotalExposureText","Source"})&&upgraded.Visible.Contains("FileType")&&!upgraded.Visible.Contains("Metadata.TotalExposureText")&&upgraded.Visible.Contains("Source"),"Edited upgrade lost custom order/visibility or retained old headings");
+    Check(!old.Order.Contains("FileType")&&old.Visible.Contains("Metadata.TotalExposureText"),"Upgrade mutated original layout");upgraded.Visible.Add("Metadata.TotalExposureText");Check(object.ReferenceEquals(upgraded,ColumnLayout.UpgradeEdited(upgraded))&&upgraded.Visible.Contains("Metadata.TotalExposureText"),"Repeated upgrade overwrote a later user choice");
+    var settings=Util.Deserialize<Settings>(Util.Serialize(new Settings{TableLayouts=new System.Collections.Generic.Dictionary<string,ColumnLayout>{{"EditedGrid",upgraded}}}));Check(ColumnLayout.UpgradeEdited(settings.TableLayouts["EditedGrid"]).Visible.Contains("Metadata.TotalExposureText"),"Upgrade marker did not survive settings serialization");
+   });
    Test("Stack exposure preserves reported FITS values and separates exposure gain and real sub counts",()=>{
     string directory=Path.Combine(root,"stack-exposure");Directory.CreateDirectory(directory);
     var names=new[]{"M 101_30s40_Astro_20260522-013922633","Elephant's Trunk Nebula(1)_60s40_Astro_20261003-214231776","Heart Nebula_10s60_Astro_20260909-005516848","Elephant's Trunk Nebula(2)_60s40_Astro_20261003-220509309","M 31_Astro_20260816-004149349","M 31_30s40_Astro_20260815-230831858","NGC 7380_10s60_Duo-Band_20260908-214801527","C 20_30s40_Duo-Band_20260904-214653515","M 101_30s40_Astro_20260522-003541497","M 31_Astro_20260906-174558740","HD 237015_Astro_20260910-214058719","M 101_Astro_20260522-000957161","HD 237015_10s60_Astro_20260909-234054137","Soul Nebula_10s60_Duo-Band_20261006-010341085","M 101_30s40_Astro_20260521-233238543"};

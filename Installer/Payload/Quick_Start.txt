@@ -772,6 +772,8 @@ File Type shows formats such as FITS, TIFF, JPEG, PNG and GIF; its heading sorts
 the files and search includes the type. GIF is also an image class in Filters.
 Total Exposure is kept in image details and hidden from the default headings;
 enable it from the column list when needed.
+Older saved Edited layouts adopt these two heading changes once, preserving the
+rest of their arrangement. Later column choices remain yours.
 
 GIFs can show processing history. A GIF matches a still image in the same folder
 when their stems are identical, or the GIF adds _processing, _progress, _animation,

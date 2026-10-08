@@ -29,7 +29,8 @@ Package 1.12.1.1
 - Add GIF to Edited image classes and its filter menu. Show a sortable File Type
   column in the Edited viewer and folder-import review; include type in search.
 - Hide Total Exposure from the default Edited headings, retaining acquisition
-  values in image details and the optional column list.
+  values in image details and the optional column list. Update older saved Edited
+  layouts once to adopt File Type and hide Total Exposure, preserving other columns.
 
 AstroArchive 1.12.0 — capture sky, compact previews and session browsing
 Package 1.12.0.1
