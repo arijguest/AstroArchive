@@ -1,5 +1,5 @@
 AstroArchive 1.13.8 — responsive search across Repository, Import and Edited
-Package 1.13.8.1
+Package 1.13.8.2
 - Wait briefly for a typing pause and run query matching, grouping, summaries
   and numeric ordering in the background. Enter searches immediately; Escape
   clears the query while retaining filters.
@@ -7,6 +7,7 @@ Package 1.13.8.1
   corrections or source changes; process large data refreshes in the background.
 - Keep one active worker and one replaceable pending request per view. Cancel
   obsolete searches and only publish the latest query's results.
+- Restore search views correctly when processing finishes during an active query.
 - Keep query syntax, filters, target grouping, sorting and surviving selections.
   File actions wait for current results, preventing imports from an older view.
 - Replace repeated full-list membership scans in import summaries with set
