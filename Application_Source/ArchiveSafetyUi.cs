@@ -31,11 +31,11 @@ namespace AstroArchive {
   }
   FormWindow BackupDialog(out TextBox destination,out CheckBox compress){
    destination=null;compress=null;if(repo==null||cancel!=null)return null;var dialog=new FormWindow(Window,"Back up archive",600,520);
-   dialog.Text("Create a recoverable backup",true);dialog.Text("Includes originals, edited files and the current archive database. Choose a folder outside the archive; a separate drive provides better protection.");
+   dialog.Text("Create a recoverable backup",true);dialog.Text("Copies originals, edited files and the current archive database. Choose a folder outside the archive; a separate drive is best.");
+   dialog.Text("Large backups can take a long time to create and verify. You can keep using Windows and cancel safely.");
    var folderInput=dialog.Input("Save backup in",settings.BackupDestination??"");destination=folderInput;folderInput.IsReadOnly=true;
    dialog.Button("Choose backup folder…",()=>{string path=Folder("Choose a backup destination outside the archive",folderInput.Text,dialog.Window);if(path!=null)folderInput.Text=path;});
-   compress=dialog.Check("Compress backup as ZIP (lossless)",settings.CompressBackup);dialog.Text("Without compression, the backup is a normal folder. ZIP compression preserves every image byte, including resolution and metadata.");
-   dialog.Text("Creating and verifying a backup can take a long time, especially for a large archive or a compressed backup. You can keep using Windows and cancel safely.");
+   compress=dialog.Check("Compress as ZIP (lossless)",settings.CompressBackup);dialog.Text("Without compression, the backup is a normal folder. ZIP compression preserves every image byte, including resolution and metadata.");
    dialog.Accept("Create backup",()=>{try{if(string.IsNullOrWhiteSpace(folderInput.Text))throw new IOException("Choose a backup folder first.");Repository.ValidateBackupDestination(folderInput.Text,repo.Root);return true;}catch(Exception error){MessageBox.Show(dialog.Window,error.Message,"Choose a backup folder",MessageBoxButton.OK,MessageBoxImage.Information);return false;}});
    return dialog;
   }

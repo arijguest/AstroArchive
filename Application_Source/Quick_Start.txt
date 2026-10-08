@@ -68,6 +68,7 @@ AstroArchive temporarily unlocks affected paths for confirmed operations.
 Edited files, Dump and archive metadata remain writable. Initial protection
 can take a while; no background permission scan runs afterward. Turn off
 protection in the same section to restore the previous deletion permissions.
+Turn protection off before moving or deleting the archive outside AstroArchive.
 The Windows owner can deliberately change permissions; protection is not a backup.
 
 Back up… saves the entire archive and current database outside the repository.
