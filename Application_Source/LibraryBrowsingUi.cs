@@ -22,7 +22,7 @@ namespace AstroArchive {
    if(mode=="Session summaries"){
     var previous=subframeSessions.ToDictionary(g=>g.Key);subframeSessions=preparedSessions??SubframeSessions.Build(displayed);foreach(var session in subframeSessions){SubframeSession old;if(previous.TryGetValue(session.Key,out old)){session.Expanded=old.Expanded;session.IsSelected=old.IsSelected;}}
     view.GroupDescriptions.Add(new SubframeSessionDescription(subframeSessions));
-   }else{subframeSessions.Clear();activeSessionKey=null;if(mode!="Files"&&mode!="Show all files"){view.GroupDescriptions.Add(new PropertyGroupDescription("TargetLabel"));if(mode=="By target and session")view.GroupDescriptions.Add(new PropertyGroupDescription("SessionKey"));}}
+   }else{subframeSessions.Clear();activeSessionKey=null;if(mode!="Files"&&mode!="Show all files"){view.GroupDescriptions.Add(new CaptureTypeTargetDescription());if(mode=="By target and session")view.GroupDescriptions.Add(new PropertyGroupDescription("SessionKey"));}}
    changingSessionSelection=true;try{
     SetRows("FramesGrid",view,presorted);
     // WPF can retain a current row when the grouped view is replaced. Restore
@@ -31,6 +31,10 @@ namespace AstroArchive {
    }finally{changingSessionSelection=false;}Details();
    var summary=preparedSummary??CaptureGroups.Summarize(displayed);L("LibrarySummaryLabel").Text=summary.Detail;
   }
+ }
+ // Target/session groups must not merge separate capture sections back together.
+ public sealed class CaptureTypeTargetDescription:GroupDescription {
+  public override object GroupNameFromItem(object item,int level,CultureInfo culture){var frame=(Frame)item;string section=CaptureSky.IsCalibration(frame)?"Calibration":frame.Kind=="Stack"?"Stacks":frame.Kind=="Light"?"Subframes":"Other files";return frame.TargetLabel+" · "+section;}
  }
  public sealed class SubframeSessionDescription:GroupDescription {
   readonly Dictionary<Frame,SubframeSession> sessions=new Dictionary<Frame,SubframeSession>();
