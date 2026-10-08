@@ -24,7 +24,7 @@ namespace AstroArchive {
     r.ReadLine();string line;while((line=r.ReadLine())!=null){string[] a=line.Split(';');if(a.Length<9)continue;double? ra=Sex(a[2],true),dec=Sex(a[3],false);if(!ra.HasValue||!dec.HasValue)continue;
      string name=CompactId(a[0]);if(!string.IsNullOrEmpty(a[6]))name="M"+a[6].TrimStart('0');
      double d,mag;var o=new CatalogObject{Name=name,Common=a[7].Split(',')[0],Aliases=a[8],Type=a[1],RA=ra.Value,Dec=dec.Value,Diameter=double.TryParse(a[4],NumberStyles.Float,CultureInfo.InvariantCulture,out d)?d/60:0,Magnitude=double.TryParse(a[5],NumberStyles.Float,CultureInfo.InvariantCulture,out mag)?(double?)mag:null};Objects.Add(o);if(!string.IsNullOrWhiteSpace(o.Common))commonNames[name]=o.Common;
-     AddAlias(a[0],name);AddAlias(name,name);foreach(string t in a[7].Split(','))AddAlias(t,name);foreach(string t in a[8].Split(','))if(Regex.IsMatch(t.Trim(),@"^(M|NGC|IC|C|SH\s*2|B)\s*\d",RegexOptions.IgnoreCase)){AddAlias(t,name);string compact=CompactId(t);if(Regex.IsMatch(compact,@"^C\d+$")){AddAlias(compact,name);AddAlias("Caldwell "+compact.Substring(1),name);}}
+     AddAlias(a[0],name);AddAlias(name,name);foreach(string t in a[7].Split(','))AddAlias(t,name);foreach(string t in a[8].Split(','))if(Regex.IsMatch(t.Trim(),@"^(M|NGC|IC|C|SH\s*2|B|UGC|PGC)\s*\d",RegexOptions.IgnoreCase)){AddAlias(t,name);string compact=CompactId(t);if(Regex.IsMatch(compact,@"^C\d+$")){AddAlias(compact,name);AddAlias("Caldwell "+compact.Substring(1),name);}}
     }
    }
    AddAlias("Sun","Sun");AddAlias("Solar","Sun");
@@ -36,12 +36,12 @@ namespace AstroArchive {
    foreach(var item in Objects){string common;if(commonNames.TryGetValue(item.Name,out common))item.Common=common;item.Aliases=Aliases(item.Name);}
    foreach(var phrase in phrases.GroupBy(p=>p.Key).Select(g=>g.First())){if(KnownName(phrase.Key)!=phrase.Value)continue;string pattern=@"\b"+string.Join(@"\s*",phrase.Key.Split(new[]{' '},StringSplitOptions.RemoveEmptyEntries).Select(Regex.Escape))+@"\b";var entry=new KeyValuePair<Regex,string>(new Regex(pattern,RegexOptions.CultureInvariant),phrase.Value);filenamePatterns.Add(entry);string token="";foreach(string word in phrase.Key.Split(' ')){token+=word;List<KeyValuePair<Regex,string>> list;if(!phraseIndex.TryGetValue(token,out list))phraseIndex[token]=list=new List<KeyValuePair<Regex,string>>();list.Add(entry);}}
   }
-  static void AddAlias(string a,string name){if(string.IsNullOrWhiteSpace(a))return;string label;if(!descriptions.TryGetValue(name,out label))label="";descriptions[name]=label+" "+a;string key=Key(a);if(key.Length==0||ambiguous.Contains(key))return;string existing;if(aliases.TryGetValue(key,out existing)&&existing!=name){aliases.Remove(key);ambiguous.Add(key);}else aliases[key]=name;string words=Regex.Replace(a.ToUpperInvariant(),@"[^A-Z0-9]+"," ").Trim();if(words.Length>=4&&!Regex.IsMatch(key,@"^(M|NGC|IC|C|B|SH2)\d+[A-Z]?$")&&words.Any(char.IsLetter))phrases.Add(new KeyValuePair<string,string>(words,name));}
+  static void AddAlias(string a,string name){if(string.IsNullOrWhiteSpace(a))return;string label;if(!descriptions.TryGetValue(name,out label))label="";descriptions[name]=label+" "+a+" "+CompactId(a);string key=Key(a);if(key.Length==0||ambiguous.Contains(key))return;string existing;if(aliases.TryGetValue(key,out existing)&&existing!=name){aliases.Remove(key);ambiguous.Add(key);}else aliases[key]=name;string words=Regex.Replace(a.ToUpperInvariant(),@"[^A-Z0-9]+"," ").Trim();if(words.Length>=4&&!Regex.IsMatch(key,@"^(M|NGC|IC|C|B|SH2|UGC|PGC)\d+[A-Z]?$")&&words.Any(char.IsLetter))phrases.Add(new KeyValuePair<string,string>(words,name));}
   public static string KnownName(string name){string value;return aliases.TryGetValue(Key(name),out value)?value:null;}
   static HashSet<string> FilenameTargets(string filename){
    string stem=Regex.Replace(Path.GetFileName(filename??""),@"\.(fit|fits|fts)(\.gz)?$","",RegexOptions.IgnoreCase);
    string text=Regex.Replace(stem.ToUpperInvariant(),@"[^A-Z0-9]+"," ");var found=new HashSet<string>();
-   foreach(Match match in Regex.Matches(text,@"\b(M|NGC|IC|C|CALDWELL)\s*0*(\d+)([A-Z]?)\b")){string id=KnownName(match.Groups[1].Value+match.Groups[2].Value+match.Groups[3].Value);if(id!=null)found.Add(id);}
+   foreach(Match match in Regex.Matches(text,@"\b(M|NGC|IC|C|CALDWELL|B|UGC|PGC|SH\s*2)\s*0*(\d+)([A-Z]?)\b")){string id=KnownName(Regex.Replace(match.Groups[1].Value,@"\s+","")+match.Groups[2].Value+match.Groups[3].Value);if(id!=null)found.Add(id);}
    foreach(string token in text.Split(new[]{' '},StringSplitOptions.RemoveEmptyEntries).Distinct()){List<KeyValuePair<Regex,string>> list;if(phraseIndex.TryGetValue(token,out list))foreach(var phrase in list)if(phrase.Key.IsMatch(text))found.Add(phrase.Value);}
    if(Regex.IsMatch(text,@"\bSUN\b"))found.Add("Sun");
    return found;
@@ -58,21 +58,21 @@ namespace AstroArchive {
    var found=FilenameTargets(text);if(found.Count==1)return found.First();
    return text.Replace('_',' ');
   }
-  public static string ObjectId(string target){string id=CanonicalTarget(target);return KnownName(id)!=null||Regex.IsMatch(id,@"^(M|NGC|IC|C|B|SH2)\d+[A-Z]?$",RegexOptions.IgnoreCase)?id:"";}
+  public static string ObjectId(string target){string id=CanonicalTarget(target);return !IsAmbiguous(id)&&(KnownName(id)!=null||Regex.IsMatch(id,@"^(M|NGC|IC|C|B|SH2|UGC|PGC)\d+[A-Z]?$",RegexOptions.IgnoreCase))?id:"";}
   public static string CommonName(string target){string name;return commonNames.TryGetValue(CanonicalTarget(target),out name)?name:"";}
   public static string Label(string target){string id=CanonicalTarget(target),common=CommonName(id);return id+(common.Length>0?" · "+common:"");}
   static string Key(string s){return Regex.Replace(CompactId(s??"").ToUpperInvariant(),@"[^A-Z0-9]","");}
-  public static string CompactId(string s){var m=Regex.Match((s??"").Trim(),@"^(NGC|IC|M|C|CALDWELL|B)\s*[_-]?\s*0*(\d+)(.*)$",RegexOptions.IgnoreCase);return m.Success?(m.Groups[1].Value.Equals("CALDWELL",StringComparison.OrdinalIgnoreCase)?"C":m.Groups[1].Value.ToUpperInvariant())+m.Groups[2].Value+m.Groups[3].Value:s;}
+  public static string CompactId(string s){var m=Regex.Match((s??"").Trim(),@"^(NGC|IC|M|C|CALDWELL|B|UGC|PGC)\s*[_-]?\s*0*(\d+)(.*)$",RegexOptions.IgnoreCase);return m.Success?(m.Groups[1].Value.Equals("CALDWELL",StringComparison.OrdinalIgnoreCase)?"C":m.Groups[1].Value.ToUpperInvariant())+m.Groups[2].Value+m.Groups[3].Value:s;}
   public static double? Sex(string s,bool hours){
    string[] p=Regex.Split((s??"").Trim().Replace("h",":").Replace("m",":").Replace("s",""),@"[:\s]+");double a,b,c;if(p.Length<2||!double.TryParse(p[0],NumberStyles.Float,CultureInfo.InvariantCulture,out a)||!double.TryParse(p[1],NumberStyles.Float,CultureInfo.InvariantCulture,out b))return null;c=0;if(p.Length>2&&!double.TryParse(p[2],NumberStyles.Float,CultureInfo.InvariantCulture,out c))return null;
    double v=(Math.Abs(a)+b/60+c/3600)*(s.TrimStart().StartsWith("-")?-1:1);return hours?v*15:v;
   }
   public static string Normalize(string s){
    s=(s??"").Trim().Trim('_','-');if(IsAmbiguous(s))return "Unknown";if(FilenameTargets(s).Count>1)return s.Replace('_',' ');s=CanonicalTarget(s);string val;if(aliases.TryGetValue(Key(s),out val))return val;
-   var m=Regex.Match(s,@"\b(M|NGC|IC|C|CALDWELL)\s*[_-]?\s*0*(\d+)([A-Z]?)\b",RegexOptions.IgnoreCase);if(m.Success){string id=m.Groups[1].Value.ToUpperInvariant()+m.Groups[2].Value+m.Groups[3].Value.ToUpperInvariant();return aliases.TryGetValue(Key(id),out val)?val:id;}
+   var m=Regex.Match(s,@"\b(M|NGC|IC|C|CALDWELL|B|UGC|PGC)\s*[_-]?\s*0*(\d+)([A-Z]?)\b",RegexOptions.IgnoreCase);if(m.Success){string id=m.Groups[1].Value.ToUpperInvariant()+m.Groups[2].Value+m.Groups[3].Value.ToUpperInvariant();return aliases.TryGetValue(Key(id),out val)?val:id;}
    return s.Replace('_',' ').Trim();
   }
-  public static bool IsAmbiguous(string s){return string.IsNullOrWhiteSpace(s)||Regex.IsMatch(s.Trim(),@"^(unknown|unnamed|none|n/?a|target|object|sky|test|light|raw|image|frame|manual|custom|calibration|\d+)([_\s-]*\d*)$",RegexOptions.IgnoreCase);}
+  public static bool IsAmbiguous(string s){return string.IsNullOrWhiteSpace(s)||ambiguous.Contains(Key(s))||Regex.IsMatch(s.Trim(),@"^(unknown|unnamed|none|n/?a|target|object|sky|test|light|raw|image|frame|manual|custom|calibration|\d+)([_\s-]*\d*)$",RegexOptions.IgnoreCase);}
   public static double Distance(double ra,double dec,double ra2,double dec2){double k=Math.PI/180;double x=Math.Sin((dec2-dec)*k/2),y=Math.Sin((ra2-ra)*k/2);double h=x*x+Math.Cos(dec*k)*Math.Cos(dec2*k)*y*y;return 2*Math.Asin(Math.Sqrt(Math.Min(1,h)))/k;}
   public static List<Candidate> Nearby(double ra,double dec,double radius){return Objects.Select(o=>new Candidate{Name=o.Name,Common=o.Common,Separation=Distance(ra,dec,o.RA,o.Dec)}).Where(c=>c.Separation<=radius).OrderBy(c=>c.Separation).GroupBy(c=>c.Name).Select(g=>g.First()).Take(30).ToList();}
   public static List<CatalogObject> Search(string q){string v=Key(q),known=KnownName(q);return Objects.Where(o=>o.Name==known||Key(o.Name+" "+o.Common+" "+o.Aliases).Contains(v)).OrderByDescending(o=>o.Name==known).Take(50).ToList();}
@@ -80,6 +80,12 @@ namespace AstroArchive {
  public static class Classifier {
   public sealed class ShotsMetadata {public Dictionary<string,object> Raw;public Dictionary<string,string> Values=new Dictionary<string,string>(StringComparer.OrdinalIgnoreCase);public string Path;public string Note;public FileStamp Stamp;}
   static double? MatchNumber(string text,string pattern){var m=Regex.Match(text,pattern,RegexOptions.IgnoreCase);double d;return m.Success&&double.TryParse(m.Groups[1].Value,NumberStyles.Float,CultureInfo.InvariantCulture,out d)?(double?)d:null;}
+  public static bool FilenameExposureGain(string filename,out double? exposure,out double? gain){
+   exposure=gain=null;var matches=Regex.Matches(Path.GetFileName(filename??""),@"(?:^|[_ -])(\d+(?:\.\d+)?)s(\d+)(?=[_. -]|$)",RegexOptions.IgnoreCase);double seconds,value;
+   if(matches.Count!=1)return false;var match=matches[0];
+   if(!double.TryParse(match.Groups[1].Value,NumberStyles.Float,CultureInfo.InvariantCulture,out seconds)||seconds<=0||double.IsInfinity(seconds)||!double.TryParse(match.Groups[2].Value,NumberStyles.Float,CultureInfo.InvariantCulture,out value)||double.IsInfinity(value))return false;
+   exposure=seconds;gain=value;return true;
+  }
   static string CleanStem(string s){return Regex.Replace(s,@"\.(fit|fits|fts)(\.gz)?$","",RegexOptions.IgnoreCase);}
   public static Frame Read(string path,string root,string telescope,string model,long? enumeratedSize=null,Action<int> counted=null,Dictionary<string,ShotsMetadata> shotsCache=null,FitsHeader parsedHeader=null,FileStamp parsedStamp=null,System.Threading.CancellationToken ct=default(System.Threading.CancellationToken),PipelineMetrics metrics=null,AssetInfo asset=null,string imageKey=null,string originalName=null){
    ct.ThrowIfCancellationRequested();FileStamp sourceStamp=parsedStamp;if(asset==null&&parsedHeader!=null)asset=new AssetInfo{Format="FITS",Header=parsedHeader,Images={new ImageDescriptor{Key="hdu:0",Label="Image 1",Width=parsedHeader.Width,Height=parsedHeader.Height,Channels=parsedHeader.Channels,Bitpix=parsedHeader.Bitpix,Offset=parsedHeader.Offset,Count=1,Encoding="FITS",Numeric=new[]{8,16,32,64,-32,-64}.Contains(parsedHeader.Bitpix),Headers=parsedHeader.Values,Comments=parsedHeader.Comments}}};if(asset==null){using(var locked=new FileStream(path,FileMode.Open,FileAccess.Read,FileShare.Read)){sourceStamp=FileStamp.Read(path);asset=Assets.Inspect(path,n=>{ct.ThrowIfCancellationRequested();if(counted!=null)counted(n);});if(!sourceStamp.ContentSame(FileStamp.Read(path)))throw new InvalidDataException("Source changed during metadata inspection.");}}var selectedImage=asset.Images.FirstOrDefault(i=>i.Key==imageKey);if(selectedImage!=null)asset.Header=new FitsHeader{Width=selectedImage.Width,Height=selectedImage.Height,Channels=selectedImage.Channels,Bitpix=selectedImage.Bitpix,Values=selectedImage.Headers??new Dictionary<string,string>(),Comments=selectedImage.Comments??new Dictionary<string,string>()};FitsHeader h=asset.Header;string rel=path.Substring(root.TrimEnd('\\','/').Length).TrimStart('\\','/');string text=Path.GetFileName(root.TrimEnd('\\','/'))+"/"+rel.Replace('\\','/');string low=text.ToLowerInvariant();string stem=CleanStem(originalName??Path.GetFileName(path));string name=stem.ToLowerInvariant();
@@ -102,12 +108,14 @@ namespace AstroArchive {
    if(!f.Exposure.HasValue)f.Exposure=MatchNumber(stem,@"(?:^|[_ -])(\d+(?:\.\d+)?)\s*(?:sec|s)(?:[_ -]|$)");
    if(!f.Exposure.HasValue)f.Exposure=MatchNumber(text,@"\d+x(\d+(?:\.\d+)?)(?:sec|s)");
    f.Gain=h.Number("GAIN");if(!f.Gain.HasValue)f.Gain=MatchNumber(text,@"GAIN[_ =-](-?\d+(?:\.\d+)?)");
+   double? filenameExposure,filenameGain;if(FilenameExposureGain(f.OriginalName,out filenameExposure,out filenameGain)){if(!f.Gain.HasValue)f.Gain=filenameGain;if(!f.Exposure.HasValue&&f.Kind=="Light")f.Exposure=filenameExposure;}
    f.Temperature=h.Number("CCD-TEMP","SENSOR_T","SENSORT","CAMTEMP","TEMPERAT");if(!f.Temperature.HasValue)f.Temperature=MatchNumber(text,@"(?:^|[_ -])T?(-?\d+(?:\.\d+)?)\s*°?C(?:[_ .-]|$)");
    double? bin=MatchNumber(text,@"BIN[_ =-](\d+)");if(bin.HasValue&&!h.Number("XBINNING","BINNING").HasValue)f.BinX=f.BinY=(int)bin.Value;
-   f.StackCount=(int)(h.Number("NCOMBINE","STACKCNT","NSTACK","STACKNUM")??0);
-   if(f.StackCount==0){double? n=MatchNumber(name,@"(?:stack[_-]?|^)(\d+)(?:x|$|_)");if(n.HasValue)f.StackCount=(int)n.Value;}
+   double? stackCount=h.Number("NCOMBINE","STACKCNT","NSTACK","STACKNUM","NSUBS","SUBCOUNT");
+   if(!stackCount.HasValue)stackCount=MatchNumber(name,@"(?:^|[_ -])(\d+)x\d+(?:\.\d+)?(?:sec|s)(?=[_ .-]|$)")??MatchNumber(name,@"(?:stack[_-]?|^)(\d+)(?:x|$|_)");
+   if(stackCount.HasValue&&stackCount.Value>0&&stackCount.Value<=int.MaxValue&&stackCount.Value==Math.Floor(stackCount.Value))f.StackCount=(int)stackCount.Value;
    if(f.Kind=="Light"&&f.StackCount>1){f.Kind="Stack";f.Notes+="Header indicates multiple combined exposures. ";}
-   if(f.Kind=="Unknown"&&(h.Number("NCOMBINE","STACKCNT","NSTACK")??0)>1)f.Kind="Stack";
+   if(f.Kind=="Unknown"&&f.StackCount>1)f.Kind="Stack";
    string filter=h.Get("FILTER","FILTERID","FILTNAME");if(!string.IsNullOrEmpty(filter))f.Filter=filter;
    else {double? ir=MatchNumber(text,@"(?:^|_)IR[_-]?(\d)");if(ir.HasValue)f.Filter=ir==0?"Standard":ir==1?"Astro":ir==2?"Dual band":"IR "+ir;else if(Regex.IsMatch(low,@"(?:^|[_/ -])ir[_ -]*cut(?:[_/ .-]|$)"))f.Filter="IRCUT";else if(Regex.IsMatch(low,@"(?:^|[_/ -])(duo|dual|lp)[_-]?(band|filter)?(?:[_/ -]|$)"))f.Filter="Dual band";}
    f.ObservationMode=h.Get("OBSMODE","CAPMODE","SHOOTMOD","MODE");

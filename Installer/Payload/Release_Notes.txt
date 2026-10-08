@@ -1,3 +1,22 @@
+AstroArchive 1.11.1 — exposure evidence, spacing and catalogue identities
+Package 1.11.1.1
+
+- Add six pixels of space above the top navigation buttons and logo/title.
+- Hover over Exposure in Repository or Import to see the saved FITS exposure
+  cards, their comments, the combined-frame count and filename exposure/gain.
+  Preserve reported stack exposures without multiplying them automatically.
+- Recover explicit count × duration sub-counts wherever they occur in a filename;
+  reject fractional or invalid counts. Read compact exposure/gain settings such
+  as 30s40 as 30 seconds per sub and gain 40, keeping confirmed headers first.
+- Recover per-sub exposure from compact settings in Edited imports. Calculate
+  total integration only when a real sub-count is supplied; unspecified reported
+  exposure remains separate from per-sub and total exposure.
+- Resolve bundled PGC and UGC identifiers to the same canonical object as their
+  Messier, NGC and IC aliases, including filename recognition, search and old
+  archive records. Shared ambiguous identifiers remain unknown.
+- Keep catalogue prefixes distinct: M106 and NGC4258 describe the same object;
+  M106 and NGC106 describe different objects despite their matching number.
+
 AstroArchive 1.11.0 — Edited workspace and expanded repository layout
 Package 1.11.0.1
 

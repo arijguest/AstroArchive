@@ -1,4 +1,4 @@
-AstroArchive 1.11.0
+AstroArchive 1.11.1
 Windows 10/11 x64 desktop app. Built-in .NET Framework 4.8 and Windows SQLite.
 Runs offline. No Python or Google login required.
 
@@ -701,3 +701,20 @@ other acquisition details are retained. Folder names and meteorite do not match.
 
 Preview defaults to Auto per channel for scientific images. Saved stretch choices
 are retained. Solar/planetary images and processed raster previews stay linear.
+
+CATALOGUE IDENTITIES
+Recognised catalogue aliases use one object ID and target group. For example,
+M106, NGC4258, UGC7353 and PGC39600 all resolve to M106. Catalogue prefixes remain
+part of the identity: M106 and NGC106 are different objects. Bare numbers are
+not IDs; aliases shared by distinct catalogue entries remain unknown. Existing
+archive records are normalised when loaded without moving their archived images.
+
+EXPOSURE VALUES
+Hover over an Exposure cell in Repository or Import to inspect its saved FITS
+exposure cards and comments, combined-frame count and filename exposure/gain
+settings. For example, 30s40 means 30-second subs at gain 40, not 40 subs.
+DWARF's stacked-16 prefix describes image bit depth, not a combined-frame count.
+The displayed exposure preserves the reported value; it is not automatically
+multiplied. Edited imports keep unspecified reported exposure separate from
+per-sub and total integration, and calculate totals only from confirmed counts
+and sub durations or explicitly labelled total-exposure metadata.

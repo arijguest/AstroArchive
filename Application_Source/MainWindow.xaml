@@ -521,7 +521,7 @@
   </Style>
   <Thickness x:Key="FocusWidth">2</Thickness>
  </Window.Resources>
- <Grid Margin="18,2,18,4" x:Name="WorkspaceRoot">
+ <Grid Margin="18,8,18,4" x:Name="WorkspaceRoot">
   <Grid.RowDefinitions>
    <RowDefinition Height="Auto" />
    <RowDefinition Height="Auto" />

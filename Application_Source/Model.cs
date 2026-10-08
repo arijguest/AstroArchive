@@ -1,4 +1,4 @@
-// AstroArchive 1.11.0. C# 5, .NET Framework 4.8, Windows 10/11 x64.
+// AstroArchive 1.11.1. C# 5, .NET Framework 4.8, Windows 10/11 x64.
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -83,6 +83,7 @@ namespace AstroArchive {
   public string PanelText {get{return MosaicLabels!=null&&MosaicLabels.Count>0?string.Join("; ",MosaicLabels.Select(m=>m.Panel)):Mosaic==null||MosaicDismissed?"-":Mosaic.PanelKey??"Unassigned";}}
   public string ReviewText {get{return CaptureScreening.NeedsReview(this)?"Needs review":Screened?"Passed":"Not screened";}}
   public string ExposureText {get{return Exposure.HasValue?Util.Num(Exposure)+" s":"-";}}
+  [ScriptIgnore]public string ExposureTooltip {get{return MetadataProfiles.ExposureEvidence(this);}}
   public string MakeText {get{return !string.IsNullOrEmpty(Make)?Make:InstrumentDetection.MakeOf(Model);}}
   public string InstrumentText {get{return string.IsNullOrEmpty(Model)||Model=="Auto"?MakeText:Model;}}
   public string GainText {get{return Gain.HasValue?Util.Num(Gain):"-";}} public string TemperatureText {get{return Temperature.HasValue?Util.Num(Temperature)+" °C":"-";}}
