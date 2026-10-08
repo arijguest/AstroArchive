@@ -20,13 +20,20 @@ namespace AstroArchive {
   public static string FindAstap(){string[] p={Path.Combine(AppDomain.CurrentDomain.BaseDirectory,"astap.exe"),Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles),"astap","astap.exe"),Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles),"ASTAP","astap_cli.exe"),Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86),"astap","astap.exe")};return p.FirstOrDefault(File.Exists)??"";}
   public static bool Configured(Settings s){return (!s.UseOnline&&File.Exists(s.Astap))||(s.UseOnline&&!string.IsNullOrEmpty(Unprotect(s.ApiKeyProtected)));}
   public static SolveResult Solve(Frame frame,string path,Settings settings,CancellationToken ct,Action<string> progress,Action<int> counted=null){
+   using(var deadline=CancellationTokenSource.CreateLinkedTokenSource(ct)){
+    deadline.CancelAfter(TimeSpan.FromMinutes(settings.UseOnline?10:5));try{return SolveFrameCore(frame,path,settings,deadline.Token,progress??(message=>{}),counted);}
+    catch(OperationCanceledException){ct.ThrowIfCancellationRequested();throw SolveTimeout(settings);}
+   }
+  }
+  static TimeoutException SolveTimeout(Settings settings){return new TimeoutException(settings.UseOnline?"Astrometry.net solving exceeded ten minutes.":"ASTAP solving exceeded five minutes.");}
+  static SolveResult SolveFrameCore(Frame frame,string path,Settings settings,CancellationToken ct,Action<string> progress,Action<int> counted){
    if(!Assets.CanDecode(frame))throw new NotSupportedException("This image has no available pixel decoder.");if(string.IsNullOrEmpty(frame.Format)||frame.Format=="FITS"&&!Exporter.RequiresConversion(frame))return Solve(path,settings,ct,progress,counted);
    string directory=Path.Combine(Path.GetTempPath(),"AstroArchiveDecode_"+Guid.NewGuid().ToString("N"));Directory.CreateDirectory(directory);string converted=Path.Combine(directory,"input.fits");try{progress("Decoding representative image for the solver");ScientificFits.Write(converted,Assets.Read(frame,path,frame.ImageIndex??0,ct),frame,ct);return Solve(converted,settings,ct,progress,counted);}finally{try{File.Delete(converted);Directory.Delete(directory);}catch{}}
   }
   public static SolveResult Solve(string path,Settings s,CancellationToken ct,Action<string> progress,Action<int> counted=null){
    using(var deadline=CancellationTokenSource.CreateLinkedTokenSource(ct)){
-    deadline.CancelAfter(TimeSpan.FromMinutes(s.UseOnline?10:5));try{return SolveCore(path,s,deadline.Token,progress,counted);}
-    catch(OperationCanceledException){ct.ThrowIfCancellationRequested();throw new TimeoutException(s.UseOnline?"Astrometry.net solving exceeded ten minutes.":"ASTAP solving exceeded five minutes.");}
+    deadline.CancelAfter(TimeSpan.FromMinutes(s.UseOnline?10:5));try{return SolveCore(path,s,deadline.Token,progress??(message=>{}),counted);}
+    catch(OperationCanceledException){ct.ThrowIfCancellationRequested();throw SolveTimeout(s);}
    }
   }
   static SolveResult SolveCore(string path,Settings s,CancellationToken ct,Action<string> progress,Action<int> counted){
