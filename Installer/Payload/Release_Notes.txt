@@ -1,3 +1,14 @@
+AstroArchive 1.12.2 — Windows application icon
+Package 1.12.2.1
+
+- Use the bundled multi-size Windows ICO for the main window, taskbar and
+  auxiliary windows. Keep the full-resolution PNG for the in-app logo.
+- Set icons explicitly on settings/processing forms, preview, guide, walkthrough
+  and Dump progress windows. Icons load from the executable, independent of
+  the working directory and without requiring external asset files.
+- Verify native small/large icon handles on the main window, forms, guide and
+  preview during Windows UI validation.
+
 AstroArchive 1.12.1 — preview, progress and Edited refinements
 Package 1.12.1.1
 

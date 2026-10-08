@@ -19,7 +19,7 @@ namespace AstroArchive {
    Loaded+=(s,e)=>{motion=new MotionPreview(preview,path,info=>message.Visibility=Visibility.Collapsed,error=>{message.Text=error;message.Visibility=Visibility.Visible;});motion.Start();};Closed+=(s,e)=>{if(motion!=null)motion.Dispose();};
   }
   public ImagePreviewWindow(Window owner,string filename,int width,int height,byte[] pixels){
-   Owner=owner;Title="Preview - "+filename;WindowStartupLocation=WindowStartupLocation.CenterOwner;Background=owner.Background;FontFamily=owner.FontFamily;FontSize=13;Resources.MergedDictionaries.Add(owner.Resources);Theme.Bind(this,Control.BackgroundProperty,"Canvas");Theme.Bind(this,Control.ForegroundProperty,"Text");
+   Owner=owner;Icon=ApplicationIcon.Image;Title="Preview - "+filename;WindowStartupLocation=WindowStartupLocation.CenterOwner;Background=owner.Background;FontFamily=owner.FontFamily;FontSize=13;Resources.MergedDictionaries.Add(owner.Resources);Theme.Bind(this,Control.BackgroundProperty,"Canvas");Theme.Bind(this,Control.ForegroundProperty,"Text");
    // Reserve the native window chrome, then size the client area to the portrait image.
    var geometry=new PreviewGeometry(width,height);var work=SystemParameters.WorkArea;double clientWidth,clientHeight;geometry.Frame(Math.Min(560,work.Width-64),Math.Max(1,Math.Min(760,work.Height-100)-PreviewViewport.ToolbarSpace),out clientWidth,out clientHeight);
    Width=clientWidth+2*SystemParameters.ResizeFrameVerticalBorderWidth+16;Height=clientHeight+PreviewViewport.ToolbarSpace+SystemParameters.CaptionHeight+2*SystemParameters.ResizeFrameHorizontalBorderHeight+16;MinWidth=Math.Min(Width,260);MinHeight=Math.Min(Height,360);

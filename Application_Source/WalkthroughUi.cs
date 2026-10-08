@@ -25,7 +25,7 @@ namespace AstroArchive {
         readonly Action<bool> complete;
         bool finished;
         public WalkthroughWindow(Window owner, WalkthroughStep[] steps, Action<WalkthroughStep> select, Action<WalkthroughStep> action, Action<bool> complete) {
-            Owner = owner; this.steps = steps; this.select = select; this.action = action; this.complete = complete;
+            Owner = owner; Icon = ApplicationIcon.Image; this.steps = steps; this.select = select; this.action = action; this.complete = complete;
             Title = "AstroArchive walkthrough";
             Width = Math.Min(530, SystemParameters.WorkArea.Width - 24); MinWidth = Math.Min(460, Width);
             Height = Math.Min(430, SystemParameters.WorkArea.Height - 24); MinHeight = Math.Min(330, Height);

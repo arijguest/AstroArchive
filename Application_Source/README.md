@@ -1,4 +1,4 @@
-# AstroArchive 1.12.0
+# AstroArchive 1.12.2
 
 Repository defaults to expandable subframe session summaries. Edited shares its targets/table/Preview layout and supports reviewed mixed-folder import, GIF associations, starless/stars-only classification and acquisition metadata recovery. Animated GIF, SER and Windows video previews have Pause/Play controls. Dump processing shows progress in a separate window.
 

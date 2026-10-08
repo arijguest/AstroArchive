@@ -1,11 +1,15 @@
-AstroArchive 1.12.1 validation
-Package 1.12.1.1; Windows 10/11 x64; .NET Framework 4.8.
+AstroArchive 1.12.2 validation
+Package 1.12.2.1; Windows 10/11 x64; .NET Framework 4.8.
 
 The Windows release workflow runs application regressions, a separate six-case
 Windows WIC integration suite, installer/updater regressions, x64 compilation,
 WPF application/installer rendering and disposable install/repair/uninstall checks.
 A successful workflow is required before publishing installers and the SHA-256
 update feed. Its logs are authoritative for test counts and package hashes.
+
+Native window-icon checks verify the bundled ICO retains 16/32-pixel frames,
+uses the shared frozen image and supplies Windows with both small and large icon
+handles for the main window, forms, guide and preview.
 
 Capture sky regressions check sidereal time, longitude signs, northern/southern
 and polar horizons, acquisition clocks and offsets, missing/ambiguous clocks,
