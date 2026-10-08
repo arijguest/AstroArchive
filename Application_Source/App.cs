@@ -31,7 +31,7 @@ namespace AstroArchive {
    try{
     AstroArchive.Installation.ShellIdentity.InitializeProcess();
     Assets.Register(new RasterReader(),".tif",".tiff",".png",".jpg",".jpeg");var app=new Application{ShutdownMode=ShutdownMode.OnMainWindowClose};var ui=new MainUi(args.Length>0&&args[0]=="--ui-test");app.MainWindow=ui.Window;
-    app.DispatcherUnhandledException+=(s,e)=>{MessageBox.Show(ui.Window,e.Exception.Message,"AstroArchive",MessageBoxButton.OK,MessageBoxImage.Error);e.Handled=true;};
+    app.DispatcherUnhandledException+=(s,e)=>{if(args.Length>1&&args[0]=="--ui-test"){Directory.CreateDirectory(args[1]);File.WriteAllText(Path.Combine(args[1],"ui-smoke-error.txt"),e.Exception.ToString());Environment.Exit(1);}MessageBox.Show(ui.Window,e.Exception.Message,"AstroArchive",MessageBoxButton.OK,MessageBoxImage.Error);e.Handled=true;};
     if(args.Length>0&&args[0]=="--ui-test") {if(args.Length<2)throw new ArgumentException("Output directory required.");app.Dispatcher.Invoke(new Action(()=>ui.Smoke(args[1])));ui.Dispose();return 0;}
     app.Run(ui.Window);return 0;
    }catch(Exception e){

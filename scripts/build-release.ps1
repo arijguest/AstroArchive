@@ -66,7 +66,14 @@ $pinnedFixture = Join-Path ([Environment]::GetFolderPath('ApplicationData')) ('M
 function Run-Checked([string]$File, [string[]]$Arguments) {
     $process = Start-Process -FilePath $File -ArgumentList $Arguments -PassThru
     # Wait for setup itself; PowerShell -Wait also waits for the restarted app.
-    $process.WaitForExit()
+    if ($Arguments -contains '--ui-test') {
+        if (-not $process.WaitForExit(300000)) {
+            $process.Kill()
+            $stageFile = Join-Path $OutputDirectory 'ui-preview\target-solving-stage.txt'
+            if (Test-Path $stageFile) { Get-Content $stageFile | Write-Output }
+            throw 'Windows UI smoke did not complete within five minutes.'
+        }
+    } else { $process.WaitForExit() }
     if ($process.ExitCode -ne 0) {
         $smokeError = Join-Path $OutputDirectory 'ui-preview\ui-smoke-error.txt'
         if (Test-Path $smokeError) { Get-Content $smokeError | Write-Output }
