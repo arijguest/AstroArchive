@@ -9,6 +9,14 @@ using System.Windows.Data;
 namespace AstroArchive {
  public partial class MainUi {
   volatile IdentificationProgress identificationProgress;
+  Action pendingTargetReview;
+  void ShowTargetReviewWhenReady(Action review){
+   if(Window.IsVisible&&Window.WindowState!=WindowState.Minimized&&cancel==null)review();else pendingTargetReview=review;
+  }
+  void ResumeTargetReview(){
+   if(pendingTargetReview==null||closing||cancel!=null||!Window.IsVisible||Window.WindowState==WindowState.Minimized)return;
+   var review=pendingTargetReview;pendingTargetReview=null;Window.Dispatcher.BeginInvoke(new Action(()=>ShowTargetReviewWhenReady(review)));
+  }
   void IdentificationStage(IdentificationProgress value){identificationProgress=value;var metrics=activeMetrics;if(metrics!=null){metrics.Stage=value.Stage;metrics.UpdateLegacy(value.Completed,value.Total,value.Detail);}}
   SolveResult SolveIdentification(Frame sample,bool imported,CancellationToken ct,Action<string> progress){
    if(PendingImport(sample,imported)){
@@ -19,17 +27,18 @@ namespace AstroArchive {
   }
   void IdentifyByPlate(bool imported,List<Frame> selected,int named){
    if(!PlateSolve.Configured(settings)){Configure(2);if(!PlateSolve.Configured(settings)){L("StatusLabel").Text=named+" filename matches; "+selected.Count+" captures need a configured plate solver.";return;}}
-   List<TargetSolveJob> jobs=null;
-   Run(ct=>{jobs=TargetSolving.Plan(selected);TargetSolving.Solve(jobs,(frame,token,stage)=>SolveIdentification(frame,imported,token,stage),ct,IdentificationStage);return "";},done=>{
+   List<TargetSolveJob> jobs=null;var repository=repo;
+   Run(ct=>{jobs=TargetSolving.Plan(selected);TargetSolving.Solve(jobs,(frame,token,stage)=>SolveIdentification(frame,imported,token,stage),ct,IdentificationStage);return "";},done=>ShowTargetReviewWhenReady(()=>{
+    if(closing||repository!=repo)return;
     if(!jobs.Any(j=>j.Solved)){L("StatusLabel").Text="No fields solved. Capture metadata was retained.";ShowReport("Target identification",IdentificationReport(jobs));return;}
     if(jobs.Count!=1||!jobs[0].Include){var dialog=IdentificationDialog(jobs);if(!dialog.Show()){L("StatusLabel").Text="Solved "+jobs.Count(j=>j.Solved)+" fields; metadata changes were not applied.";return;}}
     ApplyIdentifications(jobs,imported,named);
-   });
+   }));
   }
   void ApplyIdentifications(List<TargetSolveJob> jobs,bool imported,int named){
    var chosen=jobs.Where(j=>j.Solved&&j.Include).ToList();int updated=0;var errors=new List<string>();
    cancellationMessage="Identification canceled. Metadata already applied is retained.";
-   Run(ct=>{int done=0,total=chosen.Sum(j=>j.Frames.Count);foreach(var job in chosen)foreach(var original in job.Frames){ct.ThrowIfCancellationRequested();IdentificationStage(new IdentificationProgress{Completed=done,Total=total,Stage="Applying target metadata",Detail=original.OriginalName+"\n"+Catalog.Label(job.Target)+" · "+job.Scope});try{var frame=TargetSolving.Apply(job,original,job.Target);StoreIdentification(original,frame,imported,ct);updated++;}catch(OperationCanceledException){throw;}catch(Exception error){errors.Add(original.OriginalName+": "+error.Message);}done++;}IdentificationStage(new IdentificationProgress{Completed=done,Total=total,Stage="Saving archive index",Detail=updated+" captures updated"});if(!imported||chosen.Any(j=>j.Frames.Any(f=>!PendingImport(f,imported))))repo.Checkpoint(ct);return "";},done=>{
+   Run(ct=>{int done=0,total=chosen.Sum(j=>j.Frames.Count);foreach(var job in chosen)foreach(var original in job.Frames){ct.ThrowIfCancellationRequested();IdentificationStage(new IdentificationProgress{Completed=done,Total=total,Metadata=true,Stage="Applying target metadata",Detail=original.OriginalName+"\n"+Catalog.Label(job.Target)+" · "+job.Scope});try{var frame=TargetSolving.Apply(job,original,job.Target);StoreIdentification(original,frame,imported,ct);updated++;}catch(OperationCanceledException){throw;}catch(Exception error){errors.Add(original.OriginalName+": "+error.Message);}done++;}IdentificationStage(new IdentificationProgress{Completed=done,Total=total,Metadata=true,Stage="Saving archive index",Detail=updated+" captures updated"});if(!imported||chosen.Any(j=>j.Frames.Any(f=>!PendingImport(f,imported))))repo.Checkpoint(ct);return "";},done=>{
     if(imported)FilterImports();L("StatusLabel").Text=(named+updated)+" captures identified · "+jobs.Count(j=>j.Solved)+" fields solved · "+jobs.Count(j=>!j.Solved)+" failed";
     if(errors.Count>0||jobs.Any(j=>!j.Solved))ShowReport("Target identification report",IdentificationReport(jobs)+(errors.Count==0?"":"\n\nMetadata not applied:\n"+string.Join("\n",errors)));
    });
@@ -56,7 +65,7 @@ namespace AstroArchive {
   void AutoIdentify(List<Frame> frames,CancellationToken ct,PipelineMetrics metrics){
    var jobs=TargetSolving.Plan(frames);TargetSolving.Solve(jobs,(frame,token,stage)=>SolveAutomaticFrame(frame,settings,token,stage,metrics),ct,IdentificationStage);
    int count=0,total=jobs.Where(j=>j.Include).Sum(j=>j.Frames.Count);
-   foreach(var job in jobs){ct.ThrowIfCancellationRequested();foreach(var original in job.Frames){ct.ThrowIfCancellationRequested();if(job.Include){IdentificationStage(new IdentificationProgress{Completed=count,Total=total,Stage="Applying target metadata",Detail=original.OriginalName+"\n"+job.TargetLabel});repo.Refile(TargetSolving.Apply(job,original,job.Target),ct);count++;}
+   foreach(var job in jobs){ct.ThrowIfCancellationRequested();foreach(var original in job.Frames){ct.ThrowIfCancellationRequested();if(job.Include){IdentificationStage(new IdentificationProgress{Completed=count,Total=total,Metadata=true,Stage="Applying target metadata",Detail=original.OriginalName+"\n"+job.TargetLabel});repo.Refile(TargetSolving.Apply(job,original,job.Target),ct);count++;}
      else{var frame=job.Solved?TargetSolving.WithPointing(job,original):original.Clone();if(job.Solved){frame.Notes=(frame.Notes??"")+job.Match+". Use Identify target to review. ";}else frame.Notes=(frame.Notes??"")+"Plate solve unavailable: "+job.Error+". ";repo.Save(frame);}
     }if(job.Error!=null&&plan!=null)plan.Errors.Add(job.Filename+": "+job.Error);
    }

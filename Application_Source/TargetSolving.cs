@@ -15,15 +15,17 @@ namespace AstroArchive {
   public string TargetLabel{get{return string.IsNullOrEmpty(Target)?"Choose target…":Catalog.Label(Target);}}
  }
  public sealed class IdentificationProgress {
-  public int Completed,Total;public string Stage,Detail;
+  public int Completed,Total;public string Stage,Detail;public bool Metadata;
  }
  public static class TargetSolving {
-  // Only selected Lights with an explicit shared session and target share a solve.
-  // Unknown session IDs, stacks and different sensors/geometry remain independent.
+  // Selected Lights follow the session/date subgroup identity used by the table.
+  // Undated unknown sessions, stacks and different sensors/geometry remain independent.
   static string GroupKey(Frame f,int index){
-   if(f.Kind!="Light"||string.IsNullOrWhiteSpace(f.Session))return "file:"+index;
+   if(f.Kind!="Light")return "file:"+index;
+   var date=string.IsNullOrWhiteSpace(f.Session)?CaptureSessions.Date(f):null;
+   if(string.IsNullOrWhiteSpace(f.Session)&&date==null)return "file:"+index;
    string target=Catalog.KnownName(f.Target)??Catalog.Normalize(f.Target);
-   return Util.Serialize(new object[]{f.SessionKey,target,f.MakeText,f.CameraId,f.CameraModel,f.Width,f.Height,f.BinX,f.BinY,f.Roi,f.OpticalConfiguration,f.ImageIndex});
+   return Util.Serialize(new object[]{f.SessionKey,date==null?"":date.Date.ToString("yyyy-MM-dd",CultureInfo.InvariantCulture),target,f.MakeText,f.CameraId,f.CameraModel,f.Width,f.Height,f.BinX,f.BinY,f.Roi,f.OpticalConfiguration,f.ImageIndex});
   }
   public static List<TargetSolveJob> Plan(IEnumerable<Frame> selected){
    return selected.Select((f,i)=>new{Frame=f,Key=GroupKey(f,i)}).GroupBy(f=>f.Key).Select(g=>{
