@@ -58,7 +58,7 @@ namespace AstroArchive {
     Func<CancellationToken,SearchResult> work;
     if(name=="EditedSearchBox"){
      var source=editedImages.ToArray();string imageClass=Convert.ToString(C("EditedClassFilter").SelectedItem);string target=EditedTargets.SelectedItem is TargetSummary?((TargetSummary)EditedTargets.SelectedItem).Name:"All targets";
-     var sorts=SearchSorts("EditedGrid");var culture=G("EditedGrid").Items.Culture;var index=state.Edited??(state.Edited=new SearchIndex<EditedImage>(EditedSearchDocument));
+     var sorts=SearchSorts("EditedGrid");var culture=G("EditedGrid").Items.Culture??CultureInfo.CurrentCulture;var index=state.Edited??(state.Edited=new SearchIndex<EditedImage>(EditedSearchDocument));
      work=token=>{var query=FileSearch.Parse(text);var rows=index.Find(source,query,i=>imageClass=="All images"||i.Metadata.ImageClass==imageClass,token);token.ThrowIfCancellationRequested();
       var targets=TargetNavigation.Build(rows.Select(i=>new Frame{Target=i.Metadata.ImageClass=="Meteor"?"Meteor":i.Metadata.Object,Kind="Edited image"}),token).Select(t=>(TargetSummary)new EditedTargetSummary{Name=t.Name,Files=t.Files}).ToList();
       string active=targets.Any(t=>t.Name==target)?target:"All targets";if(active!="All targets")rows=rows.Where(i=>Catalog.CanonicalTarget(i.Metadata.ImageClass=="Meteor"?"Meteor":i.Metadata.Object)==active).ToList();
@@ -66,7 +66,7 @@ namespace AstroArchive {
     }else{
      bool imports=name=="ImportSearchBox";var source=(imports?CurrentImportRows():all).ToArray();var criteria=(imports?importFilters:libraryFilters).Snapshot();bool skip=SkipFlagged;
      string target=Targets.SelectedItem is TargetSummary?((TargetSummary)Targets.SelectedItem).Name:"All targets";string mode=Convert.ToString(C("LibraryViewBox").SelectedItem);
-     var sorts=SearchSorts(imports?"ImportGrid":"FramesGrid");var culture=G(imports?"ImportGrid":"FramesGrid").Items.Culture;
+     var sorts=SearchSorts(imports?"ImportGrid":"FramesGrid");var culture=G(imports?"ImportGrid":"FramesGrid").Items.Culture??CultureInfo.CurrentCulture;
      var index=state.Captures??(state.Captures=new SearchIndex<Frame>(SearchDocument.FromFrame));
      work=token=>{var query=FileSearch.Parse(text);var rows=index.Find(source,query,criteria.Matches,token);token.ThrowIfCancellationRequested();
       if(imports){var summary=ImportWorkflow.Summarize(source,rows,skip);int retry=ImportWorkflow.Select(rows,skip,true).Count;return new SearchResult{Query=query,Source=source.ToList(),Frames=SearchOrdering.Order(rows,sorts,culture,token),ImportSummary=summary,Retry=retry};}
