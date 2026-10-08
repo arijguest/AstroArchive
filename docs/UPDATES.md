@@ -66,7 +66,13 @@ From the active installation folder:
 ```
 
 Manual installation and repair work offline. Update-check errors are logged at
-`%LOCALAPPDATA%\AstroArchive\updates\last-error.txt`; setup errors are logged at
+`%LOCALAPPDATA%\AstroArchive\updates\last-error.txt` by both the startup launcher
+and the application's release dialog. The log retains the native Windows error
+code, exact downloaded installer path, expected/saved SHA-256 and the feed's
+reported signing status. When Windows blocks installer launch, it also reads
+matching Code Integrity events 3033/3077 around that attempt, including their
+policy IDs. Event access failures are recorded without preventing the current
+app from opening or removing the verified download. Setup errors are logged at
 `%TEMP%\AstroArchive-setup-error.txt`. Installer downloads for installed apps are
 stored inside the installation's `updates` folder. Older launcher downloads may
 remain under the per-user updates cache.
@@ -75,3 +81,20 @@ Release checks display package-specific notes, with a bounded exact-tag GitHub A
 fallback for older update feeds. A notes error leaves installation available.
 Downloads show byte and percentage progress; downloaded installers remain verified
 before the app hands off to setup.
+
+### Smart App Control blocks
+
+Policy ID `{0283ac0f-fff1-49ae-ada1-8a933130cad6}` identifies Windows' usual
+`VerifiedAndReputableDesktop` Smart App Control policy. The wording “Enterprise
+signing level” in a Code Integrity event does not itself mean the PC is managed
+by an organisation. A blocked cached installer means setup has not started;
+a blocked `Start.exe` after setup identifies a separate launcher rejection.
+
+[Microsoft's Smart App Control documentation](https://learn.microsoft.com/windows/apps/develop/smart-app-control/overview)
+explains that unknown, unsigned programs are blocked when enforcement is on.
+That explains why one unsigned package can work while a newly built package is
+rejected. A checksum confirms the download, not publisher trust. Rebuilding,
+renaming, relocating or changing how the same file is launched does not give it
+a trusted signature. Follow [the signing setup](RELEASING.md#configure-windows-signing)
+to sign the installer, launcher and app with a validated publisher identity.
+Signing support in the workflow alone does not mean published files were signed.

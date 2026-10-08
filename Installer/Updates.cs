@@ -13,6 +13,60 @@ namespace AstroArchive.Installation {
   public string application_version, package_version, url, download_url, sha256;
   public string release_notes;
   public long size;
+  public bool? authenticode_signed;
+ }
+ public static class UpdateDiagnostics {
+  public static string LogPath {get{return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),"AstroArchive","updates","last-error.txt");}}
+  public static string Message(Exception error,string log){
+   string message=WindowsPolicyError.IsPolicyBlock(error)?"Windows blocked the update installer under Application Control or signature verification. Installation did not start. A trusted signed release is needed if Windows does not recognise this package.\r\n\r\n"+error.Message:error.Message;
+   return message+(log==null?"":"\r\n\r\nDetails: "+log);
+  }
+  public static string Details(Exception error,UpdateManifest update,string installer,DateTime attemptedUtc,Func<string,DateTime,string> policyEvents=null){
+   var text=new StringBuilder(DateTime.UtcNow.ToString("u")+"\r\n"+WindowsPolicyError.Details(error));
+   if(update!=null)text.Append("\r\nPackage: ").Append(update.package_version).Append("\r\nExpected SHA-256: ").Append(update.sha256).Append("\r\nFeed reports Authenticode signed: ").Append(update.authenticode_signed.HasValue?update.authenticode_signed.Value.ToString():"not reported");
+   if(!string.IsNullOrEmpty(installer)){
+    text.Append("\r\nInstaller: ").Append(installer);
+    try{InstallCore.NoLinks(installer);if(File.Exists(installer)&&new FileInfo(installer).Length<=UpdateClient.MaximumInstallerSize)text.Append("\r\nSaved SHA-256: ").Append(InstallCore.HashFile(installer));}catch(Exception e){text.Append("\r\nSaved checksum unavailable: ").Append(e.Message);}
+    if(WindowsPolicyError.IsPolicyBlock(error)&&attemptedUtc!=DateTime.MinValue){
+     try{text.Append("\r\n\r\n").Append((policyEvents??PolicyEvents)(installer,attemptedUtc));}catch(Exception e){text.Append("\r\nPolicy events unavailable: ").Append(e.Message);}
+    }
+   }
+   return text.ToString();
+  }
+  public static string Record(Exception error,UpdateManifest update,string installer,DateTime attemptedUtc){
+   try{string path=LogPath;InstallCore.NoLinks(path);Directory.CreateDirectory(Path.GetDirectoryName(path));File.WriteAllText(path,Details(error,update,installer,attemptedUtc),new UTF8Encoding(false));return path;}catch{return null;}
+  }
+  static string PolicyEvents(string installer,DateTime attemptedUtc){
+   if(Environment.OSVersion.Platform!=PlatformID.Win32NT)return "Code Integrity events are available on Windows only.";
+   return ReadWindowsEvents(installer,attemptedUtc);
+  }
+  public static bool MatchesInstaller(string eventXml,string installer){
+   var xml=new System.Xml.XmlDocument{XmlResolver=null};xml.LoadXml(eventXml);
+   string path=installer.Replace('/','\\');
+   // Code Integrity uses device paths. Compare the complete path after the drive prefix.
+   string suffix=path.Length>2&&path[1]==':'?path.Substring(2):path;
+   foreach(System.Xml.XmlNode field in xml.SelectNodes("//*[local-name()='Data' and @Name='FileName']"))
+    if(field.InnerText.Trim().Replace('/','\\').EndsWith(suffix,StringComparison.OrdinalIgnoreCase))return true;
+   return false;
+  }
+  static string ReadWindowsEvents(string installer,DateTime attemptedUtc){
+   string since=attemptedUtc.ToUniversalTime().AddSeconds(-5).ToString("yyyy-MM-ddTHH:mm:ss.fffffffZ",System.Globalization.CultureInfo.InvariantCulture);
+   string query="*[System[(EventID=3077 or EventID=3033) and TimeCreated[@SystemTime >= '"+since+"']]]";
+   var request=new System.Diagnostics.Eventing.Reader.EventLogQuery("Microsoft-Windows-CodeIntegrity/Operational",System.Diagnostics.Eventing.Reader.PathType.LogName,query){ReverseDirection=true};
+   var output=new StringBuilder();var watch=Stopwatch.StartNew();int count=0;
+   using(var reader=new System.Diagnostics.Eventing.Reader.EventLogReader(request)){
+    for(int examined=0;examined<40&&watch.Elapsed.TotalSeconds<2&&count<6;examined++){
+     using(var entry=reader.ReadEvent(TimeSpan.FromMilliseconds(250))){
+      if(entry==null)break;string xml=entry.ToXml();if(!MatchesInstaller(xml,installer))continue;
+      output.Append("\r\nCode Integrity event ").Append(entry.Id).Append(" at ").Append(entry.TimeCreated).Append("\r\n");
+      if(xml.IndexOf("0283ac0f-fff1-49ae-ada1-8a933130cad6",StringComparison.OrdinalIgnoreCase)>=0)output.Append("Policy: Windows Smart App Control (VerifiedAndReputableDesktop)\r\n");
+      // Raw event fields retain the exact policy ID and rejected path in every locale.
+      output.Append(xml.Substring(0,Math.Min(xml.Length,32768))).Append("\r\n");count++;
+     }
+    }
+   }
+   return count==0?"No matching Code Integrity events were available for this installer at the launch time.":output.ToString();
+  }
  }
  public sealed class UpdateDownloadProgress {public long Received,Total;public int Percent {get{return Total<=0?0:(int)Math.Max(0,Math.Min(100,Received*100/Total));}}}
  public sealed class UpdateReceipt {public int Schema=1;public string PackageVersion,PreviousPackageVersion,InstalledUtc;}

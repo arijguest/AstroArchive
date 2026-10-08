@@ -1,3 +1,15 @@
+AstroArchive 1.10.4 — menu scrolling and preview navigation
+Package 1.10.4.2
+
+- Slow menu and dropdown scrolling to roughly one row per wheel notch. Small
+  touchpad deltas now scroll proportionally, including rapid gestures. Settings
+  and filter panels use the same handling; nested scroll areas retain their input.
+- Reverse all four preview navigation directions, with matching keyboard arrows.
+- Put the zoom/navigation toolbar directly below the image in sidebar and popup
+  previews. Reserve its space while retaining the full image, zoom, drag and Fit.
+- Log the rejected installer path, native Windows error, package checksum and
+  matching Code Integrity policy events from both startup and in-app updates.
+
 AstroArchive 1.10.4 — remove version-specific AstroWizard handoff
 Package 1.10.4.1
 

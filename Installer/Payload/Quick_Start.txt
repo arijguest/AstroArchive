@@ -136,8 +136,8 @@ columns resets visibility and order for just that table. Hiding a sorted heading
 removes it from sorting; row selections and filters are retained.
 
 Select one repository file and choose Preview image… from its context menu.
-Pinch, scroll or use the centred toolbar over the image to zoom. After zooming,
-drag or use the arrows to pan; Fit (or F) restores the whole image. Pan and zoom-out
+Pinch, scroll or use the centred toolbar below the image to zoom. After zooming,
+drag the image or use the arrows to move the view; Fit (or F) restores the whole image. Pan and zoom-out
 buttons are disabled while the whole image is fitted. Escape closes
 the popup preview. The gesture viewer uses the same
 colour decoders and display stretch as the preview pane. Source pixels stay intact.

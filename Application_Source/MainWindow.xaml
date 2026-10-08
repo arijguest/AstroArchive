@@ -79,7 +79,8 @@
   <Style x:Key="PopupScrollViewer" TargetType="ScrollViewer">
    <Setter Property="HorizontalScrollBarVisibility" Value="Auto" />
    <Setter Property="VerticalScrollBarVisibility" Value="Auto" />
-   <Setter Property="CanContentScroll" Value="True" />
+   <Setter Property="CanContentScroll" Value="False" />
+   <Setter Property="local:MenuScrolling.Enabled" Value="True" />
    <Setter Property="Focusable" Value="False" />
    <Setter Property="Template">
     <Setter.Value>

@@ -1,5 +1,5 @@
 AstroArchive 1.10.4 validation
-Package 1.10.4.1; Windows 10/11 x64; .NET Framework 4.8.
+Package 1.10.4.2; Windows 10/11 x64; .NET Framework 4.8.
 
 The Windows release workflow runs application regressions, a separate five-case
 Windows WIC integration suite, installer/updater regressions, x64 compilation,
@@ -40,3 +40,13 @@ or authenticated online solves were unavailable. The ASTAP protocol test uses a
 test double. AVI/camera RAW archive support does not claim a bundled pixel decoder.
 SER recordings are planetary inputs, not automatic deep-sky stacking inputs.
 Stacking, calibration/master generation and stitching use external software.
+
+Menu input checks compare small touchpad deltas with full wheel notches, accumulate
+rapid packets before layout, reverse direction immediately and check menu limits
+and nested scroll ownership. Popup checks retain both themes and 100/150/200%
+layout scales. Preview checks exercise reversed button/keyboard directions and
+verify the toolbar fits directly below the image in both preview surfaces.
+Sixteen pixel-rendered image/DPI/resize cases continue to verify full-image fit.
+
+Update-policy diagnostics preserve the native error and saved installer, handle
+event-access failures and match rejected device paths instead of parent processes.
