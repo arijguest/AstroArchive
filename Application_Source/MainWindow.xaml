@@ -942,6 +942,8 @@
      <ColumnDefinition Width="Auto" />
     </Grid.ColumnDefinitions>
     <StackPanel>
+     <TextBlock x:Name="OperationHeading" Text="Processing files" FontWeight="SemiBold" Foreground="{DynamicResource Text}" Margin="0,0,0,10" />
+     <TextBlock x:Name="OperationDetail" TextWrapping="Wrap" Foreground="{DynamicResource Text}" Margin="0,0,12,8" Visibility="Collapsed" />
      <TextBlock x:Name="StatusLabel" Text="Ready" Foreground="{DynamicResource Muted}" TextWrapping="Wrap" Margin="0,0,12,0" />
      <TextBlock x:Name="RateLabel" TextWrapping="Wrap" Text="" FontSize="{DynamicResource UiFontSmall}" Foreground="{DynamicResource Muted}" Margin="0,4,0,0" Visibility="Collapsed" />
     </StackPanel>

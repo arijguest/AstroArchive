@@ -1,4 +1,4 @@
-AstroArchive 1.13.11
+AstroArchive 1.13.12
 Windows 10/11 x64; .NET Framework 4.8.
 
 START HERE
@@ -168,7 +168,19 @@ recorded user changes retain priority. Choose HDU / page / frame selects a conta
 image for supported pixel operations. Movie preview plays the recording.
 Target identification needs ASTAP plus its star database, or an Astrometry.net
 account/API key and an internet connection. Configure them in Settings > Plate solving.
-Online solving sends detected star coordinates. Review ambiguous target suggestions.
+Identify target solves one representative for each selected Light session/target
+and instrument group. Selecting a collapsed subgroup includes all its files.
+Stacks solve individually. A batch review lists completed fields with the nearest
+major targets selected; change or uncheck each row before applying. A single
+matched group applies automatically. Frames outside the selection stay unchanged.
+Major means Messier, Caldwell, named deep-sky objects, or objects at magnitude 10
+or brighter / at least 10 arcminutes across. The nearest within the solved field
+wins; a field without a major candidate needs your choice. IDs and common names
+resolve to the same target. Individual capture times and known pointings remain.
+Online solving sends detected star coordinates. Progress shows the current job,
+file, group and solver stage. Cancel stops the current solve; completed metadata
+changes are retained. Local solves time out after five minutes; online after ten.
+When no solver is configured, recognised filenames can identify captures.
 Rotation analysis needs timestamped acquisition subs, adequate time coverage and
 observing location/pointing data. Stacks and registered images are unsuitable.
 Mount labels ending in ? are suggestions. Confirm them through Edit metadata.
