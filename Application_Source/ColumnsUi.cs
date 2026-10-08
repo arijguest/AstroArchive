@@ -21,7 +21,7 @@ namespace AstroArchive {
    originalColumnOrder[name]=grid.Columns.Select(ColumnId).ToList();grid.CanUserReorderColumns=true;
   }
   void InitializeColumnLayouts(){
-   foreach(string name in new[]{"FramesGrid","ImportGrid"}){
+   foreach(string name in new[]{"FramesGrid","ImportGrid","EditedGrid"}){
     string table=name;var grid=G(table);ApplyColumnLayout(table,SavedColumnLayout(table));
     grid.ColumnReordered+=(s,e)=>PersistColumnLayout(table);
     grid.PreviewMouseRightButtonDown+=(s,e)=>{
@@ -29,6 +29,7 @@ namespace AstroArchive {
      while(node!=null){header=node as DataGridColumnHeader;if(header!=null)break;node=node is Visual?VisualTreeHelper.GetParent(node):LogicalTreeHelper.GetParent(node);}
      if(header==null||header.Column==null)return;e.Handled=true;var menu=BuildColumnsMenu(table,header.Column);menu.PlacementTarget=header;menu.Placement=PlacementMode.Bottom;menu.IsOpen=true;
     };
+    if(table=="EditedGrid")continue;
     var button=B(table=="FramesGrid"?"LibraryColumnsButton":"ImportColumnsButton");
     UiHelp.Tip(button,"Choose the headings shown in this table. Drag headings left or right to rearrange them. Each table remembers its own layout; Restore default columns resets it.");
     button.Click+=(s,e)=>{var menu=BuildColumnsMenu(table,null);menu.PlacementTarget=button;menu.Placement=PlacementMode.Bottom;menu.IsOpen=true;};

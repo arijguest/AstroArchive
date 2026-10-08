@@ -63,7 +63,7 @@ namespace AstroArchive {
    if(!editedReady)return;var selected=ActiveEditedImage;var words=Util.Tokens(T("EditedSearchBox").Text);L("EditedSearchHint").Visibility=words.Length==0?Visibility.Visible:Visibility.Collapsed;
    string imageClass=Convert.ToString(C("EditedClassFilter").SelectedItem);var rows=editedImages.Where(i=>(imageClass=="All images"||i.Metadata.ImageClass==imageClass)&&words.All(w=>(i.Filename+" "+i.Kind+" "+i.Source+" "+i.Metadata.ImageClass+" "+i.Metadata.ObjectLabel+" "+Catalog.Aliases(i.Metadata.Object)+" "+i.Metadata.Filters+" "+i.Project.Name).IndexOf(w,StringComparison.OrdinalIgnoreCase)>=0)).ToList();
    if(rebuildTargets){string target=EditedTargets.SelectedItem is TargetSummary?((TargetSummary)EditedTargets.SelectedItem).Name:"All targets";var summaries=TargetNavigation.Build(rows.Select(i=>new Frame{Target=i.Metadata.ImageClass=="Meteor"?"Meteor":i.Metadata.Object,Kind="Edited image"})).Select(t=>new EditedTargetSummary{Name=t.Name,Files=t.Files}).ToList();var view=new ListCollectionView(summaries);view.GroupDescriptions.Add(new PropertyGroupDescription("Group"));refreshingEditedTargets=true;try{EditedTargets.ItemsSource=view;EditedTargets.SelectedItem=summaries.FirstOrDefault(t=>t.Name==target)??summaries.First();}finally{refreshingEditedTargets=false;}}
-   var active=EditedTargets.SelectedItem as TargetSummary;if(active!=null&&active.Name!="All targets")rows=rows.Where(i=>Catalog.CanonicalTarget(i.Metadata.ImageClass=="Meteor"?"Meteor":i.Metadata.Object)==active.Name).ToList();G("EditedGrid").ItemsSource=rows;G("EditedGrid").SelectedItem=rows.FirstOrDefault(i=>selected!=null&&i.Project.Id==selected.Project.Id&&i.RelativePath==selected.RelativePath);
+   var active=EditedTargets.SelectedItem as TargetSummary;if(active!=null&&active.Name!="All targets")rows=rows.Where(i=>Catalog.CanonicalTarget(i.Metadata.ImageClass=="Meteor"?"Meteor":i.Metadata.Object)==active.Name).ToList();SetRows("EditedGrid",rows);G("EditedGrid").SelectedItem=rows.FirstOrDefault(i=>selected!=null&&i.Project.Id==selected.Project.Id&&i.RelativePath==selected.RelativePath);
    L("EditedSummary").Text=rows.Count+" images";L("EditedEmptyState").Visibility=rows.Count==0?Visibility.Visible:Visibility.Collapsed;UpdateEditedActions();
   }
   void UpdateEditedActions(){
@@ -121,7 +121,7 @@ namespace AstroArchive {
    string projectName=name.Text;Run(ct=>repo.CreateEditedWorkingCopies(selected,projectName,"Other editor",ct,Progress).Id,id=>{RefreshEdited(id);GoToPage(3);OpenEditedFolder();});
   }
   void BuildEditedNavigation(MenuItem menu){
-   menu.Items.Add(MenuAction("Browse edited images",()=>{RefreshEdited();GoToPage(3);},true,false));menu.Items.Add(MenuAction("Add images…",AddEditedImages,repo!=null));menu.Items.Add(MenuAction("Import folder…",ImportEditedFolder,repo!=null));
+   menu.Items.Add(ColumnsNavigation("EditedGrid"));menu.Items.Add(MenuAction("Browse edited images",()=>{RefreshEdited();GoToPage(3);},true,false));menu.Items.Add(MenuAction("Add images…",AddEditedImages,repo!=null));menu.Items.Add(MenuAction("Import folder…",ImportEditedFolder,repo!=null));
    menu.Items.Add(MenuAction("Open project folder",OpenEditedFolder,repo!=null&&EditedImageProject!=null));menu.Items.Add(MenuAction("Preview selected image…",PreviewEditedImage,ActiveEditedImage!=null));menu.Items.Add(MenuAction("Refresh projects",()=>RefreshEdited(),repo!=null));
   }
   void ShowPerformanceTable(){
