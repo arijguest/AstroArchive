@@ -1,20 +1,18 @@
-AstroArchive 1.12.0
-Package 1.12.0.1
+AstroArchive 1.13.10
+Package 1.13.10.1
 
-- Repository uses expandable subframe session summaries with dates, file count,
-  exposure and filters. Show all files restores a flat view; stacks stay separate.
-- Edited has targets, a compact table and Preview, with All projects browsing,
-  saved column layouts and numeric exposure sorting.
-- Edited folder imports offer Browse, Scan and review, skipping repository/database
-  folders and archived originals, including renamed identical copies.
-- GIFs match uniquely named edited images and retain available acquisition details.
-  GIF and SER playback has Pause / Play; common videos use Windows codecs.
-- Exports default to images only: stacks copy directly to the destination and
-  subs retain compatible input folders. Add Metadata and Create new folder are
-  optional and off by default; filename collisions receive numbered suffixes.
-- Preview shows original capture filenames. Moon and Lunar share the Moon target.
-- Dump processing has a cancellable progress window. Import buttons have more
-  space below them.
-
-Stacking and editing use external software. Video playback depends on installed
-Windows codecs; unknown acquisition data remains unknown.
+- Shorter tooltips throughout menus, previews, filters and metadata controls.
+  Essential selection rules, deletion effects and capture evidence remain available.
+- Faster repeat telescope imports skip archived filenames and completed dated
+  DWARF sessions by default. Seestar imports still discover new filenames.
+  Robust import matching checks changed files, metadata and missing archive copies;
+  Full rescan revisits everything. Newly imported copies remain checksum-verified.
+- A visible Import from telescope button uses saved connected-device profiles.
+- Exports default to images without metadata or an enclosing folder. Stacks copy
+  directly to the destination; subs retain compatible input folders. Add Metadata
+  and Create new folder are separate options, both off by default.
+- Existing export files are retained with numbered filename suffixes. Cancelled
+  exports keep verified copies and remove unfinished temporary files.
+- Stacking-app buttons work with metadata-free exports.
+- Shorter offline guides describe the current app, with licensing and catalogue
+  credits retained.
