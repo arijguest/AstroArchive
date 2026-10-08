@@ -17,7 +17,7 @@ namespace AstroArchive {
   public static readonly DependencyProperty SurfaceBrushProperty=Palette("SurfaceBrush");
   static DependencyProperty Palette(string name){return DependencyProperty.Register(name,typeof(Brush),typeof(SkyGlobeView),new FrameworkPropertyMetadata(Brushes.Gray,FrameworkPropertyMetadataOptions.AffectsRender));}
   CaptureSky context;SkyVector[] stars;DrawingGroup drawing;double lastWidth,lastHeight;object[] palette;
-  SkyVector right,up,front;double radius;Point centre;internal int DrawingBuilds;
+  SkyVector right,up,front;double radius;Point centre;internal int DrawingBuilds,TrackSegmentsDrawn;
   internal readonly SkyGlobeCamera Camera=new SkyGlobeCamera();
   internal readonly Dictionary<string,Rect> CardinalLabels=new Dictionary<string,Rect>();
   internal Rect GlobeBounds{get{return new Rect(centre.X-radius,centre.Y-radius,2*radius,2*radius);}}
@@ -56,7 +56,7 @@ namespace AstroArchive {
   }
   public void SetContext(CaptureSky value){
    value=value??CaptureSky.Resolve(null,null);bool changed=context==null||context.Key!=value.Key;if(changed)context=value;
-   ToolTip=value.TargetLabel+"\n"+value.TimeLabel+" · "+value.Summary+(value.StackSeconds.HasValue&&value.HasHorizon&&value.HasPosition?"\nEstimated stack track: end time minus integration duration; gaps and proper motion unknown.":"")+(value.ApproximatePosition?" · approximate":"")+"\n"+NavigationHelp;AutomationProperties.SetName(this,"Capture sky. "+value.TargetLabel+". "+value.TimeLabel+". "+value.Summary);
+   ToolTip=value.TargetLabel+"\n"+value.TimeLabel+" · "+value.Summary+(value.TrackStartUtc.HasValue&&value.HasHorizon&&value.HasPosition?"\n"+value.TrackEvidence:"")+(value.ApproximatePosition?" · approximate":"")+"\n"+NavigationHelp;AutomationProperties.SetName(this,"Capture sky. "+value.TargetLabel+". "+value.TimeLabel+". "+value.Summary);
    if(!changed)return;
    var target=value.Orientation.Map(SkyVector.Equatorial(value.RA,value.Dec));Camera.SetHome(value.HasPosition?Math.Atan2(target.X,target.Y)*180/Math.PI:180,value.HasHorizon&&value.Altitude<0?-25:25);
    stars=SkyFigures.Stars.Select(value.Orientation.Map).ToArray();drawing=null;InvalidateVisual();
@@ -68,7 +68,7 @@ namespace AstroArchive {
    var previous=SkyVector.Horizontal(0,altitude);for(int angle=5;angle<=360;angle+=5){var next=SkyVector.Horizontal(angle,altitude);dc.DrawLine((previous.Dot(front)+next.Dot(front))/2>=0?visible:faint,Project(previous),Project(next));previous=next;}
   }
   protected override void OnRender(DrawingContext dc){
-   base.OnRender(dc);dc.DrawRectangle(Brushes.Transparent,null,new Rect(RenderSize));if(ActualWidth<50||ActualHeight<50)return;
+   base.OnRender(dc);if(context.BelowHorizon){CardinalLabels.Clear();TrackSegmentsDrawn=0;return;}dc.DrawRectangle(Brushes.Transparent,null,new Rect(RenderSize));if(ActualWidth<50||ActualHeight<50)return;
    var colours=new[]{GetValue(LineBrushProperty),GetValue(TextBrushProperty),GetValue(AccentBrushProperty),GetValue(SurfaceBrushProperty)};
    if(drawing==null||lastWidth!=ActualWidth||lastHeight!=ActualHeight||palette==null||colours.Where((c,i)=>!ReferenceEquals(c,palette[i])).Any()){
     lastWidth=ActualWidth;lastHeight=ActualHeight;palette=colours;drawing=Build((Brush)colours[0],(Brush)colours[1],(Brush)colours[2],(Brush)colours[3]);DrawingBuilds++;
@@ -90,7 +90,7 @@ namespace AstroArchive {
    }
   }
   DrawingGroup Build(Brush line,Brush text,Brush accent,Brush surface){
-   var group=new DrawingGroup();centre=new Point(ActualWidth/2,ActualHeight/2);radius=Math.Max(5,Math.Min(ActualWidth/2-10,ActualHeight/2-10))*Camera.Zoom;
+   var group=new DrawingGroup();centre=new Point(ActualWidth/2,ActualHeight/2);radius=Math.Max(5,Math.Min(ActualWidth/2-14,ActualHeight/2-14))*Camera.Zoom;
    var target=context.Orientation.Map(SkyVector.Equatorial(context.RA,context.Dec));double yaw=Camera.Yaw*Math.PI/180,tilt=Camera.Tilt*Math.PI/180;
    right=new SkyVector(Math.Cos(yaw),-Math.Sin(yaw),0);up=new SkyVector(-Math.Sin(yaw)*Math.Sin(tilt),-Math.Cos(yaw)*Math.Sin(tilt),Math.Cos(tilt));front=new SkyVector(Math.Sin(yaw)*Math.Cos(tilt),Math.Cos(yaw)*Math.Cos(tilt),Math.Sin(tilt));
    Pen horizon=Stroke(line,0.85,1),grid=Stroke(line,0.22,0.7),rear=Stroke(line,0.10,0.7),below=Stroke(line,0.13,0.7),figures=Stroke(line,0.60,0.8),near=Stroke(line,0.9,1);
@@ -105,7 +105,7 @@ namespace AstroArchive {
     }
     Brush starBrush=Tint(text,0.65),faintStar=Tint(line,0.25);for(int i=0;i<stars.Length;i++)if(stars[i].Dot(front)>0)dc.DrawEllipse(context.HasHorizon&&stars[i].Z<0?faintStar:starBrush,null,points[i],1.05,1.05);
     var track=context.StackTrack;Pen trackNear=Stroke(accent,0.8,1.6),trackRear=Stroke(accent,0.2,1);
-    for(int i=1;i<track.Length;i++)dc.DrawLine((track[i-1].Dot(front)+track[i].Dot(front))/2>=0?trackNear:trackRear,Project(track[i-1]),Project(track[i]));
+    TrackSegmentsDrawn=0;for(int i=1;i<track.Length;i++){if(context.HasHorizon&&track[i-1].Z<0&&track[i].Z<0)continue;dc.DrawLine((track[i-1].Dot(front)+track[i].Dot(front))/2>=0?trackNear:trackRear,Project(track[i-1]),Project(track[i]));TrackSegmentsDrawn++;}
     if(track.Length>0&&track[0].Dot(front)>=0)dc.DrawEllipse(null,trackNear,Project(track[0]),3,3);
     if(context.HasPosition&&target.Dot(front)>=0){
      var point=Project(target);dc.DrawEllipse(Tint(accent,0.12),Stroke(accent,1,1.5),point,6,6);dc.DrawEllipse(accent,null,point,2,2);

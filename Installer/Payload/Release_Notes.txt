@@ -1,20 +1,20 @@
-AstroArchive 1.13.13
-Package 1.13.13.1
+AstroArchive 1.13.14
+Package 1.13.14.1
 
-- Target identification solves one representative per selected Light session,
-  target and compatible instrument group, updating the selected group together.
-  Stacks are solved individually; batch review offers each target after solving.
-- The nearest major target in the solved field is selected automatically, including
-  when several major targets are nearby. Review allows individual overrides or
-  leaving a group unchanged. Fields without major candidates require a choice.
-- Solved positions use the image centre, with the WCS footprint when available.
-  Group updates retain individual capture times and existing pointings. IDs and
-  common names continue to share one target identity.
-- A single progress window shows job counts, representative filename, group scope,
-  solver stage, elapsed time and time limits. The repeated solve/save dialog cycle
-  and per-subframe star-matching reads have been removed.
-- Progress windows open without stealing focus and detach before closing, keeping
-  the main window's state intact. Error messages appear after progress has closed.
-- Cancellation terminates unresponsive local solver processes. Local and online
-  solving have five- and ten-minute deadlines; failed fields do not stop the batch.
-- Unknown Common name values display as a dash in Repository, Import and Edited.
+- Identifying a selected Light subgroup solves one representative and updates all
+  selected members. Crop, image-index and optional header differences no longer
+  split a displayed subgroup into separate jobs. Failed representatives retry up
+  to two other subs; a successful sample stops immediately. Stacks stay separate.
+- Solved-target review visibly selects the nearest major target. Each dropdown
+  shows both its catalogue ID and common name, including a target chosen via Search.
+- Selected Light groups show their target's sky track across the recorded capture
+  interval, including gaps and the final exposure. Stack previews retain exposure
+  comments, labelled integration and saved Edited totals to recover known duration.
+  Stack intervals estimated from integration are labelled; unknown gaps are not guessed.
+- Below-horizon targets leave the sky area blank. The map is centred and fills the
+  space left after fitting the image, with slight padding. Its reset control is
+  borderless, uses a counterclockwise icon and sits close to the map edge.
+- NGC2244 and Rosette Nebula labels resolve to NGC2237, grouped under Nebulae.
+  Existing archive entries, imports, filenames and catalogue searches share this identity.
+- Repository shows Gain beside Exposure by default, with a dash for unknown gain.
+  Existing column layouts gain the heading once; later visibility choices are retained.

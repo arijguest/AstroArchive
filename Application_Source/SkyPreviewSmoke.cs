@@ -55,7 +55,9 @@ namespace AstroArchive {
        var key=new KeyEventArgs(Keyboard.PrimaryDevice,PresentationSource.FromVisual(globe),0,Key.Left){RoutedEvent=Keyboard.KeyDownEvent};double rotated=globe.Camera.Yaw;globe.RaiseEvent(key);if(!key.Handled||globe.Camera.Yaw==rotated)throw new Exception("Sky keyboard navigation did not rotate");
        B(prefix+"PreviewSkyResetButton").RaiseEvent(new RoutedEventArgs(Button.ClickEvent));PumpPopupLayout();if(globe.Camera.Yaw!=yaw||globe.Camera.Tilt!=tilt||globe.Camera.Zoom!=1)throw new Exception("Sky reset button did not restore capture view");
        if(!globe.Focusable||!globe.IsManipulationEnabled)throw new Exception("Sky touch or keyboard navigation is disabled");
-       var reset=B(prefix+"PreviewSkyResetButton");var resetBounds=reset.TransformToAncestor(host).TransformBounds(new Rect(reset.RenderSize));var skyBounds=globe.TransformToAncestor(host).TransformBounds(new Rect(globe.RenderSize));if(resetBounds.Right>skyBounds.Left-3||Math.Abs(resetBounds.Bottom-(host.ActualHeight-4))>1||Math.Abs(resetBounds.Left-6)>1)throw new Exception("Sky reset is not beside the map at the panel bottom-left");
+       var reset=B(prefix+"PreviewSkyResetButton");var resetBounds=reset.TransformToAncestor(host).TransformBounds(new Rect(reset.RenderSize));var sphereBounds=globe.TransformToAncestor(host).TransformBounds(globe.GlobeBounds);var panel=(Grid)Window.FindName(prefix+"PreviewSkyPanel");var panelBounds=panel.TransformToAncestor(host).TransformBounds(new Rect(panel.RenderSize));
+       if(Math.Abs(sphereBounds.X+sphereBounds.Width/2-(panelBounds.X+panelBounds.Width/2))>1||Math.Abs(sphereBounds.Y+sphereBounds.Height/2-(panelBounds.Y+panelBounds.Height/2))>1||Math.Abs(sphereBounds.Width-(Math.Min(panel.ActualWidth,panel.ActualHeight)-36))>1)throw new Exception("Sky sphereBounds is not centred or maximised with slight padding");
+       if(reset.BorderThickness!=new Thickness(0)||Math.Abs(resetBounds.Left-sphereBounds.Left)>1||Math.Abs(resetBounds.Bottom-sphereBounds.Bottom)>1||!(reset.Content is System.Windows.Shapes.Path))throw new Exception("Reset is not borderless with an oriented icon close to the sphereBounds edge");
    }finally{preview.SetImage(original,true);PumpPopupLayout();preview.Resize();PumpPopupLayout();}
   }
   void SmokeCaptureSky(string output){
@@ -87,10 +89,21 @@ namespace AstroArchive {
       foreach(string kind in new[]{"Dark","Master dark","Dark flat","Master flat","Bias","Master bias"}){
        var calibration=frame.Clone();calibration.Kind=kind;var imageSize=stage.RenderSize;UpdateCaptureSky(prefix,calibration);PumpPopupLayout();preview.Resize();PumpPopupLayout();if(panel.IsVisible||stage.RenderSize!=imageSize)throw new Exception("Calibration sky is visible or changed image fit: "+kind);
       }
-      frame.Kind="Stack";frame.SkyStackDurationSeconds=3600;UpdateCaptureSky(prefix,frame);PumpPopupLayout();if(!panel.IsVisible||globe.Context.StackTrack.Length!=33)throw new Exception("Stack sky track did not render");
+      frame.Kind="Stack";frame.SkyStackDurationSeconds=3600;UpdateCaptureSky(prefix,frame);PumpPopupLayout();if(!panel.IsVisible||globe.Context.StackTrack.Length!=33||globe.TrackSegmentsDrawn==0)throw new Exception("Stack sky track did not render");
       CaptureSidebar(host,Path.Combine(output,"AstroArchive_Visible_Stack_Sky_"+prefix+settings.ThemeMode+".png"));
       var cachedTrack=globe.Context.StackTrack;int trackBuilds=globe.DrawingBuilds;UpdateCaptureSky(prefix,frame);globe.InvalidateVisual();PumpPopupLayout();if(!ReferenceEquals(cachedTrack,globe.Context.StackTrack)||globe.DrawingBuilds!=trackBuilds)throw new Exception("Unchanged stack track rebuilt");
-      frame.Kind="Light";frame.SkyStackDurationSeconds=null;UpdateCaptureSky(prefix,frame);PumpPopupLayout();
+      frame.Kind="Light";frame.SkyStackDurationSeconds=null;
+      var group=Enumerable.Range(0,3).Select(i=>{var sub=frame.Clone();sub.Exposure=30;sub.ObservedUtc=new DateTime(2026,10,7,22,i*20,0,DateTimeKind.Utc).ToString("o");return sub;}).ToList();
+      UpdateCaptureSky(prefix,group[0],group);PumpPopupLayout();if(globe.TrackSegmentsDrawn==0||globe.Context.StackTrack.Length!=33)throw new Exception("Selected subgroup shows only a dot without a drawn trail");
+      CaptureSidebar(host,Path.Combine(output,"AstroArchive_Visible_Group_Sky_"+prefix+settings.ThemeMode+".png"));
+      if(prefix.Length==0){RefreshSkyPreviews();PumpPopupLayout();if(globe.TrackSegmentsDrawn==0)throw new Exception("Refreshing preview lost group interval");}
+      if(prefix.Length>0){var edited=EditedSky(group[0],new EditedImage{Metadata=new EditedMetadata{TotalExposure=3600}});UpdateCaptureSky(prefix,edited);PumpPopupLayout();if(globe.Context.StackSeconds!=3600||globe.TrackSegmentsDrawn==0)throw new Exception("Edited saved total exposure did not draw a sky trail");}
+      UpdateCaptureSky(prefix,frame);PumpPopupLayout();
+      var below=frame.Clone();below.RA=SkyOrientation.Wrap(SkyOrientation.Sidereal(CaptureSky.CaptureUtc(below).Value,0)+180);below.Dec=0;below.Latitude=51.5;below.Longitude=0;
+      globe.SetContext(CaptureSky.Resolve(below,settings));PumpPopupLayout();var blank=new RenderTargetBitmap((int)Math.Ceiling(globe.ActualWidth),(int)Math.Ceiling(globe.ActualHeight),96,96,PixelFormats.Pbgra32);blank.Render(globe);var blankPixels=new byte[blank.PixelWidth*blank.PixelHeight*4];blank.CopyPixels(blankPixels,blank.PixelWidth*4,0);
+      if(!globe.Context.BelowHorizon||blankPixels.Any(b=>b!=0)||globe.CardinalLabels.Count!=0||globe.TrackSegmentsDrawn!=0)throw new Exception("Below-horizon sky is not completely blank");
+      var fitted=stage.RenderSize;UpdateCaptureSky(prefix,below);PumpPopupLayout();if(panel.IsVisible||stage.RenderSize!=fitted)throw new Exception("Below-horizon map was not hidden or changed image fit");
+      UpdateCaptureSky(prefix,frame);PumpPopupLayout();
       frame.Dec=-60;frame.RA=160;frame.Latitude=-33.9;frame.Longitude=151.2;UpdateCaptureSky(prefix,frame);PumpPopupLayout();if(!globe.Context.Evidence.Contains("Southern celestial sky"))throw new Exception("Southern capture hemisphere lost");frame.ObservedUtc=null;UpdateCaptureSky(prefix,frame);PumpPopupLayout();if(globe.Context.HasHorizon||globe.CardinalLabels.Count!=0)throw new Exception("Missing capture clock produced a horizon or compass directions");
      }finally{popup.IsOpen=false;preview.SetImage(original,true);UpdateCaptureSky(prefix,null);}
     }

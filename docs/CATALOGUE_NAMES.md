@@ -30,3 +30,8 @@ Southern Pleiades, Blue Horsehead and Summer Beehive contain shorter names of
 different objects. Filename recognition prefers the full phrase within that
 span. An independent shorter name elsewhere, or an explicit conflicting
 catalogue ID, still makes the filename ambiguous.
+
+AstroArchive uses NGC2237 as the whole Rosette Nebula target. NGC2244 capture
+labels (the associated cluster) are assigned to that target for archive grouping.
+The general Rosette Nebula name also uses NGC2237; the bundled NGC2238 component
+retains its specific catalogue ID and position.
