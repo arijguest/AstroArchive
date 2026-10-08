@@ -65,7 +65,7 @@ namespace AstroArchive {
             }
         }
         void InitializeNavigation(bool firstRun) {
-            var tabs=(TabControl)Window.FindName("MainTabs");tabs.SelectionChanged+=(s,e)=>{if(e.OriginalSource!=tabs)return;SyncPageSelector();if(tabs.SelectedIndex!=0&&previewMotion!=null)previewMotion.Pause();if(tabs.SelectedIndex!=3&&editedMotion!=null)editedMotion.Pause();};
+            var tabs=(TabControl)Window.FindName("MainTabs");if(tabs.SelectedIndex<0)tabs.SelectedIndex=0;tabs.SelectionChanged+=(s,e)=>{if(e.OriginalSource!=tabs)return;SyncPageSelector();if(tabs.SelectedIndex!=0&&previewMotion!=null)previewMotion.Pause();if(tabs.SelectedIndex!=3&&editedMotion!=null)editedMotion.Pause();};
             var selector = C("PageSelector");
             selector.SelectionChanged += (s,e) => { if (!updatingPageSelector && selector.SelectedItem != null) GoToPage(Convert.ToInt32(((ComboBoxItem)selector.SelectedItem).Tag)); };
             SyncPageSelector();
