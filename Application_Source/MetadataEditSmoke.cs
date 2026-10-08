@@ -35,7 +35,7 @@ namespace AstroArchive {
           var border=parent as Border;var panel=parent as Panel;Brush surface=border!=null?border.Background:panel!=null?panel.Background:null;var solid=surface as SolidColorBrush;
           if(solid!=null&&solid.Color.A==255){background=surface;break;}
          }
-         Readable(label.Foreground,background,mode+" metadata label: "+label.Text);
+         Readable(label.Foreground,background,mode+" metadata label: "+label.Text+" ("+label.Foreground+" on "+background+")");
         }
         if(scale==1.0&&!batch)CapturePopup(editor.Form.Window,Path.Combine(output,"AstroArchive_Metadata_"+mode+"_"+tab+".png"));
        }
