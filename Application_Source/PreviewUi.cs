@@ -58,6 +58,7 @@ namespace AstroArchive {
    SmokeStackingApps(output);
    SmokePreviewRendering(output);
    SmokeCaptureSky(output);
+   SmokeEditedPreviewLayout(output);
    SmokeProgressivePreview(output);
    // Exercise the Windows codecs with generated high-depth and common raster data.
    int width=80,height=60;ushort[] rgb=new ushort[width*height*3];for(int y=0;y<height;y++)for(int x=0;x<width;x++){int i=(y*width+x)*3;rgb[i]=(ushort)(x*700);rgb[i+1]=(ushort)(y*900);rgb[i+2]=(ushort)(x*400+y*300);}

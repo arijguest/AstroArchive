@@ -6,18 +6,18 @@ using System.Windows.Controls;
 
 namespace AstroArchive {
  public partial class MainUi {
-  Frame previewSkyFrame,editedSkyFrame;
+  Frame previewSkyFrame;
   void InitializeSkyPreview(string prefix){
    InitializePreviewHeader(prefix);
    var globe=(SkyGlobeView)Window.FindName(prefix+"PreviewSky");var reset=B(prefix+"PreviewSkyResetButton");reset.Click+=(s,e)=>globe.ResetView();globe.SizeChanged+=(s,e)=>PositionSkyReset(prefix);UiHelp.Tip(reset,"Reset sky view.");
    UpdateCaptureSky(prefix,null);
   }
   void UpdateCaptureSky(string prefix,Frame frame){
-   if(prefix.Length==0)previewSkyFrame=frame;else editedSkyFrame=frame;
+   if(prefix.Length==0)previewSkyFrame=frame;
    var globe=Window.FindName(prefix+"PreviewSky") as SkyGlobeView;if(globe==null)return;var sky=CaptureSky.Resolve(frame,settings);globe.SetContext(sky);
    var viewport=prefix.Length==0?previewViewport:editedPreviewViewport;if(viewport!=null)viewport.SetRemainderEnabled(!CaptureSky.IsCalibration(frame)&&!sky.BelowHorizon);PositionSkyReset(prefix);
   }
-  void RefreshSkyPreviews(){UpdateCaptureSky("",previewSkyFrame);UpdateCaptureSky("Edited",editedSkyFrame);}
+  void RefreshSkyPreviews(){UpdateCaptureSky("",previewSkyFrame);}
   void PositionSkyReset(string prefix){
    var panel=(Grid)Window.FindName(prefix+"PreviewSkyPanel");var globe=(SkyGlobeView)Window.FindName(prefix+"PreviewSky");var button=B(prefix+"PreviewSkyResetButton");
    double diameter=Math.Max(0,Math.Min(globe.ActualWidth,globe.ActualHeight)-28);

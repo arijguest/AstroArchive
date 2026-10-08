@@ -90,7 +90,10 @@ Preview image action for a larger window. Settings > General controls the previe
 Right-click table headings to choose columns. Open external files from Windows.
 Scroll or pinch to zoom. Drag or use the arrow buttons to pan after zooming.
 Fit or F restores the full image; plus/minus zoom; Escape closes the popup.
-Preview keeps controls and capture sky visible while loading a new image.
+Repository Preview keeps controls and capture sky visible while loading a new image.
+Edited uses a larger image-only preview with a compact filename/enlarge header.
+Its width fits a full-height 3:4 portrait; drag the divider to adjust it.
+Zoom, pan and Fit remain below the image; right-click a file for image details.
 The text-free sky globe uses capture time and location when available, or
 celestial coordinates otherwise; hover for the recorded context.
 Sidebar previews rotate landscape images into portrait. Large previews open in

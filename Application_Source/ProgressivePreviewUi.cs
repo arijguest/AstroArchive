@@ -12,7 +12,7 @@ namespace AstroArchive {
    // already updated synchronously, and cancellation removes queued requests.
    await Task.Delay(35,token);await previewDecodeGate.WaitAsync(token);
    try{return await Task.Run(()=>{
-    token.ThrowIfCancellationRequested();if(sky==null){var metadata=ReadSkyFrame(path,fallbackTarget);Window.Dispatcher.BeginInvoke(DispatcherPriority.Normal,new Action(()=>{if(current()&&!token.IsCancellationRequested)showSky(metadata);}));}
+    token.ThrowIfCancellationRequested();if(showSky!=null&&sky==null){var metadata=ReadSkyFrame(path,fallbackTarget);Window.Dispatcher.BeginInvoke(DispatcherPriority.Normal,new Action(()=>{if(current()&&!token.IsCancellationRequested)showSky(metadata);}));}
     var data=previewCache.Get(path,frame,()=> (decode??DecodePreview)(path,token,frame),token);data.ApplyContext(frame,path);return data;
    },token);}finally{previewDecodeGate.Release();}
   }

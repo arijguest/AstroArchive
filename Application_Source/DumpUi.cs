@@ -43,7 +43,7 @@ namespace AstroArchive {
     else if(operationBusy){if(dumpProgressWindow.WindowState==WindowState.Minimized)dumpProgressWindow.WindowState=WindowState.Normal;if(!dumpProgressWindow.IsVisible)dumpProgressWindow.Show();}
    }
    ResumeTargetReview();
-   if(!visible){if(filtersPopup!=null)filtersPopup.IsOpen=false;ClosePreviewDetails("");ClosePreviewDetails("Edited");}
+   if(!visible){if(filtersPopup!=null)filtersPopup.IsOpen=false;ClosePreviewDetails("");}
   }
   static void CloseProgressWindow(Window window){
    // Closing an active owned tool window must not change the owner's activation/state.
