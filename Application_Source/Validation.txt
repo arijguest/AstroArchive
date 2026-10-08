@@ -1,5 +1,5 @@
-AstroArchive 1.12.1 validation
-Package 1.12.1.1; Windows 10/11 x64; .NET Framework 4.8.
+AstroArchive 1.12.2 validation
+Package 1.12.2.1; Windows 10/11 x64; .NET Framework 4.8.
 
 The Windows release workflow runs application regressions, a separate six-case
 Windows WIC integration suite, installer/updater regressions, x64 compilation,
@@ -7,13 +7,22 @@ WPF application/installer rendering and disposable install/repair/uninstall chec
 A successful workflow is required before publishing installers and the SHA-256
 update feed. Its logs are authoritative for test counts and package hashes.
 
+Page navigation checks verify the accent dropdown beside Settings, page/content
+and selection/filter/import-state retention, synchronization with menu navigation,
+forward/backward keyboard cycling, removal of the old tab strip, six-pixel gaps,
+light/dark popup contrast, high contrast, and narrow/normal window layouts at
+100/150% text sizes. The interactive guide highlights and opens the selector.
+
 Capture sky regressions check sidereal time, longitude signs, northern/southern
 and polar horizons, acquisition clocks and offsets, missing/ambiguous clocks,
 capture-site precedence, pointing/catalogue provenance, non-UTC header standards,
 full constellation coverage and vector normalization. Native WPF checks verify
 both preview surfaces in light/dark and 100/150% text: maximum image fit, remaining
 space and height-limited hiding, aspect changes, all four image quadrant pixels,
-text-free cached drawings, accessible header icons and details popup/Escape.
+text-free cached drawings, interactive orbit/zoom without editing captures,
+routed scroll/keyboard inputs, touch support, view retention/reset and its overlay,
+accessible header icons and details popup/Escape. IC common-name checks cover
+existing labels, filters, search, aliases and nested-name filename ambiguities.
 Session checks cover group selection, individual files, Ctrl/Shift, deduplication,
 right-click membership, expansion/refresh retention, filtered-out groups, matching
 row typography, roomy chevrons and default Frame Type sorting. Edited regressions

@@ -76,6 +76,18 @@ namespace AstroArchive {
     }}}
     Check(ownership.Count>1000,"Too few catalogue aliases checked");foreach(var alias in ownership){string resolved=Catalog.KnownName(alias.Key);Check(alias.Value.Count==1?resolved==alias.Value.Single():resolved==null,"Ambiguous or missing bundled alias: "+alias.Key);if(alias.Value.Count>1)Check(Catalog.ObjectId(alias.Key)==""&&Catalog.Normalize(alias.Key)=="Unknown","Ambiguous alias acquired an object ID: "+alias.Key);}
    });
+   Test("IC colloquial names work in existing labels searches and capture filenames",()=>{
+    foreach(var pair in new[]{new[]{"IC63","Ghost of Cassiopeia"},new[]{"IC410","Tadpole Nebula"},new[]{"IC418","Spirograph Nebula"},new[]{"NGC1909","Witch Head Nebula"},new[]{"IC2391","Omicron Velorum Cluster"},new[]{"IC2602","Southern Pleiades"},new[]{"IC2944","Running Chicken Nebula"},new[]{"IC3568","Lemon Slice Nebula"},new[]{"IC4406","Retina Nebula"},new[]{"IC4592","Blue Horsehead Nebula"},new[]{"IC4604","Rho Ophiuchi Nebula"},new[]{"IC4665","Summer Beehive Cluster"},new[]{"IC4756","Graff's Cluster"}}){
+     Check(Catalog.KnownName(pair[1])==pair[0]&&Catalog.CommonName(pair[0])==pair[1],"IC common name missing: "+pair[1]);
+     Check(Catalog.TargetFromFilename("Light_"+pair[1].Replace(' ','_')+"_001.fit")==pair[0],"Common-name filename conflicts with a shorter name: "+pair[1]);
+     var frame=Util.Deserialize<Frame>("{\"Target\":\""+pair[0]+"\"}");Check(frame.TargetName==pair[1]&&new CaptureFilters().Apply(new[]{frame},pair[1]).Count==1,"Existing capture does not display/search its IC nickname");
+     Check(Catalog.Search(pair[1]).Any(item=>item.Name==pair[0]),"Catalogue search missed "+pair[1]);
+    }
+    Check(Catalog.KnownName("IC 0063")=="IC63"&&Catalog.KnownName("Cassiopeia's Ghost")=="IC63"&&Catalog.KnownName("IC2118")=="NGC1909","Alternate IC names/IDs lost their canonical identity");
+    Check(Catalog.KnownName("IC59")!="IC63"&&Catalog.KnownName("Horsehead Nebula")=="B33"&&Catalog.KnownName("Pleiades")=="M45","IC nicknames merged different astronomical objects");
+    Check(Catalog.TargetFromFilename("B33_Blue_Horsehead_Nebula.fit")==null&&Catalog.TargetFromFilename("Southern_Pleiades_M45.fit")==null&&Catalog.TargetFromFilename("Southern_Pleiades_and_Pleiades.fit")==null,"Explicit mixed-object filenames acquired a single target");
+    Check(Catalog.CommonName("IC405")=="Flaming Star Nebula"&&Catalog.CommonName("IC5146")=="Cocoon Nebula"&&Catalog.CommonName("IC2220")=="Toby Jug Nebula","Existing IC common names changed unexpectedly");
+   });
    Test("Expanded common names preserve unambiguous astronomical identities",()=>{
     foreach(var pair in new[]{new[]{"M17","Swan Nebula"},new[]{"M45","Seven Sisters"},new[]{"NGC2359","Thor's Helmet"},new[]{"NGC6334","Cat's Paw Nebula"},new[]{"NGC6960","Western Veil Nebula"},new[]{"IC2177","Seagull Nebula"},new[]{"IC443","Jellyfish Nebula"},new[]{"B33","Horsehead Nebula"},new[]{"C9","Cave Nebula"},new[]{"C14","Double Cluster"},new[]{"C41","Hyades"},new[]{"C99","Coalsack Nebula"}}){
      Check(Catalog.KnownName(pair[1])==pair[0]&&Catalog.CommonName(pair[0]).Length>0,"Common label missing or wrong: "+pair[1]);

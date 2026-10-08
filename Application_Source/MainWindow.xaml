@@ -519,6 +519,27 @@
     </Setter.Value>
    </Setter>
   </Style>
+  <Style x:Key="PageSelectorStyle" TargetType="ComboBox" BasedOn="{StaticResource {x:Type ComboBox}}">
+   <Setter Property="Background" Value="{DynamicResource Accent}" />
+   <Setter Property="Foreground" Value="{DynamicResource AccentText}" />
+   <Setter Property="BorderBrush" Value="{DynamicResource Accent}" />
+   <Setter Property="FontWeight" Value="SemiBold" />
+   <Setter Property="FocusVisualStyle" Value="{StaticResource KeyboardFocusOutline}" />
+   <Setter Property="Template"><Setter.Value><ControlTemplate TargetType="ComboBox">
+    <Border x:Name="PageFocus" BorderBrush="Transparent" BorderThickness="2" CornerRadius="7">
+     <Grid>
+      <ToggleButton Background="{TemplateBinding Background}" Foreground="{TemplateBinding Foreground}" BorderBrush="{TemplateBinding BorderBrush}" Focusable="False" IsChecked="{Binding IsDropDownOpen, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}">
+       <ToggleButton.Template><ControlTemplate TargetType="ToggleButton"><Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="1" CornerRadius="5"><TextBlock Text="▾" Foreground="{TemplateBinding Foreground}" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,10,0"/></Border></ControlTemplate></ToggleButton.Template>
+      </ToggleButton>
+      <ContentPresenter Content="{TemplateBinding SelectionBoxItem}" ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}" Margin="10,7,28,7" VerticalAlignment="Center" IsHitTestVisible="False" TextElement.Foreground="{TemplateBinding Foreground}" />
+      <Popup x:Name="PART_Popup" IsOpen="{TemplateBinding IsDropDownOpen}" Placement="Bottom" AllowsTransparency="True" Focusable="False">
+       <Border MinWidth="{Binding ActualWidth, RelativeSource={RelativeSource TemplatedParent}}" Background="{DynamicResource Surface}" BorderBrush="{DynamicResource Border}" BorderThickness="1" Padding="4" CornerRadius="6"><ScrollViewer Style="{StaticResource PopupScrollViewer}" MaxHeight="{TemplateBinding MaxDropDownHeight}"><ItemsPresenter KeyboardNavigation.DirectionalNavigation="Contained"/></ScrollViewer></Border>
+      </Popup>
+     </Grid>
+    </Border>
+    <ControlTemplate.Triggers><Trigger Property="IsKeyboardFocusWithin" Value="True"><Setter TargetName="PageFocus" Property="BorderBrush" Value="{DynamicResource Focus}"/></Trigger><Trigger Property="IsEnabled" Value="False"><Setter Property="Opacity" Value="0.4"/></Trigger></ControlTemplate.Triggers>
+   </ControlTemplate></Setter.Value></Setter>
+  </Style>
   <Style x:Key="TopNavigationMenu" TargetType="MenuItem" BasedOn="{StaticResource {x:Type MenuItem}}">
    <Setter Property="Background" Value="{DynamicResource SurfaceAlt}" />
    <Setter Property="BorderBrush" Value="{DynamicResource Border}" />
@@ -583,20 +604,24 @@
      <ColumnDefinition Width="*" />
      <ColumnDefinition Width="Auto" />
     </Grid.ColumnDefinitions>
-    <ScrollViewer VerticalScrollBarVisibility="Disabled" HorizontalScrollBarVisibility="Disabled" Focusable="False" VerticalAlignment="Center">
+    <Grid x:Name="NavigationToolbar" VerticalAlignment="Center">
+     <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
      <Menu x:Name="MainMenu" Background="Transparent" Foreground="{DynamicResource Text}" VerticalAlignment="Center" KeyboardNavigation.TabNavigation="Once">
-      <Menu.ItemsPanel>
-       <ItemsPanelTemplate><WrapPanel /></ItemsPanelTemplate>
-      </Menu.ItemsPanel>
-      <MenuItem x:Name="ImportMenu" Header="_Import" Style="{StaticResource TopNavigationMenu}" />
-      <MenuItem x:Name="ExportMenu" Header="_Export" Style="{StaticResource TopNavigationMenu}" />
-      <MenuItem x:Name="RepositoryMenu" Header="_Repository" Style="{StaticResource TopNavigationMenu}" />
-      <MenuItem x:Name="EditedMenu" Header="E_dited" Style="{StaticResource TopNavigationMenu}" />
-      <MenuItem x:Name="SettingsMenu" Header="_Settings" Style="{StaticResource TopNavigationMenu}" />
-      <MenuItem x:Name="GuideMenu" Header="_Guide" Style="{StaticResource TopNavigationMenu}" />
-      <MenuItem x:Name="CoffeeMenu" Header="_Buy Me a Coffee" Style="{StaticResource TopNavigationMenu}" Background="{DynamicResource SupportSurface}" FontWeight="Bold" />
+      <Menu.ItemsPanel><ItemsPanelTemplate><WrapPanel/></ItemsPanelTemplate></Menu.ItemsPanel>
+      <MenuItem x:Name="ImportMenu" Header="_Import" Style="{StaticResource TopNavigationMenu}"/>
+      <MenuItem x:Name="ExportMenu" Header="_Export" Style="{StaticResource TopNavigationMenu}"/>
+      <MenuItem x:Name="RepositoryMenu" Header="_Repository" Style="{StaticResource TopNavigationMenu}"/>
+      <MenuItem x:Name="EditedMenu" Header="E_dited" Style="{StaticResource TopNavigationMenu}"/>
      </Menu>
-    </ScrollViewer>
+     <ComboBox Grid.Column="1" x:Name="PageSelector" Width="150" Style="{StaticResource PageSelectorStyle}" VerticalAlignment="Center" Margin="6,0,12,4" AutomationProperties.Name="Choose page" IsTextSearchEnabled="True">
+      <ComboBoxItem Content="Repository" Tag="0"/><ComboBoxItem Content="Edited" Tag="3"/><ComboBoxItem Content="Mosaic" Tag="2"/><ComboBoxItem Content="Import" Tag="1"/>
+     </ComboBox>
+     <Menu Grid.Column="2" x:Name="UtilityMenu" Background="Transparent" Foreground="{DynamicResource Text}" VerticalAlignment="Center" KeyboardNavigation.TabNavigation="Once">
+      <MenuItem x:Name="SettingsMenu" Header="_Settings" Style="{StaticResource TopNavigationMenu}"/>
+      <MenuItem x:Name="GuideMenu" Header="_Guide" Style="{StaticResource TopNavigationMenu}"/>
+      <MenuItem x:Name="CoffeeMenu" Header="_Buy Me a Coffee" Style="{StaticResource TopNavigationMenu}" Background="{DynamicResource SupportSurface}" FontWeight="Bold"/>
+     </Menu>
+    </Grid>
     <StackPanel x:Name="BrandPanel" Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" Margin="22,0,0,4">
      <Image x:Name="BrandLogo" Width="40" Height="40" Stretch="Uniform" RenderOptions.BitmapScalingMode="HighQuality" />
      <TextBlock x:Name="BrandTitle" Text="AstroArchive" FontSize="{DynamicResource UiFontHeaderBrand}" FontWeight="SemiBold" Margin="10,0,0,0" VerticalAlignment="Center" />
@@ -609,7 +634,8 @@
     <TextBlock x:Name="UpdateNoticeText" TextWrapping="Wrap" VerticalAlignment="Center" />
    </DockPanel>
   </Border>
-  <TabControl Grid.Row="2" x:Name="MainTabs">
+  <TabControl Grid.Row="2" x:Name="MainTabs" Focusable="False">
+   <TabControl.Template><ControlTemplate TargetType="TabControl"><Grid KeyboardNavigation.TabNavigation="Local"><ContentPresenter x:Name="PART_SelectedContentHost" ContentSource="SelectedContent"/></Grid></ControlTemplate></TabControl.Template>
    <TabItem Header="Repository">
     <Grid>
      <Grid.RowDefinitions>
@@ -716,6 +742,7 @@
           <TextBlock x:Name="PreviewMessage" Text="Select a capture or open an image." Foreground="{DynamicResource Muted}" HorizontalAlignment="Center" VerticalAlignment="Center" TextWrapping="Wrap" TextAlignment="Center" Margin="18"/>
          </Grid>
          <local:SkyGlobeView x:Name="PreviewSky" VerticalAlignment="Top" Visibility="Collapsed"/>
+         <Button x:Name="PreviewSkyResetButton" Content="↺" Width="26" Height="26" MinHeight="0" FontSize="16" Padding="0" Margin="6,6,6,0" HorizontalAlignment="Right" VerticalAlignment="Top" Visibility="{Binding Visibility, ElementName=PreviewSky}" RenderTransform="{Binding RenderTransform, ElementName=PreviewSky}" AutomationProperties.Name="Reset capture sky view"/>
         </Grid>
        </Grid>
       </Border>
@@ -723,7 +750,7 @@
     </Grid>
    </TabItem>
    <TabItem Header="Import">
-    <Grid Margin="0,14,0,8">
+    <Grid Margin="0,0,0,8">
      <Grid.RowDefinitions>
       <RowDefinition Height="Auto" />
       <RowDefinition Height="Auto" />
@@ -818,7 +845,7 @@
     </Grid>
    </TabItem>
    <TabItem Header="Mosaics">
-    <Grid Margin="0,12,0,0">
+    <Grid Margin="0">
      <Grid.RowDefinitions>
       <RowDefinition Height="Auto" />
       <RowDefinition Height="Auto" />
@@ -892,7 +919,7 @@
     </Grid>
    </TabItem>
    <TabItem Header="Edited" x:Name="EditedTab">
-    <Grid Margin="0,12,0,8">
+    <Grid Margin="0,0,0,8">
      <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="*"/></Grid.RowDefinitions>
      <DockPanel Margin="0,0,0,10">
       <StackPanel DockPanel.Dock="Right" Orientation="Horizontal"><Button x:Name="EditedAddButton" Content="Add images…"/><Button x:Name="EditedImportFolderButton" Content="Import folder…" Background="{DynamicResource Accent}" Foreground="White" BorderBrush="{DynamicResource Accent}" Margin="8,0,0,0"/><Button x:Name="EditedRefreshButton" Content="Refresh" Margin="8,0,0,0"/></StackPanel>
@@ -967,6 +994,7 @@
           <TextBlock x:Name="EditedPreviewMessage" Text="Select a capture or open an image." Foreground="{DynamicResource Muted}" HorizontalAlignment="Center" VerticalAlignment="Center" TextWrapping="Wrap" TextAlignment="Center" Margin="18"/>
          </Grid>
          <local:SkyGlobeView x:Name="EditedPreviewSky" VerticalAlignment="Top" Visibility="Collapsed"/>
+         <Button x:Name="EditedPreviewSkyResetButton" Content="↺" Width="26" Height="26" MinHeight="0" FontSize="16" Padding="0" Margin="6,6,6,0" HorizontalAlignment="Right" VerticalAlignment="Top" Visibility="{Binding Visibility, ElementName=EditedPreviewSky}" RenderTransform="{Binding RenderTransform, ElementName=EditedPreviewSky}" AutomationProperties.Name="Reset capture sky view"/>
         </Grid>
        </Grid>
       </Border>

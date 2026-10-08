@@ -43,7 +43,11 @@ namespace AstroArchive {
    string stem=Regex.Replace(Path.GetFileName(filename??""),@"\.(fit|fits|fts)(\.gz)?$","",RegexOptions.IgnoreCase);
    string text=Regex.Replace(stem.ToUpperInvariant(),@"[^A-Z0-9]+"," ");var found=new HashSet<string>();
    foreach(Match match in Regex.Matches(text,@"\b(M|NGC|IC|C|CALDWELL|B|UGC|PGC|SH\s*2)\s*0*(\d+)([A-Z]?)\b")){string id=KnownName(Regex.Replace(match.Groups[1].Value,@"\s+","")+match.Groups[2].Value+match.Groups[3].Value);if(id!=null)found.Add(id);}
-   foreach(string token in text.Split(new[]{' '},StringSplitOptions.RemoveEmptyEntries).Distinct()){List<KeyValuePair<Regex,string>> list;if(phraseIndex.TryGetValue(token,out list))foreach(var phrase in list)if(phrase.Key.IsMatch(text))found.Add(phrase.Value);}
+   // Prefer a complete common name over a shorter name contained inside it:
+   // Southern Pleiades is IC2602, while an independent Pleiades mention is M45.
+   var matches=new List<Tuple<int,int,string>>();
+   foreach(string token in text.Split(new[]{' '},StringSplitOptions.RemoveEmptyEntries).Distinct()){List<KeyValuePair<Regex,string>> list;if(phraseIndex.TryGetValue(token,out list))foreach(var phrase in list)foreach(Match match in phrase.Key.Matches(text))matches.Add(Tuple.Create(match.Index,match.Length,phrase.Value));}
+   foreach(var match in matches)if(!matches.Any(other=>other.Item2>match.Item2&&other.Item1<=match.Item1&&other.Item1+other.Item2>=match.Item1+match.Item2))found.Add(match.Item3);
    if(Regex.IsMatch(text,@"\bSUN\b"))found.Add("Sun");
    return found;
   }

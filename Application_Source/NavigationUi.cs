@@ -11,8 +11,27 @@ using System.Windows.Input;
 namespace AstroArchive {
     public partial class MainUi {
         bool navigationReady;
+        bool updatingPageSelector;
         bool preparingNavigation;
         MenuItem TopMenu(string name) { return (MenuItem)Window.FindName(name); }
+        IEnumerable<MenuItem> TopMenus() { return new[] { "ImportMenu", "ExportMenu", "RepositoryMenu", "EditedMenu", "SettingsMenu", "GuideMenu", "CoffeeMenu" }.Select(TopMenu); }
+        void SyncPageSelector() {
+            var selector = C("PageSelector"); var tabs = (TabControl)Window.FindName("MainTabs");
+            updatingPageSelector = true;
+            try { selector.SelectedItem = selector.Items.Cast<ComboBoxItem>().First(item => Convert.ToInt32(item.Tag) == tabs.SelectedIndex); }
+            finally { updatingPageSelector = false; }
+        }
+        void UpdateCompactHeader() {
+            var header = (FrameworkElement)Window.FindName("HeaderBar");
+            bool compact = (header.ActualWidth > 0 ? header.ActualWidth : Window.Width - 36) < 1200 || settings.TextScalePercent > 100;
+            ((FrameworkElement)Window.FindName("BrandTitle")).Visibility = compact ? Visibility.Collapsed : Visibility.Visible;
+            TopMenu("CoffeeMenu").Header = compact ? "_Support" : "_Buy Me a Coffee";
+            foreach (var item in TopMenus()) item.Padding = new Thickness(compact ? 6 : 12, 7, compact ? 6 : 12, 7);
+        }
+        void CyclePage(int direction) {
+            var selector = C("PageSelector"); selector.IsDropDownOpen = false;
+            selector.SelectedIndex = (selector.SelectedIndex + direction + selector.Items.Count) % selector.Items.Count;
+        }
         void GoToPage(int index) { ((TabControl)Window.FindName("MainTabs")).SelectedIndex = index; }
         void OpenTopMenu(string name) {
             var menu = TopMenu(name);
@@ -46,7 +65,13 @@ namespace AstroArchive {
             }
         }
         void InitializeNavigation(bool firstRun) {
-            var tabs=(TabControl)Window.FindName("MainTabs");tabs.SelectionChanged+=(s,e)=>{if(e.OriginalSource!=tabs)return;if(tabs.SelectedIndex!=0&&previewMotion!=null)previewMotion.Pause();if(tabs.SelectedIndex!=3&&editedMotion!=null)editedMotion.Pause();};
+            var tabs=(TabControl)Window.FindName("MainTabs");tabs.SelectionChanged+=(s,e)=>{if(e.OriginalSource!=tabs)return;SyncPageSelector();if(tabs.SelectedIndex!=0&&previewMotion!=null)previewMotion.Pause();if(tabs.SelectedIndex!=3&&editedMotion!=null)editedMotion.Pause();};
+            var selector = C("PageSelector");
+            selector.SelectionChanged += (s,e) => { if (!updatingPageSelector && selector.SelectedItem != null) GoToPage(Convert.ToInt32(((ComboBoxItem)selector.SelectedItem).Tag)); };
+            SyncPageSelector();
+            UiHelp.Tip(selector, "Choose Repository, Edited, Mosaic or Import. Ctrl+1–4 selects a page; Ctrl+Tab cycles pages. Switching retains search, selection and progress.");
+            ((FrameworkElement)Window.FindName("HeaderBar")).SizeChanged += (s,e) => UpdateCompactHeader();
+            UpdateCompactHeader();
             foreach (string name in new[] { "ImportMenu", "ExportMenu", "RepositoryMenu", "EditedMenu", "SettingsMenu", "GuideMenu" }) {
                 string captured = name;
                 var menu = TopMenu(name);
@@ -75,7 +100,10 @@ namespace AstroArchive {
         }
         void NavigationKeys(object sender, KeyEventArgs e) {
             if ((Keyboard.Modifiers & ModifierKeys.Control) == 0) return;
-            if (e.Key == Key.F) {
+            if (e.Key == Key.Tab) { CyclePage((Keyboard.Modifiers & ModifierKeys.Shift) != 0 ? -1 : 1); e.Handled = true; }
+            else if (e.Key >= Key.D1 && e.Key <= Key.D4) { C("PageSelector").SelectedIndex = e.Key - Key.D1; e.Handled = true; }
+            else if (e.Key >= Key.NumPad1 && e.Key <= Key.NumPad4) { C("PageSelector").SelectedIndex = e.Key - Key.NumPad1; e.Handled = true; }
+            else if (e.Key == Key.F) {
                 GoToPage(((TabControl)Window.FindName("MainTabs")).SelectedIndex == 3 ? 3 : ((TabControl)Window.FindName("MainTabs")).SelectedIndex == 1 ? 1 : 0);
                 var search = T(((TabControl)Window.FindName("MainTabs")).SelectedIndex == 3 ? "EditedSearchBox" : ((TabControl)Window.FindName("MainTabs")).SelectedIndex == 1 ? "ImportSearchBox" : "SearchBox");
                 search.Focus(); search.SelectAll(); e.Handled = true;

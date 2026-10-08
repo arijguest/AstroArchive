@@ -11,7 +11,7 @@ namespace AstroArchive {
  public partial class MainUi {
   void Guide(){
    var menu=new ContextMenu();Action<string,string> add=(title,key)=>{var item=new MenuItem{Header=title,ToolTip="Open this topic in the searchable guide."};item.Click+=(s,e)=>OpenGuide(key);menu.Items.Add(item);};
-   add("Search the guide…",null);add("Help for this tab (F1)",CurrentHelpTopic());menu.Items.Add(new Separator());
+   add("Search the guide…",null);add("Help for this page (F1)",CurrentHelpTopic());menu.Items.Add(new Separator());
    add("Getting started","START HERE");add("USB and saved telescopes","USB TRANSFER AND SAVED TELESCOPES");add("Image preview and tables","IMAGE PREVIEW AND TABLES");add("Stacking projects","STACKING PROJECTS AND SESSIONS");add("Mosaic collections","MOSAIC COLLECTIONS AND PANELS");add("Troubleshooting","TROUBLESHOOTING");add("Keyboard shortcuts","KEYBOARD SHORTCUTS");add("Frame types and glossary","FRAME TYPES AND GLOSSARY");
    menu.PlacementTarget=TopMenu("GuideMenu");menu.IsOpen=true;
   }

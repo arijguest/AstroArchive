@@ -15,10 +15,10 @@ namespace AstroArchive {
             int page = tabs.SelectedIndex;
             var saved = Util.Serialize(settings);
             try {
+                SmokePageNavigation(output);
                 GoToPage(0); Window.UpdateLayout();
-                var menu = (Menu)Window.FindName("MainMenu");
-                string[] expected = { "Import", "Export", "Repository", "Edited", "Settings", "Guide", "Buy Me a Coffee" };
-                if (!menu.Items.Cast<MenuItem>().Select(item => Convert.ToString(item.Header).Replace("_", "")).SequenceEqual(expected)) throw new Exception("Top-level menu order changed.");
+                string[] expected = { "ImportMenu", "ExportMenu", "RepositoryMenu", "EditedMenu", "SettingsMenu", "GuideMenu", "CoffeeMenu" };
+                if (!TopMenus().Select(item => item.Name).SequenceEqual(expected)) throw new Exception("Top-level menu order changed.");
                 if (Convert.ToString(((TabItem)tabs.Items[0]).Header) != "Repository") throw new Exception("Repository tab retains the Library label.");
                 if (B("ThemeButton").IsVisible || B("MoreButton").IsVisible || B("PerformanceButton").IsVisible || B("RotationButton").IsVisible) throw new Exception("Secondary action buttons remain visible.");
                 if (!B("ExportButton").IsVisible || !B("RepositoryImportButton").IsVisible) throw new Exception("Primary repository actions are missing.");
@@ -30,7 +30,7 @@ namespace AstroArchive {
                 var workspace=(Grid)Window.FindName("WorkspaceRoot");if(workspace.RowDefinitions.Count!=3||((Popup)Window.FindName("OperationPopup")).IsOpen)throw new Exception("Idle workspace retains a bottom status row.");
                 foreach (string mode in new[] { "Light", "Dark" }) {
                     settings.ThemeMode = mode; ApplyAppearance();
-                    foreach (var item in menu.Items.Cast<MenuItem>()) {
+                    foreach (var item in TopMenus()) {
                         item.ApplyTemplate();
                         Readable(item.Foreground, item.Background, mode + " top menu");
                     }
@@ -81,9 +81,10 @@ namespace AstroArchive {
                 if ((Brush)Window.FindResource("Focus") == null) throw new Exception("Focus highlight is missing.");
                 Capture(Path.Combine(output, "AstroArchive_Accessibility_UI.png"));
                 settings.TextScalePercent = 150; ApplyAppearance(); PumpPopupLayout();
-                foreach (var item in menu.Items.Cast<MenuItem>()) {
-                    var bounds = PopupBounds(item, menu);
-                    if (bounds.Right > menu.ActualWidth + 1 || bounds.Bottom > menu.ActualHeight + 1 || item.FontSize < 19) throw new Exception("Large-text navigation is clipped or does not scale.");
+                foreach (var item in TopMenus()) {
+                    var toolbar = (FrameworkElement)Window.FindName("NavigationToolbar");
+                    var bounds = PopupBounds(item, toolbar);
+                    if (bounds.Right > toolbar.ActualWidth + 1 || bounds.Bottom > toolbar.ActualHeight + 1 || item.FontSize < 19) throw new Exception("Large-text navigation is clipped or does not scale.");
                 }
                 var tableViewer = PopupChildren<ScrollViewer>(grid).First();
                 if (grid.Columns.Any(column => column.Visibility == Visibility.Visible && column.ActualWidth + 1 < column.MinWidth)) throw new Exception("Table squeezed columns below their readable minimum.");
@@ -108,6 +109,8 @@ namespace AstroArchive {
                 try {
                     tour.Show(); PumpPopupLayout();
                     for (int index = 0; index < steps.Length; index++) { tour.SetStep(index); PumpPopupLayout(); if (tour.StepIndex != index || tour.Heading.Text != steps[index].Title) throw new Exception("Walkthrough lost a step."); }
+                    tour.SetStep(0); tour.Try.RaiseEvent(new RoutedEventArgs(Button.ClickEvent)); PumpPopupLayout();
+                    if (!C("PageSelector").IsDropDownOpen || walkthroughHighlight == null || walkthroughHighlight.AdornedElement != C("PageSelector")) throw new Exception("Walkthrough did not highlight and open the page selector.");
                     tour.SetStep(1); tour.Back.RaiseEvent(new RoutedEventArgs(Button.ClickEvent)); if (tour.StepIndex != 0) throw new Exception("Walkthrough Back did not return.");
                     if (T("SourceBox").Text != originalSource || cancel != null) throw new Exception("Walkthrough performed an import or changed the source.");
                     foreach (var button in new[] { tour.Next, tour.Back, tour.Try }) {
@@ -121,9 +124,8 @@ namespace AstroArchive {
                     tour.Next.RaiseEvent(new RoutedEventArgs(Button.ClickEvent)); PumpPopupLayout();
                     if (walkthrough != null || walkthroughHighlight != null || walkthroughHighlightLayer != null || !settings.GuideCompleted || (layer.GetAdorners(highlight.AdornedElement) ?? new System.Windows.Documents.Adorner[0]).Contains(highlight)) throw new Exception("Finished walkthrough left a highlight behind.");
                     GoToPage(0); T("SearchBox").Focus(); PumpPopupLayout();
-                    var repositoryTab = (TabItem)tabs.Items[0];
-                    var tabSurface = repositoryTab.Template.FindName("Tab", repositoryTab) as Border;
-                    if (tabSurface == null || tabSurface.BorderThickness.Left != 0 || repositoryTab.FocusVisualStyle == null) throw new Exception("Page focus outlines its tab or keyboard focus styling is missing.");
+                    var selector = C("PageSelector");
+                    if (PopupChildren<TabPanel>(tabs).Any() || selector.FocusVisualStyle == null || selector.IsDropDownOpen) throw new Exception("Page navigation retains a tab row or the walkthrough left its selector open.");
                     Capture(Path.Combine(output, "AstroArchive_After_Guide_UI.png"));
                     StartWalkthrough(); walkthrough.SetStep(4); var skippedHighlight = walkthroughHighlight; var skippedLayer = walkthroughHighlightLayer;
                     walkthrough.Close(); PumpPopupLayout();

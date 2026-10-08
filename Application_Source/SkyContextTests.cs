@@ -4,6 +4,13 @@ namespace AstroArchive {
  public partial class Tests {
   static Frame SkyFrame(double ra,double dec,double latitude,double longitude){return new Frame{Target="Unknown",RA=SkyOrientation.Wrap(ra),Dec=dec,Latitude=latitude,Longitude=longitude,ObservedUtc="2000-01-01T12:00:00Z"};}
   static void SkyContextTests(){
+   Test("Sky camera wraps rotation clamps poles and zoom and resets to capture",()=>{
+    var camera=new SkyGlobeCamera();camera.SetHome(355,-25);camera.Orbit(20,30);Check(camera.Yaw==15&&camera.Tilt==5,"Orbit did not cross longitude seam");
+    camera.Orbit(0,1000);Check(camera.Tilt==89,"North pole was not bounded");camera.Orbit(0,-1);Check(camera.Tilt==88,"Pole overshoot delayed reverse drag");camera.Orbit(-720,-1000);Check(camera.Yaw==15&&camera.Tilt==-89,"South pole or multiple orbit wrap failed");
+    camera.Magnify(1000);Check(camera.Zoom==3,"Zoom overflow");camera.Magnify(0.00001);Check(camera.Zoom==0.6,"Zoom underflow");camera.Reset();Check(camera.Yaw==355&&camera.Tilt==-25&&camera.Zoom==1,"Reset lost original capture view");
+    camera.Orbit(double.NaN,20);camera.Magnify(double.PositiveInfinity);Check(camera.Yaw==355&&camera.Tilt==-25&&camera.Zoom==1,"Invalid gesture corrupted camera");
+    camera.SetHome(120,25);Check(camera.Yaw==120&&camera.Tilt==25&&camera.Zoom==1,"New capture retained previous camera");
+   });
    Test("Sky horizon uses east-positive longitude and known sidereal time",()=>{
     var utc=new DateTime(2000,1,1,12,0,0,DateTimeKind.Utc);Check(Math.Abs(SkyOrientation.Sidereal(utc,0)-280.46061837)<0.000001,"J2000 sidereal reference changed");
     Check(Math.Abs(SkyOrientation.Sidereal(utc,30)-310.46061837)<0.000001,"Eastern longitude reversed");

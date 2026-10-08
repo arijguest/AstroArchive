@@ -59,7 +59,7 @@ Download the installer, run it and open AstroArchive from its shortcut. Installa
 Each release includes SHA-256 checksums. In PowerShell, substitute your downloaded installer’s filename:
 
 ```powershell
-Get-FileHash .\AstroArchive1.12.1.1.exe -Algorithm SHA256
+Get-FileHash .\AstroArchive1.12.2.1.exe -Algorithm SHA256
 ```
 
 Compare `Hash` with the corresponding `.sha256` file. A checksum checks file integrity; publisher identity depends on code signing.
@@ -90,8 +90,9 @@ Compare `Hash` with the corresponding `.sha256` file. A checksum checks file int
 | **Table headings** | Click to sort; **Shift-click** adds columns. Arrows and priorities show the active sort order. |
 | **Preview toolbar** | Controls sit below the image. Scroll or pinch to zoom; drag the image or use arrows to move the view after zooming. **Fit** or **F** restores the whole image; **Escape** closes the popup. |
 | **Capture sky** | A cached, text-free constellation globe uses only the space left after fitting the image. Hover for recorded capture time, direction and altitude. Uses capture location or your saved observing place; missing time/site shows celestial coordinates. |
+| **Purple page dropdown** | Switch Repository, Edited, Mosaic and Import beside Settings without losing state. Ctrl+1–4 selects a page; Ctrl+Tab cycles pages. |
 | **Settings → Preferences** | System/light/dark themes, text size, comfortable rows, high contrast and reduced progress animation. |
-| **Guide** | Repeat the first-run walkthrough, search offline help or open About. **F1** opens help for the current tab. |
+| **Guide** | Repeat the first-run walkthrough, search offline help or open About. **F1** opens help for the current page. |
 
 Target groups show file counts and known sub-exposure totals. Stacks are counted separately and excluded from those exposure totals; unknown exposure remains explicit.
 
