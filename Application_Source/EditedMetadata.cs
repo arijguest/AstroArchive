@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 namespace AstroArchive {
  public sealed class EditedMetadata {
+  public EditedMetadata Clone(){return (EditedMetadata)MemberwiseClone();}
   public string ImageClass{get;set;} public string Object{get;set;} public string Filters{get;set;} public string RA{get;set;} public string Dec{get;set;}
   public int? Subs{get;set;} public double? SubExposure{get;set;} public double? TotalExposure{get;set;} public double? ReportedExposure{get;set;} public string Evidence{get;set;}
   public string ObjectLabel{get{return ImageClass=="Meteor"?"Meteor":string.IsNullOrEmpty(Object)?"Unknown":Catalog.Label(Object);}}

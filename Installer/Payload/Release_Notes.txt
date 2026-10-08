@@ -1,18 +1,12 @@
-AstroArchive 1.13.10
-Package 1.13.10.1
+AstroArchive 1.13.11
+Package 1.13.11.1
 
-- Shorter tooltips throughout menus, previews, filters and metadata controls.
-  Essential selection rules, deletion effects and capture evidence remain available.
-- Faster repeat telescope imports skip archived filenames and completed dated
-  DWARF sessions by default. Seestar imports still discover new filenames.
-  Robust import matching checks changed files, metadata and missing archive copies;
-  Full rescan revisits everything. Newly imported copies remain checksum-verified.
-- A visible Import from telescope button uses saved connected-device profiles.
-- Exports default to images without metadata or an enclosing folder. Stacks copy
-  directly to the destination; subs retain compatible input folders. Add Metadata
-  and Create new folder are separate options, both off by default.
-- Existing export files are retained with numbered filename suffixes. Cancelled
-  exports keep verified copies and remove unfinished temporary files.
-- Stacking-app buttons work with metadata-free exports.
-- Shorter offline guides describe the current app, with licensing and catalogue
-  credits retained.
+- Edited shows all imports and working copies together. Project choices have been
+  removed from the gallery, imports and editor handoffs. Existing images remain
+  intact when importing selected files; duplicate and changed-version review stays available.
+- Select Edited images and use Edit metadata to assign targets, filters, class,
+  exposures, sub counts or coordinates. Assignments persist with the repository
+  without rewriting image files. Image Class is removed from table headings.
+- Large previews open in source orientation with left/right rotation buttons.
+  Rotation affects the display only and stays applied during GIF and SER playback.
+- Guides describe the combined gallery, metadata editing and preview controls.

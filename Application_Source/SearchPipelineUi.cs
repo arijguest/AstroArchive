@@ -94,7 +94,7 @@ namespace AstroArchive {
   void ApplyEditedSearch(SearchResult result){
    var selected=ActiveEditedImage;var view=new ListCollectionView(result.Targets);view.GroupDescriptions.Add(new PropertyGroupDescription("Group"));refreshingEditedTargets=true;
    try{EditedTargets.ItemsSource=view;EditedTargets.SelectedItem=result.Targets.First(t=>t.Name==result.Target);}finally{refreshingEditedTargets=false;}
-   SetRows("EditedGrid",result.Images,true);G("EditedGrid").SelectedItem=result.Images.FirstOrDefault(i=>selected!=null&&i.Project.Id==selected.Project.Id&&i.RelativePath==selected.RelativePath);
+   SetRows("EditedGrid",result.Images,true);RestoreEditedSelection(result.Images,selected);
    L("EditedSummary").Text=result.Images.Count+" images";L("EditedSearchHint").Visibility=result.Query.IsEmpty?Visibility.Visible:Visibility.Collapsed;L("EditedEmptyState").Visibility=result.Images.Count==0?Visibility.Visible:Visibility.Collapsed;UpdateEditedActions();
   }
   void DisposeSearch(){foreach(var state in searchPanels.Values)state.Dispose();}

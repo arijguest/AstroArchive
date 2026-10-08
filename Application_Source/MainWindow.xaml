@@ -852,7 +852,7 @@
      <StackPanel>
      <DockPanel Margin="0,0,0,10">
       <StackPanel DockPanel.Dock="Right" Orientation="Horizontal"><Button x:Name="EditedAddButton" Content="Add images…"/><Button x:Name="EditedImportFolderButton" Content="Import folder…" Background="{DynamicResource Accent}" Foreground="White" BorderBrush="{DynamicResource Accent}" Margin="8,0,0,0"/><Button x:Name="EditedRefreshButton" Content="Refresh" Margin="8,0,0,0"/></StackPanel>
-      <TextBlock Text="PROJECT" FontSize="{DynamicResource UiFontCaption}" FontWeight="SemiBold" Foreground="{DynamicResource Muted}" VerticalAlignment="Center" Margin="0,0,10,0" DockPanel.Dock="Left"/><ComboBox x:Name="EditedProjectsList" DisplayMemberPath="Name" Width="250" HorizontalAlignment="Left"/>
+      <TextBlock Text="Edited images" FontSize="{DynamicResource UiFontTitle}" FontWeight="SemiBold" VerticalAlignment="Center"/>
      </DockPanel>
       <Border x:Name="EditedImportNotice" Visibility="Collapsed" Background="{DynamicResource SurfaceAlt}" CornerRadius="6" Padding="10,6" Margin="0,0,0,10">
        <DockPanel><Button x:Name="DismissEditedImportNotice" DockPanel.Dock="Right" Content="×" Padding="6,0" MinHeight="0" Margin="10,0,0,0" AutomationProperties.Name="Dismiss last Edited import summary"/><TextBlock x:Name="EditedImportNoticeText" Foreground="{DynamicResource Muted}" TextWrapping="Wrap" VerticalAlignment="Center" AutomationProperties.LiveSetting="Polite"/></DockPanel>
@@ -875,13 +875,12 @@
        </Grid></DataTemplate></ListBox.ItemTemplate>
       </ListBox></DockPanel></Border>
       <Grid Grid.Column="1"><Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="*"/></Grid.RowDefinitions>
-       <StackPanel Margin="0,0,0,8"><TextBlock x:Name="EditedProjectInfo" Foreground="{DynamicResource Muted}" TextTrimming="CharacterEllipsis"/><WrapPanel Margin="0,6,0,0"><Button x:Name="EditedDetailsButton" Content="Image details…" Margin="0,0,8,0"/><Button x:Name="EditedPreviewButton" Content="Preview image…"/><Button x:Name="EditedEditorButton" Content="Open in editor ▾" Margin="8,0,0,0"/><Button x:Name="EditedFolderButton" Content="Open project folder" Margin="8,0,0,0"/></WrapPanel></StackPanel>
+       <StackPanel Margin="0,0,0,8"><WrapPanel Margin="0,6,0,0"><Button x:Name="EditedEditButton" Content="Edit metadata…" Margin="0,0,8,0"/><Button x:Name="EditedDetailsButton" Content="Image details…" Margin="0,0,8,0"/><Button x:Name="EditedPreviewButton" Content="Preview image…"/><Button x:Name="EditedEditorButton" Content="Open in editor ▾" Margin="8,0,0,0"/><Button x:Name="EditedFolderButton" Content="Open image folder" Margin="8,0,0,0"/></WrapPanel></StackPanel>
        <Border Grid.Row="1" Background="{DynamicResource Surface}" BorderBrush="{DynamicResource Border}" BorderThickness="1" CornerRadius="8" ClipToBounds="True"><Grid><DataGrid x:Name="EditedGrid" CanUserSortColumns="True"><DataGrid.RowStyle><Style TargetType="DataGridRow" BasedOn="{StaticResource {x:Type DataGridRow}}"><Setter Property="ToolTip" Value="{Binding Filename}"/></Style></DataGrid.RowStyle><DataGrid.Columns>
          <DataGridTextColumn Header="FILE" Binding="{Binding Filename}" Width="*" MinWidth="200"/>
          <DataGridTextColumn Header="FILE TYPE" Binding="{Binding FileType}" Width="85"/>
          <DataGridTextColumn Header="OBJECT ID" Binding="{Binding Metadata.ObjectId}" Width="85"/>
          <DataGridTextColumn Header="COMMON NAME / LABEL" Binding="{Binding Metadata.TargetName}" Width="180"/>
-         <DataGridTextColumn Header="IMAGE CLASS" Binding="{Binding Metadata.ImageClass}" Width="120"/>
          <DataGridTextColumn Header="TOTAL EXPOSURE" Binding="{Binding Metadata.TotalExposureText}" Width="130" Visibility="Collapsed"/>
          <DataGridTextColumn Header="FILTERS / CHANNELS" Binding="{Binding Metadata.FiltersLabel}" Width="140"/>
          <DataGridTextColumn Header="SUBS" Binding="{Binding Metadata.SubsText}" Width="70" Visibility="Collapsed"/>
@@ -890,8 +889,7 @@
          <DataGridTextColumn Header="MODIFIED" Binding="{Binding Modified, StringFormat={}{0:g}}" Width="150" Visibility="Collapsed"/>
          <DataGridTextColumn Header="BYTES" Binding="{Binding Bytes}" Width="100" Visibility="Collapsed"/>
          <DataGridTextColumn Header="ORIGINAL" Binding="{Binding Source}" Width="180" Visibility="Collapsed"/>
-         <DataGridTextColumn Header="PROJECT" Binding="{Binding Project.Name}" Width="150" Visibility="Collapsed"/>
-         <DataGridTextColumn Header="PROJECT PATH" Binding="{Binding RelativePath}" Width="240" Visibility="Collapsed"/>
+         <DataGridTextColumn Header="FILE PATH" Binding="{Binding RelativePath}" Width="240" Visibility="Collapsed"/>
         </DataGrid.Columns></DataGrid><TextBlock x:Name="EditedEmptyState" Text="Add edited images, or send a repository stack to an editor to create a working copy." Foreground="{DynamicResource Muted}" HorizontalAlignment="Center" VerticalAlignment="Center" TextWrapping="Wrap" TextAlignment="Center" MaxWidth="420" Margin="24" IsHitTestVisible="False"/></Grid></Border>
       </Grid>
       <GridSplitter Grid.Column="2" Width="4" HorizontalAlignment="Center" Background="{DynamicResource Border}" ResizeBehavior="PreviousAndNext"/>

@@ -35,20 +35,22 @@ Use one AstroArchive writer per repository, including cloud-synced repositories.
 
 - **Repository:** choose a target, search, or open **Filters**. Repeated Light subframes are grouped into collapsed session summaries showing dates, count, exposure and filters. Expand a summary to inspect files, or choose **Repository → View → Show all files**. Stacks remain separate.
 - **Tables:** click a heading to sort; Shift-click adds a sorting column. Right-click a heading to choose columns. Repository, Import and Edited remember their own layouts.
-- **Preview:** scroll or pinch to zoom, drag or use arrows to pan, and choose **Fit** to recenter. Stretch affects the display only. Animated GIFs and videos have **Pause / Play** below the image.
+- **Preview:** scroll or pinch to zoom, drag or use arrows to pan, and choose **Fit** to recenter. Large previews open in source orientation and offer rotate buttons. Stretch affects the display only. Animated GIFs and videos have **Pause / Play** below the image.
 - **Navigation:** the purple page selector switches Repository, Edited and Import. Ctrl+1–3 selects a page; Ctrl+Tab cycles pages.
 - **Preferences:** choose appearance and accessibility options from **Settings**. **F1** opens help for the current page.
 
 ## Edited images and processing
 
-**Edited** has targets, a table and Preview, with an **All projects** view.
+**Edited** shows all imports and working copies together, with targets, a table and Preview.
 Add individual images or use **Import folder** to scan and review an existing collection.
-Folder imports skip repository/database folders and originals already archived, including renamed identical copies. Duplicate review groups identical Edited copies across projects; originals are retained.
+Folder imports skip repository/database folders and originals already archived, including renamed identical copies. Identical files already in Edited are skipped; changed files with the same name can be added as new versions. Unchecked entries leave existing images untouched.
+
+Select images and choose **Edit metadata** to assign targets, filters, image class, exposures, sub counts or coordinates. Assignments persist with the repository and do not rewrite image files.
 
 Starless and Stars only filenames are recognised. Object, filter, sub-count and exposure details come from available metadata or explicit filename labels. GIFs inherit missing details from a uniquely matching edited image in the same folder.
 
 Sending a stack to **Siril** creates a verified working copy in Edited.
-For AstroWizard or another editor, choose **Export → Create Edited working copies**, then load the copies from the opened project folder. Save outputs there and refresh Edited to find them.
+For AstroWizard or another editor, choose **Export → Create Edited working copies**, then load the copies from the opened image folder. Save outputs there and refresh Edited to find them.
 
 Exports default to image files only: stacks copy directly to the destination; subs
 retain compatible input folders. **Add Metadata** and **Create new folder** are off

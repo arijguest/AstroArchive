@@ -13,8 +13,9 @@ namespace AstroArchive {
  }
  // Rotate only the display; fitting the frame to this aspect avoids letterboxing.
  public class PreviewGeometry {
-  public readonly double Width,Height;public readonly bool Rotated;
-  public PreviewGeometry(double width,double height){Rotated=width>height;Width=Rotated?height:width;Height=Rotated?width:height;}
+  public readonly double Width,Height;public readonly bool Rotated;public readonly int QuarterTurns;
+  public PreviewGeometry(double width,double height):this(width,height,width>height?1:0){}
+  public PreviewGeometry(double width,double height,int quarterTurns){QuarterTurns=((quarterTurns%4)+4)%4;Rotated=QuarterTurns%2!=0;Width=Rotated?height:width;Height=Rotated?width:height;}
   public void Frame(double availableWidth,double availableHeight,out double width,out double height){width=Math.Max(0,Math.Min(availableWidth,availableHeight*Width/Height));height=width*Height/Width;}
  }
  public class PreviewZoom {

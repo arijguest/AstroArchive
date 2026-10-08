@@ -21,12 +21,12 @@ namespace AstroArchive {
   public ImagePreviewWindow(Window owner,string filename,int width,int height,byte[] pixels){
    Owner=owner;Icon=ApplicationIcon.Image;Title="Preview - "+filename;WindowStartupLocation=WindowStartupLocation.CenterOwner;Background=owner.Background;FontFamily=owner.FontFamily;FontSize=13;Resources.MergedDictionaries.Add(owner.Resources);Theme.Bind(this,Control.BackgroundProperty,"Canvas");Theme.Bind(this,Control.ForegroundProperty,"Text");
    // Reserve the native window chrome, then size the client area to the portrait image.
-   var geometry=new PreviewGeometry(width,height);var work=SystemParameters.WorkArea;double clientWidth,clientHeight;geometry.Frame(Math.Min(560,work.Width-64),Math.Max(1,Math.Min(760,work.Height-100)-PreviewViewport.ToolbarSpace),out clientWidth,out clientHeight);
+   var geometry=new PreviewGeometry(width,height,0);var work=SystemParameters.WorkArea;double clientWidth,clientHeight;geometry.Frame(Math.Min(1100,work.Width-64),Math.Max(1,Math.Min(760,work.Height-100)-PreviewViewport.ToolbarSpace),out clientWidth,out clientHeight);
    Width=clientWidth+2*SystemParameters.ResizeFrameVerticalBorderWidth+16;Height=clientHeight+PreviewViewport.ToolbarSpace+SystemParameters.CaptionHeight+2*SystemParameters.ResizeFrameHorizontalBorderHeight+16;MinWidth=Math.Min(Width,260);MinHeight=Math.Min(Height,360);
-   var host=new Grid{Margin=new Thickness(8)};var viewport=new Grid();var image=new Image();viewport.Children.Add(image);host.Children.Add(viewport);Content=host;preview=new PreviewViewport(host,viewport,image);
+   var host=new Grid{Margin=new Thickness(8)};var viewport=new Grid();var image=new Image();viewport.Children.Add(image);host.Children.Add(viewport);Content=host;preview=new PreviewViewport(host,viewport,image,null,false,true);
    var bitmap=BitmapSource.Create(width,height,96,96,PixelFormats.Rgb24,null,pixels,width*3);bitmap.Freeze();preview.SetImage(bitmap,true);
    Loaded+=(s,e)=>preview.Resize();PreviewKeyDown+=(s,e)=>{if(e.Key==Key.Escape){Close();e.Handled=true;}else if(e.Key==Key.F){preview.Fit();e.Handled=true;}};
   }
-  public void SmokeGestures(){preview.SmokeGestures();}
+  public void SmokeGestures(){preview.SmokeGestures();preview.SmokeRotation();}
  }
 }

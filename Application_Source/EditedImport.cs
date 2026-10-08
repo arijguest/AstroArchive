@@ -38,7 +38,7 @@ namespace AstroArchive {
     }catch(OperationCanceledException){throw;}catch(IOException e){plan.Errors.Add(directory+": "+e.Message);}catch(UnauthorizedAccessException e){plan.Errors.Add(directory+": "+e.Message);}
    }
    foreach(var row in plan.Images.Where(i=>i.Include))row.NameConflict=duplicates.NameConflict(System.IO.Path.GetFileName(row.Path),row.Hash);
-   foreach(var gif in plan.Images.Where(i=>i.Include&&MediaFiles.Gif(i.Path))){string match=MediaFiles.MatchingImage(gif.RelativePath,plan.Images.Where(i=>i.Include).Select(i=>i.RelativePath));if(match!=null){var still=plan.Images.Single(i=>i.RelativePath==match);gif.Metadata=EditedMetadata.Read(gif.RelativePath,Assets.Inspect(gif.Path).Header,still.Metadata,matcher);gif.Metadata.Evidence+="\nRelated edited image: "+still.RelativePath;}}
+   foreach(var gif in plan.Images.Where(i=>i.Metadata!=null&&MediaFiles.Gif(i.Path))){string match=MediaFiles.MatchingImage(gif.RelativePath,plan.Images.Where(i=>i.Metadata!=null).Select(i=>i.RelativePath));if(match!=null){var still=plan.Images.Single(i=>i.RelativePath==match);gif.Metadata=EditedMetadata.Read(gif.RelativePath,Assets.Inspect(gif.Path).Header,still.Metadata,matcher);gif.Metadata.Evidence+="\nRelated edited image: "+still.RelativePath;}}
    return plan;
   }
   public EditedProject ImportEditedFolder(EditedImportPlan plan,string name,CancellationToken ct,Action<ProgressInfo> progress,EditedImportResult result=null){

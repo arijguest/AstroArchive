@@ -1,4 +1,4 @@
-AstroArchive 1.13.10
+AstroArchive 1.13.11
 Windows 10/11 x64; .NET Framework 4.8.
 
 START HERE
@@ -69,8 +69,9 @@ Fit or F restores the full image; plus/minus zoom; Escape closes the popup.
 Preview keeps controls and capture sky visible while loading a new image.
 The text-free sky globe uses capture time and location when available, or
 celestial coordinates otherwise; hover for the recorded context.
-Landscape images display rotated into portrait. Large still previews are sampled,
-so use your editor for inspection at the original pixel resolution.
+Sidebar previews rotate landscape images into portrait. Large previews open in
+source orientation; Rotate left/right turns the display without changing files.
+Large still previews are sampled; use your editor for original-pixel inspection.
 Stretch changes the display only. Scientific images default to Auto per channel;
 saved choices are retained. Solar, lunar, planetary and processed raster images
 start with Linear. Source pixels and headers remain unchanged.
@@ -80,20 +81,25 @@ save independently for Repository, Import and Edited. Restore default columns
 resets the layout. A dash indicates missing metadata, not zero.
 
 EDITED IMAGES AND WORKING COPIES
-Edited has targets, a table and Preview. All projects shows every project;
-choose a project to narrow the list. Search or filter by object, class or name.
-Add images copies files into a new or existing project. Import folder offers
-Browse and Scan, including an optional subfolder crawl and review before copying.
-Repository/database folders and originals already archived are skipped, including
-renamed byte-identical copies. Sources stay in place. Unreadable files are excluded.
+Edited shows all imports and working copies together, with targets, a table and
+Preview. Search or filter by object, class or name. Add images copies files into
+Edited. Import folder offers Browse and Scan, with an optional subfolder crawl
+and review before copying. Repository/database folders and archived originals
+are skipped, including renamed byte-identical copies. Identical images already
+in Edited are excluded; changed files with the same name can be added as new
+versions. Unchecked entries leave existing images untouched. Sources stay in
+place; unreadable files are excluded.
 Sending a repository stack to Siril creates a verified Edited working copy.
-For AstroWizard or another editor, Export > Create Edited working copies opens a
-project folder for manual loading. Save outputs there; Refresh finds them. Edited duplicate review identifies byte-
-identical copies across projects and retains acquisition originals.
-Use Open project folder, Enlarge, Image details or Open in editor on Edited.
-Projects move with the repository and remain separate from acquisition captures.
+For another editor, Export > Create Edited working copies opens a folder for
+manual loading. Save outputs there; Refresh finds them.
+Use Open image folder, Enlarge, Image details or Open in editor on Edited.
+Edited images move with the repository and remain separate from acquisition captures.
 
 EDITED METADATA AND EXPOSURE
+Select images and choose Edit metadata, or right-click > Edit metadata, to assign
+targets, filters, class, exposures, sub counts or coordinates. Unchanged and empty
+fields keep existing values. Assignments persist with Edited without rewriting
+image pixels or headers.
 Starless and Stars only labels are recognised in filenames. Object, filters,
 coordinates, sub counts and exposures come from image metadata or explicit names.
 For example, M31_Ha_120x60s_starless means 120 subs of 60 seconds, 7200 seconds
@@ -197,7 +203,7 @@ allows a later import from an available source; it does not restore deleted file
 Remove source originals is optional. Only verified, safely removable imported
 originals are removed; duplicates, failed cleanup and other source files are retained.
 Delete all archive data permanently clears indexed captures and managed metadata.
-Edited projects, deletion history, source mirrors and unindexed files remain.
+Edited images, deletion history, source mirrors and unindexed files remain.
 Review the confirmation and back up wanted images first.
 
 CLOUD FOLDERS AND BACKUPS
@@ -206,7 +212,7 @@ Browser-only folders cannot be used. Alt+D in the folder picker lets you paste a
 Make cloud inputs available offline to avoid on-demand download waits. Directory
 links are skipped. Cloud sync may continue after AstroArchive finishes copying.
 Move or back up the whole repository, including .astroarchive/index.sqlite and
-Edited projects. Use one writer per repository. Application uninstall retains data.
+Edited images. Use one writer per repository. Application uninstall retains data.
 
 INSTALLATION AND UPDATES
 Run the installer for a fresh installation, update or repair. The default location
@@ -252,7 +258,7 @@ Folder picker: Alt+D focuses its address bar.
 TROUBLESHOOTING
 Import disabled: choose a repository, existing source folder and device ID, then
 scan. Wait for active work to finish. Check that the filtered scan has eligible files.
-No rows: Clear search/filters, choose All targets or All projects, and check the
+No rows: Clear search/filters, choose All targets, and check the
 repository. Expand session summaries to see individual acquisition files.
 USB missing: check its Windows USB volume, Browse its capture folder and save the
 association. Refresh connected devices. USB upload uses local storage, not Wi-Fi.
@@ -284,7 +290,7 @@ Master calibration: combined dark, flat or bias, distinct from raw calibrations.
 Starless / Stars only: edited image layers recognised from filename labels.
 Session: related acquisition group. Device ID: one physical telescope, not its model.
 Plate solving: finding an image's sky position. Repository: archived originals and metadata.
-Edited project: mutable working copies and outputs kept with the repository.
+Edited: mutable working copies and outputs kept with the repository.
 
 CATALOGUE CREDITS
 Object catalogue: OpenNGC by Mattia Verga and contributors, CC BY-SA 4.0.
