@@ -4,7 +4,7 @@ namespace AstroArchive {
  public partial class Tests {
   static void HelpTests(){
    Test("Bundled help retains workflows and searches complete topic text",()=>{
-    var topics=HelpCatalog.Load();foreach(string key in new[]{"START HERE","IMPORT WORKFLOW","LIBRARY WORKFLOW","USB TRANSFER AND SAVED TELESCOPES","IMAGE PREVIEW AND TABLES","STACKING PROJECTS AND SESSIONS","TROUBLESHOOTING","KEYBOARD SHORTCUTS","FRAME TYPES AND GLOSSARY"})Check(topics.Any(t=>t.Key==key&&!string.IsNullOrWhiteSpace(t.Body)),"Missing guide topic: "+key);
+    var topics=HelpCatalog.Load();foreach(string key in new[]{"START HERE","IMPORT OVER WI-FI / LAN","IMPORT WORKFLOW","LIBRARY WORKFLOW","USB TRANSFER AND SAVED TELESCOPES","IMAGE PREVIEW AND TABLES","STACKING PROJECTS AND SESSIONS","TROUBLESHOOTING","KEYBOARD SHORTCUTS","FRAME TYPES AND GLOSSARY"})Check(topics.Any(t=>t.Key==key&&!string.IsNullOrWhiteSpace(t.Body)),"Missing guide topic: "+key);
     Check(topics.Select(t=>t.Key).Distinct().Count()==topics.Count,"Duplicate guide topics");Check(HelpCatalog.Search(topics,"PINCH").Any(t=>t.Key=="IMAGE PREVIEW AND TABLES"),"Full-text search is case sensitive or loses preview text");Check(HelpCatalog.Search(topics,"USB volume").Any(t=>t.Key=="USB TRANSFER AND SAVED TELESCOPES"),"Search does not combine title and body");Check(HelpCatalog.Search(topics,"no-such-help-topic-123456").Count==0&&HelpCatalog.Search(topics," \t").Count==topics.Count,"Empty search and no-result behavior");
     var parsed=HelpCatalog.Parse("About\r\n\r\nFIRST TOPIC\r\nFirst paragraph.\r\n\r\nSecond paragraph.\r\nSECOND TOPIC\r\nLast paragraph.");Check(parsed.Count==3&&parsed[1].Body.Contains("Second paragraph.")&&parsed[2].Body=="Last paragraph.","Help parser lost paragraphs or final topic");
    });
@@ -17,7 +17,7 @@ namespace AstroArchive {
    });
    Test("Guide sections stay searchable without promoting formatted content to topics",()=>{
     var parsed=HelpCatalog.Parse("FIRST TOPIC\n## USB\n- FITS\n1. USB\nSECOND TOPIC\nLast paragraph.");Check(parsed.Count==2&&parsed[0].Body.Contains("## USB")&&parsed[0].Body.Contains("1. USB"),"Subheadings or list labels became guide topics");
-    var topics=HelpCatalog.Load();Check(topics.Count==28&&HelpCatalog.Blocks(topics.Single(t=>t.Key=="START HERE").Body).Count(b=>b.Kind==HelpBlockKind.Numbered)==5,"Bundled guide lost topics or first-import steps");
+    var topics=HelpCatalog.Load();Check(topics.Count==29&&HelpCatalog.Blocks(topics.Single(t=>t.Key=="START HERE").Body).Count(b=>b.Kind==HelpBlockKind.Numbered)==5,"Bundled guide lost topics or first-import steps");
     Check(HelpCatalog.Blocks(topics.Single(t=>t.Key=="KEYBOARD SHORTCUTS").Body).Count(b=>b.Kind==HelpBlockKind.Bullet)==5&&HelpCatalog.Blocks(topics.Single(t=>t.Key=="TROUBLESHOOTING").Body).Count(b=>b.Kind==HelpBlockKind.Bullet)==10,"Shortcut or troubleshooting entries lost list structure");
     Check(topics.Single(t=>t.Key=="IMAGE PREVIEW AND TABLES").Body.Contains("Individual targets: stacks above lights")&&topics.Single(t=>t.Key=="STACKING PROJECTS AND SESSIONS").Body.Contains("Open with… after export"),"Workflow notes were lost");
     Check(!topics.Any(t=>new[]{"Sky map:","skymap","sky globe","## Capture sky"}.Any(text=>t.Body.IndexOf(text,StringComparison.OrdinalIgnoreCase)>=0)),"Skymap instructions remain in the interactive guide");

@@ -91,11 +91,12 @@ namespace AstroArchive {
  }
  public sealed class RemoteArchiveResult {public RemoteStagingResult Downloads;public AutoUploadResult Archive;public string Summary{get{return Archive.Summary+" "+Downloads.Downloaded+" downloaded; "+Downloads.Reused+" verified local downloads reused; "+Downloads.Errors.Count+" network files need retry.";}}}
  public static class RemoteArchiveImport {
+  public static bool Included(Entry file,bool ignoreFailed,bool ignoreRaster){return (!ignoreFailed||!Util.FailedFilename(file.Name))&&(!ignoreRaster||!ImportPolicy.RasterFilename(file.Name));}
   public static RemoteArchiveResult Run(Repository repo,TelescopeProfile profile,RemoteConnection c,IEnumerable<Entry> files,string cache,int workers,CancellationToken ct,Action<ProgressInfo> progress,Action<Frame> frame=null,Action<ImportPlan> plan=null,bool ignoreFailed=false,bool ignoreRaster=false,Func<RemoteConnection,ISource> sourceFactory=null){
-   RemoteStagingResult downloaded;using(var source=(sourceFactory??Downloader.Source)(c))downloaded=RemoteCaptureStaging.Download(source,c,files,cache,ct,progress);
+   var requested=files.ToList();var included=requested.Where(f=>Included(f,ignoreFailed,ignoreRaster)).ToList();if(included.Count==0)throw new IOException("The selected files are excluded by import preferences. Adjust those preferences or choose other captures.");RemoteStagingResult downloaded;using(var source=(sourceFactory??Downloader.Source)(c))downloaded=RemoteCaptureStaging.Download(source,c,included,cache,ct,progress);
    if(downloaded.Files.Count==0)throw new IOException("No complete captures could be downloaded. "+string.Join("\n",downloaded.Errors));
    var selected=ImportSelection.Create(downloaded.Root,downloaded.Files);var archived=UsbAutoUpload.Run(repo,profile,downloaded.Root,workers,ct,progress,frame,plan,ignoreFailed:ignoreFailed,ignoreRaster:ignoreRaster,robustMatching:true,selection:selected);
-   archived.Import.Errors.AddRange(downloaded.Errors);archived.Import.Warnings.AddRange(downloaded.Warnings);repo.SaveImportReport(archived.Import);return new RemoteArchiveResult{Downloads=downloaded,Archive=archived};
+   archived.Import.IgnoredFailed+=requested.Count(e=>ignoreFailed&&Util.FailedFilename(e.Name));archived.Import.IgnoredRaster+=requested.Count(e=>ignoreRaster&&ImportPolicy.RasterFilename(e.Name)&&(!ignoreFailed||!Util.FailedFilename(e.Name)));archived.Import.Errors.AddRange(downloaded.Errors);archived.Import.Warnings.AddRange(downloaded.Warnings);repo.SaveImportReport(archived.Import);return new RemoteArchiveResult{Downloads=downloaded,Archive=archived};
   }
  }
  public sealed class RemoteLiveTracker {
@@ -110,7 +111,7 @@ namespace AstroArchive {
    var tracker=new RemoteLiveTracker();int imported=0;sourceFactory=sourceFactory??Downloader.Source;
    while(true){ct.ThrowIfCancellationRequested();try{
     List<Entry> entries;using(var source=sourceFactory(c))entries=RemoteCaptureCatalog.Search(source,c,c.Folder,ct,n=>{if(progress!=null)progress(new ProgressInfo{Stage="Scanning telescope",Text=n.ToString("N0")+" capture names checked for new files",TotalKnown=false});});
-    var ready=tracker.Observe(entries,c.IncludeExisting);if(ready.Count>0){var result=RemoteArchiveImport.Run(repo,profile,c,ready,cache,workers,ct,progress,frame,plan,ignoreFailed,ignoreRaster,sourceFactory);imported+=result.Archive.Import.Imported;
+    var ready=tracker.Observe(entries.Where(e=>RemoteArchiveImport.Included(e,ignoreFailed,ignoreRaster)),c.IncludeExisting);if(ready.Count>0){var result=RemoteArchiveImport.Run(repo,profile,c,ready,cache,workers,ct,progress,frame,plan,ignoreFailed,ignoreRaster,sourceFactory);imported+=result.Archive.Import.Imported;
      var finished=new HashSet<string>(result.Archive.Plan.Frames.Where(f=>f.Status=="Imported"||f.Status.StartsWith("Duplicate")||f.Status=="Deleted"||f.Rejected).Select(f=>f.SourcePath),StringComparer.OrdinalIgnoreCase);
      foreach(var entry in ready)if(finished.Contains(Path.Combine(result.Downloads.Root,RemoteCapturePaths.LocalRelative(c,entry.Path))))tracker.Imported(entry.Path);
     }
