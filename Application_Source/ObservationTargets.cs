@@ -24,9 +24,9 @@ namespace AstroArchive {
   // Repair stored metadata without moving images or reading capture files.
   void NormalizeStoredMetadata(){
    db.Transaction(()=>{
-    foreach(var frame in All()){bool changed=Classifier.ApplySeestarStackExposure(frame);string target=ObservationTargets.CanonicalSolar(frame.Target);if(target!=frame.Target||changed){frame.Target=target;Save(frame);}}
-    foreach(string data in db.Query("SELECT data FROM source_manifest")){var manifest=Util.Deserialize<SourceManifest>(data);if(manifest.Metadata==null)continue;bool changed=Classifier.ApplySeestarStackExposure(manifest.Metadata);string target=ObservationTargets.CanonicalSolar(manifest.Metadata.Target);if(target!=manifest.Metadata.Target||changed){manifest.Metadata.Target=target;Manifest(manifest);}}
-    foreach(var deletion in Deletions()){if(deletion.Metadata==null)continue;bool changed=Classifier.ApplySeestarStackExposure(deletion.Metadata);string target=ObservationTargets.CanonicalSolar(deletion.Metadata.Target);if(target!=deletion.Metadata.Target||changed){deletion.Metadata.Target=target;db.Exec("INSERT OR REPLACE INTO deleted_files(hash,data) VALUES(?,?)",deletion.Hash,Util.Serialize(deletion));}}
+    foreach(var frame in All()){bool changed=Classifier.ApplyStackMetadata(frame);string target=ObservationTargets.CanonicalSolar(frame.Target);if(target!=frame.Target||changed){frame.Target=target;Save(frame);}}
+    foreach(string data in db.Query("SELECT data FROM source_manifest")){var manifest=Util.Deserialize<SourceManifest>(data);if(manifest.Metadata==null)continue;bool changed=Classifier.ApplyStackMetadata(manifest.Metadata);string target=ObservationTargets.CanonicalSolar(manifest.Metadata.Target);if(target!=manifest.Metadata.Target||changed){manifest.Metadata.Target=target;Manifest(manifest);}}
+    foreach(var deletion in Deletions()){if(deletion.Metadata==null)continue;bool changed=Classifier.ApplyStackMetadata(deletion.Metadata);string target=ObservationTargets.CanonicalSolar(deletion.Metadata.Target);if(target!=deletion.Metadata.Target||changed){deletion.Metadata.Target=target;db.Exec("INSERT OR REPLACE INTO deleted_files(hash,data) VALUES(?,?)",deletion.Hash,Util.Serialize(deletion));}}
    });
   }
  }

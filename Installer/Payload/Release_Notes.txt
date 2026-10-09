@@ -8,5 +8,7 @@ Package 2.1.10.1
   page, including selections under other targets and condensed sessions. It
   works from the search bar and target pane as well as the file table. Open
   menus, dropdowns and Activity still dismiss before clearing file selections.
-- Verified that importing a recognised Seestar stack keeps it in Repository;
-  Edited working copies are created only through an explicit Edited action.
+- DWARF device stacks derive sub counts from total integration and the
+  filename's per-sub exposure when the result is a whole number. Known counts
+  show Stack (571), for example. Existing records are repaired from cached
+  headers on opening; explicit/manual counts and image files are preserved.

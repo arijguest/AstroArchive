@@ -143,7 +143,10 @@ Seestar's Stacked_36_NGC 7000_5.0s_... means 36 subs of 5 seconds: 180 seconds
 total exposure. Repository and Edited metadata use that count and duration;
 explicit header totals and manual corrections take precedence. Existing repository
 records are repaired on opening, without rereading or moving capture files.
-DWARF's stacked-16 is bit depth. Unspecified EXPTIME stays reported exposure;
+DWARF's stacked-16 is bit depth. For recognised DWARF device stacks, total
+integration divided by filename per-sub exposure supplies a count only when
+the result is a whole number. Existing cached records gain the same count.
+Explicit/manual counts take precedence. Other unspecified EXPTIME stays reported exposure;
 it is not assumed to be per-sub or total. Unknown/conflicting values need review.
 Image details and the Exposure tooltip show evidence. Sub-summary integration
 counts acquisition subs only, excluding stacks.

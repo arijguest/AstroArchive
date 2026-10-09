@@ -55,6 +55,10 @@ namespace AstroArchive {
     if(result.SubExposure.HasValue&&Math.Abs(result.SubExposure.Value-filenameSub.Value)>0.001)notes.Add("Filename sub exposure disagrees with metadata; metadata retained");
     else{result.SubExposure=result.SubExposure??filenameSub;notes.Add("Per-sub exposure from filename exposure/gain settings; gain is not a sub-count");}
    }
+   int dwarfCount;double dwarfTotal,dwarfSeconds;
+   if(!result.Subs.HasValue&&Classifier.DwarfStackCount(leaf,header,InstrumentDetection.MakeOf(header.Get("TELESCOP","TELMODEL")+" "+header.Get("INSTRUME","CAMMODEL")),out dwarfCount,out dwarfTotal,out dwarfSeconds)){
+    result.Subs=dwarfCount;result.TotalExposure=result.TotalExposure??dwarfTotal;result.SubExposure=result.SubExposure??dwarfSeconds;notes.Add("DWARF stack sub-count: "+Util.Num(dwarfTotal)+" s total / "+Util.Num(dwarfSeconds)+" s per sub");
+   }
    var products=Product.Matches(filename??"").Cast<Match>().Select(m=>new{Count=Count(Number(m.Groups["count"].Value)),Exposure=Number(m.Groups["duration"].Value),Unit=Unit(m.Groups["unit"].Value)}).Where(p=>p.Count.HasValue&&p.Exposure.HasValue).ToList();
    if(products.Count>0){long count=products.Sum(p=>(long)p.Count.Value);double total=products.Sum(p=>p.Count.Value*p.Exposure.Value*p.Unit);var durations=products.Select(p=>p.Exposure.Value*p.Unit).Distinct().ToList();
     bool conflict=result.Subs.HasValue&&result.Subs.Value!=count||result.TotalExposure.HasValue&&Math.Abs(result.TotalExposure.Value-total)>0.001||result.SubExposure.HasValue&&(durations.Count!=1||Math.Abs(result.SubExposure.Value-durations[0])>0.001);
