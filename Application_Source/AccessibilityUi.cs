@@ -4,15 +4,21 @@ using System.Windows;
 using System.Windows.Controls;
 
 namespace AstroArchive {
+    public static class SelectionAppearance {
+        public static readonly DependencyProperty EnabledProperty = DependencyProperty.RegisterAttached("Enabled", typeof(bool), typeof(SelectionAppearance), new FrameworkPropertyMetadata(false, FrameworkPropertyMetadataOptions.Inherits));
+        public static bool GetEnabled(DependencyObject element) { return (bool)element.GetValue(EnabledProperty); }
+        public static void SetEnabled(DependencyObject element, bool value) { element.SetValue(EnabledProperty, value); }
+    }
     public sealed class AccessibilityChoices {
         public ComboBox Scale;
-        public CheckBox Rows, Contrast, Motion;
+        public CheckBox Rows, Contrast, Motion, Selections;
         public void Save(Settings settings) {
             int scale;
             settings.TextScalePercent = int.TryParse(Convert.ToString(Scale.SelectedItem).TrimEnd('%'), out scale) ? scale : 100;
             settings.ComfortableRows = Rows.IsChecked == true;
             settings.HighContrast = Contrast.IsChecked == true;
             settings.ReducedMotion = Motion.IsChecked == true;
+            settings.ClearerSelections = Selections.IsChecked == true;
         }
     }
     public partial class MainUi {
@@ -26,6 +32,7 @@ namespace AstroArchive {
             Window.Resources["UiCheckSize"] = 18.0 * scale;
             Window.Resources["UiToolbarIconSize"] = 16.0 * scale;
             Window.Resources["PreferHighContrast"] = settings.HighContrast;
+            SelectionAppearance.SetEnabled(Window, settings.ClearerSelections);
             Theme.Apply(Window, settings.ThemeMode);
             if (navigationReady) UpdateCompactHeader();SizeActivity();
             foreach (string name in new[] { "FramesGrid", "ImportGrid", "EditedGrid", "MetricsGrid" }) {
@@ -41,11 +48,13 @@ namespace AstroArchive {
                 Scale = dialog.Select("Text size", new[] { "100%", "115%", "130%", "150%" }, percent + "%"),
                 Rows = dialog.Check("Comfortable table rows", settings.ComfortableRows),
                 Contrast = dialog.Check("High contrast surfaces and text", settings.HighContrast),
+                Selections = dialog.Check("Clearer selections", settings.ClearerSelections),
                 Motion = dialog.Check("Reduce motion and indeterminate progress animation", settings.ReducedMotion)
             };
             UiHelp.Describe(choices.Scale, "Increase text size without scaling images.");
             UiHelp.Describe(choices.Rows, "Use taller table rows.");
             UiHelp.Describe(choices.Contrast, "Use high-contrast colours.");
+            UiHelp.Describe(choices.Selections, "Add a prominent outline to focused targets, files and sub groups.");
             UiHelp.Describe(choices.Motion, "Disable progress animation.");
             dialog.Advanced("Keyboard shortcuts",()=>{
             dialog.Text("Alt reveals menu access keys. Arrow keys move through dropdowns; Escape closes them. Tab follows the visible controls, with clear focus outlines. The purple page selector switches pages; Ctrl+1–3 selects Repository, Edited or Import, and Ctrl+Tab cycles pages. Ctrl+F focuses search, Ctrl+I opens Import, Ctrl+E opens Export, and F1 opens help for the current page.");

@@ -324,6 +324,8 @@ keeping the selected folders and files in the dialog.
 Settings opens Preferences: General, Import, Export, Sky & solving, Accessibility,
 Updates and Backups. Save preferences applies changes; Cancel retains settings.
 Accessibility adjusts text size, rows, contrast and progress animation.
+Enable Clearer selections for prominent outlines around focused targets, files and
+sub groups. It is off by default; selected entries retain their usual highlight.
 Alt reveals menu access keys; arrows navigate menus; Tab moves between controls.
 The purple selector switches Repository/Edited/Import; Ctrl+1–3 selects a page.
 

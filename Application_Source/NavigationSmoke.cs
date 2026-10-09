@@ -105,8 +105,9 @@ namespace AstroArchive {
                 var preferences = new FormWindow(Window, "Accessibility smoke", 640, 620);
                 preferences.Tabs("Preferences", "Processing", "Plate solving", "Repository", "Accessibility");
                 preferences.Tab(4);var controls = AddAccessibilityPreferences(preferences); preferences.SelectTab(4); preferences.CloseOnly();
-                try { preferences.Window.Show(); PumpPopupLayout(); controls.Scale.SelectedItem = "150%"; var snapshot = new Settings(); controls.Save(snapshot);
-                    if (snapshot.TextScalePercent != 150 || !snapshot.HighContrast || !snapshot.ComfortableRows) throw new Exception("Accessibility preferences were not preserved.");
+                try { preferences.Window.Show(); PumpPopupLayout(); controls.Scale.SelectedItem = "150%"; controls.Selections.IsChecked=true;var snapshot = new Settings(); controls.Save(snapshot);
+                    if (snapshot.TextScalePercent != 150 || !snapshot.HighContrast || !snapshot.ComfortableRows || !Util.Deserialize<Settings>(Util.Serialize(snapshot)).ClearerSelections) throw new Exception("Accessibility preferences were not preserved.");
+                    controls.Selections.IsChecked=false;controls.Save(snapshot);if(snapshot.ClearerSelections||Util.Deserialize<Settings>("{}").ClearerSelections)throw new Exception("Clearer selections did not switch off or defaults on for existing settings.");
                 } finally { preferences.Window.Close(); }
                 var about = AboutPage();
                 try { about.Window.Show(); PumpPopupLayout(); if (!PopupChildren<TextBlock>(about.Window).Any(text => text.Text == "Ari J. Guest")) throw new Exception("About page lacks author attribution."); if (!PopupChildren<TextBlock>(about.Window).Any(text => text.Text.Contains("PolyForm Noncommercial License 1.0.0"))) throw new Exception("About page lacks software licensing."); CapturePopup(about.Window, Path.Combine(output, "AstroArchive_About_UI.png")); }

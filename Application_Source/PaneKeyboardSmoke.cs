@@ -29,7 +29,24 @@ namespace AstroArchive {
    if(page==0?librarySelection.Count==0:editedSelection.Count==0)throw new Exception("Entering an unselected file pane did not select its first entry");
    if(session!=null)SelectSession(session,ModifierKeys.None);else SelectOnlyTargetRow(grid.Name,selected.First());
    if(page==0){settings.ShowPreview=false;SetPreviewVisibility();targets.Focus();SmokePaneKey(Key.Right);SmokePaneKey(Key.Right);if(!grid.IsKeyboardFocusWithin)throw new Exception("Pane navigation entered a hidden preview");settings.ShowPreview=true;SetPreviewVisibility();}
-   targets.Focus();
+   SmokeClearerSelections(page);targets.Focus();
+  }
+  void SmokeClearerSelections(int page){
+   bool previous=settings.ClearerSelections;var targets=page==0?Targets:EditedTargets;var grid=G(page==0?"FramesGrid":"EditedGrid");
+   try{foreach(bool enabled in new[]{false,true,false}){
+    settings.ClearerSelections=enabled;ApplyAppearance();targets.ScrollIntoView(targets.SelectedItem);PumpPopupLayout();
+    var target=targets.ItemContainerGenerator.ContainerFromItem(targets.SelectedItem) as ListBoxItem;if(target==null||!target.Focus())throw new Exception("Selection appearance target did not receive focus");PumpPopupLayout();
+    var border=target.Template.FindName("Item",target) as Border;
+    if(border==null||border.BorderThickness!=(enabled?new Thickness(1):new Thickness(3,0,0,0)))throw new Exception("Clearer selections did not toggle the target outline");
+    SmokePaneKey(Key.Right);if(!grid.IsKeyboardFocusWithin)throw new Exception("Selection appearance lost file focus");
+    var button=Keyboard.FocusedElement as Button;
+    if(button!=null&&object.Equals(button.Tag,"SelectSession")){
+     var outline=button.Template.FindName("ButtonFocus",button) as Border;if(outline==null||outline.Visibility!=(enabled?Visibility.Visible:Visibility.Hidden))throw new Exception("Clearer selections did not toggle the sub group outline");
+    }else{
+     var cell=PaneChildren<DataGridCell>(grid).FirstOrDefault(c=>c.IsKeyboardFocusWithin);if(cell==null||cell.BorderThickness!=(enabled?new Thickness(1):new Thickness(0)))throw new Exception("Clearer selections did not toggle the file outline");
+    }
+    if(page==0?librarySelection.Count==0:editedSelection.Count==0)throw new Exception("Toggling clearer selections cleared the selected entry");
+   }}finally{settings.ClearerSelections=previous;ApplyAppearance();}
   }
  }
 }
