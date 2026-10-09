@@ -9,9 +9,21 @@ namespace AstroArchive {
  public sealed class MetadataEditor {
   public readonly FormWindow Form;public readonly MetadataEditing Model;public readonly CheckBox Sessions;
   public readonly Dictionary<string,Control> Inputs=new Dictionary<string,Control>();
-  readonly List<Action> resets=new List<Action>();readonly TextBlock summary;readonly int selectedCount;
-  public MetadataEditor(Window owner,List<Frame> selected){
-   selectedCount=selected.Count;Model=new MetadataEditing(selected);
+  readonly List<Action> resets=new List<Action>();readonly TextBlock summary;readonly int selectedCount,sessionCount;
+  static readonly Dictionary<string,string> FieldHelp=new Dictionary<string,string>{
+   {"Telescope","Unique ID for this physical telescope, separate from its model."},
+   {"CameraId","Serial or unique ID for the physical camera; used for calibration matching."},
+   {"OpticalConfiguration","Identify the optical setup, including reducers or adapters, to match flats."},
+   {"Roi","Sensor crop and origin: x,y,width,height. Used for calibration matching."},
+   {"ReadoutMode","Sensor readout setting, such as high conversion gain."},
+   {"LinearData","Only confirmed linear acquisition data can be exported for stacking."},
+   {"TimeZoneId","Windows timezone ID, such as UTC or Eastern Standard Time. Converts recorded local capture times to UTC."},
+   {"Calibration","Calibrated or registered lights receive no additional calibration files."},
+   {"Bayer","Sensor colour-filter pattern, such as RGGB. Leave unknown patterns unassigned."},
+   {"GainUnit","Unit of the recorded gain, such as dB or camera units."}
+  };
+  public MetadataEditor(Window owner,List<Frame> selected,int? sessionFileCount=null){
+   selectedCount=selected.Count;sessionCount=sessionFileCount??selectedCount;Model=new MetadataEditing(selected);
    Form=new FormWindow(owner,"Edit metadata",780,740);
    Form.Text(selected.Count==1?selected[0].OriginalName:selected.Count+" selected files",true);
    Form.Text("Existing values are filled in. Mixed fields keep each file’s value until you enter a replacement. Blank fields keep existing values.");
@@ -29,7 +41,7 @@ namespace AstroArchive {
    Form.Tab(3);Form.Text("Inspect the recorded values and their sources for any selected file. This view does not change the batch edit fields.");
    var picker=Form.Select("File",selected.Select((f,i)=>(i+1)+" · "+f.OriginalName).ToArray(),"1 · "+selected[0].OriginalName);
    var details=new DataGrid{IsReadOnly=true,AutoGenerateColumns=false,CanUserAddRows=false,Height=360,SelectionMode=DataGridSelectionMode.Single};
-   foreach(string name in new[]{"Field","Value","Source"}){var style=new Style(typeof(TextBlock));style.Setters.Add(new Setter(FrameworkElement.ToolTipProperty,new System.Windows.Data.Binding(name)));details.Columns.Add(new DataGridTextColumn{Header=name,Binding=new System.Windows.Data.Binding(name),ElementStyle=style,Width=new DataGridLength(name=="Value"?2:1,DataGridLengthUnitType.Star)});}
+   foreach(string name in new[]{"Field","Value","Source"}){var style=new Style(typeof(TextBlock));style.Setters.Add(new Setter(FrameworkElement.ToolTipProperty,new System.Windows.Data.Binding(name)));style.Setters.Add(new Setter(UiHelp.OnlyWhenTruncatedProperty,true));details.Columns.Add(new DataGridTextColumn{Header=name,Binding=new System.Windows.Data.Binding(name),ElementStyle=style,Width=new DataGridLength(name=="Value"?2:1,DataGridLengthUnitType.Star)});}
    details.ItemsSource=MetadataDetail.For(selected[0]);picker.SelectionChanged+=(s,e)=>{if(picker.SelectedIndex>=0)details.ItemsSource=MetadataDetail.For(selected[picker.SelectedIndex]);};Form.Add(details);
    Form.SelectTab(0);UpdateSummary();
    Form.Accept("Save metadata",()=>{string error=Model.Patch().Validate();if(error==null)return true;MessageBox.Show(Form.Window,error,"Check metadata",MessageBoxButton.OK,MessageBoxImage.Information);return false;});
@@ -50,19 +62,20 @@ namespace AstroArchive {
    input.Name="Metadata"+value.Field.Key;Inputs[value.Field.Key]=input;panel.Children.Add(input);
    string hint=value.Mixed?"Mixed · "+string.Join(" / ",value.Values.Take(3).Select(v=>v.Length==0?"not recorded":v))+(value.Values.Length>3?" / …":""):value.Initial.Length==0?"Not recorded":"";
    if(value.Field.Key=="Mount"&&!value.Mixed&&value.Initial.EndsWith("?"))hint="Suggested / inferred · select EQ or Alt-Az to confirm";
-   UiHelp.Tip(input,value.Mixed?"Mixed values stay unchanged until replaced.":value.Field.Key=="Mount"?"A ? marks an inference. Blank keeps existing values.":"Blank keeps existing values.");
-   if(hint.Length>0){var label=new TextBlock{Text=hint,TextTrimming=TextTrimming.CharacterEllipsis,Margin=new Thickness(0,4,0,0)};Theme.Bind(label,TextBlock.ForegroundProperty,"Muted");if(value.Mixed)UiHelp.Tip(label,value.Values.Length+" different values. See Current metadata.");panel.Children.Add(label);}
+   System.Windows.Automation.AutomationProperties.SetName(input,value.Field.Label);UiHelp.Describe(input,value.Mixed?"Mixed values stay unchanged until replaced.":"Blank keeps existing values.");
+   string help;if(FieldHelp.TryGetValue(value.Field.Key,out help)){UiHelp.Tip(input,help);UiHelp.Describe(input,help+" Blank keeps existing values.");}
+   if(hint.Length>0){var label=new TextBlock{Text=hint,TextTrimming=TextTrimming.CharacterEllipsis,Margin=new Thickness(0,4,0,0)};Theme.Bind(label,TextBlock.ForegroundProperty,"Muted");if(value.Mixed)UiHelp.Hint(label,value.Values.Length+" different values. See Current metadata.");panel.Children.Add(label);}
    return panel;
   }
-  void UpdateSummary(){if(summary==null)return;int count=Model.Values.Count(v=>v.Changed);summary.Text=count==0?"No changes yet":count+" changed field"+(count==1?"":"s")+" · "+(Sessions.IsChecked==true?"all files in the selected sessions":selectedCount+" selected file"+(selectedCount==1?"":"s"));}
+  void UpdateSummary(){if(summary==null)return;var changes=Model.Values.Where(v=>v.Changed).ToList();int count=changes.Count;summary.Text=(count==0?"No changes yet":count+" changed field"+(count==1?"":"s"))+" · "+(Sessions.IsChecked==true?sessionCount+" files in the selected sessions":selectedCount+" selected file"+(selectedCount==1?"":"s"))+"\n"+string.Join(", ",changes.Select(v=>v.Field.Label));}
  }
  public partial class MainUi {
   void Edit(bool imported){
    if(repo==null)return;var selected=Context(imported);if(selected.Count==0)return;
-   var editor=new MetadataEditor(Window,selected);if(!editor.Form.Show())return;
+   var sessionRows=MetadataSessionRows(selected,imported);var editor=new MetadataEditor(Window,selected,sessionRows.Count);if(!editor.Form.Show())return;
    MetadataPatch patch=editor.Model.Patch();if(patch.Count==0){L("StatusLabel").Text="No metadata changes.";return;}
    var items=selected;
-   if(editor.Sessions.IsChecked==true){var ids=new HashSet<string>(selected.Where(f=>!string.IsNullOrEmpty(f.Session)).Select(f=>f.Session));items=(imported?plan.Frames:all).Where(f=>(ids.Contains(f.Session)||selected.Contains(f))&&(!imported||f.Status!="Deleted")).ToList();}
+   if(editor.Sessions.IsChecked==true)items=sessionRows;
    Run(ct=>{
     // Validate all timezone conversions before any file is moved or saved.
     var updates=new List<Tuple<Frame,Frame>>();foreach(var original in items){ct.ThrowIfCancellationRequested();updates.Add(Tuple.Create(original,patch.Apply(original)));}
@@ -70,5 +83,6 @@ namespace AstroArchive {
     return items.Count+" captures updated · "+patch.Count+" changed fields.";
    },message=>{if(imported)FilterImports();L("StatusLabel").Text=message;});
   }
+  List<Frame> MetadataSessionRows(List<Frame> selected,bool imported){var ids=new HashSet<string>(selected.Where(f=>!string.IsNullOrEmpty(f.Session)).Select(f=>f.Session));return (imported?plan.Frames:all).Where(f=>(ids.Contains(f.Session)||selected.Contains(f))&&(!imported||f.Status!="Deleted")).ToList();}
  }
 }

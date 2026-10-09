@@ -42,10 +42,10 @@ namespace AstroArchive {
                 Contrast = dialog.Check("High contrast surfaces and text", settings.HighContrast),
                 Motion = dialog.Check("Reduce motion and indeterminate progress animation", settings.ReducedMotion)
             };
-            UiHelp.Tip(choices.Scale, "Increase text size.");
-            UiHelp.Tip(choices.Rows, "Use taller table rows.");
-            UiHelp.Tip(choices.Contrast, "Use high-contrast colours.");
-            UiHelp.Tip(choices.Motion, "Disable progress animation.");
+            UiHelp.Describe(choices.Scale, "Increase text size without scaling images.");
+            UiHelp.Describe(choices.Rows, "Use taller table rows.");
+            UiHelp.Describe(choices.Contrast, "Use high-contrast colours.");
+            UiHelp.Describe(choices.Motion, "Disable progress animation.");
             dialog.Text("Keyboard access", true);
             dialog.Text("Alt reveals menu access keys. Arrow keys move through dropdowns; Escape closes them. Tab follows the visible controls, with clear focus outlines. The purple page selector switches pages; Ctrl+1–3 selects Repository, Edited or Import, and Ctrl+Tab cycles pages. Ctrl+F focuses search, Ctrl+I opens Import, Ctrl+E opens Export, and F1 opens help for the current page.");
             dialog.Text("Table sorting uses ▲ for ascending and ▼ for descending. Numbers show the order of multi-column sorting. Shift-click a heading adds it to the sort.");

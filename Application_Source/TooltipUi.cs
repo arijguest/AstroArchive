@@ -1,17 +1,26 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Windows;
 using System.Windows.Automation;
 using System.Windows.Controls;
+using System.Windows.Media;
 namespace AstroArchive {
  public static class UiHelp {
-  public static void Tip(FrameworkElement control,string text){if(string.IsNullOrEmpty(text))return;control.ToolTip=new ToolTip{Content=new TextBlock{Text=text,TextWrapping=TextWrapping.Wrap,MaxWidth=360}};ToolTipService.SetShowOnDisabled(control,true);ToolTipService.SetShowDuration(control,20000);AutomationProperties.SetHelpText(control,text);}
-  public static void For(FrameworkElement control,string label){string text;if(DialogTips.TryGetValue(label.TrimEnd('…','.'),out text))Tip(control,text);}
+  public static void Describe(FrameworkElement control,string text){AutomationProperties.SetHelpText(control,text??"");}
+  public static void ClearTip(FrameworkElement control){control.ClearValue(FrameworkElement.ToolTipProperty);}
+  public static readonly DependencyProperty OnlyWhenTruncatedProperty=DependencyProperty.RegisterAttached("OnlyWhenTruncated",typeof(bool),typeof(UiHelp),new PropertyMetadata(false,OverflowChanged));
+  public static void SetOnlyWhenTruncated(DependencyObject control,bool value){control.SetValue(OnlyWhenTruncatedProperty,value);}
+  public static bool GetOnlyWhenTruncated(DependencyObject control){return (bool)control.GetValue(OnlyWhenTruncatedProperty);}
+  static void OverflowChanged(DependencyObject control,DependencyPropertyChangedEventArgs e){var text=control as TextBlock;if(text==null)return;if((bool)e.NewValue)text.ToolTipOpening+=OverflowOpening;else text.ToolTipOpening-=OverflowOpening;}
+  static void OverflowOpening(object sender,ToolTipEventArgs e){var text=(TextBlock)sender;var full=new FormattedText(text.Text??"",CultureInfo.CurrentUICulture,text.FlowDirection,new Typeface(text.FontFamily,text.FontStyle,text.FontWeight,text.FontStretch),text.FontSize,text.Foreground??Brushes.Black,VisualTreeHelper.GetDpi(text).PixelsPerDip);if(full.WidthIncludingTrailingWhitespace<=Math.Max(0,text.ActualWidth-text.Padding.Left-text.Padding.Right)+0.5)e.Handled=true;}
+  public static void Tip(FrameworkElement control,string text,bool showOnDisabled=false){if(string.IsNullOrEmpty(text)){ClearTip(control);return;}control.ToolTip=new ToolTip{Content=new TextBlock{Text=text,TextWrapping=TextWrapping.Wrap,MaxWidth=360}};ToolTipService.SetShowOnDisabled(control,showOnDisabled);ToolTipService.SetInitialShowDelay(control,800);ToolTipService.SetShowDuration(control,20000);}
+  public static void Hint(FrameworkElement control,string text,bool showOnDisabled=false){Tip(control,text,showOnDisabled);Describe(control,text);}
+  public static void For(FrameworkElement control,string label){string text;if(DialogTips.TryGetValue(label.TrimEnd('…','.'),out text)){Tip(control,text);Describe(control,text);}}
   static readonly Dictionary<string,string> DialogTips=new Dictionary<string,string>{
    {"Choose HDU / page / frame","Choose the image or frame used for preview and export."},
    {"Re-detect metadata and review","Review detected values before applying changes."},
    {"Convert supported images to FITS (keeps archived originals)","Export linear images as FITS; keep archived originals."},
-   {"Review calibration matches and reasons","See which calibration files match and why."},
    {"Telescope model name (optional)","Model name, separate from the physical telescope ID."},
    {"Camera model (optional)","Used to match calibration files."},
    {"Physical camera ID / serial (optional)","Identify the physical camera for calibration matching."},
@@ -21,10 +30,7 @@ namespace AstroArchive {
    {"Optical configuration ID (optional)","Optical setup used to match flats."},
    {"Capture timezone ID (optional; e.g. UTC or Eastern Standard Time)","Timezone of the recorded capture times."},
    {"Image data","Only confirmed linear data can be exported for stacking."},
-   {"Frame / slice number (1-based)","Frame numbers start at 1."},
    {"Physical telescope ID","Unique name for this physical telescope."},
-   {"Camera channel","Blank keeps existing channels; calibration stays separate."},
-   {"Instrument model","Keep existing preserves each capture’s model."},
    {"Frame type","Master calibration frames remain separate."},
    {"Mount mode","Choose EQ or Alt-Az. A ? marks an inference."},
    {"Calibration state","Calibrated or registered lights receive no extra calibration."},
@@ -32,22 +38,12 @@ namespace AstroArchive {
    {"Gain (optional)","Use a decimal dot. Blank keeps existing values."},
    {"Sensor temperature °C (optional)","Celsius; use a decimal dot. Blank keeps existing values."},
    {"Binning x × y (optional, e.g. 1x1)","Horizontal × vertical binning. Blank keeps existing values."},
-   {"Apply to entire selected sessions","Apply to every capture in the selected sessions."},
-   {"Archive folder","A new repository takes effect after saving settings."},
-   {"Choose repository folder","Choose where archived captures are stored."},
    {"ASTAP executable","Local solving also requires an ASTAP star database."},
-   {"Browse ASTAP","Locate astap.exe."},
-   {"ASTAP star database folder (blank uses ASTAP default)","Blank uses ASTAP’s default database location."},
-   {"Browse star database","Locate the installed ASTAP star database."},
    {"ASTAP image height in degrees (blank: automatic; useful for wide cameras)","Greater than 0° and at most 180°; blank is automatic."},
    {"Use Astrometry.net instead of ASTAP","Requires internet and your Astrometry.net API key."},
-   {"Copy workers","Auto chooses the fastest setting; fixed counts limit parallel copies."},
    {"Delete all archive data","Permanently delete indexed archive data; keep sources and unindexed files."},
-   {"Delete permanently","Drag the slider fully right to confirm permanent deletion."},
    {"Destination folder","Use a location outside the repository."},
    {"New folder name","Existing folders are not overwritten."},
-   {"Create new folder","Place this export in a new enclosing folder."},
-   {"Add Metadata","Include a manifest, companion metadata and workflow notes."},
    {"Separate sessions into their own folders","Off combines compatible sessions."},
    {"Include matching calibration files","Add compatible darks, flats and biases."},
    {"Include calibrations for subs with unknown calibration state","Review unknown processing states before calibrating."},
@@ -59,59 +55,34 @@ namespace AstroArchive {
    {"Export destinations","Choose application locations and defaults by file type."},
    {"Ready-to-stack folder","Group selected lights or stacks by compatible settings."},
    {"Ready-to-stack with calibrations","Include available matching calibration files."},
-   {"Preview image","Preview one selected file. Scroll or pinch to zoom; drag to pan."},
-   {"Show file in Explorer","Locate one selected archive file."},
    {"Delete selected files","Delete selected archive copies; keep source originals."},
-   {"Edit metadata","Blank fields keep existing values."},
    {"Identify target","Solve once per Light session/target group; stacks solve individually."},
    {"Verify repository checksums","Report missing or changed archive files."},
    {"Index an existing repository","Index existing images without copying or moving them."},
-   {"Export searchable catalogue CSV","Export capture metadata as CSV."},
-   {"Show selected file location","Locate the selected archive copy."},
-   {"Export files","Copy selected files to the destination."},
-   {"Export folder","Create the stacking folder."},
    {"Search catalogue or enter a custom target","Choose a catalogue target or enter a custom name."},
-   {"Zoom out","Zoom out (−)."},
-   {"Zoom in","Zoom in (+)."},
    {"100%","One sampled preview pixel per screen pixel."},
-   {"Save metadata","Apply changes to the selected files or sessions."},
-   {"Reset changes","Restore the original field values."},
-   {"Apply changes to entire selected sessions","Apply changed fields to every capture in the selected sessions."},
-   {"Check for and install new releases","Download and install the latest release."},
   };
  }
  public partial class MainUi {
   static readonly Dictionary<string,string> ControlTips=new Dictionary<string,string>{
-   {"LibraryViewBox","Choose files, targets or sessions."},
-   {"ReviewLibraryButton","Review flagged captures."},
-   {"ReviewImportsButton","Review flagged captures or screen them again."},
    {"RetryImportsButton","Retry visible failed transfers; rescan changed sources."},
    {"SkipFlaggedCheck","Exclude rejected or damaged captures."},
    {"IgnoreFailedCheck","Skip filenames containing “failed”; keep originals."},
    {"ImportOptionsButton","Set exclusions, capture overrides and optional analysis."},
    {"AssignUnknownTargetButton","Assign selected Unknown lights/stacks, or visible ones if none selected."},
-   {"LibraryFiltersButton","Filter repository captures."},
-   {"ImportFiltersButton","Filter scan results; only eligible matches are imported."},
    {"ImportClearButton","Clear import search and filters."},
    {"ScreenImportsButton","Check visible captures for rejection or damaged FITS data."},
    {"ScreenLibraryButton","Check selected captures, or visible ones, for rejection or damaged FITS data."},
-   {"PreviewToggle","Show or hide preview."},
    {"OpenPreviewButton","Open image."},
    {"StretchMode","Display stretch; image data stays unchanged."},
    {"CoffeeButton","Support AstroArchive on Ko-fi."},
    {"ThemeButton","Switch light/dark theme."},
-   {"DismissUpdateNotice","Dismiss update confirmation."},
-   {"ImportSearchBox","Search scan results; only eligible matches are imported."},
    {"ImportToolsButton","Metadata, target identification and scan report."},
-   {"SettingsButton","Open settings."},
    {"HelpButton","Open the guide (F1)."},
    {"AutoUploadButton","Import new USB captures; keep originals."},
-   {"SearchBox","Search files and metadata. ? shows examples."},
    {"ClearButton","Clear search, filters and target selection."},
    {"LibraryColumnsButton","Choose columns; drag headers to reorder."},
    {"ImportColumnsButton","Choose columns; drag headers to reorder."},
-   {"TargetList","Choose a target; badges count files."},
-   {"FramesGrid","Ctrl/Shift selects files; right-click opens tools."},
    {"ExportButton","Export selected files, or all visible files if none selected."},
    {"RotationButton","Assess mount mode from rotation in acquisition subs."},
    {"SolveButton","Solve selected Light groups and stacks; review batch target matches."},
@@ -121,22 +92,17 @@ namespace AstroArchive {
    {"SaveTelescopeButton","Save this device, model and source folder."},
    {"RenameTelescopeButton","Rename this device and its archived captures."},
    {"RebuildTelescopesButton","Recover missing saved devices from archive metadata."},
-   {"RefreshUsbButton","Refresh connected USB telescopes."},
-   {"SourceButton","Choose a capture folder."},
-   {"SourceBox","Capture source folder. Scan before importing."},
    {"TelescopeBox","Use a unique name for each physical telescope."},
    {"ModelBox","Auto detects each capture’s model."},
    {"CameraBox","Overrides apply to every scanned capture."},
    {"DeleteOriginalsCheck","Delete verified new/restored source images. Cloud deletions sync."},
    {"ImportSolveMode","Choose which targets to solve; requires a configured solver."},
    {"ImportRotationMode","Choose which acquisition sessions to analyse."},
-   {"ScanButton","Skip known names/DWARF sessions. Full rescan checks edits and additions."},
-   {"ImportGrid","Review scan status; Ctrl/Shift selects files."},
-   {"ImportButton","Copy and verify eligible visible files; skip duplicates."},
    {"MetricsGrid","Measured work by stage; concurrent times can overlap."},
    {"PerformanceButton","Import timings and error diagnostics."},
    {"CancelButton","Stop safely; completed imports remain."}
   };
-  void InitializeTooltips(){foreach(var entry in ControlTips){var control=Window.FindName(entry.Key) as FrameworkElement;if(control!=null)UiHelp.Tip(control,entry.Value);}}
+  void InitializeTooltips(){foreach(var entry in ControlTips){var control=Window.FindName(entry.Key) as FrameworkElement;if(control!=null){UiHelp.Tip(control,entry.Value);UiHelp.Describe(control,entry.Value);}}foreach(string name in new[]{"SearchBox","ImportSearchBox","EditedSearchBox","SourceBox","SettingsButton","LibraryFiltersButton","ImportFiltersButton","ImportGrid","FramesGrid","TargetList","DismissUpdateNotice"}){var control=Window.FindName(name) as FrameworkElement;if(control!=null)UiHelp.ClearTip(control);}UiHelp.Describe(G("FramesGrid"),"Ctrl/Shift selects files; right-click opens file actions.");UiHelp.Describe(G("ImportGrid"),"Review scan results. Row selection does not limit imports; search and filters do.");UiHelp.Describe(T("SourceBox"),"Capture source folder. Scan before importing.");}
+  void UpdateSelectionTooltips(int count){string scope=count>0?count+" selected files":displayed.Count+" files in view (nothing selected)";foreach(string name in new[]{"ExportButton","EditButton","ScreenLibraryButton"}){UiHelp.Tip(B(name),scope+". "+(name=="ExportButton"?"Choose an export action.":name=="EditButton"?"Edit metadata for these files.":"Check rejection markers and file integrity."));UiHelp.Describe(B(name),scope);} }
  }
 }

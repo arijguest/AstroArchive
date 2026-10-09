@@ -84,7 +84,7 @@ namespace AstroArchive {
             var selector = C("PageSelector");
             selector.SelectionChanged += (s,e) => { if (!updatingPageSelector && selector.SelectedItem != null) GoToPage(Convert.ToInt32(((ComboBoxItem)selector.SelectedItem).Tag)); };
             SyncPageSelector();
-            UiHelp.Tip(selector, "Switch page (Ctrl+1–3).");
+            UiHelp.Hint(selector, "Switch page (Ctrl+1–3).");
             ((FrameworkElement)Window.FindName("HeaderBar")).SizeChanged += (s,e) => UpdateCompactHeader();
             UpdateCompactHeader();
             foreach (string name in new[] { "ImportMenu", "ExportMenu", "RepositoryMenu", "EditedMenu", "SettingsMenu", "GuideMenu" }) {
@@ -95,20 +95,20 @@ namespace AstroArchive {
                 PopulateNavigation(name);
             }
             TopMenu("CoffeeMenu").Click += (s,e) => OpenWebsite("https://ko-fi.com/arijguest");
-            UiHelp.Tip(TopMenu("CoffeeMenu"), "Support AstroArchive on Ko-fi.");
+            UiHelp.Hint(TopMenu("CoffeeMenu"), "Support AstroArchive on Ko-fi.");
             B("OpenRepositoryFolderButton").Click += (s,e) => OpenRepositoryFolder();
             B("RepositoryImportButton").Click += (s,e) => GoToPage(1);
             B("ImportExportButton").Click += (s,e) => OpenTopMenu("ExportMenu");
             B("ImportOptionsButton").Click += (s,e) => ImportPreferences();
             B("AssignUnknownTargetButton").Click += (s,e) => AssignUnknownImportTargets();
-            UiHelp.Tip(B("OpenRepositoryFolderButton"), "Open repository folder.");
-            UiHelp.Tip(B("RepositoryImportButton"), "Choose a source and review imports.");
-            UiHelp.Tip(B("ImportExportButton"), "Export archived files; import scanned files first.");
+            UiHelp.Hint(B("OpenRepositoryFolderButton"), "Open repository folder.");
+            UiHelp.Describe(B("RepositoryImportButton"), "Choose a source and review imports.");
+            UiHelp.Hint(B("ImportExportButton"), "Export archived files; import scanned files first.");
             Window.PreviewKeyDown += NavigationKeys;
             navigationReady = true;
             UpdateNavigationState();
             if (firstRun) Window.ContentRendered += (s,e) => {
-                Window.Dispatcher.BeginInvoke(new Action(() => { if (!settings.GuideSeen && cancel == null && !closing) StartWalkthrough(); }));
+                Window.Dispatcher.BeginInvoke(new Action(() => { if (!settings.GuideSeen && cancel == null && !closing) StartWalkthrough(true); }));
             };
         }
         void NavigationKeys(object sender, KeyEventArgs e) {
@@ -125,6 +125,8 @@ namespace AstroArchive {
         }
         void UpdateNavigationState() {
             if (!navigationReady) return;
+            string scanTip=settings.RobustImportMatching?"Robust scan checks file changes and missing archive copies.":"Quick scan skips archived filenames and known DWARF sessions. Use Full rescan to check changes.";
+            UiHelp.Hint(B("ScanButton"),B("ScanButton").IsEnabled?scanTip:cancel!=null?"Wait for the current operation to finish.":"Choose a repository first.",true);
             TopMenu("ImportMenu").IsEnabled = cancel == null;
             TopMenu("ExportMenu").IsEnabled = cancel == null && repo != null&&!ActiveSearchBlocked&&!SearchBlocked(((TabControl)Window.FindName("MainTabs")).SelectedIndex==2?"EditedSearchBox":"SearchBox");
             TopMenu("SettingsMenu").IsEnabled = cancel == null;
@@ -231,7 +233,7 @@ namespace AstroArchive {
             menu.Items.Add(MenuAction("Repository settings…", () => Configure(3)));
             menu.Items.Add(Branch("Image compatibility", MenuAction("Supported formats and conversion…", () => ShowReport("Image compatibility", FormatGuide)),
                 MenuAction("Open optional codec folder", () => { Directory.CreateDirectory(NativeCodecs.Folder); OpenFolder(NativeCodecs.Folder); })));
-            menu.Items.Add(new Separator()); menu.Items.Add(MenuAction("Check for and install releases…", () => Releases(Window)));
+            menu.Items.Add(new Separator()); menu.Items.Add(MenuAction("Check for and install releases…", () => Configure(0,true)));
         }
         void BuildGuideNavigation(MenuItem menu) {
             menu.Items.Add(MenuAction("Interactive walkthrough…", StartWalkthrough, cancel == null));
@@ -276,6 +278,8 @@ namespace AstroArchive {
             dialog.Tab(1);
             var model = dialog.Select("Instrument model", TelescopeProfiles.Models.ToArray(), Convert.ToString(C("ModelBox").SelectedItem));
             var camera = dialog.Select("Camera channel", new[] { "Auto", "Telephoto", "Wide" }, Convert.ToString(C("CameraBox").SelectedItem));
+            UiHelp.Hint(model,"Auto detects the model for each capture. An explicit choice overrides the scanned captures.");
+            UiHelp.Hint(camera,"Auto preserves detection. An explicit choice overrides every scanned capture.");
             var target=ImportTargetChoice(dialog,unknownImportTarget);
             dialog.Text("This target fills Unknown lights/stacks in the current folder scan and next manual import. Known targets, meteor captures and calibration labels stay intact. For mixed targets, use Set Unknown targets on selected scan rows instead.");
             var targetError=new TextBlock{TextWrapping=TextWrapping.Wrap};dialog.Add(targetError);

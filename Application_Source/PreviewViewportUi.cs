@@ -45,12 +45,12 @@ namespace AstroArchive {
    viewport.MouseMove+=(s,e)=>{if(!dragging)return;if(e.LeftButton!=MouseButtonState.Pressed){viewport.ReleaseMouseCapture();return;}var point=e.GetPosition(viewport);Pan(point.X-previous.X,point.Y-previous.Y);previous=point;e.Handled=true;};
    viewport.MouseLeftButtonUp+=(s,e)=>{if(dragging){viewport.ReleaseMouseCapture();e.Handled=true;}};viewport.LostMouseCapture+=(s,e)=>{dragging=false;viewport.Cursor=Cursors.Arrow;};
    viewport.KeyDown+=(s,e)=>{if(geometry==null)return;if(e.Key==Key.F)Fit();else if(e.Key==Key.Add||e.Key==Key.OemPlus)ZoomAt(1.25,Center);else if(e.Key==Key.Subtract||e.Key==Key.OemMinus)ZoomAt(1/1.25,Center);else if(e.Key==Key.Left)Navigate(-40,0);else if(e.Key==Key.Right)Navigate(40,0);else if(e.Key==Key.Up)Navigate(0,-40);else if(e.Key==Key.Down)Navigate(0,40);else return;e.Handled=true;};
-   UiHelp.Tip(viewport,"Scroll or pinch to zoom; drag to pan.");
+   UiHelp.Describe(viewport,"Scroll or pinch to zoom; drag to pan. F fits the image; arrow keys pan.");
   }
   bool FromControl(object source){var element=source as DependencyObject;while(element!=null&&element!=viewport){if(element is ButtonBase)return true;element=VisualTreeHelper.GetParent(element);}return false;}
   Button AddButton(Panel panel,string symbol,string label,Action action){
    var button=new Button{Content=symbol,Width=28,Height=28,Padding=new Thickness(0),Margin=new Thickness(1,0,1,0),FontSize=16,Background=new SolidColorBrush(Color.FromArgb(220,20,29,46)),Foreground=Brushes.White,BorderBrush=new SolidColorBrush(Color.FromArgb(150,148,165,192)),BorderThickness=new Thickness(1)};
-   AutomationProperties.SetName(button,label);UiHelp.Tip(button,label=="Recenter image"?"Fit image (F).":label.StartsWith("View")?label+" (when zoomed).":label);ToolTipService.SetShowOnDisabled(button,true);button.Click+=(s,e)=>{action();e.Handled=true;};panel.Children.Add(button);return button;
+   AutomationProperties.SetName(button,label);UiHelp.Hint(button,label=="Recenter image"?"Fit image (F).":label.StartsWith("View")?label+" (when zoomed).":label);ToolTipService.SetShowOnDisabled(button,false);button.Click+=(s,e)=>{action();e.Handled=true;};panel.Children.Add(button);return button;
   }
   public void SetImage(BitmapSource source,bool reset){
    loading=false;
@@ -79,7 +79,7 @@ namespace AstroArchive {
    image.Visibility=Visibility.Collapsed;image.Width=width;image.Height=height;element.Width=width;element.Height=height;element.Stretch=Stretch.Fill;element.RenderTransform=transform;
    if(geometry==null||portrait)quarterTurns=portrait&&width>height?1:0;geometry=new PreviewGeometry(width,height,quarterTurns);controls.IsEnabled=true;toolbarHost.Visibility=Visibility.Visible;viewport.Background=Brushes.Black;fitting=true;Resize();
   }
-  public void SetPlayback(Action toggle,bool playing){togglePlayback=toggle;playbackButton.Visibility=toggle==null?Visibility.Collapsed:Visibility.Visible;playbackButton.Content=playing?"Ⅱ":"▶";AutomationProperties.SetName(playbackButton,playing?"Pause playback":"Play playback");UiHelp.Tip(playbackButton,playing?"Pause playback":"Play playback");}
+  public void SetPlayback(Action toggle,bool playing){togglePlayback=toggle;playbackButton.Visibility=toggle==null?Visibility.Collapsed:Visibility.Visible;playbackButton.Content=playing?"Ⅱ":"▶";AutomationProperties.SetName(playbackButton,playing?"Pause playback":"Play playback");UiHelp.Hint(playbackButton,playing?"Pause playback":"Play playback");}
   public bool HasPlaybackControl{get{return playbackButton.Visibility==Visibility.Visible;}}
   public void TogglePlayback(){playbackButton.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));}
   public void Resize(){

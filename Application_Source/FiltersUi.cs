@@ -25,6 +25,7 @@ namespace AstroArchive {
     var frame=G("ImportGrid").SelectedItem as Frame;
     L("ImportDetailsLabel").Text=frame==null?"Select a capture to see screening or import details.":frame.OriginalName+"  ·  "+frame.Status+"  ·  "+(CaptureScreening.NeedsReview(frame)?frame.ReviewCategory+" · "+frame.ReviewReason:frame.SourceDisposition??frame.Notes);
     B("AssignUnknownTargetButton").IsEnabled=cancel==null&&UnknownImportSelection().Count>0;
+    UiHelp.Tip(B("ImportButton"),G("ImportGrid").SelectedItems.Count>0?"Row selection does not limit imports. Search and filters choose the ready files.":null);
    };
   }
   ContextMenu BuildFiltersMenu(bool imports){
@@ -44,7 +45,7 @@ namespace AstroArchive {
    var grid=G("ImportGrid");var selection=new HashSet<string>(grid.SelectedItems.Cast<Frame>().Select(f=>f.SourcePath));SetRows("ImportGrid",visibleImports,presorted);foreach(var frame in visibleImports.Where(f=>selection.Contains(f.SourcePath)))if(!grid.SelectedItems.Contains(frame))grid.SelectedItems.Add(frame);
    B("ImportFiltersButton").Content="Filters"+(importFilters.ActiveCount>0?" ("+importFilters.ActiveCount+")":"");
    int ready=summary.Ready;L("ImportSummaryLabel").Text=summary.Text;
-   B("ImportButton").Content="Import "+ready+" file"+(ready==1?"":"s");B("ImportButton").ToolTip="Imports the ready files in this filtered view.";
+   B("ImportButton").Content="Import "+ready+" file"+(ready==1?"":"s");UiHelp.Tip(B("ImportButton"),grid.SelectedItems.Count>0?"Row selection does not limit imports. Search and filters choose the ready files.":null);UiHelp.Describe(B("ImportButton"),"Import "+ready+" eligible files in this filtered view. Row selection does not limit imports.");
    B("ImportButton").IsEnabled=cancel==null&&repo!=null&&plan!=null&&ready>0;
    B("ScreenImportsButton").IsEnabled=cancel==null&&repo!=null&&visibleImports.Any(f=>f.Status!="Deleted");
    B("ReviewImportsButton").IsEnabled=cancel==null&&repo!=null&&summary.Flagged>0;retry=plan==null?0:retry;B("RetryImportsButton").Content="Retry "+retry+" failed import"+(retry==1?"":"s");B("RetryImportsButton").IsEnabled=cancel==null&&repo!=null&&retry>0;

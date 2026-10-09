@@ -26,7 +26,7 @@ namespace AstroArchive {
         bool finished;
         public WalkthroughWindow(Window owner, WalkthroughStep[] steps, Action<WalkthroughStep> select, Action<WalkthroughStep> action, Action<bool> complete) {
             Owner = owner; Icon = ApplicationIcon.Image; this.steps = steps; this.select = select; this.action = action; this.complete = complete;
-            Title = "AstroArchive walkthrough";
+            Title = steps.Length==4?"AstroArchive: first import":"AstroArchive walkthrough";
             Width = Math.Min(530, SystemParameters.WorkArea.Width - 24); MinWidth = Math.Min(460, Width);
             Height = Math.Min(430, SystemParameters.WorkArea.Height - 24); MinHeight = Math.Min(330, Height);
             WindowStartupLocation = WindowStartupLocation.CenterOwner; FontFamily = owner.FontFamily; FontSize = owner.FontSize;
@@ -50,9 +50,9 @@ namespace AstroArchive {
             DockPanel.SetDock(navigation, Dock.Right); buttons.Children.Add(navigation); navigation.Children.Add(Back); navigation.Children.Add(Next);
             Back.Click += (s,e) => SetStep(StepIndex - 1);
             Next.Click += (s,e) => { if (StepIndex == steps.Length - 1) { finished = true; Close(); } else SetStep(StepIndex + 1); };
-            UiHelp.Tip(Back, "Previous step."); UiHelp.Tip(Next, "Next step (Enter).");
-            UiHelp.Tip(Try, "Open this step’s menu or settings.");
-            UiHelp.Tip(close, "Close walkthrough.");
+            UiHelp.Describe(Back, "Previous step."); UiHelp.Describe(Next, "Next step (Enter).");
+            UiHelp.Describe(Try, "Open this step’s menu or settings.");
+            UiHelp.Describe(close, "Close walkthrough.");
             Loaded += (s,e) => SetStep(0);
             PreviewKeyDown += (s,e) => { if (e.Key == System.Windows.Input.Key.Escape) { e.Handled = true; Close(); } };
             Closed += (s,e) => this.complete(finished);
@@ -81,23 +81,25 @@ namespace AstroArchive {
         int walkthroughOriginalPage;
         static WalkthroughStep[] WalkthroughSteps() {
             return new[] {
-                new WalkthroughStep { Title = "Switch pages from the toolbar", Page = 0, Target = "PageSelector", Action = "Try the page selector", Body = "The centred purple dropdown labelled PAGE shows your current page. It sits beside the toolbar actions when there is room, or just below them in smaller windows. Open it to choose Repository, Edited, Import. Search, filters, selections and import progress stay in place when you switch. Ctrl+1–3 selects those pages; Ctrl+Tab cycles them." },
-                new WalkthroughStep { Title = "Choose your repository", Page = 0, Target = "OpenRepositoryFolderButton", Action = "Open Repository menu", Body = "Your repository is the folder where AstroArchive keeps verified capture copies and its portable index. Choose it from Repository → Choose repository folder. The path in the grey strip below the repository table opens that folder in Explorer." },
-                new WalkthroughStep { Title = "Select a telescope or source folder", Page = 1, Target = "ImportSourceCard", Action = "Open Import menu", Body = "Select a saved physical telescope or Browse its capture folder. Each telescope gets a distinct device ID. Import → USB telescopes finds connected storage; Saved telescopes manages profiles. Scan folder trusts matching filenames and omits known DWARF session folders. Seestar folders still find new filenames. Enable Robust file matching in Import options to revisit edits and additions inside an omitted session. Import → Full rescan of source reads and hashes every file when you want a complete check." },
-                new WalkthroughStep { Title = "Review before importing", Page = 1, Target = "ImportGrid", Action = "Open review and import options", Body = "The scan table shows status and review reasons. Use Import → Review and recovery to inspect flagged files or retry transfers. Import options controls analysis and original removal. The policy summary stays visible; originals are kept by default." },
-                new WalkthroughStep { Title = "Import verified copies", Page = 1, Target = "ImportButton", Action = "Show import actions", Body = "Import copies only ready files in the filtered scan and verifies their checksums. Already archived content is skipped. During a job, timing and progress appear in a temporary panel; Cancel stops safely after the current operation. This walkthrough never starts an import for you." },
+                new WalkthroughStep { Title = "Switch pages from the toolbar", Page = 0, Target = "PageSelector", Action = "Try the page selector", Body = "Choose Repository, Edited or Import from the purple PAGE selector. Your search, filters and progress stay in place. Ctrl+1–3 selects a page; Ctrl+Tab cycles pages." },
+                new WalkthroughStep { Title = "Choose your repository", Page = 0, Target = "OpenRepositoryFolderButton", Action = "Open Repository menu", Body = "Choose Repository → Choose repository folder to store verified capture copies and the archive index. The path below the table opens that folder in Explorer." },
+                new WalkthroughStep { Title = "Select a telescope or source folder", Page = 1, Target = "ImportSourceCard", Action = "Open Import menu", Body = "Select a saved telescope or browse its capture folder. Give each physical telescope a unique device ID, then choose Scan folder. Quick scans skip known filenames and DWARF sessions; Robust file matching checks changes. The guide explains both modes." },
+                new WalkthroughStep { Title = "Review before importing", Page = 1, Target = "ImportGrid", Action = "Open review and import options", Body = "Review statuses and flagged captures before copying. Import → Review and recovery explains problems and retries failed transfers. Import options controls exclusions and analysis. Originals are kept by default." },
+                new WalkthroughStep { Title = "Import verified copies", Page = 1, Target = "ImportButton", Action = "Show import actions", Body = "Import copies and verifies the ready files in your filtered view. Highlighting rows does not limit the import. Already archived content is skipped. Cancel keeps completed imports. This walkthrough does not start an import." },
                 new WalkthroughStep { Title = "Browse, preview and sort", Page = 0, Target = "FramesGrid", Action = "Open Repository view options", Body = "Search your captures or browse targets and sessions. Click a table heading to sort; click again to reverse. Shift-click adds another heading. ▲ and ▼ show direction, and numbers show sort priority. Ctrl/Shift selects files; right-click opens file actions. View contains filters, columns and the preview pane." },
                 new WalkthroughStep { Title = "Explore the capture sky", Page = 0, Target = "PreviewSky", Action = "Reset the sky view", Body = "Select a capture to show its sky globe below the preview. It appears when the image leaves room and uses the recorded capture time and location. Drag to rotate it; scroll or pinch to zoom. Arrow keys rotate and plus/minus zoom when the globe has focus. The small reset button, double-click or Home restores the capture view. Exploring changes only the viewing angle; capture coordinates, time and horizon stay fixed." },
-                new WalkthroughStep { Title = "Export a stacking project", Page = 0, Target = "ExportButton", Action = "Open Export menu", Body = "Select repository files and choose Export for original copies or a ready-to-stack folder. Matching calibrations are offered with reasons; scientific conversion is explicit. Stacking happens in your chosen processing software. Stacks copy directly to the destination; subs keep compatible input folders. Add Metadata and Create new folder are off by default. Existing files are kept." },
+                new WalkthroughStep { Title = "Export a stacking project", Page = 0, Target = "ExportButton", Action = "Open Export menu", Body = "Choose Export to open verified inputs in a processing app, save files, or prepare a stacking folder. With no selection, Export uses all files in view. Matching calibrations and conversion options are explained in the export dialog. Existing files are kept." },
                 new WalkthroughStep { Title = "Make AstroArchive comfortable", Page = 0, Target = "SettingsMenu", Action = "Open accessibility preferences", Body = "Settings → Preferences contains appearance; Settings → Accessibility adjusts larger text, comfortable rows, high contrast and reduced progress animation. Guide holds searchable help, this walkthrough and About AstroArchive. F1 opens help for the current page." }
             };
         }
-        void StartWalkthrough() {
+        void StartWalkthrough(){StartWalkthrough(false);}
+        void StartWalkthrough(bool firstImport) {
             if (cancel != null) return;
             if (walkthrough != null) { walkthrough.Activate(); return; }
             settings.GuideSeen = true; SaveSettings();
             walkthroughOriginalPage = ((TabControl)Window.FindName("MainTabs")).SelectedIndex;
-            walkthrough = new WalkthroughWindow(Window, WalkthroughSteps(), SelectWalkthroughStep, step => {
+            var steps=WalkthroughSteps();if(firstImport)steps=new[]{steps[1],steps[2],steps[3],steps[4]};
+            walkthrough = new WalkthroughWindow(Window, steps, SelectWalkthroughStep, step => {
                 if (cancel != null) return;
                 Window.Activate();
                 if (step.Target == "PageSelector") { C("PageSelector").Focus(); C("PageSelector").IsDropDownOpen = true; }

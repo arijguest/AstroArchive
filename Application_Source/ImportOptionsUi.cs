@@ -10,7 +10,7 @@ namespace AstroArchive {
    dialog.Text("Target for Unknown light/stack captures",true);
    var choice=new ComboBox{IsEditable=true,IsTextSearchEnabled=false,Text=value,Margin=new Thickness(0,6,0,8)};
    choice.DropDownOpened+=(s,e)=>{string text=choice.Text;choice.ItemsSource=Catalog.Search(text).Select(o=>Catalog.Label(o.Name)).ToList();choice.Text=text;};
-   UiHelp.Tip(choice,"Enter an object ID or name. Blank keeps Unknown.");dialog.Add(choice);return choice;
+   UiHelp.Hint(choice,"Enter an object ID or name. Blank keeps Unknown.");dialog.Add(choice);return choice;
   }
   static bool ValidImportTarget(string value,TextBlock error,bool optional){
    error.Text="";if(optional&&string.IsNullOrWhiteSpace(value))return true;
@@ -27,14 +27,14 @@ namespace AstroArchive {
   }
   CheckBox ImportMatchingChoice(FormWindow dialog){
    var choice=dialog.Check("Robust file matching (slower)",settings.RobustImportMatching);
-   UiHelp.Tip(choice,"Check file/metadata changes and missing copies; off skips known names/DWARF sessions.");return choice;
+   UiHelp.Hint(choice,"Check file/metadata changes and missing copies; off skips known names/DWARF sessions.");return choice;
   }
   void AddImportPolicyControls(FormWindow dialog,out CheckBox flagged,out CheckBox failed,out CheckBox raster,out CheckBox originals){
    flagged=dialog.Check("Skip flagged captures",SkipFlagged);
    failed=dialog.Check("Ignore failed filenames",settings.IgnoreFailed);
    raster=dialog.Check("Ignore non-raw files (PNG/JPG/JPEG)",settings.IgnoreRasterImports);
-   UiHelp.Tip(failed,"Skip filenames containing “failed”; keep originals.");
-   UiHelp.Tip(raster,"Skip PNG/JPG/JPEG files; keep originals.");
+   UiHelp.Hint(failed,"Skip filenames containing “failed”; keep originals.");
+   UiHelp.Hint(raster,"Skip PNG/JPG/JPEG files; keep originals.");
    originals=dialog.Check("Delete originals after verified import",((CheckBox)Window.FindName("DeleteOriginalsCheck")).IsChecked==true);
    originals.IsEnabled=((CheckBox)Window.FindName("DeleteOriginalsCheck")).IsEnabled;
   }

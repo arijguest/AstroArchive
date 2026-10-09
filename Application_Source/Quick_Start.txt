@@ -16,7 +16,7 @@ Stacking and image processing take place in your external software.
 GUIDE AND TOOLTIPS
 F1 opens help for the current page. Guide > Search the guide searches titles
 and full text; enter several words to narrow results. Ctrl+F focuses help search.
-Hover over controls and headings for concise hints. Help is available offline.
+Icon buttons and unusual settings offer concise hover hints. Help is available offline.
 Guide > Interactive walkthrough shows the main controls without importing files.
 
 IMPORT WORKFLOW
@@ -259,8 +259,9 @@ Run the installer for a fresh installation, update or repair. The default locati
 is %LOCALAPPDATA%\Programs\AstroArchive and requires no administrator access.
 The desktop and Start menu launcher checks for releases. Later opens the installed
 version. Settings > Check for and install releases checks from inside the app.
-Install release downloads and verifies the installer, saves state, and restarts
-the app after setup. Updates retain repositories, settings and local codecs.
+Settings > Preferences contains release checks, notes and download progress.
+Install and restart verifies the installer, saves the current settings, and
+restarts the app after setup. Updates retain repositories, settings and local codecs.
 Manual installation works offline. Start.exe --no-updates skips startup checking.
 Uninstall through Windows Installed Apps; repositories and settings are retained.
 

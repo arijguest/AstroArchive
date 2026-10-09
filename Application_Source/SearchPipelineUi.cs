@@ -88,7 +88,7 @@ namespace AstroArchive {
     UpdateNavigationState();
    }catch(OperationCanceledException){}catch(Exception error){
     if(state.Disposed||state.Version!=version||Window.Dispatcher.HasShutdownStarted)return;
-    state.Pending=false;state.Blocked=true;string message="Search could not finish: "+error.Message;L(name=="SearchBox"?"LibrarySummaryLabel":name=="ImportSearchBox"?"ImportSummaryLabel":"EditedSummary").Text=message;UiHelp.Tip(T(name),message+". Change or clear the search to retry.");
+    state.Pending=false;state.Blocked=true;string message="Search could not finish: "+error.Message;L(name=="SearchBox"?"LibrarySummaryLabel":name=="ImportSearchBox"?"ImportSummaryLabel":"EditedSummary").Text=message;UiHelp.Hint(T(name),message+". Change or clear the search to retry.");
    }
   }
   void ApplyEditedSearch(SearchResult result){

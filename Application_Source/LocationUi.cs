@@ -12,7 +12,7 @@ namespace AstroArchive {
    var choice=new ObservingSiteChoice(settings);dialog.Text("Observing town / city",true);
    dialog.Text("Select your nearest town or city. Its centre is used for rotation analysis; without a selection, capture location metadata is used when available.");
    var label=dialog.Input("Town / city",choice.Label);label.IsReadOnly=true;
-   UiHelp.Tip(label,"Saved location used for sky views and mount analysis.");
+   UiHelp.Hint(label,"Saved location used for sky views and mount analysis.");
    dialog.Button("Choose town / city…",()=>{var picker=new CityPicker(dialog.Window,choice.CityLabel);try{if(picker.Show()){choice.Select(picker.SelectedCity);label.Text=choice.Label;}}finally{picker.Dispose();}});
    dialog.Button("Clear observing location",()=>{choice.Clear();label.Text=choice.Label;});return choice;
   }
@@ -24,9 +24,9 @@ namespace AstroArchive {
   public CityPicker(Window owner,string currentLabel=null){
    dialog=new FormWindow(owner,"Choose observing town / city",730,600);dialog.Text("Observing town / city",true);
    dialog.Text("Search by name, region or country, then select the matching place. The list is available offline.");
-   SearchBox=dialog.Input("Find a town or city","");UiHelp.Tip(SearchBox,"Enter a city and country or region.");
+   SearchBox=dialog.Input("Find a town or city","");UiHelp.Hint(SearchBox,"Enter a city and country or region.");
    Results=new ListBox{Height=270,HorizontalContentAlignment=HorizontalAlignment.Stretch,DisplayMemberPath="Label",Margin=new Thickness(0,8,0,8)};ScrollViewer.SetHorizontalScrollBarVisibility(Results,ScrollBarVisibility.Auto);dialog.Add(Results);
-   UiHelp.Tip(Results,"Double-click a place to use it.");
+   UiHelp.Hint(Results,"Double-click a place to use it.");
    Status=new TextBlock{Text="Type at least two characters to find a place.",TextWrapping=TextWrapping.Wrap};Theme.Bind(Status,TextBlock.ForegroundProperty,"Muted");dialog.Add(Status);
    dialog.Text("Place names and coordinates: GeoNames · CC BY 4.0. Covers towns/cities with at least 500 inhabitants and administrative seats worldwide.");
    dialog.Accept("Use town / city",()=>{if(SelectedCity!=null)return true;Status.Text="Select a town or city from the results first.";Results.Focus();return false;});

@@ -652,7 +652,7 @@
        <ColumnDefinition Width="Auto" />
       </Grid.ColumnDefinitions>
       <Grid>
-       <TextBox x:Name="SearchBox" ToolTip="Search files and metadata. ? shows examples."  Padding="9,6,34,6"/>
+       <TextBox x:Name="SearchBox"  Padding="9,6,34,6"/>
        <TextBlock x:Name="SearchHint" Text="Search captures…" Foreground="{DynamicResource Muted}" Margin="10,0" VerticalAlignment="Center" IsHitTestVisible="False" /><Button x:Name="SearchHelpButton" Content="?" Width="24" Height="24" MinHeight="0" Padding="0" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,5,0" AutomationProperties.Name="Search syntax and examples"/>
       </Grid>
       <Button x:Name="LibraryFiltersButton" Grid.Column="1" Content="Filters" Margin="8,0,0,0" />
@@ -784,7 +784,7 @@
          <TextBlock Text="SOURCE FOLDER" FontSize="{DynamicResource UiFontCaption}" Foreground="{DynamicResource Muted}" FontWeight="SemiBold" />
          <DockPanel Margin="0,6,0,0">
           <Button DockPanel.Dock="Right" x:Name="SourceButton" Content="Browse" Padding="12,8" Margin="8,0,0,0" />
-          <TextBox x:Name="SourceBox" ToolTip="Capture source folder." />
+          <TextBox x:Name="SourceBox" />
          </DockPanel>
         </StackPanel>
         <StackPanel Grid.Column="1" Margin="0,0,16,0">
@@ -810,7 +810,7 @@
         <ColumnDefinition Width="Auto" />
        </Grid.ColumnDefinitions>
        <Grid>
-        <TextBox x:Name="ImportSearchBox" ToolTip="Search scan results; only eligible matches are imported."  Padding="9,6,34,6"/>
+        <TextBox x:Name="ImportSearchBox"  Padding="9,6,34,6"/>
         <TextBlock x:Name="ImportSearchHint" Text="Search import results…" Foreground="{DynamicResource Muted}" Margin="10,0" VerticalAlignment="Center" IsHitTestVisible="False" /><Button x:Name="ImportSearchHelpButton" Content="?" Width="24" Height="24" MinHeight="0" Padding="0" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,5,0" AutomationProperties.Name="Search syntax and examples"/>
        </Grid>
        <Button Grid.Column="1" x:Name="ImportFiltersButton" Content="Filters" Margin="8,0,0,0" />
@@ -843,7 +843,7 @@
        <RowDefinition Height="Auto" />
        <RowDefinition Height="Auto" />
       </Grid.RowDefinitions>
-      <TextBlock x:Name="ImportDetailsLabel" ToolTip="{Binding Text, RelativeSource={RelativeSource Self}}" Text="Select a capture to see its review category and reason." TextTrimming="CharacterEllipsis" Foreground="{DynamicResource Muted}" FontSize="{DynamicResource UiFontSmall}" Margin="2,0,0,9" />
+      <TextBlock x:Name="ImportDetailsLabel" ToolTip="{Binding Text, RelativeSource={RelativeSource Self}}" local:UiHelp.OnlyWhenTruncated="True" Text="Select a capture to see its review category and reason." TextTrimming="CharacterEllipsis" Foreground="{DynamicResource Muted}" FontSize="{DynamicResource UiFontSmall}" Margin="2,0,0,9" />
       <DockPanel Grid.Row="1">
        <Button DockPanel.Dock="Left" x:Name="ImportButton" Content="Import 0 files" Background="{DynamicResource Accent}" Foreground="White" BorderBrush="{DynamicResource Accent}" />
        <Button Content="Export ▾" Margin="8,0,12,0" x:Name="ImportExportButton" DockPanel.Dock="Left" />
@@ -864,7 +864,7 @@
        <DockPanel><Button x:Name="DismissEditedImportNotice" DockPanel.Dock="Right" Content="×" Padding="6,0" MinHeight="0" Margin="10,0,0,0" AutomationProperties.Name="Dismiss last Edited import summary"/><TextBlock x:Name="EditedImportNoticeText" Foreground="{DynamicResource Muted}" TextWrapping="Wrap" VerticalAlignment="Center" AutomationProperties.LiveSetting="Polite"/></DockPanel>
       </Border>
      </StackPanel>
-     <DockPanel Grid.Row="1" Margin="0,0,0,10"><Button DockPanel.Dock="Right" x:Name="EditedClearButton" Content="Clear" Margin="8,0,0,0"/><Button DockPanel.Dock="Right" x:Name="EditedFiltersButton" Content="Filters" Margin="8,0,0,0"/><TextBlock DockPanel.Dock="Right" x:Name="EditedSummary" Foreground="{DynamicResource Muted}" VerticalAlignment="Center" Margin="12,0,0,0"/><ComboBox x:Name="EditedClassFilter" Visibility="Collapsed"/><Grid><TextBox x:Name="EditedSearchBox" ToolTip="Search edited images and metadata. ? shows examples." Padding="9,6,34,6"/><TextBlock x:Name="EditedSearchHint" Text="Search edited images…" Foreground="{DynamicResource Muted}" Margin="10,0" VerticalAlignment="Center" IsHitTestVisible="False"/><Button x:Name="EditedSearchHelpButton" Content="?" Width="24" Height="24" MinHeight="0" Padding="0" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,5,0" AutomationProperties.Name="Search syntax and examples"/></Grid></DockPanel>
+     <DockPanel Grid.Row="1" Margin="0,0,0,10"><Button DockPanel.Dock="Right" x:Name="EditedClearButton" Content="Clear" Margin="8,0,0,0"/><Button DockPanel.Dock="Right" x:Name="EditedFiltersButton" Content="Filters" Margin="8,0,0,0"/><TextBlock DockPanel.Dock="Right" x:Name="EditedSummary" Foreground="{DynamicResource Muted}" VerticalAlignment="Center" Margin="12,0,0,0"/><ComboBox x:Name="EditedClassFilter" Visibility="Collapsed"/><Grid><TextBox x:Name="EditedSearchBox" Padding="9,6,34,6"/><TextBlock x:Name="EditedSearchHint" Text="Search edited images…" Foreground="{DynamicResource Muted}" Margin="10,0" VerticalAlignment="Center" IsHitTestVisible="False"/><Button x:Name="EditedSearchHelpButton" Content="?" Width="24" Height="24" MinHeight="0" Padding="0" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,5,0" AutomationProperties.Name="Search syntax and examples"/></Grid></DockPanel>
      <Grid Grid.Row="2" x:Name="EditedBody">
       <Grid.ColumnDefinitions><ColumnDefinition Width="260"/><ColumnDefinition Width="*" MinWidth="260"/><ColumnDefinition Width="10"/><ColumnDefinition Width="290" MinWidth="0"/></Grid.ColumnDefinitions>
       <Border Background="{DynamicResource Surface}" BorderBrush="{DynamicResource Border}" BorderThickness="1" CornerRadius="8" Margin="0,0,10,0"><DockPanel><TextBlock DockPanel.Dock="Top" Text="TARGETS" FontSize="{DynamicResource UiFontCaption}" FontWeight="SemiBold" Foreground="{DynamicResource Muted}" Margin="12,13,0,8"/><ListBox x:Name="EditedTargetList" BorderThickness="0" Background="Transparent" ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.CanContentScroll="True" VirtualizingPanel.IsVirtualizingWhenGrouping="True" VirtualizingPanel.VirtualizationMode="Recycling" TextSearch.TextPath="DisplayName" IsTextSearchEnabled="True">
@@ -882,7 +882,7 @@
       </ListBox></DockPanel></Border>
       <Grid Grid.Column="1"><Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="*"/></Grid.RowDefinitions>
        <StackPanel Margin="0,0,0,8"><WrapPanel Margin="0,6,0,0"><Button x:Name="EditedEditButton" Content="Edit metadata…" Margin="0,0,8,0"/><Button x:Name="EditedDetailsButton" Content="Image details…" Margin="0,0,8,0"/><Button x:Name="EditedPreviewButton" Content="Preview image…"/><Button x:Name="EditedEditorButton" Content="Export to…" Margin="8,0,0,0"/><Button x:Name="EditedFolderButton" Content="Open image folder" Margin="8,0,0,0"/></WrapPanel></StackPanel>
-       <Border Grid.Row="1" Background="{DynamicResource Surface}" BorderBrush="{DynamicResource Border}" BorderThickness="1" CornerRadius="8" ClipToBounds="True"><Grid><DataGrid x:Name="EditedGrid" CanUserSortColumns="True"><DataGrid.RowStyle><Style TargetType="DataGridRow" BasedOn="{StaticResource {x:Type DataGridRow}}"><Setter Property="ToolTip" Value="{Binding Filename}"/></Style></DataGrid.RowStyle><DataGrid.Columns>
+       <Border Grid.Row="1" Background="{DynamicResource Surface}" BorderBrush="{DynamicResource Border}" BorderThickness="1" CornerRadius="8" ClipToBounds="True"><Grid><DataGrid x:Name="EditedGrid" CanUserSortColumns="True"><DataGrid.Columns>
          <DataGridTextColumn Header="FILE" Binding="{Binding Filename}" Width="*" MinWidth="200"/>
          <DataGridTextColumn Header="FILE TYPE" Binding="{Binding FileType}" Width="85"/>
          <DataGridTextColumn Header="OBJECT ID" Binding="{Binding Metadata.ObjectId}" Width="85"/>

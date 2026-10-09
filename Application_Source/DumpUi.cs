@@ -70,7 +70,7 @@ namespace AstroArchive {
    dialog.Button("Process dump folder now",()=>{dialog.Window.Close();ProcessDumpUi();});
   }
   async void ProcessDumpUi(){
-   if(repo==null||cancel!=null||closing||dumpChecking)return;
+   if(repo==null||cancel!=null||closing||dumpChecking||releaseInstalling)return;
    var repository=repo;bool ignoreFailed=settings.IgnoreFailed,ignoreRaster=settings.IgnoreRasterImports;
    bool pending=false;dumpChecking=true;
    try{pending=await Task.Run(()=>repository.HasPendingDumpFiles(CancellationToken.None,ignoreFailed,ignoreRaster));}
@@ -78,7 +78,7 @@ namespace AstroArchive {
    finally{dumpChecking=false;}
    if(closing||!Window.IsVisible)return;
    if(repo!=repository){ProcessDumpUi();return;}
-   if(!pending||cancel!=null)return;
+   if(!pending||cancel!=null||releaseInstalling)return;
    OpenDumpProgress();
    ((CheckBox)Window.FindName("DeleteOriginalsCheck")).IsChecked=false;plan=null;BeginLive(true);DumpResult result=null;
    Run(ct=>{result=repository.ProcessDump(ct,Progress,settings.CopyWorkers,LiveFrame,ignoreFailed,ignoreRaster);return result.Summary;},summary=>{

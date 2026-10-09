@@ -47,7 +47,7 @@ namespace AstroArchive {
    InitializeEditedFileMenu();B("EditedEditButton").Click+=(s,e)=>EditEditedMetadata();
    B("EditedAddButton").Click+=(s,e)=>AddEditedImages();B("EditedImportFolderButton").Click+=(s,e)=>ImportEditedFolder();B("EditedRefreshButton").Click+=(s,e)=>RefreshEdited();B("DismissEditedImportNotice").Click+=(s,e)=>((FrameworkElement)Window.FindName("EditedImportNotice")).Visibility=Visibility.Collapsed;
    B("EditedFolderButton").Click+=(s,e)=>OpenEditedFolder();B("EditedPreviewButton").Click+=(s,e)=>PreviewEditedImage();B("EditedEditorButton").Click+=(s,e)=>ShowEditedEditors();B("EditedDetailsButton").Click+=(s,e)=>ShowEditedDetails();
-   UiHelp.Tip(B("EditedAddButton"),"Add images to Edited.");UiHelp.Tip(B("EditedRefreshButton"),"Find new editor outputs.");UiHelp.Tip(B("EditedFolderButton"),"Open image folder.");
+   UiHelp.Describe(B("EditedAddButton"),"Add images to Edited.");UiHelp.Hint(B("EditedRefreshButton"),"Find new editor outputs.");UiHelp.Describe(B("EditedFolderButton"),"Open image folder.");UiHelp.Hint(B("EditedClearButton"),"Clear search, image-class filter and target selection.");
    editedReady=true;RefreshEdited();Window.Activated+=(s,e)=>{if(editedReady&&cancel==null&&!closing)RefreshEdited();};
   }
   void RefreshEdited(string select=null,string focusPath=null){
