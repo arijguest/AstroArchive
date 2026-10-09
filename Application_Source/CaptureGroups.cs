@@ -17,7 +17,7 @@ namespace AstroArchive {
   static bool KnownExposure(Frame f){return f.Exposure.HasValue&&f.Exposure.Value>0&&!double.IsNaN(f.Exposure.Value)&&!double.IsInfinity(f.Exposure.Value);}
   public static string ExposureLabel(double seconds,int unknown){
    string text=seconds>=3600?((int)(seconds/3600))+" h "+((int)(seconds%3600/60))+" min":seconds>=60?((int)(seconds/60))+" min "+((int)(seconds%60))+" s":seconds.ToString("0.#")+" s";
-   return text+" in subs"+(unknown>0?" ("+unknown+" exposure unknown)":"");
+   return text+" total"+(unknown>0?" ("+unknown+" exposure unknown)":"");
   }
  }
 }

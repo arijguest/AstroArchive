@@ -27,8 +27,8 @@ namespace AstroArchive {
    Test("Concise target rows keep identity counts and honest exposure totals in tooltips",()=>{
     var rows=new[]{new Frame{Target="M42",Kind="Light",Exposure=3600},new Frame{Target="M42",Kind="Light",Exposure=60},new Frame{Target="M42",Kind="Light"},new Frame{Target="M42",Kind="Stack",Exposure=7200},new Frame{Target="M42",Kind="Dark",Exposure=900}};
     var target=TargetNavigation.Build(rows).Single(s=>s.Name=="M42");Check(target.DisplayName=="M42 - Orion Nebula"&&target.FileCount=="5"&&target.Subline==TargetNavigation.Identifier("M42")+" · 1h 1m + ?","Short row lost identity or counted stack/calibration exposure");
-    Check(target.Tooltip.Contains("M42")&&target.Tooltip.Contains("5 files · 3 subs · 1 stack")&&target.Tooltip.Contains("exposure unknown"),"Full details omitted from the tooltip");
-    var stack=TargetNavigation.Build(new[]{new Frame{Target="C/2023 A3",Kind="Stack",Exposure=7200}})[1];Check(stack.Subline==""&&!stack.Tooltip.Contains("in subs"),"Stack total presented as acquisition exposure");
+    Check(target.Tooltip.Contains("M42")&&target.Tooltip.Contains("5 files · 3 subs · 1 stack")&&target.Tooltip.Contains("1 h 1 min total")&&target.Tooltip.Contains("exposure unknown"),"Full details omitted from the tooltip");
+    var stack=TargetNavigation.Build(new[]{new Frame{Target="C/2023 A3",Kind="Stack",Exposure=7200}})[1];Check(stack.Subline==""&&!stack.Tooltip.Contains("total"),"Stack total presented as acquisition exposure");
     Check(TargetNavigation.Exposure(20)=="20s"&&TargetNavigation.Exposure(90)=="1m 30s"&&TargetNavigation.Exposure(3600)=="1h","Compact exposure labels misleading");
     var comet=TargetNavigation.Build(new[]{new Frame{Target="C/2023 A3 (Tsuchinshan-ATLAS)",Kind="Light",Exposure=30}})[1];Check(comet.DisplayName=="C/2023 A3 - Tsuchinshan-ATLAS"&&comet.Subline=="30s"&&comet.Tooltip.Contains("C/2023 A3 (Tsuchinshan-ATLAS)"),"Short comet label lost its identity");
     Check(TargetNavigation.ShortName("12P/Pons-Brooks")=="12P - Pons-Brooks"&&TargetNavigation.Identifier("12P/Pons-Brooks")=="","Numbered comet labels remained verbose");
