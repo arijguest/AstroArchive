@@ -1,15 +1,14 @@
-AstroArchive 2.1.13
-Package 2.1.13.1
+AstroArchive 2.1.14
+Package 2.1.14.1
 
-- Table headings now use ID, OBJECT, TYPE and DATE. File receives the largest
-  default width preference; columns adapt to window and preview-pane resizing.
-  Manual dragging still redistributes neighbouring widths and allows horizontal
-  scrolling. Restoring default columns also restores their default widths.
-- Responsive widths respect physical pixel rounding to avoid scrollbar resize
-  loops. Recycled headers show the current sort direction and priority.
-- Up and Down navigation on grouped subs changes the selected group and its
-  files, keeping selection and keyboard focus together.
-- Grouped exposure labels show durations such as 10s and use total for the
-  accumulated exposure, retaining mixed and unknown exposure indicators.
-- Target rows omit a repeated catalogue ID after the common name, including
-  IC434 - Flame Nebula, while preserving distinct catalogue identities.
+- Target and All targets exposure totals include video duration for AVI, MP4,
+  MOV, M4V, WMV, MKV and SER recordings. Video-only targets show their totals;
+  missing durations remain marked as unknown. Videos retain their Video type.
+- Metadata menus apply changes to every selected file by default in Repository,
+  Import and Edited, including selections spanning targets or Edited projects.
+  Editors clearly show the batch scope and preserve unchanged fields. Expanding
+  changes to entire capture sessions remains an optional choice.
+- Clicking a Repository or Edited row without Ctrl or Shift selects only that
+  entry and clears earlier selections, including files hidden under other
+  targets. Plain grouped-sub selection also replaces the previous batch.
+  Right-clicking an already selected entry preserves the batch for file actions.
