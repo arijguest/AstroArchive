@@ -1,22 +1,15 @@
-AstroArchive 2.1.12
-Package 2.1.12.1
+AstroArchive 2.1.13
+Package 2.1.13.1
 
-- Fast scans no longer hash new video payloads merely because the archive has
-  deletion history. Verified import still excludes deleted content, including
-  renamed files. Active reads and directory discovery no longer appear stalled.
-- AVI, MP4, MOV, M4V, WMV, MKV and SER recordings use the Video frame type.
-  Exposure shows recording duration from bounded metadata reads. SER uses its
-  capture timestamp span; unreadable or missing durations stay unknown.
-- Ignore non-raw inputs and repository non-raw purge now include MP4 files.
-- Table columns can grow beyond the viewport, redistribute neighbouring widths,
-  and clip or scroll content instead of limiting the requested size.
-- Activity closes on outside clicks. Only completed processes lasting more than
-  five minutes raise an unread count. Opening Activity clears that count while
-  retaining its entries; the extra notification dot is removed.
-- Telescope and Edited import dialogs include an Import preferences shortcut.
-- Calibration originals are always retained when source deletion is enabled.
-  Edited imports always keep sources and do not offer the deletion option.
-  Source-removing imports, including Dump processing, require confirmation before
-  starting and clearly identify the source folder and retention rules.
-- Metadata editors release and suspend image/video previews while saving,
-  preventing open preview handles from blocking file moves or metadata updates.
+- Table headings now use ID, OBJECT, TYPE and DATE. File receives the largest
+  default width preference; columns adapt to window and preview-pane resizing.
+  Manual dragging still redistributes neighbouring widths and allows horizontal
+  scrolling. Restoring default columns also restores their default widths.
+- Responsive widths respect physical pixel rounding to avoid scrollbar resize
+  loops. Recycled headers show the current sort direction and priority.
+- Up and Down navigation on grouped subs changes the selected group and its
+  files, keeping selection and keyboard focus together.
+- Grouped exposure labels show durations such as 10s and use total for the
+  accumulated exposure, retaining mixed and unknown exposure indicators.
+- Target rows omit a repeated catalogue ID after the common name, including
+  IC434 - Flame Nebula, while preserving distinct catalogue identities.
