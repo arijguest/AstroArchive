@@ -91,6 +91,9 @@ Turn protection off before moving the archive in Explorer.
 The Windows owner can change permissions; protection is not a backup.
 
 IMAGE PREVIEW AND TABLES
+On first opening, Repository and Edited select the top All Targets entry and
+load its preview. Returning to a view keeps its selection for this session.
+
 
 ## Preview
 Select a file for the sidebar; open Preview image for a larger window.

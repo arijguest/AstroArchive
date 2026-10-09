@@ -59,7 +59,7 @@ namespace AstroArchive {
   string editedFocusProject,editedFocusPath;
   void RestoreEditedSelection(IEnumerable<EditedImage> rows,EditedImage previous){
    var focus=rows.FirstOrDefault(i=>editedFocusProject!=null?i.Project.Id==editedFocusProject&&(editedFocusPath==null||i.RelativePath==editedFocusPath):previous!=null&&i.Project.Id==previous.Project.Id&&i.RelativePath==previous.RelativePath);
-   if(editedFocusProject!=null&&focus!=null)editedSelection.Add(focus);RestoreTargetSelection("EditedGrid",focus);editedFocusProject=null;editedFocusPath=null;LoadEditedPreview();
+   if(editedFocusProject!=null&&focus!=null)editedSelection.Add(focus);RestoreTargetSelection("EditedGrid",focus);editedFocusProject=null;editedFocusPath=null;SelectOpeningRow("EditedGrid");LoadEditedPreview();
   }
   void FilterEditedImages(bool rebuildTargets=true){
    if(!editedReady)return;if(Window.IsLoaded&&editedImages.Count>2000){ScheduleSearch("EditedSearchBox",true,true);return;}CancelSearch("EditedSearchBox");var selected=ActiveEditedImage;var query=FileSearch.Parse(T("EditedSearchBox").Text);ShowSearchError("EditedSearchBox",query);L("EditedSearchHint").Visibility=query.IsEmpty?Visibility.Visible:Visibility.Collapsed;

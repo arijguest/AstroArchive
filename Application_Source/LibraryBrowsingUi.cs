@@ -24,7 +24,7 @@ namespace AstroArchive {
    }else{subframeSessions.Clear();activeSessionKey=null;if(mode!="Files"&&mode!="Show all files"){view.GroupDescriptions.Add(new CaptureTypeTargetDescription());if(mode=="By target and session")view.GroupDescriptions.Add(new PropertyGroupDescription("SessionKey"));}}
    changingSessionSelection=true;try{
     SetRows("FramesGrid",view,presorted);
-   }finally{changingSessionSelection=false;}Details();
+   }finally{changingSessionSelection=false;}SelectOpeningRow("FramesGrid");Details();
    var summary=preparedSummary??CaptureGroups.Summarize(displayed);L("LibrarySummaryLabel").Text=summary.Detail;
   }
  }
