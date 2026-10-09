@@ -61,6 +61,8 @@ namespace AstroArchive {
     displayed=displayed.Where(f=>f.Target=="M31").ToList();DisplayLibrary();WaitForSearches();if(subframeSessions.Any(g=>g.IsSelected)||SelectedFiles().Count!=2||SelectedFiles().Any(f=>f.Target!="M45"))throw new Exception("Target filtering lost retained selection or kept an invisible group selected");
     updating=true;C("LibraryViewBox").SelectedItem="Show all files";updating=false;DisplayLibrary();WaitForSearches();if(((ListCollectionView)grid.ItemsSource).GroupDescriptions.Count!=0||grid.Items.Count!=3)throw new Exception("Show all files did not restore a flat table.");
     displayed.Add(new Frame{Target="M31",Kind="Stack",OriginalName="z-stack.fit",Exposure=5});displayed.Add(new Frame{Target="M31",Kind="Light",OriginalName="a-single.fit",Exposure=1});
+    foreach(string extension in new[]{"avi","mp4","mov","m4v","wmv","mkv","ser"})displayed.Add(new Frame{Target="M31",Kind="Video",OriginalName="z-recording."+extension,Exposure=15});
+    displayed.Add(new Frame{Target="M31",Kind="Unknown",OriginalName="a-other.fit"});
     all=displayed.ToList();
     foreach(string layout in new[]{"Session summaries","Show all files","By target","By target and session"})foreach(var direction in new[]{System.ComponentModel.ListSortDirection.Ascending,System.ComponentModel.ListSortDirection.Descending}){
      updating=true;C("LibraryViewBox").SelectedItem=layout;updating=false;
@@ -72,7 +74,12 @@ namespace AstroArchive {
       DisplayLibrary(presorted:background);WaitForSearches();PumpPopupLayout();
       var ordered=grid.Items.Cast<Frame>().ToList();var expected=RepositoryOrdering.Order(source,SearchSorts("FramesGrid"),System.Globalization.CultureInfo.CurrentCulture,allTargets,layout=="Session summaries",System.Threading.CancellationToken.None);
       if(!ordered.SequenceEqual(expected))throw new Exception("Repository sections differ between sorting paths: "+layout+", background "+background);
-      if(layout=="Session summaries"&&allTargets&&!(((ListCollectionView)grid.ItemsSource).Groups.Cast<CollectionViewGroup>().First().Name is SubframeSession))throw new Exception("Merged subs are not first in All Targets");
+      if(ordered.Take(7).Any(f=>f.Kind!="Video"))throw new Exception("Videos are not above subs in "+layout);
+      if(layout=="Session summaries"){
+       var groups=((ListCollectionView)grid.ItemsSource).Groups.Cast<CollectionViewGroup>().ToList();
+       if(groups.Take(7).Any(g=>!(g.Name is Frame)||((Frame)g.Name).Kind!="Video")||groups.FindIndex(g=>g.Name is SubframeSession)<7)throw new Exception("Rendered session groups appeared above video entries.");
+       if(allTargets&&!(groups[7].Name is SubframeSession))throw new Exception("Merged subs did not follow videos in All Targets");
+      }
      }
     }
    }finally{tableSorts["FramesGrid"]=savedSorts;updating=true;C("LibraryViewBox").SelectedItem=mode;updating=false;all=previousRows;librarySelection.Clear();foreach(var frame in previousSelection)librarySelection.Add(frame);displayed=previous;DisplayLibrary();WaitForSearches();GoToPage(page);}

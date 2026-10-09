@@ -30,7 +30,7 @@ namespace AstroArchive {
  }
  // Target/session groups must not merge separate capture sections back together.
  public sealed class CaptureTypeTargetDescription:GroupDescription {
-  public override object GroupNameFromItem(object item,int level,CultureInfo culture){var frame=(Frame)item;string section=CaptureSky.IsCalibration(frame)?"Calibration":frame.Kind=="Stack"?"Stacks":frame.Kind=="Light"?"Subframes":"Other files";return frame.TargetLabel+" · "+section;}
+  public override object GroupNameFromItem(object item,int level,CultureInfo culture){var frame=(Frame)item;string section=CaptureSky.IsCalibration(frame)?"Calibration":frame.Kind=="Video"?"Videos":frame.Kind=="Stack"?"Stacks":frame.Kind=="Light"?"Subframes":"Other files";return frame.TargetLabel+" · "+section;}
  }
  public sealed class SubframeSessionDescription:GroupDescription {
   readonly Dictionary<Frame,SubframeSession> sessions=new Dictionary<Frame,SubframeSession>();
