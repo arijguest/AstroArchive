@@ -110,6 +110,27 @@ total integration and filters. Mixed durations show a range; missing values rema
 unknown. Expand the row or turn off Repository > Group subs by session.
 Stacks remain separate. Known counts show Stack (1445); filters still use Stack.
 
+## Analytics exports
+Repository > Analytics offers six branded charts: Targets photographed, Imaging
+timeline, Time per target, Time per telescope, Filter mix and Exposure lengths.
+Select a chart to preview it, or All six charts for the combined preview. Scope
+starts with the entire repository, independently of browsing filters or selection.
+Expand Scope to choose a physical telescope, inclusive acquisition dates, a
+document label, or whether to include rejected light frames. Reset scope restores
+the entire repository. Undated frames are excluded only when a date range is set.
+Time is recorded individual light-frame integration, not elapsed observing time.
+Stacks, videos and calibrations are excluded to avoid double counting. Missing
+exposures and dates remain unknown and are reported with the chart.
+Target/filter shares show the largest seven categories plus Other when needed.
+Time rankings continue onto additional pages so every target and telescope is
+included. Timeline gaps remain zero; longer timelines use years or grouped periods.
+Choose PNG or JPEG at 300 dpi for print or 150 dpi for screen. PDF keeps charts and
+lettering as vectors; SVG embeds the logo and keeps graphics scalable. Export chart
+saves the selected chart; Export all saves one document containing all six charts.
+PDF uses individual landscape pages; image/SVG exports arrange pages on one sheet.
+Very large collections may need 150 dpi, PDF or SVG. Open export folder appears
+after a successful save. Exports leave the archive and capture files unchanged.
+
 USB TRANSFER AND SAVED TELESCOPES
 
 ## Connect and import

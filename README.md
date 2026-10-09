@@ -66,6 +66,14 @@ The page selector switches **Repository**, **Edited** and **Import**.
 **Ctrl+1–3** switches pages; **F1** opens help. Less obvious menu actions have short
 tooltips. Checkboxes distinguish off, on, mixed and unavailable states.
 
+**Repository → Analytics** previews six branded charts: targets photographed,
+imaging timeline, time per target, time per telescope, filter mix and exposure
+lengths. Scope by telescope and acquisition dates, then export **PNG, JPEG, PDF or
+SVG**. **Export all** saves one document; PDF uses landscape pages and image/SVG
+exports use a combined sheet. Long rankings include every target and telescope on
+continuation pages. Time means individual light-frame integration; stacks, videos
+and calibrations are excluded. Unknown exposures and dates are reported.
+
 ## Edited files and export
 
 **Edited** keeps working copies and returned editor outputs with the archive.

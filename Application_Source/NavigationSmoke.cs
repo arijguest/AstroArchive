@@ -46,6 +46,8 @@ namespace AstroArchive {
                     }
                     if(root.Items.OfType<MenuItem>().Any(item=>new[]{"Browse repository","Choose repository folder…","Open repository in Explorer","Selected files"}.Contains(Convert.ToString(item.Header))))throw new Exception("Redundant repository navigation remains.");
                     if(!root.Items.OfType<MenuItem>().Any(item=>Convert.ToString(item.Header)=="Filters…"))throw new Exception("Direct filter access is missing.");
+                    var analytics=root.Items.OfType<MenuItem>().SingleOrDefault(item=>Convert.ToString(item.Header)=="Analytics");
+                    if(analytics==null||analytics.Items.OfType<MenuItem>().Count()!=7)throw new Exception("Analytics navigation is missing charts or Export all.");
                     root.IsSubmenuOpen = false;
                     PumpPopupLayout();
                     ShowFilters(false);PumpPopupLayout();

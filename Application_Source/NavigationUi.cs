@@ -180,6 +180,7 @@ namespace AstroArchive {
         void BuildRepositoryNavigation(MenuItem menu) {
             var grouped=MenuAction("Group subs by session",()=>{GoToPage(0);C("LibraryViewBox").SelectedItem=Convert.ToString(C("LibraryViewBox").SelectedItem)=="Session summaries"?"Show all files":"Session summaries";},repo!=null);grouped.IsCheckable=true;grouped.IsChecked=Convert.ToString(C("LibraryViewBox").SelectedItem)=="Session summaries";menu.Items.Add(grouped);
             menu.Items.Add(MenuAction("Filters…",()=>{GoToPage(0);ShowFilters(false);},repo!=null));
+            menu.Items.Add(AnalyticsMenu());
             menu.Items.Add(MenuAction("Back up archive…",BackUpArchive,repo!=null));
             menu.Items.Add(new Separator());menu.Items.Add(Branch("Review and analysis",ButtonAction("Review flagged files…","ReviewLibraryButton",0),ButtonAction("Screen files","ScreenLibraryButton",0),ButtonAction("Identify targets…","SolveButton",0),ButtonAction("Analyse rotation…","RotationButton",0)));
             var maintenance=Branch("Maintenance");maintenance.IsEnabled=!RepositoryOperationBlocked&&repo!=null;if(repo!=null)MoveMenuItems(maintenance,BuildRepositoryTools(),item=>item is MenuItem&&Convert.ToString(((MenuItem)item).Header)!="Export searchable catalogue CSV"&&Convert.ToString(((MenuItem)item).Header)!="Show selected file location");maintenance.Items.Add(new Separator());maintenance.Items.Add(MenuAction("Delete archive data…",ResetArchive,repo!=null));menu.Items.Add(maintenance);

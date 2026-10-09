@@ -1,0 +1,38 @@
+name: Analytics Windows checks
+
+on:
+  pull_request:
+    paths:
+      - 'Application_Source/Analytics*.cs'
+      - 'Application_Source/NavigationUi.cs'
+      - 'Application_Source/test.ps1'
+      - '.github/workflows/analytics.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  analytics:
+    runs-on: windows-2022
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+      - name: Check analytics calculations and vector documents
+        shell: powershell
+        run: .\Application_Source\test.ps1 -AnalyticsOnly
+      - name: Build application
+        shell: powershell
+        run: .\Application_Source\build.ps1
+      - name: Check themed previews and all export formats
+        shell: powershell
+        run: |
+          $output = Join-Path $PWD 'Application_Source\test-data\analytics-ui'
+          $process = Start-Process -FilePath '.\Application_Source\dist\AstroArchive.exe' -ArgumentList @('--ui-test', $output, '--analytics-only', '--no-updates') -Wait -PassThru
+          if ($process.ExitCode -ne 0) { throw "Analytics UI checks failed with exit code $($process.ExitCode)." }
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: analytics-previews-and-exports
+          path: Application_Source/test-data
+          retention-days: 7

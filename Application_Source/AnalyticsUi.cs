@@ -1,0 +1,141 @@
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Automation;
+using System.Windows.Controls;
+using System.Windows.Input;
+using System.Windows.Media;
+using System.Windows.Threading;
+using Microsoft.Win32;
+
+namespace AstroArchive {
+ public partial class MainUi {
+  MenuItem AnalyticsMenu(){
+   var menu=Branch("Analytics");menu.IsEnabled=repo!=null&&!RepositoryOperationBlocked;
+   for(int i=0;i<ArchiveAnalytics.Titles.Length;i++){int index=i;menu.Items.Add(MenuAction(ArchiveAnalytics.Titles[i]+"…",()=>ShowAnalytics(index),repo!=null));}
+   menu.Items.Add(new Separator());menu.Items.Add(MenuAction("Export all…",()=>ShowAnalytics(6),repo!=null));
+   UiHelp.Hint(menu,"Explore six branded charts and export publication-ready PNG, JPEG, PDF or SVG.");return menu;
+  }
+  void ShowAnalytics(int index){
+   if(repo==null||RepositoryOperationBlocked)return;
+   // Freeze only the metadata needed by analytics. No files are opened or decoded.
+   var frames=all.Where(f=>f.Kind=="Light"&&f.Status!="Deleted").Select(f=>new Frame{Target=f.Target,Telescope=f.Telescope,Filter=f.Filter,Kind=f.Kind,Exposure=f.Exposure,Rejected=f.Rejected,AcquisitionDate=f.AcquisitionDate,AcquisitionDateSource=f.AcquisitionDateSource,Observed=f.Observed,TimeSource=f.TimeSource,OriginalName=f.OriginalName}).ToList();
+   string caption=new DirectoryInfo(repo.Root).Name;
+   new AnalyticsWindow(Window,frames,caption,index).ShowDialog();
+  }
+ }
+ public sealed class AnalyticsWindow:Window {
+  readonly List<Frame> frames;readonly ListBox charts;readonly Image preview;readonly TextBlock summary,status,previewTitle,exportHint;
+  readonly ComboBox telescope,format,resolution,previewPage;readonly DatePicker from,to;readonly CheckBox rejected;readonly TextBox caption;
+  readonly Button export,exportAll,close;readonly Expander scope;readonly DispatcherTimer debounce;readonly Grid body;
+  AnalyticsSnapshot snapshot;List<AnalyticsPage> pages;List<AnalyticsPage>[] reportPages;int generation;bool exporting,closed,ready;string lastOutput;
+  static TextBlock Label(string text,double size=13,bool bold=false){var label=new TextBlock{Text=text,FontSize=size,FontWeight=bold?FontWeights.SemiBold:FontWeights.Normal,TextWrapping=TextWrapping.Wrap};label.SetResourceReference(TextBlock.FontSizeProperty,size>=16?"UiFontTitle":size<=12?"UiFontSmall":"UiFontControl");return label;}
+  static void AccessibleName(DependencyObject control,string name){AutomationProperties.SetName(control,name);}
+  public AnalyticsWindow(Window owner,List<Frame> source,string repositoryName,int initial){
+   frames=source;Owner=owner;Icon=ApplicationIcon.Image;Title="Analytics · AstroArchive";WindowStartupLocation=WindowStartupLocation.CenterOwner;
+   Width=Math.Min(1280,SystemParameters.WorkArea.Width-24);Height=Math.Min(900,SystemParameters.WorkArea.Height-24);MinWidth=Math.Min(820,Width);MinHeight=Math.Min(600,Height);
+   FontFamily=owner.FontFamily;FontSize=owner.FontSize;Resources.MergedDictionaries.Add(owner.Resources);Theme.Bind(this,BackgroundProperty,"Canvas");Theme.Bind(this,ForegroundProperty,"Text");
+   var root=new Grid{Margin=new Thickness(24)};Content=root;root.RowDefinitions.Add(new RowDefinition{Height=GridLength.Auto});root.RowDefinitions.Add(new RowDefinition{Height=GridLength.Auto});root.RowDefinitions.Add(new RowDefinition());root.RowDefinitions.Add(new RowDefinition{Height=GridLength.Auto});
+   var header=new DockPanel{Margin=new Thickness(0,0,0,14)};root.Children.Add(header);
+   var brand=new Image{Source=((Image)owner.FindName("BrandLogo")).Source,Width=48,Height=48,Margin=new Thickness(0,0,14,0)};DockPanel.SetDock(brand,Dock.Left);header.Children.Add(brand);
+   var heading=new StackPanel();heading.Children.Add(Label("Archive analytics",25,true));summary=Label("Preparing your observatory notes…");Theme.Bind(summary,TextBlock.ForegroundProperty,"Muted");heading.Children.Add(summary);header.Children.Add(heading);
+   scope=new Expander{Header="Scope · Entire repository",Margin=new Thickness(0,0,0,14)};Grid.SetRow(scope,1);root.Children.Add(scope);
+   var filters=new WrapPanel{Margin=new Thickness(0,12,0,6)};scope.Content=filters;
+   telescope=new ComboBox{MinWidth=180,MaxWidth=260};telescope.Items.Add("All telescopes");foreach(string value in frames.Select(f=>string.IsNullOrWhiteSpace(f.Telescope)?"":f.Telescope).Distinct(StringComparer.OrdinalIgnoreCase).OrderBy(t=>t)){telescope.Items.Add(new ComboBoxItem{Content=string.IsNullOrWhiteSpace(value)?"Unknown telescope":value,Tag=value});}telescope.SelectedIndex=0;
+   from=new DatePicker{Width=145};to=new DatePicker{Width=145};caption=new TextBox{Text=repositoryName,Width=220,MaxLength=160};
+   AddField(filters,"Telescope",telescope);AddField(filters,"From (inclusive)",from);AddField(filters,"To (inclusive)",to);AddField(filters,"Document label",caption);
+   rejected=new CheckBox{Content="Include rejected light frames",Margin=new Thickness(0,25,18,0),VerticalAlignment=VerticalAlignment.Center};AccessibleName(rejected,"Include rejected light frames");filters.Children.Add(rejected);
+   UiHelp.Hint(from,"Start acquisition date, inclusive. Undated captures are excluded when a date range is set.");UiHelp.Hint(to,"End acquisition date, inclusive. Clear both dates to include undated captures.");
+   UiHelp.Hint(rejected,"Off excludes light frames marked as rejected. Unknown exposures are never guessed.");
+   var reset=new Button{Content="Reset scope",Margin=new Thickness(0,24,0,0),VerticalAlignment=VerticalAlignment.Center};filters.Children.Add(reset);
+   reset.Click+=(s,e)=>{telescope.SelectedIndex=0;from.SelectedDate=null;to.SelectedDate=null;from.Text="";to.Text="";rejected.IsChecked=false;caption.Text=repositoryName;Schedule();};
+   body=new Grid();Grid.SetRow(body,2);root.Children.Add(body);body.ColumnDefinitions.Add(new ColumnDefinition{Width=new GridLength(240)});body.ColumnDefinitions.Add(new ColumnDefinition());
+   charts=new ListBox{BorderThickness=new Thickness(0),Margin=new Thickness(0,0,18,0),Style=owner.TryFindResource("TargetNavigationListStyle") as Style};AccessibleName(charts,"Analytics charts");ScrollViewer.SetHorizontalScrollBarVisibility(charts,ScrollBarVisibility.Disabled);body.Children.Add(charts);
+   string[] details={"Share of light frames","Integration through time","Your most imaged objects","Physical instrument totals","Integration by filter","Distribution of sub lengths","One document · six graphics"};
+   for(int i=0;i<7;i++){
+    var card=new StackPanel{Margin=new Thickness(8,9,8,9)};card.Children.Add(Label(i==6?"All six charts":(i+1).ToString("00")+"  "+ArchiveAnalytics.Titles[i],14,true));var detail=Label(details[i],12);detail.Margin=new Thickness(0,5,0,0);Theme.Bind(detail,TextBlock.ForegroundProperty,"Muted");card.Children.Add(detail);
+    var item=new ListBoxItem{Content=card};AccessibleName(item,i==6?"All six charts":ArchiveAnalytics.Titles[i]);TextSearch.SetText(item,i==6?"All six charts":ArchiveAnalytics.Titles[i]);charts.Items.Add(item);
+   }
+   var pane=new Grid();pane.RowDefinitions.Add(new RowDefinition{Height=GridLength.Auto});pane.RowDefinitions.Add(new RowDefinition());pane.RowDefinitions.Add(new RowDefinition{Height=GridLength.Auto});Grid.SetColumn(pane,1);body.Children.Add(pane);
+   var previewHeader=new DockPanel{Margin=new Thickness(0,0,0,10)};pane.Children.Add(previewHeader);
+   previewPage=new ComboBox{Width=132,Margin=new Thickness(12,0,0,0),Visibility=Visibility.Collapsed};AccessibleName(previewPage,"Preview page");UiHelp.Hint(previewPage,"Inspect an individual print page or the combined sheet. Exports include every page in the chosen chart.");DockPanel.SetDock(previewPage,Dock.Right);previewHeader.Children.Add(previewPage);
+   previewTitle=Label("Preview",16,true);previewHeader.Children.Add(previewTitle);
+   preview=new Image{Stretch=Stretch.Uniform,Margin=new Thickness(12),HorizontalAlignment=HorizontalAlignment.Stretch,VerticalAlignment=VerticalAlignment.Center};AccessibleName(preview,"Branded analytics export preview");
+   var paper=new Border{Background=Brushes.White,BorderThickness=new Thickness(1),Child=preview};Theme.Bind(paper,Border.BorderBrushProperty,"Border");Grid.SetRow(paper,1);pane.Children.Add(paper);
+   exportHint=Label("");exportHint.Margin=new Thickness(0,10,0,0);Theme.Bind(exportHint,TextBlock.ForegroundProperty,"Muted");Grid.SetRow(exportHint,2);pane.Children.Add(exportHint);
+   var footer=new StackPanel{Margin=new Thickness(0,18,0,0)};Grid.SetRow(footer,3);root.Children.Add(footer);
+   var actions=new WrapPanel{VerticalAlignment=VerticalAlignment.Center};footer.Children.Add(actions);
+   format=new ComboBox{ItemsSource=new[]{"PNG","JPEG","PDF","SVG"},SelectedIndex=2,Width=105};resolution=new ComboBox{ItemsSource=new[]{"300 dpi · Print","150 dpi · Screen"},SelectedIndex=0,Width=158};
+   AddField(actions,"Export format",format);AddField(actions,"Image resolution",resolution);
+   export=new Button{Content="Export chart…",Margin=new Thickness(0,22,8,0),VerticalAlignment=VerticalAlignment.Bottom};Theme.Bind(export,Control.BackgroundProperty,"Accent");Theme.Bind(export,Control.BorderBrushProperty,"Accent");Theme.Bind(export,Control.ForegroundProperty,"AccentText");
+   exportAll=new Button{Content="Export all…",Margin=new Thickness(0,22,8,0),VerticalAlignment=VerticalAlignment.Bottom};close=new Button{Content="Close",IsCancel=true,Margin=new Thickness(0,22,0,0),VerticalAlignment=VerticalAlignment.Bottom};actions.Children.Add(export);actions.Children.Add(exportAll);actions.Children.Add(close);
+   UiHelp.Hint(export,"Save the previewed chart in the chosen format. Long rankings include continuation pages.");UiHelp.Hint(exportAll,"Save all six charts in one document, using the same telescope and date scope.");
+   status=Label("Time totals use individual light-frame exposures. Stacks, videos and calibrations are excluded.",12);status.Margin=new Thickness(0,10,0,0);Theme.Bind(status,TextBlock.ForegroundProperty,"Muted");AccessibleName(status,"Analytics status");AutomationProperties.SetLiveSetting(status,AutomationLiveSetting.Polite);footer.Children.Add(status);
+   var open=new Button{Content="Open export folder",HorizontalAlignment=HorizontalAlignment.Left,Visibility=Visibility.Collapsed,Margin=new Thickness(0,8,0,0)};footer.Children.Add(open);
+   open.Click+=(s,e)=>{try{System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(Path.GetDirectoryName(lastOutput)){UseShellExecute=true});}catch(Exception error){status.Text=error.Message;}};
+   debounce=new DispatcherTimer{Interval=TimeSpan.FromMilliseconds(250)};debounce.Tick+=(s,e)=>{debounce.Stop();RefreshData();};
+   telescope.SelectionChanged+=(s,e)=>Schedule();from.SelectedDateChanged+=(s,e)=>Schedule();to.SelectedDateChanged+=(s,e)=>Schedule();caption.TextChanged+=(s,e)=>Schedule();rejected.Checked+=(s,e)=>Schedule();rejected.Unchecked+=(s,e)=>Schedule();
+   // Invalid typed dates must also invalidate the current export, rather than
+   // silently retaining the last successfully parsed date.
+   from.AddHandler(TextBox.TextChangedEvent,new TextChangedEventHandler((s,e)=>Schedule()));to.AddHandler(TextBox.TextChangedEvent,new TextChangedEventHandler((s,e)=>Schedule()));
+   from.DateValidationError+=(s,e)=>{e.ThrowException=false;Schedule();};to.DateValidationError+=(s,e)=>{e.ThrowException=false;Schedule();};
+   charts.SelectionChanged+=(s,e)=>RenderPreview();previewPage.SelectionChanged+=(s,e)=>DrawPreview();format.SelectionChanged+=(s,e)=>Hints();
+   export.Click+=async(s,e)=>{if(await Export(false)){open.Visibility=Visibility.Visible;}};exportAll.Click+=async(s,e)=>{if(await Export(true)){open.Visibility=Visibility.Visible;}};close.Click+=(s,e)=>Close();
+   Closing+=(s,e)=>{if(exporting){e.Cancel=true;status.Text="Finishing your export…";}};
+   Closed+=(s,e)=>{closed=true;generation++;debounce.Stop();};
+   ready=true;charts.SelectedIndex=Math.Max(0,Math.Min(6,initial));RefreshData();
+  }
+  static void AddField(Panel parent,string label,Control control){var field=new StackPanel{Margin=new Thickness(0,0,16,0)};var text=Label(label,12);text.Margin=new Thickness(0,0,0,5);field.Children.Add(text);field.Children.Add(control);AccessibleName(control,label);parent.Children.Add(field);}
+  void Schedule(){if(!ready||exporting)return;generation++;snapshot=null;export.IsEnabled=false;exportAll.IsEnabled=false;status.Text="Updating analytics…";debounce.Stop();debounce.Start();}
+  bool ValidDate(DatePicker picker){DateTime parsed;return string.IsNullOrWhiteSpace(picker.Text)||(picker.SelectedDate.HasValue&&DateTime.TryParse(picker.Text,out parsed)&&parsed.Date==picker.SelectedDate.Value.Date);}
+  async void RefreshData(){
+   if(!ValidDate(from)||!ValidDate(to)){status.Text="Enter a valid date or clear the date field.";return;}
+   int request=++generation;snapshot=null;export.IsEnabled=false;exportAll.IsEnabled=false;status.Text="Updating analytics…";
+   var selected=telescope.SelectedItem as ComboBoxItem;var options=new AnalyticsOptions{Telescope=selected==null?null:Convert.ToString(selected.Tag),From=from.SelectedDate,To=to.SelectedDate,IncludeRejected=rejected.IsChecked==true,Caption=caption.Text.Trim()};
+   // An unknown telescope is represented by empty metadata; normalise just this
+   // snapshot so it remains selectable independently of All telescopes.
+   IEnumerable<Frame> source=frames;if(selected!=null&&string.IsNullOrWhiteSpace(options.Telescope)){source=frames.Where(f=>string.IsNullOrWhiteSpace(f.Telescope)).ToList();options.Telescope=null;}
+   if(selected!=null)options.Caption=(string.IsNullOrWhiteSpace(options.Caption)?"Repository":options.Caption)+" · "+Convert.ToString(selected.Content);
+   try{
+    var result=await Task.Run(()=>ArchiveAnalytics.Build(source,options));if(closed||request!=generation)return;snapshot=result;reportPages=Enumerable.Range(0,6).Select(i=>AnalyticsGraphics.Pages(snapshot,i)).ToArray();pages=reportPages.SelectMany(p=>p).ToList();
+    summary.Text=result.Captures.ToString("N0")+" light frames · "+ArchiveAnalytics.Number(result.Seconds/3600)+" h integration · "+result.Targets+" targets";
+    scope.Header="Scope · "+(selected==null?"All telescopes":Convert.ToString(selected.Content))+(options.From.HasValue||options.To.HasValue?" · Date range":" · All dates");
+    status.Text=result.Captures==0?"No light frames match this scope. Adjust the telescope or date range.":result.UnknownExposure+" unknown exposures · "+result.UnknownDate+" undated frames · "+result.ExcludedRejected+" rejected frames excluded"+(result.ExcludedUndated>0?" · "+result.ExcludedUndated+" undated frames excluded by date range":"")+". Integration excludes stacks, videos and calibrations.";
+    RenderPreview();
+   }catch(Exception error){if(closed||request!=generation)return;status.Text=error.Message;}
+  }
+  void RenderPreview(){
+   if(!ready||snapshot==null||charts.SelectedIndex<0)return;bool all=charts.SelectedIndex==6;
+   var selected=all?pages:reportPages[charts.SelectedIndex];previewPage.Items.Clear();previewPage.Items.Add("All pages");for(int i=0;i<selected.Count;i++)previewPage.Items.Add(new ComboBoxItem{Content="Page "+(i+1)+" of "+selected.Count,ToolTip=selected[i].Title});previewPage.Visibility=selected.Count>1?Visibility.Visible:Visibility.Collapsed;previewPage.SelectedIndex=all?0:1;
+   previewTitle.Text=all?"All six charts · Combined preview":ArchiveAnalytics.Titles[charts.SelectedIndex]+" · Export preview";
+   export.Content=all?"Export all…":"Export chart…";exportAll.Visibility=all?Visibility.Collapsed:Visibility.Visible;export.IsEnabled=exportAll.IsEnabled=snapshot.Captures>0&&!exporting;Hints();
+  }
+  void DrawPreview(){
+   if(!ready||snapshot==null||charts.SelectedIndex<0||previewPage.SelectedIndex<0)return;
+   var selected=charts.SelectedIndex==6?pages:reportPages[charts.SelectedIndex];int page=previewPage.SelectedIndex-1;preview.Source=AnalyticsExport.Preview(page<0?selected:new List<AnalyticsPage>{selected[page]});
+  }
+  void Hints(){
+   if(!ready)return;string value=Convert.ToString(format.SelectedItem);resolution.IsEnabled=(value=="PNG"||value=="JPEG")&&!exporting;
+   exportHint.Text=value=="PDF"?"Vector charts and lettering on landscape pages. Long rankings continue onto extra pages; every target and telescope is included.":value=="SVG"?"Scalable vector graphics with an embedded logo. Multiple pages combine into one sheet.":"High-resolution images on white paper. Multiple pages combine into one sheet.";
+  }
+  async Task<bool> Export(bool all){
+   if(snapshot==null||snapshot.Captures==0||exporting)return false;all=all||charts.SelectedIndex==6;string selectedFormat=Convert.ToString(format.SelectedItem),extension=selectedFormat=="JPEG"?"jpg":selectedFormat.ToLowerInvariant();
+   var chosen=all?pages:reportPages[charts.SelectedIndex];
+   var dialog=new SaveFileDialog{Title=all?"Export all analytics":"Export analytics chart",FileName="AstroArchive_"+(all?"Analytics":snapshot.Reports[charts.SelectedIndex].Id)+"."+extension,Filter=selectedFormat+" document|*."+extension,DefaultExt="."+extension,AddExtension=true,OverwritePrompt=true};
+   if(dialog.ShowDialog(this)!=true)return false;
+   exporting=true;scope.IsEnabled=false;charts.IsEnabled=false;format.IsEnabled=false;resolution.IsEnabled=false;export.IsEnabled=false;exportAll.IsEnabled=false;close.IsEnabled=false;status.Text="Preparing "+selectedFormat+" export…";
+   int dpi=resolution.SelectedIndex==0?300:150;
+   try{
+    // WPF's image encoder needs an STA. Keep large raster and PDF work off the UI
+    // dispatcher while retaining the immutable scene shown in the preview.
+    var completion=new TaskCompletionSource<bool>();var thread=new Thread(()=>{try{AnalyticsExport.Save(dialog.FileName,chosen,selectedFormat,dpi);completion.SetResult(true);}catch(Exception error){completion.SetException(error);}}){IsBackground=true};thread.SetApartmentState(ApartmentState.STA);thread.Start();await completion.Task;
+    lastOutput=dialog.FileName;status.Text="Exported "+(all?"all six charts":"chart")+" · "+Path.GetFileName(lastOutput);return true;
+   }catch(Exception error){status.Text="Export could not be saved: "+error.Message;return false;}
+   finally{exporting=false;scope.IsEnabled=true;charts.IsEnabled=true;format.IsEnabled=true;close.IsEnabled=true;RenderPreview();}
+  }
+ }
+}
