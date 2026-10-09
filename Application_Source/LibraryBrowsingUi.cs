@@ -13,7 +13,7 @@ namespace AstroArchive {
    C("LibraryViewBox").ItemsSource=new[]{"Session summaries","Show all files","By target","By target and session"};C("LibraryViewBox").SelectedIndex=0;
    C("LibraryViewBox").SelectionChanged+=(s,e)=>{if(!updating)Filter(false);};
    G("FramesGrid").GroupStyle.Add(new GroupStyle{ContainerStyle=(Style)Window.FindResource("CaptureSessionGroupStyle")});
-   InitializeSessionSelection();InitializeTargetSelection();
+   InitializeSessionSelection();InitializeTargetSelection();InitializeTargetKeyboard();
   }
   List<SubframeSession> subframeSessions=new List<SubframeSession>();
   void DisplayLibrary(List<SubframeSession> preparedSessions=null,CaptureGroupSummary preparedSummary=null,bool presorted=false){
@@ -24,13 +24,13 @@ namespace AstroArchive {
    }else{subframeSessions.Clear();activeSessionKey=null;if(mode!="Files"&&mode!="Show all files"){view.GroupDescriptions.Add(new CaptureTypeTargetDescription());if(mode=="By target and session")view.GroupDescriptions.Add(new PropertyGroupDescription("SessionKey"));}}
    changingSessionSelection=true;try{
     SetRows("FramesGrid",view,presorted);
-   }finally{changingSessionSelection=false;}Details();
+   }finally{changingSessionSelection=false;}SelectOpeningRow("FramesGrid");Details();
    var summary=preparedSummary??CaptureGroups.Summarize(displayed);L("LibrarySummaryLabel").Text=summary.Detail;
   }
  }
  // Target/session groups must not merge separate capture sections back together.
  public sealed class CaptureTypeTargetDescription:GroupDescription {
-  public override object GroupNameFromItem(object item,int level,CultureInfo culture){var frame=(Frame)item;string section=CaptureSky.IsCalibration(frame)?"Calibration":frame.Kind=="Stack"?"Stacks":frame.Kind=="Light"?"Subframes":"Other files";return frame.TargetLabel+" · "+section;}
+  public override object GroupNameFromItem(object item,int level,CultureInfo culture){var frame=(Frame)item;string section=CaptureSky.IsCalibration(frame)?"Calibration":frame.Kind=="Video"?"Videos":frame.Kind=="Stack"?"Stacks":frame.Kind=="Light"?"Subframes":"Other files";return frame.TargetLabel+" · "+section;}
  }
  public sealed class SubframeSessionDescription:GroupDescription {
   readonly Dictionary<Frame,SubframeSession> sessions=new Dictionary<Frame,SubframeSession>();

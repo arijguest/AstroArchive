@@ -91,6 +91,9 @@ Turn protection off before moving the archive in Explorer.
 The Windows owner can change permissions; protection is not a backup.
 
 IMAGE PREVIEW AND TABLES
+On first opening, Repository and Edited select the top All Targets entry and
+load its preview. Returning to a view keeps its selection for this session.
+
 
 ## Preview
 Select a file for the sidebar; open Preview image for a larger window.
@@ -258,6 +261,11 @@ changed sources need a fresh scan. Completed imports survive cancellation.
 ## Exclusions and deletion
 Settings > Import can ignore failed filenames and PNG/JPG/JPEG/MP4 inputs; rescan after
 changes. Repository > Maintenance offers Delete failed and Purge non-raw files.
+Fill missing metadata previews additions from original headers, recognised
+filenames and preserved session metadata. Existing values and user edits stay
+in place; conflicting or unsupported fields remain unknown. DSO and solar-system
+targets default to Tele when the camera channel is unknown; this is recorded
+as a target-based default rather than a detected camera marker.
 Recordings (AVI, MP4, MOV, M4V, WMV, MKV and SER) use the Video frame type.
 Their Exposure column shows recording length in seconds. SER uses its measured
 capture timestamp span; files without readable duration show unknown.
@@ -316,6 +324,8 @@ keeping the selected folders and files in the dialog.
 Settings opens Preferences: General, Import, Export, Sky & solving, Accessibility,
 Updates and Backups. Save preferences applies changes; Cancel retains settings.
 Accessibility adjusts text size, rows, contrast and progress animation.
+Enable Clearer selections for prominent outlines around focused targets, files and
+sub groups. It is off by default; selected entries retain their usual highlight.
 Alt reveals menu access keys; arrows navigate menus; Tab moves between controls.
 The purple selector switches Repository/Edited/Import; Ctrl+1–3 selects a page.
 
@@ -327,8 +337,8 @@ Repository > Diagnostics shows timings and the latest import report.
 KEYBOARD SHORTCUTS
 
 - **Main window:** Escape clears the active file selection; Ctrl+F search; Ctrl+I Import; Ctrl+E Export; F1 page help.
-- **Tables:** Ctrl-click toggle; Shift-click range; Shift-click heading adds sort; Delete confirms removal on Repository or Edited.
-- **Preview:** F Fit; plus/minus zoom; arrows pan; Escape closes.
+- **Tables:** Left/Right switches target, file and preview panes, activating the current entry (or the first if none is selected); Up/Down changes selection; Ctrl-click toggles; Shift-click selects a range; Shift-click heading adds sort; Delete confirms removal on Repository or Edited.
+- **Preview:** F Fit; plus/minus zoom; Up/Down or Ctrl+Left/Right pans in the sidebar; all arrows pan in a separate preview window; Escape closes.
 - **Guide:** Ctrl+F search; Up/Down topic; Ctrl+C copy; Escape close.
 - **Folder picker:** Alt+D address bar.
 

@@ -16,7 +16,7 @@ namespace AstroArchive {
   public static int AssignUnknown(IEnumerable<Frame> frames,string value){
    string target=Target(value);int count=0;
    foreach(var frame in frames.Where(UnknownScience)){
-    frame.Target=target;frame.TargetEvidence="User assigned during import";Assets.UserFact(frame,"Target");count++;
+    frame.Target=target;frame.TargetEvidence="User assigned during import";Assets.UserFact(frame,"Target");CameraDetection.DefaultForTarget(frame);count++;
    }
    return count;
   }

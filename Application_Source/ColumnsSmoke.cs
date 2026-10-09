@@ -4,10 +4,13 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
+using System.Globalization;
+using System.Windows.Media;
 namespace AstroArchive {
  public partial class MainUi {
   void SmokeColumnLayouts(){
    SmokeColumnResizing();
+   SmokeColumnLabelsFit();
    foreach(string name in new[]{"FramesGrid","ImportGrid","EditedGrid"})foreach(var column in G(name).Columns){
     string id=ColumnId(column),expected=id=="ObjectId"||id=="Metadata.ObjectId"?"ID":id=="TargetName"||id=="Metadata.TargetName"?"OBJECT":id=="Kind"&&name!="EditedGrid"?"TYPE":id=="AcquisitionDateLabel"?"DATE":null;
     if(expected!=null&&Convert.ToString(column.Header)!=expected)throw new Exception("Concise table header missing: "+name+" / "+id);
@@ -32,6 +35,20 @@ namespace AstroArchive {
      ResetColumns(name);if(!CurrentColumnLayout(name).Visible.SequenceEqual(defaultColumns[name])||SavedColumnLayout(name)!=null)throw new Exception("Restore defaults did not restore the original layout.");
     }
    }finally{settings.TableLayouts=Util.Deserialize<System.Collections.Generic.Dictionary<string,ColumnLayout>>(saved);foreach(string name in new[]{"FramesGrid","ImportGrid"})ApplyColumnLayout(name,SavedColumnLayout(name));testingColumnLayouts=false;}
+  }
+  void SmokeColumnLabelsFit(){
+   int previousScale=settings.TextScalePercent;
+   try{foreach(int scale in new[]{100,150}){
+    settings.TextScalePercent=scale;ApplyAppearance();
+    var d=new FormWindow(Window,"Column labels fixture",760,440);var grid=new DataGrid{Height=200,ItemsSource=new[]{new Frame{Target="NGC7000",Kind="Stack",StackCount=1000,Gain=80,OriginalName="Stack_NGC7000.fit"}}};
+    foreach(var value in new[]{new[]{"ID","ObjectId","88"},new[]{"TYPE","KindLabel","114"},new[]{"GAIN","GainText","54"},new[]{"DATE","AcquisitionDateLabel","88"},new[]{"FILE","OriginalName","*"}})grid.Columns.Add(new DataGridTextColumn{Header=value[0],Binding=new System.Windows.Data.Binding(value[1]),Width=value[2]=="*"?new DataGridLength(1,DataGridLengthUnitType.Star):new DataGridLength(int.Parse(value[2]))});
+    d.Add(grid);d.CloseOnly();try{d.Window.Show();foreach(double width in new[]{760.0,610.0,920.0}){d.Window.Width=width;PumpPopupLayout();
+     foreach(string label in new[]{"NGC7000","Stack (1000)"}){var cell=PopupChildren<DataGridCell>(grid).FirstOrDefault(c=>c.Content is TextBlock&&((TextBlock)c.Content).Text==label);if(cell==null)throw new Exception("Column label fixture did not render "+label);
+      var text=(TextBlock)cell.Content;var measured=new FormattedText(label,CultureInfo.CurrentUICulture,FlowDirection.LeftToRight,new Typeface(text.FontFamily,text.FontStyle,text.FontWeight,text.FontStretch),text.FontSize,Brushes.Black,VisualTreeHelper.GetDpi(text).PixelsPerDip);
+      if(text.ActualWidth+0.5<measured.WidthIncludingTrailingWhitespace)throw new Exception(label+" does not fit at "+width+"px / "+scale+"% text scale");
+     }
+    }}finally{d.Window.Close();}
+   }}finally{settings.TextScalePercent=previousScale;ApplyAppearance();}
   }
   void SmokeColumnResizing(){
    var dialog=new FormWindow(Window,"Column resizing fixture",760,480);

@@ -69,13 +69,14 @@ namespace AstroArchive {
                 try {
                     SortTable("FramesGrid", exposure, false);
                     var kind = grid.Columns.First(column => column.SortMemberPath == "Kind"); SortTable("FramesGrid", kind, true);
+                    WaitForSearches();
                     // A collapsed group has no realized file row to bring into
                     // view. Scroll the header itself for column virtualization.
                     var headerViewer=PopupChildren<ScrollViewer>(grid).First(viewer=>viewer.Name=="DG_ScrollViewer");
                     headerViewer.ScrollToHorizontalOffset(grid.Columns.Where(column=>column.Visibility==Visibility.Visible).OrderBy(column=>column.DisplayIndex).TakeWhile(column=>column!=exposure).Sum(column=>column.ActualWidth));Window.UpdateLayout();PumpPopupLayout();
                     if (TableSortIndicators.GetMark(exposure) != "▲ 1" || TableSortIndicators.GetMark(kind) != "▲ 2") throw new Exception("Sort arrows or priorities are missing.");
                     var rendered = PopupChildren<DataGridColumnHeader>(grid).FirstOrDefault(header => header.Column == exposure);
-                    if (rendered == null || !PopupChildren<TextBlock>(rendered).Any(text => text.Text == "▲ 1")) throw new Exception("Sort indicator did not render in the header: "+(rendered==null?"header not realized":"texts "+string.Join(" | ",PopupChildren<TextBlock>(rendered).Select(text=>text.Text))));
+                    if (rendered == null || !PopupChildren<TextBlock>(rendered).Any(text => text.Text == "▲ 1")) throw new Exception("Sort indicator did not render in the header: "+(rendered==null?"header not realized; viewport="+headerViewer.ViewportWidth+", extent="+headerViewer.ExtentWidth+", offset="+headerViewer.HorizontalOffset+", columns="+string.Join(" | ",grid.Columns.Where(c=>c.Visibility==Visibility.Visible).OrderBy(c=>c.DisplayIndex).Select(c=>c.Header+"="+c.ActualWidth)):"texts "+string.Join(" | ",PopupChildren<TextBlock>(rendered).Select(text=>text.Text))));
                     if (!AutomationProperties.GetName(rendered).Contains("ascending") || !AutomationProperties.GetName(rendered).Contains("priority 1")) throw new Exception("Sorted header lacks an accessible description.");
                     Capture(Path.Combine(output, "AstroArchive_Sorted_UI.png"));
                     SortTable("FramesGrid", exposure, true); if (TableSortIndicators.GetMark(exposure) != "▼ 1") throw new Exception("Descending sort marker did not reverse.");
@@ -104,8 +105,9 @@ namespace AstroArchive {
                 var preferences = new FormWindow(Window, "Accessibility smoke", 640, 620);
                 preferences.Tabs("Preferences", "Processing", "Plate solving", "Repository", "Accessibility");
                 preferences.Tab(4);var controls = AddAccessibilityPreferences(preferences); preferences.SelectTab(4); preferences.CloseOnly();
-                try { preferences.Window.Show(); PumpPopupLayout(); controls.Scale.SelectedItem = "150%"; var snapshot = new Settings(); controls.Save(snapshot);
-                    if (snapshot.TextScalePercent != 150 || !snapshot.HighContrast || !snapshot.ComfortableRows) throw new Exception("Accessibility preferences were not preserved.");
+                try { preferences.Window.Show(); PumpPopupLayout(); controls.Scale.SelectedItem = "150%"; controls.Selections.IsChecked=true;var snapshot = new Settings(); controls.Save(snapshot);
+                    if (snapshot.TextScalePercent != 150 || !snapshot.HighContrast || !snapshot.ComfortableRows || !Util.Deserialize<Settings>(Util.Serialize(snapshot)).ClearerSelections) throw new Exception("Accessibility preferences were not preserved.");
+                    controls.Selections.IsChecked=false;controls.Save(snapshot);if(snapshot.ClearerSelections||Util.Deserialize<Settings>("{}").ClearerSelections)throw new Exception("Clearer selections did not switch off or defaults on for existing settings.");
                 } finally { preferences.Window.Close(); }
                 var about = AboutPage();
                 try { about.Window.Show(); PumpPopupLayout(); if (!PopupChildren<TextBlock>(about.Window).Any(text => text.Text == "Ari J. Guest")) throw new Exception("About page lacks author attribution."); if (!PopupChildren<TextBlock>(about.Window).Any(text => text.Text.Contains("PolyForm Noncommercial License 1.0.0"))) throw new Exception("About page lacks software licensing."); CapturePopup(about.Window, Path.Combine(output, "AstroArchive_About_UI.png")); }

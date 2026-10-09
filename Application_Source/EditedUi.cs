@@ -59,7 +59,7 @@ namespace AstroArchive {
   string editedFocusProject,editedFocusPath;
   void RestoreEditedSelection(IEnumerable<EditedImage> rows,EditedImage previous){
    var focus=rows.FirstOrDefault(i=>editedFocusProject!=null?i.Project.Id==editedFocusProject&&(editedFocusPath==null||i.RelativePath==editedFocusPath):previous!=null&&i.Project.Id==previous.Project.Id&&i.RelativePath==previous.RelativePath);
-   if(editedFocusProject!=null&&focus!=null)editedSelection.Add(focus);RestoreTargetSelection("EditedGrid",focus);editedFocusProject=null;editedFocusPath=null;LoadEditedPreview();
+   if(editedFocusProject!=null&&focus!=null)editedSelection.Add(focus);RestoreTargetSelection("EditedGrid",focus);editedFocusProject=null;editedFocusPath=null;SelectOpeningRow("EditedGrid");LoadEditedPreview();
   }
   void FilterEditedImages(bool rebuildTargets=true){
    if(!editedReady)return;if(Window.IsLoaded&&editedImages.Count>2000){ScheduleSearch("EditedSearchBox",true,true);return;}CancelSearch("EditedSearchBox");var selected=ActiveEditedImage;var query=FileSearch.Parse(T("EditedSearchBox").Text);ShowSearchError("EditedSearchBox",query);L("EditedSearchHint").Visibility=query.IsEmpty?Visibility.Visible:Visibility.Collapsed;
@@ -124,5 +124,5 @@ namespace AstroArchive {
    var grid=new DataGrid{ItemsSource=G("MetricsGrid").ItemsSource,IsReadOnly=true,AutoGenerateColumns=false,MinHeight=160,MaxHeight=320};foreach(var column in G("MetricsGrid").Columns.OfType<DataGridTextColumn>())grid.Columns.Add(new DataGridTextColumn{Header=column.Header,Binding=column.Binding,Width=column.Width});dialog.Add(grid);dialog.CloseOnly();dialog.Show();
   }
  }
- public sealed class EditedTargetSummary:TargetSummary {public new string Tooltip{get{return Label+"\n"+Files+" edited image"+(Files==1?"":"s");}}}
+ public sealed class EditedTargetSummary:TargetSummary {public new string Tooltip{get{return TargetNavigation.TargetId(Name);}}}
 }

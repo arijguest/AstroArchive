@@ -109,7 +109,7 @@ namespace AstroArchive {
                     f.MakeEvidence="Explicit instrument metadata; "+profile.Id;
                 }
             }
-            if(f.Camera=="Unknown"&&(!string.IsNullOrEmpty(f.CameraModel)||!string.IsNullOrEmpty(f.CameraId))&&f.Make!="DWARFLAB") {
+            if(f.Camera=="Unknown"&&(f.CameraEvidence??"").IndexOf("conflict",StringComparison.OrdinalIgnoreCase)<0&&(!string.IsNullOrEmpty(f.CameraModel)||!string.IsNullOrEmpty(f.CameraId))&&f.Make!="DWARFLAB") {
                 f.Camera="Primary";
                 f.CameraEvidence="Explicit camera metadata";
             }

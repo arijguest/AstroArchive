@@ -81,7 +81,7 @@ namespace AstroArchive {
         void InitializeNavigation(bool firstRun) {
             InitializeSearch();
             T("SourceBox").TextChanged+=(s,e)=>{unknownImportTarget="";if(navigationReady)UpdateNavigationState();};
-            var tabs=(TabControl)Window.FindName("MainTabs");SelectInitialPage();tabs.SelectionChanged+=(s,e)=>{if(e.OriginalSource!=tabs)return;ScheduleEditedRefresh();SyncPageSelector();if(tabs.SelectedIndex!=0&&previewMotion!=null)previewMotion.Pause();if(tabs.SelectedIndex!=2&&editedMotion!=null)editedMotion.Pause();UpdateNavigationState();};
+            var tabs=(TabControl)Window.FindName("MainTabs");SelectInitialPage();tabs.SelectionChanged+=(s,e)=>{if(e.OriginalSource!=tabs)return;BeginOpeningSelection(tabs.SelectedIndex);ScheduleEditedRefresh();SyncPageSelector();if(tabs.SelectedIndex!=0&&previewMotion!=null)previewMotion.Pause();if(tabs.SelectedIndex!=2&&editedMotion!=null)editedMotion.Pause();UpdateNavigationState();};
             var selector = C("PageSelector");
             selector.SelectionChanged += (s,e) => { if (!updatingPageSelector && selector.SelectedItem != null) GoToPage(Convert.ToInt32(((ComboBoxItem)selector.SelectedItem).Tag)); };
             SyncPageSelector();
@@ -108,7 +108,7 @@ namespace AstroArchive {
             UiHelp.Describe(B("RepositoryImportButton"), "Choose a source and review imports.");
             UiHelp.Hint(B("ImportExportButton"), "Export archived files; import scanned files first.");
             Window.PreviewKeyDown += NavigationKeys;
-            navigationReady = true;
+            DescribePaneNavigation();navigationReady = true;BeginOpeningSelection(tabs.SelectedIndex);
             var originals=(CheckBox)Window.FindName("DeleteOriginalsCheck");originals.Checked+=(s,e)=>UpdateNavigationState();originals.Unchecked+=(s,e)=>UpdateNavigationState();
             UpdateNavigationState();
             if (firstRun) Window.ContentRendered += (s,e) => {

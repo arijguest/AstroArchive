@@ -222,6 +222,9 @@
        <Trigger Property="IsKeyboardFocused" Value="True">
         <Setter TargetName="ButtonFocus" Property="Visibility" Value="Visible" />
        </Trigger>
+       <MultiTrigger><MultiTrigger.Conditions><Condition Property="Tag" Value="SelectSession"/><Condition Property="local:SelectionAppearance.Enabled" Value="False"/></MultiTrigger.Conditions>
+        <Setter TargetName="ButtonFocus" Property="Visibility" Value="Hidden" />
+       </MultiTrigger>
        <Trigger Property="IsEnabled" Value="False">
         <Setter TargetName="Surface" Property="Background" Value="{DynamicResource DisabledSurface}" />
         <Setter TargetName="Surface" Property="BorderBrush" Value="{DynamicResource DisabledBorder}" />
@@ -441,10 +444,10 @@
      <Setter Property="Background" Value="{DynamicResource Selection}" />
      <Setter Property="Foreground" Value="{DynamicResource Text}" />
     </Trigger>
-    <Trigger Property="IsKeyboardFocusWithin" Value="True">
+    <MultiTrigger><MultiTrigger.Conditions><Condition Property="IsKeyboardFocusWithin" Value="True"/><Condition Property="local:SelectionAppearance.Enabled" Value="True"/></MultiTrigger.Conditions>
      <Setter Property="BorderBrush" Value="{DynamicResource Focus}" />
      <Setter Property="BorderThickness" Value="1" />
-    </Trigger>
+    </MultiTrigger>
    </Style.Triggers>
   </Style>
   <Style TargetType="TabControl">
@@ -526,10 +529,10 @@
        <MultiTrigger><MultiTrigger.Conditions><Condition Property="IsMouseOver" Value="True"/><Condition Property="IsSelected" Value="False"/></MultiTrigger.Conditions>
         <Setter TargetName="Item" Property="Background" Value="{DynamicResource SurfaceAlt}" />
        </MultiTrigger>
-       <Trigger Property="IsKeyboardFocusWithin" Value="True">
+       <MultiTrigger><MultiTrigger.Conditions><Condition Property="IsKeyboardFocusWithin" Value="True"/><Condition Property="local:SelectionAppearance.Enabled" Value="True"/></MultiTrigger.Conditions>
         <Setter TargetName="Item" Property="BorderBrush" Value="{DynamicResource Focus}" />
         <Setter TargetName="Item" Property="BorderThickness" Value="1" />
-       </Trigger>
+       </MultiTrigger>
       </ControlTemplate.Triggers>
      </ControlTemplate>
     </Setter.Value>
@@ -678,7 +681,7 @@
             </Border>
             <ControlTemplate.Triggers>
              <Trigger Property="IsChecked" Value="True"><Setter TargetName="Chevron" Property="RenderTransform"><Setter.Value><RotateTransform Angle="180"/></Setter.Value></Setter></Trigger>
-             <Trigger Property="IsKeyboardFocused" Value="True"><Setter TargetName="ChevronSurface" Property="BorderThickness" Value="1"/></Trigger>
+             <MultiTrigger><MultiTrigger.Conditions><Condition Property="IsKeyboardFocused" Value="True"/><Condition Property="local:SelectionAppearance.Enabled" Value="True"/></MultiTrigger.Conditions><Setter TargetName="ChevronSurface" Property="BorderThickness" Value="1"/></MultiTrigger>
              <Trigger Property="IsPressed" Value="True"><Setter TargetName="ChevronSurface" Property="Background" Value="{DynamicResource Selection}"/></Trigger>
              <Trigger Property="IsEnabled" Value="False"><Setter TargetName="Chevron" Property="Stroke" Value="{DynamicResource DisabledText}"/><Setter TargetName="ChevronSurface" Property="Cursor" Value="Arrow"/></Trigger>
             </ControlTemplate.Triggers>
@@ -788,7 +791,7 @@
         </Grid>
        </DataTemplate></GroupStyle.HeaderTemplate></GroupStyle></ListBox.GroupStyle>
        <ListBox.ItemTemplate><DataTemplate><Grid><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions><Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
-        <TextBlock Text="{Binding DisplayName}" TextWrapping="Wrap" VerticalAlignment="Center"><TextBlock.Style><Style TargetType="TextBlock"><Setter Property="FontWeight" Value="SemiBold"/><Style.Triggers><DataTrigger Binding="{Binding Name}" Value="All targets"><Setter Property="FontWeight" Value="Bold"/></DataTrigger></Style.Triggers></Style></TextBlock.Style></TextBlock>
+        <local:TargetTitle FullTitle="{Binding DisplayName}" TextWrapping="Wrap" VerticalAlignment="Center"><local:TargetTitle.Style><Style TargetType="TextBlock"><Setter Property="FontWeight" Value="SemiBold"/><Style.Triggers><DataTrigger Binding="{Binding Name}" Value="All targets"><Setter Property="FontWeight" Value="Bold"/></DataTrigger></Style.Triggers></Style></local:TargetTitle.Style></local:TargetTitle>
         <Border Grid.Column="1" Background="{DynamicResource SurfaceAlt}" CornerRadius="3" Padding="4,1" Margin="5,0,0,0" VerticalAlignment="Center"><TextBlock Text="{Binding FileCount}" FontSize="{DynamicResource UiFontCaption}" Foreground="{DynamicResource Muted}"/></Border>
         <TextBlock Grid.Row="1" Grid.ColumnSpan="2" Text="{Binding Subline}" FontSize="{DynamicResource UiFontCaption}" Foreground="{DynamicResource Muted}" TextWrapping="Wrap" Margin="0,3,0,0"><TextBlock.Style><Style TargetType="TextBlock"><Style.Triggers><DataTrigger Binding="{Binding Subline}" Value=""><Setter Property="Visibility" Value="Collapsed"/></DataTrigger></Style.Triggers></Style></TextBlock.Style></TextBlock>
        </Grid></DataTemplate></ListBox.ItemTemplate>
@@ -801,12 +804,12 @@
         <DataGrid x:Name="FramesGrid">
          <DataGrid.Columns>
           <DataGridTextColumn Header="FILE" Binding="{Binding OriginalName}" Width="*" MinWidth="175" />
-          <DataGridTextColumn Header="ID" Binding="{Binding ObjectId}" Width="56" />
+          <DataGridTextColumn Header="ID" Binding="{Binding ObjectId}" Width="88" />
           <DataGridTextColumn Header="OBJECT" Binding="{Binding TargetName}" Width="160" />
-          <DataGridTextColumn Header="TYPE" Binding="{Binding Kind}" Width="88" />
-          <DataGridTextColumn Header="DATE" Binding="{Binding AcquisitionDateLabel}" Width="96" />
+          <DataGridTextColumn Header="TYPE" Binding="{Binding Kind}" Width="114" />
+          <DataGridTextColumn Header="DATE" Binding="{Binding AcquisitionDateLabel}" Width="88" />
           <DataGridTextColumn Header="EXPOSURE" Binding="{Binding ExposureText}" Width="88" />
-          <DataGridTextColumn Header="GAIN" Binding="{Binding GainText}" Width="64" />
+          <DataGridTextColumn Header="GAIN" Binding="{Binding GainText}" Width="54" />
           <DataGridTextColumn Header="FILTER" Binding="{Binding Filter}" Width="88" />
          </DataGrid.Columns>
         </DataGrid>
@@ -937,12 +940,12 @@
        <DataGrid.Columns>
         <DataGridTextColumn Header="STATUS" Binding="{Binding Status}" Width="110" />
         <DataGridTextColumn Header="REVIEW" Binding="{Binding ReviewText}" Width="115" />
-        <DataGridTextColumn Header="ID" Binding="{Binding ObjectId}" Width="56" />
+        <DataGridTextColumn Header="ID" Binding="{Binding ObjectId}" Width="88" />
         <DataGridTextColumn Header="OBJECT" Binding="{Binding TargetName}" Width="160" />
         <DataGridTextColumn Header="DEVICE / MODEL" Binding="{Binding InstrumentText}" Width="150" />
-        <DataGridTextColumn Header="TYPE" Binding="{Binding Kind}" Width="88" />
+        <DataGridTextColumn Header="TYPE" Binding="{Binding Kind}" Width="114" />
         <DataGridTextColumn Header="CAMERA" Binding="{Binding Camera}" Width="90" />
-        <DataGridTextColumn Header="DATE" Binding="{Binding AcquisitionDateLabel}" Width="96" />
+        <DataGridTextColumn Header="DATE" Binding="{Binding AcquisitionDateLabel}" Width="88" />
         <DataGridTextColumn Header="EXPOSURE" Binding="{Binding ExposureText}" Width="88" />
         <DataGridTextColumn Header="FILE" Binding="{Binding OriginalName}" Width="*" MinWidth="180" />
        </DataGrid.Columns>
@@ -998,7 +1001,7 @@
         </Grid>
        </DataTemplate></GroupStyle.HeaderTemplate></GroupStyle></ListBox.GroupStyle>
        <ListBox.ItemTemplate><DataTemplate><Grid><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions><Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
-        <TextBlock Text="{Binding DisplayName}" TextWrapping="Wrap" VerticalAlignment="Center"><TextBlock.Style><Style TargetType="TextBlock"><Setter Property="FontWeight" Value="SemiBold"/><Style.Triggers><DataTrigger Binding="{Binding Name}" Value="All targets"><Setter Property="FontWeight" Value="Bold"/></DataTrigger></Style.Triggers></Style></TextBlock.Style></TextBlock>
+        <local:TargetTitle FullTitle="{Binding DisplayName}" TextWrapping="Wrap" VerticalAlignment="Center"><local:TargetTitle.Style><Style TargetType="TextBlock"><Setter Property="FontWeight" Value="SemiBold"/><Style.Triggers><DataTrigger Binding="{Binding Name}" Value="All targets"><Setter Property="FontWeight" Value="Bold"/></DataTrigger></Style.Triggers></Style></local:TargetTitle.Style></local:TargetTitle>
         <Border Grid.Column="1" Background="{DynamicResource SurfaceAlt}" CornerRadius="3" Padding="4,1" Margin="5,0,0,0" VerticalAlignment="Center"><TextBlock Text="{Binding FileCount}" FontSize="{DynamicResource UiFontCaption}" Foreground="{DynamicResource Muted}"/></Border>
         <TextBlock Grid.Row="1" Grid.ColumnSpan="2" Text="{Binding Subline}" FontSize="{DynamicResource UiFontCaption}" Foreground="{DynamicResource Muted}" TextWrapping="Wrap" Margin="0,3,0,0"><TextBlock.Style><Style TargetType="TextBlock"><Style.Triggers><DataTrigger Binding="{Binding Subline}" Value=""><Setter Property="Visibility" Value="Collapsed"/></DataTrigger></Style.Triggers></Style></TextBlock.Style></TextBlock>
        </Grid></DataTemplate></ListBox.ItemTemplate>
@@ -1008,7 +1011,7 @@
        <Border Grid.Row="1" Background="{DynamicResource Surface}" BorderBrush="{DynamicResource Border}" BorderThickness="1" CornerRadius="8" ClipToBounds="True"><Grid><DataGrid x:Name="EditedGrid" CanUserSortColumns="True"><DataGrid.Columns>
          <DataGridTextColumn Header="FILE" Binding="{Binding Filename}" Width="*" MinWidth="200"/>
          <DataGridTextColumn Header="FILE TYPE" Binding="{Binding FileType}" Width="85"/>
-         <DataGridTextColumn Header="ID" Binding="{Binding Metadata.ObjectId}" Width="56"/>
+         <DataGridTextColumn Header="ID" Binding="{Binding Metadata.ObjectId}" Width="88"/>
          <DataGridTextColumn Header="OBJECT" Binding="{Binding Metadata.TargetName}" Width="160"/>
          <DataGridTextColumn Header="TOTAL EXPOSURE" Binding="{Binding Metadata.TotalExposureText}" Width="130" Visibility="Collapsed"/>
          <DataGridTextColumn Header="SUBS" Binding="{Binding Metadata.SubsText}" Width="70" Visibility="Collapsed"/>

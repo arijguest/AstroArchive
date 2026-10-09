@@ -96,6 +96,7 @@ namespace AstroArchive {
    }
    foreach(string key in facts)Assets.UserFact(item,key);
    if(facts.Contains("Gain"))item.Facts["Gain"].Unit=item.GainUnit;
+   if(changes.ContainsKey("Target")&&!changes.ContainsKey("Camera"))CameraDetection.DefaultForTarget(item);
    return item;
   }
  }
