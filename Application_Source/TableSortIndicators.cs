@@ -21,6 +21,7 @@ namespace AstroArchive {
                 // Captions/cells clip; explicit resizing may overflow the viewport.
                 column.MinWidth = 32 * scale;
             }
+            TableColumnResizing.Refresh(grid);
         }
         public static void Update(DataGrid grid,System.Collections.Generic.IEnumerable<SortDescription> preparedSorts=null) {
             if(preparedSorts!=null)grid.SetValue(PreparedSortsProperty,preparedSorts.ToList());

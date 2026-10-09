@@ -28,7 +28,7 @@ namespace AstroArchive {
             Window.Resources["PreferHighContrast"] = settings.HighContrast;
             Theme.Apply(Window, settings.ThemeMode);
             if (navigationReady) UpdateCompactHeader();SizeActivity();
-            foreach (string name in new[] { "FramesGrid", "ImportGrid", "MetricsGrid" }) {
+            foreach (string name in new[] { "FramesGrid", "ImportGrid", "EditedGrid", "MetricsGrid" }) {
                 var table = Window.FindName(name) as DataGrid;
                 if (table != null) TableSortIndicators.SizeColumns(table, scale);
             }

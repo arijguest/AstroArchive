@@ -801,13 +801,13 @@
         <DataGrid x:Name="FramesGrid">
          <DataGrid.Columns>
           <DataGridTextColumn Header="FILE" Binding="{Binding OriginalName}" Width="*" MinWidth="175" />
-          <DataGridTextColumn Header="OBJECT ID" Binding="{Binding ObjectId}" Width="85" />
-          <DataGridTextColumn Header="COMMON NAME / LABEL" Binding="{Binding TargetName}" Width="180" />
-          <DataGridTextColumn Header="FRAME TYPE" Binding="{Binding Kind}" Width="110" />
-          <DataGridTextColumn Header="ACQUIRED" Binding="{Binding AcquisitionDateLabel}" Width="96" />
-          <DataGridTextColumn Header="EXPOSURE" Binding="{Binding ExposureText}" Width="76" />
-          <DataGridTextColumn Header="GAIN" Binding="{Binding GainText}" Width="60" />
-          <DataGridTextColumn Header="FILTER" Binding="{Binding Filter}" Width="85" />
+          <DataGridTextColumn Header="ID" Binding="{Binding ObjectId}" Width="56" />
+          <DataGridTextColumn Header="OBJECT" Binding="{Binding TargetName}" Width="160" />
+          <DataGridTextColumn Header="TYPE" Binding="{Binding Kind}" Width="88" />
+          <DataGridTextColumn Header="DATE" Binding="{Binding AcquisitionDateLabel}" Width="96" />
+          <DataGridTextColumn Header="EXPOSURE" Binding="{Binding ExposureText}" Width="88" />
+          <DataGridTextColumn Header="GAIN" Binding="{Binding GainText}" Width="64" />
+          <DataGridTextColumn Header="FILTER" Binding="{Binding Filter}" Width="88" />
          </DataGrid.Columns>
         </DataGrid>
         <StackPanel x:Name="EmptyState" IsHitTestVisible="False" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="20">
@@ -937,13 +937,13 @@
        <DataGrid.Columns>
         <DataGridTextColumn Header="STATUS" Binding="{Binding Status}" Width="110" />
         <DataGridTextColumn Header="REVIEW" Binding="{Binding ReviewText}" Width="115" />
-        <DataGridTextColumn Header="OBJECT ID" Binding="{Binding ObjectId}" Width="90" />
-        <DataGridTextColumn Header="COMMON NAME / LABEL" Binding="{Binding TargetName}" Width="220" />
+        <DataGridTextColumn Header="ID" Binding="{Binding ObjectId}" Width="56" />
+        <DataGridTextColumn Header="OBJECT" Binding="{Binding TargetName}" Width="160" />
         <DataGridTextColumn Header="DEVICE / MODEL" Binding="{Binding InstrumentText}" Width="150" />
-        <DataGridTextColumn Header="FRAME TYPE" Binding="{Binding Kind}" Width="100" />
+        <DataGridTextColumn Header="TYPE" Binding="{Binding Kind}" Width="88" />
         <DataGridTextColumn Header="CAMERA" Binding="{Binding Camera}" Width="90" />
-        <DataGridTextColumn Header="ACQUIRED" Binding="{Binding AcquisitionDateLabel}" Width="100" />
-        <DataGridTextColumn Header="EXPOSURE" Binding="{Binding ExposureText}" Width="80" />
+        <DataGridTextColumn Header="DATE" Binding="{Binding AcquisitionDateLabel}" Width="96" />
+        <DataGridTextColumn Header="EXPOSURE" Binding="{Binding ExposureText}" Width="88" />
         <DataGridTextColumn Header="FILE" Binding="{Binding OriginalName}" Width="*" MinWidth="180" />
        </DataGrid.Columns>
       </DataGrid>
@@ -1008,8 +1008,8 @@
        <Border Grid.Row="1" Background="{DynamicResource Surface}" BorderBrush="{DynamicResource Border}" BorderThickness="1" CornerRadius="8" ClipToBounds="True"><Grid><DataGrid x:Name="EditedGrid" CanUserSortColumns="True"><DataGrid.Columns>
          <DataGridTextColumn Header="FILE" Binding="{Binding Filename}" Width="*" MinWidth="200"/>
          <DataGridTextColumn Header="FILE TYPE" Binding="{Binding FileType}" Width="85"/>
-         <DataGridTextColumn Header="OBJECT ID" Binding="{Binding Metadata.ObjectId}" Width="85"/>
-         <DataGridTextColumn Header="COMMON NAME / LABEL" Binding="{Binding Metadata.TargetName}" Width="180"/>
+         <DataGridTextColumn Header="ID" Binding="{Binding Metadata.ObjectId}" Width="56"/>
+         <DataGridTextColumn Header="OBJECT" Binding="{Binding Metadata.TargetName}" Width="160"/>
          <DataGridTextColumn Header="TOTAL EXPOSURE" Binding="{Binding Metadata.TotalExposureText}" Width="130" Visibility="Collapsed"/>
          <DataGridTextColumn Header="SUBS" Binding="{Binding Metadata.SubsText}" Width="70" Visibility="Collapsed"/>
          <DataGridTextColumn Header="PER SUB" Binding="{Binding Metadata.SubExposureText}" Width="130" Visibility="Collapsed"/>
