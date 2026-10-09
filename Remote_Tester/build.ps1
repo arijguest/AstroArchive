@@ -10,5 +10,6 @@ $compilerArguments = @('/nologo','/target:winexe','/platform:x64','/optimize+','
 if ($LASTEXITCODE -ne 0) { throw 'Remote tester compilation failed.' }
 Copy-Item (Join-Path $PSScriptRoot 'AstroArchive.RemoteTester.exe.config') $OutputDirectory
 Copy-Item (Join-Path $PSScriptRoot 'README.md') $OutputDirectory
+Copy-Item (Join-Path $PSScriptRoot 'Collect-diagnostics.ps1') $OutputDirectory
 Copy-Item (Join-Path $PSScriptRoot '..\LICENSE') $OutputDirectory
 Write-Output (Join-Path $OutputDirectory 'AstroArchive.RemoteTester.exe')

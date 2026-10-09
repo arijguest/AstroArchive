@@ -1,4 +1,4 @@
-# AstroArchive Remote tester 0.1
+# AstroArchive Remote tester 0.1.1
 
 Portable Windows 10/11 x64 tester. Requires .NET Framework 4.8. Extract the ZIP
 and double-click **AstroArchive.RemoteTester.exe**. No installer, Python, ASCOM,
@@ -89,3 +89,26 @@ From a Windows PowerShell terminal in this directory:
 Output: `dist\AstroArchive.RemoteTester.exe`. Only the built-in .NET Framework C#
 compiler and reference libraries are needed. The shared palette is compiled from
 `Application_Source\Theme.cs`; the main application is not modified.
+
+## If Windows blocks the tester or it fails to open
+
+This test executable is unsigned. Smart App Control can block an unsigned, unknown
+application. A startup fix does not remove that policy block; a trusted publisher
+signature is needed. Do not disable protection or install a self-signed root
+certificate for this tester. Recent Windows updates may allow Smart App Control to
+be re-enabled in Windows Security → App & browser control → Smart App Control.
+
+Version 0.1.1 saves caught startup errors to
+`%LOCALAPPDATA%\AstroArchive.RemoteTester\startup-error.txt` and shows a selectable
+error window with **Copy details**. The log includes the full exception, runtime
+version and architecture. If the CLR or Windows policy prevents the process from
+starting, app-level logging cannot run. Use **Collect-diagnostics.ps1** (right-click
+→ Run with PowerShell, if permitted by your existing policy) to save a read-only
+report to the Desktop. It checks framework version, executable signature and recent
+matching Windows events without running the tester or changing security settings.
+It opens the report in Notepad so you can copy the text.
+
+If scripts are also blocked, do not change execution policy. Open Event Viewer →
+Windows Logs → Application and Application and Services Logs → Microsoft → Windows
+→ CodeIntegrity → Operational; look for AstroArchive.RemoteTester entries near the
+attempted launch time. Event details can be copied with the **Copy** action.

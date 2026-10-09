@@ -29,13 +29,13 @@ namespace AstroArchive.Remote {
  public static class Program {
   [STAThread] public static int Main(string[] args){
    if(args.Length>=3&&args[0]=="--worker")return Worker(args[1],args[2]);
-   try{return RunUi(args);}catch(Exception e){ShowError(e);return 1;}
+   try{return RunUi(args);}catch(Exception e){if(args.Length>0&&args[0]=="--ui-test")StartupDiagnostics.Save(e);else ShowError(e);return 1;}
   }
   // Keep WPF loading inside the catch boundary so missing framework assemblies
   // can be reported through the independent Windows Forms fallback.
   [MethodImpl(MethodImplOptions.NoInlining)] static int RunUi(string[] args){
    var app=new Application();RemoteUi ui=null;
-   app.DispatcherUnhandledException+=(s,e)=>{ShowError(e.Exception);e.Handled=true;};
+   app.DispatcherUnhandledException+=(s,e)=>{if(args.Length>0&&args[0]=="--ui-test"){StartupDiagnostics.Save(e.Exception);Environment.Exit(1);}else{ShowError(e.Exception);e.Handled=true;}};
    ui=new RemoteUi();
    if(args.Length==2&&args[0]=="--ui-test"){
     string output=Path.GetFullPath(args[1]);Directory.CreateDirectory(output);

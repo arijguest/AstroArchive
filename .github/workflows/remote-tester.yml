@@ -25,12 +25,12 @@ jobs:
           if (-not $process.WaitForExit(45000)) {
             Stop-Process -Id $process.Id -Force
             $log = Join-Path $env:LOCALAPPDATA 'AstroArchive.RemoteTester\startup-error.txt'
-            if (Test-Path $log) { Get-Content $log }
+            if (Test-Path $log) { Get-Content $log; Copy-Item $log '.\Remote_Tester\startup-error.txt' }
             throw 'Native WPF startup did not complete.'
           }
           if ($process.ExitCode -ne 0 -or -not (Test-Path (Join-Path $output 'ui-startup-passed.txt'))) {
             $log = Join-Path $env:LOCALAPPDATA 'AstroArchive.RemoteTester\startup-error.txt'
-            if (Test-Path $log) { Get-Content $log }
+            if (Test-Path $log) { Get-Content $log; Copy-Item $log '.\Remote_Tester\startup-error.txt' }
             throw 'Native WPF startup failed.'
           }
           Get-Content (Join-Path $output 'ui-startup-passed.txt')
@@ -40,5 +40,5 @@ jobs:
           name: remote-tester-windows
           path: |
             Remote_Tester/dist/
-            ~\AppData\Local\AstroArchive.RemoteTester\startup-error.txt
+            Remote_Tester/startup-error.txt
           if-no-files-found: error
