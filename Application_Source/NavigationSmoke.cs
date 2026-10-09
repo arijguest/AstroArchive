@@ -15,7 +15,9 @@ namespace AstroArchive {
             int page = tabs.SelectedIndex;
             var saved = Util.Serialize(settings);
             try {
+                File.WriteAllText(Path.Combine(output,"ui-current-stage.txt"),"SmokeNavigation: page switching");
                 SmokePageNavigation(output);
+                File.WriteAllText(Path.Combine(output,"ui-current-stage.txt"),"SmokeNavigation: repository layout");
                 GoToPage(0); Window.UpdateLayout();
                 string[] expected = { "ImportMenu", "ExportMenu", "RepositoryMenu", "SettingsMenu", "GuideMenu", "CoffeeMenu" };
                 if (!TopMenus().Select(item => item.Name).SequenceEqual(expected)) throw new Exception("Top-level menu order changed.");
@@ -29,6 +31,7 @@ namespace AstroArchive {
                 if(position.X<Window.ActualWidth/2||path.TranslatePoint(new Point(),Window).Y+1<repositoryGrid.TranslatePoint(new Point(0,repositoryGrid.ActualHeight),Window).Y)throw new Exception("Repository path is not below its data table.");
                 var workspace=(Grid)Window.FindName("WorkspaceRoot");if(workspace.RowDefinitions.Count!=3||((Popup)Window.FindName("OperationPopup")).IsOpen)throw new Exception("Idle workspace retains a bottom status row.");
                 foreach (string mode in new[] { "Light", "Dark" }) {
+                    File.WriteAllText(Path.Combine(output,"ui-current-stage.txt"),"SmokeNavigation: menus and filters "+mode);
                     settings.ThemeMode = mode; ApplyAppearance();
                     foreach (var item in TopMenus()) {
                         item.ApplyTemplate();
@@ -59,7 +62,8 @@ namespace AstroArchive {
                     SavePopup(filterBody,Path.Combine(output,"AstroArchive_Filters_"+mode+".png"));filtersPopup.IsOpen=false;PumpPopupLayout();
                     Capture(Path.Combine(output, "AstroArchive_Navigation_" + mode + ".png"));
                 }
-                SmokePreferences(output);
+                File.WriteAllText(Path.Combine(output,"ui-current-stage.txt"),"SmokeNavigation: preferences");SmokePreferences(output);
+                File.WriteAllText(Path.Combine(output,"ui-current-stage.txt"),"SmokeNavigation: table sorting");
                 var grid = G("FramesGrid"); var exposure = grid.Columns.First(column => column.SortMemberPath == "Exposure");
                 var before = tableSorts["FramesGrid"].ToList();
                 try {
@@ -73,6 +77,7 @@ namespace AstroArchive {
                     Capture(Path.Combine(output, "AstroArchive_Sorted_UI.png"));
                     SortTable("FramesGrid", exposure, true); if (TableSortIndicators.GetMark(exposure) != "▼ 1") throw new Exception("Descending sort marker did not reverse.");
                 } finally { tableSorts["FramesGrid"] = before; RestoreTableSort("FramesGrid");if(grid.Items.Count>0)grid.ScrollIntoView(grid.Items[0],grid.Columns.First()); }
+                File.WriteAllText(Path.Combine(output,"ui-current-stage.txt"),"SmokeNavigation: text scaling");
                 settings.TextScalePercent = 130; settings.ComfortableRows = true; settings.HighContrast = true; ApplyAppearance(); Window.UpdateLayout();
                 if (Math.Abs(Window.FontSize - 16.9) > 0.05 || grid.RowHeight < 57) throw new Exception("Accessible text or row sizing did not apply.");
                 Readable(Window.Foreground, Window.Background, "High contrast workspace");
@@ -105,6 +110,7 @@ namespace AstroArchive {
                 var licence = LicencePage();
                 try { licence.Window.Show(); PumpPopupLayout(); if (!PopupChildren<TextBlock>(licence.Window).Any(text => text.Text.Contains("Required Notice: Copyright 2026 Ari J. Guest") && text.Text.Contains("## Noncommercial Purposes"))) throw new Exception("Offline software licence is incomplete."); CapturePopup(licence.Window, Path.Combine(output, "AstroArchive_Licence_UI.png")); }
                 finally { licence.Window.Close(); }
+                File.WriteAllText(Path.Combine(output,"ui-current-stage.txt"),"SmokeNavigation: walkthrough");
                 var steps = WalkthroughSteps(); var originalSource = T("SourceBox").Text;
                 StartWalkthrough(); var tour = walkthrough;
                 try {

@@ -50,7 +50,7 @@ namespace AstroArchive {
    }));
   }
   static void Fit(DataGrid grid,Layout layout,bool force){
-   double available=Viewport(grid);if(available<=0)return;var columns=Visible(grid);bool changed=!columns.SequenceEqual(layout.Visible);
+   double available=Viewport(grid);if(available<=0)return;var columns=Visible(grid);bool changed=columns.Count!=layout.Visible.Count||columns.Any(c=>!layout.Visible.Contains(c));
    if(!force&&!changed&&Math.Abs(available-layout.Available)<0.5)return;
    RememberColumns(grid,layout);if(changed)layout.Overflow=0;layout.Visible=columns;layout.Available=available;
    var font=grid.TryFindResource("UiFontCaption");double size=font is double?(double)font:10,scale=size/10;
@@ -66,7 +66,17 @@ namespace AstroArchive {
      minimum[i]=Math.Min(minimum[i],column.MaxWidth);
     }
    }
-   var widths=ColumnWidths.Fit(preferred,minimum,columns.Select(c=>c.MaxWidth).ToArray(),columns.Select(c=>c.CanUserResize).ToArray(),available+layout.Overflow);
+   // The window rounds layout to physical pixels. Round the whole allocation
+   // together so individual columns cannot overrun the viewport and toggle bars.
+   double dpi=VisualTreeHelper.GetDpi(grid).DpiScaleX,budget=Math.Floor((available+layout.Overflow)*dpi)/dpi;
+   minimum=minimum.Select(width=>Math.Ceiling(width*dpi)/dpi).ToArray();
+   var maximum=columns.Select(c=>Math.Floor(c.MaxWidth*dpi)/dpi).ToArray();
+   var widths=ColumnWidths.Fit(preferred,minimum,maximum,columns.Select(c=>c.CanUserResize).ToArray(),budget);
+   for(int i=0;i<widths.Length;i++)widths[i]=Math.Max(minimum[i],Math.Floor(widths[i]*dpi)/dpi);
+   double spare=Math.Max(0,Math.Floor((budget-widths.Sum())*dpi+0.000001)/dpi);
+   foreach(int i in Enumerable.Range(0,widths.Length).Where(i=>columns[i].CanUserResize).OrderByDescending(i=>preferred[i])){
+    double give=Math.Floor(Math.Min(spare,maximum[i]-widths[i])*dpi)/dpi;widths[i]+=give;spare-=give;if(spare<=0)break;
+   }
    layout.Updating=true;
    try{for(int i=0;i<columns.Count;i++)columns[i].Width=new DataGridLength(widths[i]);}
    finally{layout.Updating=false;}
