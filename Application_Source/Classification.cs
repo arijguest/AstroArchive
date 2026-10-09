@@ -218,8 +218,8 @@ namespace AstroArchive {
    string cal=h.Get("CALSTAT");if(h.Get("CALIBRAT","CALIBRED")=="T"||Regex.IsMatch(cal,@"[DBF]"))f.Calibration="Calibrated";
    if(h.Get("REGISTER","REGISTRD","DEROTATE")=="T"||Regex.IsMatch(name,@"^(r_|r_pp_|registered[_-])")||low.Contains("/registered/"))f.Calibration="Registered";
    if(f.Kind=="Stack")f.Calibration="Device stack";if(f.Kind.StartsWith("Master")||f.Kind=="Dark"||f.Kind=="Flat"||f.Kind=="Bias")f.Calibration="Calibration frame";
-   if(f.Target=="Unknown")f.Notes+="Target needs identification. ";if(f.Kind=="Unknown")f.Notes+="Frame type needs review. ";if(f.Camera=="Unknown")f.Notes+="Camera channel unknown. ";
-   f.Sky=SkyWcs.FromHeader(h,f.Width,f.Height);if(classification!=null)classification.Complete();MetadataProfiles.Apply(f,h,asset);CameraDetection.DefaultForTarget(f);f.Session=Util.HashText(telescope+"|"+sourceSession+"|"+f.Night+"|"+f.Target+"|"+f.Camera+"|"+f.Width+"x"+f.Height).Substring(0,16);if(selectedImage!=null)f.ImageKey=selectedImage.Key;ApplyStackMetadata(f);if(f.Kind=="Video")MediaFiles.ApplyVideoDuration(f,asset.DurationSeconds,asset.DurationSource);return f;
+   if(f.Target=="Unknown")f.Notes+="Target needs identification. ";if(f.Kind=="Unknown")f.Notes+="Frame type needs review. ";
+   f.Sky=SkyWcs.FromHeader(h,f.Width,f.Height);if(classification!=null)classification.Complete();MetadataProfiles.Apply(f,h,asset);CameraDetection.DefaultForTarget(f);if(f.Camera=="Unknown")f.Notes+="Camera channel unknown. ";f.Session=Util.HashText(telescope+"|"+sourceSession+"|"+f.Night+"|"+f.Target+"|"+f.Camera+"|"+f.Width+"x"+f.Height).Substring(0,16);if(selectedImage!=null)f.ImageKey=selectedImage.Key;ApplyStackMetadata(f);if(f.Kind=="Video")MediaFiles.ApplyVideoDuration(f,asset.DurationSeconds,asset.DurationSource);return f;
    }
   }
   static Dictionary<string,string> ReadShots(string path,string root,Frame f,Dictionary<string,ShotsMetadata> cache,Action<int> counted,System.Threading.CancellationToken ct,PipelineMetrics metrics){

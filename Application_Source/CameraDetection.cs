@@ -13,6 +13,6 @@ namespace AstroArchive {public static class CameraDetection {
   string group=TargetNavigation.Group(frame.Target);if(!new[]{"Solar system","Nebulae","Galaxies","Star clusters"}.Contains(group))return false;
   frame.Camera="Telephoto";frame.CameraEvidence="Target-based default: "+TargetNavigation.TargetId(frame.Target)+" (not a detected camera marker)";
   if(frame.Facts==null)frame.Facts=new Dictionary<string,MetadataFact>();frame.Facts["Camera"]=new MetadataFact{Value=frame.Camera,Raw=frame.Target,Source=frame.CameraEvidence};
-  frame.Notes=(frame.Notes??"").Replace("Camera channel unknown. ","");return true;
+  return true;
  }
 }}

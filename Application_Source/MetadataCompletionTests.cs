@@ -7,7 +7,7 @@ namespace AstroArchive {
  public partial class Tests {
   static void MetadataCompletionTests(){
    Test("Unknown cameras default to Tele for selected DSO and solar targets only",()=>{
-    foreach(string target in new[]{"NGC7000","M31","M45","Moon","Mars","C/2023 A3"}){var frame=new Frame{Target=target,Camera="Unknown",Kind="Light"};Check(CameraDetection.DefaultForTarget(frame)&&frame.Camera=="Telephoto"&&frame.Facts["Camera"].Source.StartsWith("Target-based default"),"Target fallback missing: "+target);Check(!CameraDetection.DefaultForTarget(frame),"Camera fallback was not idempotent");}
+    foreach(string target in new[]{"NGC7000","M31","M45","Moon","Mars","C/2023 A3"}){var frame=new Frame{Target=target,Camera="Unknown",Kind="Light",Notes="Camera channel unknown. User notes."};Check(CameraDetection.DefaultForTarget(frame)&&frame.Camera=="Telephoto"&&frame.Facts["Camera"].Source.StartsWith("Target-based default")&&frame.Notes=="Camera channel unknown. User notes.","Target fallback missing or recorded notes changed: "+target);Check(!CameraDetection.DefaultForTarget(frame),"Camera fallback was not idempotent");}
     foreach(string target in new[]{"Unknown","Calibration","Meteor","Unidentified field","Sirius"}){var frame=new Frame{Target=target,Camera="Unknown"};Check(!CameraDetection.DefaultForTarget(frame),"Unidentified/non-DSO target defaulted: "+target);}
     foreach(string camera in new[]{"Wide","Telephoto","Primary","Custom camera"}){var frame=new Frame{Target="M31",Camera=camera};Check(!CameraDetection.DefaultForTarget(frame)&&frame.Camera==camera,"Recorded camera replaced");}
     var calibration=new Frame{Target="M31",Camera="Unknown",Kind="Dark"};Check(!CameraDetection.DefaultForTarget(calibration),"Calibration camera guessed");
