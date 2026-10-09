@@ -47,6 +47,7 @@ namespace AstroArchive {
  }
  public static class RemoteCaptureStaging {
   public static string CacheRoot(string cache,RemoteConnection c){return Path.Combine(cache,Util.HashText(c.Kind+"|"+c.Host+"|"+c.Port+"|"+c.Folder));}
+  static void ForgetMetadata(RemoteConnection c,string path,string root,string receipts){string relative=RemoteCapturePaths.LocalRelative(c,path),local=Path.Combine(root,relative),receipt=Path.Combine(receipts,Util.HashText(relative)+".json");Paths.CheckLinks(local,root);Paths.CheckLinks(receipt,receipts);if(File.Exists(local))File.Delete(local);if(File.Exists(receipt))File.Delete(receipt);}
   static string Copy(ISource source,RemoteConnection c,Entry expected,string root,string receipts,CancellationToken ct,Action<long> pulse,out bool reused){
    ct.ThrowIfCancellationRequested();string relative=RemoteCapturePaths.LocalRelative(c,expected.Path),destination=Path.Combine(root,relative),receiptPath=Path.Combine(receipts,Util.HashText(relative)+".json");
    Paths.CheckLinks(destination,root);Paths.CheckLinks(receiptPath,receipts);Entry before=source.Stat(expected.Path);
@@ -83,8 +84,13 @@ namespace AstroArchive {
     foreach(var file in files){string parent=RemoteCapturePaths.Parent(c,file.Path);HashSet<string> names;if(!wanted.TryGetValue(parent,out names))wanted[parent]=names=new HashSet<string>(StringComparer.OrdinalIgnoreCase);foreach(string name in AssociatedMetadata.Names(file.Name))names.Add(name);
      for(string folder=parent;;folder=RemoteCapturePaths.Parent(c,folder)){if(!wanted.TryGetValue(folder,out names))wanted[folder]=names=new HashSet<string>(StringComparer.OrdinalIgnoreCase);names.Add("shotsInfo.json");if(folder.TrimEnd('\\','/')==c.Folder.TrimEnd('\\','/'))break;}
     }
-    long metadataBytes=0;foreach(var folder in wanted){ct.ThrowIfCancellationRequested();try{foreach(var entry in source.List(folder.Key)){if(entry.Directory||!folder.Value.Contains(entry.Name))continue;if(entry.Size>16*1024*1024||(metadataBytes+=Math.Max(0,entry.Size))>128*1024*1024){result.Warnings.Add("Metadata too large to download: "+entry.Name);continue;}bool reused;Copy(source,c,entry,root,receipts,ct,null,out reused);}}
-     catch(OperationCanceledException){throw;}catch(Exception e){result.Warnings.Add("Some session metadata was unavailable: "+e.Message);}
+    long metadataBytes=0;foreach(var folder in wanted){ct.ThrowIfCancellationRequested();List<Entry> listed;
+     try{listed=source.List(folder.Key);}catch(OperationCanceledException){throw;}catch(Exception e){foreach(string name in folder.Value)ForgetMetadata(c,RemoteCapturePaths.Join(c,folder.Key,name),root,receipts);result.Warnings.Add("Some session metadata was unavailable: "+e.Message);continue;}
+     foreach(string missing in folder.Value.Where(name=>!listed.Any(e=>!e.Directory&&e.Name.Equals(name,StringComparison.OrdinalIgnoreCase))))ForgetMetadata(c,RemoteCapturePaths.Join(c,folder.Key,missing),root,receipts);
+     foreach(var entry in listed){if(entry.Directory||!folder.Value.Contains(entry.Name))continue;
+      if(entry.Size>16*1024*1024||(metadataBytes+=Math.Max(0,entry.Size))>128*1024*1024){ForgetMetadata(c,entry.Path,root,receipts);result.Warnings.Add("Metadata too large to download: "+entry.Name);continue;}
+      try{bool reused;Copy(source,c,entry,root,receipts,ct,null,out reused);}catch(OperationCanceledException){throw;}catch(Exception e){ForgetMetadata(c,entry.Path,root,receipts);result.Warnings.Add("Session metadata will need retry: "+entry.Name+": "+e.Message);}
+     }
     }
    }return result;
   }
