@@ -65,9 +65,9 @@ namespace AstroArchive {
      minimum[i]=Math.Max(minimum[i],caption.WidthIncludingTrailingWhitespace+30*scale);
      var binding=column as DataGridBoundColumn;var path=binding==null?null:binding.Binding as Binding;string field=path==null||path.Path==null?"":path.Path.Path;
      string sample=field=="ObjectId"||field=="Metadata.ObjectId"?"NGC7000":field=="Kind"||field=="KindLabel"?"Stack (1000)":null;
-     if(sample!=null){var body=grid.TryFindResource("UiFontBody");double bodySize=body is double?(double)body:grid.FontSize;
-      var text=new FormattedText(sample,CultureInfo.CurrentUICulture,FlowDirection.LeftToRight,new Typeface(grid.FontFamily,FontStyles.Normal,FontWeights.Normal,FontStretches.Normal),bodySize,Brushes.Black,VisualTreeHelper.GetDpi(grid).PixelsPerDip);
-      minimum[i]=Math.Max(minimum[i],text.WidthIncludingTrailingWhitespace+20*scale);
+     if(sample!=null){
+      var text=new FormattedText(sample,CultureInfo.CurrentUICulture,FlowDirection.LeftToRight,new Typeface(grid.FontFamily,FontStyles.Normal,FontWeights.Normal,FontStretches.Normal),grid.FontSize,Brushes.Black,VisualTreeHelper.GetDpi(grid).PixelsPerDip);
+      minimum[i]=Math.Max(minimum[i],text.WidthIncludingTrailingWhitespace+24*scale);
      }
      if(original.IsStar)minimum[i]=Math.Max(minimum[i],120*scale);
      minimum[i]=Math.Min(minimum[i],column.MaxWidth);
