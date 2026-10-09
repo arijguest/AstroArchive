@@ -60,8 +60,13 @@ namespace AstroArchive {
    WindowsTest("Edited headers on NTFS are reused and same-size same-time external edits are reread",()=>{
     string path=Path.Combine(root,"native-header-cache.fit");Write(path,8,8,(x,y)=>1000,new Dictionary<string,string>{{"OBJECT","'M31'"}});int reads=0;var cache=new EditedHeaderCache(4096,null,file=>{reads++;return Assets.Inspect(file).Header;});
     if(!FileStamp.Read(path).Reliable){Console.WriteLine("SKIP header reuse requires NTFS/ReFS change stamps");return;}
+    Thread.Sleep(2100); // Let the filesystem clock advance before testing unchanged reuse.
     Check(cache.Get(path,ct).Get("OBJECT")=="M31"&&cache.Get(path,ct).Get("OBJECT")=="M31"&&reads==1,"Native unchanged image reopened");DateTime modified=File.GetLastWriteTimeUtc(path);long size=new FileInfo(path).Length;
     Write(path,8,8,(x,y)=>1000,new Dictionary<string,string>{{"OBJECT","'M51'"}});File.SetLastWriteTimeUtc(path,modified);Check(new FileInfo(path).Length==size&&cache.Get(path,ct).Get("OBJECT")=="M51"&&reads==2,"Native same-size/same-time edit reused stale metadata");
+   });
+   Test("Recent writes are reread even when reliable file stamps share a clock tick",()=>{
+    int reads=0;var stamp=new FileStamp{Reliable=true,Identity="recent",Size=1,Modified=1,Created=1,Changed=DateTime.UtcNow.ToFileTimeUtc()};var cache=new EditedHeaderCache(4096,path=>stamp.Clone(),path=>{reads++;var header=new FitsHeader();header.Values["OBJECT"]=reads==1?"M31":"M51";return header;});
+    Check(cache.Get("recent.fit",ct).Get("OBJECT")=="M31"&&cache.Get("recent.fit",ct).Get("OBJECT")=="M51"&&reads==2&&cache.Count==0,"A write within one clock tick reused stale metadata");
    });
    Test("Edited header caching invalidates by file identity and change time and does not cache errors or cloud files",()=>{
     var stamp=new FileStamp{Reliable=true,Identity="fixture",Size=42,Modified=10,Created=1,Changed=10};int reads=0;bool fail=false;

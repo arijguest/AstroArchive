@@ -21,7 +21,8 @@ Edited refreshes still enumerate folders and reapply project assignments, target
 matching and GIF inheritance. Parsed image headers use an 8 MiB/4,096-entry cache
 only when Windows supplies reliable NTFS/ReFS identity and change stamps.
 Cloud-backed or unreliable stamps always reread headers. Changed files and
-transient errors invalidate entries; cache hits return independent headers.
+transient errors invalidate entries; cache hits return independent headers. Files
+changed within the last two seconds are reread while filesystem timestamps settle.
 Case-insensitive path indexes replace repeated source/assignment scans, and a
 combined gallery is sorted once.
 
