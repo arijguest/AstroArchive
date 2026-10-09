@@ -41,7 +41,7 @@ namespace AstroArchive {
   }
   void InitializeEdited(){
    C("EditedClassFilter").ItemsSource=new[]{"All images","Starless","Stars only","GIF","Meteor","Edited image","Unknown (conflicting labels)"};C("EditedClassFilter").SelectedIndex=0;C("EditedClassFilter").SelectionChanged+=(s,e)=>FilterEditedImages();
-   T("EditedSearchBox").TextChanged+=(s,e)=>ScheduleSearch("EditedSearchBox");G("EditedGrid").SelectionChanged+=(s,e)=>{UpdateEditedActions();LoadEditedPreview();};G("EditedGrid").MouseDoubleClick+=(s,e)=>PreviewEditedImage();
+   T("EditedSearchBox").TextChanged+=(s,e)=>ScheduleSearch("EditedSearchBox");G("EditedGrid").SelectionChanged+=(s,e)=>{if(restoringTargetSelection)return;CaptureTargetSelection("EditedGrid");UpdateEditedActions();LoadEditedPreview();};G("EditedGrid").MouseDoubleClick+=(s,e)=>PreviewEditedImage();
    EditedTargets.SelectionChanged+=(s,e)=>{if(!refreshingEditedTargets)FilterEditedImages(false);};B("EditedClearButton").Click+=(s,e)=>{T("EditedSearchBox").Clear();C("EditedClassFilter").SelectedIndex=0;EditedTargets.SelectedIndex=0;FilterEditedImages();};B("EditedFiltersButton").Click+=(s,e)=>OpenEditedFilters();InitializeEditedPreview();
    InitializeEditedFileMenu();B("EditedEditButton").Click+=(s,e)=>EditEditedMetadata();
    B("EditedAddButton").Click+=(s,e)=>AddEditedImages();B("EditedImportFolderButton").Click+=(s,e)=>ImportEditedFolder();B("EditedRefreshButton").Click+=(s,e)=>RefreshEdited();B("DismissEditedImportNotice").Click+=(s,e)=>((FrameworkElement)Window.FindName("EditedImportNotice")).Visibility=Visibility.Collapsed;
@@ -57,7 +57,8 @@ namespace AstroArchive {
   }
   string editedFocusProject,editedFocusPath;
   void RestoreEditedSelection(IEnumerable<EditedImage> rows,EditedImage previous){
-   G("EditedGrid").SelectedItem=rows.FirstOrDefault(i=>editedFocusProject!=null?i.Project.Id==editedFocusProject&&(editedFocusPath==null||i.RelativePath==editedFocusPath):previous!=null&&i.Project.Id==previous.Project.Id&&i.RelativePath==previous.RelativePath);editedFocusProject=null;editedFocusPath=null;
+   var focus=rows.FirstOrDefault(i=>editedFocusProject!=null?i.Project.Id==editedFocusProject&&(editedFocusPath==null||i.RelativePath==editedFocusPath):previous!=null&&i.Project.Id==previous.Project.Id&&i.RelativePath==previous.RelativePath);
+   if(editedFocusProject!=null&&focus!=null)editedSelection.Add(focus);RestoreTargetSelection("EditedGrid",focus);editedFocusProject=null;editedFocusPath=null;LoadEditedPreview();
   }
   void FilterEditedImages(bool rebuildTargets=true){
    if(!editedReady)return;if(Window.IsLoaded&&editedImages.Count>2000){ScheduleSearch("EditedSearchBox",true,true);return;}CancelSearch("EditedSearchBox");var selected=ActiveEditedImage;var query=FileSearch.Parse(T("EditedSearchBox").Text);ShowSearchError("EditedSearchBox",query);L("EditedSearchHint").Visibility=query.IsEmpty?Visibility.Visible:Visibility.Collapsed;
@@ -107,7 +108,7 @@ namespace AstroArchive {
   void EditedImportComplete(string id,EditedImportResult result){RefreshEdited();L("StatusLabel").Text=result.Summary;L("EditedImportNoticeText").Text=result.Summary;((FrameworkElement)Window.FindName("EditedImportNotice")).Visibility=Visibility.Visible;if(result.Warnings.Count>0)ShowReport("Edited duplicate checks",result.Summary+"\n\nExisting files that could not be checked:\n"+string.Join("\n",result.Warnings));}
   void PreviewEditedImage(){
    if(repo==null||RepositoryOperationBlocked||EditedImageProject==null||ActiveEditedImage==null)return;string path=repo.EditedPath(EditedImageProject,ActiveEditedImage.RelativePath);if(MediaFiles.Motion(path)){new ImagePreviewWindow(Window,ActiveEditedImage.Filename,path).ShowDialog();return;}PreviewData data=null;byte[] pixels=null;
-   Run(ct=>{data=DecodePreview(path,ct);data.ApplyContext(null,path);pixels=data.Render(ScientificPreview(path)?settings.PreviewStretch??"Auto per channel":"Linear",ct);return path;},image=>new ImagePreviewWindow(Window,Path.GetFileName(image),data.Width,data.Height,pixels).ShowDialog());
+   Run(ct=>{data=DecodeFullPreview(path,ct);data.ApplyContext(null,path);pixels=data.Render(ScientificPreview(path)?settings.PreviewStretch??"Auto per channel":"Linear",ct);return path;},image=>new ImagePreviewWindow(Window,Path.GetFileName(image),data.Width,data.Height,pixels).ShowDialog());
   }
   void ShowEditedEditors(){
    ExportEditedTo();

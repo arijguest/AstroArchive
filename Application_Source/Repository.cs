@@ -14,19 +14,19 @@ using System.Security.Cryptography;
 namespace AstroArchive {
  public sealed class Database:IDisposable {
   IntPtr db;readonly object sync=new object();readonly string databasePath;long generation;public long Generation{get{lock(sync)return generation;}}
-  [DllImport("winsqlite3.dll",CallingConvention=CallingConvention.Cdecl)]static extern int sqlite3_open_v2(byte[] name,out IntPtr db,int flags,IntPtr vfs);
-  [DllImport("winsqlite3.dll",CallingConvention=CallingConvention.Cdecl)]static extern int sqlite3_close(IntPtr db);
-  [DllImport("winsqlite3.dll",CallingConvention=CallingConvention.Cdecl)]static extern int sqlite3_prepare_v2(IntPtr db,byte[] sql,int n,out IntPtr stmt,IntPtr tail);
-  [DllImport("winsqlite3.dll",CallingConvention=CallingConvention.Cdecl)]static extern int sqlite3_step(IntPtr stmt);
-  [DllImport("winsqlite3.dll",CallingConvention=CallingConvention.Cdecl)]static extern int sqlite3_finalize(IntPtr stmt);
-  [DllImport("winsqlite3.dll",CallingConvention=CallingConvention.Cdecl)]static extern IntPtr sqlite3_errmsg(IntPtr db);
-  [DllImport("winsqlite3.dll",CallingConvention=CallingConvention.Cdecl)]static extern int sqlite3_extended_errcode(IntPtr db);
-  [DllImport("winsqlite3.dll",CallingConvention=CallingConvention.Cdecl)]static extern IntPtr sqlite3_column_text(IntPtr stmt,int col);
-  [DllImport("winsqlite3.dll",CallingConvention=CallingConvention.Cdecl)]static extern int sqlite3_column_bytes(IntPtr stmt,int col);
-  [DllImport("winsqlite3.dll",CallingConvention=CallingConvention.Cdecl)]static extern int sqlite3_bind_text(IntPtr stmt,int col,byte[] val,int n,IntPtr free);
-  [DllImport("winsqlite3.dll",CallingConvention=CallingConvention.Cdecl)]static extern IntPtr sqlite3_backup_init(IntPtr destination,byte[] target,IntPtr source,byte[] origin);
-  [DllImport("winsqlite3.dll",CallingConvention=CallingConvention.Cdecl)]static extern int sqlite3_backup_step(IntPtr backup,int pages);
-  [DllImport("winsqlite3.dll",CallingConvention=CallingConvention.Cdecl)]static extern int sqlite3_backup_finish(IntPtr backup);
+  [DefaultDllImportSearchPaths(DllImportSearchPath.System32)][DllImport("winsqlite3.dll",CallingConvention=CallingConvention.Cdecl)]static extern int sqlite3_open_v2(byte[] name,out IntPtr db,int flags,IntPtr vfs);
+  [DefaultDllImportSearchPaths(DllImportSearchPath.System32)][DllImport("winsqlite3.dll",CallingConvention=CallingConvention.Cdecl)]static extern int sqlite3_close(IntPtr db);
+  [DefaultDllImportSearchPaths(DllImportSearchPath.System32)][DllImport("winsqlite3.dll",CallingConvention=CallingConvention.Cdecl)]static extern int sqlite3_prepare_v2(IntPtr db,byte[] sql,int n,out IntPtr stmt,IntPtr tail);
+  [DefaultDllImportSearchPaths(DllImportSearchPath.System32)][DllImport("winsqlite3.dll",CallingConvention=CallingConvention.Cdecl)]static extern int sqlite3_step(IntPtr stmt);
+  [DefaultDllImportSearchPaths(DllImportSearchPath.System32)][DllImport("winsqlite3.dll",CallingConvention=CallingConvention.Cdecl)]static extern int sqlite3_finalize(IntPtr stmt);
+  [DefaultDllImportSearchPaths(DllImportSearchPath.System32)][DllImport("winsqlite3.dll",CallingConvention=CallingConvention.Cdecl)]static extern IntPtr sqlite3_errmsg(IntPtr db);
+  [DefaultDllImportSearchPaths(DllImportSearchPath.System32)][DllImport("winsqlite3.dll",CallingConvention=CallingConvention.Cdecl)]static extern int sqlite3_extended_errcode(IntPtr db);
+  [DefaultDllImportSearchPaths(DllImportSearchPath.System32)][DllImport("winsqlite3.dll",CallingConvention=CallingConvention.Cdecl)]static extern IntPtr sqlite3_column_text(IntPtr stmt,int col);
+  [DefaultDllImportSearchPaths(DllImportSearchPath.System32)][DllImport("winsqlite3.dll",CallingConvention=CallingConvention.Cdecl)]static extern int sqlite3_column_bytes(IntPtr stmt,int col);
+  [DefaultDllImportSearchPaths(DllImportSearchPath.System32)][DllImport("winsqlite3.dll",CallingConvention=CallingConvention.Cdecl)]static extern int sqlite3_bind_text(IntPtr stmt,int col,byte[] val,int n,IntPtr free);
+  [DefaultDllImportSearchPaths(DllImportSearchPath.System32)][DllImport("winsqlite3.dll",CallingConvention=CallingConvention.Cdecl)]static extern IntPtr sqlite3_backup_init(IntPtr destination,byte[] target,IntPtr source,byte[] origin);
+  [DefaultDllImportSearchPaths(DllImportSearchPath.System32)][DllImport("winsqlite3.dll",CallingConvention=CallingConvention.Cdecl)]static extern int sqlite3_backup_step(IntPtr backup,int pages);
+  [DefaultDllImportSearchPaths(DllImportSearchPath.System32)][DllImport("winsqlite3.dll",CallingConvention=CallingConvention.Cdecl)]static extern int sqlite3_backup_finish(IntPtr backup);
   static byte[] UTF(string s){return Encoding.UTF8.GetBytes(s+"\0");}
   string Error(){IntPtr p=sqlite3_errmsg(db);return Marshal.PtrToStringAnsi(p)+" (SQLite "+sqlite3_extended_errcode(db)+") at "+databasePath;}
   IOException Failure(){var error=new IOException(Error());error.Data["SQLiteCode"]=sqlite3_extended_errcode(db);return error;}
@@ -43,7 +43,7 @@ namespace AstroArchive {
   public string Root{get;private set;} public string Meta{get;private set;} Database db;Mutex mutex;bool held;
   public static string LocalIndexBase;
   public string WorkingIndex{get;private set;}public string LastReport="";DateTime checkpoint=DateTime.MinValue;long checkpointGeneration=-1;FileStamp checkpointStamp;
-  public Repository(string root){Root=Path.GetFullPath(root);Directory.CreateDirectory(Root);Meta=Path.Combine(Root,".astroarchive");Directory.CreateDirectory(Meta);
+  public Repository(string root){Root=Path.GetFullPath(root);Directory.CreateDirectory(Root);Meta=Path.Combine(Root,".astroarchive");CheckManagedPath(Meta,Root);Directory.CreateDirectory(Meta);
    mutex=new Mutex(false,"Local\\AstroArchive_"+Util.HashText(Root.ToLowerInvariant()));try{held=mutex.WaitOne(0);}catch(AbandonedMutexException){held=true;}if(!held){mutex.Dispose();throw new IOException("This repository is already open in another AstroArchive window.");}
    string local=Path.Combine(LocalIndexBase??Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),"AstroArchive","repositories"),Util.HashText(Root.ToLowerInvariant()+BackupIdentity()));Directory.CreateDirectory(local);WorkingIndex=Path.Combine(local,"index.sqlite");
    try{string portable=Path.Combine(Meta,"index.sqlite");if(!File.Exists(WorkingIndex)&&File.Exists(portable)){using(var original=new Database(portable))original.BackupTo(WorkingIndex,CancellationToken.None);}db=new Database(WorkingIndex);db.ManifestSchema();protection=new ArchiveProtection(Root,Meta);RecoverTelescopeRename();NormalizeSolarTargets();}catch{Dispose();throw;}
@@ -53,11 +53,11 @@ namespace AstroArchive {
   public List<Frame> All(){var frames=db.Query("SELECT data FROM files").Select(Util.Deserialize<Frame>).ToList();return frames;}
   public Frame Find(string hash){string data=db.Query("SELECT data FROM files WHERE hash=?",hash).FirstOrDefault();return data==null?null:Util.Deserialize<Frame>(data);}
   public void Save(Frame f){f.Target=ObservationTargets.CanonicalSolar(f.Target);db.Exec("INSERT OR REPLACE INTO files(hash,data) VALUES(?,?)",f.Hash,Util.Serialize(f));RememberImportName(f);}
-  public void Refile(Frame f,CancellationToken ct){string old=FilePath(f),rel=Destination(f),dest=Path.Combine(Root,rel);if(string.Equals(old,dest,StringComparison.OrdinalIgnoreCase)){Save(f);return;}if(!File.Exists(old))throw new IOException("Repository file missing: "+old);if(Util.Hash(old,ct)!=f.Hash)throw new IOException("Repository file has changed; metadata was not applied: "+old);Directory.CreateDirectory(Path.GetDirectoryName(dest));bool moved=false;string previous=f.RelativePath;
+  public void Refile(Frame f,CancellationToken ct){string old=FilePath(f),rel=Destination(f),dest=Path.Combine(Root,rel);if(string.Equals(old,dest,StringComparison.OrdinalIgnoreCase)){Save(f);return;}if(!File.Exists(old))throw new IOException("Repository file missing: "+old);if(Util.Hash(old,ct)!=f.Hash)throw new IOException("Repository file has changed; metadata was not applied: "+old);CheckManagedPath(dest,Root);Directory.CreateDirectory(Path.GetDirectoryName(dest));CheckManagedPath(dest,Root);bool moved=false;string previous=f.RelativePath;
    if(File.Exists(dest)){if(Util.Hash(dest,ct)!=f.Hash)throw new IOException("Conflicting destination file.");}else{MoveCapture(old,dest);moved=true;}try{f.RelativePath=rel;f.RepositoryStamp=FileStamp.Read(dest);Save(f);}catch{f.RelativePath=previous;if(moved)MoveCapture(dest,old);throw;}
   }
   public void SaveRotation(RotationResult r){db.Exec("INSERT OR REPLACE INTO sessions(id,data) VALUES(?,?)",r.Session,Util.Serialize(r));}
-  public string FilePath(Frame f){string p=Path.GetFullPath(Path.Combine(Root,f.RelativePath??""));if(!Util.Within(p,Root))throw new IOException("Repository path escapes the selected folder.");return p;}
+  public string FilePath(Frame f){string p=Path.GetFullPath(Path.Combine(Root,f.RelativePath??""));CheckManagedPath(p,Root);return p;}
   sealed class Scanned {public Frame Frame;public long Bytes;public bool CacheHit,HeaderHit;public string Error;}
   Scanned ScanOne(ScanEntry entry,string source,string telescope,string model,bool reindex,bool deferHash,bool cloudSource,string telescopeIdentity,Dictionary<string,SourceManifest> cached,HashSet<string> deleted,Dictionary<string,Classifier.ShotsMetadata> shots,MetadataHeaderCache headers,PipelineMetrics metrics,CancellationToken ct,Dictionary<string,Frame> archive,bool fullScan,bool scopedArchive){
    var item=new Scanned();string name=Path.GetFileName(entry.Path);
@@ -156,6 +156,15 @@ namespace AstroArchive {
   }
   public static void CopyVerified(string from,string to,string hash,CancellationToken ct,PipelineMetrics metrics=null,PipelineMetrics.Transfer transfer=null){string copied=FileTransfer.CopyHash(from,to,ct,metrics,FileStamp.Read(from).Cloud,transfer);if(!string.IsNullOrEmpty(hash)&&copied!=hash)throw new IOException("Checksum mismatch; source may have changed during copying: "+from);using(var scope=metrics==null?null:metrics.Begin("Verification",Path.GetFileName(to))){if(transfer!=null)transfer.BeginVerification();if(Util.Hash(to,ct,n=>{if(scope!=null)scope.Bytes(n);if(transfer!=null)transfer.Verified(n);})!=copied)throw new IOException("Destination checksum mismatch: "+to);if(transfer!=null)transfer.EndVerification();if(scope!=null)scope.Complete();}}
   public int Verify(CancellationToken ct,Action<ProgressInfo> progress){var all=All();int bad=0;for(int i=0;i<all.Count;i++){ct.ThrowIfCancellationRequested();var f=all[i];progress(new ProgressInfo{Done=i,Total=all.Count,Text="Verifying "+f.OriginalName});string p=FilePath(f);if(!File.Exists(p)){f.Status="Missing";bad++;}else if(Util.Hash(p,ct)!=f.Hash){f.Status="Changed";bad++;}else f.Status="Verified";Save(f);}return bad;}
-  public void ExportIndex(string path,IEnumerable<Frame> selection=null){var all=selection??All();StringBuilder b=new StringBuilder("Target,ObjectID,CommonName,Make,Model,MakeEvidence,TargetEvidence,Telescope,Camera,Kind,Mount,MountEvidence,Observed,TimeSource,AcquisitionDate,AcquisitionDateSource,Exposure_s,Gain,Temperature_C,Filter,Calibration,Dimensions,Hash,RelativePath,SourceDisposition,Format,Capabilities,CameraModel,CameraId,TelescopeModel,Offset,GainUnit,ElectronsPerADU,ReadoutMode,ROI,OpticalConfiguration,ObservedUTC,Timezone,LinearData,ImageKey,ImageIndex\r\n");foreach(var f in all){string[] a={f.Target,f.ObjectId,f.CommonName,f.MakeText,f.Model,f.MakeEvidence,f.TargetEvidence,f.Telescope,f.Camera,f.Kind,f.MountText,f.MountEvidenceText,f.Observed,f.TimeSource,f.AcquisitionDate,f.AcquisitionDateSource,Util.Num(f.Exposure),Util.Num(f.Gain),Util.Num(f.Temperature),f.Filter,f.Calibration,f.SizeText,f.Hash,f.RelativePath,f.SourceDisposition,f.Format,f.CapabilityText,f.CameraModel,f.CameraId,f.TelescopeModel,Util.Num(f.Offset),f.GainUnit,Util.Num(f.ElectronsPerAdu),f.ReadoutMode,f.Roi,f.OpticalConfiguration,f.ObservedUtc,f.TimeZoneId,f.LinearData.HasValue?f.LinearData.ToString():"",f.ImageKey,f.ImageIndex.HasValue?f.ImageIndex.ToString():""};b.AppendLine(string.Join(",",a.Select(s=>"\""+(s??"").Replace("\"","\"\"")+"\"")));}File.WriteAllText(path,b.ToString(),new UTF8Encoding(true));}
+  // CSV quoting preserves delimiters, but spreadsheet formulas need a text prefix.
+  internal static string CatalogueCsvField(string value,bool numeric=false){
+   value=value??"";
+   if(!numeric){int first=0;bool control=false;while(first<value.Length&&(char.IsWhiteSpace(value[first])||char.IsControl(value[first]))){control|=char.IsControl(value[first]);first++;}
+    bool formula=first<value.Length&&"=+-@＝＋－＠".IndexOf(value[first])>=0;
+    if(formula||control)value="\t"+value;
+   }
+   return "\""+value.Replace("\"","\"\"")+"\"";
+  }
+  public void ExportIndex(string path,IEnumerable<Frame> selection=null){var all=selection??All();StringBuilder b=new StringBuilder("Target,ObjectID,CommonName,Make,Model,MakeEvidence,TargetEvidence,Telescope,Camera,Kind,Mount,MountEvidence,Observed,TimeSource,AcquisitionDate,AcquisitionDateSource,Exposure_s,Gain,Temperature_C,Filter,Calibration,Dimensions,Hash,RelativePath,SourceDisposition,Format,Capabilities,CameraModel,CameraId,TelescopeModel,Offset,GainUnit,ElectronsPerADU,ReadoutMode,ROI,OpticalConfiguration,ObservedUTC,Timezone,LinearData,ImageKey,ImageIndex\r\n");foreach(var f in all){string[] a={f.Target,f.ObjectId,f.CommonName,f.MakeText,f.Model,f.MakeEvidence,f.TargetEvidence,f.Telescope,f.Camera,f.Kind,f.MountText,f.MountEvidenceText,f.Observed,f.TimeSource,f.AcquisitionDate,f.AcquisitionDateSource,Util.Num(f.Exposure),Util.Num(f.Gain),Util.Num(f.Temperature),f.Filter,f.Calibration,f.SizeText,f.Hash,f.RelativePath,f.SourceDisposition,f.Format,f.CapabilityText,f.CameraModel,f.CameraId,f.TelescopeModel,Util.Num(f.Offset),f.GainUnit,Util.Num(f.ElectronsPerAdu),f.ReadoutMode,f.Roi,f.OpticalConfiguration,f.ObservedUtc,f.TimeZoneId,f.LinearData.HasValue?f.LinearData.ToString():"",f.ImageKey,f.ImageIndex.HasValue?f.ImageIndex.ToString():""};b.AppendLine(string.Join(",",a.Select((s,i)=>CatalogueCsvField(s,i==16||i==17||i==18||i==30||i==32||i==40))));}File.WriteAllText(path,b.ToString(),new UTF8Encoding(true));}
  }
 }

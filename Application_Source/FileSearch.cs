@@ -19,7 +19,7 @@ namespace AstroArchive {
   public static SearchDocument FromFrame(Frame f){
    var d=new SearchDocument{Text=f.SearchText+" "+f.SourcePath+" "+f.RelativePath+" "+f.Hash,Target=f.Target};
    d.Fields["target"]=f.TargetLabel+" "+Catalog.Aliases(f.Target);d.Fields["file"]=f.OriginalName;d.Fields["path"]=f.SourcePath+" "+f.RelativePath;
-   d.Fields["device"]=f.Telescope+" "+f.InstrumentText+" "+f.TelescopeModel;d.Fields["camera"]=f.Camera+" "+f.CameraModel+" "+f.CameraId;
+   d.Fields["device"]=f.Telescope+" "+f.InstrumentText+" "+f.TelescopeModel+" "+f.MakeText+" "+f.Model;d.Fields["camera"]=f.Camera+" "+f.CameraModel+" "+f.CameraId;
    d.Fields["filter"]=f.Filter;d.Fields["type"]=f.Kind;d.Fields["format"]=f.Format;d.Fields["date"]=f.AcquisitionDate+" "+f.AcquisitionDateLabel+" "+f.Night+" "+f.Observed;
    d.Fields["mount"]=f.MountText;d.Fields["notes"]=f.Notes;d.Fields["status"]=f.Status;d.Fields["review"]=f.ReviewText+" "+f.ReviewCategory+" "+f.ReviewReason;
    d.Fields["session"]=f.Session+" "+f.SessionKey;d.Fields["hash"]=f.Hash;
@@ -29,11 +29,13 @@ namespace AstroArchive {
  public sealed class FileSearch {
   sealed class Token{public string Text;public bool Quoted;}
   sealed class Term {
-   public string Field="",Text,Known,Folded,Comparison;public double Number;public bool Exclude;public Regex Glob;
+   public string Field="",Text,Known,Folded,Comparison,Device,Kind;public double Number;public bool Exclude;public Regex Glob;
    public bool Matches(SearchDocument document){
     bool match;
     if(Comparison!=null){double? n;match=document.Numbers.TryGetValue(Field,out n)&&n.HasValue&&!double.IsNaN(n.Value)&&!double.IsInfinity(n.Value)&&(Comparison==">"?n.Value>Number:Comparison==">="?n.Value>=Number:Comparison=="<"?n.Value<Number:Comparison=="<="?n.Value<=Number:n.Value==Number);}
-    else if(Known!=null&&(Field.Length==0||Field=="target")&&document.CanonicalTarget==Known)match=true;
+    else if(Device!=null)match=Regex.IsMatch(document.Value("device")??"",Device,RegexOptions.IgnoreCase|RegexOptions.CultureInvariant);
+    else if(Kind!=null)match=Regex.IsMatch(document.Value("type")??"",@"\b"+Kind+@"\b",RegexOptions.IgnoreCase|RegexOptions.CultureInvariant);
+    else if(Known!=null&&(Field.Length==0||Field=="target"))match=document.CanonicalTarget==Known;
     else if(Glob!=null){try{match=Glob.IsMatch(document.Value(Field)??"");}catch(RegexMatchTimeoutException){match=false;}}
     else match=(document.Value(Field)??"").IndexOf(Text,StringComparison.OrdinalIgnoreCase)>=0||Folded.Length>0&&Text.IndexOf('?')<0&&document.Folded(Field).IndexOf(Folded,StringComparison.Ordinal)>=0;
     return Exclude?!match:match;
@@ -83,6 +85,13 @@ namespace AstroArchive {
       i+=consumed;
      }
      if(value.All(c=>c=='-'))throw new FormatException("Add a term after the exclusion sign.");
+     if(!token.Quoted&&(term.Field.Length==0||term.Field=="device")){
+      var model=Regex.Match(value,@"^(?:Seestar[-_ ]*)?S(30|50)(?:[-_ ]*(Pro))?$",RegexOptions.IgnoreCase);
+      if(model.Success){bool pro=model.Groups[2].Success;if(!pro&&i+1<tokens.Count&&!tokens[i+1].Quoted&&tokens[i+1].Text.Equals("Pro",StringComparison.OrdinalIgnoreCase)){pro=true;i++;}term.Device=@"\bS"+model.Groups[1].Value+(pro?@"[ _-]*Pro\b":@"(?:[ _-]*Pro)?\b");}
+      else if(Regex.IsMatch(value,@"^Dwarf(?:lab)?$",RegexOptions.IgnoreCase))term.Device=@"\bDWARF(?:LAB)?\b";
+      else if(value.Equals("Seestar",StringComparison.OrdinalIgnoreCase))term.Device=@"\bSeestar\b";
+     }
+     if(!token.Quoted&&term.Field.Length==0&&Regex.IsMatch(value,@"^stacks?(?:ed)?$",RegexOptions.IgnoreCase))term.Kind="Stack";
      term.Text=value;term.Known=Catalog.KnownName(value);term.Folded=Fold(value);
      if(value.IndexOf('*')>=0||(term.Field=="file"||term.Field=="path")&&value.IndexOf('?')>=0)term.Glob=new Regex((term.Field=="file"?"^":"")+Regex.Escape(value).Replace("\\*",".*").Replace("\\?",".")+(term.Field=="file"?"$":""),RegexOptions.IgnoreCase|RegexOptions.CultureInvariant,TimeSpan.FromMilliseconds(100));
      group.Add(term);

@@ -44,7 +44,7 @@ Each release includes a `.sha256` file. In PowerShell, replace the filename with
 your downloaded installer:
 
 ```powershell
-Get-FileHash .\AstroArchive1.12.0.1.exe -Algorithm SHA256
+Get-FileHash .\AstroArchive-VERSION.exe -Algorithm SHA256
 ```
 
 Compare its Hash with the matching checksum file. A checksum verifies the bytes;

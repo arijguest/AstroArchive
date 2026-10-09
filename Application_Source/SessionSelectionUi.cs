@@ -19,8 +19,9 @@ namespace AstroArchive {
   }
   void ClearSessionSelection(){foreach(var group in subframeSessions)group.IsSelected=false;activeSessionKey=null;}
   void SessionFileSelectionChanged(SelectionChangedEventArgs args){
+   if(restoringTargetSelection)return;
    if(!changingSessionSelection&&args.AddedItems.OfType<Frame>().Any()&&(Keyboard.Modifiers&ModifierKeys.Control)==0)ClearSessionSelection();
-   if(!changingSessionSelection)Details();
+   if(!changingSessionSelection){CaptureTargetSelection("FramesGrid");Details();}
   }
   void SelectSession(SubframeSession group,ModifierKeys modifiers){
    if(group==null)return;bool control=(modifiers&ModifierKeys.Control)!=0,range=(modifiers&ModifierKeys.Shift)!=0;
@@ -32,15 +33,16 @@ namespace AstroArchive {
     int anchor=groups.FindIndex(g=>g.Key==sessionSelectionAnchor),index=groups.IndexOf(group);
     if(range&&anchor>=0&&index>=0){if(!control)ClearSessionSelection();foreach(var item in groups.Skip(Math.Min(anchor,index)).Take(Math.Abs(anchor-index)+1))item.IsSelected=true;}
     else{group.IsSelected=!control||!group.IsSelected;sessionSelectionAnchor=group.Key;}
+    if(control&&!group.IsSelected)foreach(var frame in group.Frames)G("FramesGrid").SelectedItems.Remove(frame);
     activeSessionKey=group.IsSelected?group.Key:null;
    }finally{changingSessionSelection=false;}
-   Details();
+   CaptureTargetSelection("FramesGrid");Details();
   }
   void SelectContextSession(SubframeSession group){if(!group.IsSelected)SelectSession(group,ModifierKeys.None);}
   void InitializeSessionSelection(){
    var grid=G("FramesGrid");
    grid.AddHandler(Button.ClickEvent,new RoutedEventHandler((s,e)=>{var group=HeaderSession(e.OriginalSource as DependencyObject);if(group!=null){SelectSession(group,Keyboard.Modifiers);e.Handled=true;}}));
-   grid.PreviewKeyDown+=(s,e)=>{if(e.Key==Key.Escape&&subframeSessions.Any(g=>g.IsSelected)){ClearSessionSelection();grid.SelectedItems.Clear();Details();e.Handled=true;}};
+   grid.PreviewKeyDown+=(s,e)=>{if(e.Key==Key.Escape&&librarySelection.Count>0){ClearTargetSelection("FramesGrid");e.Handled=true;}};
   }
  }
 }

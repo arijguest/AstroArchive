@@ -20,7 +20,8 @@ namespace AstroArchive {
   // Directory handle identifies the physical filesystem even if its drive letter changes.
   public static string VolumeIdentity(string path){if(Environment.OSVersion.Platform!=PlatformID.Win32NT)return null;try{using(var h=CreateFile(LongPath(path),0,7,IntPtr.Zero,3,0x02000000,IntPtr.Zero)){IdentityInfo id;return !h.IsInvalid&&GetFileInformationByHandle(h,out id)&&id.VolumeSerial!=0?id.VolumeSerial.ToString("X8"):null;}}catch{return null;}}
   public static bool IsRedirectTag(uint tag){return (tag&0x20000000)!=0;}
-  public static bool CanTraverse(DirectoryInfo folder){if((folder.Attributes&FileAttributes.ReparsePoint)==0)return true;if(Environment.OSVersion.Platform!=PlatformID.Win32NT)return false;try{using(var h=CreateFile(LongPath(folder.FullName),0,7,IntPtr.Zero,3,0x02200000,IntPtr.Zero)){TagInfo info;return !h.IsInvalid&&GetTagInfo(h,9,out info,8)&&info.Tag!=0&&!IsRedirectTag(info.Tag);}}catch{return false;}}
+  public static bool CanTraverse(DirectoryInfo folder){return CanAccess(folder);}
+  public static bool CanAccess(FileSystemInfo entry){if((entry.Attributes&FileAttributes.ReparsePoint)==0)return true;if(Environment.OSVersion.Platform!=PlatformID.Win32NT)return false;try{using(var h=CreateFile(LongPath(entry.FullName),0,7,IntPtr.Zero,3,0x02200000,IntPtr.Zero)){TagInfo info;return !h.IsInvalid&&GetTagInfo(h,9,out info,8)&&info.Tag!=0&&!IsRedirectTag(info.Tag);}}catch{return false;}}
   [StructLayout(LayoutKind.Sequential)]struct TagInfo{public uint Attributes,Tag;}
   [DllImport("kernel32.dll",EntryPoint="GetFileInformationByHandleEx",SetLastError=true)]static extern bool GetTagInfo(SafeFileHandle handle,int kind,out TagInfo info,uint size);
   public static string LongPath(string path){path=Path.GetFullPath(path);if(Environment.OSVersion.Platform!=PlatformID.Win32NT)return path;return path.StartsWith(@"\\?\")?path:path.StartsWith(@"\\")?@"\\?\UNC\"+path.Substring(2):@"\\?\"+path;}

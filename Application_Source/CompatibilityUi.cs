@@ -159,7 +159,7 @@ namespace AstroArchive {
                 var grid=new DataGrid {
                     ItemsSource=changes,AutoGenerateColumns=false,Height=350
                 };
-                var checkStyle=new Style(typeof(CheckBox));
+                var checkStyle=new Style(typeof(CheckBox),Window.TryFindResource(typeof(CheckBox)) as Style);
                 checkStyle.Setters.Add(new Setter(UIElement.IsEnabledProperty,new Binding("CanRetain")));
                 grid.Columns.Add(new DataGridCheckBoxColumn {
                     Header="APPLY",Binding=new Binding("Apply") {

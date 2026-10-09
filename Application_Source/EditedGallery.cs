@@ -14,7 +14,14 @@ namespace AstroArchive {
    foreach(var project in projects){token.ThrowIfCancellationRequested();try{
     var images=repository.EditedImages(project,targets,token);foreach(var image in images)image.Project=project;result.Images.AddRange(images);
    }catch(Exception error){if(!ReadError(error))throw;result.Errors.Add(error.Message);}}
-   token.ThrowIfCancellationRequested();result.Images=result.Images.OrderByDescending(i=>i.Modified).ThenBy(i=>i.Filename).ToList();return result;
+   token.ThrowIfCancellationRequested();result.Images=Order(result.Images);return result;
+  }
+  static int TypeGroup(EditedImage image){
+   string type=image.FileType;if(type=="GIF")return 2;
+   return new[]{"FITS","FZ","XISF","SER","CR2","CR3","NEF","NRW","ARW","DNG","RAF","ORF","RW2","PEF","SRW"}.Contains(type)?0:1;
+  }
+  public static List<EditedImage> Order(IEnumerable<EditedImage> images){
+   return images.OrderBy(TypeGroup).ThenBy(i=>i.FileType,StringComparer.OrdinalIgnoreCase).ThenByDescending(i=>i.Modified).ThenBy(i=>i.Filename,StringComparer.OrdinalIgnoreCase).ThenBy(i=>i.Project==null?"":i.Project.Id,StringComparer.OrdinalIgnoreCase).ThenBy(i=>i.RelativePath,StringComparer.OrdinalIgnoreCase).ToList();
   }
   static bool ReadError(Exception error){return error is IOException||error is InvalidDataException||error is UnauthorizedAccessException;}
   // Compare metadata as well as file stamps: manual assignments do not change image bytes.

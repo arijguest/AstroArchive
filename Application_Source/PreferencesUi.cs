@@ -23,8 +23,13 @@ namespace AstroArchive {
     d.Text("Applies to the current source and next manual import.");f.Model=d.Select("Instrument model",TelescopeProfiles.Models.ToArray(),Convert.ToString(C("ModelBox").SelectedItem));f.Camera=d.Select("Camera channel",new[]{"Auto","Telephoto","Wide"},Convert.ToString(C("CameraBox").SelectedItem));
     f.Target=ImportTargetChoice(d,unknownImportTarget);UiHelp.Describe(f.Target,"Fill Unknown lights/stacks only. Leave blank for mixed-target scans.");f.Error=new TextBlock{TextWrapping=TextWrapping.Wrap};d.Add(f.Error);
     f.Flagged=d.Check("Skip flagged captures",SkipFlagged);f.Solve=d.Select("Target analysis",new[]{"Off","Ambiguous only","All light/stack files"},Convert.ToString(C("ImportSolveMode").SelectedItem));f.Rotation=d.Select("Rotation analysis",new[]{"Off","Ambiguous mounts","All light sessions"},Convert.ToString(C("ImportRotationMode").SelectedItem));
-    f.Originals=d.Check("Delete originals after verified import",((CheckBox)Window.FindName("DeleteOriginalsCheck")).IsChecked==true);f.Originals.IsEnabled=((CheckBox)Window.FindName("DeleteOriginalsCheck")).IsEnabled;d.Text("Originals are kept by default. Removal affects newly imported, verified files only and resets when the source changes. Cloud-synced deletions propagate.");
+    f.Originals=d.Check("Delete originals after verified import",((CheckBox)Window.FindName("DeleteOriginalsCheck")).IsChecked==true);f.Originals.IsEnabled=((CheckBox)Window.FindName("DeleteOriginalsCheck")).IsEnabled;OriginalsChoiceStatus(d,f.Originals);d.Text("Originals are kept by default. Removal affects newly imported, verified files only and resets when the source changes. Cloud-synced deletions propagate.");
    });return f;
+  }
+  TextBlock OriginalsChoiceStatus(FormWindow dialog,CheckBox choice){
+   var status=new TextBlock{TextWrapping=TextWrapping.Wrap,Margin=new Thickness(0,6,0,8),FontWeight=FontWeights.SemiBold};status.SetResourceReference(TextBlock.ForegroundProperty,"Text");status.SetResourceReference(TextBlock.FontSizeProperty,"UiFontBody");dialog.Add(status);
+   Action update=()=>{string reason=choice.IsEnabled?"":RepositoryOperationBlocked?" Wait for the current operation to finish.":repo==null?" Choose a repository, then scan a source folder to enable this option.":" Scan a source folder first to enable this option.";status.Text=(choice.IsChecked==true?"On — verified source originals will be deleted.":"Off — source originals will be kept.")+reason;UiHelp.Hint(choice,status.Text,true);};
+   choice.Checked+=(s,e)=>update();choice.Unchecked+=(s,e)=>update();choice.IsEnabledChanged+=(s,e)=>update();update();return status;
   }
   FormWindow PreferencesDialog(Window owner,int section,out PreferenceFields fields){
    var d=new FormWindow(owner,"Preferences",860,710);d.Window.MinWidth=Math.Min(640,d.Window.Width);d.Sections("General","Import","Export","Sky & solving","Accessibility","Updates","Backups");var f=fields=new PreferenceFields();

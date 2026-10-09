@@ -12,6 +12,7 @@ namespace AstroArchive {
   static void Readable(Brush text,Brush background,string label){var foreground=text as SolidColorBrush;var surface=background as SolidColorBrush;if(foreground==null||surface==null)throw new Exception(label+" did not resolve solid theme brushes.");double a=Luminance(foreground.Color),b=Luminance(surface.Color);if((Math.Max(a,b)+0.05)/(Math.Min(a,b)+0.05)<4.5)throw new Exception(label+" has unreadable contrast.");}
   static void CapturePopup(Window window,string path){window.UpdateLayout();var bitmap=PopupBitmap(window);var png=new PngBitmapEncoder();png.Frames.Add(BitmapFrame.Create(bitmap));using(var stream=File.Create(path))png.Save(stream);}
   void SmokePopupThemes(string output){
+   SmokeControlStates(output);
    foreach(string mode in new[]{"Dark","Light"}){
     Theme.Apply(Window,mode);var dialog=new FormWindow(Window,"Processing capture",650,480);dialog.Tabs("Processing","Details");dialog.Text("Processing captures",true);dialog.Text("Verifying copied files before updating the repository.");
     var message=new TextBox{Text="Copy complete. Verifying checksums…",IsReadOnly=true};dialog.Add(message);var progress=new ProgressBar{Value=65,Maximum=100,Height=8,Margin=new Thickness(0,12,0,12)};dialog.Add(progress);dialog.CloseOnly();

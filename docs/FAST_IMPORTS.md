@@ -26,7 +26,7 @@ Bookkeeping directories are excluded, and unknown/newer folder trees go first.
 by default. It bypasses filename/session/header shortcuts and reads headers and
 content hashes, including archive-copy verification. Use it for same-name edits,
 updated sidecars, additions to omitted sessions, or restoration of missing/damaged
-copies. **Full rescan of source** supplies that check for one manual scan.
+copies. **Import → Review and repair → Full rescan** supplies that check for one manual scan.
 This setting applies to folder scans and connected imports; Dump keeps verified
 copy/cleanup behavior. Newly copied files retain SHA-256 readback verification,
 and fast-skipped originals never enter source cleanup.

@@ -73,6 +73,11 @@ The Export menu contains **Export to…**, **Export files…**, **Stacking folde
 metadata and advanced stacking options expand under More options. Export completion
 keeps Open folder and Close.
 
+In **Edited**, right-click **Export files…** to copy selected working images.
+Selection can span targets. Copies keep their format, are verified, and receive
+suffixes for filename collisions. **Delete files…** removes only selected Edited
+copies after confirmation; source originals and archived captures remain.
+
 ## Open an exported stack in Siril
 
 The Export files and Stacking folder popups offer **Open with… after export**

@@ -68,6 +68,7 @@ namespace AstroArchive {
         }
         static MenuItem Branch(string label, params object[] children) {
             var item = new MenuItem { Header = label };
+            UiHelp.For(item, label);
             foreach (var child in children) item.Items.Add(child);
             return item;
         }
@@ -108,6 +109,7 @@ namespace AstroArchive {
             UiHelp.Hint(B("ImportExportButton"), "Export archived files; import scanned files first.");
             Window.PreviewKeyDown += NavigationKeys;
             navigationReady = true;
+            var originals=(CheckBox)Window.FindName("DeleteOriginalsCheck");originals.Checked+=(s,e)=>UpdateNavigationState();originals.Unchecked+=(s,e)=>UpdateNavigationState();
             UpdateNavigationState();
             if (firstRun) Window.ContentRendered += (s,e) => {
                 Window.Dispatcher.BeginInvoke(new Action(() => { if (!settings.GuideSeen && !RepositoryOperationBlocked && !closing) StartWalkthrough(true); }));

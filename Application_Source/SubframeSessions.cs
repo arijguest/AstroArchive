@@ -22,8 +22,14 @@ namespace AstroArchive {
    return rows.Select(f=>{token.ThrowIfCancellationRequested();return f;}).Where(f=>Key(f)!=null).GroupBy(Key).Where(g=>g.Count()>1).Select(g=>{
     token.ThrowIfCancellationRequested();var frames=g.ToList();var session=CaptureSessions.Describe(frames);var summary=CaptureGroups.Summarize(frames,token);
     string filters=string.Join(", ",frames.Select(f=>string.IsNullOrWhiteSpace(f.Filter)?"Unknown filter":f.Filter).Distinct());
-    return new SubframeSession{Key=g.Key,Frames=frames,Label=frames[0].TargetLabel+" · "+session.Dates+" · "+frames.Count+" subs · "+CaptureGroups.ExposureLabel(summary.ExposureSeconds,summary.UnknownExposure)+" · "+filters+" · "+frames[0].Telescope+" / "+frames[0].Camera};
+    return new SubframeSession{Key=g.Key,Frames=frames,Label=frames[0].TargetLabel+" · "+session.Dates+" · "+frames.Count+" subs · "+SubExposureLabel(frames)+" · "+CaptureGroups.ExposureLabel(summary.ExposureSeconds,summary.UnknownExposure)+" · "+filters+" · "+frames[0].Telescope+" / "+frames[0].Camera};
    }).ToList();
+  }
+  static string SubExposureLabel(List<Frame> frames){
+   var known=frames.Where(f=>f.Exposure.HasValue&&f.Exposure.Value>0&&!double.IsNaN(f.Exposure.Value)&&!double.IsInfinity(f.Exposure.Value)).Select(f=>f.Exposure.Value).ToList();
+   if(known.Count==0)return "per-sub exposure unknown";var lengths=known.Distinct().OrderBy(s=>s).ToList();
+   Func<double,string> seconds=s=>s.ToString("0.###",System.Globalization.CultureInfo.InvariantCulture);
+   return (lengths.Count==1?seconds(lengths[0]):seconds(lengths.First())+"–"+seconds(lengths.Last()))+" s/sub"+(lengths.Count>1?" (mixed)":"")+(known.Count<frames.Count?" + unknown":"");
   }
  }
 }

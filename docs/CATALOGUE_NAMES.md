@@ -9,8 +9,10 @@ handled by OpenNGC, such as Flaming Star (IC405), Cocoon (IC5146), Toby Jug
 
 The bundled catalogue, `CatalogNames.Entries`, explicit whole-region name owners
 and saved `Settings.TargetNames` rules feed one identity resolver. Repository,
-Import, Edited, search and target choices use that resolver. The Targets panels
-show the preferred common name with the canonical and alternate catalogue IDs.
+Import, Edited, search and target choices use that resolver. Targets show the
+preferred catalogue ID before the common name, such as **M31 - Andromeda Galaxy**,
+with alternate IDs below. Comet designations and recognised NEAT/LINEAR/NEOWISE
+names share Solar system; Meteors sit above Other targets.
 
 Right-click a target on Repository or Edited to edit its common name and aliases.
 Rules persist in `settings.json` and publish as a validated immutable snapshot.

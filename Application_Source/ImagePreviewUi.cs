@@ -9,14 +9,14 @@ namespace AstroArchive {
  public partial class MainUi {
   void PreviewImage(Frame frame){
    if(repo==null||RepositoryOperationBlocked||frame==null)return;var capture=frame.Clone();string mediaPath=repo.FilePath(capture);if(MediaFiles.Motion(mediaPath)){Run(ct=>{repo.ValidateCapture(capture,ct);return mediaPath;},path=>new ImagePreviewWindow(Window,capture.OriginalName,path).ShowDialog());return;}PreviewData pixels=null;byte[] rendered=null;
-   Run(ct=>{Progress(new ProgressInfo{Stage="Loading image preview",Text=capture.OriginalName});repo.ValidateCapture(capture,ct);string path=repo.FilePath(capture);pixels=DecodePreview(path,ct,capture);pixels.ApplyContext(capture,path);ct.ThrowIfCancellationRequested();rendered=pixels.Render(ScientificPreview(path)?settings.PreviewStretch??"Auto per channel":"Linear",ct);ct.ThrowIfCancellationRequested();return "";},r=>new ImagePreviewWindow(Window,capture.OriginalName,pixels.Width,pixels.Height,rendered).ShowDialog());
+   Run(ct=>{Progress(new ProgressInfo{Stage="Loading image preview",Text=capture.OriginalName});repo.ValidateCapture(capture,ct);string path=repo.FilePath(capture);pixels=DecodeFullPreview(path,ct,capture);pixels.ApplyContext(capture,path);ct.ThrowIfCancellationRequested();rendered=pixels.Render(ScientificPreview(path)?settings.PreviewStretch??"Auto per channel":"Linear",ct);ct.ThrowIfCancellationRequested();return "";},r=>new ImagePreviewWindow(Window,capture.OriginalName,pixels.Width,pixels.Height,rendered).ShowDialog());
   }
  }
  public class ImagePreviewWindow:Window {
   readonly PreviewViewport preview;MotionPreview motion;
   public ImagePreviewWindow(Window owner,string filename,string path):this(owner,filename,480,640,new byte[480*640*3]){
    var host=(Grid)Content;var message=new TextBlock{Text="Loading preview…",TextWrapping=TextWrapping.Wrap,Foreground=Brushes.White,HorizontalAlignment=HorizontalAlignment.Center,VerticalAlignment=VerticalAlignment.Center,Margin=new Thickness(12)};host.Children.Add(message);
-   Loaded+=(s,e)=>{motion=new MotionPreview(preview,path,info=>message.Visibility=Visibility.Collapsed,error=>{message.Text=error;message.Visibility=Visibility.Visible;});motion.Start();};Closed+=(s,e)=>{if(motion!=null)motion.Dispose();};
+   Loaded+=(s,e)=>{motion=new MotionPreview(preview,path,info=>message.Visibility=Visibility.Collapsed,error=>{message.Text=error;message.Visibility=Visibility.Visible;},true);motion.Start();};Closed+=(s,e)=>{if(motion!=null)motion.Dispose();};
   }
   public ImagePreviewWindow(Window owner,string filename,int width,int height,byte[] pixels){
    Owner=owner;Icon=ApplicationIcon.Image;Title="Preview - "+filename;WindowStartupLocation=WindowStartupLocation.CenterOwner;Background=owner.Background;FontFamily=owner.FontFamily;FontSize=13;Resources.MergedDictionaries.Add(owner.Resources);Theme.Bind(this,Control.BackgroundProperty,"Canvas");Theme.Bind(this,Control.ForegroundProperty,"Text");

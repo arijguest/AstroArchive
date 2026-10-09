@@ -37,7 +37,7 @@ namespace AstroArchive {
     if(e.Key==Key.Delete&&!SearchBlocked("SearchBox")&&!RepositoryOperationBlocked&&repo!=null&&SelectedFiles().Count>0){e.Handled=true;DeleteFiles(SelectedFiles());}
    };
   }
-  List<Frame> SelectedFiles(){return G("FramesGrid").SelectedItems.OfType<Frame>().Concat(subframeSessions.Where(g=>g.IsSelected).SelectMany(g=>g.Frames)).Distinct().ToList();}
+  List<Frame> SelectedFiles(){return librarySelection.Items;}
   void SelectContextRow(Frame frame){if(frame==null)return;var grid=G("FramesGrid");if(!SelectedFiles().Contains(frame)){ClearSessionSelection();grid.SelectedItems.Clear();grid.SelectedItems.Add(frame);}}
   MenuItem FileAction(string title,Action action,bool enabled=true){var item=new MenuItem{Header=title,IsEnabled=enabled};UiHelp.For(item,title);item.Click+=(s,e)=>{if(!RepositoryOperationBlocked&&!ActiveSearchBlocked)action();};return item;}
   MenuItem ExportMenu(List<Frame> selected){

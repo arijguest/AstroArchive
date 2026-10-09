@@ -18,7 +18,7 @@ namespace AstroArchive {
     foreach(string name in new[]{"SettingsButton","LibraryFiltersButton","ImportFiltersButton","FramesGrid","ImportGrid","SourceBox"})if(((FrameworkElement)Window.FindName(name)).ToolTip!=null)throw new Exception("Redundant tooltip remains: "+name);
     settings.RobustImportMatching=false;UpdateNavigationState();if(!TipText(B("ScanButton")).Contains("Quick scan"))throw new Exception("Quick scan help is missing.");
     settings.RobustImportMatching=true;UpdateNavigationState();if(!TipText(B("ScanButton")).Contains("Robust scan")||!AutomationProperties.GetHelpText(B("ScanButton")).Contains("Robust scan"))throw new Exception("Robust scan help is stale.");
-    ShowSearchError("SearchBox",FileSearch.Parse("\"unfinished"));if(!TipText(B("SearchHelpButton")).Contains("quote"))throw new Exception("Search help does not expose the error.");
+    ShowSearchError("SearchBox",FileSearch.Parse("\"unfinished"));if(!TipText(T("SearchBox")).Contains("quote"))throw new Exception("Search help does not expose the error.");
     ShowSearchError("SearchBox",FileSearch.Parse(""));if(T("SearchBox").ToolTip!=null||string.IsNullOrEmpty(AutomationProperties.GetHelpText(T("SearchBox"))))throw new Exception("Search lost accessible help or retains ordinary hover text.");
     var editor=new MetadataEditor(Window,new List<Frame>{new Frame{OriginalName="scope.fit",Target="M33",Exposure=30}},27);
     try{editor.Form.Window.Show();editor.Sessions.IsChecked=true;((TextBox)editor.Inputs["Filter"]).Text="Ha";PumpPopupLayout();

@@ -54,7 +54,7 @@ namespace AstroArchive {
     AddEditedFile(project,FilePath(capture),capture.OriginalName,capture.Hash,capture.Hash,ct,progress,null,metadata);}return project;}
    catch{RemoveNewEditedProject(project);throw;}
   }
-  EditedProject ReadEditedProject(EditedProject selected){
+  internal EditedProject ReadEditedProject(EditedProject selected){
    string id=selected.Id,path=Path.Combine(EditedProjectFolder(selected),"edited-project.json");CheckManagedPath(path,Root);var project=Util.Deserialize<EditedProject>(File.ReadAllText(path));
    if(project==null||project.Id!=id||project.Schema!=1||string.IsNullOrWhiteSpace(project.Name)||project.Sources==null)throw new InvalidDataException("Invalid edited project record.");foreach(var record in project.Sources){if(record==null)throw new InvalidDataException("Invalid edited image record.");EditedPath(project,record.RelativePath);}if(project.MetadataEdits!=null)foreach(string key in project.MetadataEdits.Keys)EditedPath(project,key);return project;
   }
@@ -97,7 +97,7 @@ namespace AstroArchive {
    foreach(var gif in images.Where(i=>MediaFiles.Gif(i.RelativePath))){ct.ThrowIfCancellationRequested();string match=MediaFiles.MatchingImage(gif.RelativePath,images.Where(i=>i.MetadataProblem==null).Select(i=>i.RelativePath));if(match==null)continue;var still=images.Single(i=>i.RelativePath==match);gif.RelatedImage=match;
     try{gif.Metadata=EditedMetadata.Read(gif.RelativePath,Assets.Inspect(EditedPath(project,gif.RelativePath)).Header,still.Metadata,matcher);gif.Metadata.Evidence+="\nRelated edited image: "+still.Filename;gif.Metadata=UserEditedMetadata(project,gif.RelativePath,gif.Metadata);}catch(IOException){}
    }
-   return images.OrderByDescending(i=>i.Modified).ThenBy(i=>i.Filename).ToList();
+   return EditedGallery.Order(images);
   }
  }
 }

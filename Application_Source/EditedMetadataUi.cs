@@ -16,7 +16,7 @@ namespace AstroArchive {
    double? Seconds(TextBox box){string value=Changed(box);if(value==null)return null;double result;if(!double.TryParse(value,NumberStyles.Float,CultureInfo.InvariantCulture,out result)||result<=0||double.IsNaN(result)||double.IsInfinity(result))throw new ArgumentException("Enter positive exposure seconds using a decimal point.");return result;}
    public EditedMetadata Values(){int count;string subs=Changed(Subs);if(subs!=null&&(!int.TryParse(subs,NumberStyles.Integer,CultureInfo.InvariantCulture,out count)||count<=0))throw new ArgumentException("Enter a positive whole-number sub count.");string imageClass=Convert.ToString(ImageClass.SelectedItem);return new EditedMetadata{Object=Changed(Object),Filters=Changed(Filters),Subs=subs==null?null:(int?)int.Parse(subs,CultureInfo.InvariantCulture),SubExposure=Seconds(SubExposure),TotalExposure=Seconds(TotalExposure),RA=Changed(RA),Dec=Changed(Dec),ImageClass=imageClass==InitialClass||imageClass=="Keep existing"?null:imageClass};}
   }
-  List<EditedImage> SelectedEditedImages(){return G("EditedGrid").SelectedItems.Cast<EditedImage>().ToList();}
+  List<EditedImage> SelectedEditedImages(){return editedSelection.Items;}
   FormWindow EditedMetadataDialog(List<EditedImage> selected,out EditedMetadataFields fields){
    var dialog=new FormWindow(Window,"Edit metadata",610,730);dialog.Text(selected.Count+" selected edited image"+(selected.Count==1?"":"s"),true);dialog.Text("Empty fields keep existing values. Assignments are saved with Edited; image files remain unchanged.");
    Func<Func<EditedMetadata,string>,string> shared=get=>{var values=selected.Select(i=>get(i.Metadata)??"").Distinct().ToList();return values.Count==1?values[0]:"";};fields=new EditedMetadataFields();
@@ -30,9 +30,37 @@ namespace AstroArchive {
    if(repo==null||RepositoryOperationBlocked||SearchBlocked("EditedSearchBox"))return;var selected=SelectedEditedImages();if(selected.Count==0)return;EditedMetadataFields fields;var dialog=EditedMetadataDialog(selected,out fields);if(!dialog.Show())return;var changes=fields.Values();var first=selected[0];
    Run(ct=>{foreach(var group in selected.GroupBy(i=>i.Project.Id))repo.SaveEditedMetadata(group.First().Project,group,changes,ct);return "Edited metadata saved.";},message=>{RefreshEdited(first.Project.Id,first.RelativePath);L("StatusLabel").Text=message;});
   }
+  bool contextOnEditedFile;
   void InitializeEditedFileMenu(){
-   var grid=G("EditedGrid");grid.PreviewMouseRightButtonDown+=(sender,args)=>{DependencyObject node=args.OriginalSource as DependencyObject;while(node!=null&&!(node is DataGridRow))node=node is Visual?VisualTreeHelper.GetParent(node):LogicalTreeHelper.GetParent(node);var row=node as DataGridRow;if(row!=null&&!row.IsSelected)grid.SelectedItem=row.Item;};
-   grid.ContextMenu=ThemedMenu();grid.ContextMenuOpening+=(sender,args)=>{var menu=grid.ContextMenu;menu.Items.Clear();menu.Items.Add(FileAction("Export to…",ExportEditedTo,SelectedEditedImages().Count>0));menu.Items.Add(FileAction("Edit metadata…",EditEditedMetadata,SelectedEditedImages().Count>0));menu.Items.Add(FileAction("Preview image…",PreviewEditedImage,SelectedEditedImages().Count==1));menu.Items.Add(FileAction("Image details…",ShowEditedDetails,ActiveEditedImage!=null));menu.Items.Add(FileAction("Open image folder",OpenEditedFolder,ActiveEditedImage!=null));};
+   var grid=G("EditedGrid");grid.ContextMenu=ThemedMenu();
+   grid.PreviewMouseRightButtonDown+=(sender,args)=>{
+    if(args.Handled)return;var row=ItemsControl.ContainerFromElement(grid,args.OriginalSource as DependencyObject) as DataGridRow;contextOnEditedFile=row!=null;
+    if(row==null){grid.ContextMenu.IsOpen=false;args.Handled=true;return;}
+    if(!row.IsSelected)grid.SelectedItem=row.Item;row.Focus();args.Handled=true;
+   };
+   grid.ContextMenuOpening+=(sender,args)=>{var selected=SelectedEditedImages();if((args.CursorLeft>=0&&!contextOnEditedFile)||repo==null||RepositoryOperationBlocked||SearchBlocked("EditedSearchBox")||selected.Count==0){args.Handled=true;return;}BuildEditedFileMenu(grid.ContextMenu,selected);};
+   grid.PreviewKeyDown+=(sender,args)=>{if(args.Key==Key.Escape&&editedSelection.Count>0){ClearTargetSelection("EditedGrid");args.Handled=true;return;}if(args.Key==Key.Delete&&repo!=null&&!RepositoryOperationBlocked&&!SearchBlocked("EditedSearchBox")&&SelectedEditedImages().Count>0){args.Handled=true;DeleteEditedFiles(SelectedEditedImages());}};
+  }
+  void BuildEditedFileMenu(ContextMenu menu,List<EditedImage> selected){
+   menu.Items.Clear();menu.Items.Add(new MenuItem{Header=selected.Count+" selected file"+(selected.Count==1?"":"s"),IsEnabled=false});menu.Items.Add(FileAction("Export files…",ExportEditedFiles,selected.Count>0));menu.Items.Add(FileAction("Export to…",ExportEditedTo,selected.Count>0));menu.Items.Add(FileAction("Edit metadata…",EditEditedMetadata,selected.Count>0));menu.Items.Add(FileAction("Preview image…",PreviewEditedImage,selected.Count==1));menu.Items.Add(FileAction("Image details…",ShowEditedDetails,selected.Count==1));menu.Items.Add(FileAction("Open image folder",OpenEditedFolder,selected.Count==1));
+   menu.Items.Add(new Separator());var delete=FileAction("Delete files…",()=>DeleteEditedFiles(selected),selected.Count>0);delete.Foreground=new SolidColorBrush(Color.FromRgb(183,40,51));UiHelp.Tip(delete,"Delete selected Edited copies; keep source originals and archived captures.");menu.Items.Add(delete);
+  }
+  void ExportEditedFiles(){
+   if(repo==null||RepositoryOperationBlocked||SearchBlocked("EditedSearchBox"))return;var selected=SelectedEditedImages();if(selected.Count==0)return;
+   var dialog=new FormWindow(Window,"Export Edited files",610,480);dialog.Text(selected.Count+" selected file"+(selected.Count==1?"":"s"),true);
+   dialog.Text("Copies the selected images in their original format. Existing files are kept; duplicate names receive a numbered suffix.");
+   var destination=ExportDestination(dialog,"AstroArchive_Edited_"+DateTime.Now.ToString("yyyyMMdd_HHmmss"));
+   dialog.Accept("Export files",()=>ValidExportDestination(dialog,destination));if(!dialog.Show())return;var options=destination.Options();
+   Run(ct=>Exporter.CreateEdited(repo,selected,options,ct,Progress),path=>ExportComplete(path,false));
+  }
+  FormWindow EditedDeletionDialog(List<EditedImage> selected){
+   var dialog=new FormWindow(Window,"Delete selected Edited files",640,520);dialog.Text("Delete "+selected.Count+" selected file"+(selected.Count==1?"":"s")+"?",true);dialog.Text(repo.Root);
+   dialog.Text("This permanently removes the selected Edited copies. Source copies, archived originals, other Edited files and project source metadata stay. Cloud-synced deletions propagate to the cloud.");
+   dialog.Add(new TextBox{Text=string.Join("\r\n",selected.Select(i=>i.Project.Name+" / "+i.RelativePath)),IsReadOnly=true,Height=170,VerticalScrollBarVisibility=ScrollBarVisibility.Auto,HorizontalScrollBarVisibility=ScrollBarVisibility.Auto});dialog.Accept("Delete selected files",()=>true,true);return dialog;
+  }
+  void DeleteEditedFiles(List<EditedImage> selected){
+   if(repo==null||RepositoryOperationBlocked||SearchBlocked("EditedSearchBox")||selected.Count==0)return;if(!EditedDeletionDialog(selected).Show())return;CancelEditedPreview();
+   Run(ct=>{var result=repo.DeleteEditedImages(selected,ct,Progress);return result.Deleted+" selected Edited files deleted."+(result.Errors.Count==0?"":"\r\n\r\n"+string.Join("\r\n",result.Errors));},message=>{L("StatusLabel").Text=message.Split('\n')[0];if(message.Contains("\n"))ShowReport("Edited file deletion report",message);},"Deleting Edited files");
   }
  }
 }

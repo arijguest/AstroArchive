@@ -59,6 +59,7 @@ namespace AstroArchive {
   public string SessionGroup {get{return SessionKey;}}
   public string Make {get;set;} public string MakeEvidence {get;set;} public string TargetEvidence {get;set;} public string SourceDisposition {get;set;}
   public string ObservationMode {get;set;} public string Kind {get;set;} public string Calibration {get;set;} public string Filter {get;set;} public string Bayer {get;set;}
+  [ScriptIgnore]public string KindLabel{get{return Kind=="Stack"&&StackCount>0?"Stack ("+StackCount.ToString(CultureInfo.InvariantCulture)+")":Kind;}}
   public string Mount {get;set;} public string MountEvidence {get;set;} public string Observed {get;set;} public string TimeSource {get;set;}
   [ScriptIgnore]public string MountText{get{return MountLabels.Display(this);}}
   [ScriptIgnore]public string MountEvidenceText{get{return MountLabels.Evidence(this);}}
@@ -91,7 +92,7 @@ namespace AstroArchive {
  }
  public class TargetSummary {
   public string Name{get;set;}public int Files{get;set;}public int Subs{get;set;}public int Stacks{get;set;}public int Sessions{get;set;}public double ExposureSeconds{get;set;}public int UnknownExposure{get;set;}
-  public string Label{get{return Name=="All targets"?Name:Catalog.Label(Name);}}
+  public string Label{get{return Name=="All targets"?"All Targets":Catalog.Label(Name);}}
   public string Group{get{return TargetNavigation.Group(Name);}}
   public string DisplayName{get{return TargetNavigation.ShortName(Name);}}
   public string FileCount{get{return Files.ToString("N0");}}

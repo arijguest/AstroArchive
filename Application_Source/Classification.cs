@@ -59,7 +59,7 @@ namespace AstroArchive {
    if(Regex.IsMatch(text,@"\bSUN\b"))found.Add("Sun");
    return found;
   }
-  public static string TargetFromFilename(string filename){if(HasFilenameConflict(filename))return null;var found=FilenameTargets(filename);return found.Count==1?found.First():null;}
+  public static string TargetFromFilename(string filename){if(HasFilenameConflict(filename))return null;var found=FilenameTargets(filename);return found.Count==1?found.First():CometTargets.FromFilename(filename);}
   public static bool HasFilenameConflict(string filename){return FilenameTargets(filename,true).Count>1;}
   public static string Aliases(string target){string s,custom;string id=CanonicalTarget(target);return (descriptions.TryGetValue(id,out s)?s:"")+" "+(savedNames.Descriptions.TryGetValue(id,out custom)?custom:"");}
   // Resolve recognised labels on deserialization too, so old archives share new groups.
@@ -69,6 +69,7 @@ namespace AstroArchive {
    if(text.Equals("Calibration",StringComparison.OrdinalIgnoreCase))return "Calibration";
    string known=KnownName(text);if(known!=null)return known;
    if(HasFilenameConflict(text))return text.Replace('_',' ');var found=FilenameTargets(text);if(found.Count==1)return found.First();
+   string comet=CometTargets.FromLabel(text);if(comet!=null)return comet;
    return text.Replace('_',' ');
   }
   public static string ObjectId(string target){string id=CanonicalTarget(target);return !IsAmbiguous(id)&&(KnownName(id)!=null||Regex.IsMatch(id,@"^(M|NGC|IC|C|B|SH2|UGC|PGC)\d+[A-Z]?$",RegexOptions.IgnoreCase))?id:"";}
@@ -82,7 +83,7 @@ namespace AstroArchive {
    double v=(Math.Abs(a)+b/60+c/3600)*(s.TrimStart().StartsWith("-")?-1:1);return hours?v*15:v;
   }
   public static string Normalize(string s){
-   s=(s??"").Trim().Trim('_','-');if(IsAmbiguous(s))return "Unknown";if(HasFilenameConflict(s))return s.Replace('_',' ');s=CanonicalTarget(s);string val;if(aliases.TryGetValue(Key(s),out val))return val;
+   s=(s??"").Trim().Trim('_','-');if(IsAmbiguous(s))return "Unknown";if(HasFilenameConflict(s))return s.Replace('_',' ');s=CanonicalTarget(s);string val;if(aliases.TryGetValue(Key(s),out val))return val;if(CometTargets.IsComet(s))return s;
    var m=Regex.Match(s,@"\b(MESSIER|M|NGC|IC|CALDWELL|C|BARNARD|B|UGC|PGC)\s*[_-]?\s*0*(\d+)([A-Z]?)\b",RegexOptions.IgnoreCase);if(m.Success){string id=CataloguePrefix(m.Groups[1].Value)+m.Groups[2].Value+m.Groups[3].Value.ToUpperInvariant();return aliases.TryGetValue(Key(id),out val)?val:id;}
    return s.Replace('_',' ').Trim();
   }
@@ -151,7 +152,7 @@ namespace AstroArchive {
    if(f.BinX==0){string b=Shot(shots,"binning","bin");var m=Regex.Match(b,@"^(\d+)(?:\s*[x*]\s*(\d+))?$");if(m.Success){f.BinX=int.Parse(m.Groups[1].Value);f.BinY=m.Groups[2].Success?int.Parse(m.Groups[2].Value):f.BinX;}}
    if(Catalog.IsAmbiguous(target)){string hint=ObservationTargets.ModeFromPath(text),body=ObservationTargets.CanonicalSolar(hint);if(body=="Sun"||body=="Moon")target=body;if(string.IsNullOrEmpty(f.ObservationMode))f.ObservationMode=hint;}
    string filenameTarget=Catalog.TargetFromFilename(f.OriginalName);
-   f.Target=filenameTarget??Catalog.Normalize(target);f.TargetEvidence=filenameTarget!=null?"Recognised filename target":Catalog.KnownName(target)!=null?"Recognised header/session target":"Unrecognised label; plate solving required";
+   f.Target=filenameTarget??Catalog.Normalize(target);f.TargetEvidence=filenameTarget!=null?"Recognised filename target":Catalog.KnownName(target)!=null||CometTargets.IsComet(f.Target)?"Recognised header/session target":"Unrecognised label; plate solving required";
    if(f.Kind.Contains("dark")||f.Kind.Contains("bias")||f.Kind.Contains("flat")||f.Kind=="Dark"||f.Kind=="Bias"||f.Kind=="Flat"){f.Target="Calibration";f.TargetEvidence="Calibration frame";}
    if(Util.MeteorFilename(f.OriginalName)){f.Target="Meteor";f.TargetEvidence="Meteor filename label; object identity omitted";}
    string obs=h.Get("DATE-OBS","DATEOBS","DATE_OBS");DateTime? dt=Util.Time(obs);bool frameTime=dt.HasValue&&obs.Length>10;
