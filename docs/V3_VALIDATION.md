@@ -27,6 +27,8 @@ The portable ZIP attached to the chat is compiled using Mono against Microsoft's
 native Windows build and checks above. That run also offers a Windows-compiled
 portable ZIP and installer in its `astroarchive-v3-windows` artifact. Both builds
 are unsigned development builds. No public release or update feed was published.
+The chat ZIP was subsequently rebuilt to include the expanded offline setup and
+troubleshooting guide; application code is unchanged from the validated source.
 
 No telescope was accessed by these checks. Model/firmware file access, real
 discovery, Wi-Fi behaviour and capture performance under download load still need

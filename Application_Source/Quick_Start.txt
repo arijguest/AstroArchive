@@ -4,8 +4,10 @@ Windows 10/11 x64; .NET Framework 4.8.
 START HERE
 
 1. Open Settings > General > Choose repository.
-2. On Import, choose a capture folder and a unique physical telescope ID.
-3. Scan folder, review the metadata, then import the eligible files shown.
+2. On Import, choose a capture folder and a unique physical telescope ID,
+   or use Connect over network beside Saved telescope.
+3. For a local folder, Scan folder and review before importing. For a network
+   telescope, connect and select files, Search all or Start live import.
 4. Browse Repository by target, search or Filters; expand sessions to see subs.
 5. Select files and use Export for copies, stacking inputs or external processing.
 
@@ -14,8 +16,10 @@ Stacking and image processing run in your external software.
 
 IMPORT OVER WI-FI / LAN
 
-On Import, click Connect over network beside Saved telescope. Connect this PC and
-Seestar/DWARF to the same LAN (or join the telescope hotspot). Discovery starts
+## Connect and choose files
+Choose a repository in Settings > General first. On Import, click Connect over
+network beside Saved telescope. Connect this PC and Seestar/DWARF to the same
+LAN (or join the telescope hotspot). Discovery starts
 automatically. Select the telescope and Connect; no IP entry is needed.
 
 Choose a saved physical telescope for the import or keep the suggested new name.
@@ -25,23 +29,49 @@ Review the count and import. Large batches warn that network transfers take long
 than USB. Originals stay on the telescope. Adjacent sidecars and DWARF session
 metadata are downloaded with captures; normal archive checks and duplicates apply.
 
-Start live import watches the displayed folder and its subfolders. By default it
-imports only captures appearing after Start. Files must remain unchanged across
-two polls and through download; incomplete FITS are retried. Capture still runs in
-the telescope app. Use Cancel in the activity/progress controls to stop. Completed
-imports and verified local downloads remain; originals stay on the telescope.
+## Import as the telescope shoots
+Start live import watches the displayed folder and its subfolders. To limit it to
+one session/target, open that folder first; use All captures for the full storage.
+Files present at the first successful scan are excluded by default, including any
+exposure already visible but still being written. Only new captures are imported.
+Files must remain unchanged across two polls and through download; incomplete
+FITS are retried. Capture still runs in
+the telescope app; AstroArchive does not control exposures. Keep AstroArchive open
+and the PC awake. Use Stop live import on Import or Cancel in Activity to stop.
+Completed imports and verified local downloads remain; originals stay on the telescope.
 A short disconnect retries automatically. To catch files captured while AstroArchive
 was stopped, use Search all or Advanced > Also import existing captures.
+The polling interval is not a delivery deadline: downloads, checking and archiving
+also take time. Lower the transfer limit if downloads disrupt telescope operation.
 
+## Advanced and connection troubleshooting
 Advanced provides manual IPv4 access, a custom storage path, an optional discovery
 adapter, DWARF FTP credentials, live polling (default 5 seconds) and a transfer limit
 (default 2 MB/s). Passwords are kept only for the active connection. Seestar direct
 SMB access leaves Windows SMB/guest/signing policies unchanged. Enable Save Each
 Frame on Seestar and use compatible firmware; file access varies by model/firmware.
 
-Downloads are staged under the current user's AstroArchive/RemoteDownloads folder.
+If nothing is found, check the telescope is awake and both devices share the same
+network. Guest Wi-Fi/client isolation can block discovery. Click Search again.
+For manual access, find the telescope's address in its app's network settings or
+your router's connected-device list. Use the telescope's IP, not this PC's IP.
+Windows Settings > Network & internet > Wi-Fi/Ethernet > Properties shows this
+PC's IPv4 address and gateway; it does not identify the telescope's address.
+Enter the telescope IPv4 address in Advanced; leave Storage path blank first.
+Defaults are \\<telescope IP>\EMMC Images for Seestar and / for DWARF.
+If connection fails after discovery, check the firmware's file-sharing support,
+storage path and (for DWARF) FTP port/credentials. A discovery reply alone does
+not guarantee file access. AstroArchive's direct Seestar access does not require
+opening the share in File Explorer or changing Windows SMB settings.
+
+## Local space and retry
+Downloads are staged in %LOCALAPPDATA%\AstroArchive\RemoteDownloads.
 Retry checks their saved hashes and reuses complete copies. Space is needed for both
-these local downloads and the final archive. Stop the import before removing caches.
+these local downloads and the final archive. Stop imports and close AstroArchive
+before removing caches. Removing them does not remove completed repository imports.
+If captures are absent, check Save Each Frame and Import preferences; ignored
+failed/raster captures are filtered before transfer. Read Repository > Diagnostics
+for import errors and warnings.
 
 GUIDE AND TOOLTIPS
 

@@ -26,6 +26,33 @@ moving it. Use one writer per repository.
 Updates appear in **Activity** and **Guide → About AstroArchive**.
 Use **Settings → Updates** to install them. [Installation, repair and policy blocks](docs/UPDATES.md).
 
+## Network and live imports (v3 preview)
+
+The `v3` development branch adds direct, read-only Seestar and DWARF imports.
+It is based on `temp`; the latest published release link above remains separate
+from this preview. Extract the complete preview ZIP and keep `SMBLibrary.dll`
+beside `AstroArchive.exe`.
+
+On **Import**, choose **Connect over network…** beside **Saved telescope**.
+Keep the PC and telescope on the same Wi-Fi/LAN, select a discovered telescope,
+and connect. Choose its saved physical telescope profile or name a new one.
+
+- **Select files** lets you browse capture folders and tick individual files.
+- **Search all** selects supported captures across the storage for review.
+- **Start live import** watches the displayed folder and subfolders for new captures
+  while the telescope app continues shooting. Use **Stop live import** to finish.
+- **Advanced…** provides manual IP/path access, DWARF FTP credentials, polling,
+  transfer limits and an option to include existing files when live import starts.
+
+Large selections warn that network transfers take longer than USB. Live imports
+wait for stable files and retry incomplete captures or brief disconnects. Originals
+stay on the telescope; local staging needs space as well as the final archive.
+File access depends on telescope firmware. Seestar access uses its own SMB client
+and does not require changing Windows guest/signing policies.
+
+See [setup, live imports and troubleshooting](docs/REMOTE_IMPORT.md) and
+[preview validation and hardware limits](docs/V3_VALIDATION.md).
+
 ## Browse and preview
 
 - **Targets:** preferred ID before the name, such as **M31 - Andromeda Galaxy**. Planet names in filenames are recognised during import. Planets and comets share the Solar system group; Meteors sit above Other targets. **All Targets** is bold and shaded.
@@ -84,6 +111,7 @@ backup. Archive deletion keeps source originals; deletion history controls reimp
 
 - [Offline user guide](Application_Source/Quick_Start.txt)
 - [Repeat telescope imports](docs/FAST_IMPORTS.md)
+- [Network and live telescope imports (v3)](docs/REMOTE_IMPORT.md)
 - [Processing handoffs](docs/PROCESSOR_HANDOFFS.md)
 - [Installation and updates](docs/UPDATES.md)
 - [File and metadata safety](docs/SECURITY.md)

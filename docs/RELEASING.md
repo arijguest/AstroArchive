@@ -24,6 +24,16 @@ Run `scripts/build-release.ps1` on a disposable Windows test account. It runs
 engine, Windows codec, installer/updater, UI and install/repair/uninstall checks.
 See [development](DEVELOPMENT.md) for isolated commands.
 
+For v3 network changes, also run the remote transport and `--remote-only` UI
+checks in [development](DEVELOPMENT.md#network-and-live-import-checks). The regular
+release script does not run these extra fixtures. The [v3 validation workflow](../.github/workflows/v3.yml)
+runs them and produces an unsigned development portable ZIP and installer;
+it does not publish a GitHub release or modify the update feed.
+
+Package the complete application output, including the separate `SMBLibrary.dll`
+and its matching source/licence notices. The installer build bundles these files
+alongside the guide and application notices. See [SMBLibrary distribution terms](../Application_Source/Remote/lib/README.md).
+
 The workflow uses `GITHUB_TOKEN` with `contents: write` in the publishing job.
 It stages the installer, compatibility alias, SHA-256 checksums and `update.json`
 in a draft, verifies them, then makes the completed release latest.

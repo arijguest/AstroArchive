@@ -5,9 +5,18 @@ Report an issue: https://github.com/arijguest/AstroArchive/issues
 
 Include the app/package version, exact error and relevant filename.
 Repository > Diagnostics shows the last import report and performance details.
+For network/live imports, include the telescope model and firmware, connection
+method (automatic/manual; Seestar SMB or DWARF FTP), whether discovery succeeded,
+and whether failure occurred during connection, listing, download or archive import.
+For live issues, include the selected folder, polling interval/transfer limit,
+whether existing captures were included and any disconnect or PC sleep.
+Do not include passwords. A discovery result alone does not verify file access.
 Setup log: %TEMP%\AstroArchive-setup-error.txt
 Update log: %LOCALAPPDATA%\AstroArchive\updates\last-error.txt
 
-Preview/codec support: Settings > Image compatibility.
+Preview/codec support: Settings > General > Image compatibility.
+Network setup and troubleshooting: Quick_Start.txt > Import over Wi-Fi / LAN.
+Live imports: keep the app open and PC awake; Stop live import retains completed
+imports and downloads. Do not remove RemoteDownloads while an import is running.
 Windows policy blocks: check the package's signing status and Windows Security;
 managed policies may require publisher approval from your administrator.

@@ -1,5 +1,10 @@
 # Repeat telescope imports
 
+This page describes local-folder and USB imports. For the v3 network picker and
+live imports, see [network telescope imports](REMOTE_IMPORT.md). Network captures
+are downloaded to a local cache before the full scan and verified archive import;
+live mode watches new captures by default rather than skipping dated sessions.
+
 Folder scans default to filename matching. The selected USB import flow described
 below always performs a full scan; unscoped engine uploads retain filename matching.
 The saved physical telescope scopes the inventory. Known files bypass image
