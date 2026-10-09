@@ -106,6 +106,28 @@ namespace AstroArchive {
    exposure=seconds;gain=value;return true;
   }
   static string CleanStem(string s){return Regex.Replace(s,@"\.(fit|fits|fts)(\.gz)?$","",RegexOptions.IgnoreCase);}
+  // Seestar records a real sub count before the target, and seconds per sub after it.
+  public static bool SeestarStackFilename(string filename,out int count,out double seconds){
+   count=0;seconds=0;var match=Regex.Match(Path.GetFileName(filename??""),@"^Stacked_(\d+)_.+?_(\d+(?:\.\d+)?)s(?=[_. -]|$)",RegexOptions.IgnoreCase|RegexOptions.CultureInvariant);
+   return match.Success&&int.TryParse(match.Groups[1].Value,NumberStyles.None,CultureInfo.InvariantCulture,out count)&&count>0&&double.TryParse(match.Groups[2].Value,NumberStyles.AllowDecimalPoint,CultureInfo.InvariantCulture,out seconds)&&seconds>0&&!double.IsInfinity(seconds)&&!double.IsInfinity(count*seconds);
+  }
+  static bool UserMetadata(Frame frame,string field){MetadataFact fact;return frame.Facts!=null&&frame.Facts.TryGetValue(field,out fact)&&fact!=null&&fact.Source=="User";}
+  static bool StackFact(Frame frame,string field,MetadataFact fact){MetadataFact old;if(frame.Facts.TryGetValue(field,out old)&&old!=null&&old.Value==fact.Value&&old.Raw==fact.Raw&&old.Source==fact.Source&&old.Unit==fact.Unit)return false;frame.Facts[field]=fact;return true;}
+  public static bool ApplySeestarStackExposure(Frame frame){
+   int count;double seconds;if(frame.Kind!="Stack"||frame.MakeText!="Seestar"||!SeestarStackFilename(frame.OriginalName,out count,out seconds))return false;
+   bool changed=false;if(frame.Facts==null)frame.Facts=new Dictionary<string,MetadataFact>();
+   if(!UserMetadata(frame,"StackCount")&&frame.StackCount<=0){frame.StackCount=count;StackFact(frame,"StackCount",new MetadataFact{Value=count.ToString(CultureInfo.InvariantCulture),Raw=frame.OriginalName,Source="Seestar stacked filename"});changed=true;}
+   if(!UserMetadata(frame,"Exposure")){
+    var image=frame.Images==null?null:frame.Images.FirstOrDefault(i=>i.Key==frame.ImageKey)??frame.Images.FirstOrDefault();var header=image==null?new FitsHeader():new FitsHeader{Values=image.Headers??new Dictionary<string,string>(),Comments=image.Comments??new Dictionary<string,string>()};
+    double? total=header.Number("TOTALEXP","TOTEXP","EXPTOTAL","INTTIME","INTEGRAT");string comment;header.Comments.TryGetValue("EXPTIME",out comment);
+    if(!total.HasValue&&Regex.IsMatch(comment??"",@"total|integrat",RegexOptions.IgnoreCase))total=header.Number("EXPTIME");
+    bool explicitTotal=total.HasValue&&total.Value>0&&!double.IsInfinity(total.Value)&&!double.IsNaN(total.Value);
+    if(!explicitTotal)total=(frame.StackCount>0?frame.StackCount:count)*seconds;
+    if(frame.Exposure!=total){frame.Exposure=total;changed=true;}
+    changed=StackFact(frame,"Exposure",new MetadataFact{Value=total.Value.ToString("R",CultureInfo.InvariantCulture),Raw=explicitTotal?header.Get("TOTALEXP","TOTEXP","EXPTOTAL","INTTIME","INTEGRAT","EXPTIME"):frame.OriginalName,Source=explicitTotal?"Header: explicit total exposure":"Seestar stacked filename: "+(frame.StackCount>0?frame.StackCount:count)+" subs × "+seconds.ToString("G",CultureInfo.InvariantCulture)+" s per sub",Unit="s"})||changed;
+   }
+   return changed;
+  }
   public static Frame Read(string path,string root,string telescope,string model,long? enumeratedSize=null,Action<int> counted=null,Dictionary<string,ShotsMetadata> shotsCache=null,FitsHeader parsedHeader=null,FileStamp parsedStamp=null,System.Threading.CancellationToken ct=default(System.Threading.CancellationToken),PipelineMetrics metrics=null,AssetInfo asset=null,string imageKey=null,string originalName=null){
    ct.ThrowIfCancellationRequested();FileStamp sourceStamp=parsedStamp;if(asset==null&&parsedHeader!=null)asset=new AssetInfo{Format="FITS",Header=parsedHeader,Images={new ImageDescriptor{Key="hdu:0",Label="Image 1",Width=parsedHeader.Width,Height=parsedHeader.Height,Channels=parsedHeader.Channels,Bitpix=parsedHeader.Bitpix,Offset=parsedHeader.Offset,Count=1,Encoding="FITS",Numeric=new[]{8,16,32,64,-32,-64}.Contains(parsedHeader.Bitpix),Headers=parsedHeader.Values,Comments=parsedHeader.Comments}}};if(asset==null){using(var locked=new FileStream(path,FileMode.Open,FileAccess.Read,FileShare.Read)){sourceStamp=FileStamp.Read(path);asset=Assets.Inspect(path,n=>{ct.ThrowIfCancellationRequested();if(counted!=null)counted(n);});if(!sourceStamp.ContentSame(FileStamp.Read(path)))throw new InvalidDataException("Source changed during metadata inspection.");}}var selectedImage=asset.Images.FirstOrDefault(i=>i.Key==imageKey);if(selectedImage!=null)asset.Header=new FitsHeader{Width=selectedImage.Width,Height=selectedImage.Height,Channels=selectedImage.Channels,Bitpix=selectedImage.Bitpix,Values=selectedImage.Headers??new Dictionary<string,string>(),Comments=selectedImage.Comments??new Dictionary<string,string>()};FitsHeader h=asset.Header;string rel=path.Substring(root.TrimEnd('\\','/').Length).TrimStart('\\','/');string text=Path.GetFileName(root.TrimEnd('\\','/'))+"/"+rel.Replace('\\','/');string low=text.ToLowerInvariant();string stem=CleanStem(originalName??Path.GetFileName(path));string name=stem.ToLowerInvariant();
    var f=new Frame{SourcePath=path,OriginalName=originalName??Path.GetFileName(path),Telescope=telescope,TelescopeIdentity=telescope,Model=model,Camera="Unknown",Target="Unknown",Kind="Unknown",Calibration="Unknown",Filter="Unknown",Bayer=h.Get("BAYERPAT","BAYERPATTERN"),Mount="Unknown",MountEvidence="Not analyzed",Notes="",Status="New",Bytes=enumeratedSize??new FileInfo(path).Length,Width=h.Width,Height=h.Height,Channels=h.Channels,BinX=(int)(h.Number("XBINNING","CCDXBIN","BINNING")??0),BinY=(int)(h.Number("YBINNING","CCDYBIN","BINNING")??0)};
@@ -173,7 +195,7 @@ namespace AstroArchive {
    if(h.Get("REGISTER","REGISTRD","DEROTATE")=="T"||Regex.IsMatch(name,@"^(r_|r_pp_|registered[_-])")||low.Contains("/registered/"))f.Calibration="Registered";
    if(f.Kind=="Stack")f.Calibration="Device stack";if(f.Kind.StartsWith("Master")||f.Kind=="Dark"||f.Kind=="Flat"||f.Kind=="Bias")f.Calibration="Calibration frame";
    if(f.Target=="Unknown")f.Notes+="Target needs identification. ";if(f.Kind=="Unknown")f.Notes+="Frame type needs review. ";if(f.Camera=="Unknown")f.Notes+="Camera channel unknown. ";
-   f.Sky=SkyWcs.FromHeader(h,f.Width,f.Height);if(classification!=null)classification.Complete();MetadataProfiles.Apply(f,h,asset);if(selectedImage!=null)f.ImageKey=selectedImage.Key;return f;
+   f.Sky=SkyWcs.FromHeader(h,f.Width,f.Height);if(classification!=null)classification.Complete();MetadataProfiles.Apply(f,h,asset);if(selectedImage!=null)f.ImageKey=selectedImage.Key;ApplySeestarStackExposure(f);return f;
    }
   }
   static Dictionary<string,string> ReadShots(string path,string root,Frame f,Dictionary<string,ShotsMetadata> cache,Action<int> counted,System.Threading.CancellationToken ct,PipelineMetrics metrics){

@@ -136,6 +136,10 @@ Select images > Edit metadata to assign targets, filters, class, exposures, sub
 counts or coordinates. Empty/unchanged fields retain values; files are not rewritten.
 Starless and Stars only labels are recognised in filenames.
 120x60s means 120 subs of 60 seconds; 30s40 means sub exposure/gain.
+Seestar's Stacked_36_NGC 7000_5.0s_... means 36 subs of 5 seconds: 180 seconds
+total exposure. Repository and Edited metadata use that count and duration;
+explicit header totals and manual corrections take precedence. Existing repository
+records are repaired on opening, without rereading or moving capture files.
 DWARF's stacked-16 is bit depth. Unspecified EXPTIME stays reported exposure;
 it is not assumed to be per-sub or total. Unknown/conflicting values need review.
 Image details and the Exposure tooltip show evidence. Sub-summary integration
