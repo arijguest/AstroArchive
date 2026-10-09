@@ -25,6 +25,7 @@ namespace AstroArchive {
   }
   void CancelEditedPreview(){if(editedMotion!=null){editedMotion.Dispose();editedMotion=null;}editedPreviewGeneration++;if(editedPreviewCancel!=null){editedPreviewCancel.Cancel();editedPreviewCancel.Dispose();editedPreviewCancel=null;}editedPreviewData=null;if(editedPreviewViewport!=null)editedPreviewViewport.SetImage(null,true);}
   async void LoadEditedPreview(bool reload=true,Func<string,CancellationToken,Frame,PreviewData> decode=null){
+   if(metadataPreviewSuspended)return;
    if(!editedReady)return;var image=ActiveEditedImage;if(image==null||repo==null){CancelEditedPreview();L("EditedPreviewName").Text="Select an edited image";L("EditedPreviewMessage").Text="Select an edited image.";L("EditedPreviewMessage").Visibility=Visibility.Visible;return;}
    if(editedMotion!=null){editedMotion.Dispose();editedMotion=null;}if(editedPreviewCancel!=null){editedPreviewCancel.Cancel();editedPreviewCancel.Dispose();}editedPreviewCancel=new CancellationTokenSource();var token=editedPreviewCancel.Token;int generation=++editedPreviewGeneration;var previous=reload||editedPreviewData==null?null:editedPreviewData.Copy();
    string path;try{path=repo.EditedPath(image.Project,image.RelativePath);}catch(Exception error){L("EditedPreviewMessage").Text=error.Message;L("EditedPreviewMessage").Visibility=Visibility.Visible;return;}
