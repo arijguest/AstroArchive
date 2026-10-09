@@ -88,10 +88,10 @@ namespace AstroArchive {
    try{
     if(!UsbAvailable(telescope))throw new IOException("The telescope drive is unavailable. Reconnect it and refresh connected telescopes.");
     var profile=UsbTelescopeDiscovery.MatchProfile(telescope,settings.Telescopes,settings.SelectedTelescope);
-    picker=new TelescopeImportPicker(Window,telescope,settings.Telescopes,profile);if(!picker.Show())return;
+    picker=new TelescopeImportPicker(Window,telescope,settings.Telescopes,profile,importPreferences:ImportPreferencesFromDialog);if(!picker.Show())return;
     var token=usbDiscoveryCancel.Token;int count=await Task.Run(()=>picker.Selection.CaptureCountUpTo(ImportSelection.LargeFileSelection,token));
     if(telescopesDisposed)return;
-    if(count>=ImportSelection.LargeFileSelection&&!TelescopeImportConfirmation.Create(Window,picker.Selection,telescope.Make).Show())return;
+    if(count>=ImportSelection.LargeFileSelection&&!TelescopeImportConfirmation.Create(Window,picker.Selection,telescope.Make,ImportPreferencesFromDialog).Show())return;
     if(!UsbAvailable(telescope))throw new IOException("The telescope disconnected before import. Reconnect it and choose the selection again.");
     var candidate=Util.Deserialize<Settings>(Util.Serialize(settings));var selected=TelescopeProfiles.Save(candidate,picker.Profile.Id,picker.Profile.Model,picker.Profile.Camera,picker.Selection.SourceRoot,new[]{telescope.Volume});
     selected.SourceMake=telescope.Make;selected.LastImportSelection=picker.Selection.Paths.Select(p=>p.Substring(picker.Selection.SourceRoot.TrimEnd('\\','/').Length).TrimStart('\\','/')).ToList();

@@ -15,6 +15,7 @@ namespace AstroArchive {
   public string Title,Status,ReportTitle,Report,OutputPath,ActionLabel,RepositoryRoot;
   public DateTime StartedUtc=DateTime.UtcNow;
   public bool Running,Unread,NeedsReview,Failed,Canceled;
+  public double? DurationSeconds;
   public ProgressInfo Progress;
   public Action Review,Cancel;
  }
@@ -22,12 +23,12 @@ namespace AstroArchive {
   readonly List<ActivityEntry> activities=new List<ActivityEntry>();
   readonly Dictionary<ActivityEntry,ActivityCard> activityCards=new Dictionary<ActivityEntry,ActivityCard>();
   ActivityEntry currentActivity,completionActivity,reviewingActivity;
-  Border activityPanel,activityToast;StackPanel activityItems;Button activityBell;TextBlock activityBadge,activityDot,activityToastText;
+  Border activityPanel,activityToast;StackPanel activityItems;Button activityBell;TextBlock activityBadge,activityToastText;
   DispatcherTimer activityToastTimer;
   string nextActivityTitle;
   bool activityOpeningReport,activityDisposed;
   sealed class ActivityCard {public TextBlock Title,Status,Rate,Details;public ProgressBar Bar;public WrapPanel Actions;}
-  bool RepositoryOperationBlocked {get{return closing||cancel!=null||dumpChecking||releaseInstalling||usbImportPicking;}}
+  bool RepositoryOperationBlocked {get{return closing||cancel!=null||dumpChecking||releaseInstalling||usbImportPicking||sourceRemovalConfirming;}}
   void InitializeActivity(){
    var root=(Grid)Window.Content;
    var menu=(Menu)Window.FindName("MainMenu");
@@ -39,7 +40,6 @@ namespace AstroArchive {
    foreach(var property in new[]{FrameworkElement.HeightProperty,FrameworkElement.WidthProperty})activityBell.SetBinding(property,new Binding("ActualHeight"){Source=TopMenu("CoffeeMenu")});
    var icon=new Grid();icon.SetResourceReference(FrameworkElement.WidthProperty,"UiToolbarIconSize");icon.SetResourceReference(FrameworkElement.HeightProperty,"UiToolbarIconSize");
    var bell=new System.Windows.Shapes.Path{Data=Geometry.Parse("M18,8 C18,4.7 15.3,2 12,2 C8.7,2 6,4.7 6,8 C6,15 3,15 3,17 L21,17 C21,15 18,15 18,8 Z M10,21 C11,22.3 13,22.3 14,21"),StrokeThickness=1.6,StrokeStartLineCap=PenLineCap.Round,StrokeEndLineCap=PenLineCap.Round,StrokeLineJoin=PenLineJoin.Round,Stretch=Stretch.Uniform};bell.SetResourceReference(System.Windows.Shapes.Shape.StrokeProperty,"Text");icon.Children.Add(bell);
-   activityDot=new TextBlock{Text="•",Margin=new Thickness(0,0,-5,-5),HorizontalAlignment=HorizontalAlignment.Right,VerticalAlignment=VerticalAlignment.Bottom,FontWeight=FontWeights.Bold,Visibility=Visibility.Collapsed};activityDot.SetResourceReference(TextBlock.ForegroundProperty,"Accent");icon.Children.Add(activityDot);
    activityBadge=new TextBlock{Margin=new Thickness(0,-6,-6,0),HorizontalAlignment=HorizontalAlignment.Right,VerticalAlignment=VerticalAlignment.Top,FontWeight=FontWeights.Bold,Visibility=Visibility.Collapsed};activityBadge.SetResourceReference(TextBlock.FontSizeProperty,"UiFontCaption");activityBadge.SetResourceReference(TextBlock.ForegroundProperty,"Accent");activityBadge.SetResourceReference(TextBlock.BackgroundProperty,"SurfaceAlt");icon.Children.Add(activityBadge);activityBell.Content=icon;
    AutomationProperties.SetName(activityBell,"Activity and notifications");UiHelp.Hint(activityBell,"Activity and notifications (Ctrl+Shift+N)");Grid.SetColumn(activityBell,1);toolbar.Children.Add(activityBell);
    activityPanel=new Border{Padding=new Thickness(18),CornerRadius=new CornerRadius(8),BorderThickness=new Thickness(1),HorizontalAlignment=HorizontalAlignment.Right,VerticalAlignment=VerticalAlignment.Stretch,Visibility=Visibility.Collapsed,Margin=new Thickness(0,0,0,6)};
@@ -53,6 +53,8 @@ namespace AstroArchive {
    activityItems=new StackPanel();var scroll=new ScrollViewer{Content=activityItems,VerticalScrollBarVisibility=ScrollBarVisibility.Auto,HorizontalScrollBarVisibility=ScrollBarVisibility.Disabled};MenuScrolling.SetEnabled(scroll,true);layout.Children.Add(scroll);
    activityPanel.PreviewKeyDown+=(s,e)=>{if(e.Key==Key.Escape){CloseActivity();e.Handled=true;}};
    Window.PreviewKeyDown+=(s,e)=>{if(e.Key==Key.N&&(Keyboard.Modifiers&(ModifierKeys.Control|ModifierKeys.Shift))==(ModifierKeys.Control|ModifierKeys.Shift)){if(activityPanel.Visibility==Visibility.Visible)CloseActivity();else OpenActivity();e.Handled=true;}};
+   Window.PreviewMouseDown+=(s,e)=>DismissActivityOutside(e.OriginalSource as DependencyObject);
+   Window.Deactivated+=(s,e)=>{if(activityPanel.Visibility==Visibility.Visible)CloseActivity(false);};
    Window.SizeChanged+=(s,e)=>SizeActivity();SizeActivity();
    activityToast=new Border{CornerRadius=new CornerRadius(6),Padding=new Thickness(12),BorderThickness=new Thickness(1),HorizontalAlignment=HorizontalAlignment.Right,VerticalAlignment=VerticalAlignment.Top,MaxWidth=420,Visibility=Visibility.Collapsed};activityToast.SetResourceReference(Border.BackgroundProperty,"SurfaceAlt");activityToast.SetResourceReference(Border.BorderBrushProperty,"Border");Grid.SetRow(activityToast,2);Panel.SetZIndex(activityToast,19);root.Children.Add(activityToast);
    var toastLayout=new DockPanel();activityToast.Child=toastLayout;var view=new Button{Content="View",Margin=new Thickness(10,0,0,0)};DockPanel.SetDock(view,Dock.Right);toastLayout.Children.Add(view);view.Click+=(s,e)=>OpenActivity();activityToastText=new TextBlock{TextWrapping=TextWrapping.Wrap,VerticalAlignment=VerticalAlignment.Center};AutomationProperties.SetLiveSetting(activityToastText,AutomationLiveSetting.Polite);toastLayout.Children.Add(activityToastText);
@@ -61,13 +63,22 @@ namespace AstroArchive {
   }
   void SizeActivity(){if(activityPanel!=null)activityPanel.Width=Math.Min(Math.Max(420,420*Math.Max(1,settings.TextScalePercent/100.0)),Math.Max(320,Window.ActualWidth-48));}
   void OpenActivity(){if(activityPanel==null)return;activityToastTimer.Stop();activityToast.Visibility=Visibility.Collapsed;activityPanel.Visibility=Visibility.Visible;foreach(var entry in activities)entry.Unread=false;RenderActivity();activityPanel.MoveFocus(new TraversalRequest(FocusNavigationDirection.First));}
-  void CloseActivity(){if(activityPanel==null)return;activityPanel.Visibility=Visibility.Collapsed;activityBell.Focus();}
+  void CloseActivity(bool restoreFocus=true){if(activityPanel==null)return;activityPanel.Visibility=Visibility.Collapsed;if(restoreFocus)activityBell.Focus();}
+  void DismissActivityOutside(DependencyObject source){
+   if(activityPanel==null||activityPanel.Visibility!=Visibility.Visible)return;
+   for(var node=source;node!=null;node=node is Visual?VisualTreeHelper.GetParent(node):node is FrameworkContentElement?((FrameworkContentElement)node).Parent:LogicalTreeHelper.GetParent(node))if(node==activityPanel||node==activityBell)return;
+   // Let the same click focus/activate the control beneath the dismissed panel.
+   CloseActivity(false);
+  }
   ActivityEntry AddActivity(string title,bool running=false){
    var entry=new ActivityEntry{Title=title,Running=running,Status=running?"Preparing…":"",RepositoryRoot=repo==null?null:repo.Root};activities.Insert(0,entry);
    foreach(var old in activities.Where(a=>!a.Running&&!a.NeedsReview&&a.Review==null).Skip(40).ToList())activities.Remove(old);RenderActivity();return entry;
   }
   void NotifyActivity(ActivityEntry entry){
-   if(activityDisposed||closing)return;entry.Unread=activityPanel==null||activityPanel.Visibility!=Visibility.Visible;RenderActivity();
+   if(activityDisposed||closing)return;
+   bool notify=!entry.Running&&entry.DurationSeconds.HasValue&&entry.DurationSeconds.Value>300;
+   entry.Unread=notify&&(activityPanel==null||activityPanel.Visibility!=Visibility.Visible);RenderActivity();
+   if(!notify)return;
    if(activityToast==null||activityPanel.Visibility==Visibility.Visible||!Window.IsVisible||Window.WindowState==WindowState.Minimized)return;
    activityToastText.Text=entry.Title+": "+entry.Status;activityToast.Visibility=Visibility.Visible;activityToastTimer.Stop();activityToastTimer.Start();
   }
@@ -83,13 +94,13 @@ namespace AstroArchive {
   }
   Button ActivityAction(string label,Action action){var button=new Button{Content=label,Margin=new Thickness(0,0,6,6),Padding=new Thickness(8,4,8,4)};button.Click+=(s,e)=>{try{action();}catch(Exception error){var entry=AddActivity(label);entry.Failed=true;entry.Status=error.Message;NotifyActivity(entry);}};return button;}
   void UpdateActivityBadge(){
-   if(activityBell==null)return;int unread=activities.Count(a=>a.Unread),running=activities.Count(a=>a.Running),review=activities.Count(a=>a.NeedsReview);activityBadge.Text=unread.ToString();activityBadge.Visibility=unread==0?Visibility.Collapsed:Visibility.Visible;activityDot.Visibility=running==0?Visibility.Collapsed:Visibility.Visible;
+   if(activityBell==null)return;int unread=activities.Count(a=>a.Unread),running=activities.Count(a=>a.Running),review=activities.Count(a=>a.NeedsReview);activityBadge.Text=unread.ToString();activityBadge.Visibility=unread==0?Visibility.Collapsed:Visibility.Visible;
    string description="Activity: "+running+" running, "+unread+" unread, "+review+" need attention";AutomationProperties.SetName(activityBell,description);activityBell.ToolTip=description+" (Ctrl+Shift+N)";
   }
   static string ActivityRate(ActivityEntry entry){
    var p=entry.Progress;if(p==null)return "Started "+entry.StartedUtc.ToLocalTime().ToString("g");
    string eta=p.Finished||!entry.Running?"":p.Finalising?" · Finalising":p.Stalled?" · "+(p.Activity!=null&&p.Activity.Contains("Cloud availability")?"Waiting for cloud provider":"Waiting for filesystem"):p.RemainingSeconds.HasValue?" · ETA ~"+EtaEstimate.Format(p.RemainingSeconds.Value):" · ETA estimating";
-   return "Elapsed "+PipelineMetrics.Duration(p.ElapsedSeconds)+eta+" · "+(p.TotalKnown?p.Done+" / "+p.Total:p.Done+" inspected · "+p.Total+" discovered");
+   return "Elapsed "+PipelineMetrics.Duration(p.ElapsedSeconds)+eta+" · "+(p.TotalKnown?p.Done+" / "+p.Total:p.Done+" inspected · "+p.Total+" discovered")+PipelineMetrics.Reading(p);
   }
   void UpdateActivityCard(ActivityEntry entry,ActivityCard card){
    card.Title.Text=entry.Title;card.Status.Text=entry.Status;card.Rate.Text=ActivityRate(entry);var p=entry.Progress;card.Bar.Visibility=entry.Running||p!=null?Visibility.Visible:Visibility.Collapsed;card.Bar.IsIndeterminate=entry.Running&&!settings.ReducedMotion&&(p==null||!p.TotalKnown&&!p.Finished);card.Bar.Value=p==null?0:Math.Max(0,Math.Min(1,p.ProgressFraction));

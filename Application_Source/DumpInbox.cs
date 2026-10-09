@@ -8,7 +8,7 @@ namespace AstroArchive {
  public class DumpResult {
   public ImportPlan Plan;public ImportResult Import;
   public bool NeedsReview {get{return Plan.Errors.Count>0||Import.Failed>0||Import.OriginalsKept>0||Import.Warnings.Count>0;}}
-  public string Summary {get{return "Dump: "+Import.Imported+" imported; "+Import.Duplicates+" duplicates; "+Import.OriginalsDeleted+" processed files removed; "+(Plan.Errors.Count+Import.Failed)+" errors; "+Import.OriginalsKept+" files retained after cleanup; "+Import.IgnoredFailed+" failed filenames ignored; "+Import.IgnoredRaster+" PNG/JPG files ignored.";}}
+  public string Summary {get{return "Dump: "+Import.Imported+" imported; "+Import.Duplicates+" duplicates; "+Import.OriginalsDeleted+" processed files removed; "+(Plan.Errors.Count+Import.Failed)+" errors; "+Import.OriginalsKept+" files retained after cleanup; "+Import.IgnoredFailed+" failed filenames ignored; "+Import.IgnoredRaster+" PNG/JPG/MP4 files ignored.";}}
  }
  public sealed partial class Repository {
   public string DumpFolder {get{return Path.Combine(Root,"Dump");}}

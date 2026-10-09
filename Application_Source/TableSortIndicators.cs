@@ -13,21 +13,13 @@ namespace AstroArchive {
         public static readonly DependencyProperty MarkProperty = DependencyProperty.RegisterAttached("Mark", typeof(string), typeof(TableSortIndicators), new PropertyMetadata(""));
         static readonly DependencyProperty PreparedSortsProperty = DependencyProperty.RegisterAttached("PreparedSorts", typeof(System.Collections.Generic.IEnumerable<SortDescription>), typeof(TableSortIndicators), new PropertyMetadata(null));
         static readonly DependencyProperty AttachedProperty = DependencyProperty.RegisterAttached("Attached", typeof(bool), typeof(TableSortIndicators), new PropertyMetadata(false));
-        static readonly DependencyProperty BaseMinimumProperty = DependencyProperty.RegisterAttached("BaseMinimum", typeof(double), typeof(TableSortIndicators), new PropertyMetadata(double.NaN));
         public static string GetMark(DependencyObject element) { return (string)element.GetValue(MarkProperty); }
         public static void SetMark(DependencyObject element, string value) { element.SetValue(MarkProperty, value); }
         public static void SizeColumns(DataGrid grid, double scale) {
             foreach (var column in grid.Columns) {
-                double minimum = (double)column.GetValue(BaseMinimumProperty);
-                if (double.IsNaN(minimum)) {
-                    minimum = Math.Max(column.MinWidth, column.Width.IsAbsolute ? column.Width.Value : column.Width.IsStar ? 120 : 20);
-                    column.SetValue(BaseMinimumProperty, minimum);
-                }
-                var caption = new TextBlock { Text = System.Convert.ToString(column.Header), FontFamily = grid.FontFamily, FontSize = 10 * scale, FontWeight = FontWeights.SemiBold };
-                caption.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
-                // A star column otherwise lets WPF squeeze pixel columns down to 20 px.
-                // Preserve the caption and room for direction/priority; scroll the table.
-                column.MinWidth = Math.Max(minimum * scale, caption.DesiredSize.Width + 48);
+                // Keep a usable gripper without forcing the caption's full width.
+                // Captions/cells clip; explicit resizing may overflow the viewport.
+                column.MinWidth = 32 * scale;
             }
         }
         public static void Update(DataGrid grid,System.Collections.Generic.IEnumerable<SortDescription> preparedSorts=null) {
@@ -48,6 +40,7 @@ namespace AstroArchive {
         public static void Attach(DataGrid grid) {
             if ((bool)grid.GetValue(AttachedProperty)) return;
             grid.SetValue(AttachedProperty, true);
+            TableColumnResizing.Attach(grid);
             var font = grid.TryFindResource("UiFontCaption");
             SizeColumns(grid, font is double ? (double)font / 10.0 : 1.0);
             foreach (var column in grid.Columns) {

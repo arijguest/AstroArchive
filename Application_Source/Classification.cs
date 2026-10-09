@@ -180,6 +180,7 @@ namespace AstroArchive {
    if(stackCount.HasValue&&stackCount.Value>0&&stackCount.Value<=int.MaxValue&&stackCount.Value==Math.Floor(stackCount.Value))f.StackCount=(int)stackCount.Value;
    if(f.Kind=="Light"&&f.StackCount>1){f.Kind="Stack";f.Notes+="Header indicates multiple combined exposures. ";}
    if(f.Kind=="Unknown"&&f.StackCount>1)f.Kind="Stack";
+   if(MediaFiles.Video(path))f.Kind="Video";
    string filter=h.Get("FILTER","FILTERID","FILTNAME");if(!string.IsNullOrEmpty(filter))f.Filter=filter;
    else {double? ir=MatchNumber(text,@"(?:^|_)IR[_-]?(\d)");if(ir.HasValue)f.Filter=ir==0?"Standard":ir==1?"Astro":ir==2?"Dual band":"IR "+ir;else if(Regex.IsMatch(low,@"(?:^|[_/ -])ir[_ -]*cut(?:[_/ .-]|$)"))f.Filter="IRCUT";else if(Regex.IsMatch(low,@"(?:^|[_/ -])(duo|dual|lp)[_-]?(band|filter)?(?:[_/ -]|$)"))f.Filter="Dual band";}
    f.ObservationMode=h.Get("OBSMODE","CAPMODE","SHOOTMOD","MODE");
@@ -219,7 +220,7 @@ namespace AstroArchive {
    if(h.Get("REGISTER","REGISTRD","DEROTATE")=="T"||Regex.IsMatch(name,@"^(r_|r_pp_|registered[_-])")||low.Contains("/registered/"))f.Calibration="Registered";
    if(f.Kind=="Stack")f.Calibration="Device stack";if(f.Kind.StartsWith("Master")||f.Kind=="Dark"||f.Kind=="Flat"||f.Kind=="Bias")f.Calibration="Calibration frame";
    if(f.Target=="Unknown")f.Notes+="Target needs identification. ";if(f.Kind=="Unknown")f.Notes+="Frame type needs review. ";if(f.Camera=="Unknown")f.Notes+="Camera channel unknown. ";
-   f.Sky=SkyWcs.FromHeader(h,f.Width,f.Height);if(classification!=null)classification.Complete();MetadataProfiles.Apply(f,h,asset);if(selectedImage!=null)f.ImageKey=selectedImage.Key;ApplyStackMetadata(f);return f;
+   f.Sky=SkyWcs.FromHeader(h,f.Width,f.Height);if(classification!=null)classification.Complete();MetadataProfiles.Apply(f,h,asset);if(selectedImage!=null)f.ImageKey=selectedImage.Key;ApplyStackMetadata(f);if(f.Kind=="Video")MediaFiles.ApplyVideoDuration(f,asset.DurationSeconds,asset.DurationSource);return f;
    }
   }
   static Dictionary<string,string> ReadShots(string path,string root,Frame f,Dictionary<string,ShotsMetadata> cache,Action<int> counted,System.Threading.CancellationToken ct,PipelineMetrics metrics){

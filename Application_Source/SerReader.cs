@@ -35,7 +35,7 @@ namespace AstroArchive {
                 };
                 if(counted!=null)counted(178);
                 return new AssetInfo {
-                    Format="SER",Header=header,Images= {
+                    Format="SER",DurationSeconds=VideoHeaders.SerDuration(stream,length,frames,counted),DurationSource="SER capture timestamp span",Header=header,Images= {
                         descriptor
                     },Note=supported?"Planetary recording. Preview frames or export the original sequence.":"This SER colour arrangement is archived without pixel decoding."
                 };

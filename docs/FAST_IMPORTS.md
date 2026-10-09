@@ -6,7 +6,11 @@ The saved physical telescope scopes the inventory. Known files bypass image
 opens, header/pixel reads, timestamps, companion metadata, destination stats and
 hashing. Existing names are indexed in a compact SQLite table; older archives
 backfill it once from their saved records without reading archived image files.
-Archive deletion/explicit reimport decisions remain authoritative.
+Archive deletion/explicit reimport decisions remain authoritative. Fast scans do
+not hash every new candidate merely because the archive has deletion history.
+Unrecognised candidates remain provisional until verified import checks their
+content hash against that history, including renamed copies of deleted captures.
+Full scans retain the scan-time content check.
 Explicit reimport permission revisits the affected DWARF session rather than
 omitting the file along with its already archived neighbours.
 

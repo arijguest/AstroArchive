@@ -7,6 +7,7 @@ using System.Windows.Controls.Primitives;
 namespace AstroArchive {
  public partial class MainUi {
   void SmokeColumnLayouts(){
+   SmokeColumnResizing();
    var saved=Util.Serialize(settings.TableLayouts);testingColumnLayouts=true;
    try{
     foreach(string name in new[]{"FramesGrid","ImportGrid"}){
@@ -27,6 +28,23 @@ namespace AstroArchive {
      ResetColumns(name);if(!CurrentColumnLayout(name).Visible.SequenceEqual(defaultColumns[name])||SavedColumnLayout(name)!=null)throw new Exception("Restore defaults did not restore the original layout.");
     }
    }finally{settings.TableLayouts=Util.Deserialize<System.Collections.Generic.Dictionary<string,ColumnLayout>>(saved);foreach(string name in new[]{"FramesGrid","ImportGrid"})ApplyColumnLayout(name,SavedColumnLayout(name));testingColumnLayouts=false;}
+  }
+  void SmokeColumnResizing(){
+   var dialog=new FormWindow(Window,"Column resizing fixture",760,480);
+   var grid=new DataGrid{Height=220,ItemsSource=new[]{new Frame{OriginalName=new string('x',200),Target="M45",Kind="Light"}}};
+   var file=new DataGridTextColumn{Header="LONG FILE CAPTION",Binding=new System.Windows.Data.Binding("OriginalName"),Width=new DataGridLength(1,DataGridLengthUnitType.Star)};
+   var target=new DataGridTextColumn{Header="TARGET",Binding=new System.Windows.Data.Binding("Target"),Width=180};var kind=new DataGridTextColumn{Header="FRAME TYPE",Binding=new System.Windows.Data.Binding("Kind"),Width=180};grid.Columns.Add(file);grid.Columns.Add(target);grid.Columns.Add(kind);dialog.Add(grid);dialog.CloseOnly();
+   try{
+    dialog.Window.Show();PumpPopupLayout();var header=PopupChildren<DataGridColumnHeader>(grid).Single(h=>h.Column==file);header.ApplyTemplate();var thumb=(Thumb)header.Template.FindName("PART_RightHeaderGripper",header);
+    var columns=grid.Columns.ToList();var initial=columns.Select(c=>c.ActualWidth).ToArray();double increase=target.ActualWidth-target.MinWidth+kind.ActualWidth-kind.MinWidth+400;
+    thumb.RaiseEvent(new DragStartedEventArgs(0,0));thumb.RaiseEvent(new DragDeltaEventArgs(increase,0));thumb.RaiseEvent(new DragCompletedEventArgs(increase,0,false));PumpPopupLayout();
+    if(file.Width.Value<initial[0]+increase-0.1||Math.Abs(target.Width.Value-target.MinWidth)>0.1||Math.Abs(kind.Width.Value-kind.MinWidth)>0.1)throw new Exception("Star resizing hit the viewport limit instead of shrinking neighbours and scrolling.");
+    var scroll=PopupChildren<ScrollViewer>(grid).First(s=>s.Name=="DG_ScrollViewer");if(scroll.ScrollableWidth<=0||!grid.ClipToBounds)throw new Exception("Wide columns have no clipped horizontal overflow.");
+    double before=file.Width.Value;thumb.RaiseEvent(new DragStartedEventArgs(0,0));thumb.RaiseEvent(new DragDeltaEventArgs(-150,0));thumb.RaiseEvent(new DragCompletedEventArgs(-150,0,false));PumpPopupLayout();if(file.Width.Value>=before||target.Width.Value<=target.MinWidth)throw new Exception("Shrinking a column did not return space to neighbours.");
+    var widths=columns.Select(c=>c.Width).ToArray();thumb.RaiseEvent(new DragStartedEventArgs(0,0));thumb.RaiseEvent(new DragDeltaEventArgs(90,0));thumb.RaiseEvent(new DragCompletedEventArgs(90,0,true));if(!columns.Select(c=>c.Width).SequenceEqual(widths))throw new Exception("Canceled resize did not restore widths.");
+    TableColumnResizing.Resize(columns,file,initial,20);PumpPopupLayout();if(file.Width.Value!=file.MinWidth||file.MinWidth>48)throw new Exception("Caption minimum prevented a narrow column.");
+    var cell=PopupChildren<DataGridCell>(grid).First();if(!cell.ClipToBounds||!header.ClipToBounds)throw new Exception("Narrow cells or headings can paint over neighbours.");
+   }finally{dialog.Window.Close();}
   }
  }
 }

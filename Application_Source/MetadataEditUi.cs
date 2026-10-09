@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -70,18 +71,34 @@ namespace AstroArchive {
   void UpdateSummary(){if(summary==null)return;var changes=Model.Values.Where(v=>v.Changed).ToList();int count=changes.Count;summary.Text=(count==0?"No changes yet":count+" changed field"+(count==1?"":"s"))+" · "+(Sessions.IsChecked==true?sessionCount+" files in the selected sessions":selectedCount+" selected file"+(selectedCount==1?"":"s"))+"\n"+string.Join(", ",changes.Select(v=>v.Field.Label));}
  }
  public partial class MainUi {
-  void Edit(bool imported){
-   if(repo==null)return;var selected=Context(imported);if(selected.Count==0)return;
-   var sessionRows=MetadataSessionRows(selected,imported);var editor=new MetadataEditor(Window,selected,sessionRows.Count);if(!editor.Form.Show())return;
-   MetadataPatch patch=editor.Model.Patch();if(patch.Count==0){L("StatusLabel").Text="No metadata changes.";return;}
-   var items=selected;
-   if(editor.Sessions.IsChecked==true)items=sessionRows;
-   Run(ct=>{
-    // Validate all timezone conversions before any file is moved or saved.
-    var updates=new List<Tuple<Frame,Frame>>();foreach(var original in items){ct.ThrowIfCancellationRequested();updates.Add(Tuple.Create(original,patch.Apply(original)));}
-    foreach(var update in updates){ct.ThrowIfCancellationRequested();if(!PendingImport(update.Item1,imported))repo.Refile(update.Item2,ct);if(imported){int row=plan.Frames.IndexOf(update.Item1);if(row>=0)plan.Frames[row]=update.Item2;}}
-    return items.Count+" captures updated · "+patch.Count+" changed fields.";
-   },message=>{if(imported)FilterImports();L("StatusLabel").Text=message;});
+  bool metadataPreviewSuspended;
+  async Task SuspendMetadataPreviews(){
+   metadataPreviewSuspended=true;var capture=previewMotion;var edited=editedMotion;CancelPreview();CancelEditedPreview();
+   PreviewMessage("Preview paused while editing metadata.");L("EditedPreviewMessage").Text="Preview paused while editing metadata.";L("EditedPreviewMessage").Visibility=Visibility.Visible;
+   // Cancelling a decoder does not immediately release its stream. Drain the
+   // active read before the modal editor opens, without blocking the dispatcher.
+   await previewDecodeGate.WaitAsync();previewDecodeGate.Release();
+   if(capture!=null)await capture.PendingRead;if(edited!=null)await edited.PendingRead;
+  }
+  void ResumeMetadataPreviews(){
+   metadataPreviewSuspended=false;if(closing||Window.Dispatcher.HasShutdownStarted)return;
+   int page=((TabControl)Window.FindName("MainTabs")).SelectedIndex;if(page==0&&settings.ShowPreview)PreviewSelected();else if(page==2)LoadEditedPreview();
+  }
+  async void Edit(bool imported){
+   if(repo==null||RepositoryOperationBlocked||metadataPreviewSuspended)return;var selected=Context(imported);if(selected.Count==0)return;var repository=repo;
+   try{
+    await SuspendMetadataPreviews();if(closing||repo!=repository||RepositoryOperationBlocked)return;
+    var sessionRows=MetadataSessionRows(selected,imported);var editor=new MetadataEditor(Window,selected,sessionRows.Count);if(!editor.Form.Show())return;
+    MetadataPatch patch=editor.Model.Patch();if(patch.Count==0){L("StatusLabel").Text="No metadata changes.";return;}
+    var items=selected;
+    if(editor.Sessions.IsChecked==true)items=sessionRows;
+    await RunOperation(ct=>{
+     // Validate all timezone conversions before any file is moved or saved.
+     var updates=new List<Tuple<Frame,Frame>>();foreach(var original in items){ct.ThrowIfCancellationRequested();updates.Add(Tuple.Create(original,patch.Apply(original)));}
+     foreach(var update in updates){ct.ThrowIfCancellationRequested();if(!PendingImport(update.Item1,imported))repo.Refile(update.Item2,ct);if(imported){int row=plan.Frames.IndexOf(update.Item1);if(row>=0)plan.Frames[row]=update.Item2;}}
+     return items.Count+" captures updated · "+patch.Count+" changed fields.";
+    },message=>{if(imported)FilterImports();L("StatusLabel").Text=message;});
+   }finally{ResumeMetadataPreviews();}
   }
   List<Frame> MetadataSessionRows(List<Frame> selected,bool imported){var ids=new HashSet<string>(selected.Where(f=>!string.IsNullOrEmpty(f.Session)).Select(f=>f.Session));return (imported?plan.Frames:all).Where(f=>(ids.Contains(f.Session)||selected.Contains(f))&&(!imported||f.Status!="Deleted")).ToList();}
  }

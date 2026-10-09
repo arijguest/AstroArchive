@@ -242,10 +242,11 @@ Location search does not send your position to a network service.
 DUMP INBOX
 
 Drop FITS files or telescope folders into the repository's Dump folder.
-Finish copying first. Startup/repository switching process pending FITS automatically;
+Finish copying first. Startup/repository switching check pending FITS and ask you
+to confirm source removal before processing;
 Import > Dump folder also opens or processes it manually.
-Verified imports and duplicates are removed; changed, locked or failed inputs
-remain for retry. Other files stay. Correct Unknown device IDs through Edit metadata.
+Verified science imports and duplicates are removed; calibration originals stay.
+Changed, locked or failed inputs remain for retry. Other files stay. Correct Unknown device IDs through Edit metadata.
 
 REVIEW, EXCLUSIONS AND DELETION
 
@@ -255,14 +256,23 @@ Flagged captures are skipped by default. Retry failed imports uses the filtered 
 changed sources need a fresh scan. Completed imports survive cancellation.
 
 ## Exclusions and deletion
-Settings > Import can ignore failed filenames and PNG/JPG/JPEG inputs; rescan after
+Settings > Import can ignore failed filenames and PNG/JPG/JPEG/MP4 inputs; rescan after
 changes. Repository > Maintenance offers Delete failed and Purge non-raw files.
+Recordings (AVI, MP4, MOV, M4V, WMV, MKV and SER) use the Video frame type.
+Their Exposure column shows recording length in seconds. SER uses its measured
+capture timestamp span; files without readable duration show unknown.
+Activity keeps completed entries, but only processes lasting more than five minutes
+raise an unread count. Opening Activity acknowledges the count; click outside to close.
 Delete files confirms archive-copy removal; source files and shared metadata stay.
 Deletion history blocks reimport of deleted checksums. Allow reimport permits a
 later source import; it does not restore deleted files.
 
 Delete originals is optional and only removes safely removable, verified new or
-restored source captures. Duplicates and failed cleanup retain originals.
+restored source captures. Calibration frames (dark, flat, bias, dark-flat and master
+calibrations) always remain on the source/telescope. Duplicates and failed cleanup
+retain originals. An import with deletion enabled asks you to confirm source removal
+before it starts. Cancel leaves source files untouched. Edited imports always keep
+source files and do not offer this deletion option.
 Delete archive data clears indexed captures/managed metadata, keeping Edited,
 source mirrors, unindexed files and deletion history.
 
@@ -299,6 +309,9 @@ Settings > General > Image compatibility shows availability and the codec folder
 Scientific decoding has size/layout limits; ordinary exports preserve bytes.
 
 APPEARANCE AND ACCESSIBILITY
+
+Import dialogs include Import preferences…; it opens the Import section while
+keeping the selected folders and files in the dialog.
 
 Settings opens Preferences: General, Import, Export, Sky & solving, Accessibility,
 Updates and Backups. Save preferences applies changes; Cancel retains settings.

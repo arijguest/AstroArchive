@@ -16,6 +16,31 @@ namespace AstroArchive {
    return object.Equals(left,right);
   }
   static void PerformanceTests(){
+   Test("Table column growth redistributes space and overflows instead of capping the request",()=>{
+    var widths=new double[]{200,200,200};var min=new double[]{32,32,32};var max=new double[]{double.PositiveInfinity,double.PositiveInfinity,double.PositiveInfinity};var resizable=new[]{true,true,true};
+    Check(ColumnWidths.Resize(widths,min,max,resizable,0,400).SequenceEqual(new double[]{400,32,168}),"Neighbours did not give up width in display order");
+    Check(ColumnWidths.Resize(widths,min,max,resizable,0,1000).SequenceEqual(new double[]{1000,32,32}),"Viewport width capped the dragged column");
+    Check(ColumnWidths.Resize(widths,min,max,resizable,2,400).SequenceEqual(new double[]{168,32,400}),"Last-column drag could not resize earlier neighbours");
+    Check(ColumnWidths.Resize(widths,min,max,resizable,0,40).SequenceEqual(new double[]{40,360,200}),"Narrowing did not return space to neighbours");
+    Check(ColumnWidths.Resize(widths,min,max,new[]{true,false,true},0,400).SequenceEqual(new double[]{400,200,32}),"Resize altered a locked neighbour");
+    Check(widths.SequenceEqual(new double[]{200,200,200}),"Repeated drag calculations changed the initial snapshot");
+   });
+   Test("Large scan hash reads advance activity before a file completes",()=>{
+    double seconds=0;var metrics=new PipelineMetrics(NoProgress,()=>seconds);metrics.Phase(1,10*1048576,"Scan");
+    using(var read=metrics.Begin("Duplicate checking","capture.avi")){
+     for(int i=1;i<=5;i++){seconds=i;read.Bytes(1048576);var p=metrics.Progress();Check(!p.Stalled&&p.Done==0&&p.ProgressFraction==0,"Active hash was stalled or counted as a completed file");}
+     var progress=metrics.Progress();Check(progress.ReadBytes==5*1048576&&progress.ReadBytesPerSecond==1048576&&PipelineMetrics.Reading(progress).Contains("Hashing"),"Hash byte/rate detail missing");
+     seconds=8;Check(metrics.Progress().Stalled&&!metrics.Progress().RemainingSeconds.HasValue,"A real read stall retained an ETA");
+     read.Bytes(1048576);Check(!metrics.Progress().Stalled,"Resumed reads did not clear the stall");
+    }
+    metrics.Phase(1,0,"Scan");Check(metrics.Progress().ReadBytes==0,"New phase inherited scan reads");
+   });
+   Test("Discovery and metadata completion clear inactivity without inventing finished candidates",()=>{
+    double seconds=0;var metrics=new PipelineMetrics(NoProgress,()=>seconds);metrics.Phase(0,0,"Scan",false,false);seconds=4;Check(metrics.Progress().Stalled,"Fixture never stalled");metrics.Advance();Check(!metrics.Progress().Stalled&&metrics.Progress().Done==0,"Directory progress changed inspected files");
+    seconds=8;metrics.Discover(1);Check(!metrics.Progress().Stalled&&metrics.Progress().Total==1,"Discovered candidate ignored");
+    using(var metadata=metrics.Begin("Metadata","capture.mp4"))using(var header=metrics.Begin("Header open/read","capture.mp4")){seconds=12;header.Bytes(100);metadata.Bytes(100);Check(metrics.Progress().ReadBytes==100,"Nested header reads counted twice");metadata.Complete();}
+    Check(!metrics.Progress().Stalled&&metrics.Progress().Done==0,"Finished metadata falsely stalled or completed the file");
+   });
    Test("ETA advances within the first copy and includes destination verification",()=>{
     double seconds=0;var metrics=new PipelineMetrics(NoProgress,()=>seconds);metrics.Phase(1,100,"Import",true);var item=metrics.Track(100);
     item.Copied(10);seconds=2;var p=metrics.Progress();Check(p.Done==0&&p.BytesDone==10&&p.RemainingSeconds.HasValue,"First-file progress missing");Check(Math.Abs(p.RemainingSeconds.Value-38)<0.01,"Verification absent from remaining work");

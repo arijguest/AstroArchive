@@ -1,5 +1,6 @@
 // Stable property IDs keep saved table layouts independent of display labels.
 using System.Collections.Generic;
+using System;
 using System.Linq;
 namespace AstroArchive {
  public sealed class ColumnLayout {
@@ -26,6 +27,16 @@ namespace AstroArchive {
    if(visible.Count==0)visible=defaults.Where(known.Contains).Distinct().ToList();
    if(visible.Count==0&&ids.Count>0)visible.Add(ids[0]);
    return new ColumnLayout{Order=order,Visible=visible,RepositoryGainShown=saved!=null&&saved.RepositoryGainShown};
+  }
+ }
+ public static class ColumnWidths {
+  public static double[] Resize(double[] initial,double[] minimum,double[] maximum,bool[] resizable,int selected,double requested){
+   var widths=(double[])initial.Clone();if(selected<0||selected>=widths.Length||double.IsNaN(requested)||double.IsInfinity(requested))return widths;
+   double desired=Math.Max(minimum[selected],Math.Min(maximum[selected],requested)),delta=desired-widths[selected];widths[selected]=desired;
+   var neighbours=Enumerable.Range(selected+1,widths.Length-selected-1).Concat(Enumerable.Range(0,selected).Reverse()).Where(i=>resizable[i]).ToList();
+   if(delta>0){foreach(int i in neighbours){double take=Math.Min(delta,Math.Max(0,widths[i]-minimum[i]));widths[i]-=take;delta-=take;if(delta<=0)break;}}
+   else if(delta<0){foreach(int i in neighbours){double give=Math.Min(-delta,Math.Max(0,maximum[i]-widths[i]));widths[i]+=give;delta+=give;if(delta>=0)break;}}
+   return widths;
   }
  }
 }

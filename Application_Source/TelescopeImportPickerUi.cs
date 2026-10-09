@@ -10,10 +10,10 @@ using Microsoft.Win32;
 namespace AstroArchive {
  internal sealed class TelescopeImportPicker {
   internal readonly FormWindow Dialog;internal readonly ListBox Items;internal readonly ComboBox Profiles,Model;internal readonly TextBox Name;
-  internal readonly Button FolderButton,FilesButton,WholeDriveButton;internal readonly TextBlock Error;
+  internal readonly Button FolderButton,FilesButton,WholeDriveButton,PreferencesButton;internal readonly TextBlock Error;
   internal ImportSelection Selection;internal TelescopeProfile Profile;
   readonly UsbTelescope device;readonly List<TelescopeProfile> saved;readonly List<string> paths=new List<string>();
-  public TelescopeImportPicker(Window owner,UsbTelescope device,IEnumerable<TelescopeProfile> profiles,TelescopeProfile preferred,Func<string> pickFolder=null,Func<string[]> pickFiles=null){
+  public TelescopeImportPicker(Window owner,UsbTelescope device,IEnumerable<TelescopeProfile> profiles,TelescopeProfile preferred,Func<string> pickFolder=null,Func<string[]> pickFiles=null,Action<Window> importPreferences=null){
    this.device=device;saved=profiles.ToList();string brand=ImportSelection.TelescopeBrand(device.Make);
    Dialog=new FormWindow(owner,"Import from "+brand,740,720);
    Dialog.Text("Choose folders or files on your telescope",true);
@@ -36,6 +36,7 @@ namespace AstroArchive {
     Refresh();
    };
    Profiles.SelectedItem=choices.FirstOrDefault(p=>preferred!=null&&p.Id==preferred.Id)??choices[0];
+   PreferencesButton=Dialog.FooterButton("Import preferences…",()=>{if(importPreferences!=null)importPreferences(Dialog.Window);});PreferencesButton.IsEnabled=importPreferences!=null;
    Dialog.Accept("Import",Validate);
   }
   Button ChoiceButton(WrapPanel row,string text,Action action){var button=new Button{Content=text,Margin=new Thickness(0,0,8,6)};UiHelp.For(button,text);button.Click+=(s,e)=>action();row.Children.Add(button);return button;}
@@ -51,13 +52,14 @@ namespace AstroArchive {
   public bool Show(){return Dialog.Show();}
  }
  internal static class TelescopeImportConfirmation {
-  internal static FormWindow Create(Window owner,ImportSelection selection,string make){
+  internal static FormWindow Create(Window owner,ImportSelection selection,string make,Action<Window> importPreferences=null){
    var dialog=new FormWindow(owner,"Large telescope import",580,450);
    dialog.Text("Import from "+ImportSelection.TelescopeBrand(make)+"?",true);
    dialog.Text(selection.Folders.Count==0?selection.Files.Count.ToString("N0")+" capture files selected":"At least "+ImportSelection.LargeFileSelection.ToString("N0")+" capture files selected",true);
    if(selection.Folders.Count>0)dialog.Text("Selection: "+selection.Summary+".");
    dialog.Text("Large imports can take a while. Choose fewer folders or files for a quicker import.");
    dialog.Text("• Scan, check and copy eligible captures.\n• Keep originals on the telescope.\n• Cancel anytime; completed copies are retained.");
+   var preferences=dialog.FooterButton("Import preferences…",()=>{if(importPreferences!=null)importPreferences(dialog.Window);});preferences.IsEnabled=importPreferences!=null;
    dialog.Accept("Import",()=>true);return dialog;
   }
  }

@@ -28,13 +28,27 @@ namespace AstroArchive {
   }
  }
  public sealed partial class Repository {
-  // Repair stored metadata without moving images or reading capture files.
+  // Still-image repairs use saved metadata. Legacy recordings read bounded headers
+  // once to recover duration; their video payloads are never decoded or hashed here.
   void NormalizeStoredMetadata(){
    db.Transaction(()=>{
-    foreach(var frame in All()){bool changed=Classifier.ApplyStackMetadata(frame);string target=ObservationTargets.CanonicalSolar(frame.Target);if(target!=frame.Target||changed){frame.Target=target;Save(frame);}}
-    foreach(string data in db.Query("SELECT data FROM source_manifest")){var manifest=Util.Deserialize<SourceManifest>(data);if(manifest.Metadata==null)continue;bool changed=Classifier.ApplyStackMetadata(manifest.Metadata);string target=ObservationTargets.CanonicalSolar(manifest.Metadata.Target);if(target!=manifest.Metadata.Target||changed){manifest.Metadata.Target=target;Manifest(manifest);}}
-    foreach(var deletion in Deletions()){if(deletion.Metadata==null)continue;bool changed=Classifier.ApplyStackMetadata(deletion.Metadata);string target=ObservationTargets.CanonicalSolar(deletion.Metadata.Target);if(target!=deletion.Metadata.Target||changed){deletion.Metadata.Target=target;db.Exec("INSERT OR REPLACE INTO deleted_files(hash,data) VALUES(?,?)",deletion.Hash,Util.Serialize(deletion));}}
+    var frames=All();foreach(var frame in frames){bool changed=MediaFiles.ApplyVideoType(frame)|Classifier.ApplyStackMetadata(frame);
+     if(frame.Kind=="Video"&&frame.ClassificationVersion!=Assets.ClassificationVersion){
+      AssetInfo asset=null;try{string path=FilePath(frame);var before=FileStamp.Read(path);asset=Assets.Inspect(path);if(!before.ContentSame(FileStamp.Read(path)))asset=null;}
+      catch(IOException){}catch(UnauthorizedAccessException){}catch(NotSupportedException){}
+      MediaFiles.ApplyVideoDuration(frame,asset==null?null:asset.DurationSeconds,asset==null?null:asset.DurationSource);frame.ClassificationVersion=Assets.ClassificationVersion;changed=true;
+     }
+     string target=ObservationTargets.CanonicalSolar(frame.Target);if(target!=frame.Target||changed){frame.Target=target;Save(frame);}
+    }
+    var archived=frames.Where(f=>!string.IsNullOrEmpty(f.Hash)).ToDictionary(f=>f.Hash);
+    foreach(string data in db.Query("SELECT data FROM source_manifest")){var manifest=Util.Deserialize<SourceManifest>(data);if(manifest.Metadata==null)continue;bool changed=NormalizeVideoSnapshot(manifest.Metadata,archived)|Classifier.ApplyStackMetadata(manifest.Metadata);string target=ObservationTargets.CanonicalSolar(manifest.Metadata.Target);if(target!=manifest.Metadata.Target||changed){manifest.Metadata.Target=target;Manifest(manifest);}}
+    foreach(var deletion in Deletions()){if(deletion.Metadata==null)continue;bool changed=NormalizeVideoSnapshot(deletion.Metadata,archived)|Classifier.ApplyStackMetadata(deletion.Metadata);string target=ObservationTargets.CanonicalSolar(deletion.Metadata.Target);if(target!=deletion.Metadata.Target||changed){deletion.Metadata.Target=target;db.Exec("INSERT OR REPLACE INTO deleted_files(hash,data) VALUES(?,?)",deletion.Hash,Util.Serialize(deletion));}}
    });
+  }
+  static bool NormalizeVideoSnapshot(Frame frame,System.Collections.Generic.Dictionary<string,Frame> archived){
+   bool changed=MediaFiles.ApplyVideoType(frame);if(frame.Kind!="Video"||frame.ClassificationVersion==Assets.ClassificationVersion)return changed;
+   Frame copy=null;if(frame.Hash!=null)archived.TryGetValue(frame.Hash,out copy);
+   MediaFiles.ApplyVideoDuration(frame,copy==null?frame.VideoDurationSeconds:copy.VideoDurationSeconds,copy==null?frame.VideoDurationSource:copy.VideoDurationSource);frame.ClassificationVersion=Assets.ClassificationVersion;return true;
   }
  }
 }

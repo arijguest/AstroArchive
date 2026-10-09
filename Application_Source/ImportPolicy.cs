@@ -4,7 +4,9 @@ using System.IO;
 using System.Linq;
 namespace AstroArchive {
  public static class ImportPolicy {
-  public static bool RasterFilename(string path){string extension=Path.GetExtension(path??"");return extension.Equals(".png",StringComparison.OrdinalIgnoreCase)||extension.Equals(".jpg",StringComparison.OrdinalIgnoreCase)||extension.Equals(".jpeg",StringComparison.OrdinalIgnoreCase);}
+  // Keep the persisted IgnoreRasterImports option compatible with older settings.
+  public static bool RasterFilename(string path){string extension=Path.GetExtension(path??"");return extension.Equals(".png",StringComparison.OrdinalIgnoreCase)||extension.Equals(".jpg",StringComparison.OrdinalIgnoreCase)||extension.Equals(".jpeg",StringComparison.OrdinalIgnoreCase)||extension.Equals(".mp4",StringComparison.OrdinalIgnoreCase);}
+  public static bool CalibrationOriginal(Frame frame){return frame!=null&&(CaptureSky.IsCalibration(frame)||string.Equals(frame.Calibration,"Calibration frame",StringComparison.OrdinalIgnoreCase));}
   public static bool UnknownScience(Frame frame){return (frame.Kind=="Light"||frame.Kind=="Stack")&&Catalog.IsAmbiguous(frame.Target)&&CaptureScreening.Importable(frame);}
   public static string Target(string value){
    string target=Catalog.CanonicalTarget(value);

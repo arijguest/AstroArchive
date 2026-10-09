@@ -65,13 +65,26 @@ namespace AstroArchive {
    }finally{settings.ThemeMode=previousTheme;settings.TextScalePercent=previousScale;settings.HighContrast=previousContrast;ApplyAppearance();}
   }
   void SmokeOriginalsChoiceStatus(string output){
+   SmokeSourceRemovalConfirmation();
    var original=(CheckBox)Window.FindName("DeleteOriginalsCheck");bool enabled=original.IsEnabled;bool? selected=original.IsChecked;
    try{original.IsChecked=false;original.IsEnabled=false;var dialog=new FormWindow(Window,"Import option feedback",700,480);var fields=AddImportPreferences(dialog);fields.Current.IsExpanded=true;
     try{dialog.Window.Show();PumpPopupLayout();var status=PopupChildren<TextBlock>(dialog.Window).Single(t=>t.Text.StartsWith("Off — source originals"));if(fields.Originals.IsEnabled||status.Text.IndexOf("scan a source folder",StringComparison.OrdinalIgnoreCase)<0||!ToolTipService.GetShowOnDisabled(fields.Originals))throw new Exception("Unavailable deletion option gives no explanation");
      fields.Originals.IsEnabled=true;ToggleChoice(fields.Originals);if(!status.Text.StartsWith("On —")||status.Text.Contains("Scan a source"))throw new Exception("Deletion checkbox lacks immediate On feedback");ToggleChoice(fields.Originals);if(!status.Text.StartsWith("Off —"))throw new Exception("Deletion checkbox lacks immediate Off feedback");
-     original.IsChecked=true;if(!L("ImportPolicyLabel").Text.StartsWith("Originals deleted"))throw new Exception("Deletion policy summary did not follow the selected option");original.IsChecked=false;if(!L("ImportPolicyLabel").Text.StartsWith("Originals kept"))throw new Exception("Deletion policy summary did not follow the cleared option");CapturePopup(dialog.Window,Path.Combine(output,"AstroArchive_Delete_Option_Feedback.png"));
+     original.IsChecked=true;if(!L("ImportPolicyLabel").Text.StartsWith("Delete after import ON"))throw new Exception("Deletion policy summary did not follow the selected option");original.IsChecked=false;if(!L("ImportPolicyLabel").Text.StartsWith("Originals kept"))throw new Exception("Deletion policy summary did not follow the cleared option");CapturePopup(dialog.Window,Path.Combine(output,"AstroArchive_Delete_Option_Feedback.png"));
     }finally{dialog.Window.Close();}
    }finally{original.IsEnabled=enabled;original.IsChecked=selected;}
+  }
+  void SmokeSourceRemovalConfirmation(){
+   foreach(bool dump in new[]{false,true}){
+    var dialog=SourceDeletionConfirmation("C:\\source-removal-fixture",dump);bool canceled=false;Exception failure=null;
+    Window.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.ApplicationIdle,new Action(()=>{
+     try{PumpPopupLayout();var texts=PopupChildren<TextBlock>(dialog.Window).Select(t=>t.Text).ToArray();if(!texts.Contains("Delete after import is ON")||!texts.Any(t=>t.Contains("Calibration originals always stay"))||!texts.Any(t=>t.Contains("source-removal-fixture")))throw new Exception("Source removal confirmation omits deletion state, source or calibration protection.");
+      var proceed=PopupChildren<Button>(dialog.Window).Single(b=>Convert.ToString(b.Content)=="Import and delete eligible originals");if(proceed.IsDefault)throw new Exception("Enter implicitly approves source deletion.");
+      PopupChildren<Button>(dialog.Window).Single(b=>Convert.ToString(b.Content)=="Cancel").RaiseEvent(new RoutedEventArgs(Button.ClickEvent));canceled=true;
+     }catch(Exception e){failure=e;dialog.Window.Close();}
+    }));
+    if(dialog.Show()||!canceled)throw new Exception("Cancel approved a source-removing import.");if(failure!=null)throw failure;
+   }
   }
  }
 }

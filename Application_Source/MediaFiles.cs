@@ -7,6 +7,16 @@ namespace AstroArchive {
  public static class MediaFiles {
   public static bool Gif(string path){return Assets.Extension(path)==".gif";}
   public static bool Video(string path){return new[]{".avi",".mp4",".mov",".m4v",".wmv",".mkv",".ser"}.Contains(Assets.Extension(path));}
+  public static bool ApplyVideoType(Frame frame){
+   if(!Video(new[]{frame.OriginalName,frame.RelativePath,frame.SourcePath}.FirstOrDefault(p=>!string.IsNullOrEmpty(p))??"")&&!Video("."+(frame.Format??"")))return false;
+   MetadataFact fact;if(frame.Facts!=null&&frame.Facts.TryGetValue("Kind",out fact)&&fact!=null&&fact.Source=="User")return false;
+   if(frame.Kind=="Video")return false;frame.Kind="Video";if(frame.Calibration=="Device stack")frame.Calibration="Unknown";return true;
+  }
+  public static void ApplyVideoDuration(Frame frame,double? seconds,string source){
+   frame.VideoDurationSeconds=frame.Exposure=seconds;frame.VideoDurationSource=seconds.HasValue?source:null;
+   if(frame.Facts==null)frame.Facts=new Dictionary<string,MetadataFact>();
+   frame.Facts["Exposure"]=new MetadataFact{Value=seconds.HasValue?seconds.Value.ToString("R",System.Globalization.CultureInfo.InvariantCulture):"",Source=seconds.HasValue?source:"Video duration unavailable",Unit="s"};
+  }
   public static bool Motion(string path){return Gif(path)||Video(path);}
   public static string FileType(string path){string extension=Assets.Extension(path??"");return new[]{".fit",".fits",".fts"}.Contains(extension)?"FITS":new[]{".tif",".tiff"}.Contains(extension)?"TIFF":new[]{".jpg",".jpeg"}.Contains(extension)?"JPEG":extension.TrimStart('.').ToUpperInvariant();}
   static string Stem(string path){string leaf=path.EndsWith(".gz",StringComparison.OrdinalIgnoreCase)?path.Substring(0,path.Length-3):path;return Path.GetFileNameWithoutExtension(leaf).ToLowerInvariant();}
