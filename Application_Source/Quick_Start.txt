@@ -244,8 +244,8 @@ DUMP INBOX
 Drop FITS files or telescope folders into the repository's Dump folder.
 Finish copying first. Startup/repository switching process pending FITS automatically;
 Import > Dump folder also opens or processes it manually.
-Verified imports and duplicates are removed; changed, locked or failed inputs
-remain for retry. Other files stay. Correct Unknown device IDs through Edit metadata.
+Verified science imports and duplicates are removed; calibration originals stay.
+Changed, locked or failed inputs remain for retry. Other files stay. Correct Unknown device IDs through Edit metadata.
 
 REVIEW, EXCLUSIONS AND DELETION
 
@@ -267,7 +267,9 @@ Deletion history blocks reimport of deleted checksums. Allow reimport permits a
 later source import; it does not restore deleted files.
 
 Delete originals is optional and only removes safely removable, verified new or
-restored source captures. Duplicates and failed cleanup retain originals.
+restored source captures. Calibration frames (dark, flat, bias, dark-flat and master
+calibrations) always remain on the source/telescope. Duplicates and failed cleanup
+retain originals.
 Delete archive data clears indexed captures/managed metadata, keeping Edited,
 source mirrors, unindexed files and deletion history.
 

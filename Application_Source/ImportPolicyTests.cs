@@ -5,6 +5,35 @@ using System.Linq;
 namespace AstroArchive {
  public partial class Tests {
   static void ImportPolicyTests(){
+   Test("Delete when imported retains every calibration type without attempting source cleanup",()=>{
+    string source=Path.Combine(root,"keep-calibration-source");Directory.CreateDirectory(source);int index=0;
+    foreach(string kind in new[]{"Dark","Flat","Bias","Dark flat","Master dark","Master flat","Master bias","Master dark flat","Offset"}){
+     int value=2000+index++;Write(Path.Combine(source,"calibration_"+index+".fit"),64,48,(x,y)=>value,new Dictionary<string,string>{{"IMAGETYP","'"+kind+"'"}});
+    }
+    using(var repo=new Repository(Path.Combine(root,"keep-calibration-repo"))){var plan=repo.Scan(source,"Scope","Auto",ct,NoProgress);Check(plan.Frames.Count==9&&plan.Frames.All(CaptureSky.IsCalibration),"Fixture calibration types were not classified");
+     var hashes=plan.Frames.ToDictionary(f=>f.SourcePath,f=>Util.Hash(f.SourcePath,ct));var result=repo.Import(plan.Frames,ct,NoProgress,new ImportOptions{SourceRoot=source,DeleteOriginals=true,Workers=2});
+     Check(result.Imported==9&&result.OriginalsDeleted==0&&result.OriginalsKept==9&&result.Failed==0&&result.CleanupErrors.Count==0,"Calibration retention was reported as deletion or cleanup failure");
+     Check(hashes.All(p=>File.Exists(p.Key)&&Util.Hash(p.Key,ct)==p.Value)&&repo.All().All(f=>Util.Hash(repo.FilePath(f),ct)==f.Hash&&f.SourceDisposition=="Original retained (calibration frame)"),"Calibration source or verified archive copy was changed");
+     Check(!result.Metrics.Snapshot().Any(s=>s.Stage=="Source cleanup"),"Calibration originals entered source-removal work");
+    }
+   });
+   Test("Delete when imported retains calibration markers after frame-type review",()=>{
+    string source=Path.Combine(root,"keep-calibration-marker-source");Directory.CreateDirectory(source);Write(Path.Combine(source,"marker.fit"),64,48,(x,y)=>2100,new Dictionary<string,string>());Write(Path.Combine(source,"target.fit"),64,48,(x,y)=>2200,new Dictionary<string,string>());
+    using(var repo=new Repository(Path.Combine(root,"keep-calibration-marker-repo"))){var plan=repo.Scan(source,"Scope","Auto",ct,NoProgress);foreach(var frame in plan.Frames){frame.Kind="Light";frame.Target=frame.OriginalName=="target.fit"?"Calibration":"M45";frame.Calibration=frame.OriginalName=="marker.fit"?"Calibration frame":"Unknown";}
+     var result=repo.Import(plan.Frames,ct,NoProgress,new ImportOptions{SourceRoot=source,DeleteOriginals=true});Check(result.Imported==2&&result.OriginalsKept==2&&result.OriginalsDeleted==0&&result.CleanupErrors.Count==0&&Directory.GetFiles(source).Length==2,"Reviewed calibration originals entered cleanup");
+    }
+   });
+   Test("Dump imports and duplicate retries retain calibration originals",()=>{
+    using(var repo=new Repository(Path.Combine(root,"keep-calibration-dump-repo"))){repo.EnsureDumpFolder();string path=Path.Combine(repo.DumpFolder,"dark.fit");Write(path,64,48,(x,y)=>2300,new Dictionary<string,string>{{"IMAGETYP","'DARK'"}});string hash=Util.Hash(path,ct);
+     var first=repo.ProcessDump(ct,NoProgress);var repeat=repo.ProcessDump(ct,NoProgress);
+     Check(first.Import.Imported==1&&repeat.Import.Imported==0&&repeat.Import.Duplicates==1&&new[]{first,repeat}.All(r=>r.Import.OriginalsDeleted==0&&r.Import.OriginalsKept==1&&r.Import.CleanupErrors.Count==0),"Dump removed a calibration or reported intentional retention as failure");
+     Check(File.Exists(path)&&Util.Hash(path,ct)==hash&&repo.All().Count==1&&Util.Hash(repo.FilePath(repo.All().Single()),ct)==hash,"Dump calibration bytes or archive index changed");
+    }
+   });
+   WindowsTest("Delete when imported removes science originals while retaining telescope calibrations",()=>{
+    string source=Path.Combine(root,"mixed-calibration-cleanup-source");Directory.CreateDirectory(source);string light=Path.Combine(source,"light.fit"),dark=Path.Combine(source,"dark.fit");Write(light,64,48,(x,y)=>2400,new Dictionary<string,string>{{"IMAGETYP","'LIGHT'"}});Write(dark,64,48,(x,y)=>2500,new Dictionary<string,string>{{"IMAGETYP","'DARK'"}});
+    using(var repo=new Repository(Path.Combine(root,"mixed-calibration-cleanup-repo"))){var result=repo.Import(repo.Scan(source,"Scope","Auto",ct,NoProgress).Frames,ct,NoProgress,new ImportOptions{SourceRoot=source,DeleteOriginals=true});Check(result.Imported==2&&result.OriginalsDeleted==1&&result.OriginalsKept==1&&result.CleanupErrors.Count==0&&!File.Exists(light)&&File.Exists(dark)&&repo.All().Count==2,"Calibration protection blocked science cleanup or deleted the telescope dark");}
+   });
    Test("Legacy Mosaic metadata never blocks ordinary import browsing or stacking exports",()=>{
     string source=Path.Combine(root,"legacy-mosaic-source");Directory.CreateDirectory(source);string file=Path.Combine(source,"Light_M45.fit");var headers=LightHeaders(new DateTime(2026,10,6,21,0,0),"M45");headers["MOSAICID"]="'Old collection'";headers["PANELID"]="'1'";Write(file,64,48,(x,y)=>1800,headers);
     using(var repo=new Repository(Path.Combine(root,"legacy-mosaic-repo"))){repo.Import(repo.Scan(source,"Scope","Auto",ct,NoProgress).Frames,ct,NoProgress);var frame=repo.All().Single();string json=Util.Serialize(frame);json=json.Substring(0,json.Length-1)+",\"Mosaic\":{\"Declared\":true,\"Name\":\"Old collection\",\"PanelKey\":\"1\"}}";

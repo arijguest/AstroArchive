@@ -1131,7 +1131,7 @@
        </StackPanel>
       </Grid>
       <CheckBox x:Name="IgnoreFailedCheck" IsChecked="False" Content="Ignore failed" Margin="0,12,0,0" ToolTip="Skip filenames containing “failed”; keep originals." />
-      <CheckBox x:Name="DeleteOriginalsCheck" IsChecked="False" Content="Delete originals after verified import" Margin="0,10,0,0" ToolTip="Delete verified new/restored source images. Cloud deletions sync." />
+      <CheckBox x:Name="DeleteOriginalsCheck" IsChecked="False" Content="Delete originals after verified import" Margin="0,10,0,0" ToolTip="Delete verified new/restored source images; keep calibration originals. Cloud deletions sync." />
       <TextBlock Text="Originals are kept by default. Optional analysis can take longer." FontSize="{DynamicResource UiFontSmall}" Foreground="{DynamicResource Muted}" Margin="0,8,0,0" />
      </StackPanel>
     </Border>

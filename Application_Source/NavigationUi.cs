@@ -142,7 +142,7 @@ namespace AstroArchive {
             }
             var analysis = Convert.ToString(C("ImportSolveMode").SelectedItem) != "Off" || Convert.ToString(C("ImportRotationMode").SelectedItem) != "Off";
             var cleanup = ((CheckBox)Window.FindName("DeleteOriginalsCheck")).IsChecked == true;
-            L("ImportPolicyLabel").Text=(cleanup?"Originals deleted after verification":"Originals kept")+(analysis?" · Analysis enabled":"")+(!SkipFlagged?" · Flagged files included":"")+(unknownImportTarget.Length>0?" · Unknown → "+Catalog.Label(unknownImportTarget):"");
+            L("ImportPolicyLabel").Text=(cleanup?"Science originals deleted; calibration kept":"Originals kept")+(analysis?" · Analysis enabled":"")+(!SkipFlagged?" · Flagged files included":"")+(unknownImportTarget.Length>0?" · Unknown → "+Catalog.Label(unknownImportTarget):"");
             UiHelp.Tip(L("ImportPolicyLabel"),(SkipFlagged?"Flagged captures excluded":"Flagged captures included")+" · "+(settings.IgnoreFailed?"Failed filenames ignored":"Failed filenames included")+" · "+(settings.RobustImportMatching?"Robust matching":"Filename matching")+(settings.IgnoreRasterImports?" · PNG/JPG/JPEG/MP4 ignored":" · PNG/JPG/JPEG/MP4 included"));
             L("ImportPolicyLabel").FontWeight = cleanup ? FontWeights.SemiBold : FontWeights.Normal;
             L("RateLabel").Visibility = RepositoryOperationBlocked ? Visibility.Visible : Visibility.Collapsed;
