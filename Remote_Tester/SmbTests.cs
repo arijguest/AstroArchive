@@ -22,6 +22,10 @@ public static class SmbTests
         try
         {
             var path = SmbPath.Parse(@"\\192.168.1.42\EMMC Images\MyWorks\M31");
+            string host, suffix;
+            foreach (string draft in new[] { null, "", "/", "x", @"\", @"\\", @"\\host", @"\\host\", @"\\\share" })
+                Assert(!SmbPath.TrySplitAddress(draft, out host, out suffix) && host == "" && suffix == "", "incomplete UI path handled safely: " + (draft ?? "<null>"));
+            Assert(SmbPath.TrySplitAddress(path.Full, out host, out suffix) && host == path.Host && suffix == @"\EMMC Images\MyWorks\M31", "UI address replacement preserves storage and session path");
             Assert(path.Host == "192.168.1.42" && path.Share == "EMMC Images" && path.Relative == @"MyWorks\M31", "storage path separates address, share and capture folder");
             Assert(SmbPath.Parse(path.Root).Relative == "", "storage root is a valid browse target");
             Throws(() => SmbPath.Parse(@"\\192.168.1.42\EMMC Images\..\escape"), "SMB traversal rejected");

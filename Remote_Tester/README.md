@@ -1,4 +1,4 @@
-# AstroArchive Remote tester 0.2.0
+# AstroArchive Remote tester 0.2.1
 
 Portable Windows 10/11 x64 client. Requires .NET Framework 4.8. **Extract the entire
 ZIP to one folder**, then run **AstroArchive.RemoteTester.exe**. Keep its companion
@@ -11,6 +11,11 @@ Start/Stop available. Connection failures give a next step, selectable technical
 information and **Copy details**. Start becomes available after a successful folder
 connection; changing the source requires reconnecting. Appearance follows System,
 Light or Dark. Setup instructions and connection options are available when needed.
+
+Version 0.2.1 fixes an intermittent discovery-selection crash when the capture path
+is empty, partially edited, or still contains the DWARF root `/`. Selecting a Seestar
+then restores its default folder; an existing complete Seestar session path is
+preserved with the discovered address. Editing short paths is also safe.
 
 ## Quick start
 

@@ -1,4 +1,9 @@
-# Remote tester 0.2.0 validation — 9 October 2026
+# Remote tester 0.2.1 validation
+
+0.2.1 local compilation and 19 SMB configuration/path checks passed. Native Windows
+validation of the expanded discovery-selection regression checks is pending.
+
+The following records the preceding 0.2.0 validation:
 
 Native Windows run: https://github.com/arijguest/AstroArchive/actions/runs/37997859442
 Source commit: 7b4aa09.

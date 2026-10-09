@@ -15,6 +15,18 @@ namespace AstroArchive.Remote
         public string Root { get { return @"\\" + Host + "\\" + Share; } }
         public string Full { get { return Root + (Relative.Length == 0 ? "" : "\\" + Relative); } }
 
+        // UI fields may be empty or partially edited. Strict validation stays in Parse.
+        public static bool TrySplitAddress(string path, out string host, out string suffix)
+        {
+            host = suffix = "";
+            if (path == null || !path.StartsWith(@"\\")) return false;
+            int end = path.IndexOf('\\', 2);
+            if (end <= 2 || end >= path.Length - 1 || path[end + 1] == '\\') return false;
+            host = path.Substring(2, end - 2);
+            suffix = path.Substring(end);
+            return true;
+        }
+
         public static SmbPath Parse(string path)
         {
             if (string.IsNullOrWhiteSpace(path) || !path.StartsWith(@"\\") || path.Contains("/"))
