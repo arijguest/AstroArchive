@@ -13,7 +13,7 @@ namespace AstroArchive {
    C("LibraryViewBox").ItemsSource=new[]{"Session summaries","Show all files","By target","By target and session"};C("LibraryViewBox").SelectedIndex=0;
    C("LibraryViewBox").SelectionChanged+=(s,e)=>{if(!updating)Filter(false);};
    G("FramesGrid").GroupStyle.Add(new GroupStyle{ContainerStyle=(Style)Window.FindResource("CaptureSessionGroupStyle")});
-   InitializeSessionSelection();InitializeTargetSelection();
+   InitializeSessionSelection();InitializeTargetSelection();InitializeTargetKeyboard();
   }
   List<SubframeSession> subframeSessions=new List<SubframeSession>();
   void DisplayLibrary(List<SubframeSession> preparedSessions=null,CaptureGroupSummary preparedSummary=null,bool presorted=false){

@@ -124,5 +124,5 @@ namespace AstroArchive {
    var grid=new DataGrid{ItemsSource=G("MetricsGrid").ItemsSource,IsReadOnly=true,AutoGenerateColumns=false,MinHeight=160,MaxHeight=320};foreach(var column in G("MetricsGrid").Columns.OfType<DataGridTextColumn>())grid.Columns.Add(new DataGridTextColumn{Header=column.Header,Binding=column.Binding,Width=column.Width});dialog.Add(grid);dialog.CloseOnly();dialog.Show();
   }
  }
- public sealed class EditedTargetSummary:TargetSummary {public new string Tooltip{get{return Label+"\n"+Files+" edited image"+(Files==1?"":"s");}}}
+ public sealed class EditedTargetSummary:TargetSummary {public new string Tooltip{get{return TargetNavigation.TargetId(Name);}}}
 }

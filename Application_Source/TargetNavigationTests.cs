@@ -27,11 +27,16 @@ namespace AstroArchive {
    Test("Concise target rows keep identity counts and honest exposure totals in tooltips",()=>{
     var rows=new[]{new Frame{Target="M42",Kind="Light",Exposure=3600},new Frame{Target="M42",Kind="Light",Exposure=60},new Frame{Target="M42",Kind="Light"},new Frame{Target="M42",Kind="Stack",Exposure=7200},new Frame{Target="M42",Kind="Dark",Exposure=900}};
     var target=TargetNavigation.Build(rows).Single(s=>s.Name=="M42");Check(target.DisplayName=="M42 - Orion Nebula"&&target.FileCount=="5"&&target.Subline==TargetNavigation.Identifier("M42")+" · 1h 1m + ?","Short row lost identity or counted stack/calibration exposure");
-    Check(target.Tooltip.Contains("M42")&&target.Tooltip.Contains("5 files · 3 subs · 1 stack")&&target.Tooltip.Contains("1 h 1 min total")&&target.Tooltip.Contains("exposure unknown"),"Full details omitted from the tooltip");
+    Check(target.Tooltip.StartsWith("M42\n3 subs · 1 stack\n")&&target.Tooltip.Contains("1 h 1 min total")&&target.Tooltip.Contains("exposure unknown")&&!target.Tooltip.Contains("files")&&!target.Tooltip.Contains("Nebula")&&!target.Tooltip.Contains("sessions"),"Concise tooltip lost counts/total or retained names, types or file counts");
     var stack=TargetNavigation.Build(new[]{new Frame{Target="C/2023 A3",Kind="Stack",Exposure=7200}})[1];Check(stack.Subline==""&&!stack.Tooltip.Contains("total"),"Stack total presented as acquisition exposure");
     Check(TargetNavigation.Exposure(20)=="20s"&&TargetNavigation.Exposure(90)=="1m 30s"&&TargetNavigation.Exposure(3600)=="1h","Compact exposure labels misleading");
-    var comet=TargetNavigation.Build(new[]{new Frame{Target="C/2023 A3 (Tsuchinshan-ATLAS)",Kind="Light",Exposure=30}})[1];Check(comet.DisplayName=="C/2023 A3 - Tsuchinshan-ATLAS"&&comet.Subline=="30s"&&comet.Tooltip.Contains("C/2023 A3 (Tsuchinshan-ATLAS)"),"Short comet label lost its identity");
+    var comet=TargetNavigation.Build(new[]{new Frame{Target="C/2023 A3 (Tsuchinshan-ATLAS)",Kind="Light",Exposure=30}})[1];Check(comet.DisplayName=="C/2023 A3 - Tsuchinshan-ATLAS"&&comet.Subline=="30s"&&comet.Tooltip.StartsWith("C/2023 A3\n")&&!comet.Tooltip.Contains("Tsuchinshan"),"Short comet tooltip lost its ID or retained the full name");
     Check(TargetNavigation.ShortName("12P/Pons-Brooks")=="12P - Pons-Brooks"&&TargetNavigation.Identifier("12P/Pons-Brooks")=="","Numbered comet labels remained verbose");
+   });
+   Test("Compact target titles remove only a trailing object type and retain the ID",()=>{
+    Check(TargetNavigation.WithoutObjectType("NGC6960 - Western Veil Nebula")=="NGC6960 - Western Veil"&&TargetNavigation.WithoutObjectType("NGC6992 - Eastern Veil Nebula")=="NGC6992 - Eastern Veil","Veil titles were not shortened");
+    Check(TargetNavigation.WithoutObjectType("M31 - Andromeda Galaxy")=="M31 - Andromeda"&&TargetNavigation.WithoutObjectType("M13 - Hercules Globular Cluster")=="M13 - Hercules","Object type suffix retained");
+    Check(TargetNavigation.WithoutObjectType("NGC891 - Silver Sliver Galaxy with an extended observing name")=="NGC891 - Silver Sliver Galaxy with an extended observing name"&&TargetNavigation.WithoutObjectType("M45")=="M45","Non-suffix text or identity removed");
    });
    Test("Repository ordering keeps merged subs stacks and calibrations in their sections",()=>{
     var a=new Frame{Target="M31",Kind="Light",Session="fixture",OriginalName="z-sub.fit"};var b=a.Clone();b.OriginalName="a-sub.fit";
