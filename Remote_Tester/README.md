@@ -28,7 +28,8 @@ Light or Dark. Setup instructions and connection options are available when need
    existing exposures. Start with the default 5-second polling and 2 MB/s limit;
    these can be changed under Download options.
 6. Choose **Start downloads**. The Downloads view shows downloaded, waiting/copying,
-   and attention counts alongside each file's status. Stop retains completed files.
+   and attention counts alongside each file's status. Stop retains completed files. While connecting or verifying, the same button
+   becomes Cancel. Closing the window also terminates pending workers.
 
 **Try a local demo** creates twelve unique, slowly written FITS exposures and starts
 copying them to a separate demo destination automatically. No telescope/server is
