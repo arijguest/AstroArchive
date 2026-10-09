@@ -17,6 +17,14 @@ jobs:
       - name: Check transfer engine
         shell: powershell
         run: .\Remote_Tester\test.ps1
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Install loopback SMB fixture dependency
+        run: python -m pip install impacket==0.13.1
+      - name: Check direct guest SMB transfers
+        shell: powershell
+        run: .\Remote_Tester\test-smb.ps1
       - name: Check native WPF startup and rendering
         shell: powershell
         run: |
