@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 namespace AstroArchive {
  public partial class Tests {
   static void SearchWorkTests(){
+   OptimisationBrowsingTests();
    Test("Latest search bounds queued work and rejects an old result even when cancellation is ignored",()=>{
     using(var worker=new LatestSearch<int>())using(var started=new ManualResetEventSlim())using(var release=new ManualResetEventSlim()){
      int executions=0;var old=worker.Submit(token=>{Interlocked.Increment(ref executions);started.Set();if(!release.Wait(5000))throw new Exception("Barrier timed out");return -1;});Check(started.Wait(5000),"Worker did not start");

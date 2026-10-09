@@ -84,7 +84,7 @@ namespace AstroArchive {
             return result;
         }
     }
-    public sealed class XisfReader:IAssetReader {
+    public sealed class XisfReader:IAssetReader,ISampledAssetReader {
         public string Name {
             get {
                 return "XISF";
@@ -158,8 +158,8 @@ namespace AstroArchive {
                 return result;
             }
         }
-        public PixelImage Read(string path,ImageDescriptor image,int index,CancellationToken ct) {
-            if(index!=0||!image.Numeric)throw new NotSupportedException("This XISF image encoding cannot be decoded.");
+        static byte[] ReadBytes(string path,ImageDescriptor image,int index,CancellationToken ct) {
+            ct.ThrowIfCancellationRequested();if(index!=0||!image.Numeric)throw new NotSupportedException("This XISF image encoding cannot be decoded.");
             Assets.Dimensions(image.Width,image.Height,image.Channels);
             string[] format=image.Encoding.Split('|');
             int size=PixelCodecs.Size(format[0]),samples=checked(image.Width*image.Height*image.Channels),expected=checked(samples*size);
@@ -205,6 +205,10 @@ namespace AstroArchive {
                 for(int b=0;b<size;b++)for(int j=0;j<samples;j++)unshuffled[j*size+b]=raw[b*samples+j];
                 raw=unshuffled;
             }
+            return raw;
+        }
+        public PixelImage Read(string path,ImageDescriptor image,int index,CancellationToken ct) {
+            byte[] raw=ReadBytes(path,image,index,ct);string[] format=image.Encoding.Split('|');int size=PixelCodecs.Size(format[0]),samples=checked(image.Width*image.Height*image.Channels);
             var pixels=new double[samples];
             int plane=image.Width*image.Height;
             for(int p=0;p<samples;p++) {
@@ -215,6 +219,16 @@ namespace AstroArchive {
             return new PixelImage {
                 Width=image.Width,Height=image.Height,Channels=image.Channels,Pixels=pixels
             };
+        }
+        public PreviewData Preview(Frame frame,string path,ImageDescriptor image,int index,CancellationToken ct) {
+            byte[] raw=ReadBytes(path,image,index,ct);var result=new SampledPreview(frame,image);string[] format=image.Encoding.Split('|');int size=PixelCodecs.Size(format[0]),plane=checked(image.Width*image.Height);
+            for(int c=0;c<image.Channels;c++)for(int y=0;y<image.Height;y++) {
+                ct.ThrowIfCancellationRequested();for(int x=0;x<image.Width;x++) {
+                    int pixel=y*image.Width+x,sample=format[2]=="normal"?pixel*image.Channels+c:c*plane+pixel;
+                    result.Add(x,y,c,PixelCodecs.Number(raw,sample*size,format[0],format[1]=="little"));
+                }
+            }
+            return result.Finish(frame,path,ct);
         }
     }
 }

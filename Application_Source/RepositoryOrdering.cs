@@ -6,13 +6,15 @@ using System.Threading;
 namespace AstroArchive {
  public static class RepositoryOrdering {
   public static List<Frame> Order(IEnumerable<Frame> source,IEnumerable<SearchSort> sorting,CultureInfo culture,bool allTargets,bool sessionSummaries,CancellationToken token){
-   var rows=source.ToList();var merged=allTargets&&sessionSummaries?new HashSet<Frame>(SubframeSessions.Build(rows,token).SelectMany(s=>s.Frames)):new HashSet<Frame>();
+   List<SubframeSession> sessions;return Order(source,sorting,culture,allTargets,sessionSummaries,token,out sessions);
+  }
+  public static List<Frame> Order(IEnumerable<Frame> source,IEnumerable<SearchSort> sorting,CultureInfo culture,bool allTargets,bool sessionSummaries,CancellationToken token,out List<SubframeSession> sessions){
+   var rows=source.ToList();var membership=sessionSummaries?new SubframeSessions.Membership(rows,token):null;
    // Stable partition after column sorting retains the user's sort within each section.
-   return SearchOrdering.Order(rows,sorting,culture,token).OrderBy(f=>{
-    token.ThrowIfCancellationRequested();if(CaptureSky.IsCalibration(f))return 3;
-    if(allTargets){if(sessionSummaries&&merged.Contains(f)||!sessionSummaries&&f.Kind=="Light")return 0;return f.Kind=="Stack"?1:2;}
-    return f.Kind=="Stack"?0:1;
-   }).ToList();
+   var sections=Enumerable.Range(0,4).Select(i=>new List<Frame>()).ToArray();foreach(var frame in SearchOrdering.Order(rows,sorting,culture,token)){
+    token.ThrowIfCancellationRequested();int section=CaptureSky.IsCalibration(frame)?3:allTargets?(sessionSummaries&&membership.Merged(frame)||!sessionSummaries&&frame.Kind=="Light"?0:frame.Kind=="Stack"?1:2):frame.Kind=="Stack"?0:1;sections[section].Add(frame);
+   }
+   var ordered=sections.SelectMany(s=>s).ToList();sessions=sessionSummaries?SubframeSessions.Build(ordered,membership,token):null;return ordered;
   }
  }
 }

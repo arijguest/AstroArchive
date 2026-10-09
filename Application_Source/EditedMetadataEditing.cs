@@ -23,12 +23,13 @@ namespace AstroArchive {
    ValidateEditedMetadata(changes);ct.ThrowIfCancellationRequested();var project=ReadEditedProject(selected);var images=selection.ToList();if(images.Count==0)throw new ArgumentException("Select edited images.");
    if(!EditedFields.Any(field=>typeof(EditedMetadata).GetProperty(field).GetValue(changes,null)!=null))return;
    if(project.MetadataEdits==null)project.MetadataEdits=new Dictionary<string,EditedMetadata>(StringComparer.OrdinalIgnoreCase);
+   var keys=new Dictionary<string,string>(StringComparer.OrdinalIgnoreCase);foreach(string key in project.MetadataEdits.Keys)if(!keys.ContainsKey(key))keys[key]=key;
    foreach(var image in images){ct.ThrowIfCancellationRequested();if(!File.Exists(EditedPath(project,image.RelativePath)))throw new IOException("The edited image is unavailable: "+image.Filename);
-    string key=project.MetadataEdits.Keys.FirstOrDefault(k=>k.Equals(image.RelativePath,StringComparison.OrdinalIgnoreCase))??image.RelativePath;EditedMetadata previous;project.MetadataEdits.TryGetValue(key,out previous);project.MetadataEdits[key]=ApplyEditedMetadata(previous??new EditedMetadata(),changes,image.Filename);
+    string key;if(!keys.TryGetValue(image.RelativePath,out key)){key=image.RelativePath;keys[key]=key;}EditedMetadata previous;project.MetadataEdits.TryGetValue(key,out previous);project.MetadataEdits[key]=ApplyEditedMetadata(previous??new EditedMetadata(),changes,image.Filename);
    }SaveEditedProject(project,ct);
   }
-  static EditedMetadata UserEditedMetadata(EditedProject project,string relative,EditedMetadata detected){
-   if(project.MetadataEdits==null)return detected;var saved=project.MetadataEdits.FirstOrDefault(pair=>pair.Key.Equals(relative,StringComparison.OrdinalIgnoreCase));return saved.Value==null?detected:ApplyEditedMetadata(detected,saved.Value,relative);
+  static EditedMetadata UserEditedMetadata(IDictionary<string,EditedMetadata> edits,string relative,EditedMetadata detected){
+   EditedMetadata saved;return edits==null||!edits.TryGetValue(relative,out saved)||saved==null?detected:ApplyEditedMetadata(detected,saved,relative);
   }
  }
 }

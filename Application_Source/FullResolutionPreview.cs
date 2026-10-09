@@ -12,8 +12,8 @@ namespace AstroArchive {
    var result=new PreviewData{Width=image.Width,Height=image.Height,SourceWidth=image.Width,SourceHeight=image.Height,Channels=channels,FlipY=frame.Format=="FITS",Description=frame.Format+" · full resolution · "+(cfa?bayer+" colour":channels==3?"RGB":"mono")};
    if(descriptor.Bitpix>0){double low=0,high=Math.Pow(2,descriptor.Bitpix)-1;if(frame.Format=="FITS"){low=descriptor.Bitpix==8?0:-Math.Pow(2,descriptor.Bitpix-1);high=descriptor.Bitpix==8?255:Math.Pow(2,descriptor.Bitpix-1)-1;}double scale=frame.Format=="FITS"?header.Number("BSCALE")??1:1,zero=frame.Format=="FITS"?header.Number("BZERO")??0:0;result.Minimum=Math.Min(low*scale+zero,high*scale+zero);result.Maximum=Math.Max(low*scale+zero,high*scale+zero);}
    int plane=checked(image.Width*image.Height);int offsetX=(int)(header.Number("XBAYROFF")??0),offsetY=(int)(header.Number("YBAYROFF")??0);
-   if(channels==1)result.Pixels=image.Pixels;
-   else{result.Pixels=new double[checked(plane*channels)];for(int y=0;y<image.Height;y++){ct.ThrowIfCancellationRequested();for(int x=0;x<image.Width;x++)for(int c=0;c<channels;c++)result.Pixels[(y*image.Width+x)*channels+c]=cfa?Colour(image,x,y,c,bayer,offsetX,offsetY):image.Pixels[c*plane+y*image.Width+x];}}
+   if(!cfa){result.Pixels=image.Pixels;result.Planar=true;result.StoredChannels=image.Channels;}
+   else{result.Pixels=new double[checked(plane*channels)];for(int y=0;y<image.Height;y++){ct.ThrowIfCancellationRequested();for(int x=0;x<image.Width;x++)for(int c=0;c<channels;c++)result.Pixels[(y*image.Width+x)*channels+c]=Colour(image,x,y,c,bayer,offsetX,offsetY);}}
    result.Target=header.Get("OBJECT","OBJNAME","TARGET","TARGNAME");result.Filter=header.Get("FILTER","FILTERID","FILTNAME");result.ObservationMode=header.Get("OBSMODE","CAPMODE","SHOOTMOD","MODE","IMAGETYP");result.ApplyContext(frame,path);return result;
   }
   static double Colour(PixelImage image,int x,int y,int channel,string bayer,int offsetX,int offsetY){

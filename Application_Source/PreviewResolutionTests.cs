@@ -20,7 +20,7 @@ namespace AstroArchive {
    });
    Test("Native XISF popup preserves RGB planes and dimensions while inline decoding stays sampled",()=>{
     string path=Path.Combine(root,"native-rgb.xisf");byte[] raw=Enumerable.Range(0,1604*2*3).Select(n=>(byte)(n/(1604*2)*10+10)).ToArray();WriteXisf(path,"1604:2:3","UInt8",raw,"",false);var info=Assets.Inspect(path);var frame=new Frame{Format=info.Format,Images=info.Images};
-    var full=Assets.Display(frame,path,0,ct,true);Check(full.Width==1604&&full.Height==2&&full.Pixels.Take(3).SequenceEqual(new[]{10.0,20,30})&&full.Pixels.Skip(full.Pixels.Length-3).SequenceEqual(new[]{10.0,20,30}),"Native XISF dimensions or RGB order changed");
+    var full=Assets.Display(frame,path,0,ct,true);Check(full.Width==1604&&full.Height==2&&Enumerable.Range(0,3).Select(c=>full.Sample(0,c)).SequenceEqual(new[]{10.0,20,30})&&Enumerable.Range(0,3).Select(c=>full.Sample(3207,c)).SequenceEqual(new[]{10.0,20,30}),"Native XISF dimensions or RGB order changed");
     Check(Assets.Display(frame,path,0,ct).Width<=1400&&Xisf.Read(path,ct).Width<=1400,"Inline XISF became full resolution");
    });
    Test("Condensed subframes show per-sub exposure without inventing missing or mixed durations",()=>{

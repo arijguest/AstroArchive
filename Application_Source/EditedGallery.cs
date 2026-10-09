@@ -12,7 +12,7 @@ namespace AstroArchive {
    token.ThrowIfCancellationRequested();var result=new EditedGallery();if(repository==null)return result;var projects=new List<EditedProject>();
    try{projects=repository.EditedProjects(out result.Errors,token);}catch(Exception error){if(!ReadError(error))throw;result.Errors.Add(error.Message);}
    foreach(var project in projects){token.ThrowIfCancellationRequested();try{
-    var images=repository.EditedImages(project,targets,token);foreach(var image in images)image.Project=project;result.Images.AddRange(images);
+    var images=repository.ReadEditedImages(project,targets,token,false);foreach(var image in images)image.Project=project;result.Images.AddRange(images);
    }catch(Exception error){if(!ReadError(error))throw;result.Errors.Add(error.Message);}}
    token.ThrowIfCancellationRequested();result.Images=Order(result.Images);return result;
   }
