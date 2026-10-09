@@ -337,7 +337,7 @@ Repository > Diagnostics shows timings and the latest import report.
 KEYBOARD SHORTCUTS
 
 - **Main window:** Escape clears the active file selection; Ctrl+F search; Ctrl+I Import; Ctrl+E Export; F1 page help.
-- **Tables:** Left/Right switches target, file and preview panes, activating the current entry (or the first if none is selected); Up/Down changes selection; Ctrl-click toggles; Shift-click selects a range; Shift-click heading adds sort; Delete confirms removal on Repository or Edited.
+- **Tables:** Left/Right moves through visible columns, switching to targets or preview only at the table edges. Entering a pane activates the current entry (or the first if none is selected); Up/Down changes selection; Ctrl-click toggles; Shift-click selects a range; Shift-click heading adds sort; Delete confirms removal on Repository or Edited.
 - **Preview:** F Fit; plus/minus zoom; Up/Down or Ctrl+Left/Right pans in the sidebar; all arrows pan in a separate preview window; Escape closes.
 - **Guide:** Ctrl+F search; Up/Down topic; Ctrl+C copy; Escape close.
 - **Folder picker:** Alt+D address bar.
