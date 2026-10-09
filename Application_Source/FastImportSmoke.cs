@@ -46,9 +46,11 @@ namespace AstroArchive {
    Exception failure=null;bool opened=false;
    Window.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.ApplicationIdle,new Action(()=>{
     Window preferences=null;try{
-     preferences=parent.Window.OwnedWindows.Cast<Window>().Single(w=>w.Title=="Preferences");opened=true;preferences.UpdateLayout();
-     var sections=PopupChildren<ListBox>(preferences).Single(list=>System.Windows.Automation.AutomationProperties.GetName(list)=="Preferences sections");if(sections.SelectedIndex!=1||preferences.Owner!=parent.Window)throw new Exception("Import preferences opened the wrong page or owner.");
-     if(PopupChildren<Button>(preferences).Single(b=>Convert.ToString(b.Content)=="Choose repository…").IsEnabled)throw new Exception("Import preferences allows changing the picker repository.");
+     preferences=parent.Window.OwnedWindows.Cast<Window>().FirstOrDefault(w=>w.Title=="Preferences");if(preferences==null)throw new Exception("The shortcut did not open Preferences as a child of the import dialog.");opened=true;preferences.UpdateLayout();
+     var sections=PopupChildren<ListBox>(preferences).FirstOrDefault(list=>System.Windows.Automation.AutomationProperties.GetName(list)=="Preferences sections");if(sections==null||sections.SelectedIndex!=1||preferences.Owner!=parent.Window)throw new Exception("Import preferences opened the wrong page or owner.");
+     // Collapsed preference pages do not materialize their visual controls until shown.
+     sections.SelectedIndex=0;preferences.UpdateLayout();var repositoryChoice=PopupChildren<Button>(preferences).FirstOrDefault(b=>Convert.ToString(b.Content)=="Choose repository…");if(repositoryChoice==null||repositoryChoice.IsEnabled)throw new Exception("Import preferences allows changing the picker repository or omits its control.");
+     sections.SelectedIndex=1;preferences.UpdateLayout();
      if(editedImport&&(PopupChildren<CheckBox>(preferences).Any(c=>System.Windows.Automation.AutomationProperties.GetName(c)=="Delete originals after verified import")||!PopupChildren<TextBlock>(preferences).Any(t=>t.Text.Contains("Edited imports always keep source files"))))throw new Exception("Edited import preferences expose source deletion or fail to explain source retention.");
     }catch(Exception e){failure=e;}finally{if(preferences!=null)preferences.Close();}
    }));
