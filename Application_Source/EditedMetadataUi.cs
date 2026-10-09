@@ -39,7 +39,7 @@ namespace AstroArchive {
     if(!row.IsSelected)grid.SelectedItem=row.Item;row.Focus();args.Handled=true;
    };
    grid.ContextMenuOpening+=(sender,args)=>{var selected=SelectedEditedImages();if((args.CursorLeft>=0&&!contextOnEditedFile)||repo==null||RepositoryOperationBlocked||SearchBlocked("EditedSearchBox")||selected.Count==0){args.Handled=true;return;}BuildEditedFileMenu(grid.ContextMenu,selected);};
-   grid.PreviewKeyDown+=(sender,args)=>{if(args.Key==Key.Escape&&editedSelection.Count>0){ClearTargetSelection("EditedGrid");args.Handled=true;return;}if(args.Key==Key.Delete&&repo!=null&&!RepositoryOperationBlocked&&!SearchBlocked("EditedSearchBox")&&SelectedEditedImages().Count>0){args.Handled=true;DeleteEditedFiles(SelectedEditedImages());}};
+   grid.PreviewKeyDown+=(sender,args)=>{if(args.Key==Key.Delete&&repo!=null&&!RepositoryOperationBlocked&&!SearchBlocked("EditedSearchBox")&&SelectedEditedImages().Count>0){args.Handled=true;DeleteEditedFiles(SelectedEditedImages());}};
   }
   void BuildEditedFileMenu(ContextMenu menu,List<EditedImage> selected){
    menu.Items.Clear();menu.Items.Add(new MenuItem{Header=selected.Count+" selected file"+(selected.Count==1?"":"s"),IsEnabled=false});menu.Items.Add(FileAction("Export files…",ExportEditedFiles,selected.Count>0));menu.Items.Add(FileAction("Export to…",ExportEditedTo,selected.Count>0));menu.Items.Add(FileAction("Edit metadata…",EditEditedMetadata,selected.Count>0));menu.Items.Add(FileAction("Preview image…",PreviewEditedImage,selected.Count==1));menu.Items.Add(FileAction("Image details…",ShowEditedDetails,selected.Count==1));menu.Items.Add(FileAction("Open image folder",OpenEditedFolder,selected.Count==1));

@@ -5,11 +5,13 @@ using System.Linq;
 using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 namespace AstroArchive {
  public partial class MainUi {
   static void TargetWorkflowCheck(bool condition,string message){if(!condition)throw new Exception(message);}
+  void SmokeSelectionEscape(UIElement source){source.Focus();source.RaiseEvent(new KeyEventArgs(Keyboard.PrimaryDevice,PresentationSource.FromVisual(source),0,Key.Escape){RoutedEvent=Keyboard.PreviewKeyDownEvent});PumpPopupLayout();}
   public void SmokeTargetWorkflow(string output){
    Directory.CreateDirectory(output);Window.Show();PumpPopupLayout();string fixture=Path.Combine(Path.GetTempPath(),"AstroArchive-target-ui-"+Guid.NewGuid().ToString("N"));Directory.CreateDirectory(fixture);
    OpenRepository(Path.Combine(fixture,"repository"),false);((TabControl)Window.FindName("MainTabs")).SelectedIndex=0;PumpPopupLayout();
@@ -25,7 +27,7 @@ namespace AstroArchive {
    T("SearchBox").Clear();WaitForSearches();Targets.SelectedItem=Targets.Items.Cast<TargetSummary>().Single(t=>t.Name=="M31");TargetWorkflowCheck(G("FramesGrid").SelectedItems.Count==1,"Returning to a target lost its selection.");
    G("FramesGrid").SelectedItems.Add(displayed.Single(f=>f.Hash=="two"));TargetWorkflowCheck(SelectedFiles().Count==3,"Adding a second visible capture lost another target.");
    C("LibraryViewBox").SelectedItem="Session summaries";PumpPopupLayout();SelectSession(subframeSessions.First(),System.Windows.Input.ModifierKeys.None);TargetWorkflowCheck(SelectedFiles().Count==3,"Session selection dropped a hidden target.");
-   B("LibrarySelectionCounter").RaiseEvent(new RoutedEventArgs(Button.ClickEvent));TargetWorkflowCheck(SelectedFiles().Count==0&&B("LibrarySelectionCounter").Visibility==Visibility.Collapsed,"Clear kept hidden repository selections.");
+   SmokeSelectionEscape(T("SearchBox"));TargetWorkflowCheck(SelectedFiles().Count==0&&!subframeSessions.Any(group=>group.IsSelected)&&B("LibrarySelectionCounter").Visibility==Visibility.Collapsed,"Escape from search kept hidden repository/session selections.");
    var tabs=(TabControl)Window.FindName("MainTabs");tabs.SelectedIndex=2;string source=Path.Combine(fixture,"source");Directory.CreateDirectory(source);int value=20;
    foreach(string name in new[]{"M31.png","M45.png","C2023A3_Tsuchinshan-ATLAS.png"}){var encoder=new PngBitmapEncoder();encoder.Frames.Add(BitmapFrame.Create(BitmapSource.Create(2,2,96,96,PixelFormats.Gray8,null,new byte[]{(byte)value++,80,160,240},2)));using(var stream=File.Create(Path.Combine(source,name)))encoder.Save(stream);}
    repo.AddEditedImages(Directory.GetFiles(source),null,"Selection fixture",CancellationToken.None,null);RefreshEdited();WaitForSearches();
@@ -43,7 +45,9 @@ namespace AstroArchive {
    RefreshEdited();WaitForSearches();TargetWorkflowCheck(SelectedEditedImages().Count==2&&G("EditedGrid").SelectedItems.Count==1,"Edited refresh lost selections.");
    EditedTargets.SelectedItem=EditedTargets.Items.Cast<TargetSummary>().Single(t=>t.Name=="M31");TargetWorkflowCheck(G("EditedGrid").SelectedItems.Count==1,"Returning to an Edited target lost its selection.");
    foreach(string theme in new[]{"Light","Dark"}){Theme.Apply(Window,theme);PumpPopupLayout();Capture(Path.Combine(output,"AstroArchive_Target_Selection_"+theme+".png"));}
-   B("EditedSelectionCounter").RaiseEvent(new RoutedEventArgs(Button.ClickEvent));TargetWorkflowCheck(SelectedEditedImages().Count==0,"Clear left a hidden Edited selection.");
+   SmokeSelectionEscape(T("EditedSearchBox"));TargetWorkflowCheck(SelectedEditedImages().Count==0&&G("EditedGrid").SelectedItems.Count==0&&B("EditedSelectionCounter").Visibility==Visibility.Collapsed,"Escape from search left a hidden Edited selection.");
+   tabs.SelectedIndex=1;SetRows("ImportGrid",all.Take(2).ToList());WaitForSearches();foreach(var frame in G("ImportGrid").Items.OfType<Frame>())G("ImportGrid").SelectedItems.Add(frame);
+   SmokeSelectionEscape(T("ImportSearchBox"));TargetWorkflowCheck(G("ImportGrid").SelectedItems.Count==0,"Escape from search retained Import selections.");
    File.WriteAllText(Path.Combine(output,"target-workflow-smoke.txt"),"PASS: Repository and Edited retain selections across targets, searches, sorting modes and refresh; counters clear all files without enlarging panes; comet grouping, device search, menu and verified export work together.");
   }
  }
