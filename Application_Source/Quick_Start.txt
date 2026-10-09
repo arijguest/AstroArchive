@@ -121,6 +121,9 @@ Add images copies files. Import folder scans with optional subfolders and a revi
 Archived originals and byte-identical Edited files are skipped; changed files
 can become new versions. Unchecked entries leave existing files untouched.
 RAW/scientific types are grouped first by type; GIFs are last.
+Selections stay selected across targets, searches and refreshes. The target-pane
+counter shows the whole batch; export includes files selected under other targets.
+Click the counter or press Escape to clear the selection.
 
 ## Export and delete
 Export to… opens supported working images in your editor. Save outputs alongside
