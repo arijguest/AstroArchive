@@ -31,6 +31,7 @@ namespace AstroArchive {
    }finally{if(motion!=null)motion.Dispose();if(popup!=null)popup.Close();Directory.Delete(directory,true);}
   }
   void SmokeSessionSummaries(){
+   int page=((TabControl)Window.FindName("MainTabs")).SelectedIndex;GoToPage(0);
    WaitForSearches();var previous=displayed;var previousRows=all;var previousSelection=librarySelection.Items;var savedSorts=tableSorts["FramesGrid"].ToList();string mode=Convert.ToString(C("LibraryViewBox").SelectedItem);var grid=G("FramesGrid");
    try{
     displayed=new System.Collections.Generic.List<Frame>{new Frame{Target="M31",Kind="Light",Session="fixture",Telescope="Dwarf-3",Camera="Tele",Exposure=60,Filter="Ha",OriginalName="one.fit"},new Frame{Target="M31",Kind="Light",Session="fixture",Telescope="Dwarf-3",Camera="Tele",Exposure=60,Filter="Ha",OriginalName="two.fit"},new Frame{Target="M31",Kind="Stack",OriginalName="stack.fit"}};
@@ -47,7 +48,16 @@ namespace AstroArchive {
     expander.IsExpanded=true;PumpPopupLayout();if(!subframeSessions[0].Expanded||PopupChildren<DataGridRow>(grid).Count(r=>r.IsVisible)<3)throw new Exception("Expanding a session did not reveal its files beside the stack.");if(!session.IsSelected)throw new Exception("Expanding lost group selection");grid.SelectedItem=displayed[0];if(session.IsSelected||SelectedFiles().Count!=1)throw new Exception("Individual file selection did not replace group selection");
     SelectSession(session,System.Windows.Input.ModifierKeys.Control);if(SelectedFiles().Count!=2||grid.SelectedItems.Count!=1)throw new Exception("Group/file selection duplicated members");SelectContextRow(displayed[0]);if(!session.IsSelected||SelectedFiles().Count!=2)throw new Exception("Right-click changed an already selected group member");
     DisplayLibrary();WaitForSearches();PumpPopupLayout();if(!subframeSessions[0].Expanded||!subframeSessions[0].IsSelected||SelectedFiles().Count!=2)throw new Exception("Refresh lost group state");
-    displayed.Add(new Frame{Target="M45",Kind="Light",Session="second",Telescope="Dwarf-3",Camera="Tele",OriginalName="three.fit"});displayed.Add(new Frame{Target="M45",Kind="Light",Session="second",Telescope="Dwarf-3",Camera="Tele",OriginalName="four.fit"});all=displayed.ToList();DisplayLibrary();WaitForSearches();SelectSession(subframeSessions[0],System.Windows.Input.ModifierKeys.None);SelectSession(subframeSessions[1],System.Windows.Input.ModifierKeys.Shift);if(SelectedFiles().Count!=4)throw new Exception("Shift selection omitted a session group");SelectSession(subframeSessions[0],System.Windows.Input.ModifierKeys.Control);if(SelectedFiles().Count!=2)throw new Exception("Ctrl selection did not toggle a group");
+    displayed.Add(new Frame{Target="M45",Kind="Light",Session="second",Telescope="Dwarf-3",Camera="Tele",OriginalName="three.fit"});displayed.Add(new Frame{Target="M45",Kind="Light",Session="second",Telescope="Dwarf-3",Camera="Tele",OriginalName="four.fit"});all=displayed.ToList();DisplayLibrary();WaitForSearches();
+    foreach(var group in subframeSessions)group.Expanded=false;PumpPopupLayout();
+    var selectors=PopupChildren<Button>(grid).Where(b=>object.Equals(b.Tag,"SelectSession")).ToList();
+    var first=selectors.Single(b=>((CollectionViewGroup)b.DataContext).Name==subframeSessions[0]);
+    SelectSession(subframeSessions[0],System.Windows.Input.ModifierKeys.None);if(!first.Focus())throw new Exception("Session header cannot receive keyboard focus.");
+    first.RaiseEvent(new System.Windows.Input.KeyEventArgs(System.Windows.Input.Keyboard.PrimaryDevice,PresentationSource.FromVisual(first),0,System.Windows.Input.Key.Down){RoutedEvent=System.Windows.Input.Keyboard.PreviewKeyDownEvent});PumpPopupLayout();
+    if(!subframeSessions[1].IsSelected||subframeSessions[0].IsSelected||SelectedFiles().Count!=2||SelectedFiles().Any(f=>f.Target!="M45"))throw new Exception("Down moved group focus without changing selected files.");
+    var focused=System.Windows.Input.Keyboard.FocusedElement as UIElement;focused.RaiseEvent(new System.Windows.Input.KeyEventArgs(System.Windows.Input.Keyboard.PrimaryDevice,PresentationSource.FromVisual(focused),0,System.Windows.Input.Key.Up){RoutedEvent=System.Windows.Input.Keyboard.PreviewKeyDownEvent});PumpPopupLayout();
+    if(!subframeSessions[0].IsSelected||subframeSessions[1].IsSelected||SelectedFiles().Count!=2||SelectedFiles().Any(f=>f.Target!="M31"))throw new Exception("Up moved group focus without changing selected files.");
+    SelectSession(subframeSessions[0],System.Windows.Input.ModifierKeys.None);SelectSession(subframeSessions[1],System.Windows.Input.ModifierKeys.Shift);if(SelectedFiles().Count!=4)throw new Exception("Shift selection omitted a session group");SelectSession(subframeSessions[0],System.Windows.Input.ModifierKeys.Control);if(SelectedFiles().Count!=2)throw new Exception("Ctrl selection did not toggle a group");
     displayed=displayed.Where(f=>f.Target=="M31").ToList();DisplayLibrary();WaitForSearches();if(subframeSessions.Any(g=>g.IsSelected)||SelectedFiles().Count!=2||SelectedFiles().Any(f=>f.Target!="M45"))throw new Exception("Target filtering lost retained selection or kept an invisible group selected");
     updating=true;C("LibraryViewBox").SelectedItem="Show all files";updating=false;DisplayLibrary();WaitForSearches();if(((ListCollectionView)grid.ItemsSource).GroupDescriptions.Count!=0||grid.Items.Count!=3)throw new Exception("Show all files did not restore a flat table.");
     displayed.Add(new Frame{Target="M31",Kind="Stack",OriginalName="z-stack.fit",Exposure=5});displayed.Add(new Frame{Target="M31",Kind="Light",OriginalName="a-single.fit",Exposure=1});
@@ -65,7 +75,7 @@ namespace AstroArchive {
       if(layout=="Session summaries"&&allTargets&&!(((ListCollectionView)grid.ItemsSource).Groups.Cast<CollectionViewGroup>().First().Name is SubframeSession))throw new Exception("Merged subs are not first in All Targets");
      }
     }
-   }finally{tableSorts["FramesGrid"]=savedSorts;updating=true;C("LibraryViewBox").SelectedItem=mode;updating=false;all=previousRows;librarySelection.Clear();foreach(var frame in previousSelection)librarySelection.Add(frame);displayed=previous;DisplayLibrary();WaitForSearches();}
+   }finally{tableSorts["FramesGrid"]=savedSorts;updating=true;C("LibraryViewBox").SelectedItem=mode;updating=false;all=previousRows;librarySelection.Clear();foreach(var frame in previousSelection)librarySelection.Add(frame);displayed=previous;DisplayLibrary();WaitForSearches();GoToPage(page);}
   }
  }
 }

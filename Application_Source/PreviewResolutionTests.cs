@@ -25,10 +25,10 @@ namespace AstroArchive {
    });
    Test("Condensed subframes show per-sub exposure without inventing missing or mixed durations",()=>{
     Func<double?[],SubframeSession> group=values=>SubframeSessions.Build(values.Select(v=>new Frame{Target="M31",Kind="Light",Session="fixture",Exposure=v,Filter="RGB"})).Single();
-    Check(group(new double?[]{60,60}).Label.Contains("2 subs · 60 s/sub · 2 min 0 s in subs"),"Per-sub and accumulated exposure are not distinguished");
-    Check(group(new double?[]{0.25,0.25}).Label.Contains("0.25 s/sub"),"Fractional exposures lost precision");
-    Check(group(new double?[]{30,60}).Label.Contains("30–60 s/sub (mixed)"),"Mixed durations presented as one exposure");
-    Check(group(new double?[]{60,null}).Label.Contains("60 s/sub + unknown")&&group(new double?[]{null,0,double.NaN}).Label.Contains("per-sub exposure unknown"),"Unknown exposures guessed");
+    Check(group(new double?[]{60,60}).Label.Contains("2 subs · 60s · 2 min 0 s total"),"Per-sub and accumulated exposure are not distinguished");
+    Check(group(new double?[]{0.25,0.25}).Label.Contains("0.25s"),"Fractional exposures lost precision");
+    Check(group(new double?[]{30,60}).Label.Contains("30–60s (mixed)"),"Mixed durations presented as one exposure");
+    Check(group(new double?[]{60,null}).Label.Contains("60s + unknown")&&group(new double?[]{null,0,double.NaN}).Label.Contains("per-sub exposure unknown"),"Unknown exposures guessed");
    });
   }
  }

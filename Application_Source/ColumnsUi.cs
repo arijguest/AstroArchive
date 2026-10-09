@@ -14,7 +14,7 @@ namespace AstroArchive {
   static string ColumnId(DataGridColumn column){string path=((Binding)((DataGridBoundColumn)column).Binding).Path.Path;return path=="MountText"?"Mount":path=="KindLabel"?"Kind":path;}
   void AddCaptureColumns(string name){
    var grid=G(name);defaultColumns[name]=grid.Columns.Select(ColumnId).ToList();
-   string[] fields={"CapabilityText|CAPABILITIES|240","CameraModel|CAMERA MODEL|150","CameraId|CAMERA ID|150","TelescopeModel|TELESCOPE MODEL|150","Offset|OFFSET|70","ElectronsPerAdu|E-/ADU|80","ReadoutMode|READOUT MODE|130","Roi|ROI|140","OpticalConfiguration|OPTICAL CONFIGURATION|180","ObservedUtc|UTC CAPTURE TIME|180","TimeZoneId|TIMEZONE|140","OriginalName|FILE|220","ObjectId|OBJECT ID|90","TargetName|COMMON NAME / LABEL|220","Status|STATUS|110","ReviewText|REVIEW|115","Telescope|TELESCOPE|150","InstrumentText|DEVICE / MODEL|150","Camera|CAMERA|100","Kind|FRAME TYPE|110","AcquisitionDateLabel|ACQUIRED|100","Observed|RECORDED CAPTURE TIME|160","ExposureText|EXPOSURE|85","GainText|GAIN|75","TemperatureText|TEMPERATURE|110","Filter|FILTER|100","Calibration|CALIBRATION|130","SizeText|DIMENSIONS|140","BinX|BIN X|70","BinY|BIN Y|70","Bayer|BAYER PATTERN|110","Mount|MOUNT|130","Session|SESSION|160","Bytes|SIZE (BYTES)|115","ScreeningIssue|SCREENING ISSUE|240","SourceDisposition|SOURCE ACTION|240","RelativePath|REPOSITORY PATH|280","Notes|NOTES|280"};
+   string[] fields={"CapabilityText|CAPABILITIES|240","CameraModel|CAMERA MODEL|150","CameraId|CAMERA ID|150","TelescopeModel|TELESCOPE MODEL|150","Offset|OFFSET|70","ElectronsPerAdu|E-/ADU|80","ReadoutMode|READOUT MODE|130","Roi|ROI|140","OpticalConfiguration|OPTICAL CONFIGURATION|180","ObservedUtc|UTC CAPTURE TIME|180","TimeZoneId|TIMEZONE|140","OriginalName|FILE|220","ObjectId|ID|56","TargetName|OBJECT|160","Status|STATUS|110","ReviewText|REVIEW|115","Telescope|TELESCOPE|150","InstrumentText|DEVICE / MODEL|150","Camera|CAMERA|100","Kind|TYPE|88","AcquisitionDateLabel|DATE|96","Observed|RECORDED CAPTURE TIME|160","ExposureText|EXPOSURE|88","GainText|GAIN|75","TemperatureText|TEMPERATURE|110","Filter|FILTER|100","Calibration|CALIBRATION|130","SizeText|DIMENSIONS|140","BinX|BIN X|70","BinY|BIN Y|70","Bayer|BAYER PATTERN|110","Mount|MOUNT|130","Session|SESSION|160","Bytes|SIZE (BYTES)|115","ScreeningIssue|SCREENING ISSUE|240","SourceDisposition|SOURCE ACTION|240","RelativePath|REPOSITORY PATH|280","Notes|NOTES|280"};
    foreach(string field in fields){var parts=field.Split('|');if(grid.Columns.Any(c=>ColumnId(c)==parts[0]))continue;
     grid.Columns.Add(new DataGridTextColumn{Header=parts[1],Binding=new Binding(parts[0]),Width=int.Parse(parts[2]),Visibility=Visibility.Collapsed});
    }
@@ -45,6 +45,7 @@ namespace AstroArchive {
    var grid=G(name);var layout=ColumnLayout.Resolve(saved,originalColumnOrder[name],defaultColumns[name]);
    for(int i=0;i<layout.Order.Count;i++)grid.Columns.First(c=>ColumnId(c)==layout.Order[i]).DisplayIndex=i;
    foreach(var column in grid.Columns)column.Visibility=layout.Visible.Contains(ColumnId(column))?Visibility.Visible:Visibility.Collapsed;
+   TableColumnResizing.Refresh(grid);
    tableSorts[name].RemoveAll(s=>!grid.Columns.Any(c=>c.Visibility==Visibility.Visible&&c.SortMemberPath==s.PropertyName));RestoreTableSort(name);
   }
   ColumnLayout CurrentColumnLayout(string name){var columns=G(name).Columns.OrderBy(c=>c.DisplayIndex).ToList();return new ColumnLayout{Order=columns.Select(ColumnId).ToList(),Visible=columns.Where(c=>c.Visibility==Visibility.Visible).Select(ColumnId).ToList(),RepositoryGainShown=name=="FramesGrid"};}
@@ -55,6 +56,7 @@ namespace AstroArchive {
   bool SetColumnVisible(string name,DataGridColumn column,bool visible){
    var grid=G(name);if(!visible&&grid.Columns.Count(c=>c.Visibility==Visibility.Visible)<=1)return false;
    column.Visibility=visible?Visibility.Visible:Visibility.Collapsed;
+   TableColumnResizing.Refresh(grid);
    if(!visible){tableSorts[name].RemoveAll(s=>s.PropertyName==column.SortMemberPath);RestoreTableSort(name);}
    PersistColumnLayout(name);return true;
   }
@@ -62,7 +64,7 @@ namespace AstroArchive {
    var visible=G(name).Columns.Where(c=>c.Visibility==Visibility.Visible).OrderBy(c=>c.DisplayIndex).ToList();int index=visible.IndexOf(column),next=index+offset;
    if(index<0||next<0||next>=visible.Count)return;column.DisplayIndex=visible[next].DisplayIndex;PersistColumnLayout(name);
   }
-  void ResetColumns(string name){ApplyColumnLayout(name,null);if(settings.TableLayouts!=null)settings.TableLayouts.Remove(name);if(!testingColumnLayouts)SaveSettings();}
+  void ResetColumns(string name){ApplyColumnLayout(name,null);TableColumnResizing.Reset(G(name));if(settings.TableLayouts!=null)settings.TableLayouts.Remove(name);if(!testingColumnLayouts)SaveSettings();}
   ContextMenu BuildColumnsMenu(string name,DataGridColumn selected){
    var menu=ThemedMenu();var grid=G(name);
    menu.Items.Add(new MenuItem{Header="Drag headings to rearrange",IsEnabled=false});

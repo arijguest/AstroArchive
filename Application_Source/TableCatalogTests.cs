@@ -4,6 +4,19 @@ using System.Linq;
 namespace AstroArchive {
  public partial class Tests {
   static void TableCatalogTests(){
+   Test("Responsive table widths use available space while preserving limits and relative preferences",()=>{
+    var preferred=new double[]{360,60,160};var min=new double[]{120,40,70};var max=new double[]{double.PositiveInfinity,double.PositiveInfinity,double.PositiveInfinity};var all=new[]{true,true,true};
+    var narrow=ColumnWidths.Fit(preferred,min,max,all,400);var wide=ColumnWidths.Fit(preferred,min,max,all,900);
+    Check(Math.Abs(narrow.Sum()-400)<0.001&&Math.Abs(wide.Sum()-900)<0.001&&wide[0]>narrow[0]&&wide[2]>narrow[2],"Window growth did not enlarge columns or fill the viewport");
+    Check(narrow[0]>narrow[2]&&narrow[1]>=40&&narrow[2]>=70,"File priority or readable minima lost");
+    Check(ColumnWidths.Fit(preferred,min,max,all,100).SequenceEqual(min),"A small viewport forced columns below their minima instead of scrolling");
+    var capped=ColumnWidths.Fit(new double[]{100,100,100},new double[]{50,0,0},new double[]{double.PositiveInfinity,10,double.PositiveInfinity},all,120);
+    Check(Math.Abs(capped[0]-55)<0.001&&Math.Abs(capped[1]-10)<0.001&&Math.Abs(capped[2]-55)<0.001,"Minimum and maximum constraints distorted remaining proportions");
+    var locked=ColumnWidths.Fit(preferred,min,max,new[]{true,false,true},900);Check(locked[1]==60&&Math.Abs(locked.Sum()-900)<0.001,"A nonresizable column was changed");
+    var manual=ColumnWidths.Fit(new double[]{1000,32,32},new double[]{32,32,32},max,all,1264);
+    Check(manual[0]>1000&&Math.Abs(manual.Sum()-1264)<0.001,"Customized overflowing columns stopped responding to window growth");
+    Check(preferred.SequenceEqual(new double[]{360,60,160}),"Responsive sizing changed the saved preferences");
+   });
    Test("DWARF stack counts require a whole integration ratio and preserve explicit metadata",()=>{
     string name="stacked-16_Heart Nebula_10s60_Astro_20260909.fits";int count;double total,seconds;
     var header=new FitsHeader();header.Values["EXPTIME"]="5710";header.Values["INSTRUME"]="DWARF 3";

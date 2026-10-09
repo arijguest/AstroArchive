@@ -14,6 +14,10 @@ preferred catalogue ID before the common name, such as **M31 - Andromeda Galaxy*
 with alternate IDs below. Comet designations and recognised NEAT/LINEAR/NEOWISE
 names share Solar system; Meteors sit above Other targets.
 
+Target rows omit a trailing parenthesized catalogue ID when it repeats the ID
+already shown before the common name: **IC434 - Flame Nebula**. Qualified names
+remain available to the identity resolver.
+
 Right-click a target on Repository or Edited to edit its common name and aliases.
 Rules persist in `settings.json` and publish as a validated immutable snapshot.
 Saving rebuilds search indexes and the Edited fuzzy matcher and regroups existing

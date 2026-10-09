@@ -17,6 +17,13 @@ namespace AstroArchive {
     var group=button.DataContext as CollectionViewGroup;return group==null?null:group.Name as SubframeSession;
    }return null;
   }
+  static SubframeSession KeyboardSession(DependencyObject source){
+   for(var node=source;node!=null;node=node is Visual?VisualTreeHelper.GetParent(node):LogicalTreeHelper.GetParent(node)){
+    var element=node as FrameworkElement;if(element==null)continue;
+    if(!(element is Button&&object.Equals(element.Tag,"SelectSession"))&&!(element is System.Windows.Controls.Primitives.ToggleButton&&element.Name=="SessionChevron"))continue;
+    var group=element.DataContext as CollectionViewGroup;return group==null?null:group.Name as SubframeSession;
+   }return null;
+  }
   void ClearSessionSelection(){foreach(var group in subframeSessions)group.IsSelected=false;activeSessionKey=null;}
   void SessionFileSelectionChanged(SelectionChangedEventArgs args){
    if(restoringTargetSelection)return;
@@ -42,6 +49,18 @@ namespace AstroArchive {
   void InitializeSessionSelection(){
    var grid=G("FramesGrid");
    grid.AddHandler(Button.ClickEvent,new RoutedEventHandler((s,e)=>{var group=HeaderSession(e.OriginalSource as DependencyObject);if(group!=null){SelectSession(group,Keyboard.Modifiers);e.Handled=true;}}));
+   grid.PreviewKeyDown+=(s,e)=>{
+    if(e.Handled||(e.Key!=Key.Up&&e.Key!=Key.Down)||KeyboardSession(e.OriginalSource as DependencyObject)==null)return;
+    var source=Keyboard.FocusedElement as UIElement;if(source==null)return;
+    e.Handled=true;if(!source.MoveFocus(new TraversalRequest(e.Key==Key.Down?FocusNavigationDirection.Down:FocusNavigationDirection.Up)))return;
+    if((Keyboard.Modifiers&ModifierKeys.Control)!=0)return;
+    var focused=Keyboard.FocusedElement as DependencyObject;var group=KeyboardSession(focused);
+    if(group!=null)SelectSession(group,Keyboard.Modifiers);
+    else{
+     var row=ItemsControl.ContainerFromElement(grid,focused) as DataGridRow;var frame=row==null?null:row.Item as Frame;
+     if(frame!=null){ClearSessionSelection();grid.SelectedItems.Clear();grid.SelectedItem=frame;CaptureTargetSelection("FramesGrid");Details();}
+    }
+   };
   }
  }
 }

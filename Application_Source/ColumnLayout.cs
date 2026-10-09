@@ -30,6 +30,23 @@ namespace AstroArchive {
   }
  }
  public static class ColumnWidths {
+  // Fit relative preferences to the current viewport, respecting readable
+  // defaults or the smaller minima allowed after an explicit user drag.
+  public static double[] Fit(double[] preferred,double[] minimum,double[] maximum,bool[] resizable,double available){
+   var widths=new double[preferred.Length];var pending=new List<int>();
+   if(double.IsNaN(available)||double.IsInfinity(available)||available<=0)return (double[])preferred.Clone();
+   for(int i=0;i<widths.Length;i++)if(resizable[i])pending.Add(i);else{widths[i]=Math.Max(minimum[i],Math.Min(maximum[i],preferred[i]));available-=widths[i];}
+   double least=pending.Sum(i=>minimum[i]),most=pending.Sum(i=>maximum[i]);
+   if(available<=least){foreach(int i in pending)widths[i]=minimum[i];return widths;}
+   if(available>=most){foreach(int i in pending)widths[i]=maximum[i];return widths;}
+   if(pending.Count==0)return widths;
+   double low=0,high=Math.Max(1,available/pending.Sum(i=>Math.Max(1,preferred[i])));
+   Func<double,double> total=scale=>pending.Sum(i=>Math.Max(minimum[i],Math.Min(maximum[i],Math.Max(1,preferred[i])*scale)));
+   while(total(high)<available)high*=2;
+   for(int step=0;step<56;step++){double middle=(low+high)/2;if(total(middle)<available)low=middle;else high=middle;}
+   foreach(int i in pending)widths[i]=Math.Max(minimum[i],Math.Min(maximum[i],Math.Max(1,preferred[i])*high));
+   return widths;
+  }
   public static double[] Resize(double[] initial,double[] minimum,double[] maximum,bool[] resizable,int selected,double requested){
    var widths=(double[])initial.Clone();if(selected<0||selected>=widths.Length||double.IsNaN(requested)||double.IsInfinity(requested))return widths;
    double desired=Math.Max(minimum[selected],Math.Min(maximum[selected],requested)),delta=desired-widths[selected];widths[selected]=desired;

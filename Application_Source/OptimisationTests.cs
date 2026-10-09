@@ -52,7 +52,7 @@ namespace AstroArchive {
    Test("Shared session membership retains section ordering final member order and singleton files",()=>{
     var rows=new[]{new Frame{Kind="Light",Target="M31",Session="one",Telescope="A",Exposure=10},new Frame{Kind="Stack",Target="M31",Exposure=100},new Frame{Kind="Light",Target="M31",Session="one",Telescope="A",Exposure=5},new Frame{Kind="Light",Target="M31",Session="one",Telescope="B",Exposure=20},new Frame{Kind="Bias",Target="Calibration",Exposure=0}};
     List<SubframeSession> groups;var ordered=RepositoryOrdering.Order(rows,new[]{new SearchSort{Property="Exposure",Descending=true}},CultureInfo.InvariantCulture,true,true,ct,out groups);
-    Check(ordered.SequenceEqual(new[]{rows[0],rows[2],rows[1],rows[3],rows[4]}),"Section partition merged a singleton/instrument or lost user ordering");Check(groups.Count==1&&groups[0].Frames.SequenceEqual(new[]{rows[0],rows[2]})&&groups[0].Label.Contains("5–10 s/sub"),"Session frame order or label changed");
+    Check(ordered.SequenceEqual(new[]{rows[0],rows[2],rows[1],rows[3],rows[4]}),"Section partition merged a singleton/instrument or lost user ordering");Check(groups.Count==1&&groups[0].Frames.SequenceEqual(new[]{rows[0],rows[2]})&&groups[0].Label.Contains("5–10s"),"Session frame order or label changed");
     Check(SearchOrdering.Order(rows,new SearchSort[0],null,ct).SequenceEqual(rows),"Empty sort descriptors changed order");using(var cancel=new CancellationTokenSource()){cancel.Cancel();Expect(()=>SearchOrdering.Order(new Frame[0],new SearchSort[0],null,cancel.Token),"Empty sort ignored cancellation");}
    });
   }

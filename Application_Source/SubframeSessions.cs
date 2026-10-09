@@ -38,7 +38,7 @@ namespace AstroArchive {
    var known=frames.Where(f=>f.Exposure.HasValue&&f.Exposure.Value>0&&!double.IsNaN(f.Exposure.Value)&&!double.IsInfinity(f.Exposure.Value)).Select(f=>f.Exposure.Value).ToList();
    if(known.Count==0)return "per-sub exposure unknown";var lengths=known.Distinct().OrderBy(s=>s).ToList();
    Func<double,string> seconds=s=>s.ToString("0.###",System.Globalization.CultureInfo.InvariantCulture);
-   return (lengths.Count==1?seconds(lengths[0]):seconds(lengths.First())+"–"+seconds(lengths.Last()))+" s/sub"+(lengths.Count>1?" (mixed)":"")+(known.Count<frames.Count?" + unknown":"");
+   return (lengths.Count==1?seconds(lengths[0]):seconds(lengths.First())+"–"+seconds(lengths.Last()))+"s"+(lengths.Count>1?" (mixed)":"")+(known.Count<frames.Count?" + unknown":"");
   }
  }
 }

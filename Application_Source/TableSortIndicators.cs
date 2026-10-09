@@ -6,6 +6,7 @@ using System.Windows.Automation;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Data;
+using System.Windows.Media;
 using System.Windows.Threading;
 
 namespace AstroArchive {
@@ -15,12 +16,27 @@ namespace AstroArchive {
         static readonly DependencyProperty AttachedProperty = DependencyProperty.RegisterAttached("Attached", typeof(bool), typeof(TableSortIndicators), new PropertyMetadata(false));
         public static string GetMark(DependencyObject element) { return (string)element.GetValue(MarkProperty); }
         public static void SetMark(DependencyObject element, string value) { element.SetValue(MarkProperty, value); }
+        static DataGridColumnHeadersPresenter FindHeaders(DependencyObject root) {
+            var presenter = root as DataGridColumnHeadersPresenter; if (presenter != null) return presenter;
+            for (int i = 0; i < VisualTreeHelper.GetChildrenCount(root); i++) {
+                presenter = FindHeaders(VisualTreeHelper.GetChild(root, i)); if (presenter != null) return presenter;
+            }
+            return null;
+        }
+        static void UpdateHeaderMarks(DataGrid grid) {
+            var presenter = FindHeaders(grid); if (presenter == null) return;
+            foreach (var header in presenter.ItemContainerGenerator.Items.Cast<object>().Select(item => presenter.ItemContainerGenerator.ContainerFromItem(item)).OfType<DataGridColumnHeader>()) {
+                string mark = header.Column == null ? "" : GetMark(header.Column);
+                if (GetMark(header) != mark) SetMark(header, mark);
+            }
+        }
         public static void SizeColumns(DataGrid grid, double scale) {
             foreach (var column in grid.Columns) {
                 // Keep a usable gripper without forcing the caption's full width.
                 // Captions/cells clip; explicit resizing may overflow the viewport.
                 column.MinWidth = 32 * scale;
             }
+            TableColumnResizing.Refresh(grid);
         }
         public static void Update(DataGrid grid,System.Collections.Generic.IEnumerable<SortDescription> preparedSorts=null) {
             if(preparedSorts!=null)grid.SetValue(PreparedSortsProperty,preparedSorts.ToList());
@@ -36,6 +52,7 @@ namespace AstroArchive {
                     column.HeaderStyle = style;
                 }
             }
+            UpdateHeaderMarks(grid);
         }
         public static void Attach(DataGrid grid) {
             if ((bool)grid.GetValue(AttachedProperty)) return;
@@ -48,12 +65,15 @@ namespace AstroArchive {
                 if (string.IsNullOrEmpty(column.SortMemberPath) && binding != null && binding.Path != null) column.SortMemberPath = binding.Path.Path;
                 var style = new Style(typeof(DataGridColumnHeader), column.HeaderStyle ?? grid.TryFindResource(typeof(DataGridColumnHeader)) as Style);
                 var description = new MultiBinding { Converter = new SortHeaderDescriptionConverter() };
-                description.Bindings.Add(new Binding("Column.Header") { RelativeSource = new RelativeSource(RelativeSourceMode.Self) });
-                description.Bindings.Add(new Binding { Path = new PropertyPath("Column.(0)", MarkProperty), RelativeSource = new RelativeSource(RelativeSourceMode.Self) });
+                description.Bindings.Add(new Binding("Content") { RelativeSource = new RelativeSource(RelativeSourceMode.Self) });
+                description.Bindings.Add(new Binding { Path = new PropertyPath("(0)", MarkProperty), RelativeSource = new RelativeSource(RelativeSourceMode.Self) });
                 style.Setters.Add(new Setter(AutomationProperties.NameProperty, description));
                 column.HeaderStyle = style;
             }
             grid.Sorting += (s,e) => grid.Dispatcher.BeginInvoke(DispatcherPriority.DataBind, new Action(() => Update(grid)));
+            // Column is a CLR property: recycled headers do not notify a binding
+            // that their column changed. Publish the current mark on the header.
+            grid.LayoutUpdated += (s,e) => UpdateHeaderMarks(grid);
             Update(grid);
         }
     }

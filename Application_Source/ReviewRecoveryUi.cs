@@ -17,7 +17,7 @@ namespace AstroArchive {
    if(repo==null||RepositoryOperationBlocked)return;var rows=(imports?visibleImports:displayed).Where(CaptureScreening.NeedsReview).ToList();
    var d=new FormWindow(Window,"Review flagged captures",960,680);d.Text(rows.Count+" flagged captures in this view",true);d.Text("Telescope rejection, file integrity and transfer failures are shown separately. Screening checks FITS structure and rejection markers; it does not assess image quality. Unscreened captures remain labelled Not screened.");
    var grid=new DataGrid{AutoGenerateColumns=false,IsReadOnly=true,SelectionMode=DataGridSelectionMode.Extended,Height=310,ItemsSource=rows,Margin=new Thickness(0,8,0,12)};
-   ReviewColumn(grid,"Object ID","ObjectId",90);ReviewColumn(grid,"Common name / label","TargetName",180);ReviewColumn(grid,"Problem type","ReviewCategory",210);ReviewColumn(grid,"File","OriginalName",280);d.Add(grid);
+   ReviewColumn(grid,"ID","ObjectId",56);ReviewColumn(grid,"OBJECT","TargetName",160);ReviewColumn(grid,"Problem type","ReviewCategory",210);ReviewColumn(grid,"File","OriginalName",280);d.Add(grid);
    var reason=new TextBox{IsReadOnly=true,TextWrapping=TextWrapping.Wrap,VerticalScrollBarVisibility=ScrollBarVisibility.Auto,Height=110};d.Add(reason);
    grid.SelectionChanged+=(s,e)=>{var frame=grid.SelectedItem as Frame;reason.Text=frame==null?"Select a capture to read its full reason.":frame.TargetLabel+"\n"+frame.ReviewReason+"\n"+(imports?frame.SourcePath:frame.RelativePath);};if(rows.Count>0)grid.SelectedIndex=0;
    d.Button("Show flagged captures in the main view",()=>{(imports?importFilters:libraryFilters).Values["Review"]="Needs review";ApplyFilters(imports);d.Window.Close();});
