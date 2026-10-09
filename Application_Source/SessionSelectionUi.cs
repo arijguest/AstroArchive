@@ -34,6 +34,7 @@ namespace AstroArchive {
    if(group==null)return;bool control=(modifiers&ModifierKeys.Control)!=0,range=(modifiers&ModifierKeys.Shift)!=0;
    changingSessionSelection=true;
    try{
+    if(!control&&!range)librarySelection.Clear();
     if(!control){G("FramesGrid").SelectedItems.Clear();if(!range)ClearSessionSelection();}
     var view=G("FramesGrid").ItemsSource as ListCollectionView;
     var groups=view==null||view.Groups==null?subframeSessions:view.Groups.OfType<CollectionViewGroup>().Select(g=>g.Name as SubframeSession).Where(g=>g!=null).ToList();
@@ -58,7 +59,7 @@ namespace AstroArchive {
     if(group!=null)SelectSession(group,Keyboard.Modifiers);
     else{
      var row=ItemsControl.ContainerFromElement(grid,focused) as DataGridRow;var frame=row==null?null:row.Item as Frame;
-     if(frame!=null){ClearSessionSelection();grid.SelectedItems.Clear();grid.SelectedItem=frame;CaptureTargetSelection("FramesGrid");Details();}
+     if(frame!=null)SelectOnlyTargetRow("FramesGrid",frame);
     }
    };
   }

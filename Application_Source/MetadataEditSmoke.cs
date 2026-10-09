@@ -13,6 +13,7 @@ namespace AstroArchive {
  public partial class MainUi {
   void SmokeMetadataEditor(string output){
    SmokeMetadataPreviewRelease(output);
+   SmokeMetadataBatchEditing(output);
    var first=new Frame{OriginalName="Light_M33.fit",Target="M33",Telescope="Unit-01",Model="Custom telescope",Camera="Telephoto",Kind="Light",Mount="Unknown",Exposure=30.123456789,Gain=0,Temperature=-12.75,Filter="Broadband",Calibration="Custom calibration",BinX=2,BinY=1,TelescopeModel="Reflector",CameraModel="Camera 1",CameraId="Serial 123",Offset=0,ReadoutMode="Slow",Roi="0,0,128,96",OpticalConfiguration="Reducer",TimeZoneId="UTC",LinearData=false,GainUnit="dB",Bayer="RGGB",RegistrationState="Unregistered",CalibrationSteps="Dark, flat",Notes="Recorded notes",Facts=new Dictionary<string,MetadataFact>{{"Exposure",new MetadataFact{Value="30.123456789",Source="FITS header",Unit="s"}}}};
    var second=first.Clone();second.OriginalName="Light_M45.fit";second.Target="M45";second.Exposure=60;second.CameraId=null;second.LinearData=true;
    string originalTheme=settings.ThemeMode;int originalScale=settings.TextScalePercent;

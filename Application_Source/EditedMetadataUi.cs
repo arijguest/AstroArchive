@@ -18,7 +18,7 @@ namespace AstroArchive {
   }
   List<EditedImage> SelectedEditedImages(){return editedSelection.Items;}
   FormWindow EditedMetadataDialog(List<EditedImage> selected,out EditedMetadataFields fields){
-   var dialog=new FormWindow(Window,"Edit metadata",610,730);dialog.Text(selected.Count+" selected edited image"+(selected.Count==1?"":"s"),true);dialog.Text("Empty fields keep existing values. Assignments are saved with Edited; image files remain unchanged.");
+   var dialog=new FormWindow(Window,"Edit metadata",610,730);dialog.Text(selected.Count+" selected edited image"+(selected.Count==1?"":"s"),true);dialog.Text("Changes apply to all "+selected.Count+" selected image"+(selected.Count==1?"":"s")+" by default. Empty fields keep existing values. Assignments are saved with Edited; image files remain unchanged.");
    Func<Func<EditedMetadata,string>,string> shared=get=>{var values=selected.Select(i=>get(i.Metadata)??"").Distinct().ToList();return values.Count==1?values[0]:"";};fields=new EditedMetadataFields();
    fields.Object=dialog.Input("Target (object ID or common name)",shared(m=>m.Object));fields.Filters=dialog.Input("Filters / channels",shared(m=>m.Filters));
    fields.ImageClass=dialog.Select("Image class",new[]{"Keep existing","Edited image","Starless","Stars only","GIF","Meteor","Unknown (conflicting labels)"},selected.Select(i=>i.Metadata.ImageClass).Distinct().Count()==1?selected[0].Metadata.ImageClass:"Keep existing");
@@ -26,8 +26,9 @@ namespace AstroArchive {
    fields.RA=dialog.Input("RA (as recorded, optional)",shared(m=>m.RA));fields.Dec=dialog.Input("Dec (as recorded, optional)",shared(m=>m.Dec));fields.Remember();var controls=fields;
    dialog.Accept("Save metadata",()=>{try{controls.Values();return true;}catch(ArgumentException e){MessageBox.Show(dialog.Window,e.Message);return false;}});return dialog;
   }
-  async void EditEditedMetadata(){
-   if(repo==null||RepositoryOperationBlocked||SearchBlocked("EditedSearchBox")||metadataPreviewSuspended)return;var selected=SelectedEditedImages();if(selected.Count==0)return;var repository=repo;
+  void EditEditedMetadata(){EditEditedMetadata(SelectedEditedImages());}
+  async void EditEditedMetadata(List<EditedImage> selection){
+   if(repo==null||RepositoryOperationBlocked||SearchBlocked("EditedSearchBox")||metadataPreviewSuspended)return;var selected=selection.ToList();if(selected.Count==0)return;var repository=repo;
    try{
     await SuspendMetadataPreviews();if(closing||repo!=repository||RepositoryOperationBlocked)return;
     EditedMetadataFields fields;var dialog=EditedMetadataDialog(selected,out fields);if(!dialog.Show())return;var changes=fields.Values();var first=selected[0];
@@ -46,7 +47,7 @@ namespace AstroArchive {
    grid.PreviewKeyDown+=(sender,args)=>{if(args.Key==Key.Delete&&repo!=null&&!RepositoryOperationBlocked&&!SearchBlocked("EditedSearchBox")&&SelectedEditedImages().Count>0){args.Handled=true;DeleteEditedFiles(SelectedEditedImages());}};
   }
   void BuildEditedFileMenu(ContextMenu menu,List<EditedImage> selected){
-   menu.Items.Clear();menu.Items.Add(new MenuItem{Header=selected.Count+" selected file"+(selected.Count==1?"":"s"),IsEnabled=false});menu.Items.Add(FileAction("Export files…",ExportEditedFiles,selected.Count>0));menu.Items.Add(FileAction("Export to…",ExportEditedTo,selected.Count>0));menu.Items.Add(FileAction("Edit metadata…",EditEditedMetadata,selected.Count>0));menu.Items.Add(FileAction("Preview image…",PreviewEditedImage,selected.Count==1));menu.Items.Add(FileAction("Image details…",ShowEditedDetails,selected.Count==1));menu.Items.Add(FileAction("Open image folder",OpenEditedFolder,selected.Count==1));
+   menu.Items.Clear();menu.Items.Add(new MenuItem{Header=selected.Count+" selected file"+(selected.Count==1?"":"s"),IsEnabled=false});menu.Items.Add(FileAction("Export files…",ExportEditedFiles,selected.Count>0));menu.Items.Add(FileAction("Export to…",ExportEditedTo,selected.Count>0));menu.Items.Add(FileAction("Edit metadata…",()=>EditEditedMetadata(selected),selected.Count>0));menu.Items.Add(FileAction("Preview image…",PreviewEditedImage,selected.Count==1));menu.Items.Add(FileAction("Image details…",ShowEditedDetails,selected.Count==1));menu.Items.Add(FileAction("Open image folder",OpenEditedFolder,selected.Count==1));
    menu.Items.Add(new Separator());var delete=FileAction("Delete files…",()=>DeleteEditedFiles(selected),selected.Count>0);delete.Foreground=new SolidColorBrush(Color.FromRgb(183,40,51));UiHelp.Tip(delete,"Delete selected Edited copies; keep source originals and archived captures.");menu.Items.Add(delete);
   }
   void ExportEditedFiles(){

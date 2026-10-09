@@ -27,6 +27,7 @@ namespace AstroArchive {
    selectedCount=selected.Count;sessionCount=sessionFileCount??selectedCount;Model=new MetadataEditing(selected);
    Form=new FormWindow(owner,"Edit metadata",780,740);
    Form.Text(selected.Count==1?selected[0].OriginalName:selected.Count+" selected files",true);
+   Form.Text("Changes apply to all "+selected.Count+" selected file"+(selected.Count==1?"":"s")+" by default.");
    Form.Text("Existing values are filled in. Mixed fields keep each file’s value until you enter a replacement. Blank fields keep existing values.");
    summary=new TextBlock{TextWrapping=TextWrapping.Wrap,Margin=new Thickness(0,0,0,8)};Theme.Bind(summary,TextBlock.ForegroundProperty,"Muted");Form.Add(summary);
    Sessions=Form.Check("Apply changes to entire selected sessions",false);Sessions.Checked+=(s,e)=>UpdateSummary();Sessions.Unchecked+=(s,e)=>UpdateSummary();
@@ -84,8 +85,8 @@ namespace AstroArchive {
    metadataPreviewSuspended=false;if(closing||Window.Dispatcher.HasShutdownStarted)return;
    int page=((TabControl)Window.FindName("MainTabs")).SelectedIndex;if(page==0&&settings.ShowPreview)PreviewSelected();else if(page==2)LoadEditedPreview();
   }
-  async void Edit(bool imported){
-   if(repo==null||RepositoryOperationBlocked||metadataPreviewSuspended)return;var selected=Context(imported);if(selected.Count==0)return;var repository=repo;
+  async void Edit(bool imported,List<Frame> selection=null){
+   if(repo==null||RepositoryOperationBlocked||metadataPreviewSuspended||SearchBlocked(imported?"ImportSearchBox":"SearchBox"))return;var selected=(selection??Context(imported)).ToList();if(selected.Count==0)return;var repository=repo;
    try{
     await SuspendMetadataPreviews();if(closing||repo!=repository||RepositoryOperationBlocked)return;
     var sessionRows=MetadataSessionRows(selected,imported);var editor=new MetadataEditor(Window,selected,sessionRows.Count);if(!editor.Form.Show())return;

@@ -44,6 +44,13 @@ namespace AstroArchive {
      var filtered=RepositoryOrdering.Order(rows.Where(f=>f!=b),sorts,System.Globalization.CultureInfo.InvariantCulture,true,true,ct);Check(filtered[0]==stack,"Filtered singleton retained merged-group priority");
     }
    });
+   Test("Target totals include video duration without counting videos as subs",()=>{
+    var rows=new[]{new Frame{Target="Jupiter",Kind="Video",Exposure=90},new Frame{Target="Jupiter",Kind="Video",Exposure=30.5},new Frame{Target="Jupiter",Kind="Light",Exposure=10},new Frame{Target="Jupiter",Kind="Stack",Exposure=500},new Frame{Target="Jupiter",Kind="Dark",Exposure=600}};
+    var targets=TargetNavigation.Build(rows);foreach(var target in targets)Check(target.ExposureSeconds==130.5&&target.Subs==1&&target.Videos==2&&target.UnknownExposure==0&&target.Subline.EndsWith("2m 10s")&&target.Tooltip.Contains("2 videos")&&target.Tooltip.Contains("2 min 10 s total"),"Video omitted or stack/calibration double counted: "+target.Name);
+    var video=TargetNavigation.Build(rows.Take(2))[1];Check(video.Subs==0&&video.Subline=="2m"&&video.Tooltip.Contains("2 min 0 s total"),"Video-only target hid its total");
+    var unknown=TargetNavigation.Build(new[]{new Frame{Target="Jupiter",Kind="Video"},new Frame{Target="Jupiter",Kind="Video",Exposure=double.NaN},new Frame{Target="Jupiter",Kind="Video",Exposure=double.PositiveInfinity},new Frame{Target="Jupiter",Kind="Video",Exposure=-1}})[1];Check(unknown.ExposureSeconds==0&&unknown.UnknownExposure==4&&unknown.Subline=="exposure unknown"&&unknown.Tooltip.Contains("4 exposure unknown"),"Unknown durations guessed or hidden");
+    var mixed=TargetNavigation.Build(rows.Take(1).Concat(new[]{new Frame{Target="Jupiter",Kind="Video"}}))[1];Check(mixed.Subline=="1m 30s + ?"&&mixed.Tooltip.Contains("1 exposure unknown"),"Partial video total presented as complete");
+   });
    Test("Target rows omit repeated catalogue IDs without merging shared names",()=>{
     var targets=TargetNavigation.Build(new[]{new Frame{Target="IC434"},new Frame{Target="NGC2024"}});
     Check(targets.Single(t=>t.Name=="IC434").DisplayName=="IC434 - Flame Nebula","IC434 repeats its ID after the common name");
