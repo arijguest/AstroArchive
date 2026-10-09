@@ -41,14 +41,18 @@ namespace AstroArchive {
                     hash=Util.Hash(associated.SourcePath,ct);
                     relative=Path.Combine(".astroarchive","session-metadata",hash+Path.GetExtension(associated.SourcePath).ToLowerInvariant());
                     string destination=Path.Combine(Root,relative);
+                    CheckManagedPath(destination,Root);
                     Directory.CreateDirectory(Path.GetDirectoryName(destination));
+                    CheckManagedPath(destination,Root);
                     if(File.Exists(destination)) {
                         if(Util.Hash(destination,ct)!=hash)throw new IOException("Associated archive copy failed checksum verification.");
                     }
                     else {
                         string temp=destination+"."+Guid.NewGuid().ToString("N")+".partial";
                         try {
+                            CheckManagedPath(temp,Root);
                             CopyVerified(associated.SourcePath,temp,hash,ct);
+                            CheckManagedPath(destination,Root);
                             File.Move(temp,destination);
                         }
                         finally {

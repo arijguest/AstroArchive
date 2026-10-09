@@ -6,6 +6,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Diagnostics;
 using System.Linq;
+using System.Threading;
 
 namespace AstroArchive.Installation {
  public sealed class UpdateManifest {
@@ -169,16 +170,18 @@ namespace AstroArchive.Installation {
    return manifest;
   }
 
-  public string Prepare(UpdateManifest manifest, string cache) {
+  public string Prepare(UpdateManifest manifest,string cache){return Prepare(manifest,cache,CancellationToken.None);}
+  public string Prepare(UpdateManifest manifest, string cache,CancellationToken token) {
+   token.ThrowIfCancellationRequested();
    Validate(manifest);
-   Action<long> report=received=>{if(Progress!=null)Progress(new UpdateDownloadProgress{Received=received,Total=manifest.size});};report(0);
+   Action<long> report=received=>{token.ThrowIfCancellationRequested();if(Progress!=null)Progress(new UpdateDownloadProgress{Received=received,Total=manifest.size});};report(0);
    var uri=new Uri(manifest.download_url ?? manifest.url);
-   byte[] bytes = Fetch == Download ? DownloadProgressive(uri,manifest.size,report) : Fetch(uri,manifest.size);
+   byte[] bytes = Fetch == Download ? DownloadProgressive(uri,manifest.size,report,token) : Fetch(uri,manifest.size);
    if (bytes == null || bytes.LongLength != manifest.size ||
     !string.Equals(InstallCore.Hash(bytes), manifest.sha256, StringComparison.OrdinalIgnoreCase))
     throw new IOException("Downloaded update failed SHA-256 verification.");
    report(bytes.LongLength);
-   InstallCore.NoLinks(cache);
+   token.ThrowIfCancellationRequested();InstallCore.NoLinks(cache);
    string directory = Path.Combine(cache, Guid.NewGuid().ToString("N"));
    Directory.CreateDirectory(directory);
    string path = Path.Combine(directory, InstallerName(manifest));
@@ -189,20 +192,21 @@ namespace AstroArchive.Installation {
     }
     if (!string.Equals(InstallCore.HashFile(path), manifest.sha256, StringComparison.OrdinalIgnoreCase))
      throw new IOException("Saved update failed SHA-256 verification.");
-    return path;
+    token.ThrowIfCancellationRequested();return path;
    } catch { if (File.Exists(path)) File.Delete(path); if (Directory.Exists(directory)) Directory.Delete(directory); throw; }
   }
 
   static byte[] Download(Uri uri,long limit){return DownloadProgressive(uri,limit,null);}
-  static byte[] DownloadProgressive(Uri uri, long limit,Action<long> progress) {
+  static byte[] DownloadProgressive(Uri uri, long limit,Action<long> progress,CancellationToken token=default(CancellationToken)) {
    if (limit < 1 || limit > MaximumInstallerSize) throw new IOException("Invalid download limit.");
    // TLS and certificate validation remain enabled. Every redirect is checked.
    ServicePointManager.SecurityProtocol |= SecurityProtocolType.Tls12;
    for (int hop = 0; hop < 6; hop++) {
-    if (!TrustedDownload(uri)) throw new IOException("Untrusted update download destination.");
+    token.ThrowIfCancellationRequested();if (!TrustedDownload(uri)) throw new IOException("Untrusted update download destination.");
     var request = (HttpWebRequest)WebRequest.Create(uri);
     request.AllowAutoRedirect = false; request.Timeout = 10000; request.ReadWriteTimeout = 15000;
     request.UserAgent = "AstroArchive-Updater";
+    try{using(token.Register(()=>request.Abort()))
     using (var response = (HttpWebResponse)request.GetResponse()) {
      int status = (int)response.StatusCode;
      if (status == 301 || status == 302 || status == 303 || status == 307 || status == 308) {
@@ -216,12 +220,12 @@ namespace AstroArchive.Installation {
       var watch = System.Diagnostics.Stopwatch.StartNew();
       while ((count = stream.Read(buffer, 0, buffer.Length)) > 0) {
        if (output.Length + count > limit || watch.Elapsed.TotalMinutes > 3) throw new IOException("Update download exceeded its limit.");
-       output.Write(buffer, 0, count);
+       token.ThrowIfCancellationRequested();output.Write(buffer, 0, count);
        if(progress!=null)progress(output.Length);
       }
-      return output.ToArray();
+      token.ThrowIfCancellationRequested();return output.ToArray();
      }
-    }
+    }}catch(WebException){token.ThrowIfCancellationRequested();throw;}
    }
    throw new IOException("Too many update redirects.");
   }

@@ -235,9 +235,11 @@ namespace AstroArchive {
                 Width=w,Height=h,Pixels=pixels
             };
         }
-        public static PreviewData Display(Frame frame,string path,int index,CancellationToken ct) {
+        public static PreviewData Display(Frame frame,string path,int index,CancellationToken ct,bool fullResolution=false) {
+            if(fullResolution){var selected=Selected(frame)??Inspect(path).Images.FirstOrDefault();if(selected==null)throw new NotSupportedException("No decodable image is available.");return FullResolutionPreview.Create(frame,Read(frame,path,index,ct),selected,path,ct);}
             if(string.IsNullOrEmpty(frame.Format))return Fits.Preview(path,ct);
             if(frame.Format=="FITS"&&Selected(frame)!=null&&Selected(frame).Compression!="cfitsio")return Fits.Preview(path,ct,Selected(frame),index);
+            var sampled=Reader(path) as ISampledAssetReader;if(sampled!=null)return sampled.Preview(frame,path,Selected(frame)??Inspect(path).Images.First(),index,ct);
             PixelImage image=Read(frame,path,index,ct);
             var descriptor=Selected(frame);
             string bayer=(frame.Bayer??"").ToUpperInvariant();

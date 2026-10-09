@@ -9,21 +9,7 @@ using System.Windows.Data;
 namespace AstroArchive {
  public partial class MainUi {
   volatile IdentificationProgress identificationProgress;
-  Action pendingTargetReview;bool targetReviewQueued;
-  void ShowTargetReviewWhenReady(Action review){
-   if(closing)return;
-   if(Window.IsVisible&&Window.WindowState!=WindowState.Minimized&&cancel==null)review();else pendingTargetReview=review;
-  }
-  void ResumeTargetReview(){
-   if(pendingTargetReview==null||closing||targetReviewQueued)return;
-   // Native restore/visibility events can arrive before WPF finishes updating the owner.
-   // Test readiness on the dispatcher after those events; activation is a second trigger.
-   targetReviewQueued=true;Window.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Background,new Action(()=>{
-    targetReviewQueued=false;
-    if(pendingTargetReview==null||closing||cancel!=null||!Window.IsVisible||Window.WindowState==WindowState.Minimized)return;
-    var review=pendingTargetReview;pendingTargetReview=null;review();
-   }));
-  }
+  void ShowTargetReviewWhenReady(Action review){if(!closing)QueueActivityReview("Target identification results",review);}
   void IdentificationStage(IdentificationProgress value){identificationProgress=value;var metrics=activeMetrics;if(metrics!=null){metrics.Stage=value.Stage;metrics.UpdateLegacy(value.Completed,value.Total,value.Detail);}}
   SolveResult SolveIdentification(Frame sample,bool imported,CancellationToken ct,Action<string> progress){
    if(PendingImport(sample,imported)){
@@ -34,22 +20,23 @@ namespace AstroArchive {
   }
   void IdentifyByPlate(bool imported,List<Frame> selected,int named){
    if(!PlateSolve.Configured(settings)){Configure(3);if(!PlateSolve.Configured(settings)){L("StatusLabel").Text=named+" filename matches; "+selected.Count+" captures need a configured plate solver.";return;}}
-   List<TargetSolveJob> jobs=null;var repository=repo;
+   List<TargetSolveJob> jobs=null;var repository=repo;var scannedPlan=plan;var expected=selected.Where(f=>!PendingImport(f,imported)).GroupBy(f=>f.Hash).ToDictionary(g=>g.Key,g=>IdentificationSnapshot(g.First()));
    Run(ct=>{jobs=TargetSolving.Plan(selected);TargetSolving.Solve(jobs,(frame,token,stage)=>SolveIdentification(frame,imported,token,stage),ct,IdentificationStage);return "";},done=>ShowTargetReviewWhenReady(()=>{
-    if(closing||repository!=repo)return;
+    if(closing)return;if(repository!=repo||imported&&scannedPlan!=plan)throw new InvalidOperationException("The repository or import scan changed. Identify the selected captures again.");var current=repository.All().ToDictionary(f=>f.Hash);foreach(var pair in expected){Frame existing;if(!current.TryGetValue(pair.Key,out existing)||IdentificationSnapshot(existing)!=pair.Value)throw new InvalidOperationException("Capture metadata changed while these results were waiting. Identify the selected captures again.");}
     if(!jobs.Any(j=>j.Solved)){L("StatusLabel").Text="No fields solved. Capture metadata was retained.";ShowReport("Target identification",IdentificationReport(jobs));return;}
-    if(jobs.Count!=1||!jobs[0].Include){var dialog=IdentificationDialog(jobs);if(!dialog.Show()){L("StatusLabel").Text="Solved "+jobs.Count(j=>j.Solved)+" fields; metadata changes were not applied.";return;}}
+    if(jobs.Count!=1||!jobs[0].Include){var dialog=IdentificationDialog(jobs);if(!dialog.Show()){if(reviewingActivity!=null){reviewingActivity.NeedsReview=true;reviewingActivity.Status="Solved fields kept for later review.";}L("StatusLabel").Text="Solved "+jobs.Count(j=>j.Solved)+" fields; metadata changes were not applied.";return;}}
     ApplyIdentifications(jobs,imported,named);
    }));
   }
   void ApplyIdentifications(List<TargetSolveJob> jobs,bool imported,int named){
    var chosen=jobs.Where(j=>j.Solved&&j.Include).ToList();int updated=0;var errors=new List<string>();
    cancellationMessage="Identification canceled. Metadata already applied is retained.";
-   Run(ct=>{int done=0,total=chosen.Sum(j=>j.Frames.Count);foreach(var job in chosen)foreach(var original in job.Frames){ct.ThrowIfCancellationRequested();IdentificationStage(new IdentificationProgress{Completed=done,Total=total,Metadata=true,Stage="Applying target metadata",Detail=original.OriginalName+"\n"+Catalog.Label(job.Target)+" · "+job.Scope});try{var frame=TargetSolving.Apply(job,original,job.Target);StoreIdentification(original,frame,imported,ct);updated++;}catch(OperationCanceledException){throw;}catch(Exception error){errors.Add(original.OriginalName+": "+error.Message);}done++;}IdentificationStage(new IdentificationProgress{Completed=done,Total=total,Metadata=true,Stage="Saving archive index",Detail=updated+" captures updated"});if(!imported||chosen.Any(j=>j.Frames.Any(f=>!PendingImport(f,imported))))repo.Checkpoint(ct);return "";},done=>{
+   Run(ct=>{int done=0,total=chosen.Sum(j=>j.Frames.Count);foreach(var job in chosen)foreach(var original in job.Frames){ct.ThrowIfCancellationRequested();IdentificationStage(new IdentificationProgress{Completed=done,Total=total,Metadata=true,Stage="Applying target metadata",Detail=original.OriginalName+"\n"+Catalog.Label(job.Target)+" · "+job.Scope});try{if(!PendingImport(original,imported))repo.ValidateCapture(original,ct);else if(original.SourceStamp!=null&&!original.SourceStamp.ContentSame(FileStamp.Read(original.SourcePath)))throw new IOException("Source changed since identification. Scan again.");var frame=TargetSolving.Apply(job,original,job.Target);StoreIdentification(original,frame,imported,ct);updated++;}catch(OperationCanceledException){throw;}catch(Exception error){errors.Add(original.OriginalName+": "+error.Message);}done++;}IdentificationStage(new IdentificationProgress{Completed=done,Total=total,Metadata=true,Stage="Saving archive index",Detail=updated+" captures updated"});if(!imported||chosen.Any(j=>j.Frames.Any(f=>!PendingImport(f,imported))))repo.Checkpoint(ct);return "";},done=>{
     if(imported)FilterImports();L("StatusLabel").Text=(named+updated)+" captures identified · "+jobs.Count(j=>j.Solved)+" fields solved · "+jobs.Count(j=>!j.Solved)+" failed";
     if(errors.Count>0||jobs.Any(j=>!j.Solved))ShowReport("Target identification report",IdentificationReport(jobs)+(errors.Count==0?"":"\n\nMetadata not applied:\n"+string.Join("\n",errors)));
    });
   }
+  static string IdentificationSnapshot(Frame frame){var copy=frame.Clone();copy.RepositoryStamp=null;return Util.Serialize(copy);}
   static string IdentificationReport(IEnumerable<TargetSolveJob> jobs){return string.Join("\n\n",jobs.Select(j=>j.Filename+"\n"+j.Scope+"\n"+(j.Solved?j.Centre+"\n"+j.TargetLabel+" · "+j.Match:j.Error)));}
   FormWindow IdentificationDialog(List<TargetSolveJob> jobs){
    var dialog=new FormWindow(Window,"Review solved targets",1080,680);dialog.Text(jobs.Count(j=>j.Solved)+" fields solved · "+jobs.Sum(j=>j.Frames.Count)+" selected captures",true);

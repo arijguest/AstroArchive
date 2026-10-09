@@ -11,7 +11,7 @@ namespace AstroArchive {
  public sealed class ExportedFile {public Frame Frame;public Frame Source{get{return Frame;}set{Frame=value;}}public string Path;}
  public sealed class ExportResult {public string Folder;public readonly List<ExportedFile> Files=new List<ExportedFile>();}
  public sealed class StackingInputGroup {public List<Frame> Inputs=new List<Frame>();public List<Frame> Calibrations=new List<Frame>();}
- public static class Exporter {
+ public static partial class Exporter {
   public static bool MatchesCalibration(Frame light,Frame cal){return CalibrationMatching.Evaluate(light,cal).Accepted;}
   public static List<Frame> ExistingCalibrations(Repository repo,IEnumerable<Frame> frames){return frames.Where(f=>Assets.IsCalibration(f.Kind)&&!f.Rejected&&!CaptureScreening.FileProblem(f)&&f.Status!="Failed"&&File.Exists(repo.FilePath(f))).ToList();}
   public static List<Frame> CalibrationFor(IEnumerable<Frame> inputs,List<Frame> all,bool allowUnknown){

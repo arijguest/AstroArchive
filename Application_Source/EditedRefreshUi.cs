@@ -9,7 +9,7 @@ namespace AstroArchive {
   readonly LatestSearch<EditedGallery> editedRefreshWorker=new LatestSearch<EditedGallery>();
   string[] editedCaptureTargets=new string[0];
   DispatcherTimer editedRefreshTimer;int editedRefreshVersion;bool editedRefreshDisposed;
-  bool CanRefreshEditedAutomatically {get{return editedReady&&!editedRefreshDisposed&&!closing&&cancel==null&&repo!=null&&Window.IsVisible&&Window.WindowState!=WindowState.Minimized&&((TabControl)Window.FindName("MainTabs")).SelectedIndex==2;}}
+  bool CanRefreshEditedAutomatically {get{return editedReady&&!editedRefreshDisposed&&!closing&&!RepositoryOperationBlocked&&repo!=null&&Window.IsVisible&&Window.WindowState!=WindowState.Minimized&&((TabControl)Window.FindName("MainTabs")).SelectedIndex==2;}}
   void InitializeEditedRefresh(){
    editedRefreshTimer=new DispatcherTimer(DispatcherPriority.Background,Window.Dispatcher){Interval=TimeSpan.FromMilliseconds(250)};
    editedRefreshTimer.Tick+=async(s,e)=>{editedRefreshTimer.Stop();await RefreshEditedAutomatically();};

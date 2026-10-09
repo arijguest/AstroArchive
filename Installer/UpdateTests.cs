@@ -24,6 +24,11 @@ static class UpdateTests {
   throw new Exception("Expected update refusal.");
  }
  public static void Run(Action<string, Action> test, string scratch) {
+  test("Canceled update preparations leave no installer or partial cache",()=>{
+   var manifest=Manifest();string cache=Path.Combine(scratch,"cancel-download");using(var stop=new System.Threading.CancellationTokenSource()){
+    var client=Client(manifest);client.Progress=p=>{if(p.Received>0)stop.Cancel();};bool canceled=false;try{client.Prepare(manifest,cache,stop.Token);}catch(OperationCanceledException){canceled=true;}Check(canceled,"Cancellation did not stop preparation");Check(!Directory.Exists(cache)||!Directory.EnumerateFiles(cache,"*",SearchOption.AllDirectories).Any(),"Canceled preparation left a cached installer");
+   }
+  });
   test("Update policy diagnostics retain native code, verified bytes and exact launch context",()=>{
    var manifest=Manifest();manifest.authenticode_signed=false;string setup=Client(manifest).Prepare(manifest,Path.Combine(scratch,"policy-cache"));var attempted=DateTime.UtcNow;
    var error=new IOException("Could not start "+setup,new System.ComponentModel.Win32Exception(4551));

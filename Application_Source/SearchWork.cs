@@ -42,7 +42,7 @@ namespace AstroArchive {
  public static class SearchOrdering {
   sealed class Entry<T>{public T Row;public object[] Keys;public int Position;}
   public static List<T> Order<T>(IEnumerable<T> rows,IEnumerable<SearchSort> sorting,CultureInfo culture,CancellationToken token){
-   var sorts=sorting.ToArray();var properties=sorts.Select(s=>Path(typeof(T),s.Property)).ToArray();int position=0;
+   var sorts=sorting.ToArray();if(sorts.Length==0){var unchanged=new List<T>();foreach(var row in rows){token.ThrowIfCancellationRequested();unchanged.Add(row);}token.ThrowIfCancellationRequested();return unchanged;}var properties=sorts.Select(s=>Path(typeof(T),s.Property)).ToArray();int position=0;
    var entries=new List<Entry<T>>();foreach(var row in rows){token.ThrowIfCancellationRequested();entries.Add(new Entry<T>{Row=row,Position=position++,Keys=properties.Select(p=>Value(row,p)).ToArray()});}
    var comparer=new Comparer(culture??CultureInfo.CurrentCulture);try{entries.Sort((a,b)=>{token.ThrowIfCancellationRequested();for(int i=0;i<sorts.Length;i++){int comparison=sorts[i].Descending?comparer.Compare(b.Keys[i],a.Keys[i]):comparer.Compare(a.Keys[i],b.Keys[i]);if(comparison!=0)return comparison;}return a.Position.CompareTo(b.Position);});}catch(InvalidOperationException error){if(error.InnerException is OperationCanceledException)throw new OperationCanceledException(token);throw;}
    token.ThrowIfCancellationRequested();return entries.Select(e=>e.Row).ToList();

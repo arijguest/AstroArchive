@@ -1,533 +1,365 @@
-AstroArchive 2.1.8
+AstroArchive user guide
 Windows 10/11 x64; .NET Framework 4.8.
 
 START HERE
 
-## First import
-1. Click Settings, then General > Choose repository.
-2. On Import, choose a source folder and a unique physical telescope ID.
-3. **Scan folder**, review the results, then import the eligible files shown.
-4. Browse Repository by target, search or Filters. Expand a session summary to
-   see its subframes; stacks stay separate.
-5. Select captures and use Export to copy files or prepare a stacking project.
+1. Open Settings > General > Choose repository.
+2. On Import, choose a capture folder and a unique physical telescope ID.
+3. Scan folder, review the metadata, then import the eligible files shown.
+4. Browse Repository by target, search or Filters; expand sessions to see subs.
+5. Select files and use Export for copies, stacking inputs or external processing.
 
-## Move between pages
-The purple page selector switches Repository, Edited and Import. Ctrl+1–3 selects
-a page; Ctrl+Tab cycles pages.
-
-## What happens to your files
-Originals are kept by default. Imports verify copies and skip duplicates.
-Stacking and image processing take place in your external software.
+Imports verify copies and skip duplicates. Source originals are kept by default.
+Stacking and image processing run in your external software.
 
 GUIDE AND TOOLTIPS
 
-## Find the right help
-F1 opens help for the current page. Guide > Help searches titles
-and full text; enter several words to narrow results. Ctrl+F focuses help search.
-Icon actions and unusual settings offer concise hover hints. Help is available offline.
-
-## Try the walkthrough
-**Guide > Interactive walkthrough** shows the main controls without importing files.
+F1 opens page help. Guide > Help searches titles and full text; Ctrl+F focuses
+search. Guide > Interactive walkthrough introduces controls without importing.
+Less obvious menu options have concise hover hints.
+Checkboxes show an empty outline when off, a tick when on and a dash when mixed.
+Unavailable controls keep their recorded state and readable labels.
+Delete originals shows On/Off and explains when a scan is needed.
 
 IMPORT WORKFLOW
-1. Choose your repository, then open Import.
-2. Select a saved telescope, or enter a unique ID and Browse its source folder.
-   **Import > Saved telescopes > Save telescope** stores the device and association.
-3. Leave model and camera on Auto unless an override is needed. Solving and
-   rotation are Off by default. Settings > Import controls these choices.
-4. **Scan folder** reviews supported files without copying them. Default filename
-   matching skips known captures and completed dated DWARF sessions. Robust import
-   matching checks changed same-name files, metadata and missing archive copies.
-   Full rescan revisits known files and additions to previously imported sessions.
-5. Review target, frame type, status and detected values. Use Filters and search
-   to narrow the scan; import copies the eligible files in the current view.
-6. **Import new files** copies and verifies them. Review and recovery shows failures.
 
-## Resume and rescan
-Cancel retains completed imports. Resolve errors and scan again to resume.
-Change the source, model, camera or filename exclusions before rescanning.
+## Scan and import
+Choose a saved telescope or Browse a folder. Leave model/camera on Auto unless
+an override is needed. Target and rotation analysis default Off.
+Scan folder reviews files; Import copies eligible captures in the filtered view.
+
+## Repeat imports
+Default filename matching skips known captures and completed dated DWARF sessions.
+Robust file matching revisits same-name edits, sidecars and missing archive copies.
+Import > Review and repair > Full rescan reads and hashes every source file.
+Cancel keeps completed imports. Changed sources need a new scan.
 
 LIBRARY WORKFLOW
 
-## Find captures
-Choose a target on the left or All targets. Search filenames, catalogue IDs,
-common names, dates or device details. Filters narrows the view; Clear resets it.
+## Find and select files
+Choose a target or All Targets. Search IDs, common names, dates, filenames or
+device details. Combine terms: M45 Dwarflab, M45 S50 Pro, M45 stack.
+Quotes or file: search literal filename text. Clear resets search and filters.
+Selections survive target changes. The top-right counter shows the batch total;
+click it or press Escape to clear. Ctrl-click toggles; Shift-click selects a range.
 
-## Sessions and subframes
-Repository starts with Session summaries: repeated Light subframes from the same
-session, target and instrument share a collapsed row with dates, count, known
-exposure and filters. Expand it to inspect files. Turn off **Repository > Group subs by session** for a flat table. Stacks and unmatched files remain separate.
-
-## Select and act on files
-Ctrl-click toggles files; Shift-click selects a range. Right-click for preview,
-metadata, export or deletion. Bulk actions may use all captures in the filtered view, including collapsed
-summaries, when no files are selected; review their count before accepting.
-The path below the table opens the repository folder in File Explorer.
+## Condensed subs
+Repeated Lights share a collapsed session row with dates, count, per-sub exposure,
+total integration and filters. Mixed durations show a range; missing values remain
+unknown. Expand the row or turn off Repository > Group subs by session.
+Stacks remain separate. Known counts show Stack (1445); filters still use Stack.
 
 USB TRANSFER AND SAVED TELESCOPES
 
-## Connect and upload
-Connect the telescope as local USB storage so Windows exposes its USB volume.
-On Import, select or save a telescope with a unique physical device ID and source
-folder. **Import > Connected telescopes** lists recognised connected devices; choose one
-for a verified upload. Originals stay on the device and analysis stays off.
-Use Import from telescope for a connected saved device. Reconnect and import
-again for new captures. Enable **Robust import matching** to restore missing copies.
-Fast matching retains skipped source originals; new copies are always verified.
+## Connect and import
+Expose the telescope as a Windows USB volume. When recognised, Import offers
+**Import from Seestar…** or **Import from Dwarflab…**; the connected-import button
+opens the same picker. Choose a saved physical telescope or name a new one.
+Use **Add folder…** and **Add files…** to select captures on that telescope drive.
+Folders include subfolders; overlapping selections are scanned once. Previous
+selections are remembered for that telescope and volume.
+For faster scans, choose only the target folders or files you need. **Entire
+telescope drive** checks all capture folders and may take a long time.
+**Review and import…** asks for confirmation before any scan or copying. Whole-drive
+and 500-or-more-file selections receive a stronger time warning. Cancel or No
+leaves the selection unimported.
+After confirmation, every selected capture is fully scanned and hashed, then
+eligible files are screened and copied with verification. Saved filename/session
+shortcuts are bypassed even when Robust file matching is off. Import exclusions
+still apply; rejected or unreadable captures remain for review.
+Connected imports keep originals and leave analysis off. Cancel retains completed
+copies; reconnect and select the captures again to resume or repair missing copies.
 
-## Recover and rename devices
-Recover from repository adds saved device profiles; save a source association
-before using a recovered profile for USB upload.
-Rename saved telescope changes its archive labels and paths, preserving images
-and session identities. Close other writers before renaming.
+## Manage profiles
+Import > Saved telescopes saves, renames or recovers profiles from archive data.
+Recovered profiles need a source association before USB import.
+A physical telescope ID identifies one device; its model can be shared.
 
 ARCHIVE SAFETY AND BACKUPS
 
-## Find the backup controls
-**Settings > Backups** keeps backup and protection controls visible.
-**Repository > Back up archive…** opens the folder and ZIP backup options directly.
+## Create and restore a backup
+Repository > Back up archive… copies images, Edited and the current database to
+a verified folder or lossless ZIP outside the archive. Prefer a separate drive.
+Close other writers/editors. Cancel removes the incomplete backup, keeping earlier
+backups. Restore by selecting the backup's Repository folder; Restore.txt and
+backup.json contain instructions and checksums.
 
-## Optional originals protection
-**Protect originals** offers optional deletion protection on
-local NTFS drives. This blocks deletion and renaming of archived originals in
-File Explorer for your Windows account. Reading and exporting still work;
-AstroArchive temporarily unlocks affected paths for confirmed operations.
-Edited files, Dump and archive metadata remain writable. Initial protection
-can take a while; no background permission scan runs afterward. Turn off
-protection in the same section to restore the previous deletion permissions.
-Turn protection off before moving or deleting the archive outside AstroArchive.
-The Windows owner can deliberately change permissions; protection is not a backup.
-
-## Create a backup
-**Back up archive…** saves the entire archive and current database outside the repository.
-Choose a separate drive when possible. Without compression it creates a normal
-folder; **Compress backup as ZIP** preserves every byte, including image resolution,
-quality and metadata. Creation and verification may take a long time. Cancel
-safely removes the incomplete backup and keeps earlier backups.
-
-## Restore your archive
-To restore, extract the ZIP if needed, then choose its Repository folder in
-**Settings > General > Repository**. Restore.txt explains the layout; backup.json contains
-file sizes and SHA-256 checksums. Restored backups use normal permissions;
-enable **Protect originals** again if wanted. Backups exclude unfinished import
-staging files and Windows protection rules. Close external editors and other
-writers before backing up; changing files during a backup causes it to stop.
+## Protect originals
+Settings > Backups > Protect originals can prevent accidental deletion/renaming
+on local NTFS drives. Edited, Dump and metadata remain writable.
+Turn protection off before moving the archive in Explorer.
+The Windows owner can change permissions; protection is not a backup.
 
 IMAGE PREVIEW AND TABLES
 
-## Open a preview
-Select a file for Preview. Double-click an Edited image or use the file's
-Preview image action for a larger window. Settings > General controls the preview pane; drag the divider to resize it.
-Right-click table headings to choose columns. Open external files from Windows.
+## Preview
+Select a file for the sidebar; open Preview image for a larger window.
+Repository's wider preview pane is adjustable by dragging its divider.
+Sidebars sample still images, normally to 1,400 pixels on the longest edge.
+Large still/SER windows decode native pixels within format limits.
+Preview never resizes or rewrites source files.
 
-## Zoom and navigate
-Scroll or pinch to zoom. Drag or use the arrow buttons to pan after zooming.
-Fit or F restores the full image; plus/minus zoom; Escape closes the popup.
+## Zoom and display
+Scroll or pinch to zoom; drag or use arrows to pan. Fit or F recenters.
+Plus/minus zoom; Escape closes the popup. Large previews open in source orientation;
+Rotate left/right changes the display. Stretch changes display values only.
+Scientific images default to Auto per channel; processed/planetary images use Linear.
 
-## Loading and the Edited preview
-Repository Preview keeps controls and capture sky visible while loading a new image.
-Edited uses a larger image-only preview with a compact filename/enlarge header.
-Its width fits a full-height 3:4 portrait; drag the divider to adjust it.
-Zoom, pan and Fit remain below the image; right-click a file for image details.
-The text-free sky globe uses capture time and location when available, or
-celestial coordinates otherwise; hover for the recorded context.
-
-## Display orientation and stretch
-Sidebar previews rotate landscape images into portrait. Large previews open in
-source orientation; Rotate left/right turns the display without changing files.
-Large still previews are sampled; use your editor for original-pixel inspection.
-Stretch changes the display only. Scientific images default to Auto per channel;
-saved choices are retained. Solar, lunar, planetary and processed raster images
-start with Linear. Source pixels and headers remain unchanged.
-
-## Sort and customise tables
-Click headings to sort; click again to reverse. Shift-click adds a sort column.
-Right-click a heading to choose columns. Drag headings to reorder them; layouts
-save independently for Repository, Import and Edited. **Restore default columns**
-resets the layout. A dash indicates missing metadata, not zero.
-
-## Capture sky
-Sky map: drag to rotate; scroll or pinch to zoom. Reset is beside the map at
-the bottom-left. N/E/S/W appear only with a capture time/site and enough clear
-space outside the globe. Targets include Comets when comet images are present.
-All Targets: merged subs, stacks, ungrouped files, then calibration frames.
-Individual targets: stacks above lights. Column sorts apply within each section.
-Calibration and below-horizon previews hide the map. The marker shows the
-previewed image's position at its recorded capture time. For grouped subs, the
-map uses the image shown in Preview.
+## Tables and target groups
+Click a heading to sort; click again to reverse. Shift-click adds a sort column.
+Right-click to choose columns; drag to reorder. Each page saves its layout.
+Targets show the preferred ID first: M31 - Andromeda Galaxy.
+All Targets is bold and shaded; comets share Solar system. Meteors sit above
+Other targets. All Targets orders merged subs, stacks, ungrouped files, calibrations.
+Individual targets: stacks above lights. Sorts apply within each section.
 
 EDITED IMAGES AND WORKING COPIES
 
-## Add and browse images
-Edited shows all imports and working copies together, with targets, a table and
-Preview. Search or filter by object, class or name. Add images copies files into
-Edited. Import folder offers Browse and Scan, with an optional subfolder crawl
-and review before copying. Repository/database folders and archived originals
-are skipped, including renamed byte-identical copies. Identical images already
-in Edited are excluded; changed files with the same name can be added as new
-versions. Unchecked entries leave existing images untouched. Sources stay in
-place; unreadable files are excluded.
+## Add and browse
+Edited keeps working copies and returned outputs with the repository.
+Add images copies files. Import folder scans with optional subfolders and a review.
+Archived originals and byte-identical Edited files are skipped; changed files
+can become new versions. Unchecked entries leave existing files untouched.
+RAW/scientific types are grouped first by type; GIFs are last.
+Selections stay selected across targets, searches and refreshes. The target-pane
+counter shows the whole batch; export includes files selected under other targets.
+Click the counter or press Escape to clear the selection.
 
-## Open in an editor
-**Export > Export to…** opens supported images in PixInsight, Siril, GIMP,
-Photoshop or AstroWizard using verified Edited working copies. On Edited,
-Export to… opens the selected working images directly. Save outputs there;
-Refresh finds them. Right-click an Edited image for its folder, preview or image details.
-
-## Set application defaults
-**Settings > Export** stores defaults by file type and optional
-application locations. Automatic detection runs when needed; if an app cannot
-be found, choose its GUI executable. Cancel keeps your settings unchanged.
-Edited images move with the repository and remain separate from acquisition captures.
+## Export and delete
+Export to… opens supported working images in your editor. Save outputs alongside
+the working copy; Refresh finds them. Settings > Export stores app defaults.
+Right-click Export files… copies individual or multiple selected images, verifies
+their bytes and adds suffixes for filename collisions.
+Delete files… or Delete confirms removal of Edited copies. Source originals and
+archived captures remain. Right-click also offers preview, details and file location.
 
 EDITED METADATA AND EXPOSURE
 
-## Assign metadata
-Select images and choose Edit metadata, or right-click > Edit metadata, to assign
-targets, filters, class, exposures, sub counts or coordinates. Unchanged and empty
-fields keep existing values. Assignments persist with Edited without rewriting
-image pixels or headers.
-
-## Read acquisition details
-Starless and Stars only labels are recognised in filenames. Object, filters,
-coordinates, sub counts and exposures come from image metadata or explicit names.
-For example, M31_Ha_120x60s_starless means 120 subs of 60 seconds, 7200 seconds
-in total, and Ha. Mixed durations retain their total without a guessed per-sub value.
-30s40 means a 30-second sub and gain 40; DWARF's stacked-16 is image bit depth.
-An unspecified EXPTIME/EXPOSURE value is kept as reported exposure, without
-assuming it is per-sub or total. Unknown values remain unknown. Image details
-shows the evidence and conflicts. Compatible single-source editor outputs can
-inherit missing acquisition data from their working copy.
-
-## Check exposure and gain
-Hover over Exposure in Repository or Import to inspect reported header values.
-Subframe summary totals count acquisition subs only and exclude stack exposures.
-Repository shows Gain beside Exposure; unknown gain displays as a dash.
+Select images > Edit metadata to assign targets, filters, class, exposures, sub
+counts or coordinates. Empty/unchanged fields retain values; files are not rewritten.
+Starless and Stars only labels are recognised in filenames.
+120x60s means 120 subs of 60 seconds; 30s40 means sub exposure/gain.
+Seestar's Stacked_36_NGC 7000_5.0s_... means 36 subs of 5 seconds: 180 seconds
+total exposure. Repository and Edited metadata use that count and duration;
+explicit header totals and manual corrections take precedence. Existing repository
+records are repaired on opening, without rereading or moving capture files.
+DWARF's stacked-16 is bit depth. Unspecified EXPTIME stays reported exposure;
+it is not assumed to be per-sub or total. Unknown/conflicting values need review.
+Image details and the Exposure tooltip show evidence. Sub-summary integration
+counts acquisition subs only, excluding stacks.
 
 GIF AND VIDEO PREVIEWS
 
-## Playback
-GIF, SER, AVI, MP4, MOV, M4V, WMV and MKV can be imported and viewed.
-Moving images have Pause / Play in the toolbar below Preview. Playback pauses
-when leaving the page. SER uses a 10 fps preview rate, not an inferred capture rate.
-Other videos require compatible Windows codecs; Preview reports unavailable playback.
+GIF, SER and supported Windows videos offer Pause/Play below Preview.
+Playback pauses when leaving the page. SER previews run at 10 fps, not an
+inferred capture rate. Other videos require compatible Windows codecs.
 
-## Match GIF acquisition data
-A GIF matches a still image in the same folder when their filename stems match,
-or it adds _processing, _progress, _animation, _animated, _process, _timelapse,
-_before-after or _edit-history. Only a unique match inherits missing object,
-exposure, sub-count and filter data. Ambiguous matches and conflicting metadata
-are not guessed. Originals are retained.
+GIFs inherit missing acquisition data only from a unique nearby still with the
+same stem or a processing/progress/animation/timelapse/edit-history suffix.
+Ambiguous matches and conflicting metadata are not guessed.
 
 CATALOGUE IDENTITIES
 
-## Names and catalogue aliases
-Targets panels show full names and alternate catalogue IDs on Repository and
-Edited. C23, NGC891, UGC1831, PGC9031, Silver Sliver Galaxy and Outer Limits Galaxy
-share NGC891. Full Messier/Caldwell names, spacing, punctuation and accents are
-normalised consistently; different catalogue numbers are never fuzzy matched.
+Aliases share an identity: M106, NGC4258, UGC7353 and PGC39600 resolve to M106.
+Catalogue prefixes matter; M106 differs from NGC106. Spacing, accents and full
+Messier/Caldwell prefixes are normalised. Conflicting IDs stay unresolved.
+Rosette/NGC2244 labels use NGC2237. Moon/Lunar and Sun/Solar share labels.
+Comet designations and recognised names such as NEAT/LINEAR/NEOWISE group in
+Solar system. Meteor filename labels use Meteor and leave object ID blank.
 
-## Save your own names
-Right-click a target > Edit name and aliases to save a common name and other
-labels for future imports, searches and Edited matching. Unlisted names need a
-known object ID. Names are saved in your application settings and take effect
-immediately. Use built-in names clears your custom names for that object.
-
-## Ambiguous objects
-Conflicting names/IDs remain unresolved. Shared component names include their
-IDs for clarity. For example, specify an ID for Antennae Galaxies or Lobster
-Nebula rather than assuming a particular component or similarly named nebula.
-NGC2244 and Rosette Nebula labels use NGC2237 in the Nebulae section.
-
-## Search identities
-Search catalogue IDs or common names. Aliases share a target: M106, NGC4258,
-UGC7353 and PGC39600 resolve to M106. Catalogue prefixes matter: M106 and NGC106
-are different objects. Bare numbers and ambiguous aliases do not establish an ID.
-Caldwell IDs and leading-zero variants are recognised. Moon/Lunar appears as Moon;
-Sun/Solar appears as Sun. Meteor filenames use Meteor and leave object ID blank.
-The word meteor must be in the filename; meteorite and folder names do not match.
+Right-click a target > Edit name and aliases saves custom names in app settings.
+Names cannot claim another object's identity. Use built-in names resets that object.
 
 STACKING PROJECTS AND SESSIONS
 
 ## Choose an export
-Select captures and choose Export > Export files for original copies, or
-Stacking folder with Subs, Stacks or Both. Choose an existing destination.
-Export to… sends subframes or recordings to an external app after verifying
-their copies. DSS loads a typed file list; separate capture groups get separate
-lists. Siril starts in the exported folder. PixInsight, AS!4 and Stacking Wizard
-require you to load the exported inputs in their own window. No app starts
-stacking automatically. Choose subframes separately from finished stacks.
+Export files… copies originals; Stacking folder… offers Subs, Stacks or Both.
+Export to… verifies copies before opening supported inputs in external software.
+DSS loads file lists. Siril opens the exported folder; other stackers may require
+choosing the inputs. No app starts stacking automatically.
+Choose subframes separately from finished stacks.
 
-## Formats and calibration choices
-Folder exports can include matching calibrations; unknown calibration state
-requires confirmation that those subs are uncalibrated. This option appears
-in the stacking-folder dialogue. Camera RAW support depends on the receiving app.
-Export to… preserves original formats; it does not silently convert precision.
-Export > Catalogue CSV exports table data. Right-click files to create Edited copies.
+## Optional settings
+Matching calibrations are optional; unknown calibration state needs explicit
+inclusion. More options includes separate sessions and rejected-file choices.
+Add Metadata and Create new folder default Off. Metadata adds manifests, session
+details and workflow notes. Existing files stay; collisions get numbered suffixes.
+Inputs are grouped by target, device, camera, filter, geometry and acquisition
+settings. Different calibration sets stay separate.
 
-## Optional export settings
-More options keeps metadata and advanced stacking controls out of the way.
-Stacks export as image files; subs retain compatible input folders.
-**Add Metadata** and **Create new folder** are both off by default. **Add Metadata** includes
-a checksum manifest, saved session metadata and readme/workflow notes. Metadata
-already inside an image is preserved. **Create new folder** adds an enclosing folder.
-Existing files are kept; duplicate filenames receive a numbered suffix.
-For stacking exports, Separate sessions is off by default and can keep each
-acquisition session apart.
+## Single-stack handoff
+Open with… after export can open one eligible FITS stack in Siril after verification.
+Configure its location and export folder under Settings > Export.
+Cancelled/failed exports do not launch it; launch failures keep completed copies.
 
-## Keep compatible inputs together
-Inputs are separated by target, physical device, camera, filter, dimensions,
-binning, Bayer pattern, exposure, gain and calibration state. When calibrations
-are included, differing temperature/night calibration sets get separate input
-folders automatically. Compatible subs using the same set stay together.
-Do not combine stacks with their constituent subs or overlapping live-stack snapshots.
-Copies are verified and originals remain unchanged.
-Stacking runs in the external program of your choice.
-
-## Open an exported stack in Siril
-In the export dialog, Open with… after export can open one FITS stack in Siril
-after its copies are verified. Select None to export without opening an app.
-**Settings > Export** sets siril.exe and the default export working
-directory. You can change the destination for each export; Siril works in the
-exported stack’s folder. Failed or cancelled exports do not launch Siril.
+Catalogue CSV exports metadata. Formula-like text is prefixed with a tab to avoid
+spreadsheet execution; numeric columns retain their values.
 
 CALIBRATION AND FITS CONVERSION
 
-## Review calibration matches
-Calibration matching shows Accepted, Needs review or Rejected candidates.
-Review missing/conflicting identity, camera, gain, geometry or processing details.
-Flats also need compatible filter, night and optics. Darks match exposure and known
-temperatures within 3 degrees C. Processed lights receive no extra calibration.
-Unknown calibration status requires explicit inclusion.
+Matching labels candidates Accepted, Needs review or Rejected.
+Camera/device identity, gain, geometry, binning, Bayer and processing state must
+be compatible. Darks need matching exposure and known temperatures within 3°C.
+Flats need compatible filter/night/optics. Processed subs get no extra calibration.
+Dark flats match raw-flat exposure; do not subtract both bias and dark flat.
 
-## Dark flats and bias
-Dark flats match raw-flat exposure in separate sets;
-do not subtract both a bias and a dark flat from the same flat.
-
-## Convert to FITS
-Convert supported images to FITS is an explicit export option for eligible linear
-images. Confirm linearity in Edit metadata. Selected pages/slices are converted
-without a display stretch, and originals are retained. Cancelled or failed exports
-keep completed, verified copies and remove unfinished temporary copies.
-Wait for Export complete before using a full set of stacking inputs.
+Convert supported images to FITS is explicit and requires confirmed linear data.
+Selected pages/slices convert physical values without display stretch.
+Originals remain. Cancel keeps verified outputs and removes unfinished copies;
+wait for completion before processing the full set.
 
 METADATA AND OPTIONAL ANALYSIS
 
-## Correct detected metadata
-Right-click Edit metadata to correct indexed labels without rewriting image headers.
-Right-click > More actions > Review detected metadata shows detected values before applying selected fields;
-recorded user changes retain priority. Choose HDU / page / frame selects a container
-image for supported pixel operations. Movie preview plays the recording.
+## Metadata
+Right-click Edit metadata changes indexed labels, retaining source headers.
+More actions > Re-detect metadata and review compares detected values before
+applying fields; user edits have priority. Choose HDU / page / frame selects a
+container image for supported pixel operations.
 
-## Set up target identification
-Target identification needs ASTAP plus its star database, or an Astrometry.net
-account/API key and an internet connection. Configure them in **Settings > Sky & solving > Plate solver setup**.
-
-## Solve groups and review targets
-Identify target solves one representative for each selected Light session/target
-and instrument group. Selecting a collapsed subgroup includes all its files.
-Crop and header differences do not split that subgroup. If a representative
-fails, at most two other subs are tried; the first success ends the group solve.
-Stacks solve individually. A batch review lists completed fields with the nearest
-major targets selected; change or uncheck each row before applying. A single
-matched group applies automatically. Frames outside the selection stay unchanged.
-Major means Messier, Caldwell, named deep-sky objects, or objects at magnitude 10
-or brighter / at least 10 arcminutes across. The nearest within the solved field
-wins; a field without a major candidate needs your choice. IDs and common names
-resolve to the same target. Individual capture times and known pointings remain.
-
-## Progress and cancellation
-Online solving sends detected star coordinates. Progress shows the current job,
-file, group and solver stage. Cancel stops the current solve; completed metadata
-changes are retained. Local solves time out after five minutes; online after ten.
-When no solver is configured, recognised filenames can identify captures.
+## Target identification
+Settings > Sky & solving > Plate solver setup configures ASTAP plus its database
+or Astrometry.net with an API key. Online solving sends detected star coordinates.
+Identify targets solves one representative per selected Light session/group;
+stacks solve individually. Review batch matches before applying.
+Cancel retains completed changes. Recognised names can identify files without a solver.
 
 ## Rotation analysis
-Rotation analysis needs timestamped acquisition subs, adequate time coverage and
-observing location/pointing data. Stacks and registered images are unsuitable.
-Mount labels ending in ? are suggestions. Confirm them through Edit metadata.
+Requires timestamped acquisition subs with enough time coverage and site/pointing
+data. Stacks and registered images are unsuitable. Mount labels ending in ? are
+suggestions; confirm them through Edit metadata.
 
 OBSERVING TOWN / CITY
-Settings > Sky & solving opens the observing-site controls. Search the offline town/city picker by name or region,
-or enter coordinates. Place-centre coordinates approximate your observing site;
-use precise coordinates when needed for rotation analysis.
-Location searches do not send your position to a network service.
+
+Settings > Sky & solving offers an offline town/city search or manual coordinates.
+Place centres approximate your site; use precise coordinates for rotation analysis.
+Location search does not send your position to a network service.
 
 DUMP INBOX
 
-## Process a drop folder
-Each repository has a Dump folder. Drop FITS files or telescope folders there
-and finish copying before processing. Startup and repository switching process
-Dump automatically when FITS files are pending; Import > Dump folder can open it or process it manually.
-
-## Review processing results
-A progress window shows status and Cancel. Verified imports and duplicates are
-removed; changed, locked or failed inputs stay for retry. Other files stay in place.
-Mixed drops use an Unknown physical device ID; correct it through Edit metadata.
+Drop FITS files or telescope folders into the repository's Dump folder.
+Finish copying first. Startup/repository switching process pending FITS automatically;
+Import > Dump folder also opens or processes it manually.
+Verified imports and duplicates are removed; changed, locked or failed inputs
+remain for retry. Other files stay. Correct Unknown device IDs through Edit metadata.
 
 REVIEW, EXCLUSIONS AND DELETION
 
 ## Review and retry
 Import > Review and repair separates rejection, integrity and transfer issues.
-Flagged captures are skipped by default; inspect them before allowing import.
-Retry failed imports retries the failed transfers in the filtered scan. Changed
-sources need a fresh scan. Completed imports remain available after cancellation.
+Flagged captures are skipped by default. Retry failed imports uses the filtered scan;
+changed sources need a fresh scan. Completed imports survive cancellation.
 
-## Filename exclusions
-Ignore non-raw files (PNG/JPG/JPEG) defaults on; its setting is saved.
-Settings > Import > Ignore failed filenames skips filenames containing failed, regardless of
-case, in folder, USB and Dump imports. Rescan after changing this option.
-Repository's Delete failed tool lists matching indexed filenames for confirmation.
+## Exclusions and deletion
+Settings > Import can ignore failed filenames and PNG/JPG/JPEG inputs; rescan after
+changes. Repository > Maintenance offers Delete failed and Purge non-raw files.
+Delete files confirms archive-copy removal; source files and shared metadata stay.
+Deletion history blocks reimport of deleted checksums. Allow reimport permits a
+later source import; it does not restore deleted files.
 
-## Deletion and reimport
-Delete selected files removes archive copies, retaining source files and shared metadata.
-Deletion history prevents reimport of deleted checksums. Its reimport permission
-allows a later import from an available source; it does not restore deleted files.
-
-## Remove source originals
-Remove source originals is optional. Only verified, safely removable imported
-originals are removed; duplicates, failed cleanup and other source files are retained.
-
-## Clear the archive
-Delete all archive data permanently clears indexed captures and managed metadata.
-Edited images, deletion history, source mirrors and unindexed files remain.
-Review the confirmation and back up wanted images first.
+Delete originals is optional and only removes safely removable, verified new or
+restored source captures. Duplicates and failed cleanup retain originals.
+Delete archive data clears indexed captures/managed metadata, keeping Edited,
+source mirrors, unindexed files and deletion history.
 
 CLOUD FOLDERS AND BACKUPS
 
-## Use a cloud-backed folder
-Choose a filesystem folder exposed by Windows, including mounted cloud storage.
-Browser-only folders cannot be used. Alt+D in the folder picker lets you paste a path.
-Make cloud inputs available offline to avoid on-demand download waits. Directory
-links are skipped. Cloud sync may continue after AstroArchive finishes copying.
-
-## Move or back up data
-Move or back up the whole repository, including .astroarchive/index.sqlite and
-Edited images. Use one writer per repository. Application uninstall retains data.
+Use folders exposed in Windows; browser-only storage is unsupported.
+Make cloud inputs available offline and keep the whole repository, including
+.astroarchive and Edited, together. Links are skipped. Use one archive writer.
+Cloud sync can continue after copying; deletions in synced folders propagate.
+Uninstall retains repositories and settings.
 
 INSTALLATION AND UPDATES
 
-## Install or repair
-Run the installer for a fresh installation, update or repair. The default location
-is %LOCALAPPDATA%\Programs\AstroArchive and requires no administrator access.
-
-## Check for a release
-The desktop and Start menu launcher checks for releases. Later opens the installed
-version. Settings > Updates > Check for releases checks from inside the app.
-
-## Install an update
-Read release notes directly in Settings > Updates, then choose Install and restart.
-Preferences are validated and saved before the installer is downloaded and verified.
-Progress and retryable errors stay on the page. Updates retain repositories,
-settings and local codecs and restart the app after setup.
-Manual installation works offline. Start.exe --no-updates skips startup checking.
-Uninstall through Windows Installed Apps; repositories and settings are retained.
+Run the installer to install, update or repair. The default location is
+%LOCALAPPDATA%\Programs\AstroArchive and needs no administrator access.
+Settings > Updates checks releases, shows notes and offers Install and restart.
+Automatic checks run after startup and every six hours while open; Activity and
+Guide > About AstroArchive show availability. Disable checks in Settings > Updates.
+Downloads show progress/Cancel in Activity. Failed downloads retain the current app.
+Manual installation works offline; Start.exe --no-updates skips automatic checks.
+Uninstall through Windows Installed Apps; user data and codecs remain.
 
 SUPPORTED FILES
-- **FITS/gzip FITS:** supported image HDUs, RGB/Bayer data and selected cube slices.
-- **TIFF/PNG/XISF:** supported numeric layouts; eligible linear images can be converted.
-- **JPEG/GIF:** display and original-file export, with animation for GIF.
-- **SER:** planetary playback and frame selection; export the recording for processing.
-- **AVI/MP4/MOV/M4V/WMV/MKV:** Windows codec playback and original-file export.
-- **CR2/CR3/NEF/ARW/DNG:** original-file import/export; external RAW previews need a
-  compatible Windows image codec. Other Windows image formats may preview externally.
 
-## Optional codecs
-Tile-compressed FITS (.fz) needs optional CFITSIO for pixel decoding; Zstandard
-  XISF needs its optional codec. Missing codecs leave original-file export available.
+- **FITS/gzip FITS:** supported HDUs, RGB/Bayer and selected cube slices.
+- **TIFF/PNG/XISF:** supported numeric layouts; eligible linear FITS conversion.
+- **JPEG/GIF:** display, GIF animation and original-file export.
+- **SER:** planetary playback, frame selection and recording export.
+- **AVI/MP4/MOV/M4V/WMV/MKV:** Windows-codec playback and original-file export.
+- **CR2/CR3/NEF/ARW/DNG:** original import/export; preview needs a Windows codec.
 
-Settings > General > Image compatibility shows support and opens the optional codec folder.
-Compatible x64 cfitsio.dll/libzstd.dll and dependencies go in
-%LOCALAPPDATA%\AstroArchive\codecs; restart the app after installing them.
-Scientific decoders/conversions have size and pixel-layout limits. Complex XISF
-encodings and unsupported processed data remain original-file exports.
+Tile-compressed FITS needs optional CFITSIO; Zstandard XISF needs its codec.
+Settings > General > Image compatibility shows availability and the codec folder.
+Scientific decoding has size/layout limits; ordinary exports preserve bytes.
 
 APPEARANCE AND ACCESSIBILITY
-Settings opens one Preferences window with sections on the left. General changes
-appearance and the repository. Accessibility controls text
-size, comfortable rows, high contrast and reduced progress animation.
-Alt reveals menu access keys; arrows navigate menus and Tab moves between controls.
-Processing shows temporary progress and Cancel; Dump uses its own progress window.
-Repository > Diagnostics opens performance details and the last import report.
+
+Settings opens Preferences: General, Import, Export, Sky & solving, Accessibility,
+Updates and Backups. Save preferences applies changes; Cancel retains settings.
+Accessibility adjusts text size, rows, contrast and progress animation.
+Alt reveals menu access keys; arrows navigate menus; Tab moves between controls.
+The purple selector switches Repository/Edited/Import; Ctrl+1–3 selects a page.
+
+The Activity bell beside Buy Me a Coffee (Ctrl+Shift+N) shows progress, ETA, Cancel,
+reports and review actions. Closing it leaves work running; cancellation waits for
+a safe stopping point. ETA covers the current stage. Conflicting changes wait.
+Repository > Diagnostics shows timings and the latest import report.
 
 KEYBOARD SHORTCUTS
-- **Main window:** Ctrl+F searches; Ctrl+I opens Import; Ctrl+E opens Export; F1 opens page help.
-- **Tables:** Ctrl-click toggles selection; Shift-click selects a range; Shift-click a
-  heading adds sorting. Delete on Repository opens a deletion confirmation.
-- **Preview:** F recenters; plus/minus zoom; arrows pan; Escape closes the popup.
-- **Guide:** Ctrl+F searches, Up/Down selects topics, Ctrl+C copies text, Escape closes.
-- **Folder picker:** Alt+D focuses its address bar.
+
+- **Main window:** Ctrl+F search; Ctrl+I Import; Ctrl+E Export; F1 page help.
+- **Tables:** Ctrl-click toggle; Shift-click range; Shift-click heading adds sort; Delete confirms removal on Repository or Edited.
+- **Preview:** F Fit; plus/minus zoom; arrows pan; Escape closes.
+- **Guide:** Ctrl+F search; Up/Down topic; Ctrl+C copy; Escape close.
+- **Folder picker:** Alt+D address bar.
 
 TROUBLESHOOTING
-- **Import disabled:** choose a repository, existing source folder and device ID, then
-  scan. Wait for active work to finish. Check that the filtered scan has eligible files.
-- **No rows:** Clear search/filters, choose All targets, and check the
-  repository. Expand session summaries to see individual acquisition files.
-- **USB missing:** check its Windows USB volume, Browse its capture folder and save the
-  association. Refresh connected devices. USB upload uses local storage, not Wi-Fi.
-- **Import failure:** read the scan/import report, check the file path and free space,
-  and make cloud inputs available offline. Resolve the problem and scan again.
-- **Missing archive file:** verify checksums, enable **Robust import matching**, then import
-  from the original source to restore it.
-- **Slow import:** leave solving/rotation off and inspect Diagnostics. More workers
-  cannot guarantee faster storage or cloud downloads.
-- **Preview unavailable:** check the reported format/codec or size limit. Use a compatible
-  Windows codec for RAW/video, or open the original in your processing software.
-- **Unknown exposure:** inspect Image details or the Exposure tooltip. A filename gain
-  or unspecified EXPTIME does not establish total integration.
-- **Solving/calibration uncertain:** check solver settings, observing data and relevant
-  camera/exposure/processing metadata before applying an inference.
-- **Windows blocked a file:** check the release's signing status and Windows Security.
-  Application Control policies may require approval of the publisher. Setup errors:
-  %TEMP%\AstroArchive-setup-error.txt. Update errors:
-  %LOCALAPPDATA%\AstroArchive\updates\last-error.txt.
-  Include app/package version, the exact error and relevant filename when reporting
-  an issue at https://github.com/arijguest/AstroArchive/issues.
+
+- **Import disabled:** choose a repository/source/device, scan and check eligible rows.
+- **No rows:** clear search/filters, choose All Targets and expand session summaries.
+- **USB missing:** check its Windows volume, Browse/save the source and refresh devices.
+- **Import failure:** read the report; check paths, space and offline cloud availability.
+- **Preview unavailable:** check format/decoder limits and required Windows/native codecs.
+- **Application missing:** Settings > Export > Application locations; select its GUI executable.
+- **Unknown metadata:** inspect Image details; ambiguous values are not inferred.
+- **Unknown exposure:** use the Exposure tooltip; EXPTIME or filename gain alone is not total integration.
+- **Analysis uncertain:** check solver, site/time and camera/processing metadata.
+- **Windows policy block:** inspect signing status and Windows Security; managed policies may need publisher approval.
+
+Setup log: %TEMP%\AstroArchive-setup-error.txt.
+Update log: %LOCALAPPDATA%\AstroArchive\updates\last-error.txt.
+Report the version and exact error: https://github.com/arijguest/AstroArchive/issues.
 
 FRAME TYPES AND GLOSSARY
+
 - **Light / sub:** one acquisition exposure.
-- **Stack:** a combined or registered result, kept separate from its source subs.
-- **Dark:** covered sensor exposure.
-- **Flat:** uniform-field exposure for illumination/dust correction.
-- **Bias / offset:** short or zero-duration exposure for sensor readout offset.
-- **Master calibration:** combined dark, flat or bias, distinct from raw calibrations.
-- **Starless / Stars only:** edited image layers recognised from filename labels.
+- **Stack:** combined/registered result, separate from its source subs.
+- **Dark / Flat / Bias:** calibration exposures for sensor noise, illumination or offset.
+- **Master calibration:** combined dark, flat or bias.
+- **Starless / Stars only:** edited image layers.
 - **Session:** related acquisition group.
-- **Device ID:** one physical telescope, not its model.
+- **Device ID:** one physical telescope, separate from its model.
 - **Plate solving:** finding an image's sky position.
-- **Repository:** archived originals and metadata.
-- **Edited:** mutable working copies and outputs kept with the repository.
+- **Repository / Edited:** archived originals / working copies and outputs.
 
 CATALOGUE CREDITS
-Object catalogue: OpenNGC by Mattia Verga and contributors, CC BY-SA 4.0.
-https://github.com/mattiaverga/OpenNGC
-https://creativecommons.org/licenses/by-sa/4.0/
-Offline town/city catalogue: GeoNames and contributors, CC BY 4.0.
-https://www.geonames.org/
-https://creativecommons.org/licenses/by/4.0/
-See Catalogue_Notice.md, OpenNGC_README.md and City_Catalogue_Notice.md for attribution.
+
+OpenNGC by Mattia Verga and contributors: CC BY-SA 4.0.
+GeoNames offline places: CC BY 4.0.
+D3-Celestial constellation figures by Olaf Frohn: BSD 3-clause.
+See Catalogue_Notice.md, City_Catalogue_Notice.md and Sky_Catalogue_Notice.md.
 
 LICENSING
-AstroArchive is source-available under PolyForm Noncommercial 1.0.0.
-Noncommercial use, modification and sharing are permitted under its terms;
-commercial use requires separate permission from Ari J. Guest. Your images and
-outputs remain yours. See LICENSING.md and the included licence and notices.
-Constellation figures: D3-Celestial by Olaf Frohn, BSD 3-clause licence.
-See Sky_Catalogue_Notice.md.
+
+Source-available under PolyForm Noncommercial 1.0.0.
+Commercial use requires separate permission from Ari J. Guest.
+Your images and outputs remain yours; third-party data keeps its own licences.
+See LICENSE and LICENSING.md for terms and required notices.
 
 SIMPLIFIED NAVIGATION
 
-## Menus and pages
-Import and Export contain file operations; Repository contains grouped-session
-view, review, maintenance and diagnostics. Use the page selector to switch pages.
-Right-click files for preview, metadata, exports, working copies and deletion.
-Export > Export files copies originals. Stacking folder adds compatible inputs;
-matching calibrations can be included in that same dialog. More options contains
-metadata, separate sessions and explicit rejected-file choices. Unknown-state
-calibration confirmation appears beside the main calibration options.
-
-## Preferences sections
-Settings opens Preferences directly: General, Import, Export, Sky & solving,
-Accessibility, Updates and Backups. Changes apply with Save preferences; Cancel keeps them.
-The export completion popup only opens the finished folder; use the pre-export
-Siril choice to open one exported stack automatically.
+Import/Export handle files; Repository holds sessions, review, maintenance and
+diagnostics. Settings opens Preferences. Guide offers help, walkthrough and About.
+Right-click files for preview, metadata, export, working copies or deletion.
+Short hover hints explain less obvious menu actions.

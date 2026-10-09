@@ -50,7 +50,7 @@ namespace AstroArchive {
    frame.Notes=(frame.Notes??"")+"Target identified from filename: "+target+". ";return true;
   }
   public static bool NeedsPlateSolve(Frame frame) {
-   return frame.Target!="Calibration"&&!(frame.TargetEvidence??"").StartsWith("User")&&(Catalog.HasFilenameConflict(frame.OriginalName)||(Catalog.TargetFromFilename(frame.OriginalName)==null&&Catalog.KnownName(frame.Target)==null));
+   return frame.Target!="Calibration"&&!(frame.TargetEvidence??"").StartsWith("User")&&(Catalog.HasFilenameConflict(frame.OriginalName)||(Catalog.TargetFromFilename(frame.OriginalName)==null&&Catalog.KnownName(frame.Target)==null&&!CometTargets.IsComet(frame.Target)));
   }
  }
 }

@@ -52,10 +52,23 @@ Stacks remain separate. Known counts show Stack (1445); filters still use Stack.
 USB TRANSFER AND SAVED TELESCOPES
 
 ## Connect and import
-Expose the telescope as a Windows USB volume and save its physical device ID and
-source folder. Import > Connected telescopes lists recognised local storage.
-Connected imports keep originals and leave analysis off. Reconnect for new files.
-Use Robust file matching when restoring missing or damaged archive copies.
+Expose the telescope as a Windows USB volume. When recognised, Import offers
+**Import from Seestar…** or **Import from Dwarflab…**; the connected-import button
+opens the same picker. Choose a saved physical telescope or name a new one.
+Use **Add folder…** and **Add files…** to select captures on that telescope drive.
+Folders include subfolders; overlapping selections are scanned once. Previous
+selections are remembered for that telescope and volume.
+For faster scans, choose only the target folders or files you need. **Entire
+telescope drive** checks all capture folders and may take a long time.
+**Review and import…** asks for confirmation before any scan or copying. Whole-drive
+and 500-or-more-file selections receive a stronger time warning. Cancel or No
+leaves the selection unimported.
+After confirmation, every selected capture is fully scanned and hashed, then
+eligible files are screened and copied with verification. Saved filename/session
+shortcuts are bypassed even when Robust file matching is off. Import exclusions
+still apply; rejected or unreadable captures remain for review.
+Connected imports keep originals and leave analysis off. Cancel retains completed
+copies; reconnect and select the captures again to resume or repair missing copies.
 
 ## Manage profiles
 Import > Saved telescopes saves, renames or recovers profiles from archive data.
@@ -108,6 +121,9 @@ Add images copies files. Import folder scans with optional subfolders and a revi
 Archived originals and byte-identical Edited files are skipped; changed files
 can become new versions. Unchecked entries leave existing files untouched.
 RAW/scientific types are grouped first by type; GIFs are last.
+Selections stay selected across targets, searches and refreshes. The target-pane
+counter shows the whole batch; export includes files selected under other targets.
+Click the counter or press Escape to clear the selection.
 
 ## Export and delete
 Export to… opens supported working images in your editor. Save outputs alongside
@@ -123,6 +139,10 @@ Select images > Edit metadata to assign targets, filters, class, exposures, sub
 counts or coordinates. Empty/unchanged fields retain values; files are not rewritten.
 Starless and Stars only labels are recognised in filenames.
 120x60s means 120 subs of 60 seconds; 30s40 means sub exposure/gain.
+Seestar's Stacked_36_NGC 7000_5.0s_... means 36 subs of 5 seconds: 180 seconds
+total exposure. Repository and Edited metadata use that count and duration;
+explicit header totals and manual corrections take precedence. Existing repository
+records are repaired on opening, without rereading or moving capture files.
 DWARF's stacked-16 is bit depth. Unspecified EXPTIME stays reported exposure;
 it is not assumed to be per-sub or total. Unknown/conflicting values need review.
 Image details and the Exposure tooltip show evidence. Sub-summary integration

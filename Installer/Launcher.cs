@@ -22,7 +22,7 @@ namespace AstroArchive.Installation {
    bool accepted = false;
    UpdateManifest update=null;string setup=null;DateTime attemptedUtc=DateTime.MinValue;
    try {
-    var client = new UpdateClient(); update = client.Check(record);
+    var client = new UpdateClient();var monitor=new ReleaseMonitor(root,record,()=>client.Check(record));update=monitor.CheckAsync().GetAwaiter().GetResult();monitor.MarkNotified();
     if (update == null) {
      if (explicitCheck) MessageBox.Show("AstroArchive is up to date.", "AstroArchive updates");
      return false;
@@ -72,11 +72,11 @@ namespace AstroArchive.Installation {
       try { held = mutex.WaitOne(0); } catch (AbandonedMutexException) { held = true; }
       if (!held) throw new IOException("AstroArchive is already running for this installation.");
       bool explicitCheck = Array.IndexOf(args, "--updates") >= 0;
-      if (Array.IndexOf(args, "--no-updates") < 0 && Update(root, record, explicitCheck)) return 0;
+      if (explicitCheck && Array.IndexOf(args, "--no-updates") < 0 && Update(root, record, true)) return 0;
       if (explicitCheck) return 0;
       string executable = InstallCore.Managed(root, record.ActiveDirectory + "\\AstroArchive.exe");
       if (!File.Exists(executable)) throw new IOException("Application is missing. Run the installer again to repair it.");
-      using (var process = Process.Start(new ProcessStartInfo(executable) { WorkingDirectory = Path.GetDirectoryName(executable), UseShellExecute = false })) {
+      using (var process = Process.Start(new ProcessStartInfo(executable,Array.IndexOf(args,"--no-updates")>=0?"--no-updates":"") { WorkingDirectory = Path.GetDirectoryName(executable), UseShellExecute = false })) {
        process.WaitForExit(); return process.ExitCode;
       }
      } finally { if (held) mutex.ReleaseMutex(); }

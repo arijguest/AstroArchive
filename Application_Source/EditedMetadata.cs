@@ -44,6 +44,13 @@ namespace AstroArchive {
    result.Subs=Count(header.Number("NCOMBINE","STACKCNT","NSTACK","STACKNUM","NSUBS","SUBCOUNT"));result.SubExposure=Positive(header.Number("SUBEXP","SUBEXPT","EXPOSUB","EXP_SUB","SUBTIME"));result.TotalExposure=Positive(header.Number("TOTALEXP","TOTEXP","EXPTOTAL","INTTIME","INTEGRAT"));result.ReportedExposure=Positive(header.Number("EXPTIME","EXPOSURE","EXP_TIME"));
    string comment;header.Comments.TryGetValue("EXPTIME",out comment);if(result.ReportedExposure.HasValue&&comment!=null){if(Regex.IsMatch(comment,@"total|integrat",RegexOptions.IgnoreCase))result.TotalExposure=result.TotalExposure??result.ReportedExposure;else if(Regex.IsMatch(comment,@"per[ _-]?(sub|frame)|individual|single",RegexOptions.IgnoreCase))result.SubExposure=result.SubExposure??result.ReportedExposure;}
    if(result.Subs.HasValue||result.SubExposure.HasValue||result.TotalExposure.HasValue)notes.Add("Exposure/sub count from image metadata");
+   int seestarCount;double seestarSeconds;
+   if(Classifier.SeestarStackFilename(leaf,out seestarCount,out seestarSeconds)){
+    if(result.Subs.HasValue&&result.Subs.Value!=seestarCount)notes.Add("Seestar filename sub count disagrees with metadata; metadata retained");
+    else{result.Subs=result.Subs??seestarCount;notes.Add("Sub count from Seestar stacked filename");}
+    if(result.SubExposure.HasValue&&Math.Abs(result.SubExposure.Value-seestarSeconds)>0.001)notes.Add("Seestar filename sub exposure disagrees with metadata; metadata retained");
+    else{result.SubExposure=result.SubExposure??seestarSeconds;notes.Add("Per-sub exposure from Seestar stacked filename");}
+   }
    double? filenameSub,filenameGain;if(Classifier.FilenameExposureGain(leaf,out filenameSub,out filenameGain)){
     if(result.SubExposure.HasValue&&Math.Abs(result.SubExposure.Value-filenameSub.Value)>0.001)notes.Add("Filename sub exposure disagrees with metadata; metadata retained");
     else{result.SubExposure=result.SubExposure??filenameSub;notes.Add("Per-sub exposure from filename exposure/gain settings; gain is not a sub-count");}

@@ -14,10 +14,38 @@ namespace AstroArchive {
   public static bool GetOnlyWhenTruncated(DependencyObject control){return (bool)control.GetValue(OnlyWhenTruncatedProperty);}
   static void OverflowChanged(DependencyObject control,DependencyPropertyChangedEventArgs e){var text=control as TextBlock;if(text==null)return;if((bool)e.NewValue)text.ToolTipOpening+=OverflowOpening;else text.ToolTipOpening-=OverflowOpening;}
   static void OverflowOpening(object sender,ToolTipEventArgs e){var text=(TextBlock)sender;var full=new FormattedText(text.Text??"",CultureInfo.CurrentUICulture,text.FlowDirection,new Typeface(text.FontFamily,text.FontStyle,text.FontWeight,text.FontStretch),text.FontSize,text.Foreground??Brushes.Black,VisualTreeHelper.GetDpi(text).PixelsPerDip);if(full.WidthIncludingTrailingWhitespace<=Math.Max(0,text.ActualWidth-text.Padding.Left-text.Padding.Right)+0.5)e.Handled=true;}
-  public static void Tip(FrameworkElement control,string text,bool showOnDisabled=false){if(string.IsNullOrEmpty(text)){ClearTip(control);return;}control.ToolTip=new ToolTip{Content=new TextBlock{Text=text,TextWrapping=TextWrapping.Wrap,MaxWidth=360}};ToolTipService.SetShowOnDisabled(control,showOnDisabled);ToolTipService.SetInitialShowDelay(control,800);ToolTipService.SetShowDuration(control,20000);}
-  public static void Hint(FrameworkElement control,string text,bool showOnDisabled=false){Tip(control,text,showOnDisabled);Describe(control,text);}
+  public static void Tip(FrameworkElement control,string text,bool showOnDisabled=true){if(string.IsNullOrEmpty(text)){ClearTip(control);return;}control.ToolTip=new ToolTip{Content=new TextBlock{Text=text,TextWrapping=TextWrapping.Wrap,MaxWidth=360}};ToolTipService.SetShowOnDisabled(control,showOnDisabled);ToolTipService.SetInitialShowDelay(control,800);ToolTipService.SetShowDuration(control,20000);}
+  public static void Hint(FrameworkElement control,string text,bool showOnDisabled=true){Tip(control,text,showOnDisabled);Describe(control,text);}
   public static void For(FrameworkElement control,string label){string text;if(DialogTips.TryGetValue(label.TrimEnd('…','.'),out text)){Tip(control,text);Describe(control,text);}}
   static readonly Dictionary<string,string> DialogTips=new Dictionary<string,string>{
+   {"Recover profiles","Recover saved telescopes from archive metadata."},
+   {"Full rescan","Read and hash every source file again."},
+   {"Review and repair","Inspect flagged captures and retry failed transfers."},
+   {"Review flagged files","Inspect captures marked for review."},
+   {"Screen files","Check rejection labels and file integrity."},
+   {"Retry failed imports","Retry failed transfers from unchanged source files."},
+   {"Edit selected metadata","Change metadata for selected scan results."},
+   {"Identify selected targets","Solve selected lights and stacks to identify objects."},
+   {"Set Unknown targets","Assign an object to unidentified lights and stacks."},
+   {"Scan report","Show scan results, skipped files and errors."},
+   {"Dump folder","Inbox for captures waiting to be imported."},
+   {"Process files","Import inbox captures; delete originals after verification."},
+   {"Group subs by session","Condense acquisition subs into session rows."},
+   {"Back up archive","Create a verified copy of the archive."},
+   {"Review and analysis","Review captures, identify objects and assess mount rotation."},
+   {"Identify targets","Solve light groups and stacks to identify objects."},
+   {"Analyse rotation","Estimate EQ or Alt-Az from acquisition subs."},
+   {"Maintenance","Verify, reindex or remove archive files."},
+   {"Delete failed","Delete archive files with 'failed' in their filenames."},
+   {"Purge non-raw files","Delete indexed PNG/JPG/JPEG copies; keep source originals."},
+   {"Deletion history","Review archive deletions and reimport choices."},
+   {"Delete archive data","Permanently clear indexed archive data; keep source originals."},
+   {"Diagnostics","View operation timings and import reports."},
+   {"Last operation","Show timings and diagnostics for the latest operation."},
+   {"Last import report","Show the latest import's results and errors."},
+   {"Catalogue CSV","Export capture metadata for spreadsheets."},
+   {"Selected / visible files","Export metadata for selected or visible captures."},
+   {"Entire repository","Export metadata for all archived captures."},
    {"Choose HDU / page / frame","Choose the image or frame used for preview and export."},
    {"Re-detect metadata and review","Review detected values before applying changes."},
    {"Convert supported images to FITS (keeps archived originals)","Export linear images as FITS; keep archived originals."},
@@ -79,7 +107,7 @@ namespace AstroArchive {
    {"ThemeButton","Switch light/dark theme."},
    {"ImportToolsButton","Metadata, target identification and scan report."},
    {"HelpButton","Open the guide (F1)."},
-   {"AutoUploadButton","Import new USB captures; keep originals."},
+   {"AutoUploadButton","Choose telescope folders or files, then confirm a full scan and import. Keep originals."},
    {"ClearButton","Clear search, filters and target selection."},
    {"LibraryColumnsButton","Choose columns; drag headers to reorder."},
    {"ImportColumnsButton","Choose columns; drag headers to reorder."},

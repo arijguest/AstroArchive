@@ -24,7 +24,7 @@ namespace AstroArchive {
    Test("C23 NGC891 and Silver Sliver aliases share display identity grouping and search",()=>{
     var ids=new[]{"C23","C 023","Caldwell-23","Caldwell No. 23","NGC 00891","UGC1831","PGC9031","Silver Sliver Galaxy","Outer Limits Galaxy"};
     foreach(string label in ids){var frame=new Frame{Target=label};Check(frame.Target=="NGC891"&&frame.TargetName=="Silver Sliver Galaxy"&&TargetNavigation.Group(label)=="Galaxies","Silver Sliver identity/display wrong: "+label);Check(new CaptureFilters().Apply(new[]{frame},label).Count==1&&Catalog.Search(label).First().Name=="NGC891","Alternate identity not searchable: "+label);}
-    var target=TargetNavigation.Build(ids.Select(label=>new Frame{Target=label})).Single(t=>t.Name=="NGC891");Check(target.Files==ids.Length&&target.DisplayName=="Silver Sliver Galaxy"&&target.Subline.StartsWith("NGC891 · C23")&&target.Subline.Contains("UGC1831")&&target.Subline.Contains("PGC9031"),"Aliases split targets or disappeared from the navigation row");
+    var target=TargetNavigation.Build(ids.Select(label=>new Frame{Target=label})).Single(t=>t.Name=="NGC891");Check(target.Files==ids.Length&&target.DisplayName=="NGC891 - Silver Sliver Galaxy"&&target.Subline.StartsWith("C23")&&target.Subline.Contains("UGC1831")&&target.Subline.Contains("PGC9031"),"Aliases split targets or disappeared from the navigation row");
     Check(Catalog.TargetFromFilename("C23_NGC891_Silver_Sliver_Galaxy.fit")=="NGC891"&&!Catalog.HasFilenameConflict("C23_NGC891_Silver_Sliver_Galaxy.fit"),"Equivalent names conflicted");
    });
    Test("Common-name normalization handles full catalogue prefixes accents and punctuation",()=>{

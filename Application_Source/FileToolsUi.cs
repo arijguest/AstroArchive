@@ -30,16 +30,16 @@ namespace AstroArchive {
    };
    grid.ContextMenuOpening+=(s,e)=>{
     var selected=SelectedFiles();
-    if((e.CursorLeft>=0&&!contextOnFile)||cancel!=null||repo==null||selected.Count==0){e.Handled=true;return;}
+    if((e.CursorLeft>=0&&!contextOnFile)||RepositoryOperationBlocked||repo==null||selected.Count==0){e.Handled=true;return;}
     BuildFileMenu(grid.ContextMenu,selected);
    };
    grid.PreviewKeyDown+=(s,e)=>{
-    if(e.Key==Key.Delete&&!SearchBlocked("SearchBox")&&cancel==null&&repo!=null&&SelectedFiles().Count>0){e.Handled=true;DeleteFiles(SelectedFiles());}
+    if(e.Key==Key.Delete&&!SearchBlocked("SearchBox")&&!RepositoryOperationBlocked&&repo!=null&&SelectedFiles().Count>0){e.Handled=true;DeleteFiles(SelectedFiles());}
    };
   }
-  List<Frame> SelectedFiles(){return G("FramesGrid").SelectedItems.OfType<Frame>().Concat(subframeSessions.Where(g=>g.IsSelected).SelectMany(g=>g.Frames)).Distinct().ToList();}
+  List<Frame> SelectedFiles(){return librarySelection.Items;}
   void SelectContextRow(Frame frame){if(frame==null)return;var grid=G("FramesGrid");if(!SelectedFiles().Contains(frame)){ClearSessionSelection();grid.SelectedItems.Clear();grid.SelectedItems.Add(frame);}}
-  MenuItem FileAction(string title,Action action,bool enabled=true){var item=new MenuItem{Header=title,IsEnabled=enabled};UiHelp.For(item,title);item.Click+=(s,e)=>{if(cancel==null&&!ActiveSearchBlocked)action();};return item;}
+  MenuItem FileAction(string title,Action action,bool enabled=true){var item=new MenuItem{Header=title,IsEnabled=enabled};UiHelp.For(item,title);item.Click+=(s,e)=>{if(!RepositoryOperationBlocked&&!ActiveSearchBlocked)action();};return item;}
   MenuItem ExportMenu(List<Frame> selected){
    var menu=new MenuItem{Header="Export",IsEnabled=selected.Count>0};menu.Items.Add(FileAction("Export to…",()=>ExportTo(selected),selected.Count>0));menu.Items.Add(FileAction("Export files…",()=>ExportFiles(selected)));menu.Items.Add(FileAction("Stacking folder…",()=>ExportProject(selected,false),selected.Any(f=>f.Kind=="Light"||f.Kind=="Stack")));return menu;
   }
@@ -49,8 +49,8 @@ namespace AstroArchive {
    if(selected.Count==1&&selected[0].Images!=null&&(selected[0].Images.Count>1||selected[0].Images.Any(i=>i.Count>1)))more.Items.Add(FileAction("Choose HDU / page / frame…",()=>PreviewFile(selected[0])));
    menu.Items.Add(more);menu.Items.Add(new Separator());var delete=FileAction("Delete files…",()=>DeleteFiles(selected));delete.Foreground=new SolidColorBrush(Color.FromRgb(183,40,51));menu.Items.Add(delete);
   }
-  void ShowExportMenu(){if(repo==null||cancel!=null)return;var menu=ThemedMenu();var choices=new MenuItem();BuildExportNavigation(choices);foreach(var item in choices.Items.Cast<object>().ToList()){choices.Items.Remove(item);menu.Items.Add(item);}menu.PlacementTarget=B("ExportButton");menu.Placement=PlacementMode.Bottom;menu.IsOpen=true;}
-  void ExportSelectionCsv(List<Frame> selected){var picker=new Microsoft.Win32.SaveFileDialog{FileName="AstroArchive_selection.csv",Filter="CSV catalogue|*.csv"};if(picker.ShowDialog(Window)==true){repo.ExportIndex(picker.FileName,selected);L("StatusLabel").Text=selected.Count+" catalogue rows exported.";}}
+  void ShowExportMenu(){if(repo==null||RepositoryOperationBlocked)return;var menu=ThemedMenu();var choices=new MenuItem();BuildExportNavigation(choices);foreach(var item in choices.Items.Cast<object>().ToList()){choices.Items.Remove(item);menu.Items.Add(item);}menu.PlacementTarget=B("ExportButton");menu.Placement=PlacementMode.Bottom;menu.IsOpen=true;}
+  void ExportSelectionCsv(List<Frame> selected){var picker=new Microsoft.Win32.SaveFileDialog{FileName="AstroArchive_selection.csv",Filter="CSV catalogue|*.csv"};if(picker.ShowDialog(Window)==true){string destination=picker.FileName;var snapshot=selected.Select(f=>f.Clone()).ToList();Run(ct=>{ct.ThrowIfCancellationRequested();repo.ExportIndex(destination,snapshot);return snapshot.Count+" catalogue rows exported.";},message=>{L("StatusLabel").Text=message;if(completionActivity!=null)completionActivity.OutputPath=Path.GetDirectoryName(destination);},"Exporting catalogue CSV");}}
   void ShowFile(Frame frame){string path=repo.FilePath(frame);if(File.Exists(path))Process.Start(new ProcessStartInfo("explorer.exe","/select,\""+path+"\""){UseShellExecute=true});else MessageBox.Show(Window,"This file is missing from the repository.","File unavailable");}
   sealed class ExportDestinationFields {
    public TextBox Parent,Name;public CheckBox Metadata,NewFolder;public ComboBox AfterExport;public Action RefreshAfterExport;
@@ -73,8 +73,8 @@ namespace AstroArchive {
   void RunExport(List<Frame> selected,ExportOptions options,ExportDestinationFields fields,bool stacking){
    bool openSiril=Convert.ToString(fields.AfterExport.SelectedItem)=="Siril";string executable=settings.SirilExecutable;var result=openSiril?new ExportResult():null;
    Run(ct=>Exporter.Create(repo,selected,options,ct,Progress,result),path=>{
-    if(openSiril){try{using(var process=Process.Start(SirilHandoff.ExportLaunchInfo(executable,result))){if(process==null)throw new IOException("Siril did not start.");}L("StatusLabel").Text="Exported to "+path+" · opened stack in Siril";return;}
-     catch(Exception error){MessageBox.Show(Window,"Your export completed and its verified files are available at:\n"+path+"\n\nSiril could not open the stack: "+error.Message,"Export complete; Siril unavailable",MessageBoxButton.OK,MessageBoxImage.Warning);}}
+    if(openSiril){try{using(var process=Process.Start(SirilHandoff.ExportLaunchInfo(executable,result))){if(process==null)throw new IOException("Siril did not start.");}L("StatusLabel").Text="Exported to "+path+" · opened stack in Siril";if(completionActivity!=null)completionActivity.OutputPath=path;return;}
+     catch(Exception error){if(completionActivity!=null){completionActivity.NeedsReview=true;completionActivity.ReportTitle="Siril handoff";completionActivity.Report="Your export is complete: "+path+"\nSiril could not open the stack: "+error.Message;}}}
     ExportComplete(path,stacking);
    });
   }
@@ -103,22 +103,22 @@ namespace AstroArchive {
    d.Accept("Export",()=>{var options=exportOptions();if(!items.Any(f=>(options.IncludeRejected||!f.Rejected)&&(options.Mode=="Both"||options.Mode=="Subs"&&f.Kind=="Light"||options.Mode=="Stacks"&&f.Kind=="Stack"))){MessageBox.Show(d.Window,"This input choice has no eligible files.");return false;}return ValidExportDestination(d,destination);});if(d.Show())RunExport(items,exportOptions(),destination,true);
   }
   void ExportComplete(string path){ExportComplete(path,false);}
-  void ExportComplete(string path,bool stacking){L("StatusLabel").Text="Exported folder: "+path;ExportCompleteDialog(path,stacking).Show();}
+  void ExportComplete(string path,bool stacking){L("StatusLabel").Text="Exported folder: "+path;if(completionActivity!=null){completionActivity.OutputPath=path;completionActivity.Status=stacking?"Stacking folder is ready. Files copied and verified.":"Files exported and verified.";}}
   FormWindow ExportCompleteDialog(string path,bool stacking){
    var d=new FormWindow(Window,"Export complete",640,360);d.Text(stacking?"Stacking folder ready":"Files exported",true);d.Text(path);d.Text("Copied and verified.");d.Button("Open folder",()=>{try{Process.Start(new ProcessStartInfo(path){UseShellExecute=true});}catch(Exception error){MessageBox.Show(d.Window,error.Message,"Folder unavailable");}});d.CloseOnly();return d;
   }
   void DeleteFailedFiles(){
-   if(repo==null||cancel!=null)return;var matches=repo.FailedFiles();
+   if(repo==null||RepositoryOperationBlocked)return;var matches=repo.FailedFiles();
    if(matches.Count==0){L("StatusLabel").Text="No repository filenames contain 'failed'.";return;}
    DeleteFiles(matches,true);
   }
   void PurgeNonRawFiles(){
-   if(repo==null||cancel!=null)return;var matches=repo.NonRawFiles();
+   if(repo==null||RepositoryOperationBlocked)return;var matches=repo.NonRawFiles();
    if(matches.Count==0){L("StatusLabel").Text="No PNG/JPG/JPEG files are indexed in this repository.";return;}
    DeleteFiles(matches,false,true);
   }
   void DeleteFiles(List<Frame> selected,bool failedNames=false,bool nonRawFiles=false){
-   if(repo==null||cancel!=null||selected.Count==0)return;
+   if(repo==null||RepositoryOperationBlocked||selected.Count==0)return;
    var d=new FormWindow(Window,nonRawFiles?"Purge non-raw files":failedNames?"Delete failed":"Delete selected files",640,520);d.Text("Delete "+selected.Count+" "+(failedNames||nonRawFiles?"matching":"selected")+" file"+(selected.Count==1?"":"s")+"?",true);d.Text(repo.Root);
    if(failedNames)d.Text("Searches the entire active repository for filenames containing 'failed', regardless of case. Current filters and telescope selection do not limit this action.");
    if(nonRawFiles)d.Text("Finds indexed PNG/JPG/JPEG files in the entire active repository, regardless of case or current filters. Edited images, FITS, TIFF, XISF, SER and camera RAW files are excluded from this purge.");

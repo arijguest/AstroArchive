@@ -11,7 +11,7 @@ namespace AstroArchive {
   List<Frame> visibleImports=new List<Frame>();
   void InitializeFailedImports(){
    var ignore=(CheckBox)Window.FindName("IgnoreFailedCheck");ignore.IsChecked=settings.IgnoreFailed;
-   RoutedEventHandler changed=(s,e)=>{if(cancel!=null||settings.IgnoreFailed==(ignore.IsChecked==true))return;settings.IgnoreFailed=ignore.IsChecked==true;SaveSettings();InvalidateImportPlan();L("StatusLabel").Text="Import option saved. Scan the source folder again to apply it.";};
+   RoutedEventHandler changed=(s,e)=>{if(RepositoryOperationBlocked||settings.IgnoreFailed==(ignore.IsChecked==true))return;settings.IgnoreFailed=ignore.IsChecked==true;SaveSettings();InvalidateImportPlan();L("StatusLabel").Text="Import option saved. Scan the source folder again to apply it.";};
    ignore.Checked+=changed;ignore.Unchecked+=changed;
   }
   void InitializeFilters(){
@@ -24,7 +24,7 @@ namespace AstroArchive {
    G("ImportGrid").SelectionChanged+=(s,e)=>{
     var frame=G("ImportGrid").SelectedItem as Frame;
     L("ImportDetailsLabel").Text=frame==null?"Select a capture to see screening or import details.":frame.OriginalName+"  ·  "+frame.Status+"  ·  "+(CaptureScreening.NeedsReview(frame)?frame.ReviewCategory+" · "+frame.ReviewReason:frame.SourceDisposition??frame.Notes);
-    B("AssignUnknownTargetButton").IsEnabled=cancel==null&&UnknownImportSelection().Count>0;
+    B("AssignUnknownTargetButton").IsEnabled=!RepositoryOperationBlocked&&UnknownImportSelection().Count>0;
     UiHelp.Tip(B("ImportButton"),G("ImportGrid").SelectedItems.Count>0?"Row selection does not limit imports. Search and filters choose the ready files.":null);
    };
   }
@@ -40,15 +40,15 @@ namespace AstroArchive {
    B("ImportFiltersButton").Content="Filters"+(importFilters.ActiveCount>0?" ("+importFilters.ActiveCount+")":"");
    int ready=summary.Ready;L("ImportSummaryLabel").Text=summary.Text;
    B("ImportButton").Content="Import "+ready+" file"+(ready==1?"":"s");UiHelp.Tip(B("ImportButton"),grid.SelectedItems.Count>0?"Row selection does not limit imports. Search and filters choose the ready files.":null);UiHelp.Describe(B("ImportButton"),"Import "+ready+" eligible files in this filtered view. Row selection does not limit imports.");
-   B("ImportButton").IsEnabled=cancel==null&&repo!=null&&plan!=null&&ready>0;
-   B("ScreenImportsButton").IsEnabled=cancel==null&&repo!=null&&visibleImports.Any(f=>f.Status!="Deleted");
-   B("ReviewImportsButton").IsEnabled=cancel==null&&repo!=null&&summary.Flagged>0;retry=plan==null?0:retry;B("RetryImportsButton").Content="Retry "+retry+" failed import"+(retry==1?"":"s");B("RetryImportsButton").IsEnabled=cancel==null&&repo!=null&&retry>0;
-   B("AssignUnknownTargetButton").IsEnabled=cancel==null&&UnknownImportSelection().Count>0;
-   B("ImportOptionsButton").IsEnabled=cancel==null;
+   B("ImportButton").IsEnabled=!RepositoryOperationBlocked&&repo!=null&&plan!=null&&ready>0;
+   B("ScreenImportsButton").IsEnabled=!RepositoryOperationBlocked&&repo!=null&&visibleImports.Any(f=>f.Status!="Deleted");
+   B("ReviewImportsButton").IsEnabled=!RepositoryOperationBlocked&&repo!=null&&summary.Flagged>0;retry=plan==null?0:retry;B("RetryImportsButton").Content="Retry "+retry+" failed import"+(retry==1?"":"s");B("RetryImportsButton").IsEnabled=!RepositoryOperationBlocked&&repo!=null&&retry>0;
+   B("AssignUnknownTargetButton").IsEnabled=!RepositoryOperationBlocked&&UnknownImportSelection().Count>0;
+   B("ImportOptionsButton").IsEnabled=!RepositoryOperationBlocked;
    L("ScanLabel").Text=source.Count==0&&plan!=null&&plan.FastSkippedFiles>0&&plan.Errors.Count==0?"Nothing new to import · "+plan.FastSkippedFiles+" archived files skipped in "+plan.FastSkippedFolders+" folders":source.Count==0&&plan==null?"Choose a source folder and scan to begin.":summary.Shown+" / "+summary.Total+" shown · "+(summary.Total-summary.Shown)+" hidden by search/filters · "+importFilters.ActiveCount+" active filters"+(SkipFlagged?" · "+summary.SkippedFlagged+" flagged candidates skipped":" · flagged captures included")+(plan!=null&&plan.FastSkippedFiles>0?" · "+plan.FastSkippedFiles+" archived files skipped in "+plan.FastSkippedFolders+" folders":"")+(plan!=null&&plan.IgnoredFailed>0?"  ·  "+plan.IgnoredFailed+" failed filenames ignored":"")+(plan!=null&&plan.IgnoredRaster>0?" · "+plan.IgnoredRaster+" PNG/JPG ignored":"");
   }
   void ScreenFiles(bool imports){
-   if(repo==null||cancel!=null||SearchBlocked(imports?"ImportSearchBox":"SearchBox"))return;
+   if(repo==null||RepositoryOperationBlocked||SearchBlocked(imports?"ImportSearchBox":"SearchBox"))return;
    var rows=imports?visibleImports.Where(f=>f.Status!="Deleted").ToList():Context();if(rows.Count==0)return;
    ScreenSelection(rows,imports);
   }

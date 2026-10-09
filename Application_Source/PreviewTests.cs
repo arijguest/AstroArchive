@@ -10,6 +10,7 @@ using System.Threading;
 namespace AstroArchive {
  public partial class Tests {
   static void PreviewTests(){
+   OptimisationPreviewTests();
    Test("Fast linear previews preserve declared ranges colours invalid pixels and cancellation",()=>{
     var data=new PreviewData{Width=2,Height=2,Channels=3,Minimum=-10,Maximum=10,FlipY=true,Pixels=new[]{-10.0,0,10,10,5,-5,double.NaN,double.PositiveInfinity,double.NegativeInfinity,-5.0,0,5}};var samples=(double[])data.Pixels.Clone();
     Check(data.Render("Linear",ct).SequenceEqual(new byte[]{0,0,0,64,128,191,0,128,255,255,191,64}),"Fast linear conversion changed ranges, colour, origin or invalid values");Check(data.Pixels.SequenceEqual(samples),"Initial display altered samples");

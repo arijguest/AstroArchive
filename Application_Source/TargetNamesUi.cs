@@ -20,7 +20,7 @@ namespace AstroArchive {
     };
    }
   }
-  MenuItem TargetNamesAction(string target){return FileAction("Edit name and aliases…",()=>EditTargetNames(target),cancel==null&&!ActiveSearchBlocked);}
+  MenuItem TargetNamesAction(string target){return FileAction("Edit name and aliases…",()=>EditTargetNames(target),!RepositoryOperationBlocked&&!ActiveSearchBlocked);}
   FormWindow TargetNameDialog(string target,out TargetNameFields fields){
    string id=Catalog.ObjectId(target);var saved=(settings.TargetNames??new List<TargetNameRule>()).FirstOrDefault(r=>Catalog.KnownName(r.Id)==id);
    var dialog=new FormWindow(Window,"Target name and aliases",640,570);dialog.Text("Names for this object",true);dialog.Text("Save a name once to use it across Repository, Import and Edited. Catalogue IDs stay unchanged.");
@@ -41,7 +41,7 @@ namespace AstroArchive {
    Refresh();FilterImports();RefreshSkyPreviews();
   }
   void EditTargetNames(string target){
-   if(cancel!=null||ActiveSearchBlocked)return;TargetNameFields fields;var dialog=TargetNameDialog(target,out fields);if(!dialog.Show())return;
+   if(RepositoryOperationBlocked||ActiveSearchBlocked)return;TargetNameFields fields;var dialog=TargetNameDialog(target,out fields);if(!dialog.Show())return;
    try{ApplyTargetNames(Catalog.ChangeNames(settings.TargetNames,fields.Values()));L("StatusLabel").Text="Target names saved.";}
    catch(Exception error){MessageBox.Show(Window,error.Message,"Names could not be saved",MessageBoxButton.OK,MessageBoxImage.Error);}
   }

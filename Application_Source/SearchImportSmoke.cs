@@ -33,7 +33,7 @@ namespace AstroArchive {
     var candidates=plan;plan=new ImportPlan{FastSkippedFiles=12,FastSkippedFolders=1};FilterImports();PumpPopupLayout();if(!L("ScanLabel").IsVisible||!L("ScanLabel").Text.StartsWith("Nothing new to import")||!L("ScanLabel").Text.Contains("12 archived files"))throw new Exception("Completed session scan lacks a visible no-new-files summary.");plan=candidates;FilterImports();
     foreach(string mode in new[]{"Light","Dark"})foreach(int percent in new[]{100,150}){
      settings.ThemeMode=mode;settings.TextScalePercent=percent;ApplyAppearance();PumpPopupLayout();
-     foreach(string name in new[]{"ImportOptionsButton","AssignUnknownTargetButton","ImportSearchHelpButton"}){var button=B(name);var bounds=PopupBounds(button,Window);if(bounds.Left<0||bounds.Right>Window.ActualWidth+1)throw new Exception("Import controls clipped with larger text.");Readable(button.Foreground,button.Background,mode+" "+name);}
+     foreach(string name in new[]{"ImportOptionsButton","AssignUnknownTargetButton"}){var button=B(name);var bounds=PopupBounds(button,Window);if(bounds.Left<0||bounds.Right>Window.ActualWidth+1)throw new Exception("Import controls clipped with larger text.");Readable(button.Foreground,button.Background,mode+" "+name);}
      if(percent==100)Capture(Path.Combine(output,"AstroArchive_Import_Options_"+mode+".png"));
     }
     if(repo!=null){var tools=BuildRepositoryTools();if(!tools.Items.OfType<MenuItem>().Any(m=>Convert.ToString(m.Header)=="Purge non-raw files…"))throw new Exception("Repository non-raw purge is missing.");}

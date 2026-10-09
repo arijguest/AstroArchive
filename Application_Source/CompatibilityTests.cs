@@ -528,11 +528,11 @@ namespace AstroArchive {
                 return result.ToArray();
             }
         }
-        static string MakeSer(string name,int color,int endian,int bits,int frames,byte[] data) {
+        static string MakeSer(string name,int color,int endian,int bits,int frames,byte[] data,int width=2,int height=2) {
             byte[] header=new byte[178];
             Buffer.BlockCopy(Encoding.ASCII.GetBytes("LUCAM-RECORDER"),0,header,0,14);
             int[] values= {
-                color,endian,2,2,bits,frames
+                color,endian,width,height,bits,frames
             };
             for(int i=0;i<values.Length;i++)Buffer.BlockCopy(BitConverter.GetBytes(values[i]),0,header,18+i*4,4);
             Buffer.BlockCopy(BitConverter.GetBytes(new DateTime(2026,10,6,21,0,0,DateTimeKind.Utc).Ticks),0,header,170,8);

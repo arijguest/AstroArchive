@@ -8,9 +8,16 @@ namespace AstroArchive {
  public sealed partial class Repository {
   public static void CheckManagedPath(string path,string root){
    string full=Path.GetFullPath(path),boundary=Path.GetFullPath(root).TrimEnd(Path.DirectorySeparatorChar,Path.AltDirectorySeparatorChar);
-   if(!Util.Within(full,boundary)||full.TrimEnd(Path.DirectorySeparatorChar,Path.AltDirectorySeparatorChar).Equals(boundary,StringComparison.OrdinalIgnoreCase))throw new IOException("Refusing to delete outside the archive.");
-   string parent=Path.GetDirectoryName(full);while(parent!=null){if(Directory.Exists(parent)&&!FileStamp.CanTraverse(new DirectoryInfo(parent)))throw new IOException("Refusing deletion through a linked directory: "+parent);if(parent.TrimEnd(Path.DirectorySeparatorChar,Path.AltDirectorySeparatorChar).Equals(boundary,StringComparison.OrdinalIgnoreCase))return;parent=Path.GetDirectoryName(parent);}
-   throw new IOException("Refusing to delete outside the archive.");
+   if(!Util.Within(full,root)||full.TrimEnd(Path.DirectorySeparatorChar,Path.AltDirectorySeparatorChar).Equals(boundary,StringComparison.OrdinalIgnoreCase))throw new IOException("Path is outside the archive.");
+   // Inspect the leaf as well as its parents, including dangling links. Cloud
+   // placeholders remain supported; name-surrogate reparse tags redirect paths.
+   for(string item=full;item!=null;item=Path.GetDirectoryName(item)){
+    FileAttributes attributes=0;bool exists=true;
+    try{attributes=File.GetAttributes(item);}catch(FileNotFoundException){exists=false;}catch(DirectoryNotFoundException){exists=false;}
+    if(exists){FileSystemInfo entry=(attributes&FileAttributes.Directory)!=0?(FileSystemInfo)new DirectoryInfo(item):new FileInfo(item);if(!FileStamp.CanAccess(entry))throw new IOException("Archive paths cannot follow a linked file or directory: "+item);}
+    if(item.TrimEnd(Path.DirectorySeparatorChar,Path.AltDirectorySeparatorChar).Equals(boundary,StringComparison.OrdinalIgnoreCase))return;
+   }
+   throw new IOException("Path is outside the archive.");
   }
   public List<string> ResetArchive(CancellationToken ct,Action<ProgressInfo> progress){
    ct.ThrowIfCancellationRequested();var frames=All();var errors=frames.Count>0?DeleteFrames(frames,ct,progress).Errors:new List<string>();

@@ -3,7 +3,7 @@ using System.IO;
 using System.Text;
 using System.Threading;
 namespace AstroArchive {
-    public sealed class SerReader:IAssetReader {
+    public sealed class SerReader:IAssetReader,ISampledAssetReader {
         public string Name {
             get {
                 return "SER";
@@ -70,6 +70,19 @@ namespace AstroArchive {
             return new PixelImage {
                 Width=image.Width,Height=image.Height,Channels=image.Channels,Pixels=pixels
             };
+        }
+        public PreviewData Preview(Frame frame,string path,ImageDescriptor image,int index,CancellationToken ct) {
+            ct.ThrowIfCancellationRequested();if(index<0||index>=image.Count||!image.Numeric)throw new ArgumentOutOfRangeException("index");
+            var result=new SampledPreview(frame,image);int size=image.Bitpix/8;var row=new byte[checked(image.Width*image.Channels*size)];
+            string[] encoding=image.Encoding.Split('|');int color=int.Parse(encoding[1]);
+            using(var stream=File.OpenRead(path)) {
+                stream.Position=checked(image.Offset+(long)index*row.Length*image.Height);
+                for(int y=0;y<image.Height;y++) {
+                    ct.ThrowIfCancellationRequested();PixelCodecs.Full(stream,row);
+                    for(int x=0;x<image.Width;x++)for(int c=0;c<image.Channels;c++)result.Add(x,y,c,PixelCodecs.Number(row,(x*image.Channels+(color==101?2-c:c))*size,size==1?"UInt8":"UInt16",encoding[0]=="little"));
+                }
+            }
+            return result.Finish(frame,path,ct);
         }
     }
 }

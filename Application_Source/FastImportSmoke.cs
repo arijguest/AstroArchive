@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
@@ -12,13 +13,26 @@ namespace AstroArchive {
    try{
     temporary=new Repository(path);repo=temporary;settings=new Settings{Telescopes=new List<TelescopeProfile>{new TelescopeProfile{Id="My Seestar",Model="Seestar S50"},new TelescopeProfile{Id="My DWARF",Model="Dwarf 3"}}};TelescopeProfiles.Initialize(settings);pendingUsb=null;ReloadScopes("My DWARF",true);
     usbTelescopes=new List<UsbTelescope>{new UsbTelescope{Make="Seestar",Source=@"E:\MyWorks",Volume=new UsbVolume{Root=@"E:\",Id="ui-device"}}};SelectConnectedTelescope();UpdateTelescopeState(false);GoToPage(1);PumpPopupLayout();
-    if(SelectedScope.Id!="My Seestar"||T("SourceBox").Text!=@"E:\MyWorks"||!B("AutoUploadButton").IsVisible||!B("AutoUploadButton").IsEnabled)throw new Exception("Connected import did not select a matching profile and show its one-click action.");
+    if(SelectedScope.Id!="My Seestar"||T("SourceBox").Text!=@"E:\MyWorks"||!B("AutoUploadButton").IsVisible||!B("AutoUploadButton").IsEnabled||Convert.ToString(B("AutoUploadButton").Content)!="Import from Seestar…")throw new Exception("Connected import did not select a matching profile and show its branded action.");
+    var importMenu=new MenuItem();BuildImportNavigation(importMenu);if(!importMenu.Items.OfType<MenuItem>().Any(m=>Convert.ToString(m.Header)=="Import from Seestar…"&&m.IsEnabled))throw new Exception("Seestar selection action is missing from the Import menu.");
     L("UsbStatusLabel").Text="Seestar storage detected · My Seestar selected automatically";
     foreach(string theme in new[]{"Light","Dark"}){Theme.Apply(Window,theme);PumpPopupLayout();Capture(Path.Combine(output,"AstroArchive_Connected_Import_"+theme+".png"));}
     var form=new FormWindow(Window,"Import matching smoke",580,400);var robust=ImportMatchingChoice(form);form.Window.Show();PumpPopupLayout();if(robust.IsChecked==true||!robust.IsVisible)throw new Exception("Robust matching is not visible or defaults on.");form.Window.Close();
-    usbTelescopes=new List<UsbTelescope>{new UsbTelescope{Make="DWARFLAB",Source=@"F:\DWARF",Volume=new UsbVolume{Root=@"F:\",Id="ui-dwarf"}}};SelectConnectedTelescope();UpdateTelescopeState(false);PumpPopupLayout();if(SelectedScope.Id!="My DWARF")throw new Exception("A connected DWARF did not select its matching saved telescope.");
-    settings.Telescopes.RemoveAll(p=>p.Id=="My DWARF");ReloadScopes("My Seestar",true);UploadUsb(usbTelescopes[0]);if(SelectedScope.Id!=null||pendingUsb!=usbTelescopes[0]||T("SourceBox").Text!=@"F:\DWARF"||Convert.ToString(C("ModelBox").SelectedItem)!="Auto")throw new Exception("Unconfigured DWARF reused an incompatible selected telescope instead of requiring setup.");
-    File.WriteAllText(Path.Combine(output,"fast-import-smoke.txt"),"PASS: visible one-click connected import, automatic Seestar/DWARF profile selection, setup required when no matching telescope exists, robust matching off by default, light/dark rendering.");
+    usbTelescopes=new List<UsbTelescope>{new UsbTelescope{Make="DWARFLAB",Source=@"F:\DWARF",Volume=new UsbVolume{Root=@"F:\",Id="ui-dwarf"}}};SelectConnectedTelescope();UpdateTelescopeState(false);PumpPopupLayout();if(SelectedScope.Id!="My DWARF"||Convert.ToString(B("AutoUploadButton").Content)!="Import from Dwarflab…")throw new Exception("A connected DWARF did not select its matching saved telescope or brand.");
+    importMenu=new MenuItem();BuildImportNavigation(importMenu);if(!importMenu.Items.OfType<MenuItem>().Any(m=>Convert.ToString(m.Header)=="Import from Dwarflab…"))throw new Exception("Dwarflab selection action is missing from the Import menu.");
+    string card=path+"-card";Directory.CreateDirectory(card);try{
+     string folder=Path.Combine(card,"MyWorks","M45_sub"),file=Path.Combine(card,"single.fit"),outside=path+"-outside.fit";Directory.CreateDirectory(folder);File.WriteAllText(file,"");File.WriteAllText(outside,"");
+     try{
+      var device=new UsbTelescope{Make="Seestar",Source=card,Volume=new UsbVolume{Root=card,Id="picker-device"}};bool chooseOutside=false;var picker=new TelescopeImportPicker(Window,device,settings.Telescopes,settings.Telescopes.First(p=>p.Id=="My Seestar"),()=>folder,()=>new[]{chooseOutside?outside:file});
+      picker.Dialog.Window.Show();PumpPopupLayout();picker.FolderButton.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));picker.FilesButton.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));if(!picker.Validate()||picker.Selection.Folders.Count!=1||picker.Selection.Files.Count!=1)throw new Exception("Telescope picker did not combine selected folders and files.");
+      chooseOutside=true;picker.FilesButton.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));if(picker.Items.Items.Count!=2||picker.Error.Text.Length==0)throw new Exception("Telescope picker accepted a capture from outside its drive.");
+      foreach(string theme in new[]{"Light","Dark"}){Theme.Apply(picker.Dialog.Window,theme);PumpPopupLayout();CapturePopup(picker.Dialog.Window,Path.Combine(output,"AstroArchive_Telescope_Picker_"+theme+".png"));}
+      picker.WholeDriveButton.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));if(!picker.Validate()||!picker.Selection.WholeSource)throw new Exception("Whole telescope selection failed.");picker.Dialog.Window.Close();
+      settings.Telescopes.RemoveAll(p=>p.Id=="My DWARF");var dwarf=new UsbTelescope{Make="DWARFLAB",Source=card,Volume=device.Volume};var setup=new TelescopeImportPicker(Window,dwarf,settings.Telescopes,null,()=>folder);
+      setup.FolderButton.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));if(setup.Validate())throw new Exception("New physical telescope did not require its own name.");setup.Name.Text="My Dwarflab";if(!setup.Validate()||setup.Profile.Id!="My Dwarflab")throw new Exception("New physical telescope could not be configured in the picker.");setup.Dialog.Window.Close();
+     }finally{File.Delete(outside);}
+    }finally{Directory.Delete(card,true);}
+    File.WriteAllText(Path.Combine(output,"fast-import-smoke.txt"),"PASS: branded USB import menu/button, compatible profile selection, mixed folder/file picker, drive containment, new telescope setup, whole-drive choice, robust matching off by default, light/dark rendering.");
    }finally{settings=originalSettings;repo=originalRepo;all=originalAll;usbTelescopes=originalUsb;pendingUsb=originalPending;ReloadScopes(settings.SelectedTelescope,false);T("SourceBox").Text=source;T("TelescopeBox").Text=id;C("ModelBox").SelectedItem=model;C("CameraBox").SelectedItem=camera;plan=originalPlan;UpdateTelescopeState(false);L("UsbStatusLabel").Text=originalStatus;Theme.Apply(Window,settings.ThemeMode);((TabControl)Window.FindName("MainTabs")).SelectedIndex=tab;if(temporary!=null)temporary.Dispose();if(Directory.Exists(path))Directory.Delete(path,true);}
   }
  }

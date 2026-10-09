@@ -19,6 +19,7 @@ namespace AstroArchive {
   public string FileType{get{return MediaFiles.FileType(Filename??RelativePath);}}
  }
  public sealed partial class Repository {
+  readonly EditedHeaderCache editedHeaders=new EditedHeaderCache();
   public string EditedFolder{get{return Path.Combine(Meta,"edited");}}
   public string EditedProjectFolder(EditedProject project){Guid id;if(project==null||!Guid.TryParseExact(project.Id,"N",out id))throw new InvalidDataException("Invalid edited project identity.");string path=Path.Combine(EditedFolder,project.Id);CheckManagedPath(path,Root);return path;}
   public List<EditedProject> EditedProjects(out List<string> errors,CancellationToken ct=default(CancellationToken)){
@@ -54,7 +55,7 @@ namespace AstroArchive {
     AddEditedFile(project,FilePath(capture),capture.OriginalName,capture.Hash,capture.Hash,ct,progress,null,metadata);}return project;}
    catch{RemoveNewEditedProject(project);throw;}
   }
-  EditedProject ReadEditedProject(EditedProject selected){
+  internal EditedProject ReadEditedProject(EditedProject selected){
    string id=selected.Id,path=Path.Combine(EditedProjectFolder(selected),"edited-project.json");CheckManagedPath(path,Root);var project=Util.Deserialize<EditedProject>(File.ReadAllText(path));
    if(project==null||project.Id!=id||project.Schema!=1||string.IsNullOrWhiteSpace(project.Name)||project.Sources==null)throw new InvalidDataException("Invalid edited project record.");foreach(var record in project.Sources){if(record==null)throw new InvalidDataException("Invalid edited image record.");EditedPath(project,record.RelativePath);}if(project.MetadataEdits!=null)foreach(string key in project.MetadataEdits.Keys)EditedPath(project,key);return project;
   }
@@ -85,19 +86,25 @@ namespace AstroArchive {
   }
   void RemoveNewEditedProject(EditedProject project){string path=EditedProjectFolder(project);var errors=new List<string>();if(Directory.Exists(path))RemoveOwnedTree(path,Root,errors,CancellationToken.None);}
   public List<EditedImage> EditedImages(EditedProject project,IEnumerable<string> targets=null,CancellationToken ct=default(CancellationToken)){
+   return ReadEditedImages(project,targets,ct,true);
+  }
+  internal List<EditedImage> ReadEditedImages(EditedProject project,IEnumerable<string> targets,CancellationToken ct,bool sorted){
    ct.ThrowIfCancellationRequested();var images=new List<EditedImage>();string folder=EditedProjectFolder(project);if(!Directory.Exists(folder))return images;var matcher=new EditedTargetMatcher((targets??All().Select(f=>f.Target)).Concat(project.Sources.Where(s=>s.Metadata!=null).Select(s=>s.Metadata.Object)));var directories=new Stack<string>();directories.Push(folder);
+   var sources=new Dictionary<string,EditedSource>(StringComparer.OrdinalIgnoreCase);foreach(var source in project.Sources)if(!sources.ContainsKey(source.RelativePath))sources[source.RelativePath]=source;
+   var edits=new Dictionary<string,EditedMetadata>(StringComparer.OrdinalIgnoreCase);if(project.MetadataEdits!=null)foreach(var edit in project.MetadataEdits)if(!edits.ContainsKey(edit.Key))edits[edit.Key]=edit.Value;
+   var headers=new Dictionary<string,FitsHeader>(StringComparer.OrdinalIgnoreCase);
    while(directories.Count>0){ct.ThrowIfCancellationRequested();string directory=directories.Pop();CheckManagedPath(Path.Combine(directory,"edited-project.json"),Root);
     foreach(string child in Directory.EnumerateDirectories(directory)){ct.ThrowIfCancellationRequested();if(FileStamp.CanTraverse(new DirectoryInfo(child)))directories.Push(child);}
-    foreach(string path in Directory.EnumerateFiles(directory)){ct.ThrowIfCancellationRequested();if(!Util.IsImageAsset(path))continue;CheckManagedPath(path,Root);string relative=path.Substring(folder.Length+1);var source=project.Sources.FirstOrDefault(s=>s.RelativePath.Equals(relative,StringComparison.OrdinalIgnoreCase));var file=new FileInfo(path);
+    foreach(string path in Directory.EnumerateFiles(directory)){ct.ThrowIfCancellationRequested();if(!Util.IsImageAsset(path))continue;CheckManagedPath(path,Root);string relative=path.Substring(folder.Length+1);EditedSource source;sources.TryGetValue(relative,out source);var file=new FileInfo(path);
      var original=source==null?(project.Sources.Count==1?project.Sources[0].Metadata:null):source.Metadata;EditedMetadata metadata;string problem=null;
-     try{metadata=EditedMetadata.Read(relative,Assets.Inspect(path).Header,original,matcher);}catch(Exception e){if(!(e is IOException||e is InvalidDataException||e is UnauthorizedAccessException||e is NotSupportedException||e is ArgumentException||e is OverflowException))throw;metadata=EditedMetadata.Read(relative,null,original,matcher);problem=e.Message;}
-     images.Add(new EditedImage{Filename=file.Name,RelativePath=relative,Bytes=file.Length,Modified=file.LastWriteTime,Kind=source==null?"Editor output":string.IsNullOrEmpty(source.ArchiveHash)?"Added image":"Working copy",Source=source==null?"":source.OriginalName,Metadata=UserEditedMetadata(project,relative,metadata),MetadataProblem=problem});
+     try{var header=editedHeaders.Get(path,ct);headers[relative]=header;metadata=EditedMetadata.Read(relative,header,original,matcher);}catch(Exception e){if(!(e is IOException||e is InvalidDataException||e is UnauthorizedAccessException||e is NotSupportedException||e is ArgumentException||e is OverflowException))throw;metadata=EditedMetadata.Read(relative,null,original,matcher);problem=e.Message;}
+     images.Add(new EditedImage{Filename=file.Name,RelativePath=relative,Bytes=file.Length,Modified=file.LastWriteTime,Kind=source==null?"Editor output":string.IsNullOrEmpty(source.ArchiveHash)?"Added image":"Working copy",Source=source==null?"":source.OriginalName,Metadata=UserEditedMetadata(edits,relative,metadata),MetadataProblem=problem});
     }
    }
    foreach(var gif in images.Where(i=>MediaFiles.Gif(i.RelativePath))){ct.ThrowIfCancellationRequested();string match=MediaFiles.MatchingImage(gif.RelativePath,images.Where(i=>i.MetadataProblem==null).Select(i=>i.RelativePath));if(match==null)continue;var still=images.Single(i=>i.RelativePath==match);gif.RelatedImage=match;
-    try{gif.Metadata=EditedMetadata.Read(gif.RelativePath,Assets.Inspect(EditedPath(project,gif.RelativePath)).Header,still.Metadata,matcher);gif.Metadata.Evidence+="\nRelated edited image: "+still.Filename;gif.Metadata=UserEditedMetadata(project,gif.RelativePath,gif.Metadata);}catch(IOException){}
+    try{FitsHeader header;if(!headers.TryGetValue(gif.RelativePath,out header))header=editedHeaders.Get(EditedPath(project,gif.RelativePath),ct);gif.Metadata=EditedMetadata.Read(gif.RelativePath,header,still.Metadata,matcher);gif.Metadata.Evidence+="\nRelated edited image: "+still.Filename;gif.Metadata=UserEditedMetadata(edits,gif.RelativePath,gif.Metadata);}catch(IOException){}
    }
-   return images.OrderByDescending(i=>i.Modified).ThenBy(i=>i.Filename).ToList();
+   return sorted?EditedGallery.Order(images):images;
   }
  }
 }

@@ -7,7 +7,7 @@ try {
     $executable = Join-Path $testDirectory 'InstallerTests.exe'
     $arguments = @('/nologo', '/langversion:5', '/target:exe', '/platform:x64', "/out:$executable",
         '/r:System.Core.dll', '/r:System.Web.Extensions.dll', "$PSScriptRoot\InstallCore.cs",
-        "$PSScriptRoot\Updates.cs", "$PSScriptRoot\UpdateTests.cs", "$PSScriptRoot\Tests.cs")
+        "$PSScriptRoot\Updates.cs", "$PSScriptRoot\ReleaseMonitor.cs", "$PSScriptRoot\ReleaseMonitorTests.cs", "$PSScriptRoot\UpdateTests.cs", "$PSScriptRoot\Tests.cs")
     & $Compiler @arguments
     if ($LASTEXITCODE -ne 0) { throw 'Test compilation failed.' }
     $results = & $executable (Join-Path $testDirectory 'fixtures')

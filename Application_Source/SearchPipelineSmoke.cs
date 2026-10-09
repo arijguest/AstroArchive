@@ -49,6 +49,11 @@ namespace AstroArchive {
     if(exposure.SortDirection!=System.ComponentModel.ListSortDirection.Descending||TableSortIndicators.GetMark(exposure)!="▼")throw new Exception("Prepared sort heading differs: "+exposure.SortDirection+" / "+TableSortIndicators.GetMark(exposure));
     T("SearchBox").Text="\"unfinished";WaitForSearches();if(displayed.Count!=0)throw new Exception("Invalid query retained actionable previous rows.");
     B("ClearButton").RaiseEvent(new RoutedEventArgs(Button.ClickEvent));WaitForSearches();if(displayed.Count!=6000||!G("FramesGrid").IsEnabled)throw new Exception("Clear did not restore current repository rows.");
+    using(var started=new ManualResetEventSlim())using(var release=new ManualResetEventSlim()){
+     var barrier=state.Worker.Submit(token=>{started.Set();if(!release.Wait(5000))throw new Exception("Native sorting barrier timed out.");return null;});SmokeSearchWait(()=>started.IsSet);var source=G("FramesGrid").ItemsSource;int initialPulses=pulses;
+     try{SortTable("FramesGrid",exposure,false);SortTable("FramesGrid",exposure,false);SmokeSearchWait(()=>pulses>=initialPulses+3);if(!state.Pending||!state.SortOnly||!ReferenceEquals(source,G("FramesGrid").ItemsSource)||!G("FramesGrid").IsEnabled)throw new Exception("Column sort blocked the dispatcher or replaced rows synchronously.");}finally{release.Set();}
+     WaitForSearches();if(!barrier.IsCanceled||!displayed.Select(f=>f.Exposure).SequenceEqual(displayed.Select(f=>f.Exposure).OrderByDescending(v=>v)))throw new Exception("Latest column sort did not preserve ordering.");
+    }
     if(repo==null)repo=new Repository(Path.Combine(output,"search-smoke-repository"));
     plan=new ImportPlan{Frames=all.ToList()};GoToPage(1);T("ImportSearchBox").Clear();FilterImports();WaitForSearches();T("ImportSearchBox").Text="file:*00002.fit";
     if(B("ImportButton").IsEnabled)throw new Exception("Import stayed enabled while its view was stale.");Import();if(cancel!=null)throw new Exception("Import started against stale search results.");WaitForSearches();if(visibleImports.Count!=1||!B("ImportButton").IsEnabled)throw new Exception("Import result/availability did not recover.");

@@ -12,7 +12,7 @@ namespace AstroArchive {
    public ComboBox Model,Camera,Target,Solve,Rotation,Workers;public TextBlock Error;public Expander Current;
   }
   sealed class PreferenceFields {
-   public ComboBox Theme;public CheckBox Preview,Online;public TextBox Repository,Directory,Astap,Database,Fov;public PasswordBox Key;
+   public ComboBox Theme;public CheckBox Preview,Online,AutomaticReleases;public TextBox Repository,Directory,Astap,Database,Fov;public PasswordBox Key;
    public ImportPreferenceFields Import;public ObservingSiteChoice Site;public AccessibilityChoices Accessibility;public Expander Solver;public ExportPreferenceFields Exports;
   }
   ImportPreferenceFields AddImportPreferences(FormWindow d){
@@ -23,8 +23,13 @@ namespace AstroArchive {
     d.Text("Applies to the current source and next manual import.");f.Model=d.Select("Instrument model",TelescopeProfiles.Models.ToArray(),Convert.ToString(C("ModelBox").SelectedItem));f.Camera=d.Select("Camera channel",new[]{"Auto","Telephoto","Wide"},Convert.ToString(C("CameraBox").SelectedItem));
     f.Target=ImportTargetChoice(d,unknownImportTarget);UiHelp.Describe(f.Target,"Fill Unknown lights/stacks only. Leave blank for mixed-target scans.");f.Error=new TextBlock{TextWrapping=TextWrapping.Wrap};d.Add(f.Error);
     f.Flagged=d.Check("Skip flagged captures",SkipFlagged);f.Solve=d.Select("Target analysis",new[]{"Off","Ambiguous only","All light/stack files"},Convert.ToString(C("ImportSolveMode").SelectedItem));f.Rotation=d.Select("Rotation analysis",new[]{"Off","Ambiguous mounts","All light sessions"},Convert.ToString(C("ImportRotationMode").SelectedItem));
-    f.Originals=d.Check("Delete originals after verified import",((CheckBox)Window.FindName("DeleteOriginalsCheck")).IsChecked==true);f.Originals.IsEnabled=((CheckBox)Window.FindName("DeleteOriginalsCheck")).IsEnabled;d.Text("Originals are kept by default. Removal affects newly imported, verified files only and resets when the source changes. Cloud-synced deletions propagate.");
+    f.Originals=d.Check("Delete originals after verified import",((CheckBox)Window.FindName("DeleteOriginalsCheck")).IsChecked==true);f.Originals.IsEnabled=((CheckBox)Window.FindName("DeleteOriginalsCheck")).IsEnabled;OriginalsChoiceStatus(d,f.Originals);d.Text("Originals are kept by default. Removal affects newly imported, verified files only and resets when the source changes. Cloud-synced deletions propagate.");
    });return f;
+  }
+  TextBlock OriginalsChoiceStatus(FormWindow dialog,CheckBox choice){
+   var status=new TextBlock{TextWrapping=TextWrapping.Wrap,Margin=new Thickness(0,6,0,8),FontWeight=FontWeights.SemiBold};status.SetResourceReference(TextBlock.ForegroundProperty,"Text");status.SetResourceReference(TextBlock.FontSizeProperty,"UiFontBody");dialog.Add(status);
+   Action update=()=>{string reason=choice.IsEnabled?"":RepositoryOperationBlocked?" Wait for the current operation to finish.":repo==null?" Choose a repository, then scan a source folder to enable this option.":" Scan a source folder first to enable this option.";status.Text=(choice.IsChecked==true?"On — verified source originals will be deleted.":"Off — source originals will be kept.")+reason;UiHelp.Hint(choice,status.Text,true);};
+   choice.Checked+=(s,e)=>update();choice.Unchecked+=(s,e)=>update();choice.IsEnabledChanged+=(s,e)=>update();update();return status;
   }
   FormWindow PreferencesDialog(Window owner,int section,out PreferenceFields fields){
    var d=new FormWindow(owner,"Preferences",860,710);d.Window.MinWidth=Math.Min(640,d.Window.Width);d.Sections("General","Import","Export","Sky & solving","Accessibility","Updates","Backups");var f=fields=new PreferenceFields();
@@ -40,7 +45,7 @@ namespace AstroArchive {
     f.Fov=d.Input("Image height in degrees (blank: automatic)",settings.FieldHeight.HasValue?Util.Num(settings.FieldHeight):"");d.Text("Astrometry.net API key");f.Key=new PasswordBox{Password=PlateSolve.Unprotect(settings.ApiKeyProtected),Padding=new Thickness(10,8,10,8)};UiHelp.Hint(f.Key,"Saved with Windows user encryption. Online solving sends star coordinates, never the full image.");System.Windows.Automation.AutomationProperties.SetName(f.Key,"Astrometry.net API key");d.Add(f.Key);d.Text("ASTAP needs a local star database. Online solving needs your API key and internet access. Analysis stays off until selected for an import.");
    });f.Online.Checked+=(s,e)=>f.Solver.IsExpanded=true;if(settings.UseOnline)f.Solver.IsExpanded=true;
    d.Tab(4);f.Accessibility=AddAccessibilityPreferences(d);
-   d.Tab(5);AddReleaseSettings(d,()=>SavePreferences(d,f));
+   d.Tab(5);f.AutomaticReleases=d.Check("Check for releases automatically while AstroArchive is open",!settings.DisableAutomaticReleaseChecks);d.Text("Checks after startup and every six hours. Downloads and installation begin only when you request them.");AddReleaseSettings(d,()=>SavePreferences(d,f));
    d.Tab(6);AddArchiveSafetySettings(d);
    d.SelectTab(section);if(section==1)f.Import.Current.IsExpanded=true;if(section==3)f.Solver.IsExpanded=true;d.Accept("Save preferences",()=>SavePreferences(d,f));return d;
   }
@@ -59,12 +64,12 @@ namespace AstroArchive {
     bool rescan=repositoryChanged||!Equals(f.Import.Model.SelectedItem,C("ModelBox").SelectedItem)||!Equals(f.Import.Camera.SelectedItem,C("CameraBox").SelectedItem)||settings.IgnoreFailed!=(f.Import.Failed.IsChecked==true)||settings.IgnoreRasterImports!=(f.Import.Raster.IsChecked==true)||settings.RobustImportMatching!=(f.Import.Robust.IsChecked==true);
     var draft=Util.Deserialize<Settings>(Util.Serialize(settings));draft.ThemeMode=Convert.ToString(f.Theme.SelectedItem);draft.ShowPreview=f.Preview.IsChecked==true;f.Accessibility.Save(draft);f.Site.Save(draft);draft.FieldHeight=field;draft.Astap=f.Astap.Text.Trim();draft.StarDatabase=f.Database.Text.Trim();draft.UseOnline=f.Online.IsChecked==true;draft.AutoSolve=false;draft.AutoRotation=false;
     draft.ApiKeyProtected=f.Key.Password==PlateSolve.Unprotect(settings.ApiKeyProtected)?settings.ApiKeyProtected:PlateSolve.Protect(f.Key.Password);f.Exports.Save(draft);draft.ExportWorkingDirectory=directory;int workers;draft.CopyWorkers=int.TryParse(Convert.ToString(f.Import.Workers.SelectedItem),out workers)?workers:0;draft.IgnoreFailed=f.Import.Failed.IsChecked==true;draft.IgnoreRasterImports=f.Import.Raster.IsChecked==true;draft.RobustImportMatching=f.Import.Robust.IsChecked==true;draft.Model=Convert.ToString(applyCurrentImport?f.Import.Model.SelectedItem:C("ModelBox").SelectedItem);draft.LastSource=T("SourceBox").Text;draft.Telescope=T("TelescopeBox").Text;
-    Directory.CreateDirectory(Path.GetDirectoryName(config));Util.AtomicText(config,Util.Serialize(draft));settings=draft;
+    Directory.CreateDirectory(Path.GetDirectoryName(config));draft.DisableAutomaticReleaseChecks=f.AutomaticReleases.IsChecked!=true;Util.AtomicText(config,Util.Serialize(draft));settings=draft;ApplyReleaseMonitoringPreference();
     if(applyCurrentImport){unknownImportTarget=string.IsNullOrWhiteSpace(f.Import.Target.Text)?"":ImportPolicy.Target(f.Import.Target.Text);C("ModelBox").SelectedItem=f.Import.Model.SelectedItem;C("CameraBox").SelectedItem=f.Import.Camera.SelectedItem;C("ImportSolveMode").SelectedItem=f.Import.Solve.SelectedItem;C("ImportRotationMode").SelectedItem=f.Import.Rotation.SelectedItem;((CheckBox)Window.FindName("SkipFlaggedCheck")).IsChecked=f.Import.Flagged.IsChecked;}else unknownImportTarget="";((CheckBox)Window.FindName("IgnoreFailedCheck")).IsChecked=f.Import.Failed.IsChecked;
     if(rescan)InvalidateImportPlan();else if(plan!=null&&unknownImportTarget.Length>0)ImportPolicy.AssignUnknown(plan.Frames,unknownImportTarget);((CheckBox)Window.FindName("DeleteOriginalsCheck")).IsChecked=!rescan&&f.Import.Originals.IsEnabled&&f.Import.Originals.IsChecked==true;
     ApplyAppearance();SetPreviewVisibility();if(settings.ShowPreview)PreviewSelected();RefreshSkyPreviews();FilterImports();UpdateNavigationState();L("StatusLabel").Text=rescan?"Preferences saved. Scan the source again to apply import changes.":"Preferences saved.";return true;
    }catch(Exception error){MessageBox.Show(d.Window,error.Message,"Preferences could not be saved",MessageBoxButton.OK,MessageBoxImage.Warning);return false;}
   }
-  bool Configure(int initialTab=0,Window owner=null){if(cancel!=null)return false;PreferenceFields fields;return PreferencesDialog(owner??Window,initialTab,out fields).Show();}
+  bool Configure(int initialTab=0,Window owner=null){if(RepositoryOperationBlocked)return false;PreferenceFields fields;return PreferencesDialog(owner??Window,initialTab,out fields).Show();}
  }
 }

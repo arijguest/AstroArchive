@@ -6,6 +6,8 @@ using System.Threading;
 namespace AstroArchive {
  public partial class Tests {
   static void EditedRegressions(){
+   OptimisationEditedTests();
+   EditedDeletionTests();
    Test("Background gallery checks discover outputs, deletions and metadata-only changes",()=>{
     string file=Path.Combine(root,"edited-refresh-source","M31_10x60s_starless.fit");Write(file,64,48,(x,y)=>2000,new Dictionary<string,string>());
     using(var repo=new Repository(Path.Combine(root,"edited-refresh-repo"))){

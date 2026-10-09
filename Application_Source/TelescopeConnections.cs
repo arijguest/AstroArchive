@@ -9,11 +9,14 @@ using System.Threading;
 using Microsoft.Win32.SafeHandles;
 namespace AstroArchive {
  public class TelescopeProfile {
+  public List<string> LastImportSelection{get;set;}
+  public string SourceMake{get;set;}
   public string Id{get;set;} public string SessionIdentity{get;set;} public string Model{get;set;} public string Camera{get;set;}
   public string LastSource{get;set;} public string VolumeId{get;set;} public string SourceRelativePath{get;set;}
   public string DisplayText{get{return string.IsNullOrEmpty(Id)?"New telescope...":Id+(Model=="Auto"||string.IsNullOrEmpty(Model)?"":" · "+Model);}}
  }
  public static class TelescopeProfiles {
+  public static string Make(TelescopeProfile profile){string make=InstrumentDetection.MakeOf(profile.Model);return make!="Unknown"?make:profile.SourceMake=="Seestar"||profile.SourceMake=="DWARFLAB"?profile.SourceMake:"Unknown";}
   public static readonly string[] Models={"Auto","Seestar S50 Pro","Seestar S50","Seestar S30 Pro","Seestar S30","Dwarf 3","Dwarf II","Dwarf mini","Other"};
   public static string Model(string value){return Models.Contains(value)?value:"Auto";}
   public static void Initialize(Settings settings){
@@ -69,7 +72,7 @@ namespace AstroArchive {
  public static class UsbTelescopeDiscovery {
   public static TelescopeProfile MatchProfile(UsbTelescope device,IEnumerable<TelescopeProfile> profiles,string preferred=null){
    var saved=profiles.Where(p=>!string.IsNullOrEmpty(p.Id)).ToList();var bound=saved.FirstOrDefault(p=>string.Equals(p.Id,device.ProfileId,StringComparison.OrdinalIgnoreCase));if(bound!=null)return bound;
-   var candidates=saved.Where(p=>InstrumentDetection.MakeOf(p.Model)==device.Make).ToList();
+   var candidates=saved.Where(p=>TelescopeProfiles.Make(p)==device.Make).ToList();
    var selected=candidates.FirstOrDefault(p=>string.Equals(p.Id,preferred,StringComparison.OrdinalIgnoreCase));return selected??(candidates.Count==1?candidates[0]:null);
   }
   static bool Allowed(string source,string archive){return string.IsNullOrEmpty(archive)||(!Util.Within(source,archive)&&!Util.Within(archive,source));}
@@ -80,7 +83,7 @@ namespace AstroArchive {
   }
   public static List<UsbTelescope> Discover(IEnumerable<UsbVolume> volumes,IEnumerable<TelescopeProfile> profiles,string archive,CancellationToken ct){
    var result=new List<UsbTelescope>();foreach(var volume in volumes){ct.ThrowIfCancellationRequested();if(!Readable(volume.Root))continue;bool bound=false;
-    foreach(var profile in profiles){string path=Resolve(volume,profile);if(path==null||!Allowed(path,archive)||!Readable(path))continue;result.Add(new UsbTelescope{Volume=volume,Source=path,ProfileId=profile.Id,Make=InstrumentDetection.MakeOf(profile.Model)});bound=true;}
+    foreach(var profile in profiles){string path=Resolve(volume,profile);if(path==null||!Allowed(path,archive)||!Readable(path))continue;string boundMake=TelescopeProfiles.Make(profile);if(boundMake=="Unknown")boundMake=DetectLayout(path,ct);result.Add(new UsbTelescope{Volume=volume,Source=path,ProfileId=profile.Id,Make=boundMake});bound=true;}
     if(bound||!Allowed(volume.Root,archive))continue;string make=DetectLayout(volume.Root,ct);if(make=="Seestar"||make=="DWARFLAB")result.Add(new UsbTelescope{Volume=volume,Source=volume.Root,Make=make});
    }return result;
   }

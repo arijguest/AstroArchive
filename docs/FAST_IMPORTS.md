@@ -1,6 +1,7 @@
 # Repeat telescope imports
 
-Folder scans and connected Seestar/DWARF imports default to filename matching.
+Folder scans default to filename matching. The selected USB import flow described
+below always performs a full scan; unscoped engine uploads retain filename matching.
 The saved physical telescope scopes the inventory. Known files bypass image
 opens, header/pixel reads, timestamps, companion metadata, destination stats and
 hashing. Existing names are indexed in a compact SQLite table; older archives
@@ -31,12 +32,27 @@ This setting applies to folder scans and connected imports; Dump keeps verified
 copy/cleanup behavior. Newly copied files retain SHA-256 readback verification,
 and fast-skipped originals never enter source cleanup.
 
-The visible **Import from ...** button appears when telescope storage is detected.
-Saved volume bindings win, then the currently selected compatible profile, then
-a unique profile for the detected make. Ambiguous profiles require selection;
-an unconfigured telescope requires a saved physical device ID. Multiple connected
-sources are offered in a menu. The action retains originals and leaves plate
-solving/rotation off.
+Detected storage adds **Import from Seestar…** or **Import from Dwarflab…** directly
+to the Import menu and connected-telescope dropdown/button. Multiple devices of
+the same make include their profile or drive to distinguish them. Saved volume
+bindings win, then the currently selected compatible profile, then a unique
+profile for the detected make. Ambiguous/unconfigured devices are configured in
+the selection dialog with a physical device name.
+
+The picker combines selected folders and individual files inside the telescope
+volume. Paths outside that volume, linked items and system/application folders
+cannot be selected. Folder selections are recursive; overlapping selections are
+normalised. It remembers relative selections in the saved profile for the same
+volume, preserving the common drive root for ancestor metadata lookup. Opening
+or cancelling the picker performs no recursive scan or import.
+
+Every selected USB import asks for a full-scan confirmation, with a stronger time
+warning for the entire drive or at least 500 explicitly selected files. Folder
+contents are not counted before confirmation. This flow always bypasses filename,
+DWARF-session and header-cache shortcuts and checks hashes/archive copies before
+screening and verified import. Existing ignore/rejection/deletion policies remain
+applicable; originals stay and plate solving/rotation stay off. Results state the
+selected scope instead of declaring the entire repository up to date.
 
 Generated-data checks cover deliberately edited matching names, bounded session
 omission, fresh DWARF sessions with repeated filenames, Seestar additions, mirror
