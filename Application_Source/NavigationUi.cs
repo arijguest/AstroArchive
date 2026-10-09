@@ -108,7 +108,7 @@ namespace AstroArchive {
             UiHelp.Describe(B("RepositoryImportButton"), "Choose a source and review imports.");
             UiHelp.Hint(B("ImportExportButton"), "Export archived files; import scanned files first.");
             Window.PreviewKeyDown += NavigationKeys;
-            navigationReady = true;BeginOpeningSelection(tabs.SelectedIndex);
+            DescribePaneNavigation();navigationReady = true;BeginOpeningSelection(tabs.SelectedIndex);
             var originals=(CheckBox)Window.FindName("DeleteOriginalsCheck");originals.Checked+=(s,e)=>UpdateNavigationState();originals.Unchecked+=(s,e)=>UpdateNavigationState();
             UpdateNavigationState();
             if (firstRun) Window.ContentRendered += (s,e) => {

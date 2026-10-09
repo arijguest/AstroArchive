@@ -16,7 +16,7 @@ namespace AstroArchive {
     var targets=list;targets.GotKeyboardFocus+=(s,e)=>keyboardTargets=targets;
    }
    Window.PreviewMouseDown+=(s,e)=>keyboardTargets=TargetListFromElement(e.OriginalSource as DependencyObject);
-   Window.PreviewKeyDown+=TargetNavigationKeys;
+   Window.PreviewKeyDown+=PaneNavigationKeys;Window.PreviewKeyDown+=TargetNavigationKeys;
   }
   void RestoreTargetKeyboardFocus(ListBox list){
    if(keyboardTargets!=list||!list.IsVisible||!list.IsEnabled)return;
