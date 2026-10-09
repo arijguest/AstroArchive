@@ -19,6 +19,7 @@ Output: `Application_Source/dist/AstroArchive.exe`.
 | --- | --- | --- |
 | Targets, search, selection, Edited export, guide | `test.ps1 -TargetsOnly` | `--targets-only` |
 | Preview resolution, layout, sub exposure labels | `test.ps1 -PreviewOnly` | `--preview-only` |
+| Analytics calculations, layout and export | `test.ps1 -AnalyticsOnly` | `--analytics-only` |
 | Checkbox, focus, disabled or theme states | Build the app | `--controls-only` |
 | Broader engine changes or release preparation | `test.ps1` | Full UI suite |
 
@@ -34,6 +35,16 @@ those checks. UI runs use isolated settings and generated fixtures; they save
 results and screenshots. Repeat after relevant changes or failures. Copy and
 cosmetic changes need a build, link/content checks and visual review as applicable,
 not repeated full suites.
+
+Analytics checks cover integration accounting, missing metadata, date/telescope
+scoping, histogram boundaries, continuation rankings and SVG/PDF structure. The
+Windows UI switch checks both themes, live scope changes and all four export
+formats, including combined sheets, image decoding and safe file replacement:
+
+~~~powershell
+.\Application_Source\test.ps1 -AnalyticsOnly
+.\Application_Source\dist\AstroArchive.exe --ui-test .\Application_Source\test-data\analytics-ui --analytics-only --no-updates
+~~~
 
 Full checks:
 
