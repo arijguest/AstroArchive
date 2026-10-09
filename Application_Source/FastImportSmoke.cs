@@ -7,7 +7,8 @@ using System.Windows;
 using System.Windows.Controls;
 namespace AstroArchive {
  public partial class MainUi {
-  void SmokeConnectedImport(string output){
+  public void SmokeConnectedImport(string output){
+   Directory.CreateDirectory(output);Window.Show();PumpPopupLayout();
    var originalSettings=settings;var originalRepo=repo;var originalAll=all;var originalUsb=usbTelescopes;var originalPending=pendingUsb;var originalPlan=plan;string originalStatus=L("UsbStatusLabel").Text;string source=T("SourceBox").Text,id=T("TelescopeBox").Text,model=Convert.ToString(C("ModelBox").SelectedItem),camera=Convert.ToString(C("CameraBox").SelectedItem);int tab=((TabControl)Window.FindName("MainTabs")).SelectedIndex;
    string path=Path.Combine(Path.GetTempPath(),"AstroArchive-fast-import-ui-"+Guid.NewGuid().ToString("N"));Repository temporary=null;
    try{
@@ -28,6 +29,9 @@ namespace AstroArchive {
       chooseOutside=true;picker.FilesButton.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));if(picker.Items.Items.Count!=2||picker.Error.Text.Length==0)throw new Exception("Telescope picker accepted a capture from outside its drive.");
       foreach(string theme in new[]{"Light","Dark"}){Theme.Apply(picker.Dialog.Window,theme);PumpPopupLayout();CapturePopup(picker.Dialog.Window,Path.Combine(output,"AstroArchive_Telescope_Picker_"+theme+".png"));}
       picker.WholeDriveButton.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));if(!picker.Validate()||!picker.Selection.WholeSource)throw new Exception("Whole telescope selection failed.");picker.Dialog.Window.Close();
+      var confirmation=TelescopeImportConfirmation.Create(Window,picker.Selection,"Seestar");try{
+       confirmation.Window.Show();foreach(string theme in new[]{"Light","Dark"}){Theme.Apply(confirmation.Window,theme);PumpPopupLayout();foreach(var button in PopupChildren<Button>(confirmation.Window).Where(b=>Convert.ToString(b.Content)=="Import"||Convert.ToString(b.Content)=="Cancel"))if(!button.IsVisible||button.ActualWidth+button.Margin.Left+button.Margin.Right<button.DesiredSize.Width-0.5)throw new Exception("Telescope confirmation actions clipped.");if(!PopupChildren<TextBlock>(confirmation.Window).Any(t=>t.Text.Contains("500"))||!PopupChildren<TextBlock>(confirmation.Window).Any(t=>t.Text.Contains("Keep originals")))throw new Exception("Large import summary missing.");CapturePopup(confirmation.Window,Path.Combine(output,"AstroArchive_Telescope_Confirmation_"+theme+".png"));}
+      }finally{confirmation.Window.Close();}
       settings.Telescopes.RemoveAll(p=>p.Id=="My DWARF");var dwarf=new UsbTelescope{Make="DWARFLAB",Source=card,Volume=device.Volume};var setup=new TelescopeImportPicker(Window,dwarf,settings.Telescopes,null,()=>folder);
       setup.FolderButton.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));if(setup.Validate())throw new Exception("New physical telescope did not require its own name.");setup.Name.Text="My Dwarflab";if(!setup.Validate()||setup.Profile.Id!="My Dwarflab")throw new Exception("New physical telescope could not be configured in the picker.");setup.Dialog.Window.Close();
      }finally{File.Delete(outside);}

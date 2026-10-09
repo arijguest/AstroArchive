@@ -27,7 +27,7 @@ namespace AstroArchive {
   string nextActivityTitle;
   bool activityOpeningReport,activityDisposed;
   sealed class ActivityCard {public TextBlock Title,Status,Rate,Details;public ProgressBar Bar;public WrapPanel Actions;}
-  bool RepositoryOperationBlocked {get{return closing||cancel!=null||dumpChecking||releaseInstalling;}}
+  bool RepositoryOperationBlocked {get{return closing||cancel!=null||dumpChecking||releaseInstalling||usbImportPicking;}}
   void InitializeActivity(){
    var root=(Grid)Window.Content;
    var menu=(Menu)Window.FindName("MainMenu");

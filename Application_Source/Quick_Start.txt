@@ -60,10 +60,10 @@ Folders include subfolders; overlapping selections are scanned once. Previous
 selections are remembered for that telescope and volume.
 For faster scans, choose only the target folders or files you need. **Entire
 telescope drive** checks all capture folders and may take a long time.
-**Review and import…** asks for confirmation before any scan or copying. Whole-drive
-and 500-or-more-file selections receive a stronger time warning. Cancel or No
-leaves the selection unimported.
-After confirmation, every selected capture is fully scanned and hashed, then
+**Import** starts directly for small selections. Selections containing 500 or more
+capture files, including files inside folders, show a concise confirmation first.
+Cancel leaves the selection unimported.
+Every selected capture is fully scanned and hashed, then
 eligible files are screened and copied with verification. Saved filename/session
 shortcuts are bypassed even when Robust file matching is off. Import exclusions
 still apply; rejected or unreadable captures remain for review.
@@ -167,6 +167,8 @@ Aliases share an identity: M106, NGC4258, UGC7353 and PGC39600 resolve to M106.
 Catalogue prefixes matter; M106 differs from NGC106. Spacing, accents and full
 Messier/Caldwell prefixes are normalised. Conflicting IDs stay unresolved.
 Rosette/NGC2244 labels use NGC2237. Moon/Lunar and Sun/Solar share labels.
+Planet names in filenames, such as Jupiter or Saturn, resolve to Solar system
+targets during scanning. Recognised catalogue targets take precedence.
 Comet designations and recognised names such as NEAT/LINEAR/NEOWISE group in
 Solar system. Meteor filename labels use Meteor and leave object ID blank.
 

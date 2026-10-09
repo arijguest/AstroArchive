@@ -1,14 +1,10 @@
-AstroArchive 2.1.10
-Package 2.1.10.1
+AstroArchive 2.1.11
+Package 2.1.11.1
 
-- Replaced the Activity bell with a cleaner outline icon. Its button matches
-  the toolbar's height, alignment, spacing and colours. Notification indicators
-  no longer change its width; the icon follows the selected text size.
-- Escape clears all file selections on the active Repository, Edited or Import
-  page, including selections under other targets and condensed sessions. It
-  works from the search bar and target pane as well as the file table. Open
-  menus, dropdowns and Activity still dismiss before clearing file selections.
-- DWARF device stacks derive sub counts from total integration and the
-  filename's per-sub exposure when the result is a whole number. Known counts
-  show Stack (571), for example. Existing records are repaired from cached
-  headers on opening; explicit/manual counts and image files are preserved.
+- Import scans recognise planet names in filenames, including Jupiter and
+  Saturn, and group them under Solar system. Catalogue matches take precedence;
+  ambiguous names remain unresolved. Recognition also applies to Edited files.
+- Connected telescope imports start directly for small selections. A compact,
+  themed confirmation appears for 500 or more capture files, including files
+  inside selected folders. It shows the batch size, a short summary, and
+  Import / Cancel buttons. Originals remain on the telescope.

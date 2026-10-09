@@ -6,6 +6,14 @@ using System.Threading;
 namespace AstroArchive {
  public partial class Tests {
   static void TargetWorkflowTests(){
+   Test("Import scans recognise planet filenames and preserve deep-sky identities",()=>{
+    string source=Path.Combine(root,"planet-filenames");Directory.CreateDirectory(source);
+    var names=new Dictionary<string,string>{{"Jupiter_001.fit","Jupiter"},{"Light_saturn_001.fit","Saturn"},{"Stacked_MARS20261009.fit","Mars"},{"Venus-20261009.fit","Venus"},{"raw_Mercury_001.fit","Mercury"},{"Uranus_001.fit","Uranus"},{"Neptune_001.fit","Neptune"},{"pluto_001.fit","Pluto"},{"M45_Jupiter.fit","M45"},{"Ghost_of_Jupiter.fit","NGC3242"},{"header_Jupiter.fit","M31"}};int value=1000;
+    foreach(var entry in names)Write(Path.Combine(source,entry.Key),64,48,(x,y)=>value++,entry.Key=="header_Jupiter.fit"?new Dictionary<string,string>{{"OBJECT","'M31'"}}:new Dictionary<string,string>());
+    using(var repository=new Repository(Path.Combine(root,"planet-repo"))){var plan=repository.Scan(source,"Planet scope","Auto",ct,NoProgress);Check(plan.Errors.Count==0&&plan.Frames.Count==names.Count,"Planet scan missed captures");foreach(var frame in plan.Frames){Check(frame.Target==names[frame.OriginalName],"Filename target lost: "+frame.OriginalName+" -> "+frame.Target);if(ObservationTargets.NamedSolar(frame.Target)!=null)Check(TargetNavigation.Group(frame.Target)=="Solar system"&&!TargetIdentification.NeedsPlateSolve(frame)&&ObservationTargets.Unstretched(frame.Target,frame.ObservationMode),"Planet grouping or preview mode wrong: "+frame.Target);}}
+    Check(Catalog.KnownName("jupiter")=="Jupiter"&&Catalog.CanonicalTarget("Light_saturn_001")=="Saturn"&&EditedMetadata.Read("Jupiter_stack.fit",new FitsHeader()).Object=="Jupiter","Header/session or Edited recognition differs");
+    foreach(string name in new[]{"Jupiter_Saturn.fit","Jupiterlike.fit","NGC999999_Jupiter.fit"})Check(Catalog.TargetFromFilename(name)==null,"Ambiguous or unrelated label was guessed: "+name);
+   });
    Test("Comet filenames and metadata resolve to solar-system targets without stealing catalogue objects",()=>{
     foreach(string name in new[]{"NEAT","LINEAR","NEOWISE","Pan-STARRS","SWAN","SOHO","Tsuchinshan-ATLAS","C_2002_T7_LINEAR","C2023A3_Tsuchinshan-ATLAS","12P_Pons-Brooks"}){
      var metadata=EditedMetadata.Read(name+"_stack.fit",new FitsHeader());Check(CometTargets.IsComet(metadata.Object)&&TargetNavigation.Group(metadata.Object)=="Solar system","Edited comet was lost: "+name);
