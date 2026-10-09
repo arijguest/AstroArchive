@@ -44,6 +44,12 @@ namespace AstroArchive {
      var filtered=RepositoryOrdering.Order(rows.Where(f=>f!=b),sorts,System.Globalization.CultureInfo.InvariantCulture,true,true,ct);Check(filtered[0]==stack,"Filtered singleton retained merged-group priority");
     }
    });
+   Test("Target rows omit repeated catalogue IDs without merging shared names",()=>{
+    var targets=TargetNavigation.Build(new[]{new Frame{Target="IC434"},new Frame{Target="NGC2024"}});
+    Check(targets.Single(t=>t.Name=="IC434").DisplayName=="IC434 - Flame Nebula","IC434 repeats its ID after the common name");
+    Check(targets.Single(t=>t.Name=="NGC2024").DisplayName=="NGC2024 - Flame Nebula"&&targets.Count==3,"Shared display names merged catalogue identities");
+    Check(Catalog.KnownName(Catalog.CommonName("IC434"))=="IC434"&&Catalog.KnownName("Flame Nebula")=="NGC2024","Display formatting changed name resolution");
+   });
   }
  }
 }

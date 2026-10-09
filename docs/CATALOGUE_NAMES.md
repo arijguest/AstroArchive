@@ -14,6 +14,10 @@ preferred catalogue ID before the common name, such as **M31 - Andromeda Galaxy*
 with alternate IDs below. Comet designations and recognised NEAT/LINEAR/NEOWISE
 names share Solar system; Meteors sit above Other targets.
 
+Target rows omit a trailing parenthesized catalogue ID when it repeats the ID
+already shown before the common name: **IC434 - Flame Nebula**. Qualified names
+remain available to the identity resolver.
+
 Right-click a target on Repository or Edited to edit its common name and aliases.
 Rules persist in `settings.json` and publish as a validated immutable snapshot.
 Saving rebuilds search indexes and the Edited fuzzy matcher and regroups existing
@@ -90,10 +94,8 @@ labels (the associated cluster) are assigned to that target for archive grouping
 The general Rosette Nebula name also uses NGC2237; the bundled NGC2238 component
 retains its specific catalogue ID and position.
 
-The same explicit ownership rule maps Eagle Nebula to M16 and Eastern Veil /
-Network Nebula to NGC6992. Flame Nebula belongs to NGC2024; the incorrect
-Flame Nebula label on the bundled IC434 entry is removed. IC434 retains its
-Orion B label, independent identity and sky position. Component IDs remain
+The same explicit ownership rule maps Eagle Nebula to M16, Flame Nebula to
+NGC2024 and Eastern Veil / Network Nebula to NGC6992. Component IDs remain
 distinct and their displayed names include the ID when necessary. Antennae
 Galaxies is not assigned to either component without an ID. The unspecific
 Lobster Nebula name also remains ambiguous; NGC6357 uses War and Peace Nebula
