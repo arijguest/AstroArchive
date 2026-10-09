@@ -1,17 +1,13 @@
-AstroArchive 2.1.7
-Package 2.1.7.1
+AstroArchive 2.1.8
+Package 2.1.8.1
 
-- Removed repetitive hover text from clearly labelled controls, table headings
-  and image surfaces. Icon actions and unusual settings retain concise help;
-  clipped metadata reveals its full value, and screen reader help stays available.
-- Scan help follows the active matching mode. Selection-sensitive actions explain
-  their scope, search help shows the current error, and metadata edits report
-  changed fields and the number of files affected across selected sessions.
-- Updates now live directly in Preferences > Updates. Check for releases, read
-  notes and install with visible progress without opening another dialog.
-  Settings are validated and saved before installation; failures remain visible
-  with retry available, and the application restarts after a verified update.
-- First-run guidance uses four focused steps; the full walkthrough and offline
-  guide remain available. Unavailable export destinations explain requirements
-  in an expandable section that can be reached from the keyboard.
-- Main-page text and layouts are unchanged. Includes all previous release fixes.
+- Fixed interface verification overwriting the installed application's settings,
+  which could clear the saved repository selection and make an intact archive
+  appear empty. Test settings, backups and working indexes now use isolated state
+  in the test output folder; they cannot replace the installed user's settings.
+- Added a regression check that verifies isolated settings writes, backups and
+  repository indexes before running the interface checks.
+- Removed duplicate calls to the UX verification suite.
+- Existing repository databases, image files and metadata are retained. If a
+  previous interface check cleared your repository selection, choose the existing
+  archive in Settings > General > Choose repository; no reimport is required.

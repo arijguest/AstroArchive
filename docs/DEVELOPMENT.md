@@ -16,6 +16,9 @@ From the repository root:
 
 The application tests use generated fixtures. The UI command exercises rendering,
 menus, help, tables, previews and progress, and saves screenshots to the chosen folder.
+UI settings, their backups and working repository indexes stay in that folder's
+`test-state` directory. UI checks never use the installed application's settings
+or repository cache. A regression check verifies this isolation before the suite runs.
 Windows is required for WPF, Windows codecs and native installation checks.
 
 ## Complete installer build
