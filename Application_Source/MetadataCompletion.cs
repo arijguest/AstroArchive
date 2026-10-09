@@ -65,18 +65,19 @@ namespace AstroArchive {
   }
  }
  public sealed partial class Repository {
+  const string ConflictedShot="<conflicting session values>";
   static void FlattenCompletionShots(Dictionary<string,object> raw,Dictionary<string,string> values,int depth){
    if(raw==null)throw new InvalidDataException("Preserved session metadata is empty.");if(depth>5)throw new InvalidDataException("Preserved session metadata is too deeply nested.");
    foreach(var pair in raw){var nested=pair.Value as Dictionary<string,object>;if(nested!=null){FlattenCompletionShots(nested,values,depth+1);continue;}
     if(!(pair.Value is string||pair.Value is int||pair.Value is long||pair.Value is double||pair.Value is decimal))continue;
-    string value=Convert.ToString(pair.Value,CultureInfo.InvariantCulture),previous;if(values.TryGetValue(pair.Key,out previous)&&previous!=value)values[pair.Key]="";else if(!values.ContainsKey(pair.Key))values[pair.Key]=value;
+    string value=Convert.ToString(pair.Value,CultureInfo.InvariantCulture),previous;if(values.TryGetValue(pair.Key,out previous)&&previous!=value)values[pair.Key]=ConflictedShot;else if(!values.ContainsKey(pair.Key))values[pair.Key]=value;
    }
   }
   static void SessionConflicts(Frame frame,Dictionary<string,string> shots){
    if(shots==null)return;
    foreach(var field in new[]{new[]{"Camera","cameraId","camera_id","camId","cam_id"},new[]{"Exposure","exposure_s","exposureSeconds","exposureTimeSec"},new[]{"Gain","gain","cameraGain"},new[]{"Filter","ir","irCut"},new[]{"Target","targetName","target_name","objectName","object_name","target"},new[]{"BinX","binning","bin"},new[]{"BinY","binning","bin"}}){
     var values=new HashSet<string>(StringComparer.OrdinalIgnoreCase);bool repeated=false;
-    foreach(string key in field.Skip(1)){string value;if(!shots.TryGetValue(key,out value))continue;if(value.Length==0){repeated=true;continue;}double number;values.Add(field[0]=="Target"?Catalog.Normalize(value):double.TryParse(value,NumberStyles.Float,CultureInfo.InvariantCulture,out number)?number.ToString("R",CultureInfo.InvariantCulture):value.Trim());}
+    foreach(string key in field.Skip(1)){string value;if(!shots.TryGetValue(key,out value)||string.IsNullOrWhiteSpace(value))continue;if(value==ConflictedShot){repeated=true;continue;}double number;values.Add(field[0]=="Target"?Catalog.Normalize(value):double.TryParse(value,NumberStyles.Float,CultureInfo.InvariantCulture,out number)?number.ToString("R",CultureInfo.InvariantCulture):value.Trim());}
     if(repeated||values.Count>1){if(frame.MetadataConflicts==null)frame.MetadataConflicts=new List<string>();frame.MetadataConflicts.Add(field[0]+": conflicting preserved session metadata");}
    }
   }
