@@ -44,7 +44,7 @@ namespace AstroArchive {
    foreach(var phrase in phrases.GroupBy(p=>p.Key).Select(g=>g.First())){if(KnownName(phrase.Key)!=phrase.Value)continue;string pattern=@"\b"+string.Join(@"\s*",phrase.Key.Split(new[]{' '},StringSplitOptions.RemoveEmptyEntries).Select(Regex.Escape))+@"\b";var entry=new KeyValuePair<Regex,string>(new Regex(pattern,RegexOptions.CultureInvariant),phrase.Value);filenamePatterns.Add(entry);string token="";foreach(string word in phrase.Key.Split(' ')){token+=word;List<KeyValuePair<Regex,string>> list;if(!phraseIndex.TryGetValue(token,out list))phraseIndex[token]=list=new List<KeyValuePair<Regex,string>>();list.Add(entry);}}
   }
   static void AddAlias(string a,string name){if(string.IsNullOrWhiteSpace(a))return;string owner;if(CatalogNames.NameOwners.TryGetValue(a.Trim(),out owner)&&owner!=name)return;string label;if(!descriptions.TryGetValue(name,out label))label="";descriptions[name]=label+" "+a+" "+CompactId(a);string key=Key(a);if(key.Length==0||ambiguous.Contains(key))return;string existing;if(aliases.TryGetValue(key,out existing)&&existing!=name){aliases.Remove(key);ambiguous.Add(key);}else aliases[key]=name;string words=FileSearch.Fold(a);if(words.Length>=4&&!Regex.IsMatch(key,@"^(M|NGC|IC|C|B|SH2|UGC|PGC)\d+[A-Z]?$")&&words.Any(char.IsLetter))phrases.Add(new KeyValuePair<string,string>(words,name));}
-  public static string KnownName(string name){string value;string key=Key(name);return savedNames.Aliases.TryGetValue(key,out value)||aliases.TryGetValue(key,out value)?value:null;}
+  public static string KnownName(string name){string value;string key=Key(name);return savedNames.Aliases.TryGetValue(key,out value)||aliases.TryGetValue(key,out value)?value:ObservationTargets.NamedSolar(name);}
   static HashSet<string> FilenameTargets(string filename,bool includeUnknown=false){
    string stem=Regex.Replace(Path.GetFileName(filename??""),@"\.(fit|fits|fts)(\.gz)?$","",RegexOptions.IgnoreCase);
    string text=FileSearch.Fold(stem);var found=new HashSet<string>();
@@ -59,7 +59,7 @@ namespace AstroArchive {
    if(Regex.IsMatch(text,@"\bSUN\b"))found.Add("Sun");
    return found;
   }
-  public static string TargetFromFilename(string filename){if(HasFilenameConflict(filename))return null;var found=FilenameTargets(filename);return found.Count==1?found.First():CometTargets.FromFilename(filename);}
+  public static string TargetFromFilename(string filename){if(HasFilenameConflict(filename))return null;var found=FilenameTargets(filename);if(found.Count==1)return found.First();return CometTargets.FromFilename(filename)??(FilenameTargets(filename,true).Count==0?ObservationTargets.SolarFromFilename(filename):null);}
   public static bool HasFilenameConflict(string filename){return FilenameTargets(filename,true).Count>1;}
   public static string Aliases(string target){string s,custom;string id=CanonicalTarget(target);return (descriptions.TryGetValue(id,out s)?s:"")+" "+(savedNames.Descriptions.TryGetValue(id,out custom)?custom:"");}
   // Resolve recognised labels on deserialization too, so old archives share new groups.
@@ -70,6 +70,7 @@ namespace AstroArchive {
    string known=KnownName(text);if(known!=null)return known;
    if(HasFilenameConflict(text))return text.Replace('_',' ');var found=FilenameTargets(text);if(found.Count==1)return found.First();
    string comet=CometTargets.FromLabel(text);if(comet!=null)return comet;
+   if(FilenameTargets(text,true).Count==0){string solar=ObservationTargets.SolarFromFilename(text);if(solar!=null)return solar;}
    return text.Replace('_',' ');
   }
   public static string ObjectId(string target){string id=CanonicalTarget(target);return !IsAmbiguous(id)&&(KnownName(id)!=null||Regex.IsMatch(id,@"^(M|NGC|IC|C|B|SH2|UGC|PGC)\d+[A-Z]?$",RegexOptions.IgnoreCase))?id:"";}
@@ -194,8 +195,9 @@ namespace AstroArchive {
    if(!f.Gain.HasValue)f.Gain=ShotNumber(shots,"gain","cameraGain");if(!f.Exposure.HasValue)f.Exposure=ShotNumber(shots,"exposure_s","exposureSeconds","exposureTimeSec");
    if(f.Filter=="Unknown"){double? ir=ShotNumber(shots,"ir","irCut");if(ir.HasValue&&ir>=0&&ir<=2)f.Filter=ir==0?"Standard":ir==1?"Astro":"Dual band";}
    if(f.BinX==0){string b=Shot(shots,"binning","bin");var m=Regex.Match(b,@"^(\d+)(?:\s*[x*]\s*(\d+))?$");if(m.Success){f.BinX=int.Parse(m.Groups[1].Value);f.BinY=m.Groups[2].Success?int.Parse(m.Groups[2].Value):f.BinX;}}
-   if(Catalog.IsAmbiguous(target)){string hint=ObservationTargets.ModeFromPath(text),body=ObservationTargets.CanonicalSolar(hint);if(body=="Sun"||body=="Moon")target=body;if(string.IsNullOrEmpty(f.ObservationMode))f.ObservationMode=hint;}
+   if(Catalog.IsAmbiguous(target)){string hint=ObservationTargets.ModeFromPath(text),body=ObservationTargets.NamedSolar(hint);if(body!=null)target=body;if(string.IsNullOrEmpty(f.ObservationMode))f.ObservationMode=hint;}
    string filenameTarget=Catalog.TargetFromFilename(f.OriginalName);
+   if(ObservationTargets.NamedSolar(filenameTarget)!=null&&ObservationTargets.NamedSolar(target)==null&&(Catalog.KnownName(target)!=null||CometTargets.IsComet(target)))filenameTarget=null;
    f.Target=filenameTarget??Catalog.Normalize(target);f.TargetEvidence=filenameTarget!=null?"Recognised filename target":Catalog.KnownName(target)!=null||CometTargets.IsComet(f.Target)?"Recognised header/session target":"Unrecognised label; plate solving required";
    if(f.Kind.Contains("dark")||f.Kind.Contains("bias")||f.Kind.Contains("flat")||f.Kind=="Dark"||f.Kind=="Bias"||f.Kind=="Flat"){f.Target="Calibration";f.TargetEvidence="Calibration frame";}
    if(Util.MeteorFilename(f.OriginalName)){f.Target="Meteor";f.TargetEvidence="Meteor filename label; object identity omitted";}

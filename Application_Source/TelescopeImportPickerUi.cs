@@ -17,7 +17,7 @@ namespace AstroArchive {
    this.device=device;saved=profiles.ToList();string brand=ImportSelection.TelescopeBrand(device.Make);
    Dialog=new FormWindow(owner,"Import from "+brand,740,720);
    Dialog.Text("Choose folders or files on your telescope",true);
-   Dialog.Text("For faster scans, choose only the target folders or files you need. Folders include their subfolders. A full scan checks the selected captures before importing; originals stay on the telescope.");
+   Dialog.Text("Choose the captures you need; folders include subfolders. Originals stay on the telescope.");
    Dialog.Text("Telescope drive: "+device.Volume.Root);
    var choices=new List<TelescopeProfile>{new TelescopeProfile{Model="Auto"}};choices.AddRange(saved.Where(p=>TelescopeProfiles.Make(p)==device.Make||preferred!=null&&p.Id==preferred.Id));
    Profiles=new ComboBox{ItemsSource=choices,DisplayMemberPath="DisplayText",Margin=new Thickness(0,0,0,8)};System.Windows.Automation.AutomationProperties.SetName(Profiles,"Telescope for this import");UiHelp.Hint(Profiles,"Choose the physical telescope, or give a new telescope its own name.");Dialog.Add(Profiles);
@@ -36,7 +36,7 @@ namespace AstroArchive {
     Refresh();
    };
    Profiles.SelectedItem=choices.FirstOrDefault(p=>preferred!=null&&p.Id==preferred.Id)??choices[0];
-   Dialog.Accept("Review and import…",Validate);
+   Dialog.Accept("Import",Validate);
   }
   Button ChoiceButton(WrapPanel row,string text,Action action){var button=new Button{Content=text,Margin=new Thickness(0,0,8,6)};UiHelp.For(button,text);button.Click+=(s,e)=>action();row.Children.Add(button);return button;}
   string InitialFolder(){return Directory.Exists(device.Source)&&Util.Within(device.Source,device.Volume.Root)?device.Source:device.Volume.Root;}
@@ -49,5 +49,16 @@ namespace AstroArchive {
    Profile=existing?Util.Deserialize<TelescopeProfile>(Util.Serialize(selected)):new TelescopeProfile{Id=id,SessionIdentity=id,Model=Convert.ToString(Model.SelectedItem),Camera="Auto"};Error.Text="";return true;
   }catch(Exception e){Error.Text=e.Message;return false;}}
   public bool Show(){return Dialog.Show();}
+ }
+ internal static class TelescopeImportConfirmation {
+  internal static FormWindow Create(Window owner,ImportSelection selection,string make){
+   var dialog=new FormWindow(owner,"Large telescope import",580,450);
+   dialog.Text("Import from "+ImportSelection.TelescopeBrand(make)+"?",true);
+   dialog.Text(selection.Folders.Count==0?selection.Files.Count.ToString("N0")+" capture files selected":"At least "+ImportSelection.LargeFileSelection.ToString("N0")+" capture files selected",true);
+   if(selection.Folders.Count>0)dialog.Text("Selection: "+selection.Summary+".");
+   dialog.Text("Large imports can take a while. Choose fewer folders or files for a quicker import.");
+   dialog.Text("• Scan, check and copy eligible captures.\n• Keep originals on the telescope.\n• Cancel anytime; completed copies are retained.");
+   dialog.Accept("Import",()=>true);return dialog;
+  }
  }
 }

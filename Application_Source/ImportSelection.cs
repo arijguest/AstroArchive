@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading;
 namespace AstroArchive {
  public sealed class ImportSelection {
   public const int LargeFileSelection=500;
@@ -38,9 +39,13 @@ namespace AstroArchive {
    if(selected.Count+files.Count==0)throw new IOException("Select at least one capture folder or file.");
    return new ImportSelection{SourceRoot=source,Folders=selected.AsReadOnly(),Files=files.AsReadOnly()};
   }
-  public string ConfirmationText(string make){
-   string warning=WholeSource?"You selected the entire telescope drive. This can take a long time on crowded storage.":Files.Count>=LargeFileSelection?"You selected "+Files.Count+" files. A large import can take a long time.":"A full scan and import may take a while, especially for large folders.";
-   return "Import from "+TelescopeBrand(make)+"?\n\nSelection: "+Summary+".\n\n"+warning+" Selected captures will be read and checked before eligible files are copied. Selected folders include their subfolders. Current import exclusions still apply; flagged captures remain for review.\n\nFor a faster scan, choose only the target folders or files you need. Originals will remain on the telescope. You can cancel; completed imports are retained.\n\nContinue with the full scan and import?";
+  // Count names only, stopping at the prompt threshold; never open image data.
+  public int CaptureCountUpTo(int limit,CancellationToken ct){
+   if(limit<=0)throw new ArgumentOutOfRangeException("limit");ct.ThrowIfCancellationRequested();int count=Math.Min(Files.Count,limit);if(count==limit)return count;
+   var pending=new Stack<string>(Folders);while(pending.Count>0){ct.ThrowIfCancellationRequested();var directory=new DirectoryInfo(pending.Pop());if(!FileStamp.CanTraverse(directory))continue;
+    try{foreach(var entry in directory.EnumerateFileSystemInfos()){ct.ThrowIfCancellationRequested();var folder=entry as DirectoryInfo;if(folder!=null){if(!SessionScanCache.SystemFolder(folder.Name)&&FileStamp.CanTraverse(folder))pending.Push(folder.FullName);}else if((entry.Attributes&FileAttributes.ReparsePoint)==0&&Util.IsImageAsset(entry.Name)&&++count>=limit)return count;}}
+    catch(IOException){}catch(UnauthorizedAccessException){}
+   }return count;
   }
  }
 }

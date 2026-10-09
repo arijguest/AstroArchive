@@ -5,7 +5,13 @@ using System.Text.RegularExpressions;
 namespace AstroArchive {
  public static class ObservationTargets {
   static readonly string[] Bodies={"Sun","Solar","Moon","Lunar","Mercury","Venus","Mars","Jupiter","Saturn","Uranus","Neptune","Pluto","Planetary"};
-  public static string CanonicalSolar(string target){string text=(target??"").Trim();return text.Equals("Solar",StringComparison.OrdinalIgnoreCase)||text.Equals("Sun",StringComparison.OrdinalIgnoreCase)?"Sun":text.Equals("Lunar",StringComparison.OrdinalIgnoreCase)||text.Equals("Moon",StringComparison.OrdinalIgnoreCase)?"Moon":target;}
+  static readonly Regex solarWords=new Regex(@"(?<!\p{L})(?:"+string.Join("|",Bodies.Where(b=>b!="Planetary"))+@")(?!\p{L})",RegexOptions.IgnoreCase|RegexOptions.CultureInvariant|RegexOptions.Compiled);
+  public static string NamedSolar(string target){string body=Bodies.FirstOrDefault(b=>b!="Planetary"&&b.Equals((target??"").Trim(),StringComparison.OrdinalIgnoreCase));return body=="Solar"?"Sun":body=="Lunar"?"Moon":body;}
+  public static string CanonicalSolar(string target){return NamedSolar(target)??target;}
+  public static string SolarFromFilename(string filename){
+   string name=Path.GetFileName(filename??"");if(Regex.IsMatch(name,@"(?<![a-z])(nebula|galaxy|cluster)(?![a-z])",RegexOptions.IgnoreCase))return null;
+   var found=solarWords.Matches(name).Cast<Match>().Select(m=>NamedSolar(m.Value)).Distinct().ToArray();return found.Length==1?found[0]:null;
+  }
   public static bool Unstretched(string target,string observationMode){
    return Bodies.Any(body=>string.Equals((target??"").Trim(),body,StringComparison.OrdinalIgnoreCase))||Regex.IsMatch(observationMode??"",@"^\s*(solar|sun|planetary|planet|lunar|moon)(?:[ _-]+(?:mode|capture|imaging|light))?\s*$",RegexOptions.IgnoreCase);
   }
@@ -15,6 +21,7 @@ namespace AstroArchive {
     string name=Regex.Replace(parts[index],@"\.(fit|fits|fts)(\.gz)?$|\.(xisf|tiff?|png|jpe?g|bmp)$","",RegexOptions.IgnoreCase);
     string words=Regex.Replace(name,@"[_-]+"," ");
     if(Regex.IsMatch(words,@"\b(nebula|galaxy|cluster)\b",RegexOptions.IgnoreCase)){if(index==0)return "";continue;}
+    if(index==0){string body=SolarFromFilename(name);if(body!=null)return body;if(Regex.IsMatch(words,@"\bPlanetary\b",RegexOptions.IgnoreCase))return "Planetary";continue;}
     if(index>0&&!Regex.IsMatch(words,@"^("+string.Join("|",Bodies)+@")(?: (?:sub|raw|captures?|images?|mode|20\d{2}.*))?$",RegexOptions.IgnoreCase))continue;
     foreach(string body in Bodies)if(Regex.IsMatch(words,@"\b"+Regex.Escape(body)+@"\b",RegexOptions.IgnoreCase))return body;
    }return "";

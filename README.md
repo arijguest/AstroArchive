@@ -28,7 +28,7 @@ Use **Settings → Updates** to install them. [Installation, repair and policy b
 
 ## Browse and preview
 
-- **Targets:** preferred ID before the name, such as **M31 - Andromeda Galaxy**. Comets share the Solar system group; Meteors sit above Other targets. **All Targets** is bold and shaded.
+- **Targets:** preferred ID before the name, such as **M31 - Andromeda Galaxy**. Planet names in filenames are recognised during import. Planets and comets share the Solar system group; Meteors sit above Other targets. **All Targets** is bold and shaded.
 - **Search:** combine object, device and type, such as **M45 Dwarflab**, **M45 S50 Pro** or **M45 stack**. Use quotes or **file:** for literal filename text.
 - **Sessions:** condensed sub rows show dates, count, exposure per sub and total integration. Expand a row or switch off **Repository → Group subs by session**. Stacks with known counts show **Stack (1445)**; the filter remains **Stack**.
 - **Selection:** keep files selected while moving between targets. The target-pane counter shows the total; click it or press Escape to clear the batch.
