@@ -47,6 +47,7 @@ namespace AstroArchive.Remote {
    }
    if(args.Length==2&&args[0]=="--ui-demo-test"){
     string output=Path.GetFullPath(args[1]);Directory.CreateDirectory(output);ui.Window.Show();
+    SynchronizationContext.SetSynchronizationContext(new DispatcherSynchronizationContext(ui.Window.Dispatcher));
     var task=ui.CheckDemo();var frame=new DispatcherFrame();task.ContinueWith(t=>ui.Window.Dispatcher.BeginInvoke(new Action(()=>frame.Continue=false)));Dispatcher.PushFrame(frame);task.GetAwaiter().GetResult();
     File.WriteAllText(Path.Combine(output,"ui-demo-passed.txt"),"One-click demo copied original bytes through the EXE worker, stopped safely and verified its saved files.");ui.Window.Close();return 0;
    }
