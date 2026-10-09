@@ -37,7 +37,7 @@ namespace AstroArchive {
    {"Analyse rotation","Estimate EQ or Alt-Az from acquisition subs."},
    {"Maintenance","Verify, reindex or remove archive files."},
    {"Delete failed","Delete archive files with 'failed' in their filenames."},
-   {"Purge non-raw files","Delete indexed PNG/JPG/JPEG copies; keep source originals."},
+   {"Purge non-raw files","Delete indexed PNG/JPG/JPEG/MP4 copies; keep source originals."},
    {"Deletion history","Review archive deletions and reimport choices."},
    {"Delete archive data","Permanently clear indexed archive data; keep source originals."},
    {"Diagnostics","View operation timings and import reports."},

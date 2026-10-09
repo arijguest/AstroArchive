@@ -62,7 +62,7 @@ namespace AstroArchive {
   Scanned ScanOne(ScanEntry entry,string source,string telescope,string model,bool reindex,bool deferHash,bool cloudSource,string telescopeIdentity,Dictionary<string,SourceManifest> cached,HashSet<string> deleted,Dictionary<string,Classifier.ShotsMetadata> shots,MetadataHeaderCache headers,PipelineMetrics metrics,CancellationToken ct,Dictionary<string,Frame> archive,bool fullScan,bool scopedArchive){
    var item=new Scanned();string name=Path.GetFileName(entry.Path);
    try{
-    ct.ThrowIfCancellationRequested();FileStamp stamp=FileStamp.Read(new FileInfo(entry.Path),entry.Enumerated);item.Bytes=stamp.Size;Frame f=null,indexed=null;SourceManifest old;
+    ct.ThrowIfCancellationRequested();FileStamp stamp;using(var identity=metrics.Begin("File identity",name)){stamp=FileStamp.Read(new FileInfo(entry.Path),entry.Enumerated);identity.Complete();}item.Bytes=stamp.Size;Frame f=null,indexed=null;SourceManifest old;
     using(var check=metrics.Begin("Duplicate checking",name)){
      if(cached.TryGetValue(entry.Path,out old)&&old.Status=="Complete"&&stamp.VerifiedUnchanged(old.Source)&&archive.TryGetValue(old.Hash,out indexed)){
       f=indexed.Clone();f.SourcePath=entry.Path;f.SourceStamp=stamp;
@@ -82,7 +82,9 @@ namespace AstroArchive {
        if(!hit)headers.PutAsset(entry.Path,parsed.SourceStamp,asset);item.HeaderHit=hit;return parsed;
       },ct,message=>{metrics.Current=message;metrics.Pulse(true);});stamp=f.SourceStamp;f.Hash="";f.Status="New";metadata.Complete();
      }
-     if(!deferHash||reindex||deleted.Count>0){using(var check=metrics.Begin("Duplicate checking",name)){
+     // Fast candidates are provisional; Import checks the copy hash against deletion history before committing.
+     if(deferHash&&scopedArchive&&deleted.Count>0)f.SourceDisposition="Deletion exclusions will be checked during verified import. Original retained.";
+     if(!deferHash||reindex||deleted.Count>0&&!scopedArchive){using(var check=metrics.Begin("Duplicate checking",name)){
       string hash=Util.Hash(entry.Path,ct,n=>check.Bytes(n));if(!stamp.ContentSame(FileStamp.Read(entry.Path)))throw new InvalidDataException("Source changed during scanning.");
       Frame existing;if(!archive.TryGetValue(hash,out existing))existing=scopedArchive?Find(hash):null;if(deleted.Contains(hash)){f.Hash=hash;MarkDeleted(f);}else if(existing!=null){
        var detected=f;string copy=FilePath(existing);FileStamp before=null,after=null;bool present=false;
@@ -124,7 +126,7 @@ namespace AstroArchive {
       while(stack.Count>0){linked.Token.ThrowIfCancellationRequested();var directory=stack.Pop();try{
       int knownFiles;long knownBytes;if(filenames!=null&&filenames.TrySkipFolder(directory,linked.Token,out knownFiles,out knownBytes)){plan.FastSessionFolders++;plan.FastSkippedFolders++;plan.FastSkippedFiles+=knownFiles;plan.FastSkippedBytes+=knownBytes;for(int i=0;i<knownFiles;i++){metrics.Discover(0);metrics.Complete(0);}continue;}
       using(var discovery=metrics.Begin("Discovery",directory.FullName)){long files=0;int skipped=0;var children=new List<DirectoryInfo>();if(sessions!=null)sessions.BeginFolder(directory,linked.Token);foreach(var info in directory.EnumerateFileSystemInfos()){
-       linked.Token.ThrowIfCancellationRequested();if((info.Attributes&FileAttributes.Directory)!=0){if(!SessionScanCache.SystemFolder(info.Name)&&!(reindex&&info.FullName.Equals(DumpFolder,StringComparison.OrdinalIgnoreCase))){if(FileStamp.CanTraverse((DirectoryInfo)info))children.Add((DirectoryInfo)info);else lock(plan.Errors)plan.Errors.Add("Skipped linked or unresolvable directory: "+info.FullName);}}
+       linked.Token.ThrowIfCancellationRequested();metrics.Advance();if((info.Attributes&FileAttributes.Directory)!=0){if(!SessionScanCache.SystemFolder(info.Name)&&!(reindex&&info.FullName.Equals(DumpFolder,StringComparison.OrdinalIgnoreCase))){if(FileStamp.CanTraverse((DirectoryInfo)info))children.Add((DirectoryInfo)info);else lock(plan.Errors)plan.Errors.Add("Skipped linked or unresolvable directory: "+info.FullName);}}
        else if(Util.IsImageAsset(info.Name)){if(selection!=null&&(info.Attributes&FileAttributes.ReparsePoint)!=0){lock(plan.Errors)plan.Errors.Add("Skipped linked capture: "+info.FullName);continue;}if(ignoreFailed&&Util.FailedFilename(info.Name)){plan.IgnoredFailed++;continue;}if(ignoreRaster&&ImportPolicy.RasterFilename(info.Name)){plan.IgnoredRaster++;continue;}bool excluded;if(filenames!=null&&filenames.TrySkip(info.FullName,out excluded)){if(excluded)plan.FastDeletedFiles++;else plan.FastSkippedFiles++;skipped++;metrics.Discover(0);metrics.Complete(0);files++;continue;}var entry=ScanEntry.From((FileInfo)info);metrics.Discover(entry.Enumerated.Size);files++;
         if(sessions!=null&&sessions.TrySkip(entry)){plan.FastSkippedFiles++;plan.FastSkippedBytes+=entry.Enumerated.Size;skipped++;metrics.Complete(entry.Enumerated.Size);continue;}
         if(!queue.TryAdd(entry))overflow.Add(entry);}
@@ -147,7 +149,7 @@ namespace AstroArchive {
      }
      while(pending.Count>0){ct.ThrowIfCancellationRequested();var ready=Task.WhenAny(pending).GetAwaiter().GetResult();pending.Remove(ready);collect(ready);}producer.GetAwaiter().GetResult();
      metrics.Finalise("Saving scan metadata cache");try{headers.Flush();}catch(Exception e){plan.Errors.Add("Metadata cache could not be saved: "+e.Message);}if(reindex)Checkpoint(ct);
-     string summary="Scan complete: "+plan.Frames.Count+" candidates; "+plan.FastSkippedFiles+(filenameMatching?" archived names skipped across ":" unchanged archived files skipped across ")+plan.FastSkippedFolders+" folders; "+plan.FastSessionFolders+" DWARF session folders omitted; "+plan.FastDeletedFiles+" deleted names skipped; "+plan.CacheHits+" verified duplicates; "+plan.MetadataCacheHits+" cached headers; "+plan.IgnoredFailed+" failed filenames ignored; "+plan.IgnoredRaster+" PNG/JPG files ignored";if(selection!=null)summary="Selection: "+selection.Summary+". "+summary;if(!deferFinish)metrics.Finish(summary);LastReport=plan.ScanReport=summary+"\r\n\r\n"+metrics.Report()+"\r\n"+string.Join("\r\n",plan.Errors);return plan;
+     string summary="Scan complete: "+plan.Frames.Count+" candidates; "+plan.FastSkippedFiles+(filenameMatching?" archived names skipped across ":" unchanged archived files skipped across ")+plan.FastSkippedFolders+" folders; "+plan.FastSessionFolders+" DWARF session folders omitted; "+plan.FastDeletedFiles+" deleted names skipped; "+plan.CacheHits+" verified duplicates; "+plan.MetadataCacheHits+" cached headers; "+plan.IgnoredFailed+" failed filenames ignored; "+plan.IgnoredRaster+" PNG/JPG/MP4 files ignored";if(selection!=null)summary="Selection: "+selection.Summary+". "+summary;if(!deferFinish)metrics.Finish(summary);LastReport=plan.ScanReport=summary+"\r\n\r\n"+metrics.Report()+"\r\n"+string.Join("\r\n",plan.Errors);return plan;
     }finally{linked.Cancel();try{producer.GetAwaiter().GetResult();}catch(OperationCanceledException){}foreach(var task in pending){try{task.GetAwaiter().GetResult();}catch(OperationCanceledException){}}}
    }
   }

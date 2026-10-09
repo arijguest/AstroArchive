@@ -7,6 +7,17 @@ namespace AstroArchive {
  public partial class Tests {
   static ImportPlan FastScan(Repository repo,string source,string id="Scope"){return repo.Scan(source,id,"Auto",ct,NoProgress,deferHash:true,filenameMatching:true);}
   static void FastImportTests(){
+   Test("Fast video scans defer payload hashes despite unrelated deletion history",()=>{
+    string source=Path.Combine(root,"fast-video-deletions");Directory.CreateDirectory(source);string old=Path.Combine(source,"old-capture.avi");File.WriteAllText(old,"deleted recording bytes");
+    using(var repo=new Repository(Path.Combine(root,"fast-video-deletions-repo"))){
+     repo.Import(repo.Scan(source,"Scope","Auto",ct,NoProgress).Frames,ct,NoProgress);repo.DeleteFrames(repo.All(),ct,NoProgress);
+     string renamed=Path.Combine(source,"renamed-recording.mp4");File.Copy(old,renamed);
+     foreach(string name in new[]{"new-capture.avi","new-capture.mp4"})using(var stream=File.Create(Path.Combine(source,name))){stream.SetLength(8*1048576);stream.WriteByte(name.EndsWith("avi")?(byte)1:(byte)2);}
+     var fast=FastScan(repo,source);Check(fast.FastDeletedFiles==1&&fast.Frames.Count==3&&fast.Frames.All(f=>f.Hash==""&&f.Status=="New"),"Fast candidates were not deferred");Check(fast.Metrics.Snapshot().Single(s=>s.Stage=="Duplicate checking").Bytes==0&&fast.Metrics.Snapshot().Single(s=>s.Stage=="Header open/read").Bytes<1024,"Deletion history forced video payload reads");
+     var full=repo.Scan(source,"Scope","Auto",ct,NoProgress,deferHash:true,filenameMatching:true,fullScan:true);Check(full.Frames.Count(f=>f.Status=="Deleted")==2&&full.Frames.Count(f=>f.Status=="New")==2,"Robust scan lost renamed content exclusions");Check(full.Metrics.Snapshot().Single(s=>s.Stage=="Duplicate checking").Bytes>=16*1048576,"Robust video scan skipped hashing");
+     var result=repo.Import(fast.Frames,ct,NoProgress,new ImportOptions{SourceRoot=source,DeleteOriginals=true});Check(result.Imported==2&&result.SkippedDeleted==1&&repo.All().Count==2,"Deferred deletion guard committed excluded content");Check(File.Exists(old)&&File.Exists(renamed)&&fast.Frames.Single(f=>f.SourcePath==renamed).Status=="Deleted","Deferred deletion removed originals or lost final status");Check(!Directory.EnumerateFiles(Path.Combine(repo.Meta,"staging")).Any(),"Deferred exclusion leaked staging copies");
+    }
+   });
    Test("Robust import matching is opt-in and survives saved settings",()=>{
     Check(!new Settings().RobustImportMatching&&!Util.Deserialize<Settings>("{}").RobustImportMatching,"Legacy settings enabled robust mode");
     Check(Util.Deserialize<Settings>(Util.Serialize(new Settings{RobustImportMatching=true})).RobustImportMatching,"Robust setting not saved");

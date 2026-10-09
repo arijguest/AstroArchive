@@ -14,6 +14,7 @@ namespace AstroArchive {
     }
     public static class MetadataProfiles {
         public static string ExposureEvidence(Frame frame) {
+            if(frame.Kind=="Video")return "Video length: "+frame.ExposureText+"\n"+(frame.VideoDurationSeconds.HasValue?"Source: "+frame.VideoDurationSource:"No readable recording duration is available.");
             var lines=new List<string>{"Reported exposure: "+frame.ExposureText};
             MetadataFact fact;
             if(frame.Facts!=null&&frame.Facts.TryGetValue("Exposure",out fact)&&fact!=null&&!string.IsNullOrEmpty(fact.Source))lines.Add("Source: "+fact.Source);

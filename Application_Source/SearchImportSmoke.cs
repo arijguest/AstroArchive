@@ -22,7 +22,7 @@ namespace AstroArchive {
      try{
      dialog=Window.OwnedWindows.Cast<Window>().Single(w=>w.Title=="Preferences");dialog.UpdateLayout();
      var sections=PopupChildren<ListBox>(dialog).Single(list=>System.Windows.Automation.AutomationProperties.GetName(list)=="Preferences sections");if(sections.Items.Count!=7||sections.SelectedIndex!=1)throw new Exception("Import options did not open the Import preferences section.");
-     var raster=PopupChildren<CheckBox>(dialog).Single(c=>c.Content is TextBlock&&((TextBlock)c.Content).Text.Contains("PNG/JPG/JPEG"));if(raster.IsChecked!=settings.IgnoreRasterImports)throw new Exception("Import format choice is not synchronized.");
+     var raster=PopupChildren<CheckBox>(dialog).Single(c=>c.Content is TextBlock&&((TextBlock)c.Content).Text.Contains("PNG/JPG/JPEG/MP4"));if(raster.IsChecked!=settings.IgnoreRasterImports)throw new Exception("Import format choice is not synchronized.");
      PumpPopupLayout();
      var choice=PopupChildren<ComboBox>(dialog).Single(c=>c.IsEditable);choice.Text="C27";
      PopupChildren<Button>(dialog).Single(b=>Convert.ToString(b.Content)=="Save preferences").RaiseEvent(new RoutedEventArgs(Button.ClickEvent));

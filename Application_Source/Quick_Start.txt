@@ -255,8 +255,13 @@ Flagged captures are skipped by default. Retry failed imports uses the filtered 
 changed sources need a fresh scan. Completed imports survive cancellation.
 
 ## Exclusions and deletion
-Settings > Import can ignore failed filenames and PNG/JPG/JPEG inputs; rescan after
+Settings > Import can ignore failed filenames and PNG/JPG/JPEG/MP4 inputs; rescan after
 changes. Repository > Maintenance offers Delete failed and Purge non-raw files.
+Recordings (AVI, MP4, MOV, M4V, WMV, MKV and SER) use the Video frame type.
+Their Exposure column shows recording length in seconds. SER uses its measured
+capture timestamp span; files without readable duration show unknown.
+Activity keeps completed entries, but only processes lasting more than five minutes
+raise an unread count. Opening Activity acknowledges the count; click outside to close.
 Delete files confirms archive-copy removal; source files and shared metadata stay.
 Deletion history blocks reimport of deleted checksums. Allow reimport permits a
 later source import; it does not restore deleted files.

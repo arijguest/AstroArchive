@@ -356,6 +356,7 @@
    </ControlTemplate></Setter.Value></Setter>
   </Style>
   <Style TargetType="DataGrid">
+   <Setter Property="ClipToBounds" Value="True" />
    <Setter Property="Foreground" Value="{DynamicResource Text}" />
    <Setter Property="AutoGenerateColumns" Value="False" />
    <Setter Property="CanUserAddRows" Value="False" />
@@ -377,6 +378,7 @@
    <Setter Property="VerticalScrollBarVisibility" Value="Auto" />
   </Style>
   <Style TargetType="DataGridColumnHeader">
+   <Setter Property="ClipToBounds" Value="True" />
    <Setter Property="Background" Value="{DynamicResource SurfaceAlt}" />
    <Setter Property="Foreground" Value="{DynamicResource Muted}" />
    <Setter Property="Padding" Value="10,10" />
@@ -393,7 +395,7 @@
           <ColumnDefinition Width="*" />
           <ColumnDefinition Width="Auto" />
          </Grid.ColumnDefinitions>
-         <ContentPresenter VerticalAlignment="Center" RecognizesAccessKey="True" />
+         <ContentPresenter VerticalAlignment="Center" RecognizesAccessKey="True" ClipToBounds="True" />
          <TextBlock Grid.Column="1" Text="{Binding Column.(local:TableSortIndicators.Mark), RelativeSource={RelativeSource TemplatedParent}}" Margin="6,0,0,0" Foreground="{DynamicResource Text}" FontWeight="SemiBold" VerticalAlignment="Center" />
         </Grid>
        </Border>
@@ -422,6 +424,7 @@
    </Style.Triggers>
   </Style>
   <Style TargetType="DataGridCell">
+   <Setter Property="ClipToBounds" Value="True" />
    <Setter Property="Padding" Value="10,0" />
    <Setter Property="BorderThickness" Value="0" />
    <Setter Property="Template">

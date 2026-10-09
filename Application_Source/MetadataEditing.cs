@@ -36,7 +36,7 @@ namespace AstroArchive {
   public static readonly string[] Numeric={"Exposure","Gain","Temperature","Offset"};
   public static readonly MetadataEditField[] Fields={
    new MetadataEditField("Target","Target (object ID or common name)",0),
-   new MetadataEditField("Kind","Frame type",0,"Light","Stack","Dark","Master dark","Flat","Master flat","Bias","Master bias","Dark flat","Master dark flat","Unknown","Auxiliary"),
+   new MetadataEditField("Kind","Frame type",0,"Light","Stack","Video","Dark","Master dark","Flat","Master flat","Bias","Master bias","Dark flat","Master dark flat","Unknown","Auxiliary"),
    new MetadataEditField("Exposure","Exposure (s)",0),new MetadataEditField("Gain","Gain",0),
    new MetadataEditField("Temperature","Sensor temperature (°C)",0),new MetadataEditField("Filter","Filter",0),
    new MetadataEditField("Mount","Mount mode",0,"EQ","Alt-Az","Unknown"),

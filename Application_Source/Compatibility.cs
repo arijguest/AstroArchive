@@ -113,6 +113,8 @@ namespace AstroArchive {
         }
     }
     public class AssetInfo {
+        public double? DurationSeconds;
+        public string DurationSource;
         public string Format;
         public FitsHeader Header=new FitsHeader();
         public List<ImageDescriptor> Images=new List<ImageDescriptor>();
@@ -131,7 +133,7 @@ namespace AstroArchive {
     }
     public static class Assets {
         public const long MaxSamples=32L*1024*1024;
-        public const string ClassificationVersion="compat-1";
+        public const string ClassificationVersion="compat-video-2";
         static readonly Dictionary<string,IAssetReader> readers=new Dictionary<string,IAssetReader>(StringComparer.OrdinalIgnoreCase);
         static Assets() {
             Register(new FitsAssetReader(),".fit",".fits",".fts",".fz");
@@ -167,6 +169,7 @@ namespace AstroArchive {
                 ".png",".tif",".tiff",".jpg",".jpeg",".gif"
             }
             .Contains(Extension(path)))return RasterHeaders.Inspect(path);
+            if(MediaFiles.Video(path))return new AssetInfo{Format=MediaFiles.FileType(path),DurationSeconds=VideoHeaders.Duration(path,counted),DurationSource="Video container duration",Note="Original-file archiving and Windows-codec playback are supported."};
             return new AssetInfo {
                 Format=Extension(path).TrimStart('.').ToUpperInvariant(),Note="Original-file archiving is supported. Pixel decoding is unavailable in this environment."
             };

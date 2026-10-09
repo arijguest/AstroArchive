@@ -78,7 +78,7 @@ namespace AstroArchive {
     using(var process=WindowsIntegration.StartProcess(start))if(process==null)throw new IOException("The release installer could not start.");handedOff=true;entry.Status="Installer started. AstroArchive is restarting…";
    }catch(OperationCanceledException){entry.Canceled=true;entry.Status="Update canceled. The current version remains installed.";}
    catch(Exception error){entry.Failed=true;installFailure=error;entry.Status="The release could not be installed. AstroArchive remains open.";entry.ReportTitle="Release installation failed";entry.Report=UpdateDiagnostics.Message(error,null);entry.NeedsReview=true;}
-   finally{client.Progress=null;entry.Running=false;entry.Cancel=null;releaseDownloadCancel.Dispose();releaseDownloadCancel=null;releaseInstalling=false;SetBusy(false);if(releaseChanged!=null)releaseChanged();}
+   finally{client.Progress=null;entry.DurationSeconds=watch.Elapsed.TotalSeconds;entry.Running=false;entry.Cancel=null;releaseDownloadCancel.Dispose();releaseDownloadCancel=null;releaseInstalling=false;SetBusy(false);if(releaseChanged!=null)releaseChanged();}
    if(installFailure!=null){string log=await Task.Run(()=>UpdateDiagnostics.Record(installFailure,release,verified,attemptedUtc));entry.Report=UpdateDiagnostics.Message(installFailure,log);}
    if(!handedOff)NotifyActivity(entry);
    if(handedOff)Application.Current.Shutdown();else if(closing)Window.Close();

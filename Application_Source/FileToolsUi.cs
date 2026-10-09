@@ -114,14 +114,14 @@ namespace AstroArchive {
   }
   void PurgeNonRawFiles(){
    if(repo==null||RepositoryOperationBlocked)return;var matches=repo.NonRawFiles();
-   if(matches.Count==0){L("StatusLabel").Text="No PNG/JPG/JPEG files are indexed in this repository.";return;}
+   if(matches.Count==0){L("StatusLabel").Text="No PNG/JPG/JPEG/MP4 files are indexed in this repository.";return;}
    DeleteFiles(matches,false,true);
   }
   void DeleteFiles(List<Frame> selected,bool failedNames=false,bool nonRawFiles=false){
    if(repo==null||RepositoryOperationBlocked||selected.Count==0)return;
    var d=new FormWindow(Window,nonRawFiles?"Purge non-raw files":failedNames?"Delete failed":"Delete selected files",640,520);d.Text("Delete "+selected.Count+" "+(failedNames||nonRawFiles?"matching":"selected")+" file"+(selected.Count==1?"":"s")+"?",true);d.Text(repo.Root);
    if(failedNames)d.Text("Searches the entire active repository for filenames containing 'failed', regardless of case. Current filters and telescope selection do not limit this action.");
-   if(nonRawFiles)d.Text("Finds indexed PNG/JPG/JPEG files in the entire active repository, regardless of case or current filters. Edited images, FITS, TIFF, XISF, SER and camera RAW files are excluded from this purge.");
+   if(nonRawFiles)d.Text("Finds indexed PNG/JPG/JPEG/MP4 files in the entire active repository, regardless of case or current filters. Edited images, FITS, TIFF, XISF, SER and camera RAW files are excluded from this purge.");
    d.Text("This permanently removes the selected repository copies. Deletion history is retained so future telescope imports skip the same captures. Source copies, other archive files and shared session metadata stay. Cloud-synced deletions propagate to the cloud.");
    d.Add(new TextBox{Text=string.Join("\r\n",selected.Select(f=>f.RelativePath)),IsReadOnly=true,Height=170,VerticalScrollBarVisibility=ScrollBarVisibility.Auto,HorizontalScrollBarVisibility=ScrollBarVisibility.Auto});
    d.Accept(nonRawFiles?"Purge non-raw files":failedNames?"Delete failed files":"Delete selected files",()=>true,true);if(!d.Show())return;CancelPreview();
