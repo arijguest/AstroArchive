@@ -308,7 +308,7 @@ Repository > Diagnostics shows timings and the latest import report.
 
 KEYBOARD SHORTCUTS
 
-- **Main window:** Ctrl+F search; Ctrl+I Import; Ctrl+E Export; F1 page help.
+- **Main window:** Escape clears the active file selection; Ctrl+F search; Ctrl+I Import; Ctrl+E Export; F1 page help.
 - **Tables:** Ctrl-click toggle; Shift-click range; Shift-click heading adds sort; Delete confirms removal on Repository or Edited.
 - **Preview:** F Fit; plus/minus zoom; arrows pan; Escape closes.
 - **Guide:** Ctrl+F search; Up/Down topic; Ctrl+C copy; Escape close.

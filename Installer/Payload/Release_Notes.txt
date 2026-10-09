@@ -1,22 +1,12 @@
-AstroArchive 2.1.9
-Package 2.1.9.1
+AstroArchive 2.1.10
+Package 2.1.10.1
 
-- Repository and Edited keep file selections across targets, searches, sorting
-  and refreshes. A compact counter shows the whole batch and clears it on click.
-  Edited exports the selected images with byte verification, including hidden
-  target selections; confirmed deletion removes Edited copies only.
-- Targets show the preferred ID before the name. Comets share Solar system;
-  Meteors sit above Other targets. All Targets is bold and shaded. Natural
-  searches combine object, telescope and file type without extra help buttons.
-- Wider repository previews use sampled sidebar images and native pixels in
-  large still/SER windows within format limits. Sub summaries show exposure per
-  sub; known stack counts appear as Stack (1445). Seestar filename metadata
-  recovers stack counts and total exposure.
-- Faster preview buffers, session searches, background sorting and Edited
-  refreshes reduce repeated work. RAW/scientific Edited types appear first,
-  grouped by type; GIFs appear last.
-- Connected Seestar/Dwarflab imports offer a scoped folder/file picker with
-  confirmation before a full scan. Originals are retained.
-- Clear checkbox, focus and disabled states, concise menu tooltips and shorter
-  guides improve usability. File-boundary checks, trusted SQLite loading and
-  safe spreadsheet metadata exports strengthen file handling.
+- Replaced the Activity bell with a cleaner outline icon. Its button matches
+  the toolbar's height, alignment, spacing and colours. Notification indicators
+  no longer change its width; the icon follows the selected text size.
+- Escape clears all file selections on the active Repository, Edited or Import
+  page, including selections under other targets and condensed sessions. It
+  works from the search bar and target pane as well as the file table. Open
+  menus, dropdowns and Activity still dismiss before clearing file selections.
+- Verified that importing a recognised Seestar stack keeps it in Repository;
+  Edited working copies are created only through an explicit Edited action.

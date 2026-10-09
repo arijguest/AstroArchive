@@ -36,7 +36,7 @@ namespace AstroArchive {
             var natural = new Size(double.PositiveInfinity, double.PositiveInfinity);
             menu.Measure(natural);if(activityBell!=null)activityBell.Measure(natural);brand.Measure(natural);pages.Measure(natural);
             double sideSpace = (width - pages.DesiredSize.Width) / 2 - 12;
-            bool sameRow = menu.DesiredSize.Width+(activityBell==null?0:activityBell.DesiredSize.Width+6) <= sideSpace && brand.DesiredSize.Width <= sideSpace;
+            bool sameRow = menu.DesiredSize.Width+(activityBell==null?0:activityBell.DesiredSize.Width) <= sideSpace && brand.DesiredSize.Width <= sideSpace;
             Grid.SetRow(pages, sameRow ? 0 : 1);
             pages.Margin = new Thickness(0, sameRow ? 0 : 2, 0, 4);
         }

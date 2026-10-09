@@ -24,6 +24,7 @@ namespace AstroArchive {
             for (int i = 0; i < names.Length; i++) Window.Resources[names[i]] = sizes[i] * scale;
             Window.Resources["CaptureRowHeight"] = (settings.ComfortableRows ? 44.0 : 32.0) * scale;
             Window.Resources["UiCheckSize"] = 18.0 * scale;
+            Window.Resources["UiToolbarIconSize"] = 16.0 * scale;
             Window.Resources["PreferHighContrast"] = settings.HighContrast;
             Theme.Apply(Window, settings.ThemeMode);
             if (navigationReady) UpdateCompactHeader();SizeActivity();

@@ -42,7 +42,6 @@ namespace AstroArchive {
   void InitializeSessionSelection(){
    var grid=G("FramesGrid");
    grid.AddHandler(Button.ClickEvent,new RoutedEventHandler((s,e)=>{var group=HeaderSession(e.OriginalSource as DependencyObject);if(group!=null){SelectSession(group,Keyboard.Modifiers);e.Handled=true;}}));
-   grid.PreviewKeyDown+=(s,e)=>{if(e.Key==Key.Escape&&librarySelection.Count>0){ClearTargetSelection("FramesGrid");e.Handled=true;}};
   }
  }
 }
