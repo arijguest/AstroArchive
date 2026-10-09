@@ -55,7 +55,7 @@ namespace AstroArchive {
   }
   void UpdateTelescopeState(bool busy){
    busy=busy||usbImportPicking;
-   C("SavedTelescopeBox").IsEnabled=!busy;B("SaveTelescopeButton").IsEnabled=!busy;B("RenameTelescopeButton").IsEnabled=!busy&&SelectedScope!=null&&!string.IsNullOrEmpty(SelectedScope.Id);B("RebuildTelescopesButton").IsEnabled=!busy&&repo!=null;B("RefreshUsbButton").IsEnabled=!usbChecking&&!busy;
+   C("SavedTelescopeBox").IsEnabled=!busy;B("RemoteTelescopeButton").IsEnabled=!busy&&repo!=null;B("SaveTelescopeButton").IsEnabled=!busy;B("RenameTelescopeButton").IsEnabled=!busy&&SelectedScope!=null&&!string.IsNullOrEmpty(SelectedScope.Id);B("RebuildTelescopesButton").IsEnabled=!busy&&repo!=null;B("RefreshUsbButton").IsEnabled=!usbChecking&&!busy;
    var button=B("AutoUploadButton");button.Visibility=usbTelescopes.Count>0||activeUsb!=null?Visibility.Visible:Visibility.Collapsed;button.IsEnabled=!busy&&repo!=null&&usbTelescopes.Count>0;
    button.Content=usbTelescopes.Count==1?UsbImportLabel(usbTelescopes[0]):"Import connected telescope…";
    button.ToolTip=repo==null?"Choose a repository first.":"Choose folders or files to scan and import. Large selections ask for confirmation; originals stay on the telescope.";

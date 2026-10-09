@@ -10,7 +10,7 @@ using Microsoft.Win32.SafeHandles;
 namespace AstroArchive {
  public class TelescopeProfile {
   public List<string> LastImportSelection{get;set;}
-  public string SourceMake{get;set;}
+  public string SourceMake{get;set;} public string RemoteIdentity{get;set;}
   public string Id{get;set;} public string SessionIdentity{get;set;} public string Model{get;set;} public string Camera{get;set;}
   public string LastSource{get;set;} public string VolumeId{get;set;} public string SourceRelativePath{get;set;}
   public string DisplayText{get{return string.IsNullOrEmpty(Id)?"New telescope...":Id+(Model=="Auto"||string.IsNullOrEmpty(Model)?"":" · "+Model);}}

@@ -45,7 +45,7 @@ namespace AstroArchive.Installation {
   public Action<string,InstallRecord> Unregister=(r,m)=>{};
   public Action<string> EnsureClosed=r=>{};
   public Func<string,string[]> ShortcutPaths=r=>new string[0];
-  static readonly HashSet<string> names=new HashSet<string>(new[]{"AstroArchive.exe","Start.exe","Quick_Start.txt","Validation.txt","Catalogue_Notice.md","City_Catalogue_Notice.md","OpenNGC_README.md","Release_Notes.txt","LICENSE.txt","LICENSING.md"},StringComparer.OrdinalIgnoreCase);
+  static readonly HashSet<string> names=new HashSet<string>(new[]{"AstroArchive.exe","Start.exe","Quick_Start.txt","Validation.txt","Catalogue_Notice.md","City_Catalogue_Notice.md","OpenNGC_README.md","Release_Notes.txt","LICENSE.txt","LICENSING.md","SMBLibrary.dll","SMBLibrary-1.5.8-source.zip","SMBLibrary-LGPL.txt","GPL-3.0.txt","SMBLibrary-README.txt"},StringComparer.OrdinalIgnoreCase);
   public static string Hash(byte[] bytes){using(var h=SHA256.Create())return BitConverter.ToString(h.ComputeHash(bytes)).Replace("-","").ToLowerInvariant();}
   public static string HashFile(string path){using(var h=SHA256.Create())using(var s=File.OpenRead(path))return BitConverter.ToString(h.ComputeHash(s)).Replace("-","").ToLowerInvariant();}
   public static JavaScriptSerializer Json(){return new JavaScriptSerializer{MaxJsonLength=8*1024*1024};}

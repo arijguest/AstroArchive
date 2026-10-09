@@ -17,3 +17,5 @@ Application_Source/RasterTests.exe*
 
 # Python build-script caches.
 __pycache__/
+
+Application_Source/SMBLibrary.dll

@@ -12,6 +12,37 @@ START HERE
 Imports verify copies and skip duplicates. Source originals are kept by default.
 Stacking and image processing run in your external software.
 
+IMPORT OVER WI-FI / LAN
+
+On Import, click Connect over network beside Saved telescope. Connect this PC and
+Seestar/DWARF to the same LAN (or join the telescope hotspot). Discovery starts
+automatically. Select the telescope and Connect; no IP entry is needed.
+
+Choose a saved physical telescope for the import or keep the suggested new name.
+Select files opens capture folders; double-click folders or press Enter. Tick files,
+or use Search all to find supported captures throughout the selected storage.
+Review the count and import. Large batches warn that network transfers take longer
+than USB. Originals stay on the telescope. Adjacent sidecars and DWARF session
+metadata are downloaded with captures; normal archive checks and duplicates apply.
+
+Start live import watches the displayed folder and its subfolders. By default it
+imports only captures appearing after Start. Files must remain unchanged across
+two polls and through download; incomplete FITS are retried. Capture still runs in
+the telescope app. Use Cancel in the activity/progress controls to stop. Completed
+imports and verified local downloads remain; originals stay on the telescope.
+A short disconnect retries automatically. To catch files captured while AstroArchive
+was stopped, use Search all or Advanced > Also import existing captures.
+
+Advanced provides manual IPv4 access, a custom storage path, an optional discovery
+adapter, DWARF FTP credentials, live polling (default 5 seconds) and a transfer limit
+(default 2 MB/s). Passwords are kept only for the active connection. Seestar direct
+SMB access leaves Windows SMB/guest/signing policies unchanged. Enable Save Each
+Frame on Seestar and use compatible firmware; file access varies by model/firmware.
+
+Downloads are staged under the current user's AstroArchive/RemoteDownloads folder.
+Retry checks their saved hashes and reuses complete copies. Space is needed for both
+these local downloads and the final archive. Stop the import before removing caches.
+
 GUIDE AND TOOLTIPS
 
 F1 opens page help. Guide > Help searches titles and full text; Ctrl+F focuses

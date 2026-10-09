@@ -1,0 +1,36 @@
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
+using System.Net;
+using System.Net.Sockets;
+using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
+using AstroArchive.Remote;
+
+public static class DiscoveryTests {
+ static int checks;
+ static void Assert(bool value,string message){if(!value)throw new Exception(message);checks++;Console.WriteLine("PASS "+message);}
+ static byte[] Hex(string value){return value.Split(' ').Select(s=>Convert.ToByte(s,16)).ToArray();}
+ // Independent literal protobuf fixture: echo, magic, serial, name, firmware.
+ static readonly byte[] Echo=Hex("08 02 1a 04 74 78 74 6c 3a 05 53 4e 31 32 33 42 06 44 57 41 52 46 33 52 05 31 2e 35 2e 30");
+ const string Seestar="{\"code\":0,\"id\":1,\"method\":\"scan_iscope\",\"result\":{\"ssid\":\"Seestar_TEST\",\"sn\":\"SN456\",\"model\":\"Seestar\",\"product_model\":\"Seestar S50\"}}\r\n";
+ static DiscoveredTelescope Parse(string data){return TelescopeDiscovery.ParseSeestar(Encoding.UTF8.GetBytes(data),"192.168.1.42");}
+ static Socket Responder(int port,byte[] response,CancellationToken cancel,out Task task){var socket=new Socket(AddressFamily.InterNetwork,SocketType.Dgram,ProtocolType.Udp);socket.Bind(new IPEndPoint(IPAddress.Parse("127.0.0.2"),port));socket.ReceiveTimeout=100;task=Task.Run(()=>{byte[] buffer=new byte[16384];while(!cancel.IsCancellationRequested){try{EndPoint sender=new IPEndPoint(IPAddress.Any,0);int length=socket.ReceiveFrom(buffer,ref sender);bool valid=port==9900?length>=8&&buffer[0]==8&&buffer[1]==1:Encoding.UTF8.GetString(buffer,0,length).Contains("scan_iscope");if(valid){socket.SendTo(response,sender);socket.SendTo(response,sender);}}catch(SocketException e){if(e.SocketErrorCode!=SocketError.TimedOut)throw;}}});return socket;}
+ static int Main(){try{
+  var network=new DiscoveryNetwork{Name="Fixture",Address="192.168.1.10",Mask="255.255.255.0"};network.Validate();Assert(network.Broadcast=="192.168.1.255","subnet broadcast computed from IPv4 mask");Assert(network.Contains("192.168.1.42")&&!network.Contains("192.168.2.42")&&!network.Contains(network.Address)&&!network.Contains(network.Broadcast),"replies restricted to other hosts on the selected subnet");
+  var wide=new DiscoveryNetwork{Address="10.8.17.50",Mask="255.255.254.0"};wide.Validate();Assert(wide.Broadcast=="10.8.17.255"&&wide.Contains("10.8.16.42"),"non-/24 networks use their actual mask");
+  bool rejected=false;try{new DiscoveryNetwork{Address="192.168.1.1",Mask="255.0.255.0"}.Validate();}catch(ArgumentException){rejected=true;}Assert(rejected,"invalid non-contiguous mask rejected");
+  Assert(TelescopeDiscovery.DwarfPing(1).SequenceEqual(Hex("08 01 10 01 1a 04 74 78 74 6c")),"DWARF discovery ping matches independent protobuf bytes");Assert(TelescopeDiscovery.DwarfPing(300).SequenceEqual(Hex("08 01 10 ac 02 1a 04 74 78 74 6c")),"DWARF timestamp uses a multi-byte protobuf varint");
+  Assert(Encoding.UTF8.GetString(TelescopeDiscovery.SeestarPing(7))=="{\"method\":\"scan_iscope\",\"params\":\"\",\"id\":7}\r\n","Seestar discovery sends only scan_iscope with CRLF");
+  var dwarf=TelescopeDiscovery.ParseDwarf(Echo,"192.168.1.42");Assert(dwarf!=null&&dwarf.Name=="DWARF3"&&dwarf.Identity=="SN123"&&dwarf.Firmware=="1.5.0"&&dwarf.Host=="192.168.1.42","DWARF identity decoded using the response sender address");
+  byte[] secret=Echo.Concat(Hex("4a 06 73 65 63 72 65 74 72 06 2a 04 0a 00 00 01")).ToArray();var safe=TelescopeDiscovery.ParseDwarf(secret,"192.168.1.42");Assert(safe!=null&&safe.Host=="192.168.1.42"&&!new[]{safe.Name,safe.Identity,safe.Firmware}.Any(s=>s.Contains("secret")),"advertised alternate IP and password fields are ignored");
+  Assert(TelescopeDiscovery.ParseDwarf(TelescopeDiscovery.DwarfPing(1),"192.168.1.42")==null,"DWARF ping is not mistaken for a response");byte[] invalid=(byte[])Echo.Clone();invalid[4]=0;Assert(TelescopeDiscovery.ParseDwarf(invalid,"192.168.1.42")==null,"incorrect DWARF magic rejected");Assert(TelescopeDiscovery.ParseDwarf(Echo.Take(Echo.Length-1).ToArray(),"192.168.1.42")==null&&TelescopeDiscovery.ParseDwarf(Hex("08 80"),"192.168.1.42")==null,"truncated protobuf responses rejected without crashing");Assert(TelescopeDiscovery.ParseDwarf(Hex("00"),"192.168.1.42")==null&&TelescopeDiscovery.ParseDwarf(Hex("0b"),"192.168.1.42")==null,"invalid protobuf field keys and wire types rejected");
+  var seestar=Parse(Seestar);Assert(seestar!=null&&seestar.Kind=="Seestar SMB"&&seestar.Name=="Seestar S50"&&seestar.Identity=="SN456","Seestar scan result identifies the telescope");Assert(Parse(Seestar.Replace("scan_iscope","get_device_state"))==null&&Parse(Seestar.Replace("\"code\":0","\"code\":1"))==null,"unrelated and failed Seestar messages rejected");Assert(Parse(Seestar.Replace("Seestar","Printer"))==null,"other network devices are not labeled telescopes");Assert(Parse("not JSON")==null&&Parse("[]")==null&&Parse("null")==null,"malformed JSON discovery messages ignored");Assert(Parse(Seestar.Replace("\"code\":0,",""))==null,"missing Seestar success code rejected");Assert(TelescopeDiscovery.ParseDwarf(new byte[16385],"192.168.1.42")==null&&TelescopeDiscovery.ParseSeestar(new byte[16385],"192.168.1.42")==null,"oversized discovery payloads rejected");
+  var result=new DiscoveryResult();Assert(TelescopeDiscovery.Add(result,network,dwarf)&&!TelescopeDiscovery.Add(result,network,dwarf)&&result.Devices.Count==1,"duplicate replies produce one result");dwarf.Host="192.168.2.42";Assert(!TelescopeDiscovery.Add(result,network,dwarf),"off-subnet responses cannot enter the selection list");
+  var loop=new DiscoveryNetwork{Name="Loopback",Address="127.0.0.1",Mask="255.0.0.0"};using(var cancel=new CancellationTokenSource()){cancel.Cancel();bool cancelled=false;try{TelescopeDiscovery.Find(loop,cancel.Token,100,"127.0.0.2");}catch(OperationCanceledException){cancelled=true;}Assert(cancelled,"cancelled discovery exits before starting socket work");}
+  using(var stop=new CancellationTokenSource()){Task first,second;using(var a=Responder(9900,Echo,stop.Token,out first))using(var b=Responder(4720,Encoding.UTF8.GetBytes(Seestar),stop.Token,out second)){try{result=TelescopeDiscovery.Find(loop,CancellationToken.None,1250,"127.0.0.2");Assert(result.Warnings.Count==0&&result.Devices.Count==2&&result.Devices.Any(d=>d.Kind=="DWARF FTP")&&result.Devices.Any(d=>d.Kind=="Seestar SMB"),"real UDP loopback discovers both protocols and deduplicates repeated replies");Assert(result.Devices.All(d=>d.Host=="127.0.0.2"),"UDP sender address becomes the selected connection IP");using(var cancel=new CancellationTokenSource()){cancel.CancelAfter(150);var watch=Stopwatch.StartNew();bool cancelled=false;try{TelescopeDiscovery.Find(loop,cancel.Token,8000,"127.0.0.2");}catch(OperationCanceledException){cancelled=true;}Assert(cancelled&&watch.ElapsedMilliseconds<1500,"in-progress search cancellation closes promptly");}result=TelescopeDiscovery.Find(loop,CancellationToken.None,150,"127.0.0.2");Assert(result.Devices.Count==2,"search sockets are released after cancellation and can be reused");}finally{stop.Cancel();Task.WaitAll(first,second);}}}
+  Console.WriteLine(checks+" discovery checks passed.");return 0;
+ }catch(Exception e){Console.Error.WriteLine(e);return 1;}}
+}

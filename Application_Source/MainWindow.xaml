@@ -882,6 +882,7 @@
        <WrapPanel Margin="0,0,0,8">
         <TextBlock Text="SAVED TELESCOPE" FontSize="{DynamicResource UiFontCaption}" Foreground="{DynamicResource Muted}" FontWeight="SemiBold" VerticalAlignment="Center" Margin="0,0,10,0" />
         <ComboBox x:Name="SavedTelescopeBox" Width="220" Margin="0,0,10,0" ToolTip="Reuse a saved telescope." />
+        <Button x:Name="RemoteTelescopeButton" Content="Connect over network…" Margin="0" ToolTip="Find a telescope on your network, choose captures or import live as it shoots." />
        </WrapPanel>
        <DockPanel Margin="0,0,0,8">
         <Button DockPanel.Dock="Right" x:Name="AutoUploadButton" Content="Import connected telescope" Visibility="Collapsed" Background="{DynamicResource Accent}" Foreground="White" Margin="8,0,0,0"/>

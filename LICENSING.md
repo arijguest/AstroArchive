@@ -26,8 +26,15 @@ Separately licensed third-party material retains its own terms:
 - **OpenNGC:** CC BY-SA 4.0; see [Catalogue_Notice.md](Application_Source/Catalogue_Notice.md) and [OpenNGC_README.md](Application_Source/OpenNGC_README.md).
 - **GeoNames:** CC BY 4.0; see [City_Catalogue_Notice.md](Application_Source/City_Catalogue_Notice.md).
 - **D3-Celestial constellation data:** BSD 3-clause; see [Sky_Catalogue_Notice.md](Application_Source/Sky_Catalogue_Notice.md).
+- **SMBLibrary 1.5.8:** LGPL-3.0-or-later; a separate, replaceable DLL with matching
+  source and licence texts in [Remote/lib](Application_Source/Remote/lib/README.md).
 - External processing tools and optional codecs are governed by their own licences.
 
 Your imported images, capture data and processing outputs are not relicensed by
 using AstroArchive. This notice does not revoke any rights validly granted for
 previous copies under other terms.
+
+The first-party licence does not restrict replacement of SMBLibrary with a compatible
+modified version, or reverse engineering of the combined application solely to debug
+those modifications, as permitted by LGPL section 4. These permissions apply even
+where the first-party licence would otherwise restrict those activities.
