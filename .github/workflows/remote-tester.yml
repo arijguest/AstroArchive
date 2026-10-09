@@ -42,6 +42,21 @@ jobs:
             throw 'Native WPF startup failed.'
           }
           Get-Content (Join-Path $output 'ui-startup-passed.txt')
+      - name: Check one-click demo through the EXE worker
+        shell: powershell
+        run: |
+          $output = Join-Path $pwd 'Remote_Tester\dist\ui-checks'
+          $process = Start-Process -FilePath '.\Remote_Tester\dist\AstroArchive.RemoteTester.exe' -ArgumentList @('--ui-demo-test', $output) -PassThru
+          if (-not $process.WaitForExit(45000)) {
+            Stop-Process -Id $process.Id -Force
+            throw 'One-click demo timed out.'
+          }
+          if ($process.ExitCode -ne 0 -or -not (Test-Path (Join-Path $output 'ui-demo-passed.txt'))) {
+            $log = Join-Path $env:LOCALAPPDATA 'AstroArchive.RemoteTester\startup-error.txt'
+            if (Test-Path $log) { Get-Content $log }
+            throw 'One-click demo failed.'
+          }
+          Get-Content (Join-Path $output 'ui-demo-passed.txt')
       - uses: actions/upload-artifact@v4
         if: always()
         with:
