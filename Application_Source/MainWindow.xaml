@@ -396,7 +396,7 @@
           <ColumnDefinition Width="Auto" />
          </Grid.ColumnDefinitions>
          <ContentPresenter VerticalAlignment="Center" RecognizesAccessKey="True" ClipToBounds="True" />
-         <TextBlock Grid.Column="1" Text="{Binding Column.(local:TableSortIndicators.Mark), RelativeSource={RelativeSource TemplatedParent}}" Margin="6,0,0,0" Foreground="{DynamicResource Text}" FontWeight="SemiBold" VerticalAlignment="Center" />
+         <TextBlock Grid.Column="1" Text="{Binding (local:TableSortIndicators.Mark), RelativeSource={RelativeSource TemplatedParent}}" Margin="6,0,0,0" Foreground="{DynamicResource Text}" FontWeight="SemiBold" VerticalAlignment="Center" />
         </Grid>
        </Border>
        <Thumb x:Name="PART_LeftHeaderGripper" Width="8" HorizontalAlignment="Left" Opacity="0" Cursor="SizeWE" />
