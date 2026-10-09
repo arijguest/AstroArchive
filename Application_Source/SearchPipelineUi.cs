@@ -67,12 +67,15 @@ namespace AstroArchive {
      if(gridName=="ImportGrid")return new SearchResult{Frames=SearchOrdering.Order(frames,sorts,culture,token)};
      List<SubframeSession> groups;var ordered=RepositoryOrdering.Order(frames,sorts,culture,allTargets,sessions,token,out groups);return new SearchResult{Frames=ordered,Sessions=groups,Summary=CaptureGroups.Summarize(ordered,token)};
     });
-    if(state.Disposed||state.Version!=version||Window.Dispatcher.HasShutdownStarted)return;state.Pending=false;state.SortOnly=false;
-    if(!ReferenceEquals(grid.ItemsSource,source))return;
-    if(gridName=="FramesGrid"){displayed=result.Frames;DisplayLibrary(result.Sessions,result.Summary,true);}
-    else if(gridName=="EditedGrid"){var selected=ActiveEditedImage;SetRows(gridName,result.Images,true);RestoreEditedSelection(result.Images,selected);}
-    else{var selected=new HashSet<Frame>(grid.SelectedItems.OfType<Frame>());var current=grid.SelectedItem as Frame;visibleImports=result.Frames;SetRows(gridName,result.Frames,true);foreach(var frame in result.Frames.Where(selected.Contains))grid.SelectedItems.Add(frame);if(current!=null&&selected.Contains(current))grid.SelectedItem=current;}
-   }catch(OperationCanceledException){}catch(Exception error){if(!state.Disposed&&state.Version==version){state.Pending=false;state.SortOnly=false;L(name=="SearchBox"?"LibrarySummaryLabel":name=="ImportSearchBox"?"ImportSummaryLabel":"EditedSummary").Text="Could not sort: "+error.Message;}}
+    // Startup can schedule a sort before WPF installs a synchronization context.
+    await Window.Dispatcher.InvokeAsync(new Action(()=>{
+     if(state.Disposed||state.Version!=version||Window.Dispatcher.HasShutdownStarted)return;state.Pending=false;state.SortOnly=false;
+     if(!ReferenceEquals(grid.ItemsSource,source))return;
+     if(gridName=="FramesGrid"){displayed=result.Frames;DisplayLibrary(result.Sessions,result.Summary,true);}
+     else if(gridName=="EditedGrid"){var selected=ActiveEditedImage;SetRows(gridName,result.Images,true);RestoreEditedSelection(result.Images,selected);}
+     else{var selected=new HashSet<Frame>(grid.SelectedItems.OfType<Frame>());var current=grid.SelectedItem as Frame;visibleImports=result.Frames;SetRows(gridName,result.Frames,true);foreach(var frame in result.Frames.Where(selected.Contains))grid.SelectedItems.Add(frame);if(current!=null&&selected.Contains(current))grid.SelectedItem=current;}
+    }),DispatcherPriority.Normal);
+   }catch(OperationCanceledException){}catch(Exception error){if(!Window.Dispatcher.HasShutdownStarted)await Window.Dispatcher.InvokeAsync(new Action(()=>{if(!state.Disposed&&state.Version==version){state.Pending=false;state.SortOnly=false;L(name=="SearchBox"?"LibrarySummaryLabel":name=="ImportSearchBox"?"ImportSummaryLabel":"EditedSummary").Text="Could not sort: "+error.Message;}}),DispatcherPriority.Normal);}
   }
   async void ExecuteSearch(string name,SearchPanel state){
    int version=state.Version;string text=T(name).Text;
