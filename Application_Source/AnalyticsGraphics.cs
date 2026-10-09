@@ -20,9 +20,11 @@ namespace AstroArchive {
   static readonly string[] Colours={"#5951D6","#008477","#CB5078","#B37608","#427AB5","#8756A5","#6B813A","#64748B"};
   static void Box(AnalyticsPage p,double x,double y,double w,double h,string colour){p.Marks.Add(new AnalyticsMark{Kind="rect",X=x,Y=y,Width=w,Height=h,Fill=colour});}
   static void Text(AnalyticsPage p,string text,double x,double y,double size,string colour,bool bold=false,string detail=null){p.Marks.Add(new AnalyticsMark{Kind="text",Text=text,X=x,Y=y,Size=size,Fill=colour,Bold=bold,Detail=detail});}
-  static string Short(string text,int length){return text.Length<=length?text:text.Substring(0,length-1)+"…";}
-  static void Lines(AnalyticsPage p,string text,double x,double y,int characters,double size,string colour,int limit){
-   var remaining=text;int line=0;while(remaining.Length>0&&line<limit){int count=Math.Min(characters,remaining.Length);if(count<remaining.Length){int space=remaining.LastIndexOf(' ',count-1,count);if(space>characters/2)count=space;}string part=remaining.Substring(0,count);remaining=remaining.Substring(count).TrimStart();if(line==limit-1&&remaining.Length>0)part=Short(part+" "+remaining,characters);Text(p,part,x,y+line*(size+5),size,colour,false,text);line++;}
+  static string Short(string text,int length){if(text.Length<=length)return text;int count=length-1;if(count>0&&char.IsHighSurrogate(text[count-1]))count--;return text.Substring(0,count)+"…";}
+  static double TextWidth(string text,double size){return text.Sum(c=>char.IsSurrogate(c)?.6:c>=0x3000?1:"MWmw@%".IndexOf(c)>=0?.95:"ilI.,:;!| '".IndexOf(c)>=0?.3:char.IsUpper(c)?.75:.6)*size;}
+  static string Fit(string text,double width,double size){int length=text.Length;while(length>1&&TextWidth(Short(text,length),size)>width)length--;return Short(text,length);}
+  static void Lines(AnalyticsPage p,string text,double x,double y,int characters,double size,string colour,int limit,double width=0){
+   var remaining=text;int line=0;while(remaining.Length>0&&line<limit){int count=Math.Min(characters,remaining.Length);if(width>0)while(count>1&&TextWidth(remaining.Substring(0,count),size)>width)count--;if(count<remaining.Length){int space=remaining.LastIndexOf(' ',count-1,count);if(space>count/2)count=space;if(count>0&&char.IsHighSurrogate(remaining[count-1]))count--;}string part=remaining.Substring(0,count);remaining=remaining.Substring(count).TrimStart();if(line==limit-1&&remaining.Length>0){part=Short(part+" "+remaining,characters);if(width>0)part=Fit(part,width,size);}Text(p,part,x,y+line*(size+5),size,colour,false,text);line++;}
   }
   public static AnalyticsPage Page(AnalyticsSnapshot data,int index){
    return Page(data,index,0,1,data.Reports[index].Style=="bars"?data.Reports[index].Values.Take(8).ToList():ArchiveAnalytics.Compact(data.Reports[index].Values,8));
@@ -49,7 +51,7 @@ namespace AstroArchive {
    else Columns(p,report.Values,report.Unit);
    Lines(p,report.Note,60,694,133,12,Muted,2);
    Box(p,60,738,1080,1,"#DCE2EF");
-   Lines(p,data.Scope,60,752,108,11,Muted,1);
+   Lines(p,data.Scope,60,752,108,11,Muted,1,820);
    Text(p,data.DateRange,60,775,10,Muted);
    Text(p,"astroarchive.arijguest.com",910,752,11,Accent);
    Text(p,data.GeneratedUtc.ToString("dd MMM yyyy",CultureInfo.InvariantCulture)+" · UTC",988,773,10,Muted);
@@ -62,7 +64,7 @@ namespace AstroArchive {
     for(int i=steps;i>=0;i--){double a=angle+sweep*i/steps;points.Add(265+110*Math.Cos(a));points.Add(477+110*Math.Sin(a));}
     p.Marks.Add(new AnalyticsMark{Kind="polygon",Points=points.ToArray(),Fill=Colours[colour%Colours.Length]});
     double y=477-values.Count*42/2.0+colour*42;Box(p,485,y+5,12,12,Colours[colour%Colours.Length]);
-    string label=Short(value.Label,49);Text(p,label,510,y,15,Ink,false,value.Label);
+    string label=Fit(Short(value.Label,49),390,15);Text(p,label,510,y,15,Ink,false,value.Label);
     Text(p,ArchiveAnalytics.Number(value.Value)+" "+unit,935,y,15,Ink,true);
     Text(p,(value.Value/total*100).ToString("0.#",CultureInfo.InvariantCulture)+"%",1076,y,13,Muted);
     angle+=sweep;colour++;
@@ -78,7 +80,7 @@ namespace AstroArchive {
    for(int i=0;i<=4;i++){double x=start+width*i/4;Box(p,x,323,1,326,"#E8ECF4");Text(p,ArchiveAnalytics.Number(max*i/4),x-5,659,11,Muted);}
    for(int i=0;i<values.Count;i++){
     var value=values[i];double slot=326.0/values.Count,barHeight=Math.Min(44,slot*.65),y=323+i*slot+(slot-barHeight)/2;
-    Lines(p,value.Label,60,y+barHeight/2-9,value.Label.Length>80?58:40,value.Label.Length>80?11:15,Ink,2);
+    Lines(p,value.Label,60,y+barHeight/2-9,value.Label.Length>80?58:40,value.Label.Length>80?11:15,Ink,2,360);
     Box(p,start,y,Math.Max(.5,value.Value/max*width),barHeight,Colours[i%Colours.Length]);
     Text(p,ArchiveAnalytics.Number(value.Value)+" "+unit,1050,y+barHeight/2-8,15,Ink,true);
    }

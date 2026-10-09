@@ -72,6 +72,11 @@ namespace AstroArchive {
     var data=ArchiveAnalytics.Build(new Frame[0],new AnalyticsOptions());Check(data.Captures==0&&data.Seconds==0&&data.UnknownExposure==0,"Empty totals incorrect");
     var pages=Enumerable.Range(0,6).Select(i=>AnalyticsGraphics.Page(data,i)).ToList();string svg=AnalyticsGraphics.Svg(pages,"");Check(!svg.Contains("NaN")&&!svg.Contains("Infinity")&&svg.Contains("No light frames in this scope"),"Empty chart geometry invalid");XDocument.Parse(svg);
    });
+   Test("Long Unicode analytics labels remain valid across publication exports",()=>{
+    var frame=AnalyticsLight("M31",60);frame.Filter=new string('W',40)+" 🌌 "+new string('W',100);frame.Telescope=new string('W',39)+"🌌 "+new string('W',100);
+    var data=ArchiveAnalytics.Build(new[]{frame},new AnalyticsOptions{Caption=new string('W',107)+"🌌 Observatory"});
+    XDocument.Parse(AnalyticsGraphics.Svg(Enumerable.Range(0,6).SelectMany(i=>AnalyticsGraphics.Pages(data,i)).ToList(),""));
+   });
   }
  }
 }
