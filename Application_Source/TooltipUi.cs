@@ -107,7 +107,7 @@ namespace AstroArchive {
    {"ThemeButton","Switch light/dark theme."},
    {"ImportToolsButton","Metadata, target identification and scan report."},
    {"HelpButton","Open the guide (F1)."},
-   {"AutoUploadButton","Import new USB captures; keep originals."},
+   {"AutoUploadButton","Choose telescope folders or files, then confirm a full scan and import. Keep originals."},
    {"ClearButton","Clear search, filters and target selection."},
    {"LibraryColumnsButton","Choose columns; drag headers to reorder."},
    {"ImportColumnsButton","Choose columns; drag headers to reorder."},

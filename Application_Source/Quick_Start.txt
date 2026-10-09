@@ -52,10 +52,23 @@ Stacks remain separate. Known counts show Stack (1445); filters still use Stack.
 USB TRANSFER AND SAVED TELESCOPES
 
 ## Connect and import
-Expose the telescope as a Windows USB volume and save its physical device ID and
-source folder. Import > Connected telescopes lists recognised local storage.
-Connected imports keep originals and leave analysis off. Reconnect for new files.
-Use Robust file matching when restoring missing or damaged archive copies.
+Expose the telescope as a Windows USB volume. When recognised, Import offers
+**Import from Seestar…** or **Import from Dwarflab…**; the connected-import button
+opens the same picker. Choose a saved physical telescope or name a new one.
+Use **Add folder…** and **Add files…** to select captures on that telescope drive.
+Folders include subfolders; overlapping selections are scanned once. Previous
+selections are remembered for that telescope and volume.
+For faster scans, choose only the target folders or files you need. **Entire
+telescope drive** checks all capture folders and may take a long time.
+**Review and import…** asks for confirmation before any scan or copying. Whole-drive
+and 500-or-more-file selections receive a stronger time warning. Cancel or No
+leaves the selection unimported.
+After confirmation, every selected capture is fully scanned and hashed, then
+eligible files are screened and copied with verification. Saved filename/session
+shortcuts are bypassed even when Robust file matching is off. Import exclusions
+still apply; rejected or unreadable captures remain for review.
+Connected imports keep originals and leave analysis off. Cancel retains completed
+copies; reconnect and select the captures again to resume or repair missing copies.
 
 ## Manage profiles
 Import > Saved telescopes saves, renames or recovers profiles from archive data.

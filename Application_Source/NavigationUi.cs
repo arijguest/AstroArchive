@@ -158,10 +158,12 @@ namespace AstroArchive {
             else if (name == "GuideMenu") BuildGuideNavigation(menu);
         }
         void BuildImportNavigation(MenuItem menu) {
+            foreach(var telescope in usbTelescopes){var device=telescope;menu.Items.Add(MenuAction(UsbImportLabel(device),()=>{GoToPage(1);UploadUsb(device);},repo!=null&&!RepositoryOperationBlocked&&!usbImportPicking));}
+            if(usbTelescopes.Count>0)menu.Items.Add(new Separator());
             menu.Items.Add(ButtonAction("Scan source", "ScanButton", 1));
             menu.Items.Add(ButtonAction("Import ready files", "ImportButton", 1));
             var usb = Branch("Connected telescopes", ButtonAction("Refresh devices", "RefreshUsbButton"));
-            foreach (var telescope in usbTelescopes) { var device=telescope;usb.Items.Add(MenuAction((device.ProfileId??device.Make)+" · "+device.Source,()=>{GoToPage(1);UploadUsb(device);},repo!=null)); }
+            foreach (var telescope in usbTelescopes) { var device=telescope;usb.Items.Add(MenuAction(UsbImportLabel(device),()=>{GoToPage(1);UploadUsb(device);},repo!=null&&!RepositoryOperationBlocked&&!usbImportPicking)); }
             if(usbTelescopes.Count==0)usb.Items.Add(new MenuItem{Header="No telescope storage detected",IsEnabled=false});menu.Items.Add(usb);
             menu.Items.Add(Branch("Saved telescopes", ButtonAction("Save current telescope…", "SaveTelescopeButton", 1), ButtonAction("Rename telescope…", "RenameTelescopeButton", 1), ButtonAction("Recover profiles", "RebuildTelescopesButton", 1)));
             var tools=Branch("Review and repair", ButtonAction("Review flagged files…", "ReviewImportsButton", 1),ButtonAction("Screen files", "ScreenImportsButton", 1),ButtonAction("Retry failed imports", "RetryImportsButton", 1),MenuAction("Full rescan",()=>{GoToPage(1);Scan(true);},repo!=null),MenuAction("Scan report…",()=>ShowReport("Scan report",plan==null?"Scan a folder first.":plan.ScanReport)));
