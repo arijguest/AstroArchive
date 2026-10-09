@@ -1,50 +1,69 @@
-# Build and test
+# Build and check
 
-Use Windows x64 with .NET Framework 4.8 and Windows PowerShell 5.1.
-The scripts use Windows' C# 5 compiler; Visual Studio, SDK and NuGet are not required.
+Use Windows x64, .NET Framework 4.8 and PowerShell. The scripts use Windows' C# 5
+compiler; Visual Studio, SDK and NuGet are not required.
 
-## Application and isolated tests
+## Build
 
 From the repository root:
 
-```powershell
-.\Application_Source\test.ps1
+~~~powershell
 .\Application_Source\build.ps1
+~~~
+
+Output: `Application_Source/dist/AstroArchive.exe`.
+
+## Choose checks by the change
+
+| Change | Engine checks | UI checks |
+| --- | --- | --- |
+| Targets, search, selection, Edited export, guide | `test.ps1 -TargetsOnly` | `--targets-only` |
+| Preview resolution, layout, sub exposure labels | `test.ps1 -PreviewOnly` | `--preview-only` |
+| Checkbox, focus, disabled or theme states | Build the app | `--controls-only` |
+| Broader engine changes or release preparation | `test.ps1` | Full UI suite |
+
+Example:
+
+~~~powershell
+.\Application_Source\test.ps1 -TargetsOnly
+.\Application_Source\dist\AstroArchive.exe --ui-test .\Application_Source\test-data\target-checks --targets-only --no-updates
+~~~
+
+Use the corresponding preview/control switch and a separate output folder for
+those checks. UI runs use isolated settings and generated fixtures; they save
+results and screenshots. Repeat after relevant changes or failures. Copy and
+cosmetic changes need a build, link/content checks and visual review as applicable,
+not repeated full suites.
+
+Full checks:
+
+~~~powershell
+.\Application_Source\test.ps1
 .\Installer\test.ps1
-.\Application_Source\dist\AstroArchive.exe --ui-test .\ui-checks
-```
+.\Application_Source\dist\AstroArchive.exe --ui-test .\Application_Source\test-data\ui-checks --no-updates
+~~~
 
-The application tests use generated fixtures. The UI command exercises rendering,
-menus, help, tables, previews and progress, and saves screenshots to the chosen folder.
-UI settings, their backups and working repository indexes stay in that folder's
-`test-state` directory. UI checks never use the installed application's settings
-or repository cache. A regression check verifies this isolation before the suite runs.
-Windows is required for WPF, Windows codecs and native installation checks.
+## Release validation
 
-## Complete installer build
-
-Run on a disposable Windows test account: the installation smoke checks register
-AstroArchive and create/remove shortcuts.
-
-```powershell
+~~~powershell
 .\scripts\build-release.ps1
-```
+~~~
 
-Output is written to `release-artifacts/`. GitHub Actions runs this validation for
-pull requests; results and artifacts are available from the Windows workflow.
-See [releasing](RELEASING.md) for versioning, signing and publication.
+Run on a disposable Windows account: installer checks register the app and
+create/remove shortcuts. Output goes to `release-artifacts`. GitHub's Windows
+workflow validates pull requests. See [versioning and signing](RELEASING.md).
 
-## Manual checks
+## Manual coverage
 
-- Install, repair, update and uninstall; confirm repositories/settings survive.
-- Check both themes, text scaling and keyboard navigation.
-- Expand session summaries, use Show all files, and browse Edited projects/targets.
-- Preview real images, GIFs, SER and videos with the intended Windows codecs.
-- Check USB reconnection and cloud imports with the actual device/provider.
-- Use real solver/catalogue installations when checking sky identification.
+Use real files/devices for codec support, USB reconnection, cloud storage and
+external processor/solver handoffs. Check both themes, keyboard navigation and
+text scaling. Verify install, repair, update and uninstall preserve user data.
+
+The website has separate Sites source. Update its existing project, preserve the
+audience and layout, and keep resource links aligned with this repository.
 
 ## Bundled data
 
-`python scripts/build-city-catalog.py DIRECTORY` regenerates the place catalogue
-from GeoNames `cities500.txt`, `countryInfo.txt` and `admin1CodesASCII.txt`.
-Keep catalogue attribution with distributed data; see the notices in `Application_Source`.
+`scripts/build-city-catalog.py` regenerates the place catalogue from GeoNames
+`cities500.txt`, `countryInfo.txt` and `admin1CodesASCII.txt`. Preserve the attribution
+notices in Application_Source with distributed data.

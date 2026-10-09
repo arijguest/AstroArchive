@@ -24,7 +24,10 @@ are treated as slices. Conversion of 64-bit integers is refused to avoid precisi
 Numeric decoding/conversion is limited to 32 million channel samples per image,
 four channels, 256 TIFF/XISF images and the first 64 FITS HDUs. Uncompressed FITS
 can use sampled previews and original exports above the numeric allocation limit.
-Large still previews are sampled; zoom does not restore discarded display detail.
+Inline still previews use sampled buffers, normally capped at 1,400 pixels on
+the longest edge. Large still/SER popups decode native pixels separately, within
+decoder limits. Full-size popup buffers do not replace the sampled sidebar cache.
+Source files are unchanged.
 GIF preview supports up to 4,096 frames and a 32-million-pixel canvas.
 
 ## Optional codecs
@@ -57,6 +60,10 @@ and total integration. `30s40` means sub exposure/gain, and DWARF's `stacked-16`
 is bit depth. Unspecified `EXPTIME` is not assumed to be per-sub or total.
 GIFs inherit missing acquisition details only from a uniquely matching nearby still
 image. See [the user guide](../Application_Source/Quick_Start.txt) for matching names.
+
+Repository stacks show confirmed combined-frame counts, such as **Stack (1445)**;
+the filter remains **Stack**. Condensed subs show per-sub duration separately
+from total integration. Mixed or missing durations remain explicit.
 
 ## Calibration and conversion
 
