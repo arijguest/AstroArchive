@@ -41,7 +41,7 @@ namespace AstroArchive {
     File.WriteAllText(Path.Combine(output,"fast-import-smoke.txt"),"PASS: branded USB import menu/button, compatible profile selection, mixed folder/file picker, drive containment, new telescope setup, whole-drive choice, robust matching off by default, light/dark rendering.");
    }finally{settings=originalSettings;repo=originalRepo;all=originalAll;usbTelescopes=originalUsb;pendingUsb=originalPending;ReloadScopes(settings.SelectedTelescope,false);T("SourceBox").Text=source;T("TelescopeBox").Text=id;C("ModelBox").SelectedItem=model;C("CameraBox").SelectedItem=camera;plan=originalPlan;UpdateTelescopeState(false);L("UsbStatusLabel").Text=originalStatus;Theme.Apply(Window,settings.ThemeMode);((TabControl)Window.FindName("MainTabs")).SelectedIndex=tab;if(temporary!=null)temporary.Dispose();if(Directory.Exists(path))Directory.Delete(path,true);}
   }
-  void SmokeImportPreferencesButton(FormWindow parent){
+  void SmokeImportPreferencesButton(FormWindow parent,bool editedImport=false){
    PumpPopupLayout();var button=PopupChildren<Button>(parent.Window).Single(b=>Convert.ToString(b.Content)=="Import preferences…");if(!button.IsEnabled||!button.IsVisible)throw new Exception("Import preferences action is unavailable.");
    Exception failure=null;bool opened=false;
    Window.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.ApplicationIdle,new Action(()=>{
@@ -49,6 +49,7 @@ namespace AstroArchive {
      preferences=parent.Window.OwnedWindows.Cast<Window>().Single(w=>w.Title=="Preferences");opened=true;preferences.UpdateLayout();
      var sections=PopupChildren<ListBox>(preferences).Single(list=>System.Windows.Automation.AutomationProperties.GetName(list)=="Preferences sections");if(sections.SelectedIndex!=1||preferences.Owner!=parent.Window)throw new Exception("Import preferences opened the wrong page or owner.");
      if(PopupChildren<Button>(preferences).Single(b=>Convert.ToString(b.Content)=="Choose repository…").IsEnabled)throw new Exception("Import preferences allows changing the picker repository.");
+     if(editedImport&&(PopupChildren<CheckBox>(preferences).Any(c=>System.Windows.Automation.AutomationProperties.GetName(c)=="Delete originals after verified import")||!PopupChildren<TextBlock>(preferences).Any(t=>t.Text.Contains("Edited imports always keep source files"))))throw new Exception("Edited import preferences expose source deletion or fail to explain source retention.");
     }catch(Exception e){failure=e;}finally{if(preferences!=null)preferences.Close();}
    }));
    button.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));if(failure!=null)throw new Exception("Import dialog preferences failed.",failure);if(!opened||!parent.Window.IsVisible)throw new Exception("Import preferences was blocked or dismissed its import dialog.");
