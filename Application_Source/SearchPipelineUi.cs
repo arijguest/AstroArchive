@@ -75,7 +75,7 @@ namespace AstroArchive {
      else if(gridName=="EditedGrid"){var selected=ActiveEditedImage;SetRows(gridName,result.Images,true);RestoreEditedSelection(result.Images,selected);}
      else{var selected=new HashSet<Frame>(grid.SelectedItems.OfType<Frame>());var current=grid.SelectedItem as Frame;visibleImports=result.Frames;SetRows(gridName,result.Frames,true);foreach(var frame in result.Frames.Where(selected.Contains))grid.SelectedItems.Add(frame);if(current!=null&&selected.Contains(current))grid.SelectedItem=current;}
     }),DispatcherPriority.Normal);
-   }catch(OperationCanceledException){}catch(Exception error){if(!Window.Dispatcher.HasShutdownStarted)await Window.Dispatcher.InvokeAsync(new Action(()=>{if(!state.Disposed&&state.Version==version){state.Pending=false;state.SortOnly=false;L(name=="SearchBox"?"LibrarySummaryLabel":name=="ImportSearchBox"?"ImportSummaryLabel":"EditedSummary").Text="Could not sort: "+error.Message;}}),DispatcherPriority.Normal);}
+   }catch(OperationCanceledException){}catch(Exception error){if(!Window.Dispatcher.HasShutdownStarted)Window.Dispatcher.BeginInvoke(DispatcherPriority.Normal,new Action(()=>{if(!state.Disposed&&state.Version==version){state.Pending=false;state.SortOnly=false;L(name=="SearchBox"?"LibrarySummaryLabel":name=="ImportSearchBox"?"ImportSummaryLabel":"EditedSummary").Text="Could not sort: "+error.Message;}}));}
   }
   async void ExecuteSearch(string name,SearchPanel state){
    int version=state.Version;string text=T(name).Text;
