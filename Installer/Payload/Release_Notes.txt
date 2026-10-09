@@ -1,14 +1,21 @@
-AstroArchive 2.1.14
-Package 2.1.14.1
+AstroArchive 2.1.15
+Package 2.1.15.1
 
-- Target and All targets exposure totals include video duration for AVI, MP4,
-  MOV, M4V, WMV, MKV and SER recordings. Video-only targets show their totals;
-  missing durations remain marked as unknown. Videos retain their Video type.
-- Metadata menus apply changes to every selected file by default in Repository,
-  Import and Edited, including selections spanning targets or Edited projects.
-  Editors clearly show the batch scope and preserve unchanged fields. Expanding
-  changes to entire capture sessions remains an optional choice.
-- Clicking a Repository or Edited row without Ctrl or Shift selects only that
-  entry and clears earlier selections, including files hidden under other
-  targets. Plain grouped-sub selection also replaces the previous batch.
-  Right-clicking an already selected entry preserves the batch for file actions.
+- Video recordings appear above grouped subs in target and All Targets views.
+- Target tooltips show concise IDs, subs, stacks and exposure totals. Long
+  target titles drop a trailing object type when space is limited.
+- Up/Down selects targets when the target pane is active. Left/Right switches
+  between targets, files and preview, activating the current entry or selecting
+  the first entry when needed. Up/Down then selects within the active pane.
+- Accessibility > Clearer selections optionally restores prominent selection
+  outlines. It is off by default; usual selection highlights remain visible.
+- Repository and Edited select the first All Targets entry and load its preview
+  on first opening. Later visits remember the selected target and files.
+- Unknown camera channels default to Tele for DSO and solar-system targets,
+  preserving explicit choices, conflicting camera evidence and calibration data.
+- Repository > Maintenance > Fill missing metadata previews supported additions
+  from raw headers, original filenames and verified preserved session metadata.
+  Existing values, user edits and original files remain intact; conflicting or
+  unsupported fields remain unknown. Apply to selected captures or the archive.
+- Default table widths give ID and Type more room while narrowing Gain and Date.
+  ID and Type accommodate NGC7000 and Stack(1000), including larger text sizes.
