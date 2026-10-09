@@ -307,6 +307,9 @@ Scientific decoding has size/layout limits; ordinary exports preserve bytes.
 
 APPEARANCE AND ACCESSIBILITY
 
+Import dialogs include Import preferences…; it opens the Import section while
+keeping the selected folders and files in the dialog.
+
 Settings opens Preferences: General, Import, Export, Sky & solving, Accessibility,
 Updates and Backups. Save preferences applies changes; Cancel retains settings.
 Accessibility adjusts text size, rows, contrast and progress animation.
