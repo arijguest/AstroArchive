@@ -1,0 +1,44 @@
+name: Remote tester Windows validation
+on:
+  push:
+    branches: ['codex/remote-tester-*']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  remote:
+    runs-on: windows-2022
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - name: Build with the Windows compiler
+        shell: powershell
+        run: .\Remote_Tester\build.ps1
+      - name: Check transfer engine
+        shell: powershell
+        run: .\Remote_Tester\test.ps1
+      - name: Check native WPF startup and rendering
+        shell: powershell
+        run: |
+          $output = Join-Path $pwd 'Remote_Tester\dist\ui-checks'
+          $process = Start-Process -FilePath '.\Remote_Tester\dist\AstroArchive.RemoteTester.exe' -ArgumentList @('--ui-test', $output) -PassThru
+          if (-not $process.WaitForExit(45000)) {
+            Stop-Process -Id $process.Id -Force
+            $log = Join-Path $env:LOCALAPPDATA 'AstroArchive.RemoteTester\startup-error.txt'
+            if (Test-Path $log) { Get-Content $log }
+            throw 'Native WPF startup did not complete.'
+          }
+          if ($process.ExitCode -ne 0 -or -not (Test-Path (Join-Path $output 'ui-startup-passed.txt'))) {
+            $log = Join-Path $env:LOCALAPPDATA 'AstroArchive.RemoteTester\startup-error.txt'
+            if (Test-Path $log) { Get-Content $log }
+            throw 'Native WPF startup failed.'
+          }
+          Get-Content (Join-Path $output 'ui-startup-passed.txt')
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: remote-tester-windows
+          path: |
+            Remote_Tester/dist/
+            ~\AppData\Local\AstroArchive.RemoteTester\startup-error.txt
+          if-no-files-found: error
