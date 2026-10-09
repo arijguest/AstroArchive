@@ -33,6 +33,7 @@ namespace AstroArchive {
      frames.Add(new Frame{Hash=Util.Hash(path,CancellationToken.None),SourcePath=path,OriginalName=Path.GetFileName(path),Status="New",Bytes=new FileInfo(path).Length,Target=target,Kind="Light",Session="shared-batch-session",Telescope="Scope",Filter="Broadband",Exposure=paths.Count*10,Format="PNG",Width=2,Height=2,Images=Assets.Inspect(path).Images});
     }
     var imported=repo.Import(frames,CancellationToken.None,null);if(imported.Imported!=3)throw new Exception("Metadata batch fixture failed to import: "+string.Join("; ",imported.Errors));all=repo.All();Filter(true);WaitForSearches();librarySelection.Clear();foreach(var frame in all.Where(f=>f.Target!="M42"))librarySelection.Add(frame);RestoreTargetSelection("FramesGrid");
+    SmokeMissingMetadataMenu();
     var menu=ThemedMenu();BuildFileMenu(menu,SelectedFiles());SmokeSaveMetadataBatch(()=>menu.Items.OfType<MenuItem>().Single(i=>Convert.ToString(i.Header)=="Edit metadata…").RaiseEvent(new RoutedEventArgs(MenuItem.ClickEvent)),dialog=>PopupChildren<TextBox>(dialog).Single(box=>box.Name=="MetadataFilter").Text="Ha");
     var saved=repo.All();if(saved.Count(f=>f.Filter=="Ha")!=2||saved.Single(f=>f.Target=="M42").Filter!="Broadband"||saved.Any(f=>f.Exposure!=frames.Single(original=>original.Hash==f.Hash).Exposure))throw new Exception("Repository batch metadata did not update exactly the two selected files.");
     GoToPage(1);plan=new ImportPlan{Frames=frames.Select(f=>{var clone=f.Clone();clone.Status="New";return clone;}).ToList()};FilterImports();WaitForSearches();foreach(var frame in G("ImportGrid").Items.OfType<Frame>().Where(f=>f.Target!="M42"))G("ImportGrid").SelectedItems.Add(frame);
@@ -45,6 +46,17 @@ namespace AstroArchive {
    }finally{
     foreach(var dialog in Window.OwnedWindows.Cast<Window>().Where(w=>w.Title=="Edit metadata").ToArray())dialog.Close();CancelPreview();CancelEditedPreview();metadataPreviewSuspended=false;CancelAutomaticEditedRefresh();repo=previousRepo;all=previousRows;plan=previousPlan;editedImages=previousEdited;librarySelection.Clear();foreach(var frame in selected)librarySelection.Add(frame);editedSelection.Clear();foreach(var image in editedSelected)editedSelection.Add(image);settings.ShowPreview=show;SetPreviewVisibility();Filter(true);FilterImports();FilterEditedImages();WaitForSearches();GoToPage(page);if(temporary!=null)temporary.Dispose();if(Directory.Exists(directory))Directory.Delete(directory,true);
    }
+  }
+  void SmokeMissingMetadataMenu(){
+   var before=repo.All();var hashes=before.ToDictionary(f=>f.Hash,f=>Util.Hash(repo.FilePath(f),CancellationToken.None));var untouched=before.Single(f=>f.Target=="M42");int stage=0;Exception failure=null;var timer=new DispatcherTimer{Interval=TimeSpan.FromMilliseconds(10)};
+   timer.Tick+=(s,e)=>{try{
+    var dialog=Window.OwnedWindows.Cast<Window>().FirstOrDefault(w=>w.Title==(stage==0?"Fill missing metadata":"Review missing metadata"));if(dialog==null||stage>1)return;
+    if(stage==0){var scope=PopupChildren<ComboBox>(dialog).Single(c=>System.Windows.Automation.AutomationProperties.GetName(c)=="Files to check");if(!Convert.ToString(scope.SelectedItem).StartsWith("Selected files (2)"))throw new Exception("Metadata completion did not default to the selected files");stage=1;PopupChildren<Button>(dialog).Single(b=>Convert.ToString(b.Content)=="Preview missing metadata").RaiseEvent(new RoutedEventArgs(Button.ClickEvent));}
+    else{var grid=PopupChildren<DataGrid>(dialog).Single();if(grid.Items.Count==0||!grid.IsReadOnly||!grid.Columns.Any(c=>Convert.ToString(c.Header)=="Source"))throw new Exception("Missing metadata preview has no additions or evidence");stage=2;PopupChildren<Button>(dialog).Single(b=>Convert.ToString(b.Content)=="Fill missing metadata").RaiseEvent(new RoutedEventArgs(Button.ClickEvent));}
+   }catch(Exception error){failure=error;stage=3;foreach(var dialog in Window.OwnedWindows.Cast<Window>().Where(w=>w.Title.Contains("missing metadata")).ToArray())dialog.Close();}};
+   try{timer.Start();BuildRepositoryTools().Items.OfType<MenuItem>().Single(m=>Convert.ToString(m.Header)=="Fill missing metadata…").RaiseEvent(new RoutedEventArgs(MenuItem.ClickEvent));WaitPreview(()=>stage>=2&&cancel==null,"Repository metadata completion menu did not finish");if(failure!=null)throw failure;
+    var saved=repo.All();if(saved.Count(f=>f.Camera=="Telephoto")!=2||saved.Any(f=>f.Exposure!=before.Single(old=>old.Hash==f.Hash).Exposure)||Util.Serialize(repo.Find(untouched.Hash))!=Util.Serialize(untouched)||saved.Any(f=>f.RelativePath!=before.Single(old=>old.Hash==f.Hash).RelativePath||Util.Hash(repo.FilePath(f),CancellationToken.None)!=hashes[f.Hash]))throw new Exception("Menu metadata completion changed a known value, unselected capture or original file");
+   }finally{timer.Stop();}
   }
  }
 }

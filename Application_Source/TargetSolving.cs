@@ -56,7 +56,7 @@ namespace AstroArchive {
    target=Catalog.Normalize(target);if(Catalog.IsAmbiguous(target))throw new ArgumentException("Choose a target before applying this match.");
    var updated=WithPointing(job,original);updated.Target=target;updated.TargetEvidence=original==job.Representative?"Plate solved using "+job.Result.Solver:"Target from same-session plate-solved Light frame: "+job.Filename;
    if(updated.Facts==null)updated.Facts=new Dictionary<string,MetadataFact>();updated.Facts["Target"]=new MetadataFact{Value=target,Raw=target,Source=updated.TargetEvidence};
-   updated.Notes=(updated.Notes??"")+updated.TargetEvidence+". ";return updated;
+   updated.Notes=(updated.Notes??"")+updated.TargetEvidence+". ";CameraDetection.DefaultForTarget(updated);return updated;
   }
  }
 }

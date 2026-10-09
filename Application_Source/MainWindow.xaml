@@ -801,12 +801,12 @@
         <DataGrid x:Name="FramesGrid">
          <DataGrid.Columns>
           <DataGridTextColumn Header="FILE" Binding="{Binding OriginalName}" Width="*" MinWidth="175" />
-          <DataGridTextColumn Header="ID" Binding="{Binding ObjectId}" Width="56" />
+          <DataGridTextColumn Header="ID" Binding="{Binding ObjectId}" Width="88" />
           <DataGridTextColumn Header="OBJECT" Binding="{Binding TargetName}" Width="160" />
-          <DataGridTextColumn Header="TYPE" Binding="{Binding Kind}" Width="88" />
-          <DataGridTextColumn Header="DATE" Binding="{Binding AcquisitionDateLabel}" Width="96" />
+          <DataGridTextColumn Header="TYPE" Binding="{Binding Kind}" Width="114" />
+          <DataGridTextColumn Header="DATE" Binding="{Binding AcquisitionDateLabel}" Width="88" />
           <DataGridTextColumn Header="EXPOSURE" Binding="{Binding ExposureText}" Width="88" />
-          <DataGridTextColumn Header="GAIN" Binding="{Binding GainText}" Width="64" />
+          <DataGridTextColumn Header="GAIN" Binding="{Binding GainText}" Width="54" />
           <DataGridTextColumn Header="FILTER" Binding="{Binding Filter}" Width="88" />
          </DataGrid.Columns>
         </DataGrid>
@@ -937,12 +937,12 @@
        <DataGrid.Columns>
         <DataGridTextColumn Header="STATUS" Binding="{Binding Status}" Width="110" />
         <DataGridTextColumn Header="REVIEW" Binding="{Binding ReviewText}" Width="115" />
-        <DataGridTextColumn Header="ID" Binding="{Binding ObjectId}" Width="56" />
+        <DataGridTextColumn Header="ID" Binding="{Binding ObjectId}" Width="88" />
         <DataGridTextColumn Header="OBJECT" Binding="{Binding TargetName}" Width="160" />
         <DataGridTextColumn Header="DEVICE / MODEL" Binding="{Binding InstrumentText}" Width="150" />
-        <DataGridTextColumn Header="TYPE" Binding="{Binding Kind}" Width="88" />
+        <DataGridTextColumn Header="TYPE" Binding="{Binding Kind}" Width="114" />
         <DataGridTextColumn Header="CAMERA" Binding="{Binding Camera}" Width="90" />
-        <DataGridTextColumn Header="DATE" Binding="{Binding AcquisitionDateLabel}" Width="96" />
+        <DataGridTextColumn Header="DATE" Binding="{Binding AcquisitionDateLabel}" Width="88" />
         <DataGridTextColumn Header="EXPOSURE" Binding="{Binding ExposureText}" Width="88" />
         <DataGridTextColumn Header="FILE" Binding="{Binding OriginalName}" Width="*" MinWidth="180" />
        </DataGrid.Columns>
@@ -1008,7 +1008,7 @@
        <Border Grid.Row="1" Background="{DynamicResource Surface}" BorderBrush="{DynamicResource Border}" BorderThickness="1" CornerRadius="8" ClipToBounds="True"><Grid><DataGrid x:Name="EditedGrid" CanUserSortColumns="True"><DataGrid.Columns>
          <DataGridTextColumn Header="FILE" Binding="{Binding Filename}" Width="*" MinWidth="200"/>
          <DataGridTextColumn Header="FILE TYPE" Binding="{Binding FileType}" Width="85"/>
-         <DataGridTextColumn Header="ID" Binding="{Binding Metadata.ObjectId}" Width="56"/>
+         <DataGridTextColumn Header="ID" Binding="{Binding Metadata.ObjectId}" Width="88"/>
          <DataGridTextColumn Header="OBJECT" Binding="{Binding Metadata.TargetName}" Width="160"/>
          <DataGridTextColumn Header="TOTAL EXPOSURE" Binding="{Binding Metadata.TotalExposureText}" Width="130" Visibility="Collapsed"/>
          <DataGridTextColumn Header="SUBS" Binding="{Binding Metadata.SubsText}" Width="70" Visibility="Collapsed"/>
