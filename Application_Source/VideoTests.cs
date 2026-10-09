@@ -19,6 +19,7 @@ namespace AstroArchive {
     foreach(string ext in new[]{"mp4","MOV","m4v"}){
      string path=VideoWrite("Stacked_M45_20x30s."+ext,VideoJoin(VideoBox("ftyp",VideoText("isom"),new byte[4]),VideoMovie(1000,5500)));
      var frame=Classifier.Read(path,root,"Scope","Auto");Check(frame.Kind=="Video"&&frame.Exposure==5.5&&frame.VideoDurationSeconds==5.5&&frame.ExposureText=="5.5 s",ext+" used filename exposure");Check(frame.ExposureTooltip.Contains("Video length")&&!frame.ExposureTooltip.Contains("per sub"),"Duration tooltip described sub exposure");Check(new CaptureFilters{Values={{"Frame type","Video"}}}.Matches(frame)&&FileSearch.Parse("type:Video exposure>5").Matches(frame),"Video filter/search failed");Check(CaptureGroups.Summarize(new[]{frame}).Subs==0&&SubframeSessions.Build(new[]{frame}).Count==0,"Recording became a sub session");
+     Check(TargetNavigation.Build(new[]{frame})[1].ExposureSeconds==5.5,"Scanned "+ext+" omitted from target total");
     }
    });
    Test("MP4 version-one duration skips an extended multi-gigabyte media atom",()=>{
@@ -32,18 +33,20 @@ namespace AstroArchive {
     byte[] body=VideoJoin(VideoText("AVI "),VideoChunk("LIST",VideoText("hdrl"),VideoChunk("avih",main),VideoChunk("LIST",VideoText("strl"),VideoChunk("strh",video))),VideoChunk("LIST",VideoText("movi"),new byte[1048576]));
     string path=VideoWrite("Light_Jupiter_30s.avi",VideoJoin(VideoText("RIFF"),VideoNumber((ulong)body.Length,4,false),body));long bytes=0;var frame=Classifier.Read(path,root,"Scope","Auto",counted:n=>bytes+=n);
     Check(frame.Kind=="Video"&&frame.Exposure==10.01&&bytes<200,"AVI duration decoded media or used per-frame exposure");
+    Check(TargetNavigation.Build(new[]{frame})[1].ExposureSeconds==10.01,"Scanned AVI omitted from target total");
    });
    Test("WMV and MKV duration normalize their container time units",()=>{
     var properties=new byte[80];Array.Copy(VideoNumber(75000000,8,false),0,properties,40,8);Array.Copy(VideoNumber(500,8,false),0,properties,56,8);
     var file=VideoJoin(new Guid("8CABDCA1-A947-11CF-8EE4-00C00C205365").ToByteArray(),VideoNumber(104,8,false),properties);var header=VideoJoin(new Guid("75B22630-668E-11CF-A6D9-00AA0062CE6C").ToByteArray(),VideoNumber(134,8,false),VideoNumber(1,4,false),new byte[]{1,2},file);
-    Check(Classifier.Read(VideoWrite("recording.wmv",header),root,"Scope","Auto").Exposure==7,"ASF play duration/preroll wrong");
+    var wmv=Classifier.Read(VideoWrite("recording.wmv",header),root,"Scope","Auto");Check(wmv.Exposure==7&&TargetNavigation.Build(new[]{wmv})[1].ExposureSeconds==7,"ASF play duration/preroll or target total wrong");
     byte[] floating=BitConverter.GetBytes(2500.0);if(BitConverter.IsLittleEndian)Array.Reverse(floating);
     byte[] info=VideoJoin(new byte[]{0x44,0x89,0x88},floating,new byte[]{0x2a,0xd7,0xb1,0x83,0x0f,0x42,0x40});byte[] segment=VideoJoin(new byte[]{0x15,0x49,0xa9,0x66,(byte)(0x80+info.Length)},info);
-    string path=VideoWrite("recording.mkv",VideoJoin(new byte[]{0x18,0x53,0x80,0x67,0xff},segment));var frame=Classifier.Read(path,root,"Scope","Auto");Check(frame.Kind=="Video"&&frame.Exposure==2.5,"Matroska timecode scale/float wrong");
+    string path=VideoWrite("recording.mkv",VideoJoin(new byte[]{0x18,0x53,0x80,0x67,0xff},segment));var frame=Classifier.Read(path,root,"Scope","Auto");Check(frame.Kind=="Video"&&frame.Exposure==2.5&&TargetNavigation.Build(new[]{frame})[1].ExposureSeconds==2.5,"Matroska timecode scale/float or target total wrong");
    });
    Test("SER exposes its measured recording span and remains unknown without timestamps",()=>{
     string path=MakeSer("video-span.ser",0,0,8,2,new byte[8]);long start=new DateTime(2026,10,9,1,0,0,DateTimeKind.Utc).Ticks;using(var stream=new FileStream(path,FileMode.Append))using(var writer=new BinaryWriter(stream)){writer.Write(start);writer.Write(start+12345678);}
     var frame=Classifier.Read(path,root,"Scope","Auto");Check(frame.Kind=="Video"&&frame.Exposure==1.2345678&&frame.ExposureTooltip.Contains("timestamp span"),"SER duration guessed a playback rate");
+    Check(TargetNavigation.Build(new[]{frame})[1].ExposureSeconds==frame.Exposure,"SER duration omitted from target total");
     var unknown=Classifier.Read(MakeSer("video-no-times.ser",0,0,8,2,new byte[8]),root,"Scope","Auto");Check(unknown.Kind=="Video"&&!unknown.Exposure.HasValue,"SER without times invented duration");
    });
    Test("Malformed missing and excessive video metadata stay bounded with unknown duration",()=>{

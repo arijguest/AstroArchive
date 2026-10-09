@@ -31,8 +31,25 @@ namespace AstroArchive {
    restoringTargetSelection=true;try{if(name=="FramesGrid"){librarySelection.Clear();ClearSessionSelection();}else editedSelection.Clear();G(name).SelectedItems.Clear();}finally{restoringTargetSelection=false;}
    UpdateSelectionCounters();if(name=="FramesGrid")Details();else{UpdateEditedActions();LoadEditedPreview();}
   }
+  void SelectOnlyTargetRow(string name,object item){
+   bool previous=restoringTargetSelection;restoringTargetSelection=true;
+   try{
+    if(name=="FramesGrid"){librarySelection.Clear();ClearSessionSelection();}else editedSelection.Clear();
+    var grid=G(name);grid.SelectedItems.Clear();grid.SelectedItem=item;
+   }finally{restoringTargetSelection=previous;}
+   CaptureTargetSelection(name);if(name=="FramesGrid")Details();else{UpdateEditedActions();LoadEditedPreview();}
+  }
   void InitializeTargetSelection(){
    B("LibrarySelectionCounter").Click+=(s,e)=>ClearTargetSelection("FramesGrid");B("EditedSelectionCounter").Click+=(s,e)=>ClearTargetSelection("EditedGrid");
+   foreach(string name in new[]{"FramesGrid","EditedGrid"}){
+    string table=name;var grid=G(table);
+    grid.PreviewMouseLeftButtonDown+=(s,e)=>{
+     if(e.Handled||(Keyboard.Modifiers&(ModifierKeys.Control|ModifierKeys.Shift))!=0)return;
+     var row=ItemsControl.ContainerFromElement(grid,e.OriginalSource as DependencyObject) as DataGridRow;
+     if(row!=null)SelectOnlyTargetRow(table,row.Item);
+     // Let the cell process focus and editing normally after the batch is replaced.
+    };
+   }
    Window.PreviewKeyDown+=FileViewerKeys;
   }
   void FileViewerKeys(object sender,KeyEventArgs args){
