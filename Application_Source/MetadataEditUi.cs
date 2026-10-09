@@ -87,17 +87,17 @@ namespace AstroArchive {
   async void Edit(bool imported){
    if(repo==null||RepositoryOperationBlocked||metadataPreviewSuspended)return;var selected=Context(imported);if(selected.Count==0)return;var repository=repo;
    try{
-   await SuspendMetadataPreviews();if(closing||repo!=repository||RepositoryOperationBlocked)return;
-   var sessionRows=MetadataSessionRows(selected,imported);var editor=new MetadataEditor(Window,selected,sessionRows.Count);if(!editor.Form.Show())return;
-   MetadataPatch patch=editor.Model.Patch();if(patch.Count==0){L("StatusLabel").Text="No metadata changes.";return;}
-   var items=selected;
-   if(editor.Sessions.IsChecked==true)items=sessionRows;
-   await RunOperation(ct=>{
-    // Validate all timezone conversions before any file is moved or saved.
-    var updates=new List<Tuple<Frame,Frame>>();foreach(var original in items){ct.ThrowIfCancellationRequested();updates.Add(Tuple.Create(original,patch.Apply(original)));}
-    foreach(var update in updates){ct.ThrowIfCancellationRequested();if(!PendingImport(update.Item1,imported))repo.Refile(update.Item2,ct);if(imported){int row=plan.Frames.IndexOf(update.Item1);if(row>=0)plan.Frames[row]=update.Item2;}}
-    return items.Count+" captures updated · "+patch.Count+" changed fields.";
-   },message=>{if(imported)FilterImports();L("StatusLabel").Text=message;});
+    await SuspendMetadataPreviews();if(closing||repo!=repository||RepositoryOperationBlocked)return;
+    var sessionRows=MetadataSessionRows(selected,imported);var editor=new MetadataEditor(Window,selected,sessionRows.Count);if(!editor.Form.Show())return;
+    MetadataPatch patch=editor.Model.Patch();if(patch.Count==0){L("StatusLabel").Text="No metadata changes.";return;}
+    var items=selected;
+    if(editor.Sessions.IsChecked==true)items=sessionRows;
+    await RunOperation(ct=>{
+     // Validate all timezone conversions before any file is moved or saved.
+     var updates=new List<Tuple<Frame,Frame>>();foreach(var original in items){ct.ThrowIfCancellationRequested();updates.Add(Tuple.Create(original,patch.Apply(original)));}
+     foreach(var update in updates){ct.ThrowIfCancellationRequested();if(!PendingImport(update.Item1,imported))repo.Refile(update.Item2,ct);if(imported){int row=plan.Frames.IndexOf(update.Item1);if(row>=0)plan.Frames[row]=update.Item2;}}
+     return items.Count+" captures updated · "+patch.Count+" changed fields.";
+    },message=>{if(imported)FilterImports();L("StatusLabel").Text=message;});
    }finally{ResumeMetadataPreviews();}
   }
   List<Frame> MetadataSessionRows(List<Frame> selected,bool imported){var ids=new HashSet<string>(selected.Where(f=>!string.IsNullOrEmpty(f.Session)).Select(f=>f.Session));return (imported?plan.Frames:all).Where(f=>(ids.Contains(f.Session)||selected.Contains(f))&&(!imported||f.Status!="Deleted")).ToList();}
