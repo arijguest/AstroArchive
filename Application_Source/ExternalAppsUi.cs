@@ -48,7 +48,7 @@ namespace AstroArchive {
    ExportToFields fields;var dialog=ExportToDialog(selection,out fields);if(!dialog.Show())return;var app=SelectedApplication(fields.Application);RememberExport(selection,app,fields.Remember.IsChecked==true);
    if(!selection.Folder){
     EditedProject project=null;string launchError=null;var paths=new List<string>();
-    Run(ct=>{project=repo.CreateEditedWorkingCopies(selected,selected[0].TargetLabel+" · "+app.Name+" · "+DateTime.Now.ToString("yyyyMMdd_HHmmss"),app.Name,ct,Progress);paths=project.Sources.Select(f=>repo.EditedPath(project,f.RelativePath)).ToList();ct.ThrowIfCancellationRequested();try{ExternalApps.Launch(app,fields.Executable,paths,null,ct);}catch(OperationCanceledException){throw;}catch(Exception error){launchError=error.Message;}return "";},done=>{RefreshEdited(project.Id);GoToPage(2);ExportLaunchResult(app,Path.GetDirectoryName(paths[0]),launchError,false);});return;
+    Run(ct=>{project=repo.CreateEditedWorkingCopies(selected,selected[0].TargetLabel+" · "+app.Name+" · "+DateTime.Now.ToString("yyyyMMdd_HHmmss"),app.Name,ct,Progress);paths=project.Sources.Select(f=>repo.EditedPath(project,f.RelativePath)).ToList();ct.ThrowIfCancellationRequested();try{ExternalApps.Launch(app,fields.Executable,paths,null,ct);}catch(OperationCanceledException){throw;}catch(Exception error){launchError=error.Message;}return "";},done=>{RefreshEdited();ExportLaunchResult(app,Path.GetDirectoryName(paths[0]),launchError,false);});return;
    }
    bool cals=fields.Calibration.IsChecked==true,unknown=fields.Unknown.IsChecked==true&&cals;var options=fields.Destination.Options();options.Mode="Files";options.IncludeCalibration=false;options.IncludeRejected=false;List<DssJob> jobs=null;string launchFailure=null;
    Run(ct=>{
@@ -57,18 +57,17 @@ namespace AstroArchive {
     string problem=ExternalApps.Problem(app,new ExternalSelection{Folder=true,Paths=inputs.Select(f=>f.OriginalName??f.RelativePath).ToList()});if(problem!=null)throw new IOException(problem);
     string folder=Exporter.Create(repo,inputs,options,ct,Progress);if(app.Id=="dss")jobs=ExternalApps.WriteDssJobs(folder,selected,options.ExportedFiles,cals,unknown,ct);
     ct.ThrowIfCancellationRequested();if(jobs==null||jobs.Count==1)try{ExternalApps.Launch(app,fields.Executable,jobs==null?new string[0]:new[]{jobs[0].Path},folder,ct);}catch(OperationCanceledException){throw;}catch(Exception error){launchFailure=error.Message;}return folder;
-   },folder=>{if(jobs!=null&&jobs.Count>1){ChooseDssJob(folder,jobs,app,fields.Executable);return;}ExportLaunchResult(app,folder,launchFailure,app.Id!="dss"&&app.Id!="siril");});
+   },folder=>{if(jobs!=null&&jobs.Count>1){QueueActivityReview("DSS capture groups are ready",()=>ChooseDssJob(folder,jobs,app,fields.Executable));if(completionActivity!=null)completionActivity.OutputPath=folder;return;}ExportLaunchResult(app,folder,launchFailure,app.Id!="dss"&&app.Id!="siril");});
   }
   void ExportEditedTo(){
-   if(repo==null||cancel!=null||SearchBlocked("EditedSearchBox"))return;var images=SelectedEditedImages();if(images.Count==0)return;
+   if(repo==null||RepositoryOperationBlocked||SearchBlocked("EditedSearchBox"))return;var images=SelectedEditedImages();if(images.Count==0)return;
    var selection=new ExternalSelection{Paths=images.Select(i=>repo.EditedPath(i.Project,i.RelativePath)).ToList()};ExportToFields fields;var dialog=ExportToDialog(selection,out fields,true);if(!dialog.Show())return;
    var app=SelectedApplication(fields.Application);RememberExport(selection,app,fields.Remember.IsChecked==true);string error=null;
    Run(ct=>{try{ExternalApps.Launch(app,fields.Executable,selection.Paths,null,ct);}catch(OperationCanceledException){throw;}catch(Exception e){error=e.Message;}return "";},done=>ExportLaunchResult(app,Path.GetDirectoryName(selection.Paths[0]),error,false));
   }
   void ExportLaunchResult(ExportApplication app,string folder,string error,bool assisted){
-   if(error!=null){L("StatusLabel").Text="Files ready; "+app.Name+" could not open.";var d=new FormWindow(Window,"Files ready",620,470);d.Text("Your verified files are available",true);d.Text(folder);d.Text(app.Name+" could not open them: "+error);d.Button("Open folder",()=>OpenFolder(folder));d.Button("Export preferences…",()=>ExportDestinationSettings(1,app.Id));d.CloseOnly();d.Show();return;}
-   L("StatusLabel").Text=app.Name+" opened · "+folder;
-   if(assisted){var d=new FormWindow(Window,"Export complete",630,450);d.Text("Your files are ready for "+app.Name,true);d.Text(folder);d.Text(app.Help);d.Button("Open input folder",()=>OpenFolder(folder));d.CloseOnly();d.Show();}
+   L("StatusLabel").Text=error!=null?"Files ready; "+app.Name+" could not open.":app.Name+" opened · "+folder;
+   if(completionActivity!=null){completionActivity.OutputPath=folder;completionActivity.Status=L("StatusLabel").Text;if(error!=null){completionActivity.NeedsReview=true;completionActivity.ReportTitle="Processor handoff";completionActivity.Report=app.Name+" could not open the files: "+error+"\n\nVerified files remain in: "+folder;}else if(assisted){completionActivity.ReportTitle="Using the exported inputs";completionActivity.Report=app.Help;}}
   }
   void ChooseDssJob(string folder,List<DssJob> jobs,ExportApplication app,string executable){
    var d=new FormWindow(Window,"DSS capture groups",640,470);d.Text(jobs.Count+" separate capture groups are ready",true);d.Text("Each group has its own DSS file list and matching calibrations. Open a group to register and stack it separately. All lists are kept in the exported folder.");var combo=d.Select("Capture group",jobs.Select(j=>j.Name).ToArray(),jobs[0].Name);
@@ -97,7 +96,7 @@ namespace AstroArchive {
    f.StorePath();foreach(var app in ExternalApps.All){string value=f.Paths[app.Id];if(value.Length>0&&value!=(ExternalApps.Configured(settings,app)??""))try{ExternalApps.ValidateExecutable(app,value);}catch(Exception error){d.SelectTab(2);f.ApplicationOptions.IsExpanded=true;f.Application.SelectedItem=app.Name;throw new IOException(app.Name+": "+error.Message,error);}}
   }
   void ExportDestinationSettings(int tab=0,string appId=null,Window owner=null){
-   if(cancel!=null)return;PreferenceFields fields;var dialog=PreferencesDialog(owner??Window,2,out fields);if(tab==1){fields.Exports.ApplicationOptions.IsExpanded=true;fields.Exports.Application.SelectedItem=(ExternalApps.Find(appId)??ExternalApps.All[0]).Name;}else fields.Exports.DefaultOptions.IsExpanded=true;dialog.Show();
+   if(RepositoryOperationBlocked)return;PreferenceFields fields;var dialog=PreferencesDialog(owner??Window,2,out fields);if(tab==1){fields.Exports.ApplicationOptions.IsExpanded=true;fields.Exports.Application.SelectedItem=(ExternalApps.Find(appId)??ExternalApps.All[0]).Name;}else fields.Exports.DefaultOptions.IsExpanded=true;dialog.Show();
   }
  }
 }

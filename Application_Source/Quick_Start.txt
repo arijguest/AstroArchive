@@ -361,7 +361,7 @@ and finish copying before processing. Startup and repository switching process
 Dump automatically when FITS files are pending; Import > Dump folder can open it or process it manually.
 
 ## Review processing results
-A progress window shows status and Cancel. Verified imports and duplicates are
+The Activity bell shows progress and Cancel. Verified imports and duplicates are
 removed; changed, locked or failed inputs stay for retry. Other files stay in place.
 Mixed drops use an Unknown physical device ID; correct it through Edit metadata.
 
@@ -412,13 +412,15 @@ Run the installer for a fresh installation, update or repair. The default locati
 is %LOCALAPPDATA%\Programs\AstroArchive and requires no administrator access.
 
 ## Check for a release
-The desktop and Start menu launcher checks for releases. Later opens the installed
-version. Settings > Updates > Check for releases checks from inside the app.
+AstroArchive checks quietly after startup and every six hours while open. The
+Activity bell and Guide > About AstroArchive show new packages and the last
+successful check. About > Check now and Settings > Updates support manual checks.
+Disable automatic checks in Settings > Updates. Offline checks retry quietly.
 
 ## Install an update
 Read release notes directly in Settings > Updates, then choose Install and restart.
 Preferences are validated and saved before the installer is downloaded and verified.
-Progress and retryable errors stay on the page. Updates retain repositories,
+Download progress, Cancel and retryable errors appear in Activity. Updates retain repositories,
 settings and local codecs and restart the app after setup.
 Manual installation works offline. Start.exe --no-updates skips startup checking.
 Uninstall through Windows Installed Apps; repositories and settings are retained.
@@ -447,7 +449,17 @@ Settings opens one Preferences window with sections on the left. General changes
 appearance and the repository. Accessibility controls text
 size, comfortable rows, high contrast and reduced progress animation.
 Alt reveals menu access keys; arrows navigate menus and Tab moves between controls.
-Processing shows temporary progress and Cancel; Dump uses its own progress window.
+The bell beside Buy Me a Coffee opens Activity (Ctrl+Shift+N). Scans, imports,
+Dump/USB processing, exports, backups, verification and analysis run without
+automatic progress windows. Activity shows progress, elapsed time, ETA, transfer
+speed and expandable stage details. Long ETAs use hours and estimates are smoothed.
+Each ETA describes the current stage; later analysis stages may take additional time.
+Closing Activity leaves work running; Cancel waits for a safe stopping point.
+Browse, search and filter while work runs. Conflicting changes wait for completion.
+Completed jobs offer reports and output folders. Edited scans and target solving
+wait for Review results instead of opening a dialog automatically. Dismiss clears
+a notification; release availability remains in About. Recent activity is kept
+for the current session.
 Repository > Diagnostics opens performance details and the last import report.
 
 KEYBOARD SHORTCUTS

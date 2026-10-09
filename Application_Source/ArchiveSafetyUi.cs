@@ -18,7 +18,7 @@ namespace AstroArchive {
    if(repo!=null&&repo.ProtectionAvailability!=null)dialog.Text(repo.ProtectionAvailability);
   }
   void ChangeArchiveProtection(){
-   if(repo==null||cancel!=null)return;bool enable=!repo.OriginalsProtected;
+   if(repo==null||RepositoryOperationBlocked)return;bool enable=!repo.OriginalsProtected;
    var dialog=new FormWindow(Window,enable?"Protect archived originals":"Turn off archive protection",560,440);
    dialog.Text(enable?"Protect archived originals":"Remove deletion protection",true);
    dialog.Text(enable?"Windows will block deletion and renaming of archived originals in File Explorer for this account. AstroArchive can still apply metadata changes and confirmed deletions. Reading, previewing and copying images continue normally.":"Archived originals will use their previous deletion permissions. Existing images and backups are kept.");
@@ -30,11 +30,12 @@ namespace AstroArchive {
    TextBox destination;CheckBox compress;var dialog=BackupDialog(out destination,out compress);if(dialog==null)return;
    if(!dialog.Show())return;settings.BackupDestination=destination.Text;settings.CompressBackup=compress.IsChecked==true;SaveSettings();string folder=destination.Text;bool zipped=compress.IsChecked==true;BackupResult result=null;
    cancellationMessage="Backup canceled. Existing backups are kept.";OpenDumpProgress("Backing up archive");Run(ct=>{result=repo.CreateBackup(folder,zipped,ct,Progress);return "Backup verified: "+result.Files+" files.";},message=>{
-    L("StatusLabel").Text=message;var complete=new FormWindow(Window,"Backup complete",600,390);complete.Text("Backup created and verified",true);complete.Text(result.Files+" files · "+(result.Compressed?"lossless ZIP":"normal folder"));complete.Text(result.Path);complete.Text("To restore, extract the ZIP if needed, then choose the backup’s Repository folder in Settings > General.");complete.Button("Open backup folder",()=>Process.Start(new ProcessStartInfo(result.Compressed?Path.GetDirectoryName(result.Path):result.Path){UseShellExecute=true}));complete.CloseOnly();complete.Show();
+    L("StatusLabel").Text=message;if(completionActivity!=null){completionActivity.OutputPath=result.Compressed?Path.GetDirectoryName(result.Path):result.Path;completionActivity.ReportTitle="Restore this backup";completionActivity.Report=result.Path+"\n"+result.Files+" verified files\nTo restore, extract the ZIP if needed, then choose the backup’s Repository folder in Settings > General.";}
+
    });
   }
   FormWindow BackupDialog(out TextBox destination,out CheckBox compress){
-   destination=null;compress=null;if(repo==null||cancel!=null)return null;var dialog=new FormWindow(Window,"Back up archive",600,520);
+   destination=null;compress=null;if(repo==null||RepositoryOperationBlocked)return null;var dialog=new FormWindow(Window,"Back up archive",600,520);
    dialog.Text("Create a recoverable backup",true);dialog.Text("Copies originals, edited files and the current archive database. Choose a folder outside the archive; a separate drive is best.");
    dialog.Text("Large backups can take a long time to create and verify. You can keep using Windows and cancel safely.");
    var folderInput=dialog.Input("Save backup in",settings.BackupDestination??"");destination=folderInput;folderInput.IsReadOnly=true;

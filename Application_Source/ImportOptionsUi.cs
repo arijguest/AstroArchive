@@ -18,7 +18,7 @@ namespace AstroArchive {
   }
   List<Frame> UnknownImportSelection(){var selected=G("ImportGrid").SelectedItems.Cast<Frame>().ToList();return (selected.Count>0?selected:visibleImports).Where(ImportPolicy.UnknownScience).ToList();}
   void AssignUnknownImportTargets(){
-   var rows=UnknownImportSelection();if(cancel!=null||rows.Count==0)return;
+   var rows=UnknownImportSelection();if(RepositoryOperationBlocked||rows.Count==0)return;
    var dialog=new FormWindow(Window,"Assign Unknown targets",620,410);dialog.Text("Assign "+rows.Count+" Unknown capture"+(rows.Count==1?"":"s"),true);
    dialog.Text(G("ImportGrid").SelectedItems.Count>0?"Apply to selected Unknown lights and stacks. Known targets and calibrations keep their labels.":"Apply to the visible Unknown lights and stacks. Filter or select files first when they contain different targets.");
    var target=ImportTargetChoice(dialog,"");var error=new TextBlock{TextWrapping=TextWrapping.Wrap};dialog.Add(error);

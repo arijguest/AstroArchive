@@ -13,7 +13,7 @@ using System.Windows.Media.Imaging;
 namespace AstroArchive {
     public partial class MainUi {
         void PreviewFile(Frame original) {
-            if(repo==null||cancel!=null||original==null)return;
+            if(repo==null||RepositoryOperationBlocked||original==null)return;
             var d=new FormWindow(Window,"Choose image / frame",880,780);
             d.Text(original.OriginalName,true);
             d.Text(original.CapabilityText+"\nPreview stretch changes display only. Choose the image to use for analysis and export.");

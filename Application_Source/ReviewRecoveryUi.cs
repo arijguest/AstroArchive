@@ -14,7 +14,7 @@ namespace AstroArchive {
    B("RetryImportsButton").Click+=(s,e)=>Import(true);
   }
   void ReviewCaptures(bool imports){
-   if(repo==null||cancel!=null)return;var rows=(imports?visibleImports:displayed).Where(CaptureScreening.NeedsReview).ToList();
+   if(repo==null||RepositoryOperationBlocked)return;var rows=(imports?visibleImports:displayed).Where(CaptureScreening.NeedsReview).ToList();
    var d=new FormWindow(Window,"Review flagged captures",960,680);d.Text(rows.Count+" flagged captures in this view",true);d.Text("Telescope rejection, file integrity and transfer failures are shown separately. Screening checks FITS structure and rejection markers; it does not assess image quality. Unscreened captures remain labelled Not screened.");
    var grid=new DataGrid{AutoGenerateColumns=false,IsReadOnly=true,SelectionMode=DataGridSelectionMode.Extended,Height=310,ItemsSource=rows,Margin=new Thickness(0,8,0,12)};
    ReviewColumn(grid,"Object ID","ObjectId",90);ReviewColumn(grid,"Common name / label","TargetName",180);ReviewColumn(grid,"Problem type","ReviewCategory",210);ReviewColumn(grid,"File","OriginalName",280);d.Add(grid);
@@ -29,7 +29,7 @@ namespace AstroArchive {
    ScreeningResult result=null;Run(ct=>{result=repo.Screen(rows,imports,ct,Progress);return result.Checked+" screened; "+result.Problems+" need review.";},message=>{if(imports)FilterImports();else Filter(true);L("StatusLabel").Text=message;if(result.Problems>0)ShowReport("Capture screening",string.Join("\n\n",result.Errors));});
   }
   void ShowDeletionHistory(){
-   if(repo==null||cancel!=null)return;var d=new FormWindow(Window,"Deletion history",960,660);d.Text("Deleted captures and import exclusions",true);d.Text("Allowing reimport lifts the checksum exclusion. It does not restore a deleted file; a source copy must still be available. The deletion and the decision to allow reimport stay in this log.");
+   if(repo==null||RepositoryOperationBlocked)return;var d=new FormWindow(Window,"Deletion history",960,660);d.Text("Deleted captures and import exclusions",true);d.Text("Allowing reimport lifts the checksum exclusion. It does not restore a deleted file; a source copy must still be available. The deletion and the decision to allow reimport stay in this log.");
    var grid=new DataGrid{AutoGenerateColumns=false,IsReadOnly=true,SelectionMode=DataGridSelectionMode.Extended,Height=280,ItemsSource=repo.Deletions().OrderByDescending(r=>r.DeletedUtc).ToList()};
    ReviewColumn(grid,"State","State",135);ReviewColumn(grid,"Target","TargetLabel",200);ReviewColumn(grid,"File","OriginalName",260);ReviewColumn(grid,"Deleted (UTC)","DeletedUtc",180);ReviewColumn(grid,"Reimport allowed (UTC)","AllowedUtc",180);ReviewColumn(grid,"SHA-256","Hash",460);d.Add(grid);
    var audit=new TextBox{IsReadOnly=true,TextWrapping=TextWrapping.Wrap,Height=100,VerticalScrollBarVisibility=ScrollBarVisibility.Auto,Margin=new Thickness(0,12,0,12)};d.Add(audit);grid.SelectionChanged+=(s,e)=>{var record=grid.SelectedItem as DeletedCapture;audit.Text=record==null?"Select a capture to see its deletion and reimport history.":record.Audit;};

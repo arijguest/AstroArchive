@@ -21,6 +21,8 @@ namespace AstroArchive {
   public readonly Button ReleaseLink=new Button{Content="View release on GitHub",HorizontalAlignment=HorizontalAlignment.Left,Margin=new Thickness(0,12,0,0)};
   readonly FormWindow form;readonly Func<bool> save;readonly Func<Task<UpdateManifest>> check;readonly Func<UpdateManifest,Task<string>> notes;
   readonly Func<UpdateManifest,IProgress<UpdateDownloadProgress>,Task> install;readonly Action finished;readonly Action<UpdateManifest> open;readonly Action<bool> installationState;
+  public Func<bool> CanInstall=()=>true;
+  public void SetCachedRelease(UpdateManifest release,string status){if(closed||Busy)return;Available=release;SetStatus(status);if(release!=null){NotesSection.Visibility=Visibility.Visible;Notes.Text=release.release_notes??"Use View release on GitHub to read release notes.";}Refresh();}
   public UpdateManifest Available{get;private set;}public bool Busy{get;private set;}public bool Installing{get;private set;}bool closed;
   public ReleaseSettingsPanel(FormWindow form,string version,string installation,Func<bool> save,Func<Task<UpdateManifest>> check,Func<UpdateManifest,Task<string>> notes,Func<UpdateManifest,IProgress<UpdateDownloadProgress>,Task> install,Action finished,Action<UpdateManifest> open,Action<bool> installationState=null){
    this.form=form;this.save=save;this.check=check;this.notes=notes;this.install=install;this.finished=finished;this.open=open;this.installationState=installationState??(active=>{});
@@ -41,7 +43,7 @@ namespace AstroArchive {
    form.Window.Closing+=(s,e)=>{if(Installing)e.Cancel=true;};form.Window.Closed+=(s,e)=>closed=true;
   }
   void SetStatus(string text){Status.Text=text;AutomationProperties.SetHelpText(Status,text);}
-  void Refresh(){if(closed)return;Check.IsEnabled=!Busy;Install.IsEnabled=!Busy&&Available!=null;Progress.Visibility=Busy?Visibility.Visible:Visibility.Collapsed;}
+  void Refresh(){if(closed)return;Check.IsEnabled=!Busy;Install.IsEnabled=!Busy&&Available!=null&&CanInstall();Progress.Visibility=Busy?Visibility.Visible:Visibility.Collapsed;}
   public async Task CheckAsync(){
    if(Busy||closed)return;Busy=true;Available=null;NotesSection.Visibility=Visibility.Collapsed;Progress.IsIndeterminate=true;SetStatus("Checking the latest stable release…");Refresh();
    try{
@@ -55,7 +57,7 @@ namespace AstroArchive {
    finally{Busy=false;if(!closed)Progress.IsIndeterminate=false;Refresh();}
   }
   public async Task InstallAsync(){
-   if(Busy||closed||Available==null)return;
+   if(Busy||closed||Available==null||!CanInstall())return;
    installationState(true);
    try{
    try{if(!save())return;}catch(Exception error){SetStatus("Settings could not be saved. "+error.Message);return;}
@@ -86,24 +88,14 @@ namespace AstroArchive {
    try{target=ReleaseTarget();version="Current version: "+target.Running.Version+" · Package: "+target.Running.PackageVersion;
     if(target.Existing==null||target.Root!=Path.GetDirectoryName(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)))installation=target.Root;
    }catch(Exception error){version="The installation record could not be read: "+error.Message;}
-   var client=new UpdateClient();
-   return new ReleaseSettingsPanel(d,version,installation,save,
-    ()=>Task.Run(()=>{target=ReleaseTarget();return client.Check(target.Comparison);}),
-    release=>Task.Run(()=>client.ReleaseNotes(release)),
-    async(release,reporting)=>{
-     if(cancel!=null)throw new InvalidOperationException("Wait for the current file operation to finish before installing.");
-     string verified=null;DateTime attemptedUtc=DateTime.MinValue;Exception failure=null;
-     try{
-      client.Progress=p=>reporting.Report(p);verified=await Task.Run(()=>client.Prepare(release,target.Cache));client.Progress=null;
-      WindowsIntegration.EnsureNoOtherApplications(target.Root,Process.GetCurrentProcess().Id);
-      if(repo!=null)repo.Checkpoint(CancellationToken.None);
-      int waitPid=WindowsIntegration.UpdateWaitProcess(target.Root,Process.GetCurrentProcess().Id,Assembly.GetExecutingAssembly().Location);
-      var start=UpdateClient.InstallerStartInfo(release,verified,target.Root,waitPid);attemptedUtc=DateTime.UtcNow;
-      using(var process=WindowsIntegration.StartProcess(start))if(process==null)throw new IOException("The release installer could not start.");
-     }catch(Exception error){failure=error;}
-     finally{client.Progress=null;}
-     if(failure!=null){string log=await Task.Run(()=>UpdateDiagnostics.Record(failure,release,verified,attemptedUtc));throw new IOException(UpdateDiagnostics.Message(failure,log),failure);}
-    },()=>Application.Current.Shutdown(),release=>OpenWebsite(UpdateClient.ReleasePage(release)),active=>releaseInstalling=active);
+   var panel=new ReleaseSettingsPanel(d,version,installation,save,CheckReleaseAsync,
+    release=>Task.Run(()=>new UpdateClient().ReleaseNotes(release)),
+    (release,reporting)=>{
+     if(RepositoryOperationBlocked)throw new InvalidOperationException("Wait for the current operation to finish before installing.");
+     StartBackgroundReleaseInstallation(release);d.Window.Dispatcher.BeginInvoke(new Action(()=>d.Window.Close()));return Task.FromResult(0);
+    },()=>{},release=>OpenWebsite(UpdateClient.ReleasePage(release)));
+   panel.CanInstall=()=>!RepositoryOperationBlocked;
+   Action refresh=()=>panel.SetCachedRelease(releaseMonitor==null?null:releaseMonitor.State.Available,ReleaseStatusText());releaseChanged+=refresh;d.Window.Closed+=(s,e)=>releaseChanged-=refresh;refresh();return panel;
   }
  }
 }

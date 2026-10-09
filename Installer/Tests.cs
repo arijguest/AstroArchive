@@ -48,7 +48,7 @@ class Tests {
   Test("Drive root and linked installation directories are rejected",()=>{Expect(()=>InstallCore.Root(Path.GetPathRoot(scratch)));if(Environment.OSVersion.Platform==PlatformID.Unix){Directory.CreateDirectory(Root("link-target"));Check(symlink(Root("link-target"),Root("linked"))==0,"Unable to create fixture link");Expect(()=>Install("linked"));Check(!Directory.EnumerateFileSystemEntries(Root("link-target")).Any(),"Linked target changed");}});
   Test("Version fields must agree between app and installer",()=>{var p=Package();p.PackageVersion="1.1.0.1";Expect(()=>Install("mismatched-version",p));});
   Test("Progress display failures cannot damage a completed installation",()=>{Install("progress-failure");var core=new InstallCore{Progress=s=>{throw new InvalidOperationException("Disposed progress window");}};core.Install(Root("progress-failure"),Package("1.3.0"),Setup);Check(InstallCore.Read(Root("progress-failure")).Version=="1.3.0"&&File.Exists(Path.Combine(Root("progress-failure"),"app-1.3.0-r1","AstroArchive.exe")),"Display failure rolled back a committed upgrade");});
-  UpdateTests.Run(Test, scratch);
+  UpdateTests.Run(Test, scratch);ReleaseMonitorTests.Run(Test,scratch);
   Test("Application Control failures explain the policy and preserve the rejected file",()=>{
    foreach(int code in new[]{1260,4551,577}){
     var error=new IOException("Could not start C:\\Example\\Start.exe",new System.ComponentModel.Win32Exception(code));

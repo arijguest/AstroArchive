@@ -80,7 +80,7 @@ $shared = @('/nologo', '/langversion:5', '/target:winexe', '/platform:x64', '/op
     "/win32icon:$PSScriptRoot\Assets\AstroArchive.ico", "/resource:$PSScriptRoot\Assets\AstroArchive.ico,AstroArchive.ico", "/win32manifest:$build\app.manifest")
 if (-not $UsePreparedPayload) {
     $launcherArgs = $shared + @('/define:LAUNCHER', "/out:$payload\Start.exe",
-        "$PSScriptRoot\InstallCore.cs", "$PSScriptRoot\Launcher.cs", "$PSScriptRoot\Updates.cs",
+        "$PSScriptRoot\ReleaseMonitor.cs", "$PSScriptRoot\InstallCore.cs", "$PSScriptRoot\Launcher.cs", "$PSScriptRoot\Updates.cs",
         "$PSScriptRoot\WindowsIntegration.cs", "$PSScriptRoot\ShellIdentity.cs", "$build\GeneratedVersion.cs")
     & $compiler @launcherArgs
     if ($LASTEXITCODE -ne 0) { throw 'Launcher compilation failed.' }

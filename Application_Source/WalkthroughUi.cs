@@ -142,7 +142,7 @@ namespace AstroArchive {
             var dialog = new FormWindow(Window, "About AstroArchive", 650, 640);
             var logo = new Image { Source = ((Image)Window.FindName("BrandLogo")).Source, Width = 64, Height = 64, HorizontalAlignment = HorizontalAlignment.Left, Margin = new Thickness(0,0,0,12) };
             dialog.Add(logo); dialog.Text("AstroArchive", true);
-            dialog.Text("Version " + Assembly.GetExecutingAssembly().GetName().Version.ToString(3));
+            var version=ReleaseTarget().Running;dialog.Text("Version " + version.Version + " · Package " + version.PackageVersion);AddAboutReleases(dialog);
             dialog.Text("A desktop archive for astronomical images: verified imports, searchable capture metadata, image previews and export projects for your processing tools.");
             dialog.Text("Ari J. Guest", true);
             dialog.Text("Created by Ari J. Guest. Learn more about the author and their work at arijguest.com.");

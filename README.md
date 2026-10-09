@@ -31,6 +31,11 @@ For repair, offline launch or Windows policy blocks, see [installation and updat
 Keep the whole repository, including `.astroarchive`, together when moving or backing it up.
 Use one AstroArchive writer per repository, including cloud-synced repositories.
 
+Long operations appear in the **Activity bell** beside Buy Me a Coffee. Open it
+for progress, smoothed ETA, cancellation, reports and review actions. Closing the
+panel leaves work running. Release checks run quietly while the app is open;
+**Guide → About AstroArchive** shows available updates.
+
 ## Find and view images
 
 - **Repository:** choose a target, search, or open **Filters**. Repeated Light subframes are grouped into collapsed session summaries showing dates, count, exposure and filters. Expand a summary to inspect files, or turn off **Repository → Group subs by session**. Stacks remain separate.

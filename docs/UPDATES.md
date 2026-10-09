@@ -15,19 +15,26 @@ images, settings and local codecs are retained.
 
 ## Update
 
-The desktop and Start menu launcher checks for stable releases. Choose **Install release**
-or **Later** to open the current version. Inside the app, use
-**Settings → Updates → Check for releases**. Release notes, download progress,
-and **Install and restart** are shown directly on that page. Preferences are
-validated and saved before installation; a failed download leaves AstroArchive
-open with the error and a retry available.
+AstroArchive checks stable releases quietly shortly after startup and every six
+hours while it is open. An overdue check runs after waking from sleep. Offline
+checks retry after 15 minutes, one hour, then six hours without opening dialogs.
 
-The installer downloads with progress, is verified, and runs after AstroArchive
-saves state and closes. The app restarts after setup. Wait for active work to finish
-and close other instances of the installation before updating.
+A new package appears in the **Activity bell** and **Guide → About AstroArchive**.
+About shows both application and package versions, the last successful check,
+release notes and **Check now**. Reading or dismissing the bell notification keeps
+the available release visible in About. Package revisions also trigger notices.
 
-Manual installation and repair work offline. To open without a startup check,
-run `Start.exe --no-updates`, or open `AstroArchive.exe` directly.
+**Settings → Updates** offers manual checks, release notes and **Install and
+restart**. Automatic checks can be disabled there. Installation starts only when
+you request it and active archive work has finished. Downloads appear in Activity
+with progress and Cancel; closing Activity leaves the download running. The
+verified installer runs after AstroArchive saves state and closes, then restarts
+the app. A failed or canceled download leaves the current installation available.
+
+Manual installation and repair work offline. To open without automatic checks,
+run `Start.exe --no-updates` or `AstroArchive.exe --no-updates`. The launcher opens
+the app immediately; its explicit `--updates` command still supports manual
+checking and shares the app's validated release cache.
 Updating from a portable copy installs into the registered/default installation
 and retains the portable copy. Release checks need no GitHub account.
 

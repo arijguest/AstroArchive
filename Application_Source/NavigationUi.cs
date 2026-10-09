@@ -34,9 +34,9 @@ namespace AstroArchive {
             C("PageSelector").Width = 150 * Math.Max(1, settings.TextScalePercent / 100.0);
             // Measure the unwrapped actions so the centred selector never covers a button.
             var natural = new Size(double.PositiveInfinity, double.PositiveInfinity);
-            menu.Measure(natural); brand.Measure(natural); pages.Measure(natural);
+            menu.Measure(natural);if(activityBell!=null)activityBell.Measure(natural);brand.Measure(natural);pages.Measure(natural);
             double sideSpace = (width - pages.DesiredSize.Width) / 2 - 12;
-            bool sameRow = menu.DesiredSize.Width <= sideSpace && brand.DesiredSize.Width <= sideSpace;
+            bool sameRow = menu.DesiredSize.Width+(activityBell==null?0:activityBell.DesiredSize.Width+6) <= sideSpace && brand.DesiredSize.Width <= sideSpace;
             Grid.SetRow(pages, sameRow ? 0 : 1);
             pages.Margin = new Thickness(0, sameRow ? 0 : 2, 0, 4);
         }
@@ -54,9 +54,9 @@ namespace AstroArchive {
             finally { preparingNavigation = false; }
         }
         MenuItem MenuAction(string label, Action action, bool available = true, bool requiresIdle = true) {
-            var item = new MenuItem { Header = label, IsEnabled = available && (!requiresIdle || cancel == null&&!ActiveSearchBlocked) };
+            var item = new MenuItem { Header = label, IsEnabled = available && (!requiresIdle || !RepositoryOperationBlocked&&!ActiveSearchBlocked) };
             UiHelp.For(item, label);
-            item.Click += (s,e) => { if (item.IsEnabled && (!requiresIdle || cancel == null&&!ActiveSearchBlocked)) action(); };
+            item.Click += (s,e) => { if (item.IsEnabled && (!requiresIdle || !RepositoryOperationBlocked&&!ActiveSearchBlocked)) action(); };
             return item;
         }
         MenuItem ButtonAction(string label, string control, int page = -1) {
@@ -110,7 +110,7 @@ namespace AstroArchive {
             navigationReady = true;
             UpdateNavigationState();
             if (firstRun) Window.ContentRendered += (s,e) => {
-                Window.Dispatcher.BeginInvoke(new Action(() => { if (!settings.GuideSeen && cancel == null && !closing) StartWalkthrough(true); }));
+                Window.Dispatcher.BeginInvoke(new Action(() => { if (!settings.GuideSeen && !RepositoryOperationBlocked && !closing) StartWalkthrough(true); }));
             };
         }
         void NavigationKeys(object sender, KeyEventArgs e) {
@@ -123,15 +123,15 @@ namespace AstroArchive {
                 var search = T(((TabControl)Window.FindName("MainTabs")).SelectedIndex == 2 ? "EditedSearchBox" : ((TabControl)Window.FindName("MainTabs")).SelectedIndex == 1 ? "ImportSearchBox" : "SearchBox");
                 search.Focus(); search.SelectAll(); e.Handled = true;
             } else if (e.Key == Key.I) { GoToPage(1); e.Handled = true; }
-            else if (e.Key == Key.E && cancel == null && repo != null) { OpenTopMenu("ExportMenu"); e.Handled = true; }
+            else if (e.Key == Key.E && !RepositoryOperationBlocked && repo != null) { OpenTopMenu("ExportMenu"); e.Handled = true; }
         }
         void UpdateNavigationState() {
             if (!navigationReady) return;
             string scanTip=settings.RobustImportMatching?"Robust scan checks file changes and missing archive copies.":"Quick scan skips archived filenames and known DWARF sessions. Use Full rescan to check changes.";
-            UiHelp.Hint(B("ScanButton"),B("ScanButton").IsEnabled?scanTip:cancel!=null?"Wait for the current operation to finish.":"Choose a repository first.",true);
-            TopMenu("ImportMenu").IsEnabled = cancel == null;
-            TopMenu("ExportMenu").IsEnabled = cancel == null && repo != null&&!ActiveSearchBlocked&&!SearchBlocked(((TabControl)Window.FindName("MainTabs")).SelectedIndex==2?"EditedSearchBox":"SearchBox");
-            TopMenu("SettingsMenu").IsEnabled = cancel == null;
+            UiHelp.Hint(B("ScanButton"),B("ScanButton").IsEnabled?scanTip:RepositoryOperationBlocked?"Wait for the current operation to finish.":"Choose a repository first.",true);
+            TopMenu("ImportMenu").IsEnabled = !RepositoryOperationBlocked;
+            TopMenu("ExportMenu").IsEnabled = !RepositoryOperationBlocked && repo != null&&!ActiveSearchBlocked&&!SearchBlocked(((TabControl)Window.FindName("MainTabs")).SelectedIndex==2?"EditedSearchBox":"SearchBox");
+            TopMenu("SettingsMenu").IsEnabled = !RepositoryOperationBlocked;
             B("ImportExportButton").IsEnabled = TopMenu("ExportMenu").IsEnabled;
             B("OpenRepositoryFolderButton").IsEnabled = repo != null;
             if (repo != null) {
@@ -143,8 +143,8 @@ namespace AstroArchive {
             L("ImportPolicyLabel").Text=(cleanup?"Originals deleted after verification":"Originals kept")+(analysis?" · Analysis enabled":"")+(!SkipFlagged?" · Flagged files included":"")+(unknownImportTarget.Length>0?" · Unknown → "+Catalog.Label(unknownImportTarget):"");
             UiHelp.Tip(L("ImportPolicyLabel"),(SkipFlagged?"Flagged captures excluded":"Flagged captures included")+" · "+(settings.IgnoreFailed?"Failed filenames ignored":"Failed filenames included")+" · "+(settings.RobustImportMatching?"Robust matching":"Filename matching")+(settings.IgnoreRasterImports?" · PNG/JPG/JPEG ignored":" · PNG/JPG/JPEG included"));
             L("ImportPolicyLabel").FontWeight = cleanup ? FontWeights.SemiBold : FontWeights.Normal;
-            L("RateLabel").Visibility = cancel != null ? Visibility.Visible : Visibility.Collapsed;
-            ((ProgressBar)Window.FindName("ProgressBar")).Visibility = cancel != null ? Visibility.Visible : Visibility.Collapsed;
+            L("RateLabel").Visibility = RepositoryOperationBlocked ? Visibility.Visible : Visibility.Collapsed;
+            ((ProgressBar)Window.FindName("ProgressBar")).Visibility = RepositoryOperationBlocked ? Visibility.Visible : Visibility.Collapsed;
 
         }
         void PopulateNavigation(string name) {
@@ -178,11 +178,11 @@ namespace AstroArchive {
             menu.Items.Add(MenuAction("Filters…",()=>{GoToPage(0);ShowFilters(false);},repo!=null));
             menu.Items.Add(MenuAction("Back up archive…",BackUpArchive,repo!=null));
             menu.Items.Add(new Separator());menu.Items.Add(Branch("Review and analysis",ButtonAction("Review flagged files…","ReviewLibraryButton",0),ButtonAction("Screen files","ScreenLibraryButton",0),ButtonAction("Identify targets…","SolveButton",0),ButtonAction("Analyse rotation…","RotationButton",0)));
-            var maintenance=Branch("Maintenance");maintenance.IsEnabled=cancel==null&&repo!=null;if(repo!=null)MoveMenuItems(maintenance,BuildRepositoryTools(),item=>item is MenuItem&&Convert.ToString(((MenuItem)item).Header)!="Export searchable catalogue CSV"&&Convert.ToString(((MenuItem)item).Header)!="Show selected file location");maintenance.Items.Add(new Separator());maintenance.Items.Add(MenuAction("Delete archive data…",ResetArchive,repo!=null));menu.Items.Add(maintenance);
+            var maintenance=Branch("Maintenance");maintenance.IsEnabled=!RepositoryOperationBlocked&&repo!=null;if(repo!=null)MoveMenuItems(maintenance,BuildRepositoryTools(),item=>item is MenuItem&&Convert.ToString(((MenuItem)item).Header)!="Export searchable catalogue CSV"&&Convert.ToString(((MenuItem)item).Header)!="Show selected file location");maintenance.Items.Add(new Separator());maintenance.Items.Add(MenuAction("Delete archive data…",ResetArchive,repo!=null));menu.Items.Add(maintenance);
             menu.Items.Add(Branch("Diagnostics",MenuAction("Last operation…",ShowPerformanceTable,true,false),MenuAction("Last import report…",()=>ShowReport("Import report",repo==null?"Choose a repository first.":repo.LastReport),true,false)));
         }
         void BuildGuideNavigation(MenuItem menu) {
-            menu.Items.Add(MenuAction("Help…",()=>OpenGuide(CurrentHelpTopic()),true,false));menu.Items.Add(MenuAction("Interactive walkthrough…",StartWalkthrough,cancel==null));menu.Items.Add(new Separator());menu.Items.Add(MenuAction("About AstroArchive…",About,true,false));
+            menu.Items.Add(MenuAction("Help…",()=>OpenGuide(CurrentHelpTopic()),true,false));menu.Items.Add(MenuAction("Interactive walkthrough…",StartWalkthrough,!RepositoryOperationBlocked));menu.Items.Add(new Separator());menu.Items.Add(MenuAction("About AstroArchive…",About,true,false));
         }
         void OpenRepositoryFolder() { if (repo != null) OpenFolder(repo.Root); }
         void OpenFolder(string path) {
@@ -195,7 +195,7 @@ namespace AstroArchive {
         }
         void ExportCatalogue() {
             var dialog = new Microsoft.Win32.SaveFileDialog { FileName = "AstroArchive_catalog.csv", Filter = "CSV catalogue|*.csv" };
-            if (dialog.ShowDialog(Window) == true) { repo.ExportIndex(dialog.FileName); L("StatusLabel").Text = "Catalogue CSV exported."; }
+            if (dialog.ShowDialog(Window) == true) { string destination=dialog.FileName;Run(ct=>{ct.ThrowIfCancellationRequested();repo.ExportIndex(destination);return "Catalogue CSV exported.";},message=>{L("StatusLabel").Text=message;if(completionActivity!=null)completionActivity.OutputPath=Path.GetDirectoryName(destination);},"Exporting catalogue CSV"); }
         }
         void ImportPreferences() { Configure(1); }
     }
