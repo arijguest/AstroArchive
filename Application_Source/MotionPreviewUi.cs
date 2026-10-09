@@ -12,6 +12,8 @@ namespace AstroArchive {
  public sealed class MotionPreview:IDisposable {
   readonly PreviewViewport viewport;readonly Action<string> ready,error;readonly string path;readonly bool fullResolution;readonly DispatcherTimer timer=new DispatcherTimer();readonly CancellationTokenSource cancel=new CancellationTokenSource();
   Stream stream;BitmapDecoder gif;byte[] canvas,restore;int width,height,index,disposal,left,top,frameWidth,frameHeight;Frame ser;MediaElement video;bool disposed,playing=true,decoding;
+  Task pendingRead=Task.FromResult(false);
+  internal Task PendingRead{get{return pendingRead;}}
   public bool Playing{get{return playing;}}
   public MotionPreview(PreviewViewport viewport,string path,Action<string> ready,Action<string> error,bool fullResolution=false){this.viewport=viewport;this.path=path;this.ready=ready;this.error=error;this.fullResolution=fullResolution;timer.Tick+=(s,e)=>Next();}
   public void Start(){try{
@@ -46,7 +48,9 @@ namespace AstroArchive {
   async void Next(){
    if(disposed||decoding)return;timer.Stop();try{
     if(gif!=null){DrawGif();return;}if(ser==null)return;decoding=true;int current=index;var token=cancel.Token;
-    var bitmap=await Task.Run(()=>{var data=Assets.Display(ser,path,current,token,fullResolution);var pixels=data.Render("Linear",token);var image=BitmapSource.Create(data.Width,data.Height,96,96,PixelFormats.Rgb24,null,pixels,data.Width*3);image.Freeze();return image;},token);
+    var read=Task.Run(()=>{var data=Assets.Display(ser,path,current,token,fullResolution);var pixels=data.Render("Linear",token);var image=BitmapSource.Create(data.Width,data.Height,96,96,PixelFormats.Rgb24,null,pixels,data.Width*3);image.Freeze();return image;},token);
+    // Disposal cancels playback; metadata edits also await the current file read.
+    pendingRead=read.ContinueWith(finished=>{},TaskScheduler.Default);var bitmap=await read;
     if(disposed)return;viewport.SetImage(bitmap,false);viewport.SetPlayback(Toggle,playing);ready(ser.Images[0].Width+" × "+ser.Images[0].Height+" · SER · frame "+(current+1)+" / "+ser.Images[0].Count+" · 10 fps preview");index=(current+1)%ser.Images[0].Count;if(playing)timer.Start();
    }catch(OperationCanceledException){}catch(Exception e){if(!disposed)Fail(e.Message);}finally{decoding=false;}
   }

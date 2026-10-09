@@ -115,6 +115,9 @@ namespace AstroArchive {
    if(repositoryChanged)Filter(true);if(importLive)FilterImports();
   }
   async void Run(Func<CancellationToken,string> task,Action<string> complete,string title=null,[System.Runtime.CompilerServices.CallerMemberName]string caller=null){
+   await RunOperation(task,complete,title,caller);
+  }
+  async Task RunOperation(Func<CancellationToken,string> task,Action<string> complete,string title=null,[System.Runtime.CompilerServices.CallerMemberName]string caller=null){
    if(RepositoryOperationBlocked)return;cancel=new CancellationTokenSource();var cancellation=cancel;var entry=currentActivity=AddActivity(title??nextActivityTitle??ActivityTitle(caller),true);nextActivityTitle=null;entry.Cancel=()=>{cancellation.Cancel();entry.Status="Canceling after the current operation…";};operationClock=Stopwatch.StartNew();legacyProgress=true;activeMetrics=new PipelineMetrics(null);activeMetrics.Stage="Preparing";activeMetrics.Current="Checking folders and availability";lastMetrics=DateTime.MinValue;
    SetBusy(true);LiveTick();string result=null,error=null,errorDetails=null;bool success=false;
    try{result=await Task.Run(()=>task(cancellation.Token));success=true;}
