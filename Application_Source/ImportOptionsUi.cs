@@ -29,14 +29,5 @@ namespace AstroArchive {
    var choice=dialog.Check("Robust file matching (slower)",settings.RobustImportMatching);
    UiHelp.Hint(choice,"Check file/metadata changes and missing copies; off skips known names/DWARF sessions.");return choice;
   }
-  void AddImportPolicyControls(FormWindow dialog,out CheckBox flagged,out CheckBox failed,out CheckBox raster,out CheckBox originals){
-   flagged=dialog.Check("Skip flagged captures",SkipFlagged);
-   failed=dialog.Check("Ignore failed filenames",settings.IgnoreFailed);
-   raster=dialog.Check("Ignore non-raw files (PNG/JPG/JPEG)",settings.IgnoreRasterImports);
-   UiHelp.Hint(failed,"Skip filenames containing “failed”; keep originals.");
-   UiHelp.Hint(raster,"Skip PNG/JPG/JPEG files; keep originals.");
-   originals=dialog.Check("Delete originals after verified import",((CheckBox)Window.FindName("DeleteOriginalsCheck")).IsChecked==true);
-   originals.IsEnabled=((CheckBox)Window.FindName("DeleteOriginalsCheck")).IsEnabled;
-  }
  }
 }

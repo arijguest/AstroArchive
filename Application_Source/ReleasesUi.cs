@@ -1,4 +1,4 @@
-// Release checks and verified installation live in Settings > Preferences.
+// Release checks and verified installation live in Preferences > Updates.
 using System;
 using System.Diagnostics;
 using System.IO;
@@ -25,8 +25,8 @@ namespace AstroArchive {
   public ReleaseSettingsPanel(FormWindow form,string version,string installation,Func<bool> save,Func<Task<UpdateManifest>> check,Func<UpdateManifest,Task<string>> notes,Func<UpdateManifest,IProgress<UpdateDownloadProgress>,Task> install,Action finished,Action<UpdateManifest> open,Action<bool> installationState=null){
    this.form=form;this.save=save;this.check=check;this.notes=notes;this.install=install;this.finished=finished;this.open=open;this.installationState=installationState??(active=>{});
    form.Group(()=>{
-    form.Text("App releases",true);form.Text(version);
-    form.Text("Installation downloads and verifies the release, saves your settings, closes AstroArchive and restarts it. Your repositories and images are kept.");
+    form.Text("Updates",true);form.Text(version);
+    form.Text("Installation saves your settings, downloads and verifies the release, then restarts AstroArchive. Your repositories and images are kept.");
     if(!string.IsNullOrEmpty(installation))form.Text("Installation folder: "+installation);
     form.Add(View);
    });

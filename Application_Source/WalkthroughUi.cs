@@ -14,7 +14,7 @@ namespace AstroArchive {
     }
     public sealed class WalkthroughWindow : Window {
         public readonly TextBlock Heading = new TextBlock { FontWeight = FontWeights.SemiBold, TextWrapping = TextWrapping.Wrap };
-        public readonly TextBlock Body = new TextBlock { TextWrapping = TextWrapping.Wrap };
+        public readonly HelpArticle Body = new HelpArticle { Padding = new Thickness(0) };
         public readonly TextBlock Count = new TextBlock();
         public readonly Button Back = new Button { Content = "Back" };
         public readonly Button Next = new Button { Content = "Next", IsDefault = true };
@@ -27,8 +27,8 @@ namespace AstroArchive {
         public WalkthroughWindow(Window owner, WalkthroughStep[] steps, Action<WalkthroughStep> select, Action<WalkthroughStep> action, Action<bool> complete) {
             Owner = owner; Icon = ApplicationIcon.Image; this.steps = steps; this.select = select; this.action = action; this.complete = complete;
             Title = steps.Length==4?"AstroArchive: first import":"AstroArchive walkthrough";
-            Width = Math.Min(530, SystemParameters.WorkArea.Width - 24); MinWidth = Math.Min(460, Width);
-            Height = Math.Min(430, SystemParameters.WorkArea.Height - 24); MinHeight = Math.Min(330, Height);
+            Width = Math.Min(570, SystemParameters.WorkArea.Width - 24); MinWidth = Math.Min(460, Width);
+            Height = Math.Min(500, SystemParameters.WorkArea.Height - 24); MinHeight = Math.Min(360, Height);
             WindowStartupLocation = WindowStartupLocation.CenterOwner; FontFamily = owner.FontFamily; FontSize = owner.FontSize;
             Resources.MergedDictionaries.Add(owner.Resources); SetResourceReference(Control.FontSizeProperty, "UiFontControl"); Theme.Bind(this, Control.BackgroundProperty, "Canvas"); Theme.Bind(this, Control.ForegroundProperty, "Text");
             var layout = new Grid { Margin = new Thickness(22) };
@@ -39,15 +39,16 @@ namespace AstroArchive {
             Content = layout;
             var title = new StackPanel { Margin = new Thickness(0, 0, 0, 14) }; title.Children.Add(Count); title.Children.Add(Heading); layout.Children.Add(title);
             Heading.SetResourceReference(TextBlock.FontSizeProperty, "UiFontTitle"); Theme.Bind(Count, TextBlock.ForegroundProperty, "Muted");
-            Count.Margin = new Thickness(0, 0, 0, 8);
-            var reading = new ScrollViewer { Content = Body, VerticalScrollBarVisibility = ScrollBarVisibility.Auto, HorizontalScrollBarVisibility = ScrollBarVisibility.Disabled };
-            Grid.SetRow(reading, 1); layout.Children.Add(reading);
+            Count.SetResourceReference(TextBlock.FontSizeProperty, "UiFontCaption"); Count.FontWeight = FontWeights.SemiBold; Count.Margin = new Thickness(0, 0, 0, 6);
+            Theme.Bind(Body, Control.BackgroundProperty, "Canvas"); AutomationProperties.SetName(Body, "Walkthrough instructions");
+            Grid.SetRow(Body, 1); layout.Children.Add(Body);
             Try.HorizontalAlignment = HorizontalAlignment.Left; Try.Margin = new Thickness(0, 14, 0, 8); Grid.SetRow(Try, 2); layout.Children.Add(Try);
             Try.Click += (s,e) => this.action(steps[StepIndex]);
             var buttons = new DockPanel { Margin = new Thickness(0, 8, 0, 0) }; Grid.SetRow(buttons, 3); layout.Children.Add(buttons);
-            var close = new Button { Content = "Skip / close", IsCancel = true }; close.Click += (s,e) => Close(); buttons.Children.Add(close);
+            var close = new Button { Content = "Close", IsCancel = true }; close.Click += (s,e) => Close(); buttons.Children.Add(close);
             var navigation = new StackPanel { Orientation = Orientation.Horizontal, HorizontalAlignment = HorizontalAlignment.Right };
             DockPanel.SetDock(navigation, Dock.Right); buttons.Children.Add(navigation); navigation.Children.Add(Back); navigation.Children.Add(Next);
+            Theme.Bind(Next, Control.BackgroundProperty, "Accent"); Theme.Bind(Next, Control.ForegroundProperty, "AccentText"); Theme.Bind(Next, Control.BorderBrushProperty, "Accent");
             Back.Click += (s,e) => SetStep(StepIndex - 1);
             Next.Click += (s,e) => { if (StepIndex == steps.Length - 1) { finished = true; Close(); } else SetStep(StepIndex + 1); };
             UiHelp.Describe(Back, "Previous step."); UiHelp.Describe(Next, "Next step (Enter).");
@@ -59,11 +60,11 @@ namespace AstroArchive {
         }
         public void SetStep(int index) {
             StepIndex = Math.Max(0, Math.Min(steps.Length - 1, index));
-            var step = steps[StepIndex]; Heading.Text = step.Title; Body.Text = step.Body; Try.Content = step.Action;
-            Count.Text = "Step " + (StepIndex + 1) + " of " + steps.Length;
+            var step = steps[StepIndex]; Heading.Text = step.Title; Body.ShowText(step.Body); Try.Content = step.Action;
+            Count.Text = "STEP " + (StepIndex + 1) + " OF " + steps.Length;
             Back.IsEnabled = StepIndex > 0; Next.Content = StepIndex == steps.Length - 1 ? "Finish" : "Next";
             AutomationProperties.SetName(Heading, Count.Text + ": " + step.Title);
-            AutomationProperties.SetHelpText(Next, step.Body);
+            AutomationProperties.SetHelpText(Next, HelpCatalog.PlainText(step.Body));
             select(step); Next.Focus();
         }
     }
@@ -81,15 +82,15 @@ namespace AstroArchive {
         int walkthroughOriginalPage;
         static WalkthroughStep[] WalkthroughSteps() {
             return new[] {
-                new WalkthroughStep { Title = "Switch pages from the toolbar", Page = 0, Target = "PageSelector", Action = "Try the page selector", Body = "Choose Repository, Edited or Import from the purple PAGE selector. Your search, filters and progress stay in place. Ctrl+1–3 selects a page; Ctrl+Tab cycles pages." },
-                new WalkthroughStep { Title = "Choose your repository", Page = 0, Target = "OpenRepositoryFolderButton", Action = "Open Repository menu", Body = "Choose Repository → Choose repository folder to store verified capture copies and the archive index. The path below the table opens that folder in Explorer." },
-                new WalkthroughStep { Title = "Select a telescope or source folder", Page = 1, Target = "ImportSourceCard", Action = "Open Import menu", Body = "Select a saved telescope or browse its capture folder. Give each physical telescope a unique device ID, then choose Scan folder. Quick scans skip known filenames and DWARF sessions; Robust file matching checks changes. The guide explains both modes." },
-                new WalkthroughStep { Title = "Review before importing", Page = 1, Target = "ImportGrid", Action = "Open review and import options", Body = "Review statuses and flagged captures before copying. Import → Review and recovery explains problems and retries failed transfers. Import options controls exclusions and analysis. Originals are kept by default." },
-                new WalkthroughStep { Title = "Import verified copies", Page = 1, Target = "ImportButton", Action = "Show import actions", Body = "Import copies and verifies the ready files in your filtered view. Highlighting rows does not limit the import. Already archived content is skipped. Cancel keeps completed imports. This walkthrough does not start an import." },
-                new WalkthroughStep { Title = "Browse, preview and sort", Page = 0, Target = "FramesGrid", Action = "Open Repository view options", Body = "Search your captures or browse targets and sessions. Click a table heading to sort; click again to reverse. Shift-click adds another heading. ▲ and ▼ show direction, and numbers show sort priority. Ctrl/Shift selects files; right-click opens file actions. View contains filters, columns and the preview pane." },
-                new WalkthroughStep { Title = "Explore the capture sky", Page = 0, Target = "PreviewSky", Action = "Reset the sky view", Body = "Select a capture to show its sky globe below the preview. It appears when the image leaves room and uses the recorded capture time and location. Drag to rotate it; scroll or pinch to zoom. Arrow keys rotate and plus/minus zoom when the globe has focus. The small reset button, double-click or Home restores the capture view. Exploring changes only the viewing angle; capture coordinates, time and horizon stay fixed." },
-                new WalkthroughStep { Title = "Export a stacking project", Page = 0, Target = "ExportButton", Action = "Open Export menu", Body = "Choose Export to open verified inputs in a processing app, save files, or prepare a stacking folder. With no selection, Export uses all files in view. Matching calibrations and conversion options are explained in the export dialog. Existing files are kept." },
-                new WalkthroughStep { Title = "Make AstroArchive comfortable", Page = 0, Target = "SettingsMenu", Action = "Open accessibility preferences", Body = "Settings → Preferences contains appearance; Settings → Accessibility adjusts larger text, comfortable rows, high contrast and reduced progress animation. Guide holds searchable help, this walkthrough and About AstroArchive. F1 opens help for the current page." }
+                new WalkthroughStep { Title = "Switch pages from the toolbar", Page = 0, Target = "PageSelector", Action = "Try the page selector", Body = "Use the purple **PAGE** selector to move around AstroArchive. It sits beside the toolbar, or below it in smaller windows.\n\n- Choose **Repository**, **Edited** or **Import**.\n- Search, filters, selections and import progress stay in place.\n- Use `Ctrl+1–3` to select a page or `Ctrl+Tab` to cycle pages." },
+                new WalkthroughStep { Title = "Choose your repository", Page = 0, Target = "OpenRepositoryFolderButton", Action = "Open Preferences", Body = "Your repository holds verified capture copies and the archive index.\n\n1. Open **Settings → General**.\n2. Choose your archive folder.\n\nClick the repository path on the main page to open it in Explorer." },
+                new WalkthroughStep { Title = "Select a telescope or source folder", Page = 1, Target = "ImportSourceCard", Action = "Open Import menu", Body = "Select a saved telescope or **Browse** its capture folder. Give each physical telescope its own device ID.\n\n- **Connected telescopes** finds local storage; **Saved telescopes** manages profiles.\n- **Scan folder** skips matching filenames and known DWARF sessions; Seestar scans still find new filenames.\n- Enable **Robust file matching** in Import options to revisit edits and additions inside skipped sessions.\n- **Review and repair → Full rescan** reads and hashes every file for a complete check." },
+                new WalkthroughStep { Title = "Review before importing", Page = 1, Target = "ImportGrid", Action = "Open review and import options", Body = "Check each file’s **status** and **review reason** in the scan table.\n\n- **Review and repair** opens flagged captures and transfer retries.\n- **Import options** controls analysis and original removal.\n- The policy summary stays visible. **Originals are kept by default.**" },
+                new WalkthroughStep { Title = "Import verified copies", Page = 1, Target = "ImportButton", Action = "Show import actions", Body = "Import copies ready files from the **filtered scan** and verifies their checksums.\n\n- Already archived content is skipped.\n- Progress and timing appear during the job.\n- **Cancel** stops safely after the current operation.\n\nThis walkthrough never starts an import for you." },
+                new WalkthroughStep { Title = "Browse, preview and sort", Page = 0, Target = "FramesGrid", Action = "Open Repository view options", Body = "Browse targets and sessions, or narrow the view with **Search** and **Filters**.\n\n## Select and organise\n- `Ctrl/Shift` selects files; right-click opens file actions.\n- **Group subs by session** switches between compact sessions and files.\n\n## Sort and choose columns\n- Click a heading to sort; click again to reverse. `Shift-click` adds a heading.\n- ▲ / ▼ show direction; numbers show sort priority.\n- Right-click a heading to choose columns." },
+                new WalkthroughStep { Title = "Explore the capture sky", Page = 0, Target = "PreviewSky", Action = "Reset the sky view", Body = "Repository’s sky globe appears below the image when there is room. It uses the recorded capture time and location.\n\n- **Drag** to rotate; **scroll or pinch** to zoom.\n- With the globe focused, **arrow keys** rotate and **plus/minus** zoom.\n- Use **Reset**, double-click or `Home` to restore the capture view.\n\nExploring changes the viewing angle; capture coordinates, time and horizon stay fixed." },
+                new WalkthroughStep { Title = "Export a stacking project", Page = 0, Target = "ExportButton", Action = "Open Export menu", Body = "Select captures, then choose **Export** for original copies or a ready-to-stack folder.\n\n- Stacks copy to the destination; subs keep compatible input folders.\n- Matching calibrations include reasons; scientific conversion is explicit.\n- **Add Metadata** and **Create new folder** start off. Existing files are kept.\n\nStacking takes place in your chosen processing software." },
+                new WalkthroughStep { Title = "Make AstroArchive comfortable", Page = 0, Target = "SettingsMenu", Action = "Open accessibility preferences", Body = "Open **Settings** for Preferences.\n\n- **General** sets appearance and the repository.\n- **Accessibility** adjusts text, rows, contrast and motion.\n- **Guide** opens searchable help, this walkthrough and About AstroArchive.\n- Press `F1` for help on the current page." }
             };
         }
         void StartWalkthrough(){StartWalkthrough(false);}
@@ -104,6 +105,7 @@ namespace AstroArchive {
                 Window.Activate();
                 if (step.Target == "PageSelector") { C("PageSelector").Focus(); C("PageSelector").IsDropDownOpen = true; }
                 else if (step.Target == "PreviewSky") { ((SkyGlobeView)Window.FindName("PreviewSky")).ResetView(); ((SkyGlobeView)Window.FindName("PreviewSky")).Focus(); }
+                else if (step.Title == "Choose your repository") Configure();
                 else if (step.Title == "Make AstroArchive comfortable") Configure(4);
                 else if (step.Page == 1) OpenTopMenu("ImportMenu");
                 else if (step.Title == "Export a stacking project") OpenTopMenu("ExportMenu");

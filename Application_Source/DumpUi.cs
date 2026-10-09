@@ -43,15 +43,15 @@ namespace AstroArchive {
     else if(operationBusy){if(dumpProgressWindow.WindowState==WindowState.Minimized)dumpProgressWindow.WindowState=WindowState.Normal;if(!dumpProgressWindow.IsVisible)dumpProgressWindow.Show();}
    }
    ResumeTargetReview();
-   if(!visible){if(filtersPopup!=null)filtersPopup.IsOpen=false;ClosePreviewDetails("");ClosePreviewDetails("Edited");}
+   if(!visible){if(filtersPopup!=null)filtersPopup.IsOpen=false;ClosePreviewDetails("");}
   }
   static void CloseProgressWindow(Window window){
    // Closing an active owned tool window must not change the owner's activation/state.
    window.Owner=null;window.Hide();window.Close();
   }
-  void OpenDumpProgress(){
-   var window=new Window{Owner=Window,Icon=ApplicationIcon.Image,ShowInTaskbar=false,ShowActivated=false,Title="Processing Dump folder",Width=580,SizeToContent=SizeToContent.Height,ResizeMode=ResizeMode.NoResize,WindowStartupLocation=WindowStartupLocation.CenterOwner,FontFamily=Window.FontFamily,FontSize=Window.FontSize};window.Resources.MergedDictionaries.Add(Window.Resources);Theme.Bind(window,Control.BackgroundProperty,"Canvas");Theme.Bind(window,Control.ForegroundProperty,"Text");
-   var content=new StackPanel{Margin=new Thickness(24)};content.Children.Add(new TextBlock{Text="Processing Dump folder",FontWeight=FontWeights.SemiBold,Margin=new Thickness(0,0,0,12)});
+  void OpenDumpProgress(string title="Processing Dump folder"){
+   var window=new Window{Owner=Window,Icon=ApplicationIcon.Image,ShowInTaskbar=false,ShowActivated=false,Title=title,Width=580,SizeToContent=SizeToContent.Height,ResizeMode=ResizeMode.NoResize,WindowStartupLocation=WindowStartupLocation.CenterOwner,FontFamily=Window.FontFamily,FontSize=Window.FontSize};window.Resources.MergedDictionaries.Add(Window.Resources);Theme.Bind(window,Control.BackgroundProperty,"Canvas");Theme.Bind(window,Control.ForegroundProperty,"Text");
+   var content=new StackPanel{Margin=new Thickness(24)};content.Children.Add(new TextBlock{Text=title,FontWeight=FontWeights.SemiBold,Margin=new Thickness(0,0,0,12)});
    dumpProgressStatus=new TextBlock{Text="Checking files…",TextWrapping=TextWrapping.Wrap};content.Children.Add(dumpProgressStatus);
    dumpProgressRate=new TextBlock{TextWrapping=TextWrapping.Wrap,Margin=new Thickness(0,8,0,0)};content.Children.Add(dumpProgressRate);
    dumpProgressBar=new ProgressBar{Minimum=0,Maximum=1,Height=8,Margin=new Thickness(0,16,0,0)};content.Children.Add(dumpProgressBar);
@@ -61,14 +61,6 @@ namespace AstroArchive {
   }
   void CloseDumpProgress(){var window=dumpProgressWindow;dumpProgressWindow=null;dumpProgressStatus=dumpProgressRate=null;dumpProgressBar=null;dumpProgressCancel=null;if(window!=null)CloseProgressWindow(window);}
   void UpdateDumpProgress(ProgressInfo progress){if(dumpProgressWindow==null)return;dumpProgressStatus.Text=L("StatusLabel").Text;dumpProgressRate.Text=L("RateLabel").Text;dumpProgressBar.IsIndeterminate=!settings.ReducedMotion&&!progress.TotalKnown&&!progress.Finished;dumpProgressBar.Value=progress.ProgressFraction;}
-  void AddDumpSettings(FormWindow dialog){
-   dialog.Text("Dump folder",true);
-   dialog.Text("Drop FITS files or telescope folders into Dump inside your archive. On opening the archive, AstroArchive sorts them and removes successfully verified inputs, including duplicates. Failed or unsupported files stay. Edit metadata to assign each physical telescope ID.");
-   if(repo==null)return;
-   dialog.Text(repo.DumpFolder);
-   dialog.Button("Open dump folder",()=>{try{repo.EnsureDumpFolder();Process.Start(new ProcessStartInfo(repo.DumpFolder){UseShellExecute=true});}catch(Exception e){MessageBox.Show(dialog.Window,e.Message,"Dump folder unavailable");}});
-   dialog.Button("Process dump folder now",()=>{dialog.Window.Close();ProcessDumpUi();});
-  }
   async void ProcessDumpUi(){
    if(repo==null||cancel!=null||closing||dumpChecking||releaseInstalling)return;
    var repository=repo;bool ignoreFailed=settings.IgnoreFailed,ignoreRaster=settings.IgnoreRasterImports;

@@ -1,18 +1,17 @@
-AstroArchive 1.13.16
-Package 1.13.16.1
+AstroArchive 2.1.7
+Package 2.1.7.1
 
-- Export to… offers PixInsight, Siril, DeepSkyStacker, GIMP, Photoshop,
-  AutoStakkert! 4, AstroWizard and Stacking Wizard in one compatible chooser.
-  Repository image handoffs use verified Edited working copies. Subframes and
-  recordings use verified export folders. DSS loads typed file lists, with
-  separate lists and a group chooser for incompatible captures. Some stackers
-  need the user to load the exported inputs in their own window.
-- Export destinations settings store defaults per file type and an optional
-  subframe-folder default. Application locations can be detected automatically
-  or configured. Export asks for an unavailable app before creating copies.
-  Existing Siril and StackingWizard preferences are retained.
-- Export menus now offer Export to…, Save files…, Stacking folder… and More.
-  Metadata/folder extras and advanced stacking options expand when needed.
-  Edited uses the same Export to… chooser. Completion keeps its folder action.
-- Original formats and precision are retained; conversions remain explicit.
-  Launch failures retain verified files and offer their location and settings.
+- Removed repetitive hover text from clearly labelled controls, table headings
+  and image surfaces. Icon actions and unusual settings retain concise help;
+  clipped metadata reveals its full value, and screen reader help stays available.
+- Scan help follows the active matching mode. Selection-sensitive actions explain
+  their scope, search help shows the current error, and metadata edits report
+  changed fields and the number of files affected across selected sessions.
+- Updates now live directly in Preferences > Updates. Check for releases, read
+  notes and install with visible progress without opening another dialog.
+  Settings are validated and saved before installation; failures remain visible
+  with retry available, and the application restarts after a verified update.
+- First-run guidance uses four focused steps; the full walkthrough and offline
+  guide remain available. Unavailable export destinations explain requirements
+  in an expandable section that can be reached from the keyboard.
+- Main-page text and layouts are unchanged. Includes all previous release fixes.

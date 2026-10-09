@@ -6,6 +6,31 @@ using System.Threading;
 namespace AstroArchive {
  public partial class Tests {
   static void EditedRegressions(){
+   Test("Background gallery checks discover outputs, deletions and metadata-only changes",()=>{
+    string file=Path.Combine(root,"edited-refresh-source","M31_10x60s_starless.fit");Write(file,64,48,(x,y)=>2000,new Dictionary<string,string>());
+    using(var repo=new Repository(Path.Combine(root,"edited-refresh-repo"))){
+     var project=repo.AddEditedImages(new[]{file},null,"Refresh",ct,NoProgress);var original=EditedGallery.Read(repo,new string[0],ct);var image=original.Images.Single();
+     Check(original.Errors.Count==0&&EditedGallery.Read(repo,new string[0],ct).SameImages(original.Images),"Unchanged gallery required a redraw");
+     string saved=repo.EditedPath(project,image.RelativePath),hash=Util.Hash(saved,ct);DateTime modified=File.GetLastWriteTime(saved);
+     repo.SaveEditedMetadata(project,new[]{image},new EditedMetadata{Object="M51",TotalExposure=2400},ct);var assigned=EditedGallery.Read(repo,new string[0],ct);
+     Check(!assigned.SameImages(original.Images)&&assigned.Images.Single().Metadata.Object=="M51"&&assigned.Images.Single().Metadata.TotalExposure==2400&&File.GetLastWriteTime(saved)==modified&&Util.Hash(saved,ct)==hash,"Refresh missed a metadata-only edit or changed image bytes");
+     string output=Path.Combine(repo.EditedProjectFolder(project),"M31_stars.fit");File.Copy(saved,output);var added=EditedGallery.Read(repo,new string[0],ct);
+     Check(added.Images.Count==2&&!added.SameImages(assigned.Images)&&repo.All().Count==0,"Editor output was missed or entered the capture index");
+     File.Delete(output);Check(!EditedGallery.Read(repo,new string[0],ct).SameImages(added.Images),"Removed output remained in the gallery");
+    }
+   });
+   Test("Gallery workers cancel and use target snapshots without the live database",()=>{
+    string file=Path.Combine(root,"edited-refresh-cancel-source","M31_starless.fit");Write(file,64,48,(x,y)=>2000,new Dictionary<string,string>());
+    var repo=new Repository(Path.Combine(root,"edited-refresh-cancel-repo"));EditedProject project;
+    try{project=repo.AddEditedImages(new[]{file},null,"Cancel",ct,NoProgress);
+     using(var stop=new CancellationTokenSource()){stop.Cancel();List<string> errors;
+      Expect(()=>repo.EditedProjects(out errors,stop.Token),"Canceled project read ran");
+      Expect(()=>repo.EditedImages(project,new string[0],stop.Token),"Canceled image read ran");
+      Expect(()=>EditedGallery.Read(repo,new string[0],stop.Token),"Canceled gallery read ran");
+     }
+    }finally{repo.Dispose();}
+    var gallery=EditedGallery.Read(repo,new[]{"M31"},ct);Check(gallery.Images.Count==1&&gallery.Images[0].Metadata.Object=="M31"&&gallery.Errors.Count==0,"Read-only worker accessed the disposed capture database");
+   });
    Test("Edited metadata assignments persist as patches without changing images or inferred fields",()=>{
     string source=Path.Combine(root,"edited-metadata-source"),file=Path.Combine(source,"M31_10x60s_Ha_starless.fit"),directory=Path.Combine(root,"edited-metadata-repo"),moved=directory+"-moved";Write(file,64,48,(x,y)=>2000,new Dictionary<string,string>());string id;
     using(var repo=new Repository(directory)){var project=repo.AddEditedImages(new[]{file},null,"Metadata",ct,NoProgress);id=project.Id;var row=repo.EditedImages(project).Single();string saved=repo.EditedPath(project,row.RelativePath),hash=Util.Hash(saved,ct);repo.SaveEditedMetadata(project,new[]{row},new EditedMetadata{Object="C20",TotalExposure=1800,Filters="L, Ha",Subs=30,RA="12:30:00",Dec="+40:00:00"},ct);List<string> errors;project=repo.EditedProjects(out errors).Single();row=repo.EditedImages(project).Single();Check(row.Metadata.Object=="NGC7000"&&row.Metadata.TotalExposure==1800&&row.Metadata.Subs==30&&row.Metadata.SubExposure==60&&row.Metadata.ImageClass=="Starless"&&row.Metadata.RA=="12:30:00","Manual assignments or unchanged fields lost");Check(Util.Hash(saved,ct)==hash&&Util.Hash(file,ct)==hash&&project.Sources.Single().Metadata.TotalExposure==600&&repo.All().Count==0,"Metadata save changed pixels/source provenance/index");

@@ -3,8 +3,44 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
 namespace AstroArchive {
  public partial class MainUi {
+  static Color TargetSurfacePixel(FrameworkElement root,ListBox list){
+   root.UpdateLayout();var bitmap=new RenderTargetBitmap((int)Math.Ceiling(root.ActualWidth),(int)Math.Ceiling(root.ActualHeight),96,96,PixelFormats.Pbgra32);bitmap.Render(root);
+   var origin=list.TranslatePoint(new Point(2,10),root);var pixel=new byte[4];bitmap.CopyPixels(new Int32Rect((int)origin.X,(int)origin.Y,1,1),pixel,4,0);return Color.FromArgb(pixel[3],pixel[2],pixel[1],pixel[0]);
+  }
+  void SmokeTargetListBackground(string output){
+   var fixture=new Window{Owner=Window,Title="Target list refresh",Width=640,Height=360,ShowInTaskbar=false};fixture.Resources.MergedDictionaries.Add(Window.Resources);
+   var grid=new Grid();grid.ColumnDefinitions.Add(new ColumnDefinition());grid.ColumnDefinitions.Add(new ColumnDefinition());fixture.Content=grid;
+   var lists=new System.Collections.Generic.List<ListBox>();
+   var targets=TargetNavigation.Build(Enumerable.Range(1,60).Select(i=>new Frame{Target="M"+i,Kind="Light",Exposure=60}));
+   foreach(var prototype in new[]{Targets,EditedTargets}){
+    var list=new ListBox{Style=prototype.Style,ItemTemplate=prototype.ItemTemplate,ItemContainerStyle=prototype.ItemContainerStyle,Background=Brushes.Transparent,BorderThickness=new Thickness(0)};
+    foreach(var group in prototype.GroupStyle)list.GroupStyle.Add(group);var view=new ListCollectionView(targets);view.GroupDescriptions.Add(new PropertyGroupDescription("Group"));list.ItemsSource=view;
+    ScrollViewer.SetCanContentScroll(list,true);ScrollViewer.SetHorizontalScrollBarVisibility(list,ScrollBarVisibility.Disabled);VirtualizingPanel.SetIsVirtualizingWhenGrouping(list,true);VirtualizingPanel.SetVirtualizationMode(list,VirtualizationMode.Recycling);
+    var host=new Border{Child=list,Margin=new Thickness(8)};Theme.Bind(host,Border.BackgroundProperty,"Surface");Grid.SetColumn(host,lists.Count);grid.Children.Add(host);lists.Add(list);
+   }
+   try{fixture.Show();foreach(string mode in new[]{"Dark","Light"}){
+    Theme.Apply(Window,mode);PumpPopupLayout();Color expected=((SolidColorBrush)Window.FindResource("Surface")).Color;
+    foreach(bool enabled in new[]{true,false,true}){
+     foreach(var list in lists)list.IsEnabled=enabled;fixture.UpdateLayout();
+     for(int i=0;i<lists.Count;i++)if(TargetSurfacePixel(grid,lists[i])!=expected)throw new Exception(mode+" target background changed while "+(enabled?"enabled":"disabled")+" on "+(i==0?"Repository":"Edited")+".");
+    }
+    foreach(var list in lists){var scroll=PopupChildren<ScrollViewer>(list).First();if(!scroll.CanContentScroll||!PopupChildren<VirtualizingStackPanel>(list).Any())throw new Exception("The target template lost virtualized scrolling.");list.ScrollIntoView(targets.Last());fixture.UpdateLayout();PumpPopupLayout();if(scroll.VerticalOffset<=0)throw new Exception("Grouped targets no longer scroll to the last item.");list.ScrollIntoView(targets.First());}
+    CapturePopup(fixture,System.IO.Path.Combine(output,"AstroArchive_Target_Background_"+mode+".png"));
+   }System.IO.File.WriteAllText(System.IO.Path.Combine(output,"target-background-smoke.txt"),"PASS: rendered Repository and Edited target surfaces retain light/dark colours during enabled/disabled/enabled refresh states; grouped lists retain virtualized scrolling.");
+   }finally{fixture.Close();Theme.Apply(Window,settings.ThemeMode);}
+  }
+  void VerifyTargetListAppearance(ListBox list,string context){
+   list.ApplyTemplate();var surface=list.Template.FindName("TargetSurface",list) as Border;var scroll=list.Template.FindName("PART_ScrollViewer",list) as ScrollViewer;
+   if(surface==null||!object.Equals(surface.Background,list.Background)||surface.Opacity!=1||scroll==null||!scroll.CanContentScroll||scroll.HorizontalScrollBarVisibility!=ScrollBarVisibility.Disabled)throw new Exception(context+" changed its target surface or scrolling layout.");
+   var allTargets=list.Items.Cast<TargetSummary>().Single(t=>t.Name=="All targets");list.ScrollIntoView(allTargets);PumpPopupLayout();
+   var row=list.ItemContainerGenerator.ContainerFromItem(allTargets) as ListBoxItem;var label=row==null?null:PopupChildren<TextBlock>(row).FirstOrDefault(t=>t.Text=="All targets");
+   if(label==null||label.ActualWidth<=0||label.ActualHeight<=0||row.ActualWidth>list.ActualWidth+1)throw new Exception(context+" hid target entries or expanded them outside the panel.");
+   var background=Window.TryFindResource("Surface") as System.Windows.Media.Brush;Readable(label.Foreground,background,context+" target label");
+  }
   void SmokeTargetNavigation(string output){
    var previousRows=all;string previousSearch=T("SearchBox").Text;var previousFilters=libraryFilters.Values.ToList();string previousTarget=(Targets.SelectedItem as TargetSummary).Name;
    try{
@@ -26,6 +62,9 @@ namespace AstroArchive {
      var target=Targets.Items.Cast<TargetSummary>().Single(t=>t.Name=="M42");Targets.ScrollIntoView(target);PumpPopupLayout();var container=Targets.ItemContainerGenerator.ContainerFromItem(target) as ListBoxItem;
      if(container==null||!Convert.ToString(container.ToolTip).Contains("2 files")||!PopupChildren<TextBlock>(container).Any(t=>t.Text=="Orion Nebula"&&t.TextWrapping==TextWrapping.Wrap))throw new Exception("Concise row or full-detail tooltip did not render.");
      Capture(System.IO.Path.Combine(output,"AstroArchive_Targets_"+theme+".png"));
+     var source=Targets.ItemsSource;var selection=Targets.SelectedItem;Targets.IsEnabled=false;
+     try{VerifyTargetListAppearance(Targets,theme+" pending targets");if(Targets.ItemsSource!=source||Targets.SelectedItem!=selection)throw new Exception("Pending targets lost entries or selection.");Capture(System.IO.Path.Combine(output,"AstroArchive_Targets_Pending_"+theme+".png"));}
+     finally{Targets.IsEnabled=true;}VerifyTargetListAppearance(Targets,theme+" restored targets");
     }
     var previousEdited=editedImages;string editedSearch=T("EditedSearchBox").Text;object editedClass=C("EditedClassFilter").SelectedItem;string editedTarget=(EditedTargets.SelectedItem as TargetSummary).Name;
     try{

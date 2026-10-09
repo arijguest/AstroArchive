@@ -33,7 +33,7 @@ namespace AstroArchive {
    return repo.CachedSolve(sample,settings,ct,progress);
   }
   void IdentifyByPlate(bool imported,List<Frame> selected,int named){
-   if(!PlateSolve.Configured(settings)){Configure(2);if(!PlateSolve.Configured(settings)){L("StatusLabel").Text=named+" filename matches; "+selected.Count+" captures need a configured plate solver.";return;}}
+   if(!PlateSolve.Configured(settings)){Configure(3);if(!PlateSolve.Configured(settings)){L("StatusLabel").Text=named+" filename matches; "+selected.Count+" captures need a configured plate solver.";return;}}
    List<TargetSolveJob> jobs=null;var repository=repo;
    Run(ct=>{jobs=TargetSolving.Plan(selected);TargetSolving.Solve(jobs,(frame,token,stage)=>SolveIdentification(frame,imported,token,stage),ct,IdentificationStage);return "";},done=>ShowTargetReviewWhenReady(()=>{
     if(closing||repository!=repo)return;

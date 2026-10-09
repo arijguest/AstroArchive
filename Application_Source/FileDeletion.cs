@@ -21,8 +21,8 @@ namespace AstroArchive {
     string path=FilePath(frame),staged=Path.Combine(staging,i.ToString("D8")+".capture");bool moved=false,committed=false;
     try{
      CheckManagedPath(path,Root);
-     if(File.Exists(path)){Directory.CreateDirectory(staging);CheckManagedPath(staged,Root);FileRetry.Run(()=>{File.Move(path,staged);return true;},ct,null);moved=true;}
-     try{db.Transaction(()=>{RememberDeletion(frame);db.Exec("DELETE FROM files WHERE hash=?",frame.Hash);});committed=true;}catch{if(moved)File.Move(staged,path);throw;}
+     if(File.Exists(path)){Directory.CreateDirectory(staging);CheckManagedPath(staged,Root);FileRetry.Run(()=>{MoveCapture(path,staged);return true;},ct,null);moved=true;}
+     try{db.Transaction(()=>{RememberDeletion(frame);db.Exec("DELETE FROM files WHERE hash=?",frame.Hash);});committed=true;}catch{if(moved)MoveCapture(staged,path);throw;}
      result.Deleted++;if(moved)FileRetry.Run(()=>{File.Delete(staged);return true;},CancellationToken.None,null);
     }catch(OperationCanceledException){throw;}catch(Exception e){result.Errors.Add(FileRetry.Detail(committed?staged:path,e));}
    }}finally{

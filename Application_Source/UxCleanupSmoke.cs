@@ -26,8 +26,8 @@ namespace AstroArchive {
      if(editor.Inputs["Exposure"].ToolTip!=null||!TipText(editor.Inputs["Roi"]).Contains("Sensor crop"))throw new Exception("Metadata repeats generic tips or lacks specialist help.");
     }finally{editor.Form.Window.Close();}
     foreach(string theme in new[]{"Light","Dark"})foreach(int scale in new[]{100,150}){
-     settings.ThemeMode=theme;settings.TextScalePercent=scale;ApplyAppearance();var dialog=CreateSettingsDialog();
-     try{dialog.Window.Show();PumpPopupLayout();if(dialog.Window.Title!="Settings"||PopupChildren<Button>(dialog.Window).Count(b=>Convert.ToString(b.Content)=="Check for releases")!=1||PopupChildren<Button>(dialog.Window).Any(b=>Convert.ToString(b.Content)=="Check for and install new releases"))throw new Exception("Settings retains a nested release dialog.");
+     settings.ThemeMode=theme;settings.TextScalePercent=scale;ApplyAppearance();PreferenceFields fields;var dialog=PreferencesDialog(Window,5,out fields);
+     try{dialog.Window.Show();PumpPopupLayout();if(dialog.Window.Title!="Preferences"||PopupChildren<Button>(dialog.Window).Count(b=>Convert.ToString(b.Content)=="Check for releases")!=1||PopupChildren<Button>(dialog.Window).Any(b=>(Convert.ToString(b.Content)=="Check for and install new releases"||Convert.ToString(b.Content)=="Check for updates…")))throw new Exception("Settings retains a nested release dialog.");
       var install=PopupChildren<Button>(dialog.Window).Single(b=>Convert.ToString(b.Content)=="Install and restart");if(install.IsEnabled)throw new Exception("Unchecked release can be installed.");
       foreach(var label in PopupChildren<TextBlock>(dialog.Window).Where(t=>t.IsVisible&&!string.IsNullOrWhiteSpace(t.Text))){
        System.Windows.Media.Brush background=dialog.Window.Background;
@@ -36,7 +36,7 @@ namespace AstroArchive {
        }
        Readable(label.Foreground,background,"Release settings "+theme+" "+label.Text);
       }
-      var scroll=PopupChildren<ScrollViewer>(dialog.Window).First();scroll.ScrollToEnd();PumpPopupLayout();
+      var scroll=PopupChildren<ScrollViewer>(dialog.Window).Last(s=>s.IsVisible&&MenuScrolling.GetEnabled(s));scroll.ScrollToEnd();PumpPopupLayout();
       if(install.ActualWidth<120||install.ActualHeight<30)throw new Exception("Release installation action is clipped.");
       CapturePopup(dialog.Window,Path.Combine(output,"AstroArchive_Release_Settings_"+theme+scale+".png"));
      }finally{dialog.Window.Close();}

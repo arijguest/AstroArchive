@@ -17,7 +17,7 @@ namespace AstroArchive {
             try {
                 SmokePageNavigation(output);
                 GoToPage(0); Window.UpdateLayout();
-                string[] expected = { "ImportMenu", "ExportMenu", "RepositoryMenu", "EditedMenu", "SettingsMenu", "GuideMenu", "CoffeeMenu" };
+                string[] expected = { "ImportMenu", "ExportMenu", "RepositoryMenu", "SettingsMenu", "GuideMenu", "CoffeeMenu" };
                 if (!TopMenus().Select(item => item.Name).SequenceEqual(expected)) throw new Exception("Top-level menu order changed.");
                 if (Convert.ToString(((TabItem)tabs.Items[0]).Header) != "Repository") throw new Exception("Repository tab retains the Library label.");
                 if (B("ThemeButton").IsVisible || B("MoreButton").IsVisible || B("PerformanceButton").IsVisible || B("RotationButton").IsVisible) throw new Exception("Secondary action buttons remain visible.");
@@ -41,11 +41,8 @@ namespace AstroArchive {
                         item.ApplyTemplate();
                         Readable(item.Foreground, (Brush)Window.FindResource("Surface"), mode + " navigation menu");
                     }
-                    var view = root.Items.OfType<MenuItem>().Single(item => Convert.ToString(item.Header) == "View");
-                    var filters = view.Items.OfType<MenuItem>().Single(item => Convert.ToString(item.Header) == "Filters");
-                    view.IsSubmenuOpen = true; filters.IsSubmenuOpen = true; PumpPopupLayout();
-                    if (!filters.IsSubmenuOpen || !filters.Items.OfType<MenuItem>().Any(item=>Convert.ToString(item.Header)=="Open filters panel…")) throw new Exception("Compact filter panel is missing from navigation.");
-                    filters.IsSubmenuOpen = false; view.IsSubmenuOpen = false;
+                    if(root.Items.OfType<MenuItem>().Any(item=>new[]{"Browse repository","Choose repository folder…","Open repository in Explorer","Selected files"}.Contains(Convert.ToString(item.Header))))throw new Exception("Redundant repository navigation remains.");
+                    if(!root.Items.OfType<MenuItem>().Any(item=>Convert.ToString(item.Header)=="Filters…"))throw new Exception("Direct filter access is missing.");
                     root.IsSubmenuOpen = false;
                     PumpPopupLayout();
                     ShowFilters(false);PumpPopupLayout();
@@ -62,6 +59,7 @@ namespace AstroArchive {
                     SavePopup(filterBody,Path.Combine(output,"AstroArchive_Filters_"+mode+".png"));filtersPopup.IsOpen=false;PumpPopupLayout();
                     Capture(Path.Combine(output, "AstroArchive_Navigation_" + mode + ".png"));
                 }
+                SmokePreferences(output);
                 var grid = G("FramesGrid"); var exposure = grid.Columns.First(column => column.SortMemberPath == "Exposure");
                 var before = tableSorts["FramesGrid"].ToList();
                 try {
@@ -97,7 +95,7 @@ namespace AstroArchive {
                 settings.ReducedMotion=true;var previousProgress=latestProgress;latestProgress=new ProgressInfo{TotalKnown=false};LiveTick(true);if(((ProgressBar)Window.FindName("ProgressBar")).IsIndeterminate)throw new Exception("Reduced motion still animates unknown progress.");latestProgress=previousProgress;
                 var preferences = new FormWindow(Window, "Accessibility smoke", 640, 620);
                 preferences.Tabs("Preferences", "Processing", "Plate solving", "Repository", "Accessibility");
-                var controls = AddAccessibilityPreferences(preferences); preferences.SelectTab(4); preferences.CloseOnly();
+                preferences.Tab(4);var controls = AddAccessibilityPreferences(preferences); preferences.SelectTab(4); preferences.CloseOnly();
                 try { preferences.Window.Show(); PumpPopupLayout(); controls.Scale.SelectedItem = "150%"; var snapshot = new Settings(); controls.Save(snapshot);
                     if (snapshot.TextScalePercent != 150 || !snapshot.HighContrast || !snapshot.ComfortableRows) throw new Exception("Accessibility preferences were not preserved.");
                 } finally { preferences.Window.Close(); }
@@ -111,7 +109,7 @@ namespace AstroArchive {
                 StartWalkthrough(); var tour = walkthrough;
                 try {
                     tour.Show(); PumpPopupLayout();
-                    for (int index = 0; index < steps.Length; index++) { tour.SetStep(index); PumpPopupLayout(); if (tour.StepIndex != index || tour.Heading.Text != steps[index].Title) throw new Exception("Walkthrough lost a step."); }
+                    for (int index = 0; index < steps.Length; index++) { tour.SetStep(index); PumpPopupLayout(); if (tour.StepIndex != index || tour.Heading.Text != steps[index].Title) throw new Exception("Walkthrough lost a step.");CheckHelpArticle(tour.Body);if(!tour.Body.Document.Blocks.OfType<System.Windows.Documents.List>().Any()||tour.Heading.FontSize<=tour.Body.Document.FontSize||tour.Count.FontSize>=tour.Body.Document.FontSize)throw new Exception("Walkthrough lost its lists or text hierarchy"); }
                     tour.SetStep(0); tour.Try.RaiseEvent(new RoutedEventArgs(Button.ClickEvent)); PumpPopupLayout();
                     if (!C("PageSelector").IsDropDownOpen || walkthroughHighlight == null || walkthroughHighlight.AdornedElement != C("PageSelector")) throw new Exception("Walkthrough did not highlight and open the page selector.");
                     tour.SetStep(1); tour.Back.RaiseEvent(new RoutedEventArgs(Button.ClickEvent)); if (tour.StepIndex != 0) throw new Exception("Walkthrough Back did not return.");

@@ -18,25 +18,24 @@ namespace AstroArchive {
   bool refreshingEditedTargets;
   EditedImage ActiveEditedImage{get{return G("EditedGrid").SelectedItem as EditedImage;}}
   EditedProject EditedImageProject{get{return ActiveEditedImage==null?null:ActiveEditedImage.Project;}}
-  MotionPreview editedMotion;PreviewViewport editedPreviewViewport;CancellationTokenSource editedPreviewCancel;int editedPreviewGeneration;PreviewData editedPreviewData;bool editedChoosingStretch;
+  MotionPreview editedMotion;PreviewViewport editedPreviewViewport;CancellationTokenSource editedPreviewCancel;int editedPreviewGeneration;PreviewData editedPreviewData;
   void InitializeEditedPreview(){
-   editedPreviewViewport=new PreviewViewport((Grid)Window.FindName("EditedPreviewHost"),(Grid)Window.FindName("EditedPreviewStage"),(Image)Window.FindName("EditedPreviewImage"),(FrameworkElement)Window.FindName("EditedPreviewSkyPanel"));InitializeSkyPreview("Edited");C("EditedStretchMode").ItemsSource=PreviewData.StretchModes;C("EditedStretchMode").SelectedItem=settings.PreviewStretch??"Auto per channel";
-   C("EditedStretchMode").SelectionChanged+=(s,e)=>{if(!editedChoosingStretch)LoadEditedPreview(false);};B("EditedOpenPreviewButton").Click+=(s,e)=>PreviewEditedImage();
+   editedPreviewViewport=new PreviewViewport((Grid)Window.FindName("EditedPreviewHost"),(Grid)Window.FindName("EditedPreviewStage"),(Image)Window.FindName("EditedPreviewImage"));InitializeEditedPreviewLayout();
+   B("EditedOpenPreviewButton").Click+=(s,e)=>PreviewEditedImage();
   }
-  void CancelEditedPreview(){ClosePreviewDetails("Edited");if(editedMotion!=null){editedMotion.Dispose();editedMotion=null;}editedPreviewGeneration++;if(editedPreviewCancel!=null){editedPreviewCancel.Cancel();editedPreviewCancel.Dispose();editedPreviewCancel=null;}editedPreviewData=null;UpdateCaptureSky("Edited",null);if(editedPreviewViewport!=null)editedPreviewViewport.SetImage(null,true);}
+  void CancelEditedPreview(){if(editedMotion!=null){editedMotion.Dispose();editedMotion=null;}editedPreviewGeneration++;if(editedPreviewCancel!=null){editedPreviewCancel.Cancel();editedPreviewCancel.Dispose();editedPreviewCancel=null;}editedPreviewData=null;if(editedPreviewViewport!=null)editedPreviewViewport.SetImage(null,true);}
   async void LoadEditedPreview(bool reload=true,Func<string,CancellationToken,Frame,PreviewData> decode=null){
-   if(!editedReady)return;var image=ActiveEditedImage;if(image==null||repo==null){CancelEditedPreview();L("EditedPreviewName").Text="Select an edited image";L("EditedPreviewInfo").Text="";L("EditedDetailsLabel").Text="Select an edited image to view metadata.";L("EditedLibrarySummaryLabel").Text="";L("EditedPreviewMessage").Text="Select an edited image.";L("EditedPreviewMessage").Visibility=Visibility.Visible;return;}
-   if(editedMotion!=null){editedMotion.Dispose();editedMotion=null;}if(editedPreviewCancel!=null){editedPreviewCancel.Cancel();editedPreviewCancel.Dispose();}editedPreviewCancel=new CancellationTokenSource();var token=editedPreviewCancel.Token;int generation=++editedPreviewGeneration;var previous=reload||editedPreviewData==null?null:editedPreviewData.Copy();var skyContext=reload?null:editedSkyFrame;
+   if(!editedReady)return;var image=ActiveEditedImage;if(image==null||repo==null){CancelEditedPreview();L("EditedPreviewName").Text="Select an edited image";L("EditedPreviewMessage").Text="Select an edited image.";L("EditedPreviewMessage").Visibility=Visibility.Visible;return;}
+   if(editedMotion!=null){editedMotion.Dispose();editedMotion=null;}if(editedPreviewCancel!=null){editedPreviewCancel.Cancel();editedPreviewCancel.Dispose();}editedPreviewCancel=new CancellationTokenSource();var token=editedPreviewCancel.Token;int generation=++editedPreviewGeneration;var previous=reload||editedPreviewData==null?null:editedPreviewData.Copy();
    string path;try{path=repo.EditedPath(image.Project,image.RelativePath);}catch(Exception error){L("EditedPreviewMessage").Text=error.Message;L("EditedPreviewMessage").Visibility=Visibility.Visible;return;}
-   if(reload){editedPreviewData=null;editedPreviewViewport.BeginLoading();editedChoosingStretch=true;C("EditedStretchMode").SelectedItem=ScientificPreview(path)&&!ObservationTargets.Unstretched(image.Metadata.Object,null)?settings.PreviewStretch??"Auto per channel":"Linear";editedChoosingStretch=false;}
-   UpdateCaptureSky("Edited",EditedSky(skyContext??new Frame{Target=image.Metadata.Object,OriginalName=image.Filename},image));L("EditedPreviewName").Text=image.Filename;L("EditedPreviewName").ToolTip=path;L("EditedDetailsLabel").Text=image.Metadata.Details;L("EditedLibrarySummaryLabel").Text="Edited image";L("EditedPreviewMessage").Text=previous==null?"Loading image…":"Stretching…";L("EditedPreviewMessage").Visibility=Visibility.Visible;string mode=Convert.ToString(C("EditedStretchMode").SelectedItem);
-   if(MediaFiles.Motion(path)){UpdateCaptureSky("Edited",EditedSky(skyContext??ReadSkyFrame(path,image.Metadata.Object),image));C("EditedStretchMode").IsEnabled=false;editedMotion=new MotionPreview(editedPreviewViewport,path,info=>{if(generation!=editedPreviewGeneration)return;L("EditedPreviewMessage").Visibility=Visibility.Collapsed;L("EditedPreviewInfo").Text=info;},message=>{if(generation!=editedPreviewGeneration)return;L("EditedPreviewMessage").Text=message;L("EditedPreviewMessage").Visibility=Visibility.Visible;});editedMotion.Start();return;}
+   if(reload){editedPreviewData=null;editedPreviewViewport.BeginLoading();}
+   L("EditedPreviewName").Text=image.Filename;L("EditedPreviewName").ToolTip=path;L("EditedPreviewMessage").Text="Loading image…";L("EditedPreviewMessage").Visibility=Visibility.Visible;string mode=ScientificPreview(path)&&!ObservationTargets.Unstretched(image.Metadata.Object,null)?settings.PreviewStretch??"Auto per channel":"Linear";
+   if(MediaFiles.Motion(path)){editedMotion=new MotionPreview(editedPreviewViewport,path,info=>{if(generation!=editedPreviewGeneration)return;L("EditedPreviewMessage").Visibility=Visibility.Collapsed;},message=>{if(generation!=editedPreviewGeneration)return;L("EditedPreviewMessage").Text=message;L("EditedPreviewMessage").Visibility=Visibility.Visible;});editedMotion.Start();return;}
    try{Func<bool> current=()=>generation==editedPreviewGeneration&&!Window.Dispatcher.HasShutdownStarted;
-    var data=previous??await LoadPreviewSamples(path,null,skyContext,image.Metadata.Object,token,current,sky=>UpdateCaptureSky("Edited",EditedSky(sky,image)),decode);data.ApplyContext(new Frame{Target=image.Metadata.Object},path);
+    var data=previous??await LoadPreviewSamples(path,null,null,image.Metadata.Object,token,current,null,decode);data.ApplyContext(new Frame{Target=image.Metadata.Object},path);
     if(!current()||token.IsCancellationRequested)return;editedPreviewData=data;bool firstPaint=true;
     await RenderProgressivePreview(data,mode,previous==null,token,current,(bitmap,provisional)=>{
-     editedPreviewViewport.SetImage(bitmap,reload&&firstPaint);firstPaint=false;L("EditedPreviewMessage").Visibility=Visibility.Collapsed;L("EditedPreviewInfo").Text=data.SourceWidth+" × "+data.SourceHeight+" pixels";L("EditedPreviewInfo").ToolTip=data.Description+" · "+data.DisplayMode+(provisional?" · applying selected stretch":"");C("EditedStretchMode").IsEnabled=!data.SkipStretch;
-     if(data.SkipStretch){editedChoosingStretch=true;C("EditedStretchMode").SelectedItem="Linear";editedChoosingStretch=false;}
+     editedPreviewViewport.SetImage(bitmap,reload&&firstPaint);firstPaint=false;L("EditedPreviewMessage").Visibility=Visibility.Collapsed;
     });
    }catch(OperationCanceledException){}catch(Exception error){if(generation!=editedPreviewGeneration||Window.Dispatcher.HasShutdownStarted)return;if(((Image)Window.FindName("EditedPreviewImage")).Source==null)editedPreviewViewport.BeginLoading();L("EditedPreviewMessage").Text="Preview unavailable\n\n"+error.Message;L("EditedPreviewMessage").Visibility=Visibility.Visible;}
   }
@@ -48,16 +47,13 @@ namespace AstroArchive {
    B("EditedAddButton").Click+=(s,e)=>AddEditedImages();B("EditedImportFolderButton").Click+=(s,e)=>ImportEditedFolder();B("EditedRefreshButton").Click+=(s,e)=>RefreshEdited();B("DismissEditedImportNotice").Click+=(s,e)=>((FrameworkElement)Window.FindName("EditedImportNotice")).Visibility=Visibility.Collapsed;
    B("EditedFolderButton").Click+=(s,e)=>OpenEditedFolder();B("EditedPreviewButton").Click+=(s,e)=>PreviewEditedImage();B("EditedEditorButton").Click+=(s,e)=>ShowEditedEditors();B("EditedDetailsButton").Click+=(s,e)=>ShowEditedDetails();
    UiHelp.Describe(B("EditedAddButton"),"Add images to Edited.");UiHelp.Hint(B("EditedRefreshButton"),"Find new editor outputs.");UiHelp.Describe(B("EditedFolderButton"),"Open image folder.");UiHelp.Hint(B("EditedClearButton"),"Clear search, image-class filter and target selection.");
-   editedReady=true;RefreshEdited();Window.Activated+=(s,e)=>{if(editedReady&&cancel==null&&!closing)RefreshEdited();};
+   editedReady=true;RefreshEdited();InitializeEditedRefresh();
   }
   void RefreshEdited(string select=null,string focusPath=null){
-   if(!editedReady)return;var projects=new List<EditedProject>();var errors=new List<string>();editedImages=new List<EditedImage>();
-   try{if(repo!=null)projects=repo.EditedProjects(out errors);}catch(Exception e){if(!(e is IOException||e is InvalidDataException||e is UnauthorizedAccessException))throw;errors.Add(e.Message);}
-   foreach(var project in projects)try{var images=repo.EditedImages(project);foreach(var image in images)image.Project=project;editedImages.AddRange(images);}catch(Exception e){if(!(e is IOException||e is InvalidDataException||e is UnauthorizedAccessException))throw;errors.Add(e.Message);}
-   editedImages=editedImages.OrderByDescending(i=>i.Modified).ThenBy(i=>i.Filename).ToList();
+   if(!editedReady)return;CancelAutomaticEditedRefresh();editedCaptureTargets=all.Select(f=>f.Target).Distinct().ToArray();var gallery=EditedGallery.Read(repo,editedCaptureTargets,CancellationToken.None);editedImages=gallery.Images;
    if(select!=null){T("EditedSearchBox").Clear();C("EditedClassFilter").SelectedIndex=0;refreshingEditedTargets=true;try{EditedTargets.SelectedIndex=0;}finally{refreshingEditedTargets=false;}}
    editedFocusProject=select;editedFocusPath=focusPath;FilterEditedImages();
-   L("EditedSummary").ToolTip=errors.Count==0?null:string.Join("\n",errors);
+   L("EditedSummary").ToolTip=gallery.Errors.Count==0?null:string.Join("\n",gallery.Errors);
   }
   string editedFocusProject,editedFocusPath;
   void RestoreEditedSelection(IEnumerable<EditedImage> rows,EditedImage previous){
@@ -120,11 +116,6 @@ namespace AstroArchive {
    if(repo==null||cancel!=null||selected.Count==0)return;var dialog=new FormWindow(Window,"Create Edited working copies",610,390);dialog.Text("Create working copies for your editor",true);
    dialog.Text("Copy and verify the selected archived images into Edited, then open their folder. Load these copies in your preferred editor and save outputs alongside them.");dialog.Accept("Create working copies",()=>true);if(!dialog.Show())return;
    Run(ct=>repo.CreateEditedWorkingCopies(selected,"Edited working copies","Other editor",ct,Progress).Id,id=>{RefreshEdited(id);GoToPage(2);OpenEditedFolder();});
-  }
-  void BuildEditedNavigation(MenuItem menu){
-   menu.Items.Add(ColumnsNavigation("EditedGrid"));menu.Items.Add(MenuAction("Browse edited images",()=>{RefreshEdited();GoToPage(2);},true,false));menu.Items.Add(MenuAction("Add images…",AddEditedImages,repo!=null));menu.Items.Add(MenuAction("Import folder…",ImportEditedFolder,repo!=null));
-   menu.Items.Add(MenuAction("Edit metadata…",EditEditedMetadata,repo!=null&&SelectedEditedImages().Count>0));
-   menu.Items.Add(MenuAction("Open image folder",OpenEditedFolder,repo!=null&&EditedImageProject!=null));menu.Items.Add(MenuAction("Preview selected image…",PreviewEditedImage,ActiveEditedImage!=null));menu.Items.Add(MenuAction("Refresh edited images",()=>RefreshEdited(),repo!=null));
   }
   void ShowPerformanceTable(){
    var dialog=new FormWindow(Window,"Operation diagnostics",720,520);dialog.Text("Last operation",true);dialog.Text(L("StatusLabel").Text+"\n"+L("RateLabel").Text);

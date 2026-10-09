@@ -42,7 +42,7 @@ namespace AstroArchive {
   }
   public static ExternalSelection Selection(IEnumerable<Frame> frames){
    var items=frames.ToList();if(items.Count==0)throw new InvalidOperationException("Select files to export.");
-   if(items.Any(f=>f.Rejected||f.Status=="Failed"||CaptureScreening.FileProblem(f)))throw new InvalidOperationException("Select usable files only. Rejected or failed files can still be copied with Save files….");
+   if(items.Any(f=>f.Rejected||f.Status=="Failed"||CaptureScreening.FileProblem(f)))throw new InvalidOperationException("Select usable files only. Rejected or failed files can still be copied with Export files….");
    if(items.Any(f=>f.Kind=="Light")&&items.Any(f=>f.Kind!="Light"))throw new InvalidOperationException("Select subframes on their own, or select finished images. Matching calibrations can be added in the export dialog.");
    bool subs=items.All(f=>f.Kind=="Light");return new ExternalSelection{Paths=items.Select(f=>f.OriginalName??f.RelativePath).ToList(),Subframes=subs,Folder=subs||items.Any(f=>new[]{"SER","AVI"}.Contains(FileType(f.OriginalName??f.RelativePath)))};
   }
@@ -131,8 +131,8 @@ namespace AstroArchive {
   static string DssType(Frame frame){string kind=frame.Kind.ToLowerInvariant().Replace("master ","");return kind=="light"?"light":kind=="dark flat"?"darkflat":kind=="dark"?"dark":kind=="flat"?"flat":kind=="bias"?"offset":null;}
   public static List<DssJob> WriteDssJobs(string folder,List<Frame> selected,List<ExportedFile> exported,bool calibrations,bool unknown,CancellationToken ct){
    var jobs=new List<DssJob>();var cals=exported.Select(f=>f.Frame).Where(f=>Assets.IsCalibration(f.Kind)).ToList();int index=0;
-   foreach(var group in selected.GroupBy(f=>f.Target+"|"+f.Group).OrderBy(g=>g.Key)){
-    ct.ThrowIfCancellationRequested();var inputs=group.ToList();if(calibrations)inputs.AddRange(Exporter.CalibrationFor(group,cals,unknown));
+   foreach(var planned in Exporter.StackingGroups(selected,cals,false,unknown,calibrations)){var group=planned.Inputs;
+    ct.ThrowIfCancellationRequested();var inputs=group.ToList();inputs.AddRange(planned.Calibrations);
     var rows=new List<string>{"DSS file list","CHECKED\tTYPE\tFILE"};foreach(var frame in inputs.GroupBy(f=>f.Hash).Select(g=>g.First())){var file=exported.FirstOrDefault(f=>f.Frame.Hash==frame.Hash);string type=DssType(frame);if(file==null||type==null)throw new IOException("DSS file list cannot map an exported input: "+frame.OriginalName);if(file.Path.IndexOfAny(new[]{'\r','\n','\t'})>=0)throw new IOException("DSS cannot represent a filename containing a tab or newline.");rows.Add("1\t"+type+"\t"+file.Path);}
     string name=(++index).ToString("00")+"_"+Util.Safe(group.First().TargetLabel)+"_"+Util.Safe(group.First().Filter);string path=Exporter.WriteMetadataText(System.IO.Path.Combine(folder,name+".txt"),string.Join("\r\n",rows)+"\r\n",ct);jobs.Add(new DssJob{Name=name+" · "+group.Count()+" subframes",Path=path});
    }return jobs;

@@ -14,7 +14,7 @@ namespace AstroArchive {
         bool updatingPageSelector;
         bool preparingNavigation;
         MenuItem TopMenu(string name) { return (MenuItem)Window.FindName(name); }
-        IEnumerable<MenuItem> TopMenus() { return new[] { "ImportMenu", "ExportMenu", "RepositoryMenu", "EditedMenu", "SettingsMenu", "GuideMenu", "CoffeeMenu" }.Select(TopMenu); }
+        IEnumerable<MenuItem> TopMenus() { return new[] { "ImportMenu", "ExportMenu", "RepositoryMenu", "SettingsMenu", "GuideMenu", "CoffeeMenu" }.Select(TopMenu); }
         void SyncPageSelector() {
             var selector = C("PageSelector"); var tabs = (TabControl)Window.FindName("MainTabs");
             updatingPageSelector = true;
@@ -80,20 +80,22 @@ namespace AstroArchive {
         void InitializeNavigation(bool firstRun) {
             InitializeSearch();
             T("SourceBox").TextChanged+=(s,e)=>{unknownImportTarget="";if(navigationReady)UpdateNavigationState();};
-            var tabs=(TabControl)Window.FindName("MainTabs");SelectInitialPage();tabs.SelectionChanged+=(s,e)=>{if(e.OriginalSource!=tabs)return;SyncPageSelector();if(tabs.SelectedIndex!=0&&previewMotion!=null)previewMotion.Pause();if(tabs.SelectedIndex!=2&&editedMotion!=null)editedMotion.Pause();UpdateNavigationState();};
+            var tabs=(TabControl)Window.FindName("MainTabs");SelectInitialPage();tabs.SelectionChanged+=(s,e)=>{if(e.OriginalSource!=tabs)return;ScheduleEditedRefresh();SyncPageSelector();if(tabs.SelectedIndex!=0&&previewMotion!=null)previewMotion.Pause();if(tabs.SelectedIndex!=2&&editedMotion!=null)editedMotion.Pause();UpdateNavigationState();};
             var selector = C("PageSelector");
             selector.SelectionChanged += (s,e) => { if (!updatingPageSelector && selector.SelectedItem != null) GoToPage(Convert.ToInt32(((ComboBoxItem)selector.SelectedItem).Tag)); };
             SyncPageSelector();
             UiHelp.Hint(selector, "Switch page (Ctrl+1–3).");
             ((FrameworkElement)Window.FindName("HeaderBar")).SizeChanged += (s,e) => UpdateCompactHeader();
             UpdateCompactHeader();
-            foreach (string name in new[] { "ImportMenu", "ExportMenu", "RepositoryMenu", "EditedMenu", "SettingsMenu", "GuideMenu" }) {
+            foreach (string name in new[] { "ImportMenu", "ExportMenu", "RepositoryMenu", "GuideMenu" }) {
                 string captured = name;
                 var menu = TopMenu(name);
                 menu.GotKeyboardFocus += (s,e) => { if (!preparingNavigation && ReferenceEquals(e.NewFocus, menu) && !menu.IsSubmenuOpen) PopulateNavigation(captured); };
                 menu.PreviewMouseLeftButtonDown += (s,e) => { if (!menu.IsSubmenuOpen) PopulateNavigation(captured); };
                 PopulateNavigation(name);
             }
+            TopMenu("SettingsMenu").Click += (sender,args) => Configure();
+            UiHelp.Describe(TopMenu("SettingsMenu"), "Open Preferences.");
             TopMenu("CoffeeMenu").Click += (s,e) => OpenWebsite("https://ko-fi.com/arijguest");
             UiHelp.Hint(TopMenu("CoffeeMenu"), "Support AstroArchive on Ko-fi.");
             B("OpenRepositoryFolderButton").Click += (s,e) => OpenRepositoryFolder();
@@ -130,7 +132,6 @@ namespace AstroArchive {
             TopMenu("ImportMenu").IsEnabled = cancel == null;
             TopMenu("ExportMenu").IsEnabled = cancel == null && repo != null&&!ActiveSearchBlocked&&!SearchBlocked(((TabControl)Window.FindName("MainTabs")).SelectedIndex==2?"EditedSearchBox":"SearchBox");
             TopMenu("SettingsMenu").IsEnabled = cancel == null;
-            TopMenu("EditedMenu").IsEnabled = cancel == null;
             B("ImportExportButton").IsEnabled = TopMenu("ExportMenu").IsEnabled;
             B("OpenRepositoryFolderButton").IsEnabled = repo != null;
             if (repo != null) {
@@ -139,10 +140,8 @@ namespace AstroArchive {
             }
             var analysis = Convert.ToString(C("ImportSolveMode").SelectedItem) != "Off" || Convert.ToString(C("ImportRotationMode").SelectedItem) != "Off";
             var cleanup = ((CheckBox)Window.FindName("DeleteOriginalsCheck")).IsChecked == true;
-            L("ImportPolicyLabel").Text = (cleanup ? "Originals will be deleted after verified import" : "Originals kept") +
-                " · " + (analysis ? "Optional analysis enabled" : "Analysis off") + " · " + (SkipFlagged ? "Flagged captures excluded" : "Flagged captures included") +
-                (settings.IgnoreFailed ? " · Failed filenames ignored" : " · Failed filenames included") +
-                (settings.RobustImportMatching ? " · Robust matching" : " · Filename matching") + (settings.IgnoreRasterImports ? " · PNG/JPG ignored" : "") + (unknownImportTarget.Length>0?" · Unknown → "+Catalog.Label(unknownImportTarget):"") + (importFilters.ActiveCount>0?" · "+importFilters.ActiveCount+" active filters":"");
+            L("ImportPolicyLabel").Text=(cleanup?"Originals deleted after verification":"Originals kept")+(analysis?" · Analysis enabled":"")+(!SkipFlagged?" · Flagged files included":"")+(unknownImportTarget.Length>0?" · Unknown → "+Catalog.Label(unknownImportTarget):"");
+            UiHelp.Tip(L("ImportPolicyLabel"),(SkipFlagged?"Flagged captures excluded":"Flagged captures included")+" · "+(settings.IgnoreFailed?"Failed filenames ignored":"Failed filenames included")+" · "+(settings.RobustImportMatching?"Robust matching":"Filename matching")+(settings.IgnoreRasterImports?" · PNG/JPG/JPEG ignored":" · PNG/JPG/JPEG included"));
             L("ImportPolicyLabel").FontWeight = cleanup ? FontWeights.SemiBold : FontWeights.Normal;
             L("RateLabel").Visibility = cancel != null ? Visibility.Visible : Visibility.Collapsed;
             ((ProgressBar)Window.FindName("ProgressBar")).Visibility = cancel != null ? Visibility.Visible : Visibility.Collapsed;
@@ -154,105 +153,36 @@ namespace AstroArchive {
             if (name == "ImportMenu") BuildImportNavigation(menu);
             else if (name == "ExportMenu") BuildExportNavigation(menu);
             else if (name == "RepositoryMenu") BuildRepositoryNavigation(menu);
-            else if (name == "EditedMenu") BuildEditedNavigation(menu);
-            else if (name == "SettingsMenu") BuildSettingsNavigation(menu);
             else if (name == "GuideMenu") BuildGuideNavigation(menu);
         }
         void BuildImportNavigation(MenuItem menu) {
-            menu.Items.Add(MenuAction("Go to Import", () => GoToPage(1), true, false));
-            menu.Items.Add(ButtonAction("Choose source folder…", "SourceButton", 1));
-            menu.Items.Add(ButtonAction("Scan source folder", "ScanButton", 1));
-            menu.Items.Add(MenuAction("Full rescan of source", () => { GoToPage(1); Scan(true); }, repo != null && cancel == null));
+            menu.Items.Add(ButtonAction("Scan source", "ScanButton", 1));
             menu.Items.Add(ButtonAction("Import ready files", "ImportButton", 1));
-            var usb = Branch("USB telescopes", ButtonAction("Refresh connected devices", "RefreshUsbButton"));
-            foreach (var telescope in usbTelescopes) {
-                var device = telescope;
-                usb.Items.Add(MenuAction((device.ProfileId ?? device.Make) + " · " + device.Source, () => { GoToPage(1); UploadUsb(device); }, repo != null));
-            }
-            if (usbTelescopes.Count == 0) usb.Items.Add(new MenuItem { Header = "No telescope storage detected", IsEnabled = false });
-            menu.Items.Add(usb);
-            menu.Items.Add(Branch("Saved telescopes", ButtonAction("Save current telescope…", "SaveTelescopeButton", 1),
-                ButtonAction("Rename saved telescope…", "RenameTelescopeButton", 1), ButtonAction("Recover profiles from repository", "RebuildTelescopesButton", 1)));
-            menu.Items.Add(Branch("Review and recovery", ButtonAction("Review flagged captures…", "ReviewImportsButton", 1),
-                ButtonAction("Screen visible captures", "ScreenImportsButton", 1), ButtonAction("Retry failed imports", "RetryImportsButton", 1),
-                MenuAction("Scan report…", () => ShowReport("Scan report", plan == null ? "Scan a folder first." : plan.ScanReport))));
-            var tools = Branch("Selected files");tools.IsEnabled=!SearchBlocked("ImportSearchBox"); MoveMenuItems(tools, BuildImportTools(), item => item is MenuItem && Convert.ToString(((MenuItem)item).Header) != "Scan report…"); menu.Items.Add(tools);
-            menu.Items.Add(Branch("Table", FiltersNavigation(true),
-                ColumnsNavigation("ImportGrid"), MenuAction("Clear search and filters", () => B("ImportClearButton").RaiseEvent(new RoutedEventArgs(Button.ClickEvent)), repo != null)));
-            menu.Items.Add(new Separator());
-            menu.Items.Add(MenuAction("Import options…", ImportPreferences));
-            menu.Items.Add(Branch("Dump folder", MenuAction("Open Dump in Explorer", () => { repo.EnsureDumpFolder(); OpenFolder(repo.DumpFolder); }, repo != null),
-                MenuAction("Process Dump now", ProcessDumpUi, repo != null)));
-        }
-        MenuItem ColumnsNavigation(string table) {
-            var item = Branch("Columns"); MoveMenuItems(item, BuildColumnsMenu(table, null)); return item;
-        }
-        MenuItem FiltersNavigation(bool imports) {
-            var item = Branch("Filters"); MoveMenuItems(item, BuildFiltersMenu(imports)); return item;
+            var usb = Branch("Connected telescopes", ButtonAction("Refresh devices", "RefreshUsbButton"));
+            foreach (var telescope in usbTelescopes) { var device=telescope;usb.Items.Add(MenuAction((device.ProfileId??device.Make)+" · "+device.Source,()=>{GoToPage(1);UploadUsb(device);},repo!=null)); }
+            if(usbTelescopes.Count==0)usb.Items.Add(new MenuItem{Header="No telescope storage detected",IsEnabled=false});menu.Items.Add(usb);
+            menu.Items.Add(Branch("Saved telescopes", ButtonAction("Save current telescope…", "SaveTelescopeButton", 1), ButtonAction("Rename telescope…", "RenameTelescopeButton", 1), ButtonAction("Recover profiles", "RebuildTelescopesButton", 1)));
+            var tools=Branch("Review and repair", ButtonAction("Review flagged files…", "ReviewImportsButton", 1),ButtonAction("Screen files", "ScreenImportsButton", 1),ButtonAction("Retry failed imports", "RetryImportsButton", 1),MenuAction("Full rescan",()=>{GoToPage(1);Scan(true);},repo!=null),MenuAction("Scan report…",()=>ShowReport("Scan report",plan==null?"Scan a folder first.":plan.ScanReport)));
+            tools.Items.Add(new Separator());MoveMenuItems(tools,BuildImportTools(),item=>item is MenuItem&&Convert.ToString(((MenuItem)item).Header)!="Scan report…");tools.IsEnabled=!SearchBlocked("ImportSearchBox");menu.Items.Add(tools);
+            menu.Items.Add(Branch("Dump folder",MenuAction("Open folder",()=>{repo.EnsureDumpFolder();OpenFolder(repo.DumpFolder);},repo!=null),MenuAction("Process files",ProcessDumpUi,repo!=null)));
+            menu.Items.Add(new Separator());menu.Items.Add(MenuAction("Import preferences…",ImportPreferences));
         }
         void BuildExportNavigation(MenuItem menu) {
-            if(((TabControl)Window.FindName("MainTabs")).SelectedIndex==2){menu.Items.Add(MenuAction("Export to…",ExportEditedTo,SelectedEditedImages().Count>0));menu.Items.Add(MenuAction("Open image folder",OpenEditedFolder,ActiveEditedImage!=null));return;}
-            var selected = Context();
-            menu.Items.Add(new MenuItem { Header = selected.Count + " repository files" + (SelectedFiles().Count == 0 ? " in view" : " selected"), IsEnabled = false });
-            var choices = ExportMenu(selected);
-            foreach (var child in choices.Items.Cast<object>().ToList()) { choices.Items.Remove(child); menu.Items.Add(child); }
+            if(((TabControl)Window.FindName("MainTabs")).SelectedIndex==2){menu.Items.Add(MenuAction("Export to…",ExportEditedTo,SelectedEditedImages().Count>0));return;}
+            var selected=Context();menu.Items.Add(new MenuItem{Header=selected.Count+" files"+(SelectedFiles().Count==0?" in view":" selected"),IsEnabled=false});
+            menu.Items.Add(MenuAction("Export to…",()=>ExportTo(selected),selected.Count>0));menu.Items.Add(MenuAction("Export files…",()=>ExportFiles(selected),selected.Count>0));menu.Items.Add(MenuAction("Stacking folder…",()=>ExportProject(selected,false),selected.Any(f=>f.Kind=="Light"||f.Kind=="Stack")));
+            menu.Items.Add(new Separator());menu.Items.Add(Branch("Catalogue CSV",MenuAction("Selected / visible files…",()=>ExportSelectionCsv(selected),selected.Count>0),MenuAction("Entire repository…",ExportCatalogue,repo!=null)));
         }
         void BuildRepositoryNavigation(MenuItem menu) {
-            menu.Items.Add(MenuAction("Browse repository", () => GoToPage(0), true, false));
-            menu.Items.Add(MenuAction("Choose repository folder…", ChooseRepository));
-            menu.Items.Add(MenuAction("Open repository in Explorer", OpenRepositoryFolder, repo != null, false));
-            var view = Branch("View", FiltersNavigation(false), ColumnsNavigation("FramesGrid"));
-            foreach (string label in new[] { "Session summaries", "Show all files", "By target", "By target and session" }) {
-                string mode = label; var choice = MenuAction(mode, () => { GoToPage(0); C("LibraryViewBox").SelectedItem = mode; }, repo != null);
-                choice.IsCheckable = true; choice.IsChecked = Convert.ToString(C("LibraryViewBox").SelectedItem) == mode; view.Items.Add(choice);
-            }
-            var preview = MenuAction("Image preview pane", () => B("PreviewToggle").RaiseEvent(new RoutedEventArgs(Button.ClickEvent)), true, false);
-            preview.IsCheckable = true; preview.IsChecked = settings.ShowPreview; view.Items.Add(preview);
-            view.Items.Add(MenuAction("Open an external image…", OpenPreviewFile, true, false));
-            view.Items.Add(MenuAction("Clear search and filters", () => B("ClearButton").RaiseEvent(new RoutedEventArgs(Button.ClickEvent)))); menu.Items.Add(view);
-            var selection = Branch("Selected files");selection.IsEnabled=cancel==null&&!SearchBlocked("SearchBox");
-            var files = SelectedFiles();
-            if (files.Count > 0) { var context = ThemedMenu(); BuildFileMenu(context, files); MoveMenuItems(selection, context); }
-            else selection.Items.Add(new MenuItem { Header = "Select files in the repository table", IsEnabled = false });
-            menu.Items.Add(selection);
-            menu.Items.Add(Branch("Review and analysis", ButtonAction("Review flagged captures…", "ReviewLibraryButton", 0),
-                ButtonAction("Screen selected or visible captures", "ScreenLibraryButton", 0), ButtonAction("Rotation analysis…", "RotationButton", 0),
-                ButtonAction("Identify targets…", "SolveButton", 0), ButtonAction("Edit metadata…", "EditButton", 0)));
-            var maintenance = Branch("Maintenance");maintenance.IsEnabled=cancel==null&&repo!=null;
-            if (repo != null) MoveMenuItems(maintenance, BuildRepositoryTools(), item => !(item is MenuItem) || Convert.ToString(((MenuItem)item).Header) != "Export searchable catalogue CSV");
-            maintenance.Items.Add(new Separator()); maintenance.Items.Add(MenuAction("Delete all archive data…", ResetArchive, repo != null)); menu.Items.Add(maintenance);
-            var performance = MenuAction("Show performance table…", ShowPerformanceTable, true, false);
-            menu.Items.Add(Branch("Diagnostics", performance, MenuAction("Last import report…", () => ShowReport("Import performance and errors", repo == null ? "Choose a repository first." : repo.LastReport), true, false)));
-        }
-        void BuildSettingsNavigation(MenuItem menu) {
-            menu.Items.Add(MenuAction("Export destinations…", () => ExportDestinationSettings()));
-            menu.Items.Add(MenuAction("Preferences…", () => Configure(0)));
-            menu.Items.Add(MenuAction("Accessibility…", () => Configure(4)));
-            menu.Items.Add(Branch("Import and processing", MenuAction("Copy workers and observing site…", () => Configure(1)), MenuAction("Import options…", ImportPreferences)));
-            menu.Items.Add(MenuAction("Plate solving…", () => Configure(2)));
-            menu.Items.Add(MenuAction("Repository settings…", () => Configure(3)));
-            menu.Items.Add(Branch("Image compatibility", MenuAction("Supported formats and conversion…", () => ShowReport("Image compatibility", FormatGuide)),
-                MenuAction("Open optional codec folder", () => { Directory.CreateDirectory(NativeCodecs.Folder); OpenFolder(NativeCodecs.Folder); })));
-            menu.Items.Add(new Separator()); menu.Items.Add(MenuAction("Check for and install releases…", () => Configure(0,true)));
+            var grouped=MenuAction("Group subs by session",()=>{GoToPage(0);C("LibraryViewBox").SelectedItem=Convert.ToString(C("LibraryViewBox").SelectedItem)=="Session summaries"?"Show all files":"Session summaries";},repo!=null);grouped.IsCheckable=true;grouped.IsChecked=Convert.ToString(C("LibraryViewBox").SelectedItem)=="Session summaries";menu.Items.Add(grouped);
+            menu.Items.Add(MenuAction("Filters…",()=>{GoToPage(0);ShowFilters(false);},repo!=null));
+            menu.Items.Add(MenuAction("Back up archive…",BackUpArchive,repo!=null));
+            menu.Items.Add(new Separator());menu.Items.Add(Branch("Review and analysis",ButtonAction("Review flagged files…","ReviewLibraryButton",0),ButtonAction("Screen files","ScreenLibraryButton",0),ButtonAction("Identify targets…","SolveButton",0),ButtonAction("Analyse rotation…","RotationButton",0)));
+            var maintenance=Branch("Maintenance");maintenance.IsEnabled=cancel==null&&repo!=null;if(repo!=null)MoveMenuItems(maintenance,BuildRepositoryTools(),item=>item is MenuItem&&Convert.ToString(((MenuItem)item).Header)!="Export searchable catalogue CSV"&&Convert.ToString(((MenuItem)item).Header)!="Show selected file location");maintenance.Items.Add(new Separator());maintenance.Items.Add(MenuAction("Delete archive data…",ResetArchive,repo!=null));menu.Items.Add(maintenance);
+            menu.Items.Add(Branch("Diagnostics",MenuAction("Last operation…",ShowPerformanceTable,true,false),MenuAction("Last import report…",()=>ShowReport("Import report",repo==null?"Choose a repository first.":repo.LastReport),true,false)));
         }
         void BuildGuideNavigation(MenuItem menu) {
-            menu.Items.Add(MenuAction("Interactive walkthrough…", StartWalkthrough, cancel == null));
-            menu.Items.Add(MenuAction("Search the guide…", () => OpenGuide(null), true, false));
-            menu.Items.Add(MenuAction("Help for this page (F1)", () => OpenGuide(CurrentHelpTopic()), true, false));
-            var topics = Branch("Topics");
-            foreach (var entry in new[] {
-                new[] { "Getting started", "START HERE" }, new[] { "Importing captures", "IMPORT WORKFLOW" },
-                new[] { "Preview and tables", "IMAGE PREVIEW AND TABLES" }, new[] { "Stacking projects", "STACKING PROJECTS AND SESSIONS" },
-                 new[] { "Troubleshooting", "TROUBLESHOOTING" },
-                new[] { "Keyboard shortcuts", "KEYBOARD SHORTCUTS" }
-            }) { string key = entry[1]; topics.Items.Add(MenuAction(entry[0], () => OpenGuide(key), true, false)); }
-            menu.Items.Add(topics); menu.Items.Add(new Separator()); menu.Items.Add(MenuAction("About AstroArchive…", About, true, false));
-        }
-        void ChooseRepository() {
-            string selected = Folder("Choose your repository folder", repo == null ? settings.Repository : repo.Root);
-            if (selected == null) return;
-            try { OpenRepository(selected); UpdateNavigationState(); }
-            catch (Exception ex) { MessageBox.Show(Window, ex.Message, "Repository could not be opened", MessageBoxButton.OK, MessageBoxImage.Warning); }
+            menu.Items.Add(MenuAction("Help…",()=>OpenGuide(CurrentHelpTopic()),true,false));menu.Items.Add(MenuAction("Interactive walkthrough…",StartWalkthrough,cancel==null));menu.Items.Add(new Separator());menu.Items.Add(MenuAction("About AstroArchive…",About,true,false));
         }
         void OpenRepositoryFolder() { if (repo != null) OpenFolder(repo.Root); }
         void OpenFolder(string path) {
@@ -267,40 +197,6 @@ namespace AstroArchive {
             var dialog = new Microsoft.Win32.SaveFileDialog { FileName = "AstroArchive_catalog.csv", Filter = "CSV catalogue|*.csv" };
             if (dialog.ShowDialog(Window) == true) { repo.ExportIndex(dialog.FileName); L("StatusLabel").Text = "Catalogue CSV exported."; }
         }
-        void ImportPreferences() {
-            var dialog = new FormWindow(Window, "Import options", 640, 690);
-            dialog.Tabs("Files", "Capture", "Analysis");
-            dialog.Text("Options for the next import", true);
-            dialog.Text("Review the policy summary before copying. Filename and format exclusions are saved for folder, USB and Dump imports; changing them requires a new scan.");
-            CheckBox flagged,failed,raster,originals;AddImportPolicyControls(dialog,out flagged,out failed,out raster,out originals);
-            var robust=ImportMatchingChoice(dialog);
-            dialog.Text("Original removal applies only to newly imported, verified files. Scanning another source resets it. Cloud-synced source deletions propagate.");
-            dialog.Tab(1);
-            var model = dialog.Select("Instrument model", TelescopeProfiles.Models.ToArray(), Convert.ToString(C("ModelBox").SelectedItem));
-            var camera = dialog.Select("Camera channel", new[] { "Auto", "Telephoto", "Wide" }, Convert.ToString(C("CameraBox").SelectedItem));
-            UiHelp.Hint(model,"Auto detects the model for each capture. An explicit choice overrides the scanned captures.");
-            UiHelp.Hint(camera,"Auto preserves detection. An explicit choice overrides every scanned capture.");
-            var target=ImportTargetChoice(dialog,unknownImportTarget);
-            dialog.Text("This target fills Unknown lights/stacks in the current folder scan and next manual import. Known targets, meteor captures and calibration labels stay intact. For mixed targets, use Set Unknown targets on selected scan rows instead.");
-            var targetError=new TextBlock{TextWrapping=TextWrapping.Wrap};dialog.Add(targetError);
-            dialog.Tab(2);
-            var solve = dialog.Select("Target analysis", new[] { "Off", "Ambiguous only", "All light/stack files" }, Convert.ToString(C("ImportSolveMode").SelectedItem));
-            var rotation = dialog.Select("Rotation analysis", new[] { "Off", "Ambiguous mounts", "All light sessions" }, Convert.ToString(C("ImportRotationMode").SelectedItem));
-            dialog.Text("Analysis is optional and off by default. Plate solving needs a configured solver; rotation analysis needs suitable capture times and location.");
-            dialog.SelectTab(0);
-            dialog.Accept("Apply import options", () => {bool valid=ValidImportTarget(target.Text,targetError,true);if(!valid)dialog.SelectTab(1);return valid;});
-            if (!dialog.Show()) return;
-            bool rescan = !Equals(model.SelectedItem, C("ModelBox").SelectedItem) || !Equals(camera.SelectedItem, C("CameraBox").SelectedItem) || failed.IsChecked != ((CheckBox)Window.FindName("IgnoreFailedCheck")).IsChecked || settings.IgnoreRasterImports != (raster.IsChecked==true) || settings.RobustImportMatching != (robust.IsChecked==true);
-            unknownImportTarget=string.IsNullOrWhiteSpace(target.Text)?"":ImportPolicy.Target(target.Text);
-            settings.IgnoreRasterImports=raster.IsChecked==true;settings.RobustImportMatching=robust.IsChecked==true;SaveSettings();
-            C("ModelBox").SelectedItem = model.SelectedItem; C("CameraBox").SelectedItem = camera.SelectedItem;
-            C("ImportSolveMode").SelectedItem = solve.SelectedItem; C("ImportRotationMode").SelectedItem = rotation.SelectedItem;
-            ((CheckBox)Window.FindName("SkipFlaggedCheck")).IsChecked = flagged.IsChecked;
-            ((CheckBox)Window.FindName("IgnoreFailedCheck")).IsChecked = failed.IsChecked;
-            if (rescan) InvalidateImportPlan();
-            else if(plan!=null&&unknownImportTarget.Length>0)ImportPolicy.AssignUnknown(plan.Frames,unknownImportTarget);
-            ((CheckBox)Window.FindName("DeleteOriginalsCheck")).IsChecked = !rescan && originals.IsEnabled && originals.IsChecked == true;
-            FilterImports();UpdateNavigationState();
-        }
+        void ImportPreferences() { Configure(1); }
     }
 }

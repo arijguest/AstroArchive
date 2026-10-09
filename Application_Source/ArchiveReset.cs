@@ -18,6 +18,6 @@ namespace AstroArchive {
    if(errors.Count==0){LastReport="";TryRemove(Path.Combine(Path.GetDirectoryName(WorkingIndex),"last-import.txt"));}Checkpoint(ct);return errors;
   }
   static void RemoveOwnedTree(string folder,string root,List<string> errors,CancellationToken ct){CheckManagedPath(folder,root);if(!FileStamp.CanTraverse(new DirectoryInfo(folder))){errors.Add("Linked metadata directory retained: "+folder);return;}foreach(string file in Directory.EnumerateFiles(folder)){ct.ThrowIfCancellationRequested();try{CheckManagedPath(file,root);File.Delete(file);}catch(Exception e){errors.Add(FileRetry.Detail(file,e));}}foreach(string child in Directory.EnumerateDirectories(folder))RemoveOwnedTree(child,root,errors,ct);if(!Directory.EnumerateFileSystemEntries(folder).Any())Directory.Delete(folder);}
-  static void RemoveEmptyTree(string folder,string root,CancellationToken ct){ct.ThrowIfCancellationRequested();CheckManagedPath(folder,root);if(!FileStamp.CanTraverse(new DirectoryInfo(folder)))return;foreach(string child in Directory.EnumerateDirectories(folder))RemoveEmptyTree(child,root,ct);if(!Directory.EnumerateFileSystemEntries(folder).Any())Directory.Delete(folder);}
+  void RemoveEmptyTree(string folder,string root,CancellationToken ct){ct.ThrowIfCancellationRequested();CheckManagedPath(folder,root);if(!FileStamp.CanTraverse(new DirectoryInfo(folder)))return;foreach(string child in Directory.EnumerateDirectories(folder))RemoveEmptyTree(child,root,ct);if(!Directory.EnumerateFileSystemEntries(folder).Any())DeleteEmptyCaptureFolder(folder);}
  }
 }
