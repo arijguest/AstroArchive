@@ -6,3 +6,7 @@ $compiler = Join-Path $env:WINDIR 'Microsoft.NET\Framework64\v4.0.30319\csc.exe'
 if ($LASTEXITCODE -ne 0) { throw 'Test compilation failed.' }
 & "$OutputDirectory\CoreTests.exe" (Join-Path $OutputDirectory 'fixtures')
 if ($LASTEXITCODE -ne 0) { throw 'Remote download checks failed.' }
+& $compiler /nologo /target:exe /langversion:5 /r:System.Web.Extensions.dll "/out:$OutputDirectory\DiscoveryTests.exe" "$PSScriptRoot\Discovery.cs" "$PSScriptRoot\DiscoveryTests.cs"
+if ($LASTEXITCODE -ne 0) { throw 'Discovery test compilation failed.' }
+& "$OutputDirectory\DiscoveryTests.exe"
+if ($LASTEXITCODE -ne 0) { throw 'Telescope discovery checks failed.' }
