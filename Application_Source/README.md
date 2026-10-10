@@ -22,10 +22,13 @@ Use [focused checks](../docs/DEVELOPMENT.md) for the changed feature.
 The full application suite is `test.ps1`; [release validation](../docs/RELEASING.md)
 also covers the installer and updater.
 
-The `v3` branch integrates automatic telescope discovery, selected network imports
-and live imports. See [network setup and implementation checks](../docs/REMOTE_IMPORT.md)
+Released versions include automatic telescope discovery, selected network imports,
+live imports and independent sessions for multiple telescopes. See
+[network setup and implementation checks](../docs/REMOTE_IMPORT.md)
 for the user workflow, firmware requirements and read-only SMB/FTP fixtures.
 Python is used only for the optional transport checks, not by the application.
+**Repository → Analytics** provides six charts and PNG, JPEG, PDF and SVG exports;
+see the [user guide](Quick_Start.txt) for report scoping and export options.
 
 ## Notices
 

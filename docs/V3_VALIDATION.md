@@ -1,5 +1,12 @@
 # V3 development build validation
 
+This is a historical record of the 3.0.0 preview, not validation of the latest
+release. Network imports shipped in
+[3.0.1](https://github.com/arijguest/AstroArchive/releases/tag/v3.0.1.1), followed
+by simultaneous telescope sessions in
+[3.1.1](https://github.com/arijguest/AstroArchive/releases/tag/v3.1.1.1).
+Use the [network import guide](REMOTE_IMPORT.md) for current setup and behaviour.
+
 Base: `temp` at `41b1a02`. Validated application source: `80cdaaa`.
 Application/package version: 3.0.0 / 3.0.0.1.
 

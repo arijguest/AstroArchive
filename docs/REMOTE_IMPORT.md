@@ -1,7 +1,10 @@
-# Network telescope imports in v3
+# Network and live telescope imports
 
-The `v3` branch starts at `temp` commit `41b1a02`. It integrates the read-only
-Seestar SMB and DWARF FTP transports from Remote tester 0.2.1 into AstroArchive.
+Network discovery, selected imports and live imports are available in
+[AstroArchive 3.0.1](https://github.com/arijguest/AstroArchive/releases/tag/v3.0.1.1)
+and later. [3.1.1](https://github.com/arijguest/AstroArchive/releases/tag/v3.1.1.1)
+adds independent, simultaneous telescope sessions and selected downloads while live
+import runs. Seestar uses read-only SMB access; DWARF uses read-only FTP.
 
 On Import, **Connect over network…** sits beside Saved telescope. The dialog
 searches all active Wi-Fi/Ethernet IPv4 networks automatically, combines device
@@ -12,9 +15,10 @@ device identity helps select the right profile. Passwords are never saved.
 
 ## Connect and import
 
-1. Extract the entire preview ZIP and run `AstroArchive.exe`, keeping
-   `SMBLibrary.dll` beside it. Choose a test repository under **Settings → General**
-   if evaluating the preview separately from your usual archive.
+1. Install [the latest Windows release](https://github.com/arijguest/AstroArchive/releases/latest)
+   and choose a repository under **Settings → General**. If using a portable build,
+   extract the entire folder and keep `SMBLibrary.dll`, `ThirdParty` and the licence
+   notices with `AstroArchive.exe`.
 2. Keep the PC and telescope awake and on the same Wi-Fi/LAN, or connect the PC
    to the telescope hotspot. The telescope app can continue managing captures.
 3. On **Import**, click **Connect over network…**, wait for discovery, select your
@@ -55,8 +59,8 @@ and verified downloads survive cancellation; brief disconnects retry automatical
 **Stop live import** or **Cancel download** in Activity stops only that session.
 **Stop all telescope imports** on Import stops every network session. Closing the
 app cancels sessions and waits for them to finish before closing the archive.
-Keep AstroArchive open and the PC
-awake. Capture settings and exposure control remain in the telescope app.
+Keep AstroArchive open and the PC awake. Capture settings and exposure control
+remain in the telescope app.
 Polling is followed by downloading, checks and archiving, so five seconds is not
 a delivery guarantee. Lower the transfer limit if downloads affect capture/app
 responsiveness. Captures created while live import is stopped are existing files
@@ -152,7 +156,10 @@ The transport checks need Python 3.12 on PATH with impacket 0.13.1 and pyftpdlib
 2.2.0 for loopback-only, read-only fixtures; runtime users need neither. Run
 `test.ps1` first to build the test executable used by the transport script.
 Loopback ports 24445 and 24421 must be free. The regular full
-application suite also runs the remote integration checks. `.github/workflows/v3.yml`
+application suite also runs the remote integration checks. The
+[Windows build and release workflow](../.github/workflows/windows.yml) validates
+`main` and pull requests and publishes eligible release packages. The separate
+[v3 development workflow](../.github/workflows/v3.yml)
 builds and validates the application, installer/updater, SMB/FTP archive transfers
 and WPF dialog on Windows for `v3` and `temp` without publishing a release.
 

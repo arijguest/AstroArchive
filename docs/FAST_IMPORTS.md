@@ -1,6 +1,6 @@
 # Repeat telescope imports
 
-This page describes local-folder and USB imports. For the v3 network picker and
+This page describes local-folder and USB imports. For the network picker and
 live imports, see [network telescope imports](REMOTE_IMPORT.md). Network captures
 are downloaded to a local cache before the full scan and verified archive import;
 live mode watches new captures by default rather than skipping dated sessions.
@@ -55,9 +55,9 @@ normalised. It remembers relative selections in the saved profile for the same
 volume, preserving the common drive root for ancestor metadata lookup. Opening
 or cancelling the picker performs no recursive scan or import.
 
-Every selected USB import asks for a full-scan confirmation, with a stronger time
-warning for the entire drive or at least 500 explicitly selected files. Folder
-contents are not counted before confirmation. This flow always bypasses filename,
+Small selected USB imports start directly. Selections containing 500 or more
+capture files, including files inside selected folders, show a compact confirmation
+with the batch size and **Import / Cancel** buttons. This flow always bypasses filename,
 DWARF-session and header-cache shortcuts and checks hashes/archive copies before
 screening and verified import. Existing ignore/rejection/deletion policies remain
 applicable; originals stay and plate solving/rotation stay off. Results state the
