@@ -62,6 +62,9 @@ namespace AstroArchive {
   }
   void SmokeCaptureSky(string output){
    double width=Window.Width,height=Window.Height;int scale=settings.TextScalePercent,page=((TabControl)Window.FindName("MainTabs")).SelectedIndex;string theme=settings.ThemeMode;int cases=0;
+   // Sky gestures need free space below the portrait image. Banner layouts are
+   // verified separately; dismiss retained summaries while this fixture runs.
+   var summaryVisibility=activities.ToDictionary(a=>a,a=>a.BannerDismissed);foreach(var entry in activities)entry.BannerDismissed=true;RenderProcessSummaries();
    var frame=new Frame{Target="M45",ObservedUtc="2026-10-07T23:00:00Z",Latitude=51.5,Longitude=0};var rgb=new byte[720*1280*3];var colours=new[]{new byte[]{220,40,40},new byte[]{40,220,40},new byte[]{40,40,220},new byte[]{220,220,40}};
    for(int y=0;y<1280;y++)for(int x=0;x<720;x++)Array.Copy(colours[(y<640?0:2)+(x<360?0:1)],0,rgb,(y*720+x)*3,3);
    var image=BitmapSource.Create(720,1280,96,96,PixelFormats.Rgb24,null,rgb,720*3);image.Freeze();
@@ -106,7 +109,7 @@ namespace AstroArchive {
       frame.Dec=-60;frame.RA=160;frame.Latitude=-33.9;frame.Longitude=151.2;UpdateCaptureSky(prefix,frame);PumpPopupLayout();if(!globe.Context.Evidence.Contains("Southern celestial sky"))throw new Exception("Southern capture hemisphere lost");frame.ObservedUtc=null;UpdateCaptureSky(prefix,frame);PumpPopupLayout();if(globe.Context.HasHorizon||globe.CardinalLabels.Count!=0)throw new Exception("Missing capture clock produced a horizon or compass directions");
      }finally{popup.IsOpen=false;preview.SetImage(original,true);UpdateCaptureSky(prefix,null);}
     }
-   }finally{settings.ThemeMode=theme;settings.TextScalePercent=scale;ApplyAppearance();Window.Width=width;Window.Height=height;GoToPage(page);UpdateCaptureSky("",previewFrame);PumpPopupLayout();}
+   }finally{foreach(var entry in summaryVisibility)entry.Key.BannerDismissed=entry.Value;RenderProcessSummaries();settings.ThemeMode=theme;settings.TextScalePercent=scale;ApplyAppearance();Window.Width=width;Window.Height=height;GoToPage(page);UpdateCaptureSky("",previewFrame);PumpPopupLayout();}
    File.WriteAllText(Path.Combine(output,"capture-sky-smoke.txt"),"PASS: "+cases+" Repository layouts in light/dark and 100/150% text; maximum image fit, adaptive/hidden sky, image quadrant pixels, adaptive unobscured compass labels and cached drawing, orbit without editing captures, routed scroll/keyboard gestures, view retention/reset, accessible bottom-left reset without added panel height, header icons, details popup/Escape, aspect changes and hemisphere/clock fallback.");
   }
  }

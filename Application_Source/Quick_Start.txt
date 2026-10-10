@@ -377,6 +377,14 @@ as a target-based default rather than a detected camera marker.
 Recordings (AVI, MP4, MOV, M4V, WMV, MKV and SER) use the Video frame type.
 Their Exposure column shows recording length in seconds. SER uses its measured
 capture timestamp span; files without readable duration show unknown.
+In All Targets, videos appear below still images and above calibrations. Within
+an individual target, videos appear above grouped subs.
+Compact process summaries below the menu show active work and completion results.
+Live imports stay first, followed by other running jobs and completed processes.
+Summaries show elapsed time, ETA, counts and transfer details where available.
+Dismiss hides a summary without canceling work; Activity keeps its controls and
+Show dismissed restores hidden cards. Completion shows a fresh result summary.
+Multiple processes scroll only when the available space is filled.
 Activity keeps completed entries, but only processes lasting more than five minutes
 raise an unread count. Opening Activity acknowledges the count; click outside to close.
 Delete files confirms archive-copy removal; source files and shared metadata stay.

@@ -23,6 +23,10 @@ Imports verify copies and skip duplicates. Source originals are kept by default.
 Keep the entire repository, including `.astroarchive` and `Edited`, together when
 moving it. Use one running AstroArchive instance per repository.
 
+Compact dismissible process summaries show progress and completion parameters
+below the menu and in **Activity**. Live imports stay first; lists scroll when needed.
+Dismissing a summary keeps work running, and **Show dismissed** restores its controls.
+
 Updates appear in **Activity** and **Guide → About AstroArchive**.
 Use **Settings → Updates** to install them. [Installation, repair and policy blocks](docs/UPDATES.md).
 
@@ -86,7 +90,7 @@ See [setup, live imports and troubleshooting](docs/REMOTE_IMPORT.md).
 
 - **Targets:** preferred ID before the name, such as **M31 - Andromeda Galaxy**. Planet names in filenames are recognised during import. Planets and comets share the Solar system group; Meteors sit above Other targets. **All Targets** is bold and shaded.
 - **Search:** combine object, device and type, such as **M45 Dwarflab**, **M45 S50 Pro** or **M45 stack**. Use quotes or **file:** for literal filename text.
-- **Sessions and videos:** condensed sub rows show dates, count, exposure per sub and total integration. Expand a row or switch off **Repository → Group subs by session**. Stacks with known counts show **Stack (1445)**; the filter remains **Stack**. Recordings use **Video**, show duration in Exposure and appear above grouped subs. Target totals include known video durations; missing durations remain unknown.
+- **Sessions and videos:** condensed sub rows show dates, count, exposure per sub and total integration. Expand a row or switch off **Repository → Group subs by session**. Stacks with known counts show **Stack (1445)**; the filter remains **Stack**. Recordings use **Video**, show duration in Exposure and sit below still images but above calibrations in All Targets. Within a single target, videos appear above grouped subs. Target totals include known video durations; missing durations remain unknown.
 - **Selection:** keep files selected while moving between targets. A plain file-row click replaces the batch; Ctrl-click toggles and Shift-click selects a range. Right-clicking a selected entry preserves the batch. The target-pane counter shows the total; click it or press Escape to clear it.
 - **Tables:** click headings to sort; Shift-click adds a sort. Right-click to choose columns. Columns adapt to window and preview-pane resizing; each page saves its own layout. Left/Right moves through columns, switching panes at the table edges; Up/Down selects within the active pane.
 - **Preview:** Repository and Edited load the first All Targets entry on first opening and remember later selections for the session. Sampled sidebars keep browsing light; large still/SER popups decode native pixels within format limits. Zoom, pan, Fit and stretch affect display only. GIF, SER and supported videos offer Pause/Play.

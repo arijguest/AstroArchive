@@ -12,6 +12,7 @@ namespace AstroArchive {
   void SmokeActivity(string output){
    var saved=Util.Serialize(settings);var state=Window.WindowState;var originalMonitor=releaseMonitor;var originalNotice=releaseNotice;
    try{
+    SmokeProcessSummaries(output);
     foreach(string theme in new[]{"Light","Dark"})foreach(int scale in new[]{100,150}){
      settings.ThemeMode=theme;settings.TextScalePercent=scale;ApplyAppearance();
      var entry=AddActivity("Import progress fixture",true);currentActivity=entry;cancel=new CancellationTokenSource();entry.Cancel=()=>cancel.Cancel();SetBusy(true);

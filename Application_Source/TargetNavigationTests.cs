@@ -56,7 +56,7 @@ namespace AstroArchive {
     var unknown=TargetNavigation.Build(new[]{new Frame{Target="Jupiter",Kind="Video"},new Frame{Target="Jupiter",Kind="Video",Exposure=double.NaN},new Frame{Target="Jupiter",Kind="Video",Exposure=double.PositiveInfinity},new Frame{Target="Jupiter",Kind="Video",Exposure=-1}})[1];Check(unknown.ExposureSeconds==0&&unknown.UnknownExposure==4&&unknown.Subline=="exposure unknown"&&unknown.Tooltip.Contains("4 exposure unknown"),"Unknown durations guessed or hidden");
     var mixed=TargetNavigation.Build(rows.Take(1).Concat(new[]{new Frame{Target="Jupiter",Kind="Video"}}))[1];Check(mixed.Subline=="1m 30s + ?"&&mixed.Tooltip.Contains("1 exposure unknown"),"Partial video total presented as complete");
    });
-   Test("Videos precede grouped subs in target and All Targets views under either sort direction",()=>{
+   Test("Videos follow stills in All Targets and precede subs in individual targets under either sort direction",()=>{
     var a=new Frame{Target="M31",Kind="Light",Session="fixture",OriginalName="a-sub.fit"};var b=a.Clone();b.OriginalName="b-sub.fit";
     var videos=new[]{"avi","mp4","mov","m4v","wmv","mkv","ser"}.Select(ext=>new Frame{Target="M31",Kind="Video",OriginalName="z-recording."+ext}).ToArray();
     var stack=new Frame{Target="M31",Kind="Stack",OriginalName="a-stack.fit"};var dark=new Frame{Target="M31",Kind="Dark",OriginalName="a-dark.fit"};var rows=new[]{a,stack,dark,b}.Concat(videos.Reverse()).ToList();
@@ -64,9 +64,10 @@ namespace AstroArchive {
      var sorts=new[]{new SearchSort{Property="OriginalName",Descending=descending}};System.Collections.Generic.List<SubframeSession> groups;
      var ordered=RepositoryOrdering.Order(rows,sorts,System.Globalization.CultureInfo.InvariantCulture,allTargets,sessions,ct,out groups);
      var expected=SearchOrdering.Order(videos,sorts,System.Globalization.CultureInfo.InvariantCulture,ct);
-     Check(ordered.Take(videos.Length).SequenceEqual(expected)&&ordered.Last()==dark&&ordered.Count==rows.Count,"Video priority, internal sort or calibration position wrong");
+     var videoSection=allTargets?ordered.Skip(ordered.Count-videos.Length-1).Take(videos.Length):ordered.Take(videos.Length);
+     Check(videoSection.SequenceEqual(expected)&&ordered.Last()==dark&&ordered.Count==rows.Count,"Video priority, internal sort or calibration position wrong");
      Check(!sessions||groups.Count==1&&groups[0].Frames.Count==2&&groups[0].Frames.All(f=>f.Kind=="Light"),"Videos merged into subs");
-     var filtered=RepositoryOrdering.Order(rows.Where(f=>f!=b),sorts,System.Globalization.CultureInfo.InvariantCulture,allTargets,sessions,ct,out groups);Check(filtered.Take(videos.Length).All(f=>f.Kind=="Video")&&(!sessions||groups.Count==0),"Filtering changed video priority or retained a singleton group");
+     var filtered=RepositoryOrdering.Order(rows.Where(f=>f!=b),sorts,System.Globalization.CultureInfo.InvariantCulture,allTargets,sessions,ct,out groups);var filteredVideos=allTargets?filtered.Skip(filtered.Count-videos.Length-1).Take(videos.Length):filtered.Take(videos.Length);Check(filteredVideos.All(f=>f.Kind=="Video")&&(!sessions||groups.Count==0),"Filtering changed video priority or retained a singleton group");
     }
    });
    Test("Target rows omit repeated catalogue IDs without merging shared names",()=>{
