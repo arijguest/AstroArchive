@@ -4,7 +4,39 @@ using System.Globalization;
 using System.Linq;
 
 namespace AstroArchive {
+ public enum AnalyticsLayout {Landscape,Vertical,Portrait,Square,Widescreen,Pinterest}
  public static partial class AnalyticsGraphics {
+  public static void LayoutSize(AnalyticsLayout layout,out double width,out double height){
+   width=layout==AnalyticsLayout.Landscape?1200:layout==AnalyticsLayout.Widescreen?1920:layout==AnalyticsLayout.Pinterest?1000:1080;
+   height=layout==AnalyticsLayout.Landscape?800:layout==AnalyticsLayout.Vertical?1920:layout==AnalyticsLayout.Portrait?1350:layout==AnalyticsLayout.Pinterest?1500:1080;
+  }
+  static AnalyticsPage SocialPage(AnalyticsSnapshot data,int index,int part,int parts,List<AnalyticsValue> values,bool dark,AnalyticsLayout layout){
+   if(layout==AnalyticsLayout.Vertical)return PortraitPage(data,index,part,parts,values,dark);
+   if(layout==AnalyticsLayout.Widescreen){
+    var wide=Page(data,index,part,parts,values,dark,AnalyticsLayout.Landscape);ScaleScene(wide,1.35,150);wide.CanvasWidth=1920;wide.CanvasHeight=1080;
+    wide.Marks[0].X=0;wide.Marks[0].Width=1920;wide.Marks[1].X=0;wide.Marks[1].Width=1920;return wide;
+   }
+   var p=CompactSocialPage(data,index,part,parts,values,dark,layout==AnalyticsLayout.Square?1080:layout==AnalyticsLayout.Pinterest?1620:1350);
+   if(layout==AnalyticsLayout.Pinterest){ScaleScene(p,1000.0/1080,0);p.CanvasWidth=1000;p.CanvasHeight=1500;}return p;
+  }
+  static void ScaleScene(AnalyticsPage page,double scale,double offsetX){
+   foreach(var mark in page.Marks){mark.X=mark.X*scale+offsetX;mark.Y*=scale;mark.Width*=scale;mark.Height*=scale;mark.Size*=scale;if(mark.Points!=null)for(int i=0;i<mark.Points.Length;i+=2){mark.Points[i]=mark.Points[i]*scale+offsetX;mark.Points[i+1]*=scale;}}
+  }
+  static AnalyticsPage CompactSocialPage(AnalyticsSnapshot data,int index,int part,int parts,List<AnalyticsValue> values,bool dark,double height){
+   var report=data.Reports[index];var p=new AnalyticsPage{Title=report.Title,CanvasWidth=1080,CanvasHeight=height,Background=dark?"#0C1220":"#FFFFFF"};
+   Box(p,0,0,1080,height,"#FFFFFF");Box(p,0,0,1080,6,Accent);p.Marks.Add(new AnalyticsMark{Kind="logo",X=60,Y=28,Width=64,Height=64});
+   Text(p,"AstroArchive",140,44,26,Ink,true);Text(p,(index+1).ToString("00")+" / 06"+(parts>1?" · "+(part+1)+"/"+parts:""),parts>1?850:932,50,16,Accent,true);
+   Text(p,report.Title,60,125,36,Ink,true);Lines(p,report.Description+(parts>1?" · Groups "+(part*8+1)+"–"+Math.Min((part+1)*8,report.Values.Count)+" of "+report.Values.Count:""),60,180,120,18,Muted,2,960);
+   Box(p,60,244,960,86,"#F5F7FC");string[] metrics={ArchiveAnalytics.Number(data.Seconds/3600)+" h",data.Captures.ToString("N0",CultureInfo.InvariantCulture),data.Targets.ToString("N0",CultureInfo.InvariantCulture)},captions={"INTEGRATION","LIGHT FRAMES","TARGETS"};
+   for(int i=0;i<3;i++){Text(p,metrics[i],80+i*320,254,28,Ink,true);Text(p,captions[i],80+i*320,298,13,Muted,true);}
+   double total=report.Values.Sum(v=>v.Value);
+   if(total<=0){Lines(p,data.Captures==0?"No light frames in this scope":"No known exposure data for this chart",60,490,70,28,Ink,2,960);Lines(p,"Try another telescope or date range, or complete missing capture metadata.",60,575,110,19,Muted,3,960);}
+   else if(report.Style=="donut")PortraitDonut(p,values,total,report.Unit,true);
+   else if(report.Style=="bars")PortraitBars(p,values,report.Unit,report.Values.Max(v=>v.Value),true);
+   else PortraitColumns(p,report.Values,report.Unit,true);
+   Lines(p,report.Note,60,height-155,150,14,Muted,2,960);Box(p,60,height-90,960,1,"#DCE2EF");Lines(p,data.Scope,60,height-76,140,12,Muted,1,960);
+   Text(p,Fit(data.DateRange,680,12),60,height-42,12,Muted);Text(p,"astroarchive.arijguest.com",800,height-24,12,Accent);ApplyTheme(p,dark);return p;
+  }
   public static int SheetColumns(IList<AnalyticsPage> pages){return pages[0].Portrait?1:pages.Count>1?2:1;}
   public static void SheetSize(IList<AnalyticsPage> pages,out double width,out double height){
    int columns=SheetColumns(pages);width=pages[0].CanvasWidth*columns;height=pages[0].CanvasHeight*Math.Ceiling(pages.Count/(double)columns);
@@ -37,47 +69,49 @@ namespace AstroArchive {
    Text(p,"astroarchive.arijguest.com",80,1745,18,Accent);
    ApplyTheme(p,dark);return p;
   }
-  static void PortraitDonut(AnalyticsPage p,List<AnalyticsValue> values,double total,string unit){
+  static void PortraitDonut(AnalyticsPage p,List<AnalyticsValue> values,double total,string unit,bool compact=false){
+   bool sideLegend=compact&&p.CanvasHeight<1500;
+   double cx=sideLegend?285:540,cy=sideLegend?(370+p.CanvasHeight-210)/2:compact?640:854,radius=sideLegend?170:compact?240:190,inner=sideLegend?120:compact?170:136;
    double angle=-Math.PI/2;int colour=0;
    foreach(var value in values){
     double sweep=value.Value/total*2*Math.PI;int steps=Math.Max(2,(int)Math.Ceiling(sweep*60));var points=new List<double>();
-    for(int i=0;i<=steps;i++){double a=angle+sweep*i/steps;points.Add(540+190*Math.Cos(a));points.Add(854+190*Math.Sin(a));}
-    for(int i=steps;i>=0;i--){double a=angle+sweep*i/steps;points.Add(540+136*Math.Cos(a));points.Add(854+136*Math.Sin(a));}
+    for(int i=0;i<=steps;i++){double a=angle+sweep*i/steps;points.Add(cx+radius*Math.Cos(a));points.Add(cy+radius*Math.Sin(a));}
+    for(int i=steps;i>=0;i--){double a=angle+sweep*i/steps;points.Add(cx+inner*Math.Cos(a));points.Add(cy+inner*Math.Sin(a));}
     p.Marks.Add(new AnalyticsMark{Kind="polygon",Points=points.ToArray(),Fill=Colours[colour%Colours.Length]});
-    double y=1070+colour*52;Box(p,90,y+7,18,18,Colours[colour%Colours.Length]);
-    Text(p,Fit(value.Label,550,22),126,y,22,Ink,false,value.Label);
-    Text(p,Fit(ArchiveAnalytics.Number(value.Value)+" "+(unit=="frames"&&value.Value==1?"frame":unit),175,21),710,y,21,Ink,true);
-    Text(p,(value.Value/total*100).ToString("0.#",CultureInfo.InvariantCulture)+"%",910,y+2,18,Muted);
+    double y=sideLegend?cy-values.Count*58/2.0+colour*58:(compact?925:1070)+colour*52;Box(p,sideLegend?510:90,y+7,sideLegend?14:18,sideLegend?14:18,Colours[colour%Colours.Length]);
+    Text(p,Fit(value.Label,sideLegend?460:550,sideLegend?18:22),sideLegend?540:126,y,sideLegend?18:22,Ink,false,value.Label);
+    Text(p,Fit(ArchiveAnalytics.Number(value.Value)+" "+(unit=="frames"&&value.Value==1?"frame":unit),sideLegend?320:175,sideLegend?16:21),sideLegend?540:710,y+(sideLegend?25:0),sideLegend?16:21,Ink,true);
+    Text(p,(value.Value/total*100).ToString("0.#",CultureInfo.InvariantCulture)+"%",sideLegend?930:910,y+(sideLegend?25:2),sideLegend?16:18,Muted);
     angle+=sweep;colour++;
    }
-   string centre=ArchiveAnalytics.Number(total);double size=TextWidth(centre,50)>220?32:50;
-   Text(p,centre,540-TextWidth(centre,size)/2,820,size,Ink,true);
-   string label=unit=="h"?"HOURS":"LIGHT FRAMES";Text(p,label,540-TextWidth(label,17)/2,886,17,Muted,true);
+   string centre=ArchiveAnalytics.Number(total);double size=sideLegend?36:TextWidth(centre,50)>220?32:50;
+   Text(p,centre,cx-TextWidth(centre,size)/2,cy-34,size,Ink,true);
+   string label=unit=="h"?"HOURS":"LIGHT FRAMES";Text(p,label,cx-TextWidth(label,17)/2,cy+32,17,Muted,true);
   }
-  static void PortraitBars(AnalyticsPage p,List<AnalyticsValue> values,string unit,double maximum){
+  static void PortraitBars(AnalyticsPage p,List<AnalyticsValue> values,string unit,double maximum,bool compact=false){
    double max=NiceMax(maximum);const double start=80,width=650;
    for(int i=0;i<values.Count;i++){
-    var value=values[i];double y=710+i*92;
-    Lines(p,value.Label,start,y,90,21,Ink,2,920);
-    Box(p,start,y+50,width,24,"#E8ECF4");Box(p,start,y+50,Math.Max(.5,value.Value/max*width),24,Colours[i%Colours.Length]);
-    Text(p,Fit(ArchiveAnalytics.Number(value.Value)+" "+unit,240,21),760,y+48,21,Ink,true);
+    var value=values[i];double y=compact?370+i*Math.Min(92,(p.CanvasHeight-580)/values.Count):710+i*92,offset=compact?29:50,barHeight=compact?18:24;
+    if(compact)Text(p,Fit(value.Label,920,18),start,y,18,Ink,false,value.Label);else Lines(p,value.Label,start,y,90,21,Ink,2,920);
+    Box(p,start,y+offset,width,barHeight,"#E8ECF4");Box(p,start,y+offset,Math.Max(.5,value.Value/max*width),barHeight,Colours[i%Colours.Length]);
+    Text(p,Fit(ArchiveAnalytics.Number(value.Value)+" "+unit,240,compact?18:21),760,y+offset-2,compact?18:21,Ink,true);
    }
-   for(int i=0;i<=4;i++)Text(p,ArchiveAnalytics.Number(max*i/4),start+width*i/4,1480,16,Muted);
-   Text(p,"Integration (hours)",80,1510,16,Muted);
+   for(int i=0;i<=4;i++)Text(p,ArchiveAnalytics.Number(max*i/4),start+width*i/4,compact?p.CanvasHeight-210:1480,16,Muted);
+   Text(p,"Integration (hours)",80,compact?p.CanvasHeight-185:1510,16,Muted);
   }
-  static void PortraitColumns(AnalyticsPage p,List<AnalyticsValue> source,string unit){
+  static void PortraitColumns(AnalyticsPage p,List<AnalyticsValue> source,string unit,bool compact=false){
    var values=source.ToList();
    if(values.Count>8){int chunk=(int)Math.Ceiling(values.Count/8.0);values=Enumerable.Range(0,(int)Math.Ceiling(values.Count/(double)chunk)).Select(i=>{var bucket=source.Skip(i*chunk).Take(chunk).ToList();return new AnalyticsValue(bucket[0].Label+"–"+bucket.Last().Label,bucket.Sum(v=>v.Value));}).ToList();}
-   double max=NiceMax(values.Max(v=>v.Value));const double left=150,top=760,bottom=1370,width=850;
+   double max=NiceMax(values.Max(v=>v.Value)),left=150,top=compact?400:760,bottom=compact?p.CanvasHeight-285:1370,width=850;
    for(int i=0;i<=4;i++){double y=bottom-(bottom-top)*i/4;Box(p,left,y,width,1,"#E8ECF4");Text(p,Fit(ArchiveAnalytics.Number(max*i/4),70,18),70,y-10,18,Muted);}
    double cell=width/values.Count;
    for(int i=0;i<values.Count;i++){
     var value=values[i];double h=value.Value/max*(bottom-top),x=left+cell*i+cell*.15;
     if(value.Value>0)Box(p,x,bottom-h,cell*.7,h,Accent);
     Text(p,Fit(ArchiveAnalytics.Number(value.Value),cell-8,16),left+cell*i+4,bottom-h-28,16,Ink,true);
-    Lines(p,value.Label,left+cell*i+4,1390,30,16,Muted,3,cell-8);
+    Lines(p,value.Label,left+cell*i+4,bottom+20,30,16,Muted,3,cell-8);
    }
-   Text(p,unit=="h"?"Integration (hours)":"Light frames",80,704,19,Muted);
+   Text(p,unit=="h"?"Integration (hours)":"Light frames",80,compact?354:704,19,Muted);
   }
  }
 }

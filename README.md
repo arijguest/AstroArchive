@@ -113,9 +113,10 @@ Scope by telescope and acquisition dates, add a document label and optionally
 include rejected light frames. Scope starts with the entire repository independently
 of browsing filters and selection. Export **PNG, JPEG, PDF or SVG**, with 150 or
 300 DPI for raster images. **Document layout** offers the current Landscape or a
-**Portrait · 9:16** composition for TikTok, Reels and Stories, including a **1080 × 1920**
-social image preset. **Export all** saves one document; PDF uses the chosen page
-layout and image/SVG exports use a combined sheet, stacked vertically for portrait.
+social compositions: **9:16** (1080 × 1920), **4:5** (1080 × 1350), **1:1**
+(1080 × 1080), **16:9** (1920 × 1080), and **2:3** (1000 × 1500). Each has a
+matching social image preset for TikTok/Reels/Stories, Instagram, video or Pinterest. **Export all** saves one document; PDF uses the chosen page
+layout and image/SVG exports use a combined sheet, stacked vertically for tall pages or arranged in a grid for square/wide pages.
 Long rankings include every target and telescope on
 continuation pages. Time means individual light-frame integration; stacks, videos
 and calibrations are excluded. Unknown exposures and dates are reported.

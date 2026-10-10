@@ -137,10 +137,15 @@ starts (or immediately when a bandwidth limit is set).
 Documents default to Dark, with a Light option next to Export format. The larger
 AstroArchive logo, midnight/blue/cyan colours, and concise headers/footers appear
 in previews and PNG, JPEG, PDF and SVG exports.
-Document layout defaults to Landscape. Choose Portrait · 9:16 for TikTok, Reels
-or Stories. Portrait rearranges the charts, labels and branding for a vertical
-frame. Its Social image preset exports each page at exactly 1080 x 1920 pixels;
-Print and Screen resolutions remain available. The preview uses the chosen layout.
+Document layout defaults to Landscape. Social layouts rearrange the charts and
+branding for the selected frame, with these Social image presets:
+- Vertical 9:16: 1080 x 1920, for TikTok, Reels and Stories.
+- Portrait 4:5: 1080 x 1350, for Instagram feed posts.
+- Square 1:1: 1080 x 1080, for square posts.
+- Widescreen 16:9: 1920 x 1080, for video and presentations.
+- Pinterest 2:3: 1000 x 1500, for pins.
+Print and Screen resolutions remain available. Preview, PDF and SVG use the same
+selected layout. Social image presets apply to each page.
 Repository > Analytics offers six branded charts: Targets photographed, Imaging
 timeline, Time per target, Time per telescope, Filter mix and Exposure lengths.
 Select a chart to preview it, or All six charts for the combined preview. Scope
@@ -158,7 +163,8 @@ Choose PNG or JPEG at 300 dpi for print or 150 dpi for screen. PDF keeps charts 
 lettering as vectors; SVG embeds the logo and keeps graphics scalable. Export chart
 saves the selected chart; Export all saves one document containing all six charts.
 PDF uses individual pages in the selected layout; image/SVG exports arrange pages
-on one sheet. Portrait collections stack pages vertically in that sheet.
+on one sheet. Tall collections stack pages vertically; square and wide collections
+use a grid.
 Very large collections may need 150 dpi, PDF or SVG. Open export folder appears
 after a successful save. Exports leave the archive and capture files unchanged.
 

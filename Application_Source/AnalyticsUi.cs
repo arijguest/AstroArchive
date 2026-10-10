@@ -71,10 +71,10 @@ namespace AstroArchive {
    var actions=new WrapPanel{VerticalAlignment=VerticalAlignment.Center};footer.Children.Add(actions);
    format=new ComboBox{ItemsSource=new[]{"PNG","JPEG","PDF","SVG"},SelectedIndex=2,Width=105};resolution=new ComboBox{ItemsSource=new[]{"300 dpi · Print","150 dpi · Screen"},SelectedIndex=0,Width=190};
    documentTheme=new ComboBox{ItemsSource=new[]{"Dark","Light"},SelectedIndex=0,Width=100};
-   documentLayout=new ComboBox{ItemsSource=new[]{"Landscape · Current","Portrait · 9:16"},SelectedIndex=0,Width=180};
+   documentLayout=new ComboBox{ItemsSource=new[]{"Landscape · Current","Vertical · 9:16","Portrait · 4:5","Square · 1:1","Widescreen · 16:9","Pinterest · 2:3"},SelectedIndex=0,Width=200};
    AddField(actions,"Document layout",documentLayout);AddField(actions,"Document theme",documentTheme);AddField(actions,"Export format",format);AddField(actions,"Image resolution",resolution);
-   UiHelp.Hint(documentLayout,"Landscape keeps the current document layout. Portrait uses a 9:16 vertical composition for TikTok, Reels and Stories, in every export format.");
-   UiHelp.Hint(resolution,"Social exports each portrait page at 1080 × 1920 pixels; multiple pages stack vertically. Print and Screen use the selected dpi.");
+   UiHelp.Hint(documentLayout,"Landscape keeps the current document layout. Social layouts cover TikTok/Reels/Stories (9:16), Instagram feed (4:5), square posts (1:1), video (16:9) and Pinterest (2:3), in every export format.");
+   UiHelp.Hint(resolution,"Social exports each page at the pixel dimensions shown. Tall pages stack vertically; square and wide pages use a grid. Print and Screen use the selected dpi.");
    UiHelp.Hint(documentTheme,"Dark uses AstroArchive's midnight, blue and cyan palette. Choose Light for white-paper documents. Preview and all export formats use this choice.");
    export=new Button{Content="Export chart…",Margin=new Thickness(0,22,8,0),VerticalAlignment=VerticalAlignment.Bottom};Theme.Bind(export,Control.BackgroundProperty,"Accent");Theme.Bind(export,Control.BorderBrushProperty,"Accent");Theme.Bind(export,Control.ForegroundProperty,"AccentText");
    exportAll=new Button{Content="Export all…",Margin=new Thickness(0,22,8,0),VerticalAlignment=VerticalAlignment.Bottom};close=new Button{Content="Close",IsCancel=true,Margin=new Thickness(0,22,0,0),VerticalAlignment=VerticalAlignment.Bottom};actions.Children.Add(export);actions.Children.Add(exportAll);actions.Children.Add(close);
@@ -89,7 +89,7 @@ namespace AstroArchive {
    from.AddHandler(TextBox.TextChangedEvent,new TextChangedEventHandler((s,e)=>Schedule()));to.AddHandler(TextBox.TextChangedEvent,new TextChangedEventHandler((s,e)=>Schedule()));
    from.DateValidationError+=(s,e)=>{e.ThrowException=false;Schedule();};to.DateValidationError+=(s,e)=>{e.ThrowException=false;Schedule();};
    charts.SelectionChanged+=(s,e)=>RenderPreview();previewPage.SelectionChanged+=(s,e)=>DrawPreview();format.SelectionChanged+=(s,e)=>Hints();documentTheme.SelectionChanged+=(s,e)=>{if(snapshot==null||exporting)return;BuildPages();RenderPreview();};
-   documentLayout.SelectionChanged+=(s,e)=>{if(exporting)return;resolution.ItemsSource=documentLayout.SelectedIndex==1?new[]{"300 dpi · Print","150 dpi · Screen","1080 × 1920 · Social"}:new[]{"300 dpi · Print","150 dpi · Screen"};resolution.SelectedIndex=documentLayout.SelectedIndex==1?2:0;if(snapshot!=null){BuildPages();RenderPreview();}};
+   documentLayout.SelectionChanged+=(s,e)=>{if(exporting)return;double w,h;AnalyticsGraphics.LayoutSize((AnalyticsLayout)documentLayout.SelectedIndex,out w,out h);resolution.ItemsSource=documentLayout.SelectedIndex>0?new[]{"300 dpi · Print","150 dpi · Screen",w.ToString("0")+" × "+h.ToString("0")+" · Social"}:new[]{"300 dpi · Print","150 dpi · Screen"};resolution.SelectedIndex=documentLayout.SelectedIndex>0?2:0;if(snapshot!=null){BuildPages();RenderPreview();}};
    export.Click+=async(s,e)=>{if(await Export(false)){open.Visibility=Visibility.Visible;}};exportAll.Click+=async(s,e)=>{if(await Export(true)){open.Visibility=Visibility.Visible;}};close.Click+=(s,e)=>Close();
    Closing+=(s,e)=>{if(exporting){e.Cancel=true;status.Text="Finishing your export…";}};
    Closed+=(s,e)=>{closed=true;generation++;debounce.Stop();};
@@ -114,11 +114,11 @@ namespace AstroArchive {
     RenderPreview();
    }catch(Exception error){if(closed||request!=generation)return;status.Text=error.Message;}
   }
-  void BuildPages(){reportPages=Enumerable.Range(0,6).Select(i=>AnalyticsGraphics.Pages(snapshot,i,documentTheme.SelectedIndex==0,documentLayout.SelectedIndex==1)).ToArray();pages=reportPages.SelectMany(p=>p).ToList();paper.Background=new SolidColorBrush((Color)ColorConverter.ConvertFromString(pages[0].Background));}
+  void BuildPages(){reportPages=Enumerable.Range(0,6).Select(i=>AnalyticsGraphics.Pages(snapshot,i,documentTheme.SelectedIndex==0,(AnalyticsLayout)documentLayout.SelectedIndex)).ToArray();pages=reportPages.SelectMany(p=>p).ToList();paper.Background=new SolidColorBrush((Color)ColorConverter.ConvertFromString(pages[0].Background));}
   void RenderPreview(){
    if(!ready||snapshot==null||charts.SelectedIndex<0)return;bool all=charts.SelectedIndex==6;
    var selected=all?pages:reportPages[charts.SelectedIndex];previewPage.Items.Clear();previewPage.Items.Add("All pages");for(int i=0;i<selected.Count;i++)previewPage.Items.Add(new ComboBoxItem{Content="Page "+(i+1)+" of "+selected.Count,ToolTip=selected[i].Title});previewPage.Visibility=selected.Count>1?Visibility.Visible:Visibility.Collapsed;previewPage.SelectedIndex=all&&documentLayout.SelectedIndex==0?0:1;
-   previewTitle.Text=all?(documentLayout.SelectedIndex==1?"All six charts · Portrait pages":"All six charts · Combined preview"):ArchiveAnalytics.Titles[charts.SelectedIndex]+" · Export preview";
+   previewTitle.Text=all?(documentLayout.SelectedIndex>0?"All six charts · Social pages":"All six charts · Combined preview"):ArchiveAnalytics.Titles[charts.SelectedIndex]+" · Export preview";
    export.Content=all?"Export all…":"Export chart…";exportAll.Visibility=all?Visibility.Collapsed:Visibility.Visible;export.IsEnabled=exportAll.IsEnabled=snapshot.Captures>0&&!exporting;Hints();
   }
   void DrawPreview(){
@@ -127,13 +127,13 @@ namespace AstroArchive {
   }
   void Hints(){
    if(!ready)return;string value=Convert.ToString(format.SelectedItem);resolution.IsEnabled=(value=="PNG"||value=="JPEG")&&!exporting;
-   string orientation=documentLayout.SelectedIndex==1?"portrait 9:16":"landscape";string sheet=documentLayout.SelectedIndex==1?"Multiple pages stack vertically in one sheet.":"Multiple pages combine into one sheet.";
+   string orientation=Convert.ToString(documentLayout.SelectedItem).ToLowerInvariant();bool tall=documentLayout.SelectedIndex==1||documentLayout.SelectedIndex==2||documentLayout.SelectedIndex==5;string sheet=tall?"Multiple pages stack vertically in one sheet.":"Multiple pages combine into one sheet.";
    exportHint.Text=value=="PDF"?"Vector charts and lettering on "+orientation+" pages. Long rankings continue onto extra pages; every target and telescope is included.":value=="SVG"?"Scalable "+orientation+" graphics with an embedded logo. "+sheet:"High-resolution "+orientation+" images in your chosen document theme. "+sheet;
   }
   async Task<bool> Export(bool all){
    if(snapshot==null||snapshot.Captures==0||exporting)return false;all=all||charts.SelectedIndex==6;string selectedFormat=Convert.ToString(format.SelectedItem),extension=selectedFormat=="JPEG"?"jpg":selectedFormat.ToLowerInvariant();
    var chosen=all?pages:reportPages[charts.SelectedIndex];
-   var dialog=new SaveFileDialog{Title=all?"Export all analytics":"Export analytics chart",FileName="AstroArchive_"+(all?"Analytics":snapshot.Reports[charts.SelectedIndex].Id)+(documentLayout.SelectedIndex==1?"_Portrait":"")+"."+extension,Filter=selectedFormat+" document|*."+extension,DefaultExt="."+extension,AddExtension=true,OverwritePrompt=true};
+   var dialog=new SaveFileDialog{Title=all?"Export all analytics":"Export analytics chart",FileName="AstroArchive_"+(all?"Analytics":snapshot.Reports[charts.SelectedIndex].Id)+(documentLayout.SelectedIndex>0?"_"+((AnalyticsLayout)documentLayout.SelectedIndex).ToString():"")+"."+extension,Filter=selectedFormat+" document|*."+extension,DefaultExt="."+extension,AddExtension=true,OverwritePrompt=true};
    if(dialog.ShowDialog(this)!=true)return false;
    exporting=true;scope.IsEnabled=false;charts.IsEnabled=false;documentTheme.IsEnabled=false;documentLayout.IsEnabled=false;format.IsEnabled=false;resolution.IsEnabled=false;export.IsEnabled=false;exportAll.IsEnabled=false;close.IsEnabled=false;status.Text="Preparing "+selectedFormat+" export…";
    int dpi=resolution.SelectedIndex==0?300:resolution.SelectedIndex==1?150:96;

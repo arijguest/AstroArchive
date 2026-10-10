@@ -28,15 +28,15 @@ namespace AstroArchive {
   static void Lines(AnalyticsPage p,string text,double x,double y,int characters,double size,string colour,int limit,double width=0,bool bold=false){
    var remaining=text??"";int line=0;while(remaining.Length>0&&line<limit){int count=Math.Min(characters,remaining.Length);if(width>0)while(count>1&&TextWidth(remaining.Substring(0,count),size)>width)count--;if(count<remaining.Length){int space=remaining.LastIndexOf(' ',count-1,count);if(space>count/2)count=space;if(count>0&&char.IsHighSurrogate(remaining[count-1]))count--;}string part=remaining.Substring(0,count);remaining=remaining.Substring(count).TrimStart();if(line==limit-1&&remaining.Length>0){part=Short(part+" "+remaining,characters);if(width>0)part=Fit(part,width,size);}Text(p,part,x,y+line*(size+5),size,colour,bold,text);line++;}
   }
-  public static AnalyticsPage Page(AnalyticsSnapshot data,int index,bool dark=true,bool portrait=false){
-   return Page(data,index,0,1,data.Reports[index].Style=="bars"?data.Reports[index].Values.Take(8).ToList():ArchiveAnalytics.Compact(data.Reports[index].Values,8),dark,portrait);
+  public static AnalyticsPage Page(AnalyticsSnapshot data,int index,bool dark=true,AnalyticsLayout layout=AnalyticsLayout.Landscape){
+   return Page(data,index,0,1,data.Reports[index].Style=="bars"?data.Reports[index].Values.Take(8).ToList():ArchiveAnalytics.Compact(data.Reports[index].Values,8),dark,layout);
   }
-  public static List<AnalyticsPage> Pages(AnalyticsSnapshot data,int index,bool dark=true,bool portrait=false){
+  public static List<AnalyticsPage> Pages(AnalyticsSnapshot data,int index,bool dark=true,AnalyticsLayout layout=AnalyticsLayout.Landscape){
    var report=data.Reports[index];int count=report.Style=="bars"?Math.Max(1,(int)Math.Ceiling(report.Values.Count/8.0)):1;
-   return Enumerable.Range(0,count).Select(part=>Page(data,index,part,count,report.Style=="bars"?report.Values.Skip(part*8).Take(8).ToList():ArchiveAnalytics.Compact(report.Values,8),dark,portrait)).ToList();
+   return Enumerable.Range(0,count).Select(part=>Page(data,index,part,count,report.Style=="bars"?report.Values.Skip(part*8).Take(8).ToList():ArchiveAnalytics.Compact(report.Values,8),dark,layout)).ToList();
   }
-  static AnalyticsPage Page(AnalyticsSnapshot data,int index,int part,int parts,List<AnalyticsValue> values,bool dark,bool portrait){
-   if(portrait)return PortraitPage(data,index,part,parts,values,dark);
+  static AnalyticsPage Page(AnalyticsSnapshot data,int index,int part,int parts,List<AnalyticsValue> values,bool dark,AnalyticsLayout layout){
+   if(layout!=AnalyticsLayout.Landscape)return SocialPage(data,index,part,parts,values,dark,layout);
    var report=data.Reports[index];var p=new AnalyticsPage{Title=report.Title,Background=dark?"#0C1220":"#FFFFFF"};
    Box(p,0,0,1200,800,"#FFFFFF");Box(p,0,0,1200,8,Accent);
    p.Marks.Add(new AnalyticsMark{Kind="logo",X=56,Y=24,Width=70,Height=70});
