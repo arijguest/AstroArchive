@@ -13,7 +13,7 @@ using Microsoft.Win32;
 
 namespace AstroArchive {
  public partial class MainUi {
-  const double RepositoryPreviewWidth=280;
+  const double RepositoryPreviewWidth=320;
   MotionPreview previewMotion;PreviewViewport previewViewport;CancellationTokenSource previewCancel;int previewGeneration;PreviewData previewData;Frame previewFrame;string previewPath;bool previewReady,choosingStretch;
   public static string CompactPath(string path){if(string.IsNullOrEmpty(path))return "Set an archive folder in Settings";if(path.Length<=75)return path;return Path.GetPathRoot(path)+"…"+Path.DirectorySeparatorChar+new DirectoryInfo(path).Name;}
   void InitializeWorkspace(){
