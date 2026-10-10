@@ -8,10 +8,18 @@ public sealed class ProtectionRecord { public string Kind = "", Id = ""; public 
 public sealed class ArchiveProtection
 {
     private readonly bool windowsProtected;
-    public bool Enabled => false;
-    public string Availability => "Filesystem deletion protection is available in the Windows application. Linux imports retain source originals.";
+    private readonly string guardPath;
+    private bool guarded;
+    public bool Enabled => guarded;
+    public string Availability => "Linux protection prevents capture deletion and relocation in AstroArchive. Filesystem tools and Windows do not enforce this application guard; Windows NTFS protection settings remain separate.";
     public ArchiveProtection(string root, string meta)
     {
+        guardPath = Path.Combine(meta, "linux-protection.json");
+        if(File.Exists(guardPath)) {
+            var guard=Util.Deserialize<ProtectionState>(File.ReadAllText(guardPath));
+            if(guard==null||guard.Mode is not ("Off" or "Enabled"))throw new IOException("Linux capture guard settings are invalid. Restore this archive's guard settings before opening it.");
+            guarded=guard.Mode=="Enabled";
+        }
         string path = Path.Combine(meta, "protection.json");
         if (!File.Exists(path)) return;
         var state = Util.Deserialize<ProtectionState>(File.ReadAllText(path));
@@ -24,22 +32,24 @@ public sealed class ArchiveProtection
         if (windowsProtected) throw new PlatformNotSupportedException("This archive has Windows deletion protection. Disable it in AstroArchive on Windows before importing or moving captures on Linux. Browsing, export, working copies and backups remain available.");
     }
     public void ProtectCapture(string path) { }
-    public void Enable(IEnumerable<string> files, CancellationToken ct, Action<ProgressInfo>? progress) => throw new PlatformNotSupportedException(Availability);
-    public void Disable(CancellationToken ct, Action<ProgressInfo>? progress) { ct.ThrowIfCancellationRequested(); }
-    public IDisposable Unlock(string source, string? destination, bool capture = true) { if(capture) CheckCaptureWrite(); return new Scope(); }
+    public void Enable(IEnumerable<string> files, CancellationToken ct, Action<ProgressInfo>? progress) { ct.ThrowIfCancellationRequested(); Util.AtomicText(guardPath,Util.Serialize(new ProtectionState { Mode="Enabled" })); guarded=true; }
+    public void Disable(CancellationToken ct, Action<ProgressInfo>? progress) { ct.ThrowIfCancellationRequested(); Util.AtomicText(guardPath,Util.Serialize(new ProtectionState { Mode="Off" })); guarded=false; }
+    public IDisposable Unlock(string source, string? destination, bool capture = true) { if(capture) CheckRelocation(); return new Scope(); }
+    public void CheckRelocation() { CheckCaptureWrite(); if(guarded) throw new IOException("Capture protection is enabled. Disable the Linux application guard in Settings before deleting or relocating captures."); }
     private sealed class Scope : IDisposable { public void Dispose() { } }
 }
 
 public sealed partial class Repository
 {
     private ArchiveProtection protection = null!;
-    public bool OriginalsProtected => false;
+    public bool OriginalsProtected => protection.Enabled;
     public string ProtectionAvailability => protection.Availability;
     public void SetOriginalsProtection(bool enabled, CancellationToken ct, Action<ProgressInfo> progress)
-    { if (enabled) protection.Enable(All().Select(FilePath), ct, progress); }
+    { if (enabled) protection.Enable(All().Select(FilePath), ct, progress); else protection.Disable(ct,progress); }
     private void ProtectCapture(string path) => protection.ProtectCapture(path);
     private void MoveCapture(string source, string destination)
     {
+        protection.CheckRelocation();
         CheckManagedPath(source, Root); CheckManagedPath(destination, Root);
         File.Move(source, destination);
     }

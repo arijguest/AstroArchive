@@ -14,7 +14,7 @@ using System.Runtime.InteropServices;
 
 namespace AstroArchive.Desktop;
 
-public sealed class MainWindow : Window
+public sealed partial class MainWindow : Window
 {
     public ArchiveSession Session { get; }
     public Task LastOperation { get; private set; } = Task.CompletedTask;
@@ -22,6 +22,7 @@ public sealed class MainWindow : Window
     public string? LastError { get; private set; }
     public Dictionary<string, Control> Controls { get; } = new();
     private CancellationTokenSource? cancellation;
+    private Dictionary<string,List<object>> operationSelection = [];
     private readonly TextBlock status = new() { Text = "Choose an archive folder to begin.", TextWrapping = TextWrapping.Wrap };
     private readonly ProgressBar progress = new() { Minimum = 0, Maximum = 1, Height = 5 };
     private readonly TextBox report = new() { IsReadOnly = true, AcceptsReturn = true, TextWrapping = TextWrapping.Wrap, MinHeight = 100 };
@@ -32,11 +33,13 @@ public sealed class MainWindow : Window
     private readonly TextBlock summary = new() { FontSize = 16, TextWrapping = TextWrapping.Wrap };
     private readonly StackPanel charts = new() { Spacing = 18 };
     private WriteableBitmap? previewBitmap;
+    private readonly SkyGlobe sky = new();
+    private readonly TextBlock skyText = new() { TextWrapping=TextWrapping.Wrap };
     private readonly Button cancel;
 
     public MainWindow(ArchiveSession? session = null)
     {
-        Session = session ?? new ArchiveSession();
+        Session = session ?? new ArchiveSession(); FontSize=14*Math.Clamp(Session.Settings.TextScale,1,2);
         Title = "AstroArchive · Linux preview"; Width = 1220; Height = 850; MinWidth = 1100; MinHeight = 720;
         if (Application.Current != null) Application.Current.RequestedThemeVariant = Session.Settings.Theme == "Light" ? ThemeVariant.Light : Session.Settings.Theme == "System" ? ThemeVariant.Default : ThemeVariant.Dark;
         var body = new Grid { RowDefinitions = new RowDefinitions("Auto,Auto,*,Auto"), Margin = new Thickness(22) };
@@ -45,7 +48,7 @@ public sealed class MainWindow : Window
         brand.Children.Add(new TextBlock { Text = "AstroArchive", FontSize = 28, FontWeight = FontWeight.SemiBold });
         brand.Children.Add(new TextBlock { Text = "Your observations, preserved and ready to process", Opacity = 0.8 });
         title.Children.Add(brand);
-        var badge = new TextBlock { Text = "LINUX PREVIEW 1", Foreground = Brushes.LightSkyBlue, VerticalAlignment = VerticalAlignment.Center };
+        var badge = new TextBlock { Text = "LINUX PREVIEW 2", Foreground = Brushes.LightSkyBlue, VerticalAlignment = VerticalAlignment.Center };
         Grid.SetColumn(badge, 1); title.Children.Add(badge); body.Children.Add(title);
 
         archiveBar.Children.Add(Label("Archive"));
@@ -78,7 +81,7 @@ public sealed class MainWindow : Window
             ("Target", "TargetLabel"), ("File", "OriginalName"), ("Type", "KindLabel"), ("Night", "Night"),
             ("Telescope", "Telescope"), ("Filter", "Filter"), ("Exposure", "ExposureText"), ("Review", "ReviewText"));
         var search = Field("Search", "", "Search target, filename, telescope or filter", 420);
-        search.TextChanged += (_, _) => grid.ItemsSource = new CaptureFilters().Apply(Session.Captures, search.Text ?? "");
+        search.TextChanged += (_, _) => grid.ItemsSource = CaptureView(search.Text ?? "");
         var bar = Row(search, Button("Refresh", "Refresh", () => Run("Refreshing", _ => { Session.Refresh(); return Task.CompletedTask; })),
             Button("Preview", "Preview selected", () => Run("Loading preview", PreviewSelected)),
             Button("Verify", "Verify archive", () => Run("Verifying", ct => Task.Run(() => Session.Verify(ct, ReportProgress), ct))));
@@ -87,13 +90,15 @@ public sealed class MainWindow : Window
         operations.Children.Add(Heading("Export selected captures"));
         operations.Children.Add(DestinationFields("Capture"));
         operations.Children.Add(Row(Button("Export", "Export original files", () => ExportCaptures(false)), Button("StackingExport", "Prepare stacking project", () => ExportCaptures(true))));
+        operations.Children.Add(ExportOptionsPanel());
         operations.Children.Add(Heading("Metadata and working copies"));
         operations.Children.Add(Row(Field("Target", "", "New target (blank keeps existing)", 255), Field("Filter", "", "New filter", 180)));
         operations.Children.Add(Row(Button("ApplyMetadata", "Apply to selected", () => Run("Saving metadata", ct => { var frames = Selected<Frame>("Captures"); var target = Text("Target"); var filter = Text("Filter"); return Task.Run(() => Session.ApplyMetadata(frames, target, filter, ct), ct); })),
             Button("WorkingCopy", "Create Edited working copies", () => Run("Creating working copies", ct => { var frames = Selected<Frame>("Captures"); var name = Text("CaptureName"); return Task.Run(() => Session.WorkingCopies(frames, name, ct, ReportProgress), ct); }))));
-        var imagePanel = new StackPanel { Spacing = 6 }; imagePanel.Children.Add(preview); imagePanel.Children.Add(previewText);
+        var imagePanel = new StackPanel { Spacing = 6 }; imagePanel.Children.Add(preview); imagePanel.Children.Add(previewText); imagePanel.Children.Add(sky); imagePanel.Children.Add(skyText); Controls["SkyGlobe"]=sky;
         lower.Children.Add(operations); Grid.SetColumn(imagePanel, 1); lower.Children.Add(imagePanel);
-        return Layout(bar, grid, lower);
+        var bottom=new StackPanel { Spacing=12 }; bottom.Children.Add(lower); bottom.Children.Add(RepositoryTools());
+        return Layout(bar, grid, bottom);
     }
     private Control ImportPage()
     {
@@ -108,9 +113,10 @@ public sealed class MainWindow : Window
                 Session.ShowCandidates(plan); Session.SaveSettings();
                 status.Text = $"Scan found {plan.Frames.Count} files; {plan.Errors.Count} errors. Select files or import all eligible rows.";
             }))));
+        top.Children.Add(ImportOptionsPanel());
         top.Children.Add(Row(Button("ImportSelected", "Import selected", () => Import(false)), Button("ImportAll", "Import all eligible", () => Import(true))));
         var table = Table("Candidates", Session.Candidates, ("File", "OriginalName"), ("Target", "TargetLabel"), ("Type", "KindLabel"), ("Status", "Status"), ("Review", "ReviewReason"));
-        return Layout(top, table, Notice("Duplicates are verified by content. Unreadable files remain visible. Cancel retains committed copies; rescan and import to resume."));
+        return Layout(top, table, RemotePanel());
     }
     private Control EditedPage()
     {
@@ -128,13 +134,13 @@ public sealed class MainWindow : Window
                 ArchiveSession.LaunchEditor(Session.Settings.ExternalEditor, Session.RequireArchive().EditedPath(image.Project, image.RelativePath)); return Task.CompletedTask;
             }))));
         var table = Table("EditedImages", Session.Edited, ("Project", "Project.Name"), ("Image", "Filename"), ("Type", "FileType"), ("Kind", "Kind"), ("Bytes", "Bytes"));
-        return Layout(top, table, Row(DestinationFields("Edited"), Button("ExportEdited", "Export selected", () => Run("Exporting Edited images", ct => { var images = Selected<EditedImage>("EditedImages"); var parent = Text("EditedDestination"); var name = Text("EditedName"); return Task.Run(() => Session.ExportEdited(images, parent, name, ct, ReportProgress), ct); }))));
+        var bottom=new StackPanel { Spacing=12 }; bottom.Children.Add(Row(DestinationFields("Edited"), Button("ExportEdited", "Export selected", () => Run("Exporting Edited images", ct => { var images = Selected<EditedImage>("EditedImages"); var parent = Text("EditedDestination"); var name = Text("EditedName"); return Task.Run(() => Session.ExportEdited(images, parent, name, ct, ReportProgress), ct); })))); bottom.Children.Add(EditedTools()); return Layout(top,table,bottom);
     }
     private Control AnalyticsPage()
     {
         var top = new StackPanel { Spacing = 10 }; top.Children.Add(summary);
         top.Children.Add(Notice("Integration totals use individual light frames. Stacks, videos, rejected frames and calibration files are excluded."));
-        top.Children.Add(Row(DestinationFields("Analytics"), Button("ExportAnalytics", "Export SVG + data", () => Run("Exporting analytics", ct => { var parent = Text("AnalyticsDestination"); var name = Text("AnalyticsName"); return Task.Run(() => Session.ExportAnalytics(parent, name, ct), ct); }))));
+        top.Children.Add(Row(DestinationFields("Analytics"), Button("ExportAnalytics", "Export PDF / PNG / SVG + data", () => Run("Exporting analytics", ct => { var parent = Text("AnalyticsDestination"); var name = Text("AnalyticsName"); return Task.Run(() => Session.ExportAnalytics(parent, name, ct), ct); }))));
         var panel = new StackPanel { Spacing = 18 }; panel.Children.Add(top); panel.Children.Add(charts);
         return new ScrollViewer { Content = panel };
     }
@@ -154,7 +160,8 @@ public sealed class MainWindow : Window
         panel.Children.Add(Field("BackupDestination", "", "Existing destination outside the archive", 670));
         var zip = new CheckBox { Content = "Lossless ZIP backup", IsChecked = true }; Controls["ZipBackup"] = zip; panel.Children.Add(zip);
         panel.Children.Add(Button("Backup", "Create and verify backup", () => Run("Backing up archive", ct => { var parent = Text("BackupDestination"); var compressed = zip.IsChecked == true; return Task.Run(() => Session.Backup(parent, compressed, ct, ReportProgress), ct); })));
-        panel.Children.Add(Notice("Archives can move between Windows and Linux. Close AstroArchive before disconnecting the drive. Direct telescope discovery, online solving and native deletion protection are not available on Linux. Windows protection settings are retained; source originals are retained."));
+        panel.Children.Add(Notice("Archives can move between Windows and Linux. Close AstroArchive before disconnecting the drive. Telescope connections and solvers are configured below. Linux capture protection is an application guard; Windows NTFS settings are retained separately. Source originals are retained."));
+        panel.Children.Add(AdvancedSettings());
         panel.Children.Add(Heading("Activity report")); panel.Children.Add(report); Controls["Report"] = report;
         return new ScrollViewer { Content = panel };
     }
@@ -166,36 +173,38 @@ public sealed class MainWindow : Window
         panel.Children.Add(Notice("2. Scan your observations\nIn Import, choose a folder or mounted telescope card, enter a physical telescope name, then Scan source. Review unreadable files and metadata before importing."));
         panel.Children.Add(Notice("3. Preserve and organize\nImport selected files or all eligible rows. SHA-256 verification protects transfers; every source original is retained. Repository search and metadata edits organize your archive without changing capture pixels."));
         panel.Children.Add(Notice("4. Process copies\nExport original files or a stacking project. Create Edited working copies for an external editor, or add finished images to Edited."));
-        panel.Children.Add(Notice("5. Verify and back up\nVerify archive checks captured hashes. Settings creates a verified folder or lossless ZIP backup. Analytics exports six reports as SVG and JSON."));
-        panel.Children.Add(Notice("FITS, XISF and SER numeric previews are available where the reader supports the codec. Other formats can be archived and exported unchanged. Unsupported previews report the reason."));
+        panel.Children.Add(Notice("5. Verify and back up\nVerify archive checks captured hashes. Settings creates a verified folder or lossless ZIP backup. Analytics exports all reports as PDF, PNG, SVG and JSON."));
+        panel.Children.Add(Notice("FITS, XISF, SER, PNG and numeric TIFF previews preserve supported samples. JPEG/GIF and other TIFF layouts have display-only previews. Unsupported previews report the reason; originals can still be archived and exported unchanged."));
         return new ScrollViewer { Content = panel };
     }
 
     private Task Import(bool all) => Run("Importing verified copies", async ct => {
-        var selected = all ? Session.Candidates.ToList() : Selected<Frame>("Candidates");
+        ReadImportOptions(); var selected = all ? Session.Candidates.ToList() : Selected<Frame>("Candidates");
         var result = await Task.Run(() => Session.Import(selected, ct, ReportProgress), ct);
         status.Text = $"Imported {result.Imported}; duplicates {result.Duplicates}; failed {result.Failed}. Source originals retained.";
         if (result.Failed > 0) LastError = $"{result.Failed} files failed. See the activity report.";
     });
-    private Task ExportCaptures(bool stacking) => Run("Exporting verified copies", ct => { var frames = Selected<Frame>("Captures"); var parent = Text("CaptureDestination"); var name = Text("CaptureName"); return Task.Run(() => Session.Export(frames, parent, name, stacking, ct, ReportProgress), ct); });
-    private async Task PreviewSelected(CancellationToken ct)
+    private Task ExportCaptures(bool stacking) => Run("Exporting verified copies", ct => { var frames = Selected<Frame>("Captures"); var parent = Text("CaptureDestination"); var name = Text("CaptureName"); var options=ReadExportOptions(parent,name,stacking); return Task.Run(() => Session.Export(frames,options,ct,ReportProgress),ct); });
+    private Task PreviewSelected(CancellationToken ct) { var frame=Selected<Frame>("Captures").Single(); return DisplayFrame(frame,Session.RequireArchive().FilePath(frame),ct); }
+    private async Task DisplayFrame(Frame frame,string path,CancellationToken ct)
     {
-        var frame = Selected<Frame>("Captures").Single(); string path = Session.RequireArchive().FilePath(frame);
         preview.Source=null; previewBitmap?.Dispose(); previewBitmap=null; previewText.Text="Preview: "+frame.OriginalName;
 
         var data = await Task.Run(() => Assets.Display(frame, path, frame.ImageIndex ?? 0, ct), ct);
-        byte[] pixels = await Task.Run(() => data.Render("Auto per channel", ct), ct);
+        byte[] pixels = await Task.Run(() => data.Render(Choice("Stretch"), ct), ct);
         var bitmap = new WriteableBitmap(new PixelSize(data.Width, data.Height), new Vector(96,96), PixelFormat.Bgra8888, AlphaFormat.Opaque);
         byte[] bgra = new byte[checked(data.Width*data.Height*4)];
         for (int i=0;i<data.Width*data.Height;i++) { bgra[i*4]=pixels[i*3+2]; bgra[i*4+1]=pixels[i*3+1]; bgra[i*4+2]=pixels[i*3]; bgra[i*4+3]=255; }
         using (var locked = bitmap.Lock())
             for (int y=0; y<data.Height; y++) Marshal.Copy(bgra, y*data.Width*4, locked.Address+y*locked.RowBytes, data.Width*4);
+        ShowSky(frame);
         preview.Source = bitmap; previewBitmap?.Dispose(); previewBitmap = bitmap;
         previewText.Text = frame.OriginalName + " · " + data.Description + " · display stretch only";
     }
     public Task Run(string title, Func<CancellationToken, Task> operation)
     {
         if (Busy) return LastOperation;
+        operationSelection=Controls.Where(p=>p.Value is DataGrid).ToDictionary(p=>p.Key,p=>((DataGrid)p.Value).SelectedItems.Cast<object>().ToList());
         LastOperation = Execute(title, operation); return LastOperation;
     }
     private async Task Execute(string title, Func<CancellationToken, Task> operation)
@@ -206,7 +215,15 @@ public sealed class MainWindow : Window
         catch (OperationCanceledException) { status.Text = "Canceled safely. Committed copies are retained; rescan to continue."; }
         catch (Exception e) { LastError = e.Message; status.Text = "Unable to complete: " + e.Message; }
         finally {
-            try { if (Session.Repository != null) { Session.Refresh(); ((DataGrid)Controls["Captures"]).ItemsSource = new CaptureFilters().Apply(Session.Captures, Text("Search")); UpdateAnalytics(); } }
+            try { if (Session.Repository != null) {
+                var captures=(DataGrid)Controls["Captures"]; var edited=(DataGrid)Controls["EditedImages"];
+                var selectedCaptures=Selected<Frame>("Captures").Select(f=>f.Hash).ToHashSet();
+                var selectedEdited=Selected<EditedImage>("EditedImages").Select(i=>i.Project.Id+"|"+i.RelativePath).ToHashSet();
+                Session.Refresh(); RefreshFilterChoices(); captures.ItemsSource=CaptureView(Text("Search"));
+                foreach(var frame in ((IEnumerable<Frame>)captures.ItemsSource).Where(f=>selectedCaptures.Contains(f.Hash))) captures.SelectedItems.Add(frame);
+                foreach(var image in Session.Edited.Where(i=>selectedEdited.Contains(i.Project.Id+"|"+i.RelativePath))) edited.SelectedItems.Add(image);
+                UpdateAnalytics();
+            } }
             catch (Exception e) { LastError = e.Message; status.Text = "Archive refresh failed: " + e.Message; }
             report.Text = Session.LastReport + (Session.LastOutput.Length > 0 ? "\nOutput: " + Session.LastOutput : "");
             Busy = false; archiveBar.IsEnabled = tabs.IsEnabled = true; cancel.IsEnabled = false; progress.IsIndeterminate = false; progress.Value = 0;
@@ -237,7 +254,7 @@ public sealed class MainWindow : Window
         }
     }
     public string Text(string name) => ((TextBox)Controls[name]).Text?.Trim() ?? "";
-    private List<T> Selected<T>(string name) => ((DataGrid)Controls[name]).SelectedItems.Cast<T>().ToList();
+    private List<T> Selected<T>(string name) => Busy&&operationSelection.TryGetValue(name,out var saved)?saved.Cast<T>().ToList():((DataGrid)Controls[name]).SelectedItems.Cast<T>().ToList();
     private TextBox Field(string name, string value, string hint, double width) { var control = new TextBox { Name = name, Text = value, PlaceholderText = hint, Width = width }; Controls[name] = control; return control; }
     private Button Button(string name, string text, Func<Task> action) {
         var button = new Button { Name = name, Content = text, VerticalAlignment = VerticalAlignment.Center }; Controls[name] = button;
@@ -257,6 +274,6 @@ public sealed class MainWindow : Window
     private static TextBlock Label(string text) => new() { Text = text, VerticalAlignment = VerticalAlignment.Center };
     private static TextBlock Heading(string text) => new() { Text = text, FontSize = 18, FontWeight = FontWeight.SemiBold };
     private static TextBlock Notice(string text) => new() { Text = text, TextWrapping = TextWrapping.Wrap, Opacity = 0.8 };
-    private static StackPanel Row(params Control[] children) { var row = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8 }; foreach (var child in children) row.Children.Add(child); return row; }
+    private static WrapPanel Row(params Control[] children) { var row = new WrapPanel(); foreach (var child in children) { child.Margin=new Thickness(0,0,8,8); row.Children.Add(child); } return row; }
     private static Control Layout(Control top, Control center, Control bottom) { center.Height = 260; var grid = new Grid { RowDefinitions = new RowDefinitions("Auto,Auto,Auto") }; grid.Children.Add(top); center.Margin = new Thickness(0,12,0,0); Grid.SetRow(center, 1); grid.Children.Add(center); Grid.SetRow(bottom, 2); bottom.Margin = new Thickness(0,12,0,0); grid.Children.Add(bottom); return new ScrollViewer { Content = grid }; }
 }

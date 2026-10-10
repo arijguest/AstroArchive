@@ -15,9 +15,28 @@ using System.Threading;
 namespace AstroArchive {
  public class SolveResult {public SkyGeometry Sky{get;set;}public double RA{get;set;}public double Dec{get;set;}public double Radius{get;set;}public string Solver{get;set;}public string Suggested{get;set;}public string MatchReason{get;set;}public List<Candidate> Candidates{get;set;}}
  public static class PlateSolve {
-  public static string Protect(string key){return string.IsNullOrWhiteSpace(key)?"":Convert.ToBase64String(ProtectedData.Protect(Encoding.UTF8.GetBytes(key.Trim()),null,DataProtectionScope.CurrentUser));}
-  public static string Unprotect(string data){if(string.IsNullOrEmpty(data))return "";try{return Encoding.UTF8.GetString(ProtectedData.Unprotect(Convert.FromBase64String(data),null,DataProtectionScope.CurrentUser));}catch{return "";}}
-  public static string FindAstap(){string[] p={Path.Combine(AppDomain.CurrentDomain.BaseDirectory,"astap.exe"),Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles),"astap","astap.exe"),Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles),"ASTAP","astap_cli.exe"),Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86),"astap","astap.exe")};return p.FirstOrDefault(File.Exists)??"";}
+  internal static string ApiRoot="https://nova.astrometry.net";
+  public static string Protect(string key){
+#if PORTABLE
+   return LinuxSecrets.Store(key);
+#else
+   return string.IsNullOrWhiteSpace(key)?"":Convert.ToBase64String(ProtectedData.Protect(Encoding.UTF8.GetBytes(key.Trim()),null,DataProtectionScope.CurrentUser));
+#endif
+  }
+  public static string Unprotect(string data){if(string.IsNullOrEmpty(data))return "";try{
+#if PORTABLE
+   return LinuxSecrets.Read(data);
+#else
+   return Encoding.UTF8.GetString(ProtectedData.Unprotect(Convert.FromBase64String(data),null,DataProtectionScope.CurrentUser));
+#endif
+  }catch{return "";}}
+  public static string FindAstap(){
+#if PORTABLE
+   return new[]{"/usr/bin/astap_cli","/usr/bin/astap","/usr/local/bin/astap_cli","/usr/local/bin/astap"}.FirstOrDefault(File.Exists)??"";
+#else
+   string[] p={Path.Combine(AppDomain.CurrentDomain.BaseDirectory,"astap.exe"),Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles),"astap","astap.exe"),Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles),"ASTAP","astap_cli.exe"),Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86),"astap","astap.exe")};return p.FirstOrDefault(File.Exists)??"";
+#endif
+  }
   public static bool Configured(Settings s){return (!s.UseOnline&&File.Exists(s.Astap))||(s.UseOnline&&!string.IsNullOrEmpty(Unprotect(s.ApiKeyProtected)));}
   public static SolveResult Solve(Frame frame,string path,Settings settings,CancellationToken ct,Action<string> progress,Action<int> counted=null){
    using(var deadline=CancellationTokenSource.CreateLinkedTokenSource(ct)){
@@ -63,8 +82,16 @@ namespace AstroArchive {
    string temp=Path.Combine(Path.GetTempPath(),"AstroArchiveSolve_"+Guid.NewGuid().ToString("N"));Directory.CreateDirectory(temp);
    try{progress("Preparing temporary FITS copy");string input=Path.Combine(temp,"frame.fits");if(source.EndsWith(".gz",StringComparison.OrdinalIgnoreCase)){using(var f=File.OpenRead(source))using(var g=new GZipStream(f,CompressionMode.Decompress))using(var o=File.Create(input)){byte[] b=new byte[65536];int n;while((n=g.Read(b,0,b.Length))>0){ct.ThrowIfCancellationRequested();o.Write(b,0,n);if(counted!=null)counted(n);}}}else{using(var from=File.OpenRead(source))using(var to=File.Create(input)){byte[] buffer=new byte[65536];int n;while((n=from.Read(buffer,0,buffer.Length))>0){ct.ThrowIfCancellationRequested();to.Write(buffer,0,n);if(counted!=null)counted(n);}}}
     ct.ThrowIfCancellationRequested();progress("Reading image size and scale");FitsHeader header=Fits.Header(input);double fov=settings.FieldHeight??0;double? focal=header.Number("FOCALLEN","FOCLEN"),pixel=header.Number("YPIXSZ","PIXSIZE");if(fov<=0&&focal.HasValue&&pixel.HasValue&&focal>0&&pixel>0)fov=2*Math.Atan(header.Height*pixel.Value/1000/(2*focal.Value))*180/Math.PI;
-    string args="-f "+Quote(input)+" -r 180 -fov "+fov.ToString("0.#####",CultureInfo.InvariantCulture)+" -z 0 -wcs -o "+Quote(Path.Combine(temp,"solution"));if(!string.IsNullOrWhiteSpace(settings.StarDatabase)){if(!Directory.Exists(settings.StarDatabase))throw new DirectoryNotFoundException("ASTAP star database folder not found.");args+=" -d "+Quote(settings.StarDatabase);}
-    progress("ASTAP: solving star field...");var psi=new ProcessStartInfo(settings.Astap,args){UseShellExecute=false,CreateNoWindow=true,WindowStyle=ProcessWindowStyle.Hidden,WorkingDirectory=Path.GetDirectoryName(settings.Astap)};
+    if(!string.IsNullOrWhiteSpace(settings.StarDatabase)&&!Directory.Exists(settings.StarDatabase))throw new DirectoryNotFoundException("ASTAP star database folder not found.");
+    progress("ASTAP: solving star field...");
+#if PORTABLE
+    var psi=new ProcessStartInfo(settings.Astap){UseShellExecute=false,WorkingDirectory=Path.GetDirectoryName(settings.Astap)};
+    foreach(string argument in new[]{"-f",input,"-r","180","-fov",fov.ToString("0.#####",CultureInfo.InvariantCulture),"-z","0","-wcs","-o",Path.Combine(temp,"solution")})psi.ArgumentList.Add(argument);
+    if(!string.IsNullOrWhiteSpace(settings.StarDatabase)){psi.ArgumentList.Add("-d");psi.ArgumentList.Add(settings.StarDatabase);}
+#else
+    string args="-f "+Quote(input)+" -r 180 -fov "+fov.ToString("0.#####",CultureInfo.InvariantCulture)+" -z 0 -wcs -o "+Quote(Path.Combine(temp,"solution"));if(!string.IsNullOrWhiteSpace(settings.StarDatabase))args+=" -d "+Quote(settings.StarDatabase);
+    var psi=new ProcessStartInfo(settings.Astap,args){UseShellExecute=false,CreateNoWindow=true,WindowStyle=ProcessWindowStyle.Hidden,WorkingDirectory=Path.GetDirectoryName(settings.Astap)};
+#endif
     using(var p=Process.Start(psi)){WaitForSolver(p,ct,TimeSpan.FromMinutes(5),progress);
      progress("Reading ASTAP solution");
      string ini=Path.Combine(temp,"solution.ini");if(!File.Exists(ini))throw new IOException("ASTAP returned no solution file (exit "+p.ExitCode+"). Check the star database installation.");
@@ -77,7 +104,13 @@ namespace AstroArchive {
   internal static void WaitForSolver(Process process,CancellationToken ct,TimeSpan limit,Action<string> progress){
    if(process==null)throw new IOException("ASTAP did not start.");var clock=Stopwatch.StartNew();long last=-1;
    try{while(true){ct.ThrowIfCancellationRequested();if(process.WaitForExit(100))break;if(clock.Elapsed>=limit)throw new TimeoutException("ASTAP solve exceeded its time limit.");long second=(long)clock.Elapsed.TotalSeconds;if(second!=last){last=second;if(progress!=null)progress("ASTAP solving · "+PipelineMetrics.Duration(second)+" elapsed · 5 minute limit");}}}
-   catch{try{if(!process.HasExited){process.Kill();process.WaitForExit(1000);}}catch{}throw;}
+   catch{try{if(!process.HasExited){
+#if PORTABLE
+    process.Kill(true);
+#else
+    process.Kill();
+#endif
+    process.WaitForExit(1000);}}catch{}throw;}
   }
   static SkyGeometry LocalGeometry(FitsHeader ini,string directory,string input,int width,int height){
    var sky=SkyWcs.FromHeader(ini,width,height,"ASTAP WCS");if(sky!=null)return sky;
@@ -85,7 +118,7 @@ namespace AstroArchive {
    try{return SkyWcs.FromHeader(Fits.Header(input),width,height,"ASTAP temporary FITS WCS");}catch{return null;}
   }
   static SkyGeometry OnlineGeometry(long job,int width,int height,CancellationToken ct){
-   try{var request=(HttpWebRequest)WebRequest.Create("https://nova.astrometry.net/wcs_file/"+job);request.Timeout=30000;request.ReadWriteTimeout=30000;using(ct.Register(()=>request.Abort()))using(var response=request.GetResponse())using(var stream=response.GetResponseStream())return SkyWcs.FromHeader(SkyWcs.WcsCards(stream),width,height,"Astrometry.net WCS");}catch{ct.ThrowIfCancellationRequested();return null;}
+   try{var request=(HttpWebRequest)WebRequest.Create(ApiRoot+"/wcs_file/"+job);request.Timeout=30000;request.ReadWriteTimeout=30000;using(ct.Register(()=>request.Abort()))using(var response=request.GetResponse())using(var stream=response.GetResponseStream())return SkyWcs.FromHeader(SkyWcs.WcsCards(stream),width,height,"Astrometry.net WCS");}catch{ct.ThrowIfCancellationRequested();return null;}
   }
   public static FitsHeader ParseIni(string text){var h=new FitsHeader();foreach(string line in text.Split(new[]{'\r','\n'},StringSplitOptions.RemoveEmptyEntries)){int i=line.IndexOf('=');if(i<1)continue;string k=line.Substring(0,i).Trim(),v=line.Substring(i+1).Trim();int comment=v.IndexOf("//",StringComparison.Ordinal);if(comment>=0)v=v.Substring(0,comment).Trim();h.Values[k]=v;}return h;}
   static Dictionary<string,object> Request(string url,string form,byte[] multipart,string boundary,CancellationToken ct){
@@ -94,14 +127,14 @@ namespace AstroArchive {
   }
   static SolveResult Online(string path,Settings settings,CancellationToken ct,Action<string> progress,Action<int> counted){
    progress("Detecting stars for Astrometry.net...");FitsImage image=Fits.Image(path,ct,counted);var stars=Rotation.Detect(image,250);if(stars.Count<12)throw new InvalidDataException("Not enough stars for plate solving.");
-   ct.ThrowIfCancellationRequested();progress("Authenticating with Astrometry.net");var login=Request("https://nova.astrometry.net/api/login",Util.Serialize(new{apikey=Unprotect(settings.ApiKeyProtected)}),null,null,ct);object sess;if(!login.TryGetValue("session",out sess))throw new InvalidDataException("Astrometry.net login did not return a session.");
+   ct.ThrowIfCancellationRequested();progress("Authenticating with Astrometry.net");var login=Request(ApiRoot+"/api/login",Util.Serialize(new{apikey=Unprotect(settings.ApiKeyProtected)}),null,null,ct);object sess;if(!login.TryGetValue("session",out sess))throw new InvalidDataException("Astrometry.net login did not return a session.");
    var options=new Dictionary<string,object>{{"session",sess},{"publicly_visible","n"},{"allow_commercial_use","n"},{"allow_modifications","n"},{"image_width",image.Width},{"image_height",image.Height},{"scale_units","degwidth"},{"scale_type","ul"},{"scale_lower",0.15},{"scale_upper",90.0},{"crpix_center",true},{"positional_error",1.5}};
    byte[] xy=XYList(stars,image.Width,image.Height);string boundary="AstroArchive"+Guid.NewGuid().ToString("N");byte[] body;
    using(var ms=new MemoryStream()){byte[] first=Encoding.UTF8.GetBytes("--"+boundary+"\r\nContent-Disposition: form-data; name=\"request-json\"\r\nContent-Type: text/plain\r\n\r\n"+Util.Serialize(options)+"\r\n--"+boundary+"\r\nContent-Disposition: form-data; name=\"file\"; filename=\"stars.xyls\"\r\nContent-Type: application/octet-stream\r\n\r\n");ms.Write(first,0,first.Length);ms.Write(xy,0,xy.Length);byte[] last=Encoding.ASCII.GetBytes("\r\n--"+boundary+"--\r\n");ms.Write(last,0,last.Length);body=ms.ToArray();}
-   progress("Submitting star coordinates to Astrometry.net...");var upload=Request("https://nova.astrometry.net/api/upload",null,body,boundary,ct);object sub;if(!upload.TryGetValue("subid",out sub))throw new InvalidDataException("Astrometry.net returned no submission ID.");
+   progress("Submitting star coordinates to Astrometry.net...");var upload=Request(ApiRoot+"/api/upload",null,body,boundary,ct);object sub;if(!upload.TryGetValue("subid",out sub))throw new InvalidDataException("Astrometry.net returned no submission ID.");
    DateTime deadline=DateTime.UtcNow.AddMinutes(10);long job=0;
-   while(DateTime.UtcNow<deadline){ct.ThrowIfCancellationRequested();if(job==0){var status=Request("https://nova.astrometry.net/api/submissions/"+sub,null,null,null,ct);object jobs;if(status.TryGetValue("jobs",out jobs)){foreach(object j in (IEnumerable)jobs)if(j!=null){job=Convert.ToInt64(j);break;}}progress("Astrometry.net queued · submission "+sub+" · 10 minute limit");}else{
-     var status=Request("https://nova.astrometry.net/api/jobs/"+job,null,null,null,ct);object state;status.TryGetValue("status",out state);if(Convert.ToString(state)=="failure")throw new InvalidDataException("Astrometry.net could not solve this field.");if(Convert.ToString(state)=="success"){progress("Reading solved coordinates and field geometry");var cal=Request("https://nova.astrometry.net/api/jobs/"+job+"/calibration/",null,null,null,ct);return new SolveResult{RA=Convert.ToDouble(cal["ra"],CultureInfo.InvariantCulture),Dec=Convert.ToDouble(cal["dec"],CultureInfo.InvariantCulture),Radius=Convert.ToDouble(cal["radius"],CultureInfo.InvariantCulture),Solver="Astrometry.net job "+job,Sky=OnlineGeometry(job,image.Width,image.Height,ct)};}progress("Astrometry.net solving · job "+job+" · 10 minute limit");}
+   while(DateTime.UtcNow<deadline){ct.ThrowIfCancellationRequested();if(job==0){var status=Request(ApiRoot+"/api/submissions/"+sub,null,null,null,ct);object jobs;if(status.TryGetValue("jobs",out jobs)){foreach(object j in (IEnumerable)jobs)if(j!=null){job=Convert.ToInt64(j);break;}}progress("Astrometry.net queued · submission "+sub+" · 10 minute limit");}else{
+     var status=Request(ApiRoot+"/api/jobs/"+job,null,null,null,ct);object state;status.TryGetValue("status",out state);if(Convert.ToString(state)=="failure")throw new InvalidDataException("Astrometry.net could not solve this field.");if(Convert.ToString(state)=="success"){progress("Reading solved coordinates and field geometry");var cal=Request(ApiRoot+"/api/jobs/"+job+"/calibration/",null,null,null,ct);return new SolveResult{RA=Convert.ToDouble(cal["ra"],CultureInfo.InvariantCulture),Dec=Convert.ToDouble(cal["dec"],CultureInfo.InvariantCulture),Radius=Convert.ToDouble(cal["radius"],CultureInfo.InvariantCulture),Solver="Astrometry.net job "+job,Sky=OnlineGeometry(job,image.Width,image.Height,ct)};}progress("Astrometry.net solving · job "+job+" · 10 minute limit");}
     if(ct.WaitHandle.WaitOne(2000))ct.ThrowIfCancellationRequested();
    }throw new TimeoutException("Astrometry.net has not completed the solve after ten minutes. Try again later or use local ASTAP.");
   }

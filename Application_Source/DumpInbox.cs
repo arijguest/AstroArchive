@@ -37,7 +37,12 @@ namespace AstroArchive {
    var plan=ScanCore(DumpFolder,"Unknown","Auto",ct,progress,false,onFrame,true,false,true,ignoreFailed:ignoreFailed,ignoreRaster:ignoreRaster);
    foreach(var frame in plan.Frames.Where(f=>f.Status=="Duplicate"||f.Status=="Duplicate (cached)"||f.Status=="Duplicate in source"))frame.Status="New";
    foreach(var frame in plan.Frames.Where(f=>f.Status=="New"))frame.Notes=(frame.Notes??"")+"Imported from Dump. Assign the physical telescope ID using Edit metadata. ";
-   var result=Import(plan.Frames,ct,progress,new ImportOptions{SourceRoot=DumpFolder,IgnoreFailed=ignoreFailed,IgnoreRaster=ignoreRaster,DeleteOriginals=true,DumpInbox=true,Workers=workers,OnFrame=onFrame,ScanMetrics=plan.Metrics});
+#if PORTABLE
+   bool removeDumpOriginals=false;
+#else
+   bool removeDumpOriginals=true;
+#endif
+   var result=Import(plan.Frames,ct,progress,new ImportOptions{SourceRoot=DumpFolder,IgnoreFailed=ignoreFailed,IgnoreRaster=ignoreRaster,DeleteOriginals=removeDumpOriginals,DumpInbox=true,Workers=workers,OnFrame=onFrame,ScanMetrics=plan.Metrics});
    result.IgnoredFailed+=plan.IgnoredFailed;result.IgnoredRaster+=plan.IgnoredRaster;SaveImportReport(result);var report=new DumpResult{Plan=plan,Import=result};
    LastReport=report.Summary+"\r\n\r\n"+LastReport+"\r\n\r\nDump scan errors:\r\n"+string.Join("\r\n",plan.Errors);
    Directory.CreateDirectory(Path.Combine(Meta,"reports"));

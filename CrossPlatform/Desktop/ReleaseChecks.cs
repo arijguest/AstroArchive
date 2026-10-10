@@ -33,6 +33,12 @@ public static class ReleaseFixture
         }
         File.WriteAllBytes(path, bytes);
     }
+    public static string FakeAstap(string directory)
+    {
+        Directory.CreateDirectory(directory); string path=Path.Combine(directory,"astap");
+        File.WriteAllText(path,"#!/bin/sh\nprintf '%s\\n' \"$@\" > arguments.txt\nwhile [ \"$#\" -gt 0 ]; do if [ \"$1\" = -o ]; then shift; output=\"$1\"; fi; shift; done\nprintf 'PLTSOLVD=T\\nCRVAL1=10.6847\\nCRVAL2=41.269\\nCDELT1=-0.001\\nCDELT2=0.001\\n' > \"$output.ini\"\n");
+        File.SetUnixFileMode(path,UnixFileMode.UserRead|UnixFileMode.UserWrite|UnixFileMode.UserExecute); return path;
+    }
     public static void Check(bool condition, string message)
     { if(!condition) throw new InvalidOperationException(message); Console.WriteLine("PASS " + message); }
 }
@@ -67,10 +73,43 @@ public static class PackageSelfTest
                 reopened.Open(archive); ReleaseFixture.Check(reopened.Captures.Count==2 && reopened.Edited.Count==2,"installed app reopens durable index and Edited records");
                 reopened.Verify(CancellationToken.None,_=>{});
             }
+            ScientificRaster(Path.Combine(root,"scientific-raster"));
             CrashRecovery(Path.Combine(root,"crash-recovery"));
             File.WriteAllText(Path.Combine(root,"package-check.txt"),"PASS: installed executable import/export/backup/reopen");
             Console.WriteLine("Package checks passed at " + root); return 0;
         } catch(Exception e) { Console.Error.WriteLine(e); return 1; }
+    }
+    public static int Keyring(string? directory)
+    {
+        string root=Path.GetFullPath(directory??Path.Combine(Path.GetTempPath(),"astroarchive-keyring-"+Guid.NewGuid().ToString("N"))),reference="";
+        try {
+            if(Directory.Exists(root)&&Directory.EnumerateFileSystemEntries(root).Any())throw new IOException("Choose a new empty keyring test directory.");
+            string secret="AstroArchive-test-"+Guid.NewGuid().ToString("N");
+            using(var session=new ArchiveSession(Path.Combine(root,"config","settings.json"))) { reference=PlateSolve.Protect(secret);session.Settings.ApiKeyReference=reference;session.SaveSettings();ReleaseFixture.Check(!File.ReadAllText(session.ConfigPath).Contains(secret),"saved settings contain an opaque keyring reference, never the secret"); }
+            using(var session=new ArchiveSession(Path.Combine(root,"config","settings.json"))) { ReleaseFixture.Check(PlateSolve.Unprotect(session.Settings.ApiKeyReference)==secret,"credential is recovered through the actual Secret Service keyring after settings reload"); }
+            LinuxSecrets.Remove(reference);ReleaseFixture.Check(PlateSolve.Unprotect(reference)=="","keyring entry removal invalidates its reference");Console.WriteLine("PASS: actual Linux Secret Service persistence, private settings and credential removal");return 0;
+        } catch(Exception error) { Console.Error.WriteLine(error);return 1; }
+        finally { if(reference.Length>0)try{LinuxSecrets.Remove(reference);}catch{} }
+    }
+    private static void ScientificRaster(string root)
+    {
+        Directory.CreateDirectory(root);string source=Path.Combine(root,"floating Ω.tif"),output=Path.Combine(root,"derived.fit");
+        float[] samples=[-.125f,.5f,1234.75f,0f,65535f,-25.25f];
+        using(var tiff=BitMiracle.LibTiff.Classic.Tiff.Open(source,"wb")) {
+            tiff.SetField(BitMiracle.LibTiff.Classic.TiffTag.IMAGEWIDTH,3);tiff.SetField(BitMiracle.LibTiff.Classic.TiffTag.IMAGELENGTH,2);
+            tiff.SetField(BitMiracle.LibTiff.Classic.TiffTag.BITSPERSAMPLE,32);tiff.SetField(BitMiracle.LibTiff.Classic.TiffTag.SAMPLESPERPIXEL,1);
+            tiff.SetField(BitMiracle.LibTiff.Classic.TiffTag.SAMPLEFORMAT,BitMiracle.LibTiff.Classic.SampleFormat.IEEEFP);
+            tiff.SetField(BitMiracle.LibTiff.Classic.TiffTag.PHOTOMETRIC,BitMiracle.LibTiff.Classic.Photometric.MINISBLACK);
+            tiff.SetField(BitMiracle.LibTiff.Classic.TiffTag.PLANARCONFIG,BitMiracle.LibTiff.Classic.PlanarConfig.CONTIG);
+            tiff.SetField(BitMiracle.LibTiff.Classic.TiffTag.ORIENTATION,BitMiracle.LibTiff.Classic.Orientation.TOPLEFT);
+            for(int y=0;y<2;y++)ReleaseFixture.Check(tiff.WriteScanline(samples.Skip(y*3).Take(3).SelectMany(BitConverter.GetBytes).ToArray(),y),"installed TIFF codec writes its scientific fixture");
+        }
+        string hash=Util.Hash(source,CancellationToken.None);var asset=Assets.Inspect(source,_=>{});var image=new LinuxRasterReader().Read(source,asset.Images.Single(),0,CancellationToken.None);
+        ReleaseFixture.Check(image.Pixels.SequenceEqual(samples.Select(v=>(double)v)),"installed big-endian floating TIFF decode preserves every sample");
+        ScientificFits.Write(output,image,new Frame { Target="M31",Kind="Light",LinearData=true,Hash=hash },CancellationToken.None);
+        byte[] bytes=File.ReadAllBytes(output);
+        ReleaseFixture.Check(Enumerable.Range(0,samples.Length).All(i=>BitConverter.Int64BitsToDouble(System.Buffers.Binary.BinaryPrimitives.ReadInt64BigEndian(bytes.AsSpan(2880+i*8,8)))==samples[i]),"independently decoded scientific FITS export preserves signed, fractional and large TIFF samples");
+        ReleaseFixture.Check(hash==Util.Hash(source,CancellationToken.None),"scientific conversion leaves the original TIFF unchanged");
     }
     public static int CrashWorker(string root)
     {
@@ -147,11 +186,12 @@ public static class NativeSmoke
         ReleaseFixture.Check(File.ReadAllText(Path.Combine(window.Session.LastOutput,"analytics.svg")).Contains("<svg"),"Analytics exports a vector report");
         ReleaseFixture.Check(window.Session.Analytics.Reports.Count==6 && window.Session.Analytics.Seconds==120,"Analytics shows all six reports with exact integration");
         Page(4); Text("BackupDestination",parent); await Click("Backup"); await Click("SaveSettings");
+        await ParitySmoke.Run(window,root,screenshots);
         if(screenshots) {
             foreach(bool compact in new[]{false,true}) {
             window.Width=compact?1100:1220; window.Height=compact?720:850;
             for(int i=0;i<6;i++) {
-                Page(i); window.UpdateLayout(); await Task.Delay(100); window.UpdateLayout();
+                Page(i); if(((TabItem)((TabControl)window.Controls["Pages"]).Items[i]!).Content is ScrollViewer scroller)scroller.Offset=default; window.UpdateLayout(); await Task.Delay(100); window.UpdateLayout();
                 using(var bitmap=new RenderTargetBitmap(new PixelSize((int)window.Width,(int)window.Height),new Vector(96,96))) {
                     bitmap.Render(window); bitmap.Save(Path.Combine(root,$"page-{i}{(compact?"-compact":"")}.png"),new PngBitmapEncoderOptions());
                 }

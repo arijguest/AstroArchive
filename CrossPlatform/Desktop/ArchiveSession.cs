@@ -12,6 +12,23 @@ public sealed class DesktopSettings
     public string Model { get; set; } = "Auto";
     public string Theme { get; set; } = "Dark";
     public string ExternalEditor { get; set; } = "";
+    public string StackingExecutable { get; set; } = "";
+    public string Astap { get; set; } = PlateSolve.FindAstap();
+    public string StarDatabase { get; set; } = "";
+    public string ApiKeyReference { get; set; } = "";
+    public bool UseOnline { get; set; }
+    public double? FieldHeight { get; set; }
+    public double? Latitude { get; set; }
+    public double? Longitude { get; set; }
+    public string AutoSolve { get; set; } = "Off";
+    public string AutoRotation { get; set; } = "Off";
+    public bool IgnoreFailed { get; set; }
+    public bool IgnoreRaster { get; set; }
+    public int CopyWorkers { get; set; } = 2;
+    public Dictionary<string,string> RemoteCredentials { get; set; } = [];
+    public List<TelescopeProfile> Telescopes { get; set; } = [];
+    public double TextScale { get; set; } = 1;
+    public string PreviewStretch { get; set; } = "Auto per channel";
     public static string DefaultPath => Path.Combine(
         Environment.GetEnvironmentVariable("XDG_CONFIG_HOME") is { } xdg && Path.IsPathRooted(xdg)
             ? xdg : Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".config"),
@@ -20,12 +37,13 @@ public sealed class DesktopSettings
 
 // One foreground operation owns this session. The view disables conflicting
 // actions while work runs, and cancellation waits for the engine to unwind.
-public sealed class ArchiveSession : IDisposable
+public sealed partial class ArchiveSession : IDisposable
 {
     public Repository? Repository { get; private set; }
     public DesktopSettings Settings { get; private set; }
     public ObservableCollection<Frame> Captures { get; } = [];
     public ObservableCollection<Frame> Candidates { get; } = [];
+    public ObservableCollection<DeletedCapture> Deleted { get; } = [];
     public ObservableCollection<EditedImage> Edited { get; } = [];
     public AnalyticsSnapshot Analytics { get; private set; } = ArchiveAnalytics.Build([], new AnalyticsOptions());
     public string LastReport { get; private set; } = "";
@@ -50,7 +68,7 @@ public sealed class ArchiveSession : IDisposable
         catch (Exception e) when (e is IOException or JsonException or UnauthorizedAccessException)
         { SettingsWarning = "Settings could not be loaded: " + e.Message; }
         Settings.Archive ??= ""; Settings.Source ??= ""; Settings.Telescope ??= "My telescope";
-        Settings.Model ??= "Auto"; Settings.ExternalEditor ??= "";
+        Settings.Model ??= "Auto"; Settings.ExternalEditor ??= ""; Settings.Telescopes ??= []; Settings.RemoteCredentials ??= [];
         if(Settings.Theme is not ("Dark" or "Light" or "System")) Settings.Theme="Dark";
     }
 
@@ -80,7 +98,7 @@ public sealed class ArchiveSession : IDisposable
         if (Repository != null && root == Repository.Root) { Refresh(); return; }
         var next = new Repository(root);
         Repository?.Dispose(); Repository = next;
-        Settings.Archive = root; plan = null; Candidates.Clear();
+        Settings.Archive = root; plan = null; Candidates.Clear(); Solutions.Clear(); solved.Clear(); RemoteFiles.Clear(); listedConnection=null;
         Refresh(); SaveSettings();
     }
 
@@ -88,9 +106,11 @@ public sealed class ArchiveSession : IDisposable
     public void Refresh()
     {
         Replace(Captures, RequireArchive().All());
+        Replace(Deleted,RequireArchive().Deletions());
         var projects = RequireArchive().EditedProjects(out var errors);
         Replace(Edited, projects.SelectMany(p => RequireArchive().EditedImages(p).Select(image => { image.Project = p; return image; })));
         Analytics = ArchiveAnalytics.Build(Captures, new AnalyticsOptions());
+        RefreshRecovery();
         if (errors.Count > 0) LastReport = string.Join("\n", errors);
     }
 
@@ -109,11 +129,14 @@ public sealed class ArchiveSession : IDisposable
         if (plan == null) throw new InvalidOperationException("Scan a source before importing.");
         var frames = selected.ToList();
         if (frames.Count == 0) throw new InvalidOperationException("Select files to import.");
-        // Source cleanup intentionally stays off on Linux.
-        var result = RequireArchive().Import(frames, ct, progress,
-            new ImportOptions { SourceRoot = Settings.Source, DeleteOriginals = false, ScanMetrics = plan.Metrics });
-        LastReport = RequireArchive().LastReport;
-        return result;
+        var record=resuming??Record("Files",null,new TelescopeProfile { Id=Settings.Telescope,Model=Settings.Model },frames);
+        return Recoverable(record,store=> {
+            var result=RequireArchive().Import(frames,ct,progress,new ImportOptions { SourceRoot=Settings.Source,DeleteOriginals=false,IgnoreFailed=Settings.IgnoreFailed,IgnoreRaster=Settings.IgnoreRaster,Workers=Settings.CopyWorkers,ScanMetrics=plan.Metrics,OnFrame=frame=>store.Completed(record,frame) });
+            LastReport=RequireArchive().LastReport;
+            AnalyzeImported(frames.Where(f=>f.Status=="Imported"),ct,progress);
+            if(result.Failed>0) { record.Frames=frames.Select(f=>f.Clone()).ToList(); record.State="Interrupted"; }
+            return result;
+        });
     }
     public string Export(IEnumerable<Frame> selection, string destination, string name, bool stacking, CancellationToken ct, Action<ProgressInfo> progress)
     {
@@ -173,6 +196,7 @@ public sealed class ArchiveSession : IDisposable
         using var logoBytes = new MemoryStream(); logoStream.CopyTo(logoBytes);
         Exporter.WriteMetadataText(Path.Combine(dest, "analytics.svg"), AnalyticsGraphics.Svg(pages, Convert.ToBase64String(logoBytes.ToArray())), ct);
         Exporter.WriteMetadataText(Path.Combine(dest, "analytics.json"), Util.Serialize(Analytics), ct);
+        LinuxAnalyticsExport.Write(dest,pages,logoBytes.ToArray(),ct);
         LastOutput = dest; return dest;
     }
     public static void LaunchEditor(string executable, string path)
@@ -184,5 +208,5 @@ public sealed class ArchiveSession : IDisposable
     }
     private static void Replace<T>(ObservableCollection<T> collection, IEnumerable<T> values)
     { var items = values.ToList(); collection.Clear(); foreach (var item in items) collection.Add(item); }
-    public void Dispose() => Repository?.Dispose();
+    public void Dispose() { if(sessionKey.Length>0) LinuxSecrets.Forget(sessionKey); Repository?.Dispose(); }
 }

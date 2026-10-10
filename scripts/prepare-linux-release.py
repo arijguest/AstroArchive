@@ -22,13 +22,20 @@ assert counters.attrib['passed'] == counters.attrib['executed'], 'Desktop checks
 drive = (source / 'exfat-drive.log').read_text()
 assert 'PASS: exFAT import/export, unmount/remount, index freshness and read-only mount rejection' in drive
 assert 'Read-only file system' in drive, 'Missing genuine filesystem rejection'
+assert 'PASS: native Linux FTP and SMB list/download, sidecars, verified retry and unchanged telescope originals' in (source / 'network-test.log').read_text()
+assert 'PASS: actual Linux Secret Service persistence, private settings and credential removal' in (source / 'keyring-test.log').read_text()
+assert 'PARITY BUTTONS PASS:' in (source / 'ui-test.log').read_text()
+assert re.search(r'^Pages:\s+6$', (source / 'pdf-test.log').read_text(), re.M)
+parity = sorted((source / 'ui').glob('parity-*.png'))
+assert len(parity) == 8, 'Missing native workflow screenshots'
 screenshots = sorted((source / 'ui').glob('page-*.png'))
 assert len(screenshots) == 12, 'Missing native page screenshots'
 
 output.mkdir(exist_ok=True)
-for name in ['AstroArchive-3.1.3-preview.1-linux-x64.tar.gz', 'astroarchive_3.1.3-preview.1_amd64.deb']:
+for name in ['AstroArchive-3.1.3-preview.2-linux-x64.tar.gz', 'astroarchive_3.1.3-preview.2_amd64.deb']:
     shutil.copy2(source / name, output / name)
 shutil.copy2('CrossPlatform/README.md', output / 'README.md')
+shutil.copy2('CrossPlatform/FEATURE-PARITY.md', output / 'FEATURE-PARITY.md')
 ci_url = 'https://github.com/' + os.environ['GITHUB_REPOSITORY'] + '/actions/runs/' + os.environ['GITHUB_RUN_ID']
 report = pathlib.Path('CrossPlatform/VALIDATION.md').read_text()
 for key, value in {'SOURCE_SHA': os.environ['GITHUB_SHA'], 'CI_URL': ci_url,
@@ -39,13 +46,15 @@ assert not re.search(r'@[A-Z_]+@', report), 'Unresolved evidence placeholder'
 (output / 'VALIDATION.md').write_text(report)
 pages = ['repository', 'import', 'edited', 'analytics', 'settings', 'guide']
 with zipfile.ZipFile(output / 'AstroArchive-Linux-page-screenshots.zip', 'w', zipfile.ZIP_DEFLATED) as archive:
+    for screenshot in parity:
+        archive.write(screenshot, screenshot.name)
     for screenshot in screenshots:
         match = re.fullmatch(r'page-(\d+)(-compact)?\.png', screenshot.name)
         assert match and 0 <= int(match[1]) < 6
         name = pages[int(match[1])] + ('-compact.png' if match[2] else '-normal.png')
         archive.write(screenshot, name)
 with zipfile.ZipFile(output / 'Linux-validation-logs.zip', 'w', zipfile.ZIP_DEFLATED) as archive:
-    for name in ['engine.log', 'package-test.log', 'exfat-drive.log', 'test-results/linux-desktop.trx']:
+    for name in ['engine.log', 'package-test.log', 'exfat-drive.log', 'network-test.log', 'keyring-test.log', 'ui-test.log', 'pdf-test.log', 'test-results/linux-desktop.trx']:
         archive.write(source / name, name)
 
 def digest(path):
@@ -57,4 +66,4 @@ def digest(path):
 
 files = sorted(p for p in output.iterdir() if p.is_file() and p.name != 'SHA256SUMS')
 (output / 'SHA256SUMS').write_text(''.join(digest(p) + '  ' + p.name + '\n' for p in files))
-print('Prepared verified packages, 12 native screenshots and CI evidence at', output)
+print('Prepared verified packages, 20 native screenshots and CI evidence at', output)

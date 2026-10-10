@@ -1,6 +1,12 @@
-AstroArchive's first Linux x64 desktop preview, based on Windows 3.1.3. Download the Debian package for Ubuntu/Debian, or the portable tarball. Both include .NET 10; no separately installed .NET runtime is needed.
+Linux preview 2 adds workflows missing from the first preview while retaining the
+Windows 3.1.3 archive format. Both packages include .NET 10.
 
-The desktop includes Repository search and FITS/XISF/SER numeric previews, verified folder/card imports, original-file and stacking exports, Edited working copies and finished images, six analytics reports, and verified archive backups.
+Added: ASTAP/Astrometry.net target solving, reviewed assignments, rotation and optional
+post-import analysis; native telescope discovery, Direct SMB/FTP and live imports;
+restart recovery; detailed metadata/filter/review controls; exact supported PNG/TIFF
+samples and raster previews; sky context navigation; richer stacking exports; Edited
+folder imports/overrides/deletion; capture deletion/audit/reimport; desktop keyring
+credentials; capture guard; PDF/PNG analytics and saved text scale.
 
 ### Moving the same archive between Windows and Linux
 
@@ -13,17 +19,27 @@ Linux preserves Windows deletion-protection settings. Disable protection on Wind
 Verify the downloaded package against `SHA256SUMS`.
 
 ```sh
-sudo apt install ./astroarchive_3.1.3-preview.1_amd64.deb
+sudo apt install ./astroarchive_3.1.3-preview.2_amd64.deb
 astroarchive
 ```
 
-Alternatively, extract `AstroArchive-3.1.3-preview.1-linux-x64.tar.gz` and launch `AstroArchive` inside its folder. The tarball requires the distribution's ICU, OpenSSL 3, fontconfig and X11 libraries. Optional libcfitsio/libzstd enable their scientific codecs.
+Alternatively, extract `AstroArchive-3.1.3-preview.2-linux-x64.tar.gz` and launch `AstroArchive` inside its folder. The tarball requires the distribution's ICU, OpenSSL 3, fontconfig and X11 libraries. Optional libcfitsio/libzstd enable their scientific codecs.
 
 ### Validation and preview scope
 
 See the attached `VALIDATION.md` for test evidence, operating-system coverage and remaining limits. The release checks exercise all six pages, installed packages, interrupted-import recovery, a removable exFAT filesystem and archive exchanges with the Windows Framework engine in both directions.
 
-This is a preview. Source originals are retained. Direct telescope/live-network UI, plate-solving/rotation UI, native Linux deletion protection and some Windows dialogs are not included. Wayland uses XWayland. There is no automatic Linux updater. Read the attached Linux README for workflows and filesystem guidance.
+This is a preview. Linux retains source/Dump originals. Its capture guard applies
+inside AstroArchive; Windows NTFS protection remains separate. In-app raster previews
+are stills; movie/animation playback uses the system viewer. Some Windows viewport,
+layout and accessibility dialogs remain different. Wayland uses XWayland. Install
+updates manually. Hardware/firmware and external application limits are documented
+in the attached README, FEATURE-PARITY.md and VALIDATION.md.
+
+Validation includes real Linux FTP/SMB servers and UDP replies, online/ASTAP protocol
+fixtures, known synthetic rotation, exact raster samples, real page and pointer/keyboard
+controls, persisted recovery, an actual CI Secret Service keyring, 20 native screenshots,
+a six-page PDF, installed packages, exFAT remounts and Windows archive exchanges.
 
 Required Notice: Copyright 2026 Ari J. Guest (https://arijguest.com)
 Licensed under PolyForm Noncommercial 1.0.0; package includes LICENSE and third-party notices.

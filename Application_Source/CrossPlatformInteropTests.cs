@@ -16,10 +16,17 @@ namespace AstroArchive {
     Fits(Path.Combine(source,"Light_M31.fit"),"M31",11);Fits(Path.Combine(source,"Light_M45.fit"),"M45",17);File.WriteAllText(Path.Combine(source,"shotsInfo.json"),"{\"targetName\":\"M31\",\"cameraId\":0}");
     using(var repo=new Repository(archive)){
      var result=repo.Import(repo.Scan(source,"Drive scope","Dwarf 3",ct,progress).Frames,ct,progress);Check(result.Imported==2,"creator imports two original captures");
+     var frame=repo.All().Single(f=>f.OriginalName=="Light_M31.fit");
+     frame=new MetadataPatch(new Dictionary<string,string>{{"Gain","73"},{"Exposure","120.5"},{"Binning","2x2"},{"TimeZoneId","GMT Standard Time"}}).Apply(frame);
+     frame.RA=10.6847;frame.Dec=41.269;frame.Sky=new SkyGeometry{RA=frame.RA.Value,Dec=frame.Dec.Value,Evidence="Cross-platform solved metadata fixture"};repo.Refile(frame,ct);
+     string deletionSource=Path.Combine(root,"Deletion input Ω");Fits(Path.Combine(deletionSource,"Light_M81.fit"),"M81",47);
+     repo.Import(repo.Scan(deletionSource,"Drive scope","Auto",ct,progress).Frames,ct,progress);
+     var deleted=repo.All().Single(f=>f.OriginalName=="Light_M81.fit");File.WriteAllText(Path.Combine(root,"deleted-hash.txt"),deleted.Hash);
+     Check(repo.DeleteFrames(new List<Frame>{deleted},ct,progress).Deleted==1,"creator records a deletion tombstone without disturbing retained captures");
      var project=repo.CreateEditedWorkingCopies(repo.All(),"Portable working copies","Editor",ct,progress);
      project.CreatedUtc=new DateTime(2025,10,9,8,53,20,DateTimeKind.Utc).AddMilliseconds(123);
      string nested=Path.Combine(repo.EditedProjectFolder(project),"nested");Directory.CreateDirectory(nested);Fits(Path.Combine(nested,"edited_M31.fit"),"M31",23);
-     project.MetadataEdits=new Dictionary<string,EditedMetadata>();project.MetadataEdits[Path.Combine("nested","edited_M31.fit")]=new EditedMetadata{Object="M33"};
+     project.MetadataEdits=new Dictionary<string,EditedMetadata>();project.MetadataEdits[Path.Combine("nested","edited_M31.fit")]=new EditedMetadata{Object="M33",Subs=20,TotalExposure=1200,Filters="Ha"};
      Util.AtomicText(Path.Combine(repo.EditedProjectFolder(project),"edited-project.json"),Util.Serialize(project));
      repo.Checkpoint(ct);Check(repo.Verify(ct,progress)==0,"creator verifies archive pixels");
     }
@@ -28,10 +35,13 @@ namespace AstroArchive {
     using(var repo=new Repository(archive)){
      int count=mode=="--interop-update"?2:3;Check(repo.All().Count==count,"reader sees the other platform's current index");
      Check(repo.Verify(ct,progress)==0,"all archive hashes survive drive movement");
+     Check(repo.Deletions().Any(d=>d.Hash==File.ReadAllText(Path.Combine(root,"deleted-hash.txt"))&&d.Excluded),"deletion history and reimport exclusion survive drive movement");
+     var detailed=repo.All().Single(f=>f.OriginalName=="Light_M31.fit");
+     Check(detailed.RA==10.6847&&detailed.Dec==41.269&&detailed.Gain==73&&detailed.Exposure==120.5&&detailed.BinX==2&&detailed.TimeZoneId=="GMT Standard Time"&&Util.Time(detailed.ObservedUtc).Value.ToUniversalTime()==new DateTime(2026,10,6,20,0,0,DateTimeKind.Utc)&&detailed.Sky.Evidence=="Cross-platform solved metadata fixture","pointing, detailed metadata and Windows timezone IDs survive platform movement");
      Check(repo.All().All(f=>!string.IsNullOrEmpty(f.SidecarRelativePath)&&File.Exists(Path.Combine(repo.Root,f.SidecarRelativePath))),"session metadata remains accessible");
      List<string> errors;var projects=repo.EditedProjects(out errors);Check(errors.Count==0&&projects.Count==1,"Edited project identity and legacy dates survive");
      Check(projects[0].CreatedUtc.ToUniversalTime()==new DateTime(2025,10,9,8,53,20,DateTimeKind.Utc).AddMilliseconds(123),"Edited timestamps retain exact milliseconds across platforms");
-     var images=repo.EditedImages(projects[0]);Check(images.Count==3&&images.Single(i=>i.Filename=="edited_M31.fit").Metadata.Object=="M33","nested Edited paths and metadata overrides survive separators");
+     var images=repo.EditedImages(projects[0]);Check(images.Count==3&&images.Single(i=>i.Filename=="edited_M31.fit").Metadata.Object=="M33"&&images.Single(i=>i.Filename=="edited_M31.fit").Metadata.Subs==20&&images.Single(i=>i.Filename=="edited_M31.fit").Metadata.TotalExposure==1200,"nested Edited paths and metadata overrides survive separators");
      string exported=Exporter.Create(repo,repo.All(),new ExportOptions{Parent=exports,Name="export-"+Guid.NewGuid().ToString("N"),CreateNewFolder=true,Mode="Files",AddMetadata=true},ct,progress);
      Check(Directory.GetFiles(exported,"*.fit",SearchOption.AllDirectories).Length==count,"reader exports every expected original");
      if(mode=="--interop-update"){

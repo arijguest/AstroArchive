@@ -53,6 +53,7 @@ public sealed class JavaScriptSerializer
         JArray a => a.Select(Untyped).ToArray(),
         JValue v when v.Value is string value && Regex.IsMatch(value, @"^/Date\((-?\d+)(?:[+-]\d{4})?\)/$") =>
             DateTimeOffset.FromUnixTimeMilliseconds(long.Parse(Regex.Match(value, @"^/Date\((-?\d+)").Groups[1].Value, Globalization.CultureInfo.InvariantCulture)).UtcDateTime,
+        JValue v when v.Value is long number && number >= int.MinValue && number <= int.MaxValue => (int)number,
         JValue v => v.Value,
         _ => null
     };
