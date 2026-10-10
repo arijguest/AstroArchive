@@ -27,7 +27,7 @@ namespace AstroArchive {
     var off=dialog.Check("Unchecked — keep source files",false);var on=dialog.Check("Checked — delete verified copies",true);var mixed=dialog.Check("Mixed selection",false);mixed.IsThreeState=true;mixed.IsChecked=null;
     var disabledOff=dialog.Check("Unavailable, unchecked",false);disabledOff.IsEnabled=false;var disabledOn=dialog.Check("Unavailable, checked",true);disabledOn.IsEnabled=false;var disabledMixed=dialog.Check("Unavailable, mixed",false);disabledMixed.IsThreeState=true;disabledMixed.IsChecked=null;disabledMixed.IsEnabled=false;
     dialog.Tab(1);int clicked=0;var button=dialog.Button("Working action",()=>clicked++);var disabledButton=dialog.Button("Unavailable action",()=>clicked++);disabledButton.IsEnabled=false;
-    var combo=dialog.Select("Available selection",new[]{"Keep files","Delete files"},"Keep files");var disabledCombo=dialog.Select("Unavailable selection",new[]{"Recorded choice"},"Recorded choice");disabledCombo.IsEnabled=false;
+    dialog.Select("Available selection",new[]{"Keep files","Delete files"},"Keep files");var disabledCombo=dialog.Select("Unavailable selection",new[]{"Recorded choice"},"Recorded choice");disabledCombo.IsEnabled=false;
     var editable=new ComboBox{IsEditable=true,IsTextSearchEnabled=false,Text="M31",ItemsSource=new[]{"M31","M51"}};dialog.Add(editable);
     var list=new ListBox{ItemsSource=new[]{"Selected item","Other item"},SelectedIndex=0,Height=90};dialog.Add(list);
     dialog.Tab(2);var review=EditedImportReviewTable(new EditedImportPlan{Images={new EditedImportCandidate{RelativePath="new.fit",Include=true},new EditedImportCandidate{RelativePath="duplicate.fit",DuplicateReason="Already in Edited"}}});dialog.Add(review);

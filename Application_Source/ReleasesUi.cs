@@ -20,12 +20,12 @@ namespace AstroArchive {
   public readonly Expander NotesSection=new Expander{Header="Release notes",Visibility=Visibility.Collapsed,Margin=new Thickness(0,4,0,12)};
   public readonly Button ReleaseLink=new Button{Content="View release on GitHub",HorizontalAlignment=HorizontalAlignment.Left,Margin=new Thickness(0,12,0,0)};
   readonly FormWindow form;readonly Func<bool> save;readonly Func<Task<UpdateManifest>> check;readonly Func<UpdateManifest,Task<string>> notes;
-  readonly Func<UpdateManifest,IProgress<UpdateDownloadProgress>,Task> install;readonly Action finished;readonly Action<UpdateManifest> open;readonly Action<bool> installationState;
+  readonly Func<UpdateManifest,IProgress<UpdateDownloadProgress>,Task> install;readonly Action finished;readonly Action<bool> installationState;
   public Func<bool> CanInstall=()=>true;
   public void SetCachedRelease(UpdateManifest release,string status){if(closed||Busy)return;Available=release;SetStatus(status);if(release!=null){NotesSection.Visibility=Visibility.Visible;Notes.Text=release.release_notes??"Use View release on GitHub to read release notes.";}Refresh();}
   public UpdateManifest Available{get;private set;}public bool Busy{get;private set;}public bool Installing{get;private set;}bool closed;
   public ReleaseSettingsPanel(FormWindow form,string version,string installation,Func<bool> save,Func<Task<UpdateManifest>> check,Func<UpdateManifest,Task<string>> notes,Func<UpdateManifest,IProgress<UpdateDownloadProgress>,Task> install,Action finished,Action<UpdateManifest> open,Action<bool> installationState=null){
-   this.form=form;this.save=save;this.check=check;this.notes=notes;this.install=install;this.finished=finished;this.open=open;this.installationState=installationState??(active=>{});
+   this.form=form;this.save=save;this.check=check;this.notes=notes;this.install=install;this.finished=finished;this.installationState=installationState??(active=>{});
    form.Group(()=>{
     form.Text("Updates",true);form.Text(version);
     form.Text("Installation saves your settings, downloads and verifies the release, then restarts AstroArchive. Your repositories and images are kept.");

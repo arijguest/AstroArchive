@@ -778,7 +778,7 @@
        <ColumnDefinition Width="260" />
        <ColumnDefinition Width="*" MinWidth="260" />
        <ColumnDefinition x:Name="PreviewDividerColumn" Width="10" />
-       <ColumnDefinition x:Name="PreviewColumn" Width="340" MinWidth="0" />
+      <ColumnDefinition x:Name="PreviewColumn" Width="280" MinWidth="0" />
       </Grid.ColumnDefinitions>
       <Grid x:Name="LibraryToolbar" VerticalAlignment="Center" Margin="0,0,0,6">
        <Grid.Style><Style TargetType="Grid"><Setter Property="Grid.ColumnSpan" Value="2"/><Style.Triggers><DataTrigger Binding="{Binding Visibility, ElementName=PreviewPane}" Value="Collapsed"><Setter Property="Grid.ColumnSpan" Value="4"/></DataTrigger></Style.Triggers></Style></Grid.Style>
