@@ -1,5 +1,16 @@
-AstroArchive 3.0.0
-Package 3.0.0.1
+AstroArchive 3.0.1
+Package 3.0.1.1
+
+- Repository > Analytics offers six branded, publication-ready charts: targets
+  photographed, imaging timeline, imaging time per target, imaging time per
+  telescope, filter mix and exposure lengths.
+- Preview charts with date and telescope filters, a document label and optional
+  rejected-light inclusion. Export PNG, JPEG, PDF or SVG. Export all combines the
+  six charts into one document; PDF preserves separate pages and raster exports
+  offer 150 or 300 DPI. Long rankings continue across pages without losing targets.
+- Analytics use individual light frames to avoid counting stacks, videos and
+  calibration frames as additional imaging time. Missing dates and exposure
+  metadata are reported in the charts.
 
 - Connect over network beside Saved telescope automatically finds Seestar and DWARF
   devices on the active local networks. Manual addresses and custom storage paths
@@ -16,5 +27,3 @@ Package 3.0.0.1
   DWARF uses read-only FTP. Compatible file access must be exposed by the firmware.
 - The separate SMBLibrary DLL, matching source and licence notices are bundled
   with portable and installed builds.
-
-Windows signing: This development build is unsigned.

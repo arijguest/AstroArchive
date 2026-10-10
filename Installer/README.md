@@ -22,9 +22,9 @@ offline launch, checksums and Windows policy blocks.
 Replace the filename with your downloaded package:
 
 ```powershell
-.\AstroArchive3.0.0.1.exe --silent
-.\AstroArchive3.0.0.1.exe --update --silent --root "$env:LOCALAPPDATA\Programs\AstroArchive"
-.\AstroArchive3.0.0.1.exe --uninstall --root "$env:LOCALAPPDATA\Programs\AstroArchive"
+.\AstroArchive3.0.1.1.exe --silent
+.\AstroArchive3.0.1.1.exe --update --silent --root "$env:LOCALAPPDATA\Programs\AstroArchive"
+.\AstroArchive3.0.1.1.exe --uninstall --root "$env:LOCALAPPDATA\Programs\AstroArchive"
 ```
 
 `--update` requires an existing installation. `--restart` opens the app after a
