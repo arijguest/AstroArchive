@@ -1,3 +1,4 @@
+#nullable enable
 namespace AstroArchive;
 
 public sealed class ProtectionState { public string Mode = "Off", Sid = "", Root = ""; }
@@ -7,14 +8,14 @@ public sealed class ProtectionRecord { public string Kind = "", Id = ""; public 
 public sealed class ArchiveProtection
 {
     public bool Enabled => false;
-    public string Availability => "Filesystem deletion protection is available in the Windows application. Mac imports retain source originals.";
+    public string Availability => "Filesystem deletion protection is available in the Windows application. Linux imports retain source originals.";
     public ArchiveProtection(string root, string meta)
     {
         string path = Path.Combine(meta, "protection.json");
         if (!File.Exists(path)) return;
         var state = Util.Deserialize<ProtectionState>(File.ReadAllText(path));
-        if (state == null || state.Mode != "Off")
-            throw new IOException("This archive has Windows deletion protection. Open a verified backup, or disable protection in AstroArchive on Windows before moving it.");
+        if (state == null || (state.Mode != "Off" && state.Mode != "Enabled"))
+            throw new IOException("This archive has an interrupted Windows protection change. Open it on Windows to complete recovery before using it on Linux.");
     }
     public void ProtectCapture(string path) { }
     public void Enable(IEnumerable<string> files, CancellationToken ct, Action<ProgressInfo>? progress) => throw new PlatformNotSupportedException(Availability);

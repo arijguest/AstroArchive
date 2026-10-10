@@ -36,7 +36,15 @@ namespace AstroArchive {
   public static bool FailedFilename(string path) { return Path.GetFileName(path??"").IndexOf("failed",StringComparison.OrdinalIgnoreCase)>=0; }
   public static bool FailedFilename(Frame frame) { return FailedFilename(!string.IsNullOrEmpty(frame.OriginalName)?frame.OriginalName:frame.SourcePath??frame.RelativePath); }
   public static string SafeFile(string s) {var m=Regex.Match(s??"",@"(\.(fit|fits|fts)(\.gz)?)$",RegexOptions.IgnoreCase);string ext=m.Success?m.Value:Path.GetExtension(s??"");string stem=ext.Length>0?s.Substring(0,s.Length-ext.Length):s;return Safe(stem)+ext;}
-  public static bool Within(string path,string parent) { string p=Path.GetFullPath(path).TrimEnd('\\','/'), r=Path.GetFullPath(parent).TrimEnd('\\','/'); return p.Equals(r,StringComparison.OrdinalIgnoreCase)||p.StartsWith(r+Path.DirectorySeparatorChar,StringComparison.OrdinalIgnoreCase); }
+  public static readonly StringComparer PathComparer =
+#if PORTABLE
+   OperatingSystem.IsWindows() ? StringComparer.OrdinalIgnoreCase : StringComparer.Ordinal;
+  public static readonly StringComparison PathComparison = OperatingSystem.IsWindows() ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal;
+#else
+   StringComparer.OrdinalIgnoreCase;
+  public static readonly StringComparison PathComparison = StringComparison.OrdinalIgnoreCase;
+#endif
+  public static bool Within(string path,string parent) { string p=Path.GetFullPath(path).TrimEnd(Path.DirectorySeparatorChar,Path.AltDirectorySeparatorChar), r=Path.GetFullPath(parent).TrimEnd(Path.DirectorySeparatorChar,Path.AltDirectorySeparatorChar); return p.Equals(r,PathComparison)||p.StartsWith(r+Path.DirectorySeparatorChar,PathComparison); }
   public static string Num(double? n) { return n.HasValue?n.Value.ToString("0.###",CultureInfo.InvariantCulture):"?"; }
   public static DateTime? Time(string s) { DateTime d; return DateTime.TryParse(s,CultureInfo.InvariantCulture,DateTimeStyles.AssumeUniversal|DateTimeStyles.AdjustToUniversal,out d)?(DateTime?)d:null; }
   public static void AtomicText(string path,string text) {

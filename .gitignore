@@ -25,3 +25,6 @@ CrossPlatform/TestResults/
 macos-artifacts/
 
 Application_Source/SMBLibrary.dll
+
+linux-artifacts/
+**/TestResults/

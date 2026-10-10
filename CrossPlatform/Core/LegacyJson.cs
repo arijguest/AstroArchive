@@ -1,3 +1,4 @@
+#nullable enable
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Serialization;
@@ -28,6 +29,7 @@ public sealed class JavaScriptSerializer
         if (result.Length > MaxJsonLength) throw new ArgumentException("JSON exceeds the configured limit.");
         return result;
     }
+    public object DeserializeObject(string text) => Deserialize<object>(text);
     public T Deserialize<T>(string text)
     {
         if (text.Length > MaxJsonLength) throw new ArgumentException("JSON exceeds the configured limit.");
@@ -48,8 +50,27 @@ public sealed class JavaScriptSerializer
         {
             var property = base.CreateProperty(member, serialization);
             if (member.GetCustomAttribute<ScriptIgnoreAttribute>() != null) property.Ignored = true;
+            bool relative = member.Name == "RelativePath" || member.Name == "SidecarRelativePath" ||
+                member.DeclaringType == typeof(AstroArchive.SourceManifest) && member.Name == "Destination";
+            if (relative && property.ValueProvider != null) property.ValueProvider = new PortablePathValue(property.ValueProvider);
+            if (member.DeclaringType == typeof(AstroArchive.EditedProject) && member.Name == "MetadataEdits" && property.ValueProvider != null)
+                property.ValueProvider = new PortableEditsValue(property.ValueProvider);
             return property;
         }
+    }
+    // Keep the established Windows on-disk separator. Decode it at the boundary
+    // so Linux in-memory paths use '/' while released Windows versions read '\\'.
+    private sealed class PortablePathValue(IValueProvider inner) : IValueProvider
+    {
+        public object? GetValue(object target) => inner.GetValue(target) is string path ? path.Replace('/', '\\') : inner.GetValue(target);
+        public void SetValue(object target, object? value) => inner.SetValue(target, value is string path ? path.Replace('\\', IO.Path.DirectorySeparatorChar) : value);
+    }
+    private sealed class PortableEditsValue(IValueProvider inner) : IValueProvider
+    {
+        public object? GetValue(object target) => inner.GetValue(target) is Dictionary<string, AstroArchive.EditedMetadata> edits
+            ? edits.ToDictionary(p => p.Key.Replace('/', '\\'), p => p.Value) : inner.GetValue(target);
+        public void SetValue(object target, object? value) => inner.SetValue(target, value is Dictionary<string, AstroArchive.EditedMetadata> edits
+            ? edits.ToDictionary(p => p.Key.Replace('\\', IO.Path.DirectorySeparatorChar), p => p.Value) : value);
     }
     private sealed class LegacyDateConverter : JsonConverter<DateTime>
     {

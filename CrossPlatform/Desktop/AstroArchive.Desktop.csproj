@@ -1,0 +1,8 @@
+<Project Sdk="Microsoft.NET.Sdk"><PropertyGroup><OutputType>WinExe</OutputType><AssemblyName>AstroArchive</AssemblyName></PropertyGroup><ItemGroup>
+<ProjectReference Include="../Core/AstroArchive.Core.csproj" />
+<PackageReference Include="Avalonia" Version="12.1.2" />
+<PackageReference Include="Avalonia.Fonts.Inter" Version="12.1.2" />
+<PackageReference Include="Avalonia.Desktop" Version="12.1.2" />
+<PackageReference Include="Avalonia.Themes.Fluent" Version="12.1.2" />
+<PackageReference Include="Avalonia.Controls.DataGrid" Version="12.1.2" />
+</ItemGroup></Project>
