@@ -12,8 +12,10 @@ import zipfile
 source = pathlib.Path('linux-artifacts')
 output = pathlib.Path('linux-release')
 subprocess.run(['sha256sum', '-c', 'SHA256SUMS'], cwd=source, check=True)
+engine_log = (source / 'engine.log').read_text()
+assert not re.search(r'^FAIL ', engine_log, re.M), 'Engine checks contain a failure'
 engine = re.search(r'(\d+) tests passed; (\d+) platform/optional-codec tests skipped',
-                   (source / 'engine.log').read_text())
+                   engine_log)
 assert engine and int(engine[1]) > 0, 'Missing successful engine evidence'
 trx = ET.parse(source / 'test-results/linux-desktop.trx')
 counters = trx.find('.//{*}Counters')
