@@ -5,6 +5,7 @@ using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Interactivity;
 using Avalonia.Media.Imaging;
 using Avalonia.Threading;
+using Avalonia.VisualTree;
 
 namespace AstroArchive.Desktop;
 
@@ -194,6 +195,10 @@ public static class NativeSmoke
             Application.Current!.RequestedThemeVariant=mode=="-light"?Avalonia.Styling.ThemeVariant.Light:Avalonia.Styling.ThemeVariant.Dark;
             for(int i=0;i<6;i++) {
                 Page(i); if(((TabItem)((TabControl)window.Controls["Pages"]).Items[i]!).Content is ScrollViewer scroller)scroller.Offset=default; window.UpdateLayout(); await Task.Delay(100); window.UpdateLayout();
+                if(mode=="-large-text"&&i==0) {
+                    var cells=((DataGrid)window.Controls["Captures"]).GetVisualDescendants().OfType<TextBlock>().ToList();
+                    ReleaseFixture.Check(cells.Any(t=>t.Text=="Light_M31.fit"&&t.FontSize==28)&&cells.Any(t=>t.Text=="Target"&&t.FontSize==28),"native maximum text scale includes table cells and headers");
+                }
                 using(var bitmap=new RenderTargetBitmap(new PixelSize((int)window.Width,(int)window.Height),new Vector(96,96))) {
                     bitmap.Render(window); bitmap.Save(Path.Combine(root,$"page-{i}{mode}.png"),new PngBitmapEncoderOptions());
                 }

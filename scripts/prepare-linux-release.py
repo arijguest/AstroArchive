@@ -31,6 +31,7 @@ assert 'PARITY BUTTONS PASS:' in (source / 'ui-test.log').read_text()
 assert 'PASS native telescope rows render capture filenames' in (source / 'ui-test.log').read_text()
 assert 'PASS native recovery rows render the paused import title' in (source / 'ui-test.log').read_text()
 assert 'PASS native import preferences survive settings reload' in (source / 'ui-test.log').read_text()
+assert 'PASS native maximum text scale includes table cells and headers' in (source / 'ui-test.log').read_text()
 assert re.search(r'^Pages:\s+6$', (source / 'pdf-test.log').read_text(), re.M)
 parity = sorted((source / 'ui').glob('parity-*.png'))
 assert len(parity) == 9, 'Missing native workflow screenshots'

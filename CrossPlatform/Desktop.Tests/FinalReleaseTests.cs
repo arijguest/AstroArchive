@@ -3,6 +3,7 @@ using Avalonia.Controls;
 using Avalonia.Headless.XUnit;
 using Avalonia.Interactivity;
 using Avalonia.Threading;
+using Avalonia.VisualTree;
 using AstroArchive.Desktop;
 using Xunit;
 
@@ -86,6 +87,10 @@ public sealed class FinalReleaseTests : IDisposable
         var window = new MainWindow(session) { Width = 1100, Height = 720 }; window.Show();
         try
         {
+            Put(window, "ArchivePath", Path.Combine(root, "large-text-archive")); await Click(window, "OpenArchive");
+            Put(window, "SourcePath", ReleaseFixture.Prepare(root)); await Click(window, "Scan");
+            await Click(window, "ImportAll"); Assert.Null(window.LastError);
+            ((TabControl)window.Controls["Pages"]).SelectedIndex=0;
             await Dispatcher.UIThread.InvokeAsync(() => { }, DispatcherPriority.Background); window.UpdateLayout();
             foreach (string name in new[] { "OpenArchive", "BrowseArchive", "Cancel" })
             {
@@ -93,6 +98,11 @@ public sealed class FinalReleaseTests : IDisposable
                 Assert.InRange(origin.X + control.Bounds.Width, 1, window.Width);
                 Assert.InRange(origin.Y + control.Bounds.Height, 1, window.Height);
             }
+            var grid=(DataGrid)window.Controls["Captures"];
+            var filename=grid.GetVisualDescendants().OfType<TextBlock>().First(t=>t.Text=="Light_M31.fit");
+            Assert.Equal(28,filename.FontSize);
+            Put(window,"TextScale","1"); await Click(window,"SaveAdvanced"); Assert.Null(window.LastError);
+            window.UpdateLayout(); Assert.Equal(14,grid.GetVisualDescendants().OfType<TextBlock>().First(t=>t.Text=="Light_M31.fit").FontSize);
         }
         finally { window.Close(); }
     }

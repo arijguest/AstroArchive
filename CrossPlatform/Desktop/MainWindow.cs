@@ -23,6 +23,7 @@ public sealed partial class MainWindow : Window
     public Dictionary<string, Control> Controls { get; } = new();
     private CancellationTokenSource? cancellation;
     private Dictionary<string,List<object>> operationSelection = [];
+    private string successStatus = "";
     private readonly TextBlock status = new() { Text = "Choose an archive folder to begin.", TextWrapping = TextWrapping.Wrap };
     private readonly ProgressBar progress = new() { Minimum = 0, Maximum = 1, Height = 5 };
     private readonly TextBox report = new() { IsReadOnly = true, AcceptsReturn = true, TextWrapping = TextWrapping.Wrap, MinHeight = 100 };
@@ -40,6 +41,7 @@ public sealed partial class MainWindow : Window
     public MainWindow(ArchiveSession? session = null)
     {
         Session = session ?? new ArchiveSession(); FontSize=14*Math.Clamp(Session.Settings.TextScale,1,2);
+        PropertyChanged += (_,change) => { if(change.Property==FontSizeProperty) UpdateTableText(); };
         Title = "AstroArchive · Linux preview"; Width = 1220; Height = 850; MinWidth = 1100; MinHeight = 720;
         if (Application.Current != null) Application.Current.RequestedThemeVariant = Session.Settings.Theme == "Light" ? ThemeVariant.Light : Session.Settings.Theme == "System" ? ThemeVariant.Default : ThemeVariant.Dark;
         var body = new Grid { RowDefinitions = new RowDefinitions("Auto,Auto,*,Auto"), Margin = new Thickness(22) };
@@ -182,7 +184,7 @@ public sealed partial class MainWindow : Window
     private Task Import(bool all) => Run("Importing verified copies", async ct => {
         ReadImportOptions(); var selected = all ? Session.Candidates.ToList() : Selected<Frame>("Candidates");
         var result = await Task.Run(() => Session.Import(selected, ct, ReportProgress), ct);
-        status.Text = $"Imported {result.Imported}; duplicates {result.Duplicates}; failed {result.Failed}. Source originals retained.";
+        successStatus = $"Imported {result.Imported}; duplicates {result.Duplicates}; failed {result.Failed}. Source originals retained.";
         if (result.Failed > 0) LastError = $"{result.Failed} files failed. See the activity report.";
     });
     private Task ExportCaptures(bool stacking) => Run("Exporting verified copies", ct => { var frames = Selected<Frame>("Captures"); var parent = Text("CaptureDestination"); var name = Text("CaptureName"); var options=ReadExportOptions(parent,name,stacking); return Task.Run(() => Session.Export(frames,options,ct,ReportProgress),ct); });
@@ -212,7 +214,8 @@ public sealed partial class MainWindow : Window
     {
         Busy = true; LastError = null; cancellation?.Dispose(); cancellation = new CancellationTokenSource();
         archiveBar.IsEnabled = tabs.IsEnabled = false; cancel.IsEnabled = true; progress.IsIndeterminate = true; status.Text = title + "…";
-        try { await operation(cancellation.Token); if (status.Text == title + "…") status.Text = title + " complete."; }
+        successStatus = title + " complete.";
+        try { await operation(cancellation.Token); status.Text = successStatus; }
         catch (OperationCanceledException) { status.Text = "Canceled safely. Committed copies are retained; rescan to continue."; }
         catch (Exception e) { LastError = e.Message; status.Text = "Unable to complete: " + e.Message; }
         finally {
@@ -230,11 +233,14 @@ public sealed partial class MainWindow : Window
             Busy = false; archiveBar.IsEnabled = tabs.IsEnabled = true; cancel.IsEnabled = false; progress.IsIndeterminate = false; progress.Value = 0;
         }
     }
-    private void ReportProgress(ProgressInfo info) => Dispatcher.UIThread.Post(() => {
-        if (!Busy) return;
+    private void ReportProgress(ProgressInfo info) {
+        var owner=cancellation;
+        Dispatcher.UIThread.Post(() => {
+        if (!Busy || owner!=cancellation) return;
         progress.IsIndeterminate = info.Total <= 0; progress.Value = info.Total > 0 ? Math.Clamp((double)info.Done/info.Total, 0, 1) : 0;
         status.Text = info.Stage + " · " + info.Done + "/" + info.Total + " · " + info.Text;
-    });
+        });
+    }
     private void UpdateAnalytics()
     {
         var data = Session.Analytics;
@@ -275,9 +281,19 @@ public sealed partial class MainWindow : Window
             grid.Columns.Add(new DataGridTextColumn { Header = column.title,
                 Binding = fields?new Binding { Converter=new Avalonia.Data.Converters.FuncValueConverter<T,object?>(value=>ColumnValue(value,column.path)) }:new Binding(column.path),
                 SortMemberPath=column.path,CustomSortComparer=fields?new ColumnComparer(column.path):null,
+                FontSize=FontSize,MinWidth=110*FontSize/14,
                 Width = new DataGridLength(1, DataGridLengthUnitType.Star) });
         }
+        grid.Styles.Add(new Style(selector=>selector.OfType<DataGridColumnHeader>()) {
+            Setters={new Setter(FontSizeProperty,new Binding(nameof(FontSize)){Source=this})}
+        });
         Controls[name] = grid; return grid;
+    }
+    private void UpdateTableText()
+    {
+        foreach(var grid in Controls.Values.OfType<DataGrid>())
+            foreach(var column in grid.Columns.OfType<DataGridTextColumn>())
+            { column.FontSize=FontSize; column.MinWidth=110*FontSize/14; }
     }
     private static TabItem Page(string title, Control content) => new() { Header = title, Content = content, Padding = new Thickness(14,10,14,10) };
     private static bool ColumnHasFields(Type type,string path) {
