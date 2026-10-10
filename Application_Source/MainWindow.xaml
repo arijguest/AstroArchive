@@ -254,6 +254,17 @@
     <Trigger Property="IsEnabled" Value="False"><Setter Property="Background" Value="{DynamicResource DisabledSurface}"/><Setter Property="Foreground" Value="{DynamicResource DisabledText}"/><Setter Property="BorderBrush" Value="{DynamicResource DisabledBorder}"/></Trigger>
    </Style.Triggers>
   </Style>
+  <Style x:Key="SearchBoxStyle" TargetType="TextBox" BasedOn="{StaticResource {x:Type TextBox}}">
+   <Setter Property="Template">
+    <Setter.Value>
+     <ControlTemplate TargetType="TextBox">
+      <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="10" Padding="{TemplateBinding Padding}">
+       <ScrollViewer x:Name="PART_ContentHost" Focusable="False" />
+      </Border>
+     </ControlTemplate>
+    </Setter.Value>
+   </Setter>
+  </Style>
   <Style TargetType="PasswordBox">
    <Setter Property="Foreground" Value="{DynamicResource Text}" />
    <Setter Property="Background" Value="{DynamicResource Surface}" />
@@ -769,7 +780,7 @@
       </Grid.ColumnDefinitions>
       <Grid x:Name="LibraryToolbar" VerticalAlignment="Center" Margin="0,0,0,6">
        <Grid.Style><Style TargetType="Grid"><Setter Property="Grid.ColumnSpan" Value="2"/><Style.Triggers><DataTrigger Binding="{Binding Visibility, ElementName=PreviewPane}" Value="Collapsed"><Setter Property="Grid.ColumnSpan" Value="4"/></DataTrigger></Style.Triggers></Style></Grid.Style>
-       <TextBox x:Name="SearchBox" Padding="9,6,9,6"/>
+       <TextBox x:Name="SearchBox" Style="{StaticResource SearchBoxStyle}" Padding="9,6,9,6"/>
        <TextBlock x:Name="SearchHint" Text="Search captures…" Foreground="{DynamicResource Muted}" Margin="10,0" VerticalAlignment="Center" IsHitTestVisible="False"/>
       </Grid>
       <UniformGrid x:Name="LibraryToolbarActions">
@@ -882,7 +893,7 @@
        <WrapPanel Margin="0,0,0,8">
         <TextBlock Text="SAVED TELESCOPE" FontSize="{DynamicResource UiFontCaption}" Foreground="{DynamicResource Muted}" FontWeight="SemiBold" VerticalAlignment="Center" Margin="0,0,10,0" />
         <ComboBox x:Name="SavedTelescopeBox" Width="220" Margin="0,0,10,0" ToolTip="Reuse a saved telescope." />
-        <Button x:Name="RemoteTelescopeButton" Content="Connect over network…" Margin="0" ToolTip="Find a telescope on your network, choose captures or import live as it shoots." />
+        <Button x:Name="RemoteTelescopeButton" Height="{Binding ActualHeight, ElementName=SavedTelescopeBox}" VerticalAlignment="Center" Padding="12,5" Content="Connect over network…" Margin="0" ToolTip="Find a telescope on your network, choose captures or import live as it shoots." />
         <Button x:Name="RemoteLiveStatusButton" Content="● Live import underway" Visibility="Collapsed" Margin="10,0,0,0" Padding="10,5" Background="{DynamicResource SurfaceAlt}" Foreground="{DynamicResource Accent}" FontSize="{DynamicResource UiFontSmall}" AutomationProperties.Name="Live telescope imports; view Activity" ToolTip="View live telescope imports in Activity." />
        </WrapPanel>
        <DockPanel Margin="0,0,0,8">
@@ -925,7 +936,7 @@
         <ColumnDefinition Width="Auto" />
        </Grid.ColumnDefinitions>
        <Grid>
-        <TextBox x:Name="ImportSearchBox"  Padding="9,6,9,6"/>
+        <TextBox x:Name="ImportSearchBox" Style="{StaticResource SearchBoxStyle}"  Padding="9,6,9,6"/>
         <TextBlock x:Name="ImportSearchHint" Text="Search import results…" Foreground="{DynamicResource Muted}" Margin="10,0" VerticalAlignment="Center" IsHitTestVisible="False" />
        </Grid>
        <Button Grid.Column="1" x:Name="ImportFiltersButton" Content="Filters" Margin="8,0,0,0" />
@@ -984,7 +995,7 @@
       <Grid.ColumnDefinitions><ColumnDefinition Width="260"/><ColumnDefinition Width="*" MinWidth="260"/><ColumnDefinition Width="10"/><ColumnDefinition x:Name="EditedPreviewColumn" Width="400" MinWidth="0"/></Grid.ColumnDefinitions>
       <Grid x:Name="EditedToolbar" Grid.ColumnSpan="2" VerticalAlignment="Center" Margin="0,0,0,10">
        <ComboBox x:Name="EditedClassFilter" Visibility="Collapsed"/>
-       <TextBox x:Name="EditedSearchBox" Padding="9,6,9,6"/>
+       <TextBox x:Name="EditedSearchBox" Style="{StaticResource SearchBoxStyle}" Padding="9,6,9,6"/>
        <TextBlock x:Name="EditedSearchHint" Text="Search edited images…" Foreground="{DynamicResource Muted}" Margin="10,0" VerticalAlignment="Center" IsHitTestVisible="False"/>
       </Grid>
       <StackPanel Grid.Column="2" Grid.ColumnSpan="2" Margin="10,0,0,10">
