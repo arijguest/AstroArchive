@@ -31,13 +31,12 @@ namespace AstroArchive {
    }
    preview.SmokeGestures();
   }
-  static int SkyGestureFixtureWidth(FrameworkElement host){return Math.Max(1200,(int)Math.Ceiling(1280*host.ActualWidth/Math.Max(1,host.ActualHeight-PreviewViewport.ToolbarSpace-100)));}
   void SmokeSkyNavigation(string prefix,PreviewViewport preview,Frame frame){
    var globe=(SkyGlobeView)Window.FindName(prefix+"PreviewSky");var host=(Grid)Window.FindName(prefix+"PreviewHost");var original=((Image)Window.FindName(prefix+"PreviewImage")).Source as BitmapSource;
    try{
-    // The runner desktop and visible process banners can constrain preview height.
-    // Fit a gesture fixture that reserves actual space for the globe.
-    if(!globe.IsVisible){int fixtureWidth=SkyGestureFixtureWidth(host);preview.SetImage(BitmapSource.Create(fixtureWidth,1280,96,96,PixelFormats.Rgb24,null,new byte[fixtureWidth*1280*3],fixtureWidth*3),true);PumpPopupLayout();preview.Resize();PumpPopupLayout();}
+    // Runners can constrain window height to their desktop. A wider portrait
+    // fixture guarantees genuine remaining sky space before exercising inputs.
+    if(!globe.IsVisible){preview.SetImage(BitmapSource.Create(1200,1280,96,96,PixelFormats.Rgb24,null,new byte[1200*1280*3],1200*3),true);PumpPopupLayout();preview.Resize();PumpPopupLayout();}
     if(!globe.IsVisible||globe.ActualHeight<50)throw new Exception("Sky gesture fixture has no visible globe: "+prefix+", host "+host.RenderSize);
     int visibleLabels=0,hiddenLabels=0;
     foreach(double yawAngle in new[]{0.0,45,90,135,180,225,270,315})foreach(double tiltAngle in new[]{0.0,25,70}){
@@ -63,6 +62,9 @@ namespace AstroArchive {
   }
   void SmokeCaptureSky(string output){
    double width=Window.Width,height=Window.Height;int scale=settings.TextScalePercent,page=((TabControl)Window.FindName("MainTabs")).SelectedIndex;string theme=settings.ThemeMode;int cases=0;
+   // Sky gestures need free space below the portrait image. Banner layouts are
+   // verified separately; dismiss retained summaries while this fixture runs.
+   var summaryVisibility=activities.ToDictionary(a=>a,a=>a.BannerDismissed);foreach(var entry in activities)entry.BannerDismissed=true;RenderProcessSummaries();
    var frame=new Frame{Target="M45",ObservedUtc="2026-10-07T23:00:00Z",Latitude=51.5,Longitude=0};var rgb=new byte[720*1280*3];var colours=new[]{new byte[]{220,40,40},new byte[]{40,220,40},new byte[]{40,40,220},new byte[]{220,220,40}};
    for(int y=0;y<1280;y++)for(int x=0;x<720;x++)Array.Copy(colours[(y<640?0:2)+(x<360?0:1)],0,rgb,(y*720+x)*3,3);
    var image=BitmapSource.Create(720,1280,96,96,PixelFormats.Rgb24,null,rgb,720*3);image.Freeze();
@@ -86,7 +88,7 @@ namespace AstroArchive {
       }
       Window.Height=1000;PumpPopupLayout();preview.SetImage(image,true);PumpPopupLayout();// Collapsed WPF elements can retain their previous RenderSize. Compare the
       // allocated height, and verify the newly visible drawing bounds separately.
-      double first=panel.Height;int skyWidth=SkyGestureFixtureWidth(host);preview.SetImage(BitmapSource.Create(skyWidth,1280,96,96,PixelFormats.Rgb24,null,new byte[skyWidth*1280*3],skyWidth*3),true);PumpPopupLayout();preview.Resize();PumpPopupLayout();CheckSkyFit(prefix,preview,skyWidth,1280);if(panel.Height<=first)throw new Exception("Sky did not grow when image aspect left more space: "+prefix+", old "+first+", new "+panel.Height+", host "+host.RenderSize+", stage "+stage.RenderSize);
+      double first=panel.Height;preview.SetImage(BitmapSource.Create(1200,1280,96,96,PixelFormats.Rgb24,null,new byte[1200*1280*3],1200*3),true);PumpPopupLayout();preview.Resize();PumpPopupLayout();CheckSkyFit(prefix,preview,1200,1280);if(panel.Height<=first)throw new Exception("Sky did not grow when image aspect left more space: "+prefix+", old "+first+", new "+panel.Height+", host "+host.RenderSize+", stage "+stage.RenderSize);
       foreach(string kind in new[]{"Dark","Master dark","Dark flat","Master flat","Bias","Master bias"}){
        var calibration=frame.Clone();calibration.Kind=kind;var imageSize=stage.RenderSize;UpdateCaptureSky(prefix,calibration);PumpPopupLayout();preview.Resize();PumpPopupLayout();if(panel.IsVisible||stage.RenderSize!=imageSize)throw new Exception("Calibration sky is visible or changed image fit: "+kind);
       }
@@ -107,7 +109,7 @@ namespace AstroArchive {
       frame.Dec=-60;frame.RA=160;frame.Latitude=-33.9;frame.Longitude=151.2;UpdateCaptureSky(prefix,frame);PumpPopupLayout();if(!globe.Context.Evidence.Contains("Southern celestial sky"))throw new Exception("Southern capture hemisphere lost");frame.ObservedUtc=null;UpdateCaptureSky(prefix,frame);PumpPopupLayout();if(globe.Context.HasHorizon||globe.CardinalLabels.Count!=0)throw new Exception("Missing capture clock produced a horizon or compass directions");
      }finally{popup.IsOpen=false;preview.SetImage(original,true);UpdateCaptureSky(prefix,null);}
     }
-   }finally{settings.ThemeMode=theme;settings.TextScalePercent=scale;ApplyAppearance();Window.Width=width;Window.Height=height;GoToPage(page);UpdateCaptureSky("",previewFrame);PumpPopupLayout();}
+   }finally{foreach(var entry in summaryVisibility)entry.Key.BannerDismissed=entry.Value;RenderProcessSummaries();settings.ThemeMode=theme;settings.TextScalePercent=scale;ApplyAppearance();Window.Width=width;Window.Height=height;GoToPage(page);UpdateCaptureSky("",previewFrame);PumpPopupLayout();}
    File.WriteAllText(Path.Combine(output,"capture-sky-smoke.txt"),"PASS: "+cases+" Repository layouts in light/dark and 100/150% text; maximum image fit, adaptive/hidden sky, image quadrant pixels, adaptive unobscured compass labels and cached drawing, orbit without editing captures, routed scroll/keyboard gestures, view retention/reset, accessible bottom-left reset without added panel height, header icons, details popup/Escape, aspect changes and hemisphere/clock fallback.");
   }
  }
