@@ -7,6 +7,7 @@ using System.Windows.Controls.Primitives;
 namespace AstroArchive {
  public partial class MainUi {
   void SmokeSearchImport(string output){
+   SmokeToolbarLayout(output);
    var previousPlan=plan;string search=T("SearchBox").Text,importSearch=T("ImportSearchBox").Text,target=unknownImportTarget,theme=settings.ThemeMode;int page=((TabControl)Window.FindName("MainTabs")).SelectedIndex,scale=settings.TextScalePercent;
    try{
     if(((TabControl)Window.FindName("MainTabs")).Items.Count!=3||Window.FindName("MosaicGrid")!=null||CaptureFilters.Fields.Any(f=>f.Contains("Mosaic")||f=="Panel"))throw new Exception("Mosaic functionality remains in navigation or filters.");

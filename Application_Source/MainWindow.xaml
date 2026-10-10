@@ -3,7 +3,6 @@
   <local:CaptureGroupLabelConverter x:Key="CaptureGroupLabel"/>
   <local:PlainCaptureGroupConverter x:Key="PlainCaptureGroup"/>
   <local:PreviewStretchLabelConverter x:Key="PreviewStretchLabel"/>
-  <local:ToolbarButtonColumnsConverter x:Key="ToolbarButtonColumns"/>
   <DataTemplate x:Key="PreviewStretchItem">
    <TextBlock Text="{Binding Converter={StaticResource PreviewStretchLabel}}" ToolTip="{Binding}" TextTrimming="CharacterEllipsis" />
   </DataTemplate>
@@ -780,19 +779,19 @@
        <ColumnDefinition x:Name="PreviewDividerColumn" Width="10" />
        <ColumnDefinition x:Name="PreviewColumn" Width="340" MinWidth="0" />
       </Grid.ColumnDefinitions>
-      <Grid x:Name="LibraryToolbar" VerticalAlignment="Center" Margin="0,0,0,6">
-       <Grid.Style><Style TargetType="Grid"><Setter Property="Grid.ColumnSpan" Value="2"/><Style.Triggers><DataTrigger Binding="{Binding Visibility, ElementName=PreviewPane}" Value="Collapsed"><Setter Property="Grid.ColumnSpan" Value="4"/></DataTrigger></Style.Triggers></Style></Grid.Style>
-       <TextBox x:Name="SearchBox" Style="{StaticResource SearchBoxStyle}" Padding="9,6,9,6"/>
-       <TextBlock x:Name="SearchHint" Text="Search captures…" Foreground="{DynamicResource Muted}" Margin="10,0" VerticalAlignment="Center" IsHitTestVisible="False"/>
+      <Grid x:Name="LibraryToolbar" Grid.ColumnSpan="4" Margin="0,0,0,6">
+       <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/><ColumnDefinition Width="Auto"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+       <Grid>
+        <TextBox x:Name="SearchBox" Style="{StaticResource SearchBoxStyle}" Padding="9,6,9,6"/>
+        <TextBlock x:Name="SearchHint" Text="Search captures…" Foreground="{DynamicResource Muted}" Margin="10,0" VerticalAlignment="Center" IsHitTestVisible="False"/>
+       </Grid>
+       <Button Grid.Column="1" x:Name="LibraryFiltersButton" Content="Filters" Margin="8,0,0,0"/>
+       <Button Grid.Column="2" x:Name="ClearButton" Content="Clear" Margin="8,0,0,0"/>
+       <StackPanel Grid.Column="3" x:Name="LibraryToolbarActions" Orientation="Horizontal" Margin="8,0,0,0">
+        <Button x:Name="RepositoryImportButton" Content="Import" Margin="0,0,8,0"/>
+        <Button x:Name="ExportButton" Content="Export ▾" Margin="0" Background="{DynamicResource Accent}" BorderBrush="{DynamicResource Accent}" Foreground="White"/>
+       </StackPanel>
       </Grid>
-      <UniformGrid x:Name="LibraryToolbarActions">
-       <UniformGrid.Style><Style TargetType="UniformGrid"><Setter Property="Grid.Column" Value="2"/><Setter Property="Grid.ColumnSpan" Value="2"/><Setter Property="Margin" Value="10,0,0,6"/><Style.Triggers><DataTrigger Binding="{Binding Visibility, ElementName=PreviewPane}" Value="Collapsed"><Setter Property="Grid.Column" Value="0"/><Setter Property="Grid.ColumnSpan" Value="4"/><Setter Property="Grid.Row" Value="1"/><Setter Property="Margin" Value="0,0,0,6"/></DataTrigger></Style.Triggers></Style></UniformGrid.Style>
-       <UniformGrid.Columns><MultiBinding Converter="{StaticResource ToolbarButtonColumns}" ConverterParameter="4"><Binding Path="ActualWidth" RelativeSource="{RelativeSource Self}"/><Binding Path="FontSize" ElementName="LibraryFiltersButton"/></MultiBinding></UniformGrid.Columns>
-       <Button x:Name="LibraryFiltersButton" Content="Filters" Margin="0,0,6,0" Padding="6"/>
-       <Button x:Name="ClearButton" Content="Clear" Margin="0,0,6,0" Padding="6"/>
-       <Button x:Name="RepositoryImportButton" Content="Import" Margin="0,0,6,0" Padding="6"/>
-       <Button x:Name="ExportButton" Content="Export ▾" Padding="6" Background="{DynamicResource Accent}" BorderBrush="{DynamicResource Accent}" Foreground="White"/>
-      </UniformGrid>
       <Border Grid.Row="2" Background="{DynamicResource Surface}" CornerRadius="8" BorderBrush="{DynamicResource Border}" BorderThickness="1" Margin="0,0,10,0">
        <DockPanel>
         <Grid DockPanel.Dock="Top" Margin="12,13,12,8"><TextBlock Text="TARGETS" FontSize="{DynamicResource UiFontCaption}" FontWeight="SemiBold" Foreground="{DynamicResource Muted}"/><Button x:Name="LibrarySelectionCounter" Visibility="Collapsed" HorizontalAlignment="Right" VerticalAlignment="Center" MinHeight="0" Padding="0" Margin="0" BorderThickness="0" Background="Transparent" FontSize="{DynamicResource UiFontCaption}" Foreground="{DynamicResource Muted}" ToolTip="Selected files include other targets. Click to clear the selection."/></Grid>
@@ -985,7 +984,7 @@
      <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="*"/></Grid.RowDefinitions>
      <StackPanel>
      <DockPanel Margin="0,0,0,10">
-      <StackPanel DockPanel.Dock="Right" Orientation="Horizontal"><Button x:Name="EditedAddButton" Content="Add images…"/><Button x:Name="EditedImportFolderButton" Content="Import folder…" Background="{DynamicResource Accent}" Foreground="White" BorderBrush="{DynamicResource Accent}" Margin="8,0,0,0"/><Button x:Name="EditedRefreshButton" Content="Refresh" Margin="8,0,0,0"/></StackPanel>
+      <StackPanel DockPanel.Dock="Right" Orientation="Horizontal"><Button x:Name="EditedAddButton" Content="Add images…" Margin="0"/><Button x:Name="EditedImportFolderButton" Content="Import folder…" Background="{DynamicResource Accent}" Foreground="White" BorderBrush="{DynamicResource Accent}" Margin="8,0,0,0"/><Button x:Name="EditedRefreshButton" Content="Refresh" Margin="8,0,0,0"/></StackPanel>
       <TextBlock Text="Edited images" FontSize="{DynamicResource UiFontTitle}" FontWeight="SemiBold" VerticalAlignment="Center"/>
      </DockPanel>
       <Border x:Name="EditedImportNotice" Visibility="Collapsed" Background="{DynamicResource SurfaceAlt}" CornerRadius="6" Padding="10,6" Margin="0,0,0,10">
@@ -995,19 +994,19 @@
      <Grid Grid.Row="1" Grid.RowSpan="2" x:Name="EditedBody">
       <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="*"/></Grid.RowDefinitions>
       <Grid.ColumnDefinitions><ColumnDefinition Width="260"/><ColumnDefinition Width="*" MinWidth="260"/><ColumnDefinition Width="10"/><ColumnDefinition x:Name="EditedPreviewColumn" Width="400" MinWidth="0"/></Grid.ColumnDefinitions>
-      <Grid x:Name="EditedToolbar" Grid.ColumnSpan="2" VerticalAlignment="Center" Margin="0,0,0,10">
+      <Grid x:Name="EditedToolbar" Grid.ColumnSpan="4" Margin="0,0,0,10">
+       <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
        <ComboBox x:Name="EditedClassFilter" Visibility="Collapsed"/>
-       <TextBox x:Name="EditedSearchBox" Style="{StaticResource SearchBoxStyle}" Padding="9,6,9,6"/>
-       <TextBlock x:Name="EditedSearchHint" Text="Search edited images…" Foreground="{DynamicResource Muted}" Margin="10,0" VerticalAlignment="Center" IsHitTestVisible="False"/>
+       <Grid>
+        <TextBox x:Name="EditedSearchBox" Style="{StaticResource SearchBoxStyle}" Padding="9,6,9,6"/>
+        <TextBlock x:Name="EditedSearchHint" Text="Search edited images…" Foreground="{DynamicResource Muted}" Margin="10,0" VerticalAlignment="Center" IsHitTestVisible="False"/>
+       </Grid>
+       <TextBlock Grid.Column="1" x:Name="EditedSummary" Foreground="{DynamicResource Muted}" FontSize="{DynamicResource UiFontCaption}" TextTrimming="CharacterEllipsis" MaxWidth="240" VerticalAlignment="Center" Margin="12,0,0,0"/>
+       <StackPanel Grid.Column="2" x:Name="EditedToolbarActions" Orientation="Horizontal" Margin="8,0,0,0">
+        <Button x:Name="EditedFiltersButton" Content="Filters" Margin="0,0,8,0"/>
+        <Button x:Name="EditedClearButton" Content="Clear" Margin="0"/>
+       </StackPanel>
       </Grid>
-      <StackPanel Grid.Column="2" Grid.ColumnSpan="2" Margin="10,0,0,10">
-       <UniformGrid x:Name="EditedToolbarActions">
-        <UniformGrid.Columns><MultiBinding Converter="{StaticResource ToolbarButtonColumns}" ConverterParameter="2"><Binding Path="ActualWidth" RelativeSource="{RelativeSource Self}"/><Binding Path="FontSize" ElementName="EditedFiltersButton"/></MultiBinding></UniformGrid.Columns>
-        <Button x:Name="EditedFiltersButton" Content="Filters" Margin="0,0,6,0" Padding="6"/>
-        <Button x:Name="EditedClearButton" Content="Clear" Padding="6"/>
-       </UniformGrid>
-       <TextBlock x:Name="EditedSummary" Foreground="{DynamicResource Muted}" FontSize="{DynamicResource UiFontCaption}" TextWrapping="Wrap" HorizontalAlignment="Right" Margin="0,3,0,0"/>
-      </StackPanel>
       <Border Grid.Row="1" Background="{DynamicResource Surface}" BorderBrush="{DynamicResource Border}" BorderThickness="1" CornerRadius="8" Margin="0,0,10,0"><DockPanel><Grid DockPanel.Dock="Top" Margin="12,13,12,8"><TextBlock Text="TARGETS" FontSize="{DynamicResource UiFontCaption}" FontWeight="SemiBold" Foreground="{DynamicResource Muted}"/><Button x:Name="EditedSelectionCounter" Visibility="Collapsed" HorizontalAlignment="Right" VerticalAlignment="Center" MinHeight="0" Padding="0" Margin="0" BorderThickness="0" Background="Transparent" FontSize="{DynamicResource UiFontCaption}" Foreground="{DynamicResource Muted}" ToolTip="Selected files include other targets. Click to clear the selection."/></Grid><ListBox x:Name="EditedTargetList" Style="{StaticResource TargetNavigationListStyle}" BorderThickness="0" Background="Transparent" ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.CanContentScroll="True" VirtualizingPanel.IsVirtualizingWhenGrouping="True" VirtualizingPanel.VirtualizationMode="Recycling" TextSearch.TextPath="DisplayName" IsTextSearchEnabled="True">
        <ListBox.ItemContainerStyle><Style TargetType="ListBoxItem" BasedOn="{StaticResource {x:Type ListBoxItem}}"><Setter Property="Padding" Value="7,6"/><Setter Property="Margin" Value="4,1"/><Setter Property="ToolTip" Value="{Binding Tooltip}"/><Setter Property="AutomationProperties.Name" Value="{Binding Label}"/><Setter Property="AutomationProperties.HelpText" Value="{Binding Tooltip}"/><Setter Property="ToolTipService.ShowDuration" Value="20000"/><Style.Triggers><MultiDataTrigger><MultiDataTrigger.Conditions><Condition Binding="{Binding Name}" Value="All targets"/><Condition Binding="{Binding IsSelected, RelativeSource={RelativeSource Self}}" Value="False"/><Condition Binding="{Binding IsMouseOver, RelativeSource={RelativeSource Self}}" Value="False"/></MultiDataTrigger.Conditions><Setter Property="Background" Value="{DynamicResource SurfaceAlt}"/></MultiDataTrigger></Style.Triggers></Style></ListBox.ItemContainerStyle>
        <ListBox.GroupStyle><GroupStyle><GroupStyle.HeaderTemplate><DataTemplate>
@@ -1022,7 +1021,7 @@
        </Grid></DataTemplate></ListBox.ItemTemplate>
       </ListBox></DockPanel></Border>
       <Grid Grid.Row="1" Grid.Column="1"><Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="*"/></Grid.RowDefinitions>
-       <StackPanel Margin="0,0,0,8"><WrapPanel Margin="0,6,0,0"><Button x:Name="EditedEditButton" Visibility="Collapsed" Content="Edit metadata…" Margin="0,0,8,0"/><Button x:Name="EditedDetailsButton" Visibility="Collapsed" Content="Image details…" Margin="0,0,8,0"/><Button x:Name="EditedPreviewButton" Visibility="Collapsed" Content="Preview image…"/><Button x:Name="EditedEditorButton" Content="Export to…" Margin="8,0,0,0"/><Button x:Name="EditedFolderButton" Visibility="Collapsed" Content="Open image folder" Margin="8,0,0,0"/></WrapPanel></StackPanel>
+       <WrapPanel x:Name="EditedImageActions" Margin="0,6,0,8"><Button x:Name="EditedEditButton" Visibility="Collapsed" Content="Edit metadata…" Margin="0,0,8,0"/><Button x:Name="EditedDetailsButton" Visibility="Collapsed" Content="Image details…" Margin="0,0,8,0"/><Button x:Name="EditedPreviewButton" Visibility="Collapsed" Content="Preview image…" Margin="0,0,8,0"/><Button x:Name="EditedEditorButton" Content="Export to…" Margin="0,0,8,0"/><Button x:Name="EditedFolderButton" Visibility="Collapsed" Content="Open image folder" Margin="0"/></WrapPanel>
        <Border Grid.Row="1" Background="{DynamicResource Surface}" BorderBrush="{DynamicResource Border}" BorderThickness="1" CornerRadius="8" ClipToBounds="True"><Grid><DataGrid x:Name="EditedGrid" CanUserSortColumns="True"><DataGrid.Columns>
          <DataGridTextColumn Header="FILE" Binding="{Binding Filename}" Width="*" MinWidth="200"/>
          <DataGridTextColumn Header="FILE TYPE" Binding="{Binding FileType}" Width="85"/>
