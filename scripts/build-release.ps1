@@ -144,6 +144,24 @@ try {
     foreach ($launcher in @(Get-Process -Name 'Start' -ErrorAction SilentlyContinue)) {
         if ($launcher.Path -eq $launcherPath -and -not $launcher.WaitForExit(10000)) { throw 'Restarted launcher remained open.' }
     }
+    # Process exit can precede Windows releasing executable/scanner handles.
+    # Wait for the same exclusive access uninstall requires, without retrying
+    # uninstall itself or weakening its running-application checks.
+    $releaseClock = [Diagnostics.Stopwatch]::StartNew()
+    foreach ($relativeFile in $record.Files) {
+        $managedFile = Join-Path $smokeRoot $relativeFile
+        while (Test-Path $managedFile) {
+            try {
+                $handle = [IO.File]::Open($managedFile, [IO.FileMode]::Open, [IO.FileAccess]::Read, [IO.FileShare]::None)
+                $handle.Dispose()
+                break
+            } catch [IO.IOException] {
+                $nativeCode = $_.Exception.HResult -band 0xFFFF
+                if ($nativeCode -notin @(32, 33) -or $releaseClock.Elapsed.TotalSeconds -ge 10) { throw }
+                Start-Sleep -Milliseconds 100
+            }
+        }
+    }
     Write-Output 'PASS native update handoff, process wait, offline restart and archive preservation'
     Run-Checked $installer @('--uninstall', '--silent', '--root', ('"' + $smokeRoot + '"'))
     $installed = $false
