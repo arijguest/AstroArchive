@@ -91,6 +91,19 @@ namespace AstroArchive {
     File.WriteAllText(Path.Combine(output,"remote-sessions-passed.txt"),"PASS: numeric network ETAs, arriving download rows, safe Settings/filter/Analytics access, durable independent download pause/parallel resume, paused watcher captures made during pause, simultaneous Seestar/DWARF watchers, additional selections and duplicate summaries while live, device/profile conflict checks, individual Activity stop, remaining watcher continues, Stop all cleanup, verified archive and retained originals; indicator and selection dialog in light/dark at 100/150% text.");
    }finally{StopRemoteImports();foreach(var task in tasks)WaitRemote(task);CloseActivity();repo=original;if(temporary!=null)temporary.Dispose();settings=Util.Deserialize<Settings>(saved);T("SourceBox").Text=sourceText;plan=previousPlan;ReloadScopes(settings.SelectedTelescope,false);SaveSettings();ApplyAppearance();Refresh();SetBusy(false);}
   }
+  void SmokeFileImportRecovery(string output){
+   var original=repo;var savedPlan=plan;Repository temporary=null;Task work=null;string source=Path.Combine(output,"file-resume-source");
+   for(int i=0;i<3;i++)RemoteSmokeFits(Path.Combine(source,"Light_file_resume_"+i+".fit"),3000+i);
+   using(var copied=new ManualResetEvent(false))try{
+    temporary=new Repository(Path.Combine(output,"file-resume-archive"));repo=temporary;plan=repo.Scan(source,"Folder resume scope","Seestar S50",CancellationToken.None,p=>{},fullScan:true);
+    var options=new ImportOptions{SourceRoot=source,Workers=1,OnFrame=LiveFrame};var record=FolderImportRecord(plan.Frames,options,"Off","Off");pendingImportRecord=record;BeginLive(false);
+    work=RunOperation(ct=>{repo.Import(plan.Frames.Take(1).ToList(),ct,Progress,options);copied.Set();ct.WaitHandle.WaitOne();ct.ThrowIfCancellationRequested();return "";},null,"Folder pause recovery");var entry=currentActivity;
+    WaitRemote(WaitRemoteUntil(()=>copied.WaitOne(0)));if(B("PauseImportButton").Visibility!=Visibility.Visible)throw new Exception("A foreground file import did not expose Pause.");B("PauseImportButton").RaiseEvent(new RoutedEventArgs(Button.ClickEvent));WaitRemote(work);
+    if(entry.Resume==null||record.State!="Paused"||repo.All().Count!=1||!new ImportResumeStore(Path.Combine(Path.GetDirectoryName(config),"ImportJobs")).Load().Any(r=>r.Id==record.Id&&r.State=="Paused"))throw new Exception("File pause lost its completed copy or durable queue.");
+    WaitRemote(ResumeImportOperation(record,entry));if(repo.All().Count!=3||repo.Verify(CancellationToken.None,p=>{})!=0||ResumeStore.Load().Any(r=>r.Id==record.Id)||B("PauseImportButton").Visibility!=Visibility.Collapsed)throw new Exception("Folder resume did not finish its saved queue, verify copies or clean up its controls.");
+    File.WriteAllText(Path.Combine(output,"file-import-recovery-passed.txt"),"PASS: Pause control, durable saved folder queue, completed copy retained, Resume verifies and skips completed files, archive and recovery/control cleanup verified.");
+   }finally{if(work!=null&&!work.IsCompleted){if(cancel!=null)cancel.Cancel();WaitRemote(work);}repo=original;plan=savedPlan;if(temporary!=null)temporary.Dispose();Refresh();SetBusy(false);}
+  }
   public void SmokeRemoteImport(string output){
    Directory.CreateDirectory(output);Window.Show();Window.UpdateLayout();SynchronizationContext.SetSynchronizationContext(new DispatcherSynchronizationContext(Window.Dispatcher));string fixture=Path.Combine(output,"remote-ui-source");Directory.CreateDirectory(Path.Combine(fixture,"MyWorks","M31_sub"));File.WriteAllBytes(Path.Combine(fixture,"MyWorks","M31_sub","Light_M31_0001.fit"),new byte[5760]);File.WriteAllText(Path.Combine(fixture,"MyWorks","M31_sub","session.json"),"{}");
    var device=new DiscoveredTelescope{Kind="Seestar SMB",Name="Seestar S50 Pro",Host="192.168.1.42",Identity="ui-s50p"};var c=new RemoteConnection{Kind=device.Kind,Host=device.Host,Folder=@"\\192.168.1.42\EMMC Images",IncludeExisting=false};var profile=new TelescopeProfile{Id="My S50 Pro",Model="Seestar S50 Pro",SourceMake="Seestar",RemoteIdentity=device.Identity};
@@ -105,7 +118,7 @@ namespace AstroArchive {
     var warning=RemoteImportDialog.LargeImport(Window,Enumerable.Range(0,100).Select(i=>new Entry{Name="capture_"+i+".fits",Size=5760}));warning.Window.Show();try{CaptureRemote(warning.Window,Path.Combine(output,"Remote-large-import.png"));}finally{warning.Window.Close();}
     File.WriteAllText(Path.Combine(output,"remote-ui-passed.txt"),"PASS: discovery-first import gating, saved device identity, folder browsing, search-all selection, sidecar exclusion, live-import action and light/dark rendering.");
    }finally{dialog.Dialog.Window.Close();Theme.Apply(Window,settings.ThemeMode);}
-   SmokeRemoteSessions(output);
+   SmokeRemoteSessions(output);SmokeFileImportRecovery(output);
   }
  }
 }
