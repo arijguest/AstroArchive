@@ -60,6 +60,17 @@ public sealed class LinuxTests : IDisposable
         } finally { window.Close(); }
     }
     [Fact]
+    public void CorruptEditedProjectReportsErrorWithoutHidingHealthyArchive()
+    {
+        using var s=Session(); Open(s); Import(s);
+        s.WorkingCopies(s.Captures,"Healthy project",ct,_=>{});
+        string bad=Path.Combine(s.Repository!.EditedFolder,Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(bad); File.WriteAllText(Path.Combine(bad,"edited-project.json"),"{broken json");
+        s.Refresh();
+        Assert.Equal(2,s.Captures.Count); Assert.Equal(2,s.Edited.Count);
+        Assert.Contains(Path.GetFileName(bad),s.LastReport);
+    }
+    [Fact]
     public void CaseDistinctSourcesAreBothImported()
     {
         using var s=Session(); Open(s); string source=Path.Combine(root,"case");

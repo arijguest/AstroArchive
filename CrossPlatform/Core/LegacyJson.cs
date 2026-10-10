@@ -33,13 +33,19 @@ public sealed class JavaScriptSerializer
     public T Deserialize<T>(string text)
     {
         if (text.Length > MaxJsonLength) throw new ArgumentException("JSON exceeds the configured limit.");
-        if (typeof(T) == typeof(Dictionary<string, object>) || typeof(T) == typeof(object))
+        try
         {
-            using var input = new IO.StringReader(text);
-            using var reader = new JsonTextReader(input) { DateParseHandling = DateParseHandling.None, MaxDepth = RecursionLimit };
-            return (T)Untyped(JToken.Load(reader, new JsonLoadSettings { DuplicatePropertyNameHandling = DuplicatePropertyNameHandling.Error }))!;
+            if (typeof(T) == typeof(Dictionary<string, object>) || typeof(T) == typeof(object))
+            {
+                using var input = new IO.StringReader(text);
+                using var reader = new JsonTextReader(input) { DateParseHandling = DateParseHandling.None, MaxDepth = RecursionLimit };
+                return (T)Untyped(JToken.Load(reader, new JsonLoadSettings { DuplicatePropertyNameHandling = DuplicatePropertyNameHandling.Error }))!;
+            }
+            return JsonConvert.DeserializeObject<T>(text, Settings)!;
         }
-        return JsonConvert.DeserializeObject<T>(text, Settings)!;
+        // Shared readers catch the Framework serializer's ArgumentException to
+        // isolate damaged metadata instead of rejecting the entire archive.
+        catch (JsonException error) { throw new ArgumentException("Invalid archive JSON: " + error.Message, nameof(text), error); }
     }
     private static object? Untyped(JToken token) => token switch
     {
