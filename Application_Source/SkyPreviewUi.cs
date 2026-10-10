@@ -20,8 +20,14 @@ namespace AstroArchive {
   void RefreshSkyPreviews(){UpdateCaptureSky("",previewSkyFrame);}
   void PositionSkyReset(string prefix){
    var panel=(Grid)Window.FindName(prefix+"PreviewSkyPanel");var globe=(SkyGlobeView)Window.FindName(prefix+"PreviewSky");var button=B(prefix+"PreviewSkyResetButton");
-   double diameter=Math.Max(0,Math.Min(globe.ActualWidth,globe.ActualHeight)-28);
-   button.RenderTransform=new TranslateTransform(Math.Max(4,(panel.ActualWidth-diameter)/2),Math.Max(4,(panel.ActualHeight+diameter)/2-button.Height));
+   if(globe.ActualWidth<=0||globe.ActualHeight<=0)return;
+   var home=globe.HomeBounds;var anchor=globe.TranslatePoint(home.BottomLeft,panel);
+   double size=Math.Max(22,Math.Min(40,home.Width*0.11));
+   // Scale the whole control, including its vector icon and hit area, without
+   // affecting the space allocated to the image or globe. Camera zoom leaves
+   // this lower-left anchor unchanged so reset is always easy to find.
+   var transform=new TransformGroup();transform.Children.Add(new ScaleTransform(size/button.Width,size/button.Height));
+   transform.Children.Add(new TranslateTransform(anchor.X,anchor.Y-size));button.RenderTransform=transform;
   }
   static Frame ReadSkyFrame(string path,string fallbackTarget=null){
    try{var info=Assets.Inspect(path);return CaptureSky.FromHeader(info.Header,info.Format,Path.GetFileName(path),fallbackTarget);}

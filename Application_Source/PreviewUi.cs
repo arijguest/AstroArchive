@@ -13,6 +13,7 @@ using Microsoft.Win32;
 
 namespace AstroArchive {
  public partial class MainUi {
+  const double RepositoryPreviewWidth=280;
   MotionPreview previewMotion;PreviewViewport previewViewport;CancellationTokenSource previewCancel;int previewGeneration;PreviewData previewData;Frame previewFrame;string previewPath;bool previewReady,choosingStretch;
   public static string CompactPath(string path){if(string.IsNullOrEmpty(path))return "Set an archive folder in Settings";if(path.Length<=75)return path;return Path.GetPathRoot(path)+"…"+Path.DirectorySeparatorChar+new DirectoryInfo(path).Name;}
   void InitializeWorkspace(){
@@ -26,7 +27,7 @@ namespace AstroArchive {
    C("StretchMode").SelectionChanged+=(s,e)=>{if(!previewReady||choosingStretch)return;if(previewPath==null||ScientificPreview(previewPath)){settings.PreviewStretch=Convert.ToString(C("StretchMode").SelectedItem);SaveSettings();}if(previewPath!=null)LoadPreview(previewPath,false);};
    SystemEvents.UserPreferenceChanged+=AppearanceChanged;previewReady=true;SetPreviewVisibility();
   }
-  void SetPreviewVisibility(){((FrameworkElement)Window.FindName("PreviewPane")).Visibility=settings.ShowPreview?Visibility.Visible:Visibility.Collapsed;((FrameworkElement)Window.FindName("PreviewDivider")).Visibility=settings.ShowPreview?Visibility.Visible:Visibility.Collapsed;((ColumnDefinition)Window.FindName("PreviewColumn")).Width=new GridLength(settings.ShowPreview?340:0);((ColumnDefinition)Window.FindName("PreviewDividerColumn")).Width=new GridLength(settings.ShowPreview?10:0);B("PreviewToggle").Content=settings.ShowPreview?"Hide preview":"Preview";if(!settings.ShowPreview)CancelPreview();}
+  void SetPreviewVisibility(){((FrameworkElement)Window.FindName("PreviewPane")).Visibility=settings.ShowPreview?Visibility.Visible:Visibility.Collapsed;((FrameworkElement)Window.FindName("PreviewDivider")).Visibility=settings.ShowPreview?Visibility.Visible:Visibility.Collapsed;((ColumnDefinition)Window.FindName("PreviewColumn")).Width=new GridLength(settings.ShowPreview?RepositoryPreviewWidth:0);((ColumnDefinition)Window.FindName("PreviewDividerColumn")).Width=new GridLength(settings.ShowPreview?10:0);B("PreviewToggle").Content=settings.ShowPreview?"Hide preview":"Preview";if(!settings.ShowPreview)CancelPreview();}
   void CancelPreview(){ClosePreviewDetails("");if(previewMotion!=null){previewMotion.Dispose();previewMotion=null;}previewGeneration++;if(previewCancel!=null){previewCancel.Cancel();previewCancel.Dispose();previewCancel=null;}previewData=null;previewFrame=null;previewPath=null;UpdateCaptureSky("",null);C("StretchMode").IsEnabled=true;if(previewViewport!=null)previewViewport.SetImage(null,true);}
   void AppearanceChanged(object sender,UserPreferenceChangedEventArgs args){if(Window.Dispatcher.HasShutdownStarted)return;Window.Dispatcher.BeginInvoke(new Action(()=>{ApplyAppearance();}));}
   void DisposePreview(){SystemEvents.UserPreferenceChanged-=AppearanceChanged;CancelPreview();CancelEditedPreview();previewCache.Clear();}

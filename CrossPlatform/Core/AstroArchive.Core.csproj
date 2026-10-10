@@ -10,6 +10,7 @@
     <PackageReference Include="System.Security.Cryptography.ProtectedData" Version="10.0.12" />
     <Reference Include="SMBLibrary"><HintPath>../../Application_Source/Remote/lib/SMBLibrary.dll</HintPath><Private>true</Private></Reference>
     <Compile Include="../../Application_Source/Analytics.cs" Link="Engine/Analytics.cs" />
+    <Compile Include="../../Application_Source/AnalyticsConfiguration.cs" Link="Engine/AnalyticsConfiguration.cs" />
     <Compile Include="../../Application_Source/AnalyticsGraphics.cs" Link="Engine/AnalyticsGraphics.cs" />
     <Compile Include="../../Application_Source/AnalyticsStyle.cs" Link="Engine/AnalyticsStyle.cs" />
     <Compile Include="../../Application_Source/AnalyticsPortrait.cs" Link="Engine/AnalyticsPortrait.cs" />

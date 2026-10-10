@@ -24,12 +24,39 @@ namespace AstroArchive {
    double top=height+PreviewViewport.ToolbarSpace,remaining=Math.Max(0,host.ActualHeight-top);
    if(remaining>=50){var bounds=panel.TransformToAncestor(host).TransformBounds(new Rect(panel.RenderSize));if(panel.Visibility!=Visibility.Visible||Math.Abs(bounds.Top-top)>1||Math.Abs(bounds.Height-remaining)>1||bounds.Bottom>host.ActualHeight+1)throw new Exception("Sky does not fill only the remaining space: "+bounds+", host "+host.RenderSize);}
    else if(panel.Visibility!=Visibility.Collapsed)throw new Exception("Sky stole space from a height-limited image");
+   if(panel.IsVisible)CheckSkyResetLayout(prefix);
    foreach(var label in globe.CardinalLabels){
     var bounds=label.Value;var sphere=globe.GlobeBounds;double x=sphere.X+sphere.Width/2,y=sphere.Y+sphere.Height/2,r=sphere.Width/2;
     double dx=Math.Max(bounds.Left-x,Math.Max(0,x-bounds.Right)),dy=Math.Max(bounds.Top-y,Math.Max(0,y-bounds.Bottom));
     if(!new Rect(globe.RenderSize).Contains(bounds)||dx*dx+dy*dy<(r+3)*(r+3))throw new Exception("Cardinal label overlaps the globe or is clipped: "+label.Key);
    }
    preview.SmokeGestures();
+  }
+  Rect CheckSkyResetLayout(string prefix){
+   var panel=(Grid)Window.FindName(prefix+"PreviewSkyPanel");var globe=(SkyGlobeView)Window.FindName(prefix+"PreviewSky");var reset=B(prefix+"PreviewSkyResetButton");
+   var bounds=reset.TransformToAncestor(panel).TransformBounds(new Rect(reset.RenderSize));
+   var sphere=globe.TransformToAncestor(panel).TransformBounds(globe.GlobeBounds);double diameter=sphere.Width/globe.Camera.Zoom;
+   var anchor=new Point(sphere.X+sphere.Width/2-diameter/2,sphere.Y+sphere.Height/2+diameter/2);
+   if(Math.Abs(bounds.Left-anchor.X)>1||Math.Abs(bounds.Bottom-anchor.Y)>1||bounds.Width<21.9||bounds.Width>40.1||Math.Abs(bounds.Width-bounds.Height)>0.1||!new Rect(panel.RenderSize).Contains(bounds))throw new Exception("Sky reset moved away from the home globe edge or clipped: "+bounds+", sphere "+sphere);
+   if(!(reset.Content is System.Windows.Shapes.Path)||reset.BorderThickness!=new Thickness(0)||string.IsNullOrEmpty(AutomationProperties.GetName(reset)))throw new Exception("Sky reset lost its vector icon or accessibility name");
+   return bounds;
+  }
+  void SmokeSkyResetSizing(PreviewViewport preview,Frame frame){
+   var column=(ColumnDefinition)Window.FindName("PreviewColumn");var originalWidth=column.Width;var original=((Image)Window.FindName("PreviewImage")).Source as BitmapSource;var globe=(SkyGlobeView)Window.FindName("PreviewSky");
+   try{
+    // A loading placeholder leaves ample sky space even on a short CI desktop.
+    // With a portrait image, widening its pane also increases image height and
+    // can shrink the globe, so pane width alone does not prove globe scaling.
+    UpdateCaptureSky("",frame);preview.SetImage(null,true);preview.BeginLoading();
+    double smallest=0;
+    foreach(double width in new[]{220.0,280,400}){
+     column.Width=new GridLength(width);PumpPopupLayout();preview.Resize();PumpPopupLayout();if(!globe.IsVisible)throw new Exception("Reset sizing fixture has no sky");
+     var bounds=CheckSkyResetLayout("");if(width==220)smallest=bounds.Width;if(width==400&&bounds.Width<=smallest+3)throw new Exception("Sky reset did not scale with a larger globe");
+     globe.ZoomView(2);globe.RotateView(10,5);PumpPopupLayout();UpdateCaptureSky("",frame);PumpPopupLayout();var explored=CheckSkyResetLayout("");
+     if(explored!=bounds)throw new Exception("Sky exploration or refresh moved the reset control");
+     B("PreviewSkyResetButton").RaiseEvent(new RoutedEventArgs(Button.ClickEvent));PumpPopupLayout();if(globe.Camera.Zoom!=1)throw new Exception("Resized sky reset did not restore zoom");
+    }
+   }finally{globe.ResetView();column.Width=originalWidth;preview.SetImage(original,true);PumpPopupLayout();preview.Resize();PumpPopupLayout();}
   }
   void SmokeSkyNavigation(string prefix,PreviewViewport preview,Frame frame){
    var globe=(SkyGlobeView)Window.FindName(prefix+"PreviewSky");var host=(Grid)Window.FindName(prefix+"PreviewHost");var original=((Image)Window.FindName(prefix+"PreviewImage")).Source as BitmapSource;
@@ -55,12 +82,12 @@ namespace AstroArchive {
        var key=new KeyEventArgs(Keyboard.PrimaryDevice,PresentationSource.FromVisual(globe),0,Key.Left){RoutedEvent=Keyboard.KeyDownEvent};double rotated=globe.Camera.Yaw;globe.RaiseEvent(key);if(!key.Handled||globe.Camera.Yaw==rotated)throw new Exception("Sky keyboard navigation did not rotate");
        B(prefix+"PreviewSkyResetButton").RaiseEvent(new RoutedEventArgs(Button.ClickEvent));PumpPopupLayout();if(globe.Camera.Yaw!=yaw||globe.Camera.Tilt!=tilt||globe.Camera.Zoom!=1)throw new Exception("Sky reset button did not restore capture view");
        if(!globe.Focusable||!globe.IsManipulationEnabled)throw new Exception("Sky touch or keyboard navigation is disabled");
-       var reset=B(prefix+"PreviewSkyResetButton");var resetBounds=reset.TransformToAncestor(host).TransformBounds(new Rect(reset.RenderSize));var sphereBounds=globe.TransformToAncestor(host).TransformBounds(globe.GlobeBounds);var panel=(Grid)Window.FindName(prefix+"PreviewSkyPanel");var panelBounds=panel.TransformToAncestor(host).TransformBounds(new Rect(panel.RenderSize));
+       var sphereBounds=globe.TransformToAncestor(host).TransformBounds(globe.GlobeBounds);var panel=(Grid)Window.FindName(prefix+"PreviewSkyPanel");var panelBounds=panel.TransformToAncestor(host).TransformBounds(new Rect(panel.RenderSize));
        if(Math.Abs(sphereBounds.X+sphereBounds.Width/2-(panelBounds.X+panelBounds.Width/2))>1||Math.Abs(sphereBounds.Y+sphereBounds.Height/2-(panelBounds.Y+panelBounds.Height/2))>1||Math.Abs(sphereBounds.Width-(Math.Min(panel.ActualWidth,panel.ActualHeight)-36))>1)throw new Exception("Sky sphereBounds is not centred or maximised with slight padding");
-       if(reset.BorderThickness!=new Thickness(0)||Math.Abs(resetBounds.Left-sphereBounds.Left)>1||Math.Abs(resetBounds.Bottom-sphereBounds.Bottom)>1||!(reset.Content is System.Windows.Shapes.Path))throw new Exception("Reset is not borderless with an oriented icon close to the sphereBounds edge");
+       CheckSkyResetLayout(prefix);
    }finally{preview.SetImage(original,true);PumpPopupLayout();preview.Resize();PumpPopupLayout();}
   }
-  void SmokeCaptureSky(string output){
+  public void SmokeCaptureSky(string output){
    double width=Window.Width,height=Window.Height;int scale=settings.TextScalePercent,page=((TabControl)Window.FindName("MainTabs")).SelectedIndex;string theme=settings.ThemeMode;int cases=0;
    // Sky gestures need free space below the portrait image. Banner layouts are
    // verified separately; dismiss retained summaries while this fixture runs.
@@ -80,6 +107,7 @@ namespace AstroArchive {
        for(int quadrant=0;quadrant<4;quadrant++){int x=(int)(imageArea.X+imageArea.Width*(quadrant%2==0?0.2:0.8)),y=(int)(imageArea.Y+imageArea.Height*(quadrant<2?0.2:0.8)),offset=(y*full.PixelWidth+x)*4;var expected=colours[quadrant];if(Math.Abs(pixels[offset+2]-expected[0])>12||Math.Abs(pixels[offset+1]-expected[1])>12||Math.Abs(pixels[offset]-expected[2])>12||pixels[offset+3]<250)throw new Exception("Sidebar image quadrant clipped: "+prefix+mode+textScale+" quadrant "+quadrant);}
        if(!globe.Context.HasHorizon)throw new Exception("Capture sky did not use frame time/site: "+prefix+mode+textScale+"; "+globe.Context.Evidence);int builds=globe.DrawingBuilds;globe.InvalidateVisual();PumpPopupLayout();if(globe.DrawingBuilds!=builds)throw new Exception("Unchanged sky rebuilt cached drawing");
        SmokeSkyNavigation(prefix,preview,frame);
+       SmokeSkyResetSizing(preview,frame);
        foreach(string control in new[]{prefix+"PreviewDetailsButton",prefix+"OpenPreviewButton","StretchMode"}){var item=(FrameworkElement)Window.FindName(control);var bounds=item.TransformToAncestor(header).TransformBounds(new Rect(item.RenderSize));if(bounds.Right>header.ActualWidth+1||bounds.Left<0||string.IsNullOrEmpty(AutomationProperties.GetName(item)))throw new Exception("Preview header control clipped or unnamed: "+control);}
        if(object.Equals(B(prefix+"OpenPreviewButton").Content,"Open image…"))throw new Exception("Open image button is not an icon");
        L(prefix+"PreviewInfo").Text="720 × 1280 pixels";Window.Activate();B(prefix+"PreviewDetailsButton").Focus();B(prefix+"PreviewDetailsButton").RaiseEvent(new RoutedEventArgs(Button.ClickEvent));PumpPopupLayout();if(!popup.IsOpen||!L(prefix+"PreviewInfo").IsVisible)throw new Exception("Details icon did not expose capture information");CheckSkyFit(prefix,preview);SavePopup((FrameworkElement)popup.Child,Path.Combine(output,"AstroArchive_Capture_Details_"+prefix+mode+textScale+".png"));
@@ -110,7 +138,7 @@ namespace AstroArchive {
      }finally{popup.IsOpen=false;preview.SetImage(original,true);UpdateCaptureSky(prefix,null);}
     }
    }finally{foreach(var entry in summaryVisibility)entry.Key.BannerDismissed=entry.Value;RenderProcessSummaries();settings.ThemeMode=theme;settings.TextScalePercent=scale;ApplyAppearance();Window.Width=width;Window.Height=height;GoToPage(page);UpdateCaptureSky("",previewFrame);PumpPopupLayout();}
-   File.WriteAllText(Path.Combine(output,"capture-sky-smoke.txt"),"PASS: "+cases+" Repository layouts in light/dark and 100/150% text; maximum image fit, adaptive/hidden sky, image quadrant pixels, adaptive unobscured compass labels and cached drawing, orbit without editing captures, routed scroll/keyboard gestures, view retention/reset, accessible bottom-left reset without added panel height, header icons, details popup/Escape, aspect changes and hemisphere/clock fallback.");
+   File.WriteAllText(Path.Combine(output,"capture-sky-smoke.txt"),"PASS: "+cases+" Repository layouts in light/dark and 100/150% text; maximum image fit, adaptive/hidden sky, image quadrant pixels, adaptive unobscured compass labels and cached drawing, orbit without editing captures, routed scroll/keyboard gestures, view retention/reset, scaled bottom-left reset at 220/280/400px pane widths without clipping or moving during sky exploration/refresh, header icons, details popup/Escape, aspect changes and hemisphere/clock fallback.");
   }
  }
 }

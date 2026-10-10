@@ -43,6 +43,9 @@ From the repository root, run:
 
 The installer uses `Application_Source/dist/AstroArchive.exe` and the version in
 `Installer/release.json`. Output is written to `Installer/dist`.
+`Installer/Payload` contains maintained notices and release notes only. The build
+copies the current app, quick start and validation text from `Application_Source`
+and compiles the launcher into `Installer/.build/payload` before packaging.
 The payload includes the separate SMBLibrary DLL, matching source archive,
 licences and notice. Do not distribute the application executable alone.
 The [Windows build and release workflow](../.github/workflows/windows.yml) validates

@@ -21,6 +21,8 @@ namespace AstroArchive {
   internal readonly SkyGlobeCamera Camera=new SkyGlobeCamera();
   internal readonly Dictionary<string,Rect> CardinalLabels=new Dictionary<string,Rect>();
   internal Rect GlobeBounds{get{return new Rect(centre.X-radius,centre.Y-radius,2*radius,2*radius);}}
+  // Layout bounds are independent of the camera and available before rendering.
+  internal Rect HomeBounds{get{double r=Math.Max(5,Math.Min(ActualWidth/2-14,ActualHeight/2-14));return new Rect(ActualWidth/2-r,ActualHeight/2-r,2*r,2*r);}}
   Point dragPoint;bool dragging;
   public CaptureSky Context{get{return context;}}
   const string NavigationHelp="Drag to rotate; scroll or pinch to zoom.";
@@ -90,7 +92,7 @@ namespace AstroArchive {
    }
   }
   DrawingGroup Build(Brush line,Brush text,Brush accent,Brush surface){
-   var group=new DrawingGroup();centre=new Point(ActualWidth/2,ActualHeight/2);radius=Math.Max(5,Math.Min(ActualWidth/2-14,ActualHeight/2-14))*Camera.Zoom;
+   var group=new DrawingGroup();var home=HomeBounds;centre=new Point(home.X+home.Width/2,home.Y+home.Height/2);radius=home.Width/2*Camera.Zoom;
    var target=context.Orientation.Map(SkyVector.Equatorial(context.RA,context.Dec));double yaw=Camera.Yaw*Math.PI/180,tilt=Camera.Tilt*Math.PI/180;
    right=new SkyVector(Math.Cos(yaw),-Math.Sin(yaw),0);up=new SkyVector(-Math.Sin(yaw)*Math.Sin(tilt),-Math.Cos(yaw)*Math.Sin(tilt),Math.Cos(tilt));front=new SkyVector(Math.Sin(yaw)*Math.Cos(tilt),Math.Cos(yaw)*Math.Cos(tilt),Math.Sin(tilt));
    Pen horizon=Stroke(line,0.85,1),grid=Stroke(line,0.22,0.7),rear=Stroke(line,0.10,0.7),below=Stroke(line,0.13,0.7),figures=Stroke(line,0.60,0.8),near=Stroke(line,0.9,1);

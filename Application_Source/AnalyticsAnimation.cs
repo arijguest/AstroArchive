@@ -9,19 +9,20 @@ using System.Windows.Media.Imaging;
 
 namespace AstroArchive {
  public sealed class AnalyticsVideoOptions {
-  public double SecondsPerChart=4;public int FramesPerSecond=24,MaximumEdge;public string Transition="Glide";
+  public double SecondsPerChart=4,TotalSeconds;public int FramesPerSecond=24,MaximumEdge;public string Transition="Glide";public bool Loop;
  }
  // Pre-build text and geometry once. Animation transforms that drawing, rather
  // than re-layouting labels each frame. Reports always retain continuation pages.
  public sealed class AnalyticsAnimation {
   sealed class Layer {public AnalyticsMark Mark;public Drawing Drawing;public int Index;public Point? RingCentre;}
   readonly List<List<Layer>> scenes=new List<List<Layer>>();readonly IList<AnalyticsPage> pages;readonly AnalyticsVideoOptions options;
-  public double Duration {get{return pages.Count*options.SecondsPerChart;}}
+  readonly AnalyticsMotionTiming timing;
+  public double Duration {get{return timing.Duration;}}
   public AnalyticsAnimation(IList<AnalyticsPage> pages,AnalyticsVideoOptions options){
    if(pages==null||pages.Count==0)throw new ArgumentException("Choose at least one chart.");
    if(options==null||options.SecondsPerChart<=0||double.IsNaN(options.SecondsPerChart)||double.IsInfinity(options.SecondsPerChart)||options.FramesPerSecond<1||options.FramesPerSecond>60||options.MaximumEdge<0)throw new ArgumentException("Invalid animation settings.");
    if(pages.Any(p=>p.CanvasWidth!=pages[0].CanvasWidth||p.CanvasHeight!=pages[0].CanvasHeight))throw new ArgumentException("All video scenes must use the same layout.");
-   this.pages=pages;this.options=options;var logo=AnalyticsExport.BrandLogo();
+   this.pages=pages;this.options=new AnalyticsVideoOptions{SecondsPerChart=options.SecondsPerChart,TotalSeconds=options.TotalSeconds,FramesPerSecond=options.FramesPerSecond,MaximumEdge=options.MaximumEdge,Transition=options.Transition,Loop=options.Loop};timing=new AnalyticsMotionTiming(pages.Count,options.SecondsPerChart,options.TotalSeconds);var logo=AnalyticsExport.BrandLogo();
    foreach(var page in pages){var layers=new List<Layer>();int n=0;foreach(var mark in page.Marks){var drawing=new DrawingGroup();using(var context=drawing.Open())AnalyticsExport.DrawMark(context,mark,logo);drawing.Freeze();layers.Add(new Layer{Mark=mark,Drawing=drawing,Index=mark.Role=="chart"?n++:0,RingCentre=Centre(mark)});}scenes.Add(layers);}
   }
   static Point? Centre(AnalyticsMark mark){
@@ -33,13 +34,15 @@ namespace AstroArchive {
    var shape=new StreamGeometry();using(var context=shape.Open()){context.BeginFigure(centre,true,true);for(int i=0;i<=64;i++){double a=-Math.PI/2+Math.PI*2*amount*i/64;context.LineTo(new Point(centre.X+radius*Math.Cos(a),centre.Y+radius*Math.Sin(a)),true,false);}}shape.Freeze();return shape;
   }
   static double Ease(double t){t=Math.Max(0,Math.Min(1,t));return 1-Math.Pow(1-t,3);}
+  static double Smooth(double t){t=Math.Max(0,Math.Min(1,t));return t*t*t*(t*(t*6-15)+10);}
   void Scene(DrawingContext context,int index,double seconds,double opacity,double shift,double zoom){
-   double width=pages[0].CanvasWidth,height=pages[0].CanvasHeight;context.PushOpacity(opacity);context.PushTransform(new TranslateTransform(shift,0));context.PushTransform(new ScaleTransform(zoom,zoom,width/2,height/2));
+   double width=pages[0].CanvasWidth,height=pages[0].CanvasHeight;context.PushOpacity(opacity);
    foreach(var layer in scenes[index]){
     var mark=layer.Mark;if(mark.Role!="chart"){context.DrawDrawing(layer.Drawing);continue;}
-    double reveal=Ease((seconds-Math.Min(.25,layer.Index*.008))/.85);
+    context.PushTransform(new TranslateTransform(shift,0));context.PushTransform(new ScaleTransform(zoom,zoom,width/2,height/2));
+    double reveal=Ease((seconds-Math.Min(timing.StaggerSeconds,layer.Index*timing.StaggerSeconds/24))/timing.RevealSeconds);
     // Axes and background tracks remain anchored throughout the reveal.
-    bool grow=mark.FillEnd!=null&&(mark.Kind=="rect"||mark.Kind=="polygon");
+    bool grow=mark.Animation=="bar"||mark.Animation=="column"||mark.FillEnd!=null&&mark.Kind=="polygon";
     if(grow&&mark.Kind=="rect"){
      bool column=mark.VerticalGradient;context.PushTransform(new ScaleTransform(column?1:reveal,column?reveal:1,mark.X,mark.Y+mark.Height));context.DrawDrawing(layer.Drawing);context.Pop();
     }else if(grow&&mark.Kind=="polygon"){
@@ -47,16 +50,17 @@ namespace AstroArchive {
     }else if(mark.Kind=="text"){
      context.PushOpacity(reveal);context.PushTransform(new TranslateTransform(0,12*(1-reveal)));context.DrawDrawing(layer.Drawing);context.Pop();context.Pop();
     }else context.DrawDrawing(layer.Drawing);
-   }context.Pop();context.Pop();context.Pop();
+    context.Pop();context.Pop();
+   }context.Pop();
   }
   public void Draw(DrawingContext context,double time){
-   time=Math.Max(0,Math.Min(Duration-.000001,time));int scene=Math.Min(pages.Count-1,(int)(time/options.SecondsPerChart));double local=time-scene*options.SecondsPerChart;
-   double transition=Math.Min(.65,options.SecondsPerChart*.23),mix=Ease(local/transition),width=pages[0].CanvasWidth;
+   time=Math.Max(0,Math.Min(Duration-.000001,time));int scene=Math.Min(pages.Count-1,(int)(time/timing.SceneSeconds));double local=time-scene*timing.SceneSeconds;
+   double transition=timing.TransitionSeconds,mix=Smooth(local/transition),width=pages[0].CanvasWidth;bool entering=scene>0||options.Loop;
    context.PushClip(new RectangleGeometry(new Rect(0,0,width,pages[0].CanvasHeight)));
    context.DrawRectangle(new SolidColorBrush((Color)ColorConverter.ConvertFromString(pages[0].Background)),null,new Rect(0,0,width,pages[0].CanvasHeight));
    bool glide=options.Transition=="Glide",zoom=options.Transition=="Zoom";
-   if(scene>0&&local<transition)Scene(context,scene-1,options.SecondsPerChart,1,glide?-width*.075*mix:0,zoom?1+.025*mix:1);
-   Scene(context,scene,local,scene==0?1:mix,glide&&scene>0?width*.075*(1-mix):0,zoom?1.025-.025*mix:1);context.Pop();
+   if(entering&&local<transition)Scene(context,(scene+pages.Count-1)%pages.Count,timing.SceneSeconds,1,glide?-width*.06*mix:0,zoom?1+.025*mix:1);
+   Scene(context,scene,local,entering?mix:1,glide&&entering?width*.06*(1-mix):0,zoom&&entering?1.025-.025*mix:1);context.Pop();
   }
   public DrawingImage Preview(double seconds){var group=new DrawingGroup();using(var context=group.Open())Draw(context,seconds);group.Freeze();var result=new DrawingImage(group);result.Freeze();return result;}
   public byte[] Frame(double seconds,int width,int height){
@@ -68,18 +72,18 @@ namespace AstroArchive {
    int multiple=maximumEdge>0?Math.Min(a,maximumEdge/Math.Max(unitWidth,unitHeight)):a;if((unitWidth%2!=0||unitHeight%2!=0)&&multiple%2!=0)multiple--;multiple=Math.Max(2,multiple);width=unitWidth*multiple;height=unitHeight*multiple;
   }
   public static void Save(string destination,IList<AnalyticsPage> pages,string format,AnalyticsVideoOptions options,Action<int,string> progress,CancellationToken cancellation){
-   if(format!="MP4"&&format!="GIF")throw new ArgumentException("Choose MP4 or GIF.");var animation=new AnalyticsAnimation(pages,options);int width,height;Dimensions(pages[0],options.MaximumEdge,out width,out height);
+   if(format!="MP4"&&format!="GIF")throw new ArgumentException("Choose MP4 or GIF.");if(options==null)throw new ArgumentException("Choose animation settings.");var copy=new AnalyticsVideoOptions{SecondsPerChart=options.SecondsPerChart,TotalSeconds=options.TotalSeconds,FramesPerSecond=options.FramesPerSecond,MaximumEdge=options.MaximumEdge,Transition=options.Transition,Loop=format=="GIF"};var animation=new AnalyticsAnimation(pages,copy);int width,height;Dimensions(pages[0],options.MaximumEdge,out width,out height);
    int count=checked((int)Math.Ceiling(animation.Duration*options.FramesPerSecond));string temporary=destination+"."+Guid.NewGuid().ToString("N")+".tmp."+format.ToLowerInvariant();
    try{
     cancellation.ThrowIfCancellationRequested();if(format=="MP4"){
      using(var encoder=new AnalyticsMp4(temporary,width,height,options.FramesPerSecond)){
-      for(int i=0;i<count;i++){cancellation.ThrowIfCancellationRequested();encoder.Add(animation.Frame(i/(double)options.FramesPerSecond,width,height));if(progress!=null)progress((i+1)*98/count,"Rendering scene "+(Math.Min(pages.Count-1,(int)(i/(double)options.FramesPerSecond/options.SecondsPerChart))+1)+" of "+pages.Count);}
+      for(int i=0;i<count;i++){cancellation.ThrowIfCancellationRequested();encoder.Add(animation.Frame(i/(double)options.FramesPerSecond,width,height));if(progress!=null)progress((i+1)*98/count,"Rendering scene "+(Math.Min(pages.Count-1,(int)(i/(double)options.FramesPerSecond/animation.timing.SceneSeconds))+1)+" of "+pages.Count);}
       cancellation.ThrowIfCancellationRequested();if(progress!=null)progress(99,"Finalising MP4");encoder.Complete();
      }
     }else{
-     if(progress!=null)progress(0,"Preparing animation palette");var palette=AnalyticsGif.Palette(Enumerable.Range(0,pages.Count).Select(i=>{cancellation.ThrowIfCancellationRequested();return animation.Frame(i*options.SecondsPerChart+Math.Min(1.25,options.SecondsPerChart*.75),Math.Min(width,320),Math.Max(2,(int)(Math.Min(width,320)*height/(double)width)));}));
+     if(progress!=null)progress(0,"Preparing animation palette");var palette=AnalyticsGif.Palette(Enumerable.Range(0,pages.Count).Select(i=>{cancellation.ThrowIfCancellationRequested();return animation.Frame((i+.8)*animation.timing.SceneSeconds,Math.Min(width,320),Math.Max(2,(int)(Math.Min(width,320)*height/(double)width)));}));
      using(var encoder=new AnalyticsGif(temporary,width,height,palette)){
-      for(int i=0;i<count;i++){cancellation.ThrowIfCancellationRequested();int delay=(int)Math.Round((i+1)*100.0/options.FramesPerSecond)-(int)Math.Round(i*100.0/options.FramesPerSecond);encoder.Add(animation.Frame(i/(double)options.FramesPerSecond,width,height),delay);if(progress!=null)progress((i+1)*98/count,"Rendering scene "+(Math.Min(pages.Count-1,(int)(i/(double)options.FramesPerSecond/options.SecondsPerChart))+1)+" of "+pages.Count);}encoder.Complete();
+      for(int i=0;i<count;i++){cancellation.ThrowIfCancellationRequested();int delay=(int)Math.Round((i+1)*100.0/options.FramesPerSecond)-(int)Math.Round(i*100.0/options.FramesPerSecond);encoder.Add(animation.Frame(i/(double)options.FramesPerSecond,width,height),delay);if(progress!=null)progress((i+1)*98/count,"Rendering scene "+(Math.Min(pages.Count-1,(int)(i/(double)options.FramesPerSecond/animation.timing.SceneSeconds))+1)+" of "+pages.Count);}encoder.Complete();
      }
     }
     cancellation.ThrowIfCancellationRequested();if(File.Exists(destination))File.Replace(temporary,destination,null);else File.Move(temporary,destination);if(progress!=null)progress(100,"Export complete");

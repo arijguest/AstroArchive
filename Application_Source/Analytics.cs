@@ -24,6 +24,7 @@ namespace AstroArchive {
   public double RepositorySeconds;
   public double Seconds;public string Scope,DateRange;public DateTime GeneratedUtc;
   public List<AnalyticsReport> Reports;
+  internal AnalyticsSnapshot Copy(){return (AnalyticsSnapshot)MemberwiseClone();}
  }
  public static class ArchiveAnalytics {
   public static readonly string[] Titles={"Targets photographed","Imaging timeline","Time per target","Time per telescope","Filter mix","Exposure lengths"};

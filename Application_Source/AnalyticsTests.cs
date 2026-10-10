@@ -11,6 +11,25 @@ namespace AstroArchive {
    return new Frame{Target=target,Kind="Light",Exposure=seconds,AcquisitionDate=date,Telescope=telescope,Filter="L"};
   }
   static void AnalyticsTests(){
+   Test("Custom chart configurations preserve repository totals categories and chronology",()=>{
+    var data=ArchiveAnalytics.Build(Enumerable.Range(0,19).Select(i=>AnalyticsLight("Custom "+i,(i+1)*60)),new AnalyticsOptions());string original=Util.Serialize(data);
+    foreach(AnalyticsLayout layout in Enum.GetValues(typeof(AnalyticsLayout)))foreach(bool dark in new[]{true,false}){
+     var options=new AnalyticsChartOptions{Title="My observatory",Subtitle="The sky this season",Style="Bars",Categories=4,Order="Alphabetical",Palette="Nebula"};
+     var pages=AnalyticsGraphics.Pages(data,0,dark,layout,options);Check(pages.Count==5&&pages.All(p=>p.Title==options.Title),"Custom ranking pagination or title was lost");
+     foreach(var value in data.Reports[0].Values)Check(pages.SelectMany(p=>p.Marks).Any(m=>m.Detail==value.Label),"Custom ranking dropped a category");
+     Check(pages.All(p=>p.Marks.Any(m=>m.Role=="header"&&m.Text=="19")),"Customization changed repository headline totals");
+     options.Style="Donut";var donut=AnalyticsGraphics.Pages(data,2,dark,layout,options);Check(donut.Count==1&&donut[0].Marks.Any(m=>m.Detail!=null&&m.Detail.StartsWith("Other (")),"Custom donut lost remaining categories");
+     var timeline=AnalyticsGraphics.Pages(data,1,dark,layout,options);Check(timeline[0].Marks.Any(m=>m.Animation=="column")&&!timeline[0].Marks.Any(m=>m.Animation=="bar"),"Style override broke chronological charts");
+    }
+    Check(Util.Serialize(data)==original,"Custom settings mutated the shared snapshot");
+    var settings=new Settings{AnalyticsCharts=new Dictionary<string,AnalyticsChartOptions>{{"targets",new AnalyticsChartOptions{Title="Saved chart",Categories=6,Palette="Aurora"}}}};var restored=Util.Deserialize<Settings>(Util.Serialize(settings));Check(restored.AnalyticsCharts["targets"].Title=="Saved chart"&&restored.AnalyticsCharts["targets"].Categories==6,"Custom chart settings did not survive settings persistence");
+   });
+   Test("Video timing scales reveals and transitions to exact total duration",()=>{
+    foreach(int scenes in new[]{1,6,20})foreach(double duration in new[]{.125,1,9,24,300}){
+     var timing=new AnalyticsMotionTiming(scenes,4,duration);Check(timing.Duration==duration&&Math.Abs(timing.SceneSeconds*scenes-duration)<1e-9,"Custom duration changed with continuation pages");Check(timing.TransitionSeconds>0&&timing.RevealSeconds+timing.StaggerSeconds<timing.SceneSeconds*.6&&timing.TransitionSeconds<timing.SceneSeconds*.2,"Animation consumed the reading hold in a short clip");
+    }
+    Check(new AnalyticsMotionTiming(6,4).Duration==24,"Existing pace preset changed");Expect(()=>new AnalyticsMotionTiming(6,4,double.NaN),"Invalid duration accepted");
+   });
    Test("Repository headline totals survive every chart scope and missing date",()=>{
     var rejected=AnalyticsLight("M45",3600,"2025-01-01","Scope B");rejected.Rejected=true;
     var deleted=AnalyticsLight("M51",7200);deleted.Status="Deleted";

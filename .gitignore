@@ -6,6 +6,11 @@ Application_Source/ui-preview/
 Application_Source/AstroArchiveTests.exe*
 Application_Source/MockAstap.exe*
 Installer/GeneratedVersion.cs
+# Generated payloads are built in Installer/.build, never maintained here.
+Installer/Payload/AstroArchive.exe
+Installer/Payload/Start.exe
+Installer/Payload/Quick_Start.txt
+Installer/Payload/Validation.txt
 *.user
 *.suo
 .vs/
