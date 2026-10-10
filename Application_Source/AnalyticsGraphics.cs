@@ -29,7 +29,9 @@ namespace AstroArchive {
    var remaining=text??"";int line=0;while(remaining.Length>0&&line<limit){int count=Math.Min(characters,remaining.Length);if(width>0)while(count>1&&TextWidth(remaining.Substring(0,count),size)>width)count--;if(count<remaining.Length){int space=remaining.LastIndexOf(' ',count-1,count);if(space>count/2)count=space;if(count>0&&char.IsHighSurrogate(remaining[count-1]))count--;}string part=remaining.Substring(0,count);remaining=remaining.Substring(count).TrimStart();if(line==limit-1&&remaining.Length>0){part=Short(part+" "+remaining,characters);if(width>0)part=Fit(part,width,size);}Text(p,part,x,y+line*(size+5),size,colour,bold,text);line++;}
   }
   public static AnalyticsPage Page(AnalyticsSnapshot data,int index,bool dark=true,AnalyticsLayout layout=AnalyticsLayout.Landscape,AnalyticsChartOptions options=null){
-   return Pages(data,index,dark,layout,options)[0];
+   data=Configure(data,index,options);int limit=options!=null&&(options.Categories==4||options.Categories==6)?options.Categories:8;var report=data.Reports[index];
+   int count=report.Style=="bars"?Math.Max(1,(int)Math.Ceiling(report.Values.Count/(double)limit)):1;
+   var page=Page(data,index,0,count,report.Style=="bars"?report.Values.Take(limit).ToList():ArchiveAnalytics.Compact(report.Values,limit),dark,layout,limit);ConfigurePalette(page,dark,options);return page;
   }
   public static List<AnalyticsPage> Pages(AnalyticsSnapshot data,int index,bool dark=true,AnalyticsLayout layout=AnalyticsLayout.Landscape,AnalyticsChartOptions options=null){
    data=Configure(data,index,options);int limit=options!=null&&(options.Categories==4||options.Categories==6)?options.Categories:8;

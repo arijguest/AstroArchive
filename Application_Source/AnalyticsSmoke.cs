@@ -18,6 +18,8 @@ namespace AstroArchive {
     repo=null;if(AnalyticsMenu().IsEnabled)throw new Exception("Analytics is enabled without a repository.");
     using(var fixture=new Repository(Path.Combine(output,"analytics-repository"))){
      repo=fixture;var menu=AnalyticsMenu();if(!menu.IsEnabled||menu.HasItems)throw new Exception("Analytics does not open directly as a single menu action.");
+     bool opened=false;Window.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.ApplicationIdle,new Action(()=>{var direct=Window.OwnedWindows.OfType<AnalyticsWindow>().SingleOrDefault();if(direct!=null){opened=PopupChildren<ListBox>(direct).Any(c=>AutomationProperties.GetName(c)=="Analytics charts"&&c.Items.Count==7);direct.Close();}}));
+     menu.RaiseEvent(new RoutedEventArgs(MenuItem.ClickEvent));if(!opened)throw new Exception("Analytics menu click did not open the complete workspace");
      foreach(string mode in new[]{"Light","Dark"}){
       Theme.Apply(Window,mode);var customConfigurations=new Dictionary<string,AnalyticsChartOptions>();int configurationSaves=0;var dialog=new AnalyticsWindow(Window,source,"Observatory & field notes",0,customConfigurations,()=>configurationSaves++);
       try{
