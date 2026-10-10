@@ -33,12 +33,12 @@ namespace AstroArchive {
     AstroArchive.Installation.ShellIdentity.InitializeProcess();
     bool test=args.Length>0&&args[0]=="--ui-test";if(test&&args.Length<2)throw new ArgumentException("Output directory required.");
     Assets.Register(new RasterReader(),".tif",".tiff",".png",".jpg",".jpeg");var app=new Application{ShutdownMode=ShutdownMode.OnMainWindowClose};var ui=new MainUi(test,Array.IndexOf(args,"--no-updates")>=0,test?args[1]:null);app.MainWindow=ui.Window;
-    app.DispatcherUnhandledException+=(s,e)=>{if(args.Length>1&&args[0]=="--ui-test"){Directory.CreateDirectory(args[1]);File.WriteAllText(Path.Combine(args[1],"ui-smoke-error.txt"),e.Exception.ToString());Environment.Exit(1);}MessageBox.Show(ui.Window,e.Exception.Message,"AstroArchive",MessageBoxButton.OK,MessageBoxImage.Error);e.Handled=true;};
+    app.DispatcherUnhandledException+=(s,e)=>{if(args.Length>1&&args[0]=="--ui-test"){Directory.CreateDirectory(args[1]);File.WriteAllText(Path.Combine(args[1],"ui-smoke-error.txt"),e.Exception.ToString());Environment.Exit(1);}AppErrorReportingUi.Report(e.Exception,"Unhandled application error",ui.Window);MessageBox.Show(ui.Window,e.Exception.Message,"AstroArchive",MessageBoxButton.OK,MessageBoxImage.Error);e.Handled=true;};
     if(args.Length>0&&args[0]=="--ui-test") {if(args.Length<2)throw new ArgumentException("Output directory required.");app.Dispatcher.Invoke(new Action(()=>{if(Array.IndexOf(args,"--analytics-only")>=0)ui.SmokeAnalytics(args[1]);else if(Array.IndexOf(args,"--preview-only")>=0){ui.SmokePreviewResolution(args[1]);ui.SmokeCaptureSky(args[1]);}else if(Array.IndexOf(args,"--targets-only")>=0)ui.SmokeTargetWorkflow(args[1]);else if(Array.IndexOf(args,"--remote-only")>=0)ui.SmokeRemoteImport(args[1]);else if(Array.IndexOf(args,"--connected-import-only")>=0)ui.SmokeConnectedImport(args[1]);else if(Array.IndexOf(args,"--controls-only")>=0)ui.SmokeControls(args[1]);else ui.Smoke(args[1]);}));ui.Dispose();return 0;}
     app.Run(ui.Window);return 0;
    }catch(Exception e){
     if(args.Length>1&&args[0]=="--ui-test"){Directory.CreateDirectory(args[1]);File.WriteAllText(Path.Combine(args[1],"ui-smoke-error.txt"),e.ToString());Console.Error.WriteLine(e);}
-    else MessageBox.Show("AstroArchive could not start.\n\n"+e.Message,"AstroArchive",MessageBoxButton.OK,MessageBoxImage.Error);
+    else{AppErrorReportingUi.Report(e,"Startup error");MessageBox.Show("AstroArchive could not start.\n\n"+e.Message,"AstroArchive",MessageBoxButton.OK,MessageBoxImage.Error);}
     return 1;
    }
   }

@@ -404,6 +404,10 @@ namespace AstroArchive {
                 },false);
                 Check(matches.Count==3&&matches.Contains(darkFlat),"Two-stage recipe missing");
                 Check(!Exporter.MatchesCalibration(light,darkFlat)&&Exporter.MatchesCalibration(flat,darkFlat),"Dark flat applied to lights");
+                var masterFlat=flat.Clone();masterFlat.Kind="Master flat";masterFlat.Hash="master-flat";
+                Check(Exporter.MatchesCalibration(masterFlat,darkFlat),"Dark flat could not be associated with a compatible master flat");
+                var masterRecipe=Exporter.CalibrationFor(new[]{light},new List<Frame>{masterFlat,darkFlat},false);
+                Check(masterRecipe.Contains(masterFlat)&&masterRecipe.Contains(darkFlat),"Master-flat dark-flat recipe was incomplete");
                 darkFlat.Exposure=1;
                 Check(!Exporter.CalibrationFor(new[] {
                     light

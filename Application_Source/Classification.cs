@@ -99,6 +99,21 @@ namespace AstroArchive {
  }
  public static class Classifier {
   public sealed class ShotsMetadata {public Dictionary<string,object> Raw;public Dictionary<string,string> Values=new Dictionary<string,string>(StringComparer.OrdinalIgnoreCase);public string Path;public string Note;public FileStamp Stamp;}
+  internal static readonly string[] KindHeaderKeys={"IMAGETYP","IMAGETYPE","IMTYPE","IMGTYP","FRAME","FRAMETYP","OBSTYPE","CALTYPE","PROCTYPE","PROCESS","FILETYPE"};
+  static bool KindHeader(string key){return Regex.IsMatch(key??"",@".*(?:IMAGE|IMAG|FRAME|OBSTYPE|CALTYPE|PROCTYPE|PROCESS|FILETYPE).*",RegexOptions.IgnoreCase|RegexOptions.CultureInvariant);}
+  static string CalibrationType(string value){
+   string text=Regex.Replace((value??"").ToLowerInvariant(),@"[^a-z0-9]+"," ").Trim();
+   bool darkFlat=Regex.IsMatch(text,@"\b(?:dark\s*flat|flat\s*dark|darkflat|flatdark)\b");
+   if(darkFlat)return "Dark flat";
+   if(Regex.IsMatch(text,@"\b(?:dark|darks|dark\s*frame|dark\s*frames|masterdark|darkframe|darkframes)\b"))return "Dark";
+   if(Regex.IsMatch(text,@"\b(?:bias|biases|offset|zero|pedestal|biasframe|biasframes|masterbias)\b"))return "Bias";
+   if(Regex.IsMatch(text,@"\b(?:(?:dome|sky|twilight)\s*)?flat(?:s|field|fields|frame|frames)?\b"))return "Flat";
+   return null;
+  }
+  static string CalibrationTypeFromName(string name){
+   string text=Regex.Replace(Regex.Replace(name??"",@"\.(fit|fits|fts)(\.gz)?$","",RegexOptions.IgnoreCase).ToLowerInvariant(),@"[^a-z0-9]+"," ").Trim();
+   return CalibrationType(text);
+  }
   static double? MatchNumber(string text,string pattern){var m=Regex.Match(text,pattern,RegexOptions.IgnoreCase);double d;return m.Success&&double.TryParse(m.Groups[1].Value,NumberStyles.Float,CultureInfo.InvariantCulture,out d)?(double?)d:null;}
   public static bool FilenameExposureGain(string filename,out double? exposure,out double? gain){
    exposure=gain=null;var matches=Regex.Matches(Path.GetFileName(filename??""),@"(?:^|[_ -])(\d+(?:\.\d+)?)s(\d+)(?=[_. -]|$)",RegexOptions.IgnoreCase);double seconds,value;
@@ -153,35 +168,37 @@ namespace AstroArchive {
   }
   public static Frame Read(string path,string root,string telescope,string model,long? enumeratedSize=null,Action<int> counted=null,Dictionary<string,ShotsMetadata> shotsCache=null,FitsHeader parsedHeader=null,FileStamp parsedStamp=null,System.Threading.CancellationToken ct=default(System.Threading.CancellationToken),PipelineMetrics metrics=null,AssetInfo asset=null,string imageKey=null,string originalName=null,string detectionContext=null,Dictionary<string,string> sessionMetadata=null){
    ct.ThrowIfCancellationRequested();FileStamp sourceStamp=parsedStamp;if(asset==null&&parsedHeader!=null)asset=new AssetInfo{Format="FITS",Header=parsedHeader,Images={new ImageDescriptor{Key="hdu:0",Label="Image 1",Width=parsedHeader.Width,Height=parsedHeader.Height,Channels=parsedHeader.Channels,Bitpix=parsedHeader.Bitpix,Offset=parsedHeader.Offset,Count=1,Encoding="FITS",Numeric=new[]{8,16,32,64,-32,-64}.Contains(parsedHeader.Bitpix),Headers=parsedHeader.Values,Comments=parsedHeader.Comments}}};if(asset==null){using(var locked=new FileStream(path,FileMode.Open,FileAccess.Read,FileShare.Read)){sourceStamp=FileStamp.Read(path);asset=Assets.Inspect(path,n=>{ct.ThrowIfCancellationRequested();if(counted!=null)counted(n);});if(!sourceStamp.ContentSame(FileStamp.Read(path)))throw new InvalidDataException("Source changed during metadata inspection.");}}var selectedImage=asset.Images.FirstOrDefault(i=>i.Key==imageKey);if(selectedImage!=null)asset.Header=new FitsHeader{Width=selectedImage.Width,Height=selectedImage.Height,Channels=selectedImage.Channels,Bitpix=selectedImage.Bitpix,Values=selectedImage.Headers??new Dictionary<string,string>(),Comments=selectedImage.Comments??new Dictionary<string,string>()};FitsHeader h=asset.Header;string rel=path.Substring(root.TrimEnd('\\','/').Length).TrimStart('\\','/');string text=Path.GetFileName(root.TrimEnd('\\','/'))+"/"+rel.Replace('\\','/');text=detectionContext??text;string low=text.ToLowerInvariant();string stem=CleanStem(originalName??Path.GetFileName(path));string name=stem.ToLowerInvariant();
-   var f=new Frame{SourcePath=path,OriginalName=originalName??Path.GetFileName(path),Telescope=telescope,TelescopeIdentity=telescope,Model=model,Camera="Unknown",Target="Unknown",Kind="Unknown",Calibration="Unknown",Filter="Unknown",Bayer=h.Get("BAYERPAT","BAYERPATTERN"),Mount="Unknown",MountEvidence="Not analyzed",Notes="",Status="New",Bytes=enumeratedSize??new FileInfo(path).Length,Width=h.Width,Height=h.Height,Channels=h.Channels,BinX=(int)(h.Number("XBINNING","CCDXBIN","BINNING")??0),BinY=(int)(h.Number("YBINNING","CCDYBIN","BINNING")??0)};
+   var f=new Frame{SourcePath=path,OriginalName=originalName??Path.GetFileName(path),Telescope=telescope,TelescopeIdentity=telescope,Model=model,Camera="Unknown",Target="Unknown",Kind="Unknown",Calibration="Unknown",Filter="Unknown",Bayer=h.Get("BAYERPAT","BAYERPATTERN"),Mount="Unknown",MountEvidence="Not analyzed",Notes="",Status="New",Bytes=enumeratedSize??new FileInfo(path).Length,Width=h.Width,Height=h.Height,Channels=h.Channels,BinX=(int)(h.Number("XBINNING","CCDXBIN","XBIN","BINNING")??0),BinY=(int)(h.Number("YBINNING","CCDYBIN","YBIN","BINNING")??0)};
    f.SourceStamp=sourceStamp;f.AssociatedFiles=detectionContext==null?AssociatedMetadata.Discover(path):null;var shots=sessionMetadata??(detectionContext==null?ReadShots(path,root,f,shotsCache,counted,ct,metrics):new Dictionary<string,string>(StringComparer.OrdinalIgnoreCase));if(sessionMetadata!=null)f.SourceMetadataPath="Preserved shotsInfo.json";
    using(var classification=metrics==null?null:metrics.Begin("Classification",Path.GetFileName(path))){
    InstrumentDetection.Apply(f,h,root,model,detectionContext);
    CameraDetection.Apply(f,h,text,Shot(shots,"cameraId","camera_id","camId","cam_id"));
-   string type=h.Get("IMAGETYP","IMAGETYPE","FRAME","FRAMETYP").ToLowerInvariant();
-   bool master=Regex.IsMatch(name,@"(?:^|[_-])(master|stacked|stack|staced)(?:[_-]|$)")||Regex.IsMatch(name,@"(?:^|[_-])stack[_-]?\d+")||low.Contains("cali_frame/");
+   string type=string.Join(" ",h.Values.Where(pair=>KindHeader(pair.Key)).Select(pair=>pair.Value)).ToLowerInvariant();
+   var declaredKinds=h.Values.Where(pair=>KindHeader(pair.Key)).Select(pair=>CalibrationType(pair.Value)).Where(kind=>kind!=null).Distinct(StringComparer.OrdinalIgnoreCase).ToList();
+   string declaredKind=declaredKinds.FirstOrDefault();
+   bool explicitScience=Regex.IsMatch(type,@"\b(?:light|science|object|object\s*frame|science\s*frame)\b",RegexOptions.IgnoreCase);
+   bool master=Regex.IsMatch(name,@"(?:^|[_-])(master|stacked|stack|staced)(?:[_-]|$)")||Regex.IsMatch(name,@"(?:^|[_-])stack[_-]?\d+")||Regex.IsMatch(name+" "+type,@"\bmaster\b|master(?:dark|flat|bias)|stacked",RegexOptions.IgnoreCase);
    string kindPath=low.Substring(0,low.LastIndexOf('/')+1)+name;
-   bool dark=type.Contains("dark")||Regex.IsMatch(kindPath,@"(?:^|[/_ -])darks?(?:[/_ -]|$)");
-   bool bias=type.Contains("bias")||type.Contains("offset")||Regex.IsMatch(kindPath,@"(?:^|[/_ -])(bias|biases|offset)(?:[/_ -]|$)");
-   bool flat=type.Contains("flat")||Regex.IsMatch(kindPath,@"(?:^|[/_ -])flats?(?:[/_ -]|$)");
-   if(dark&&flat)f.Kind=master?"Master dark flat":"Dark flat";else if(dark)f.Kind=master?"Master dark":"Dark";else if(bias)f.Kind=master?"Master bias":"Bias";else if(flat)f.Kind=master?"Master flat":"Flat";
+   string inferredKind=CalibrationTypeFromName(kindPath);
+   string calibrationKind=declaredKind??(explicitScience?null:inferredKind);
+   if(calibrationKind=="Dark flat")f.Kind=master?"Master dark flat":"Dark flat";else if(calibrationKind=="Dark")f.Kind=master?"Master dark":"Dark";else if(calibrationKind=="Bias")f.Kind=master?"Master bias":"Bias";else if(calibrationKind=="Flat")f.Kind=master?"Master flat":"Flat";
    else if(master||type.Contains("stack")||low.Contains("restacked/")||Regex.IsMatch(name,@"\d+x\d+(?:\.\d+)?(?:s|sec)"))f.Kind="Stack";
-   else if(type.Contains("light")||Regex.IsMatch(low,@"(?:_sub|[- ]sub)(?:/|$)")||low.Contains("dwarf_raw")||Regex.IsMatch(name,@"^(light|raw|sub)[_-]")||Regex.IsMatch(low,@"(?:^|/)lights?/")||type.Contains("science"))f.Kind="Light";
+   else if(explicitScience||type.Contains("light")||Regex.IsMatch(low,@"(?:_sub|[- ]sub)(?:/|$)")||low.Contains("dwarf_raw")||Regex.IsMatch(name,@"^(light|raw|sub)[_-]")||Regex.IsMatch(low,@"(?:^|/)lights?/")||type.Contains("science"))f.Kind="Light";
    string rejection=CaptureScreening.Rejection(h,text);if(rejection.Length>0){f.Rejected=true;f.RejectionReason=rejection;f.ScreeningIssue=rejection;f.Notes+=rejection+" Excluded from stacking by default. ";if(name.Contains("weight"))f.Kind="Auxiliary";}
-   f.Exposure=h.Number("EXPTIME","EXPOSURE","EXP_TIME","EXPOS");if(!f.Exposure.HasValue)f.Exposure=MatchNumber(text,@"(?:^|[/_ -])EXP(?:OSURE)?[_ =-]*(\d+(?:\.\d+)?)");
+   f.Exposure=h.Number("EXPTIME","EXPOSURE","EXP_TIME","EXPOS","EXPT","SHUTTER");if(!f.Exposure.HasValue)f.Exposure=MatchNumber(text,@"(?:^|[/_ -])EXP(?:OSURE)?[_ =-]*(\d+(?:\.\d+)?)");
    if(!f.Exposure.HasValue)f.Exposure=MatchNumber(stem,@"(?:^|[_ -])(\d+(?:\.\d+)?)\s*(?:sec|s)(?:[_ -]|$)");
    if(!f.Exposure.HasValue)f.Exposure=MatchNumber(text,@"\d+x(\d+(?:\.\d+)?)(?:sec|s)");
-   f.Gain=h.Number("GAIN");if(!f.Gain.HasValue)f.Gain=MatchNumber(text,@"GAIN[_ =-](-?\d+(?:\.\d+)?)");
+   f.Gain=h.Number("GAIN","CAMGAIN");if(!f.Gain.HasValue)f.Gain=MatchNumber(text,@"(?:GAIN|ISO)[_ =-](-?\d+(?:\.\d+)?)");
    double? filenameExposure,filenameGain;if(FilenameExposureGain(f.OriginalName,out filenameExposure,out filenameGain)){if(!f.Gain.HasValue)f.Gain=filenameGain;if(!f.Exposure.HasValue&&f.Kind=="Light")f.Exposure=filenameExposure;}
-   f.Temperature=h.Number("CCD-TEMP","SENSOR_T","SENSORT","CAMTEMP","TEMPERAT");if(!f.Temperature.HasValue)f.Temperature=MatchNumber(text,@"(?:^|[_ -])T?(-?\d+(?:\.\d+)?)\s*°?C(?:[_ .-]|$)");
-   double? bin=MatchNumber(text,@"BIN[_ =-](\d+)");if(bin.HasValue&&!h.Number("XBINNING","BINNING").HasValue)f.BinX=f.BinY=(int)bin.Value;
+   f.Temperature=h.Number("CCD-TEMP","CCDTEMP","SENSOR_T","SENSORT","CAMTEMP","TEMPERAT","SETTEMP");if(!f.Temperature.HasValue)f.Temperature=MatchNumber(text,@"(?:^|[_ -])T?(-?\d+(?:\.\d+)?)\s*°?C(?:[_ .-]|$)");
+   double? bin=MatchNumber(text,@"BIN(?:NING)?[_ =-](\d+)");if(bin.HasValue&&f.BinX==0)f.BinX=(int)bin.Value;if(bin.HasValue&&f.BinY==0)f.BinY=(int)bin.Value;
    double? stackCount=h.Number("NCOMBINE","STACKCNT","NSTACK","STACKNUM","NSUBS","SUBCOUNT");
    if(!stackCount.HasValue)stackCount=MatchNumber(name,@"(?:^|[_ -])(\d+)x\d+(?:\.\d+)?(?:sec|s)(?=[_ .-]|$)")??MatchNumber(name,@"(?:stack[_-]?|^)(\d+)(?:x|$|_)");
    if(stackCount.HasValue&&stackCount.Value>0&&stackCount.Value<=int.MaxValue&&stackCount.Value==Math.Floor(stackCount.Value))f.StackCount=(int)stackCount.Value;
    if(f.Kind=="Light"&&f.StackCount>1){f.Kind="Stack";f.Notes+="Header indicates multiple combined exposures. ";}
    if(f.Kind=="Unknown"&&f.StackCount>1)f.Kind="Stack";
    if(MediaFiles.Video(path))f.Kind="Video";
-   string filter=h.Get("FILTER","FILTERID","FILTNAME");if(!string.IsNullOrEmpty(filter))f.Filter=filter;
+   string filter=h.Get("FILTER","FILTERID","FILTNAME","FILTERNA");if(!string.IsNullOrEmpty(filter))f.Filter=filter;
    else {double? ir=MatchNumber(text,@"(?:^|_)IR[_-]?(\d)");if(ir.HasValue)f.Filter=ir==0?"Standard":ir==1?"Astro":ir==2?"Dual band":"IR "+ir;else if(Regex.IsMatch(low,@"(?:^|[_/ -])ir[_ -]*cut(?:[_/ .-]|$)"))f.Filter="IRCUT";else if(Regex.IsMatch(low,@"(?:^|[_/ -])(duo|dual|lp)[_-]?(band|filter)?(?:[_/ -]|$)"))f.Filter="Dual band";}
    f.ObservationMode=h.Get("OBSMODE","CAPMODE","SHOOTMOD","MODE");
    if(string.IsNullOrEmpty(f.ObservationMode)&&ObservationTargets.Unstretched(null,type))f.ObservationMode=type;
@@ -219,7 +236,7 @@ namespace AstroArchive {
    if(h.Get("REGISTER","REGISTRD","DEROTATE")=="T"||Regex.IsMatch(name,@"^(r_|r_pp_|registered[_-])")||low.Contains("/registered/"))f.Calibration="Registered";
    if(f.Kind=="Stack")f.Calibration="Device stack";if(f.Kind.StartsWith("Master")||f.Kind=="Dark"||f.Kind=="Flat"||f.Kind=="Bias")f.Calibration="Calibration frame";
    if(f.Target=="Unknown")f.Notes+="Target needs identification. ";if(f.Kind=="Unknown")f.Notes+="Frame type needs review. ";
-   f.Sky=SkyWcs.FromHeader(h,f.Width,f.Height);if(classification!=null)classification.Complete();MetadataProfiles.Apply(f,h,asset);CameraDetection.DefaultForTarget(f);if(f.Camera=="Unknown")f.Notes+="Camera channel unknown. ";f.Session=Util.HashText(telescope+"|"+sourceSession+"|"+f.Night+"|"+f.Target+"|"+f.Camera+"|"+f.Width+"x"+f.Height).Substring(0,16);if(selectedImage!=null)f.ImageKey=selectedImage.Key;ApplyStackMetadata(f);if(f.Kind=="Video")MediaFiles.ApplyVideoDuration(f,asset.DurationSeconds,asset.DurationSource);return f;
+   f.Sky=SkyWcs.FromHeader(h,f.Width,f.Height);if(classification!=null)classification.Complete();MetadataProfiles.Apply(f,h,asset);if(declaredKinds.Count>1)f.MetadataConflicts.Add("Kind: conflicting frame-type metadata values.");CameraDetection.DefaultForTarget(f);if(f.Camera=="Unknown")f.Notes+="Camera channel unknown. ";f.Session=Util.HashText(telescope+"|"+sourceSession+"|"+f.Night+"|"+f.Target+"|"+f.Camera+"|"+f.Width+"x"+f.Height).Substring(0,16);if(selectedImage!=null)f.ImageKey=selectedImage.Key;ApplyStackMetadata(f);if(f.Kind=="Video")MediaFiles.ApplyVideoDuration(f,asset.DurationSeconds,asset.DurationSource);return f;
    }
   }
   static Dictionary<string,string> ReadShots(string path,string root,Frame f,Dictionary<string,ShotsMetadata> cache,Action<int> counted,System.Threading.CancellationToken ct,PipelineMetrics metrics){

@@ -12,6 +12,7 @@ namespace AstroArchive {
   void Guide(){
    var menu=new ContextMenu();Action<string,string> add=(title,key)=>{var item=new MenuItem{Header=title};item.Click+=(s,e)=>OpenGuide(key);menu.Items.Add(item);};
    add("Search the guide…",null);add("Help for this page (F1)",CurrentHelpTopic());menu.Items.Add(new Separator());
+   var report=new MenuItem{Header="Report a problem…"};report.Click+=(s,e)=>AppErrorReportingUi.Report(null,"User-submitted problem",Window);menu.Items.Add(report);
    add("Getting started","START HERE");add("USB and saved telescopes","USB TRANSFER AND SAVED TELESCOPES");add("Image preview and tables","IMAGE PREVIEW AND TABLES");add("Stacking projects","STACKING PROJECTS AND SESSIONS");add("Troubleshooting","TROUBLESHOOTING");add("Keyboard shortcuts","KEYBOARD SHORTCUTS");add("Frame types and glossary","FRAME TYPES AND GLOSSARY");
    menu.PlacementTarget=TopMenu("GuideMenu");menu.IsOpen=true;
   }

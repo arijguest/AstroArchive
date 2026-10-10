@@ -67,7 +67,7 @@ namespace AstroArchive {
             if(!light.Gain.HasValue||!cal.Gain.HasValue)review("Camera gain setting is unknown (e-/ADU is a separate quantity).");
             else if(Math.Abs(light.Gain.Value-cal.Gain.Value)>0.001)reject("Camera gain setting differs.");
             bool dark=cal.Kind=="Dark"||cal.Kind=="Master dark"||cal.Kind=="Dark flat"||cal.Kind=="Master dark flat",flat=cal.Kind=="Flat"||cal.Kind=="Master flat",darkFlat=cal.Kind=="Dark flat"||cal.Kind=="Master dark flat";
-            if(darkFlat&&light.Kind!="Flat")reject("Dark flats calibrate raw flats, rather than lights.");
+            if(darkFlat&&light.Kind!="Flat"&&light.Kind!="Master flat")reject("Dark flats calibrate raw flats, rather than lights.");
             if(dark) {
                 if(!light.Exposure.HasValue||!cal.Exposure.HasValue)review("Exposure is unknown.");
                 else if(Math.Abs(light.Exposure.Value-cal.Exposure.Value)>=0.001)reject("Exposure differs; dark scaling is not assumed.");

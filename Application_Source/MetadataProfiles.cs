@@ -19,7 +19,7 @@ namespace AstroArchive {
             MetadataFact fact;
             if(frame.Facts!=null&&frame.Facts.TryGetValue("Exposure",out fact)&&fact!=null&&!string.IsNullOrEmpty(fact.Source))lines.Add("Source: "+fact.Source);
             var image=frame.Images==null?null:frame.Images.FirstOrDefault(i=>i.Key==frame.ImageKey)??frame.Images.FirstOrDefault();
-            if(image!=null&&image.Headers!=null)foreach(string key in new[]{"EXPTIME","EXPOSURE","EXP_TIME","EXPOS","TOTALEXP","TOTEXP","EXPTOTAL","INTTIME","SUBEXP","SUBEXPT","EXPOSUB","EXP_SUB","NCOMBINE","STACKCNT","NSTACK","STACKNUM","NSUBS","SUBCOUNT"}) {
+            if(image!=null&&image.Headers!=null)foreach(string key in new[]{"EXPTIME","EXPOSURE","EXP_TIME","EXPOS","EXPT","SHUTTER","TOTALEXP","TOTEXP","EXPTOTAL","INTTIME","SUBEXP","SUBEXPT","EXPOSUB","EXP_SUB","NCOMBINE","STACKCNT","NSTACK","STACKNUM","NSUBS","SUBCOUNT"}) {
                 string value;
                 if(!image.Headers.TryGetValue(key,out value)||string.IsNullOrWhiteSpace(value))continue;
                 lines.Add(key+" = "+value);
@@ -117,12 +117,12 @@ namespace AstroArchive {
             f.ReadoutMode=Alias(f,h,"ReadoutMode","READMODE","READOUTM");
             f.Roi=Alias(f,h,"Roi","ROI");
             if(string.IsNullOrEmpty(f.Roi)&&h.Number("XORGSUBF").HasValue&&h.Number("YORGSUBF").HasValue)f.Roi=h.Get("XORGSUBF")+","+h.Get("YORGSUBF")+","+f.Width+","+f.Height;
-            f.Offset=Number(f,h,"Offset","camera units","OFFSET","BLKLEVEL");
+            f.Offset=Number(f,h,"Offset","camera units","OFFSET","BLKLEVEL","BIASLVL");
             f.ElectronsPerAdu=Number(f,h,"ElectronsPerAdu","e-/ADU","EGAIN","CCDGAIN");
-            double? gain=Number(f,h,"Gain","camera units","GAIN");
+            double? gain=Number(f,h,"Gain","camera units","GAIN","CAMGAIN");
             if(gain.HasValue)f.Gain=gain;
             f.GainUnit=f.Gain.HasValue?"camera units":null;
-            double? exposure=Number(f,h,"Exposure","s","EXPTIME","EXPOSURE","EXP_TIME","EXPOS"),temperature=Number(f,h,"Temperature","C","CCD-TEMP","SENSOR_T","SENSORT","CAMTEMP","TEMPERAT");
+            double? exposure=Number(f,h,"Exposure","s","EXPTIME","EXPOSURE","EXP_TIME","EXPOS","EXPT","SHUTTER"),temperature=Number(f,h,"Temperature","C","CCD-TEMP","CCDTEMP","SENSOR_T","SENSORT","CAMTEMP","TEMPERAT","SETTEMP");
             if(exposure.HasValue) {
                 string comment=Comment(h,"EXPTIME","EXPOSURE","EXP_TIME","EXPOS");
                 f.Exposure=Regex.IsMatch(comment,@"\b(ms|milliseconds?)\b",RegexOptions.IgnoreCase)?exposure/1000:exposure;
@@ -162,7 +162,8 @@ namespace AstroArchive {
                 f.ObservedUtc=null;
                 if(!string.IsNullOrEmpty(f.Observed))f.TimeSource="Capture time (timezone unknown)";
             }
-            Fact(f,"Kind",f.Kind,h.Get("IMAGETYP","IMAGETYPE","FRAME","FRAMETYP"),h.Get("IMAGETYP","IMAGETYPE","FRAME","FRAMETYP").Length>0?"Header":"Filename / folder rules");
+            string kind=h.Get(Classifier.KindHeaderKeys);
+            Fact(f,"Kind",f.Kind,kind,kind.Length>0?"Header":"Filename / folder rules");
             Fact(f,"Target",f.Target,h.Get("OBJECT","OBJNAME","TARGET"),f.TargetEvidence);
             Fact(f,"Model",f.Model,h.Get("TELESCOP","INSTRUME"),f.MakeEvidence);
             Fact(f,"Camera",f.Camera,h.Get("CAMERA"),f.CameraEvidence);
