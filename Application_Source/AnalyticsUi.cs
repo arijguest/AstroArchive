@@ -52,7 +52,7 @@ namespace AstroArchive {
    AddField(filters,"Telescope",telescope);AddField(filters,"From (inclusive)",from);AddField(filters,"To (inclusive)",to);AddField(filters,"Document label",caption);
    rejected=new CheckBox{Content="Include rejected light frames",Margin=new Thickness(0,25,18,0),VerticalAlignment=VerticalAlignment.Center};AccessibleName(rejected,"Include rejected light frames");filters.Children.Add(rejected);
    UiHelp.Hint(from,"Start acquisition date, inclusive. Undated captures are excluded when a date range is set.");UiHelp.Hint(to,"End acquisition date, inclusive. Clear both dates to include undated captures.");
-   UiHelp.Hint(rejected,"Off excludes light frames marked as rejected. Unknown exposures are never guessed.");
+   UiHelp.Hint(rejected,"Off excludes rejected frames from charts. Headline cards always show all repository light frames, including rejected and undated captures. Unknown exposures are never guessed.");
    var reset=new Button{Content="Reset scope",Margin=new Thickness(0,24,0,0),VerticalAlignment=VerticalAlignment.Center};filters.Children.Add(reset);
    reset.Click+=(s,e)=>{telescope.SelectedIndex=0;from.SelectedDate=null;to.SelectedDate=null;from.Text="";to.Text="";rejected.IsChecked=false;caption.Text=repositoryName;Schedule();};
    body=new Grid();Grid.SetRow(body,2);root.Children.Add(body);body.ColumnDefinitions.Add(new ColumnDefinition{Width=new GridLength(240)});body.ColumnDefinitions.Add(new ColumnDefinition());
@@ -92,7 +92,7 @@ namespace AstroArchive {
    open.Click+=(s,e)=>{try{System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(Path.GetDirectoryName(lastOutput)){UseShellExecute=true});}catch(Exception error){status.Text=error.Message;}};
    debounce=new DispatcherTimer{Interval=TimeSpan.FromMilliseconds(250)};debounce.Tick+=(s,e)=>{debounce.Stop();RefreshData();};
    playback=new DispatcherTimer{Interval=TimeSpan.FromMilliseconds(1000.0/24)};playback.Tick+=(s,e)=>{if(animation==null||playbackClock==null)return;double seconds=playbackClock.Elapsed.TotalSeconds%animation.Duration;preview.Source=animation.Preview(seconds);};
-   play.Click+=(s,e)=>{if(playback.IsEnabled){StopPlayback();DrawPreview();}else{animation=new AnalyticsAnimation(charts.SelectedIndex==6?pages:reportPages[charts.SelectedIndex],VideoOptions());playbackClock=System.Diagnostics.Stopwatch.StartNew();playback.Start();play.Content="Ⅱ Pause preview";previewPage.IsEnabled=false;}};
+   play.Click+=(s,e)=>{if(playback.IsEnabled){playback.Stop();playbackClock.Stop();play.Content="▶ Play preview";previewPage.IsEnabled=true;}else{if(animation==null){animation=new AnalyticsAnimation(charts.SelectedIndex==6?pages:reportPages[charts.SelectedIndex],VideoOptions());playbackClock=new System.Diagnostics.Stopwatch();}playbackClock.Start();playback.Start();play.Content="Ⅱ Pause preview";previewPage.IsEnabled=false;}};
    pace.SelectionChanged+=(s,e)=>{StopPlayback();Hints();};transition.SelectionChanged+=(s,e)=>{StopPlayback();Hints();};videoSize.SelectionChanged+=(s,e)=>Hints();
    telescope.SelectionChanged+=(s,e)=>Schedule();from.SelectedDateChanged+=(s,e)=>Schedule();to.SelectedDateChanged+=(s,e)=>Schedule();caption.TextChanged+=(s,e)=>Schedule();rejected.Checked+=(s,e)=>Schedule();rejected.Unchecked+=(s,e)=>Schedule();
    // Invalid typed dates must also invalidate the current export, rather than
@@ -131,18 +131,20 @@ namespace AstroArchive {
   void BuildPages(){reportPages=Enumerable.Range(0,6).Select(i=>AnalyticsGraphics.Pages(snapshot,i,documentTheme.SelectedIndex==0,(AnalyticsLayout)documentLayout.SelectedIndex)).ToArray();pages=reportPages.SelectMany(p=>p).ToList();paper.Background=new SolidColorBrush((Color)ColorConverter.ConvertFromString(pages[0].Background));}
   void RenderPreview(){
    if(!ready||snapshot==null||charts.SelectedIndex<0)return;StopPlayback();bool all=charts.SelectedIndex==6;
-   var selected=all?pages:reportPages[charts.SelectedIndex];previewPage.Items.Clear();previewPage.Items.Add("All pages");for(int i=0;i<selected.Count;i++)previewPage.Items.Add(new ComboBoxItem{Content="Page "+(i+1)+" of "+selected.Count,ToolTip=selected[i].Title});previewPage.Visibility=selected.Count>1?Visibility.Visible:Visibility.Collapsed;previewPage.SelectedIndex=all&&documentLayout.SelectedIndex==0?0:1;
+   var selected=all?pages:reportPages[charts.SelectedIndex];previewPage.Items.Clear();previewPage.Items.Add("All pages");for(int i=0;i<selected.Count;i++)previewPage.Items.Add(new ComboBoxItem{Content="Page "+(i+1)+" of "+selected.Count,ToolTip=selected[i].Title});previewPage.Visibility=selected.Count>1?Visibility.Visible:Visibility.Collapsed;previewPage.SelectedIndex=all&&documentLayout.SelectedIndex==0&&!IsMotion?0:1;
    previewTitle.Text=all?(documentLayout.SelectedIndex>0?"All six charts · Social pages":"All six charts · Combined preview"):ArchiveAnalytics.Titles[charts.SelectedIndex]+" · Export preview";
    export.Content=all?"Export all…":"Export chart…";exportAll.Visibility=all?Visibility.Collapsed:Visibility.Visible;export.IsEnabled=exportAll.IsEnabled=play.IsEnabled=snapshot.Captures>0&&!exporting;Hints();
   }
   void DrawPreview(){
    if(!ready||snapshot==null||charts.SelectedIndex<0||previewPage.SelectedIndex<0)return;
+   StopPlayback();
    var selected=charts.SelectedIndex==6?pages:reportPages[charts.SelectedIndex];int page=previewPage.SelectedIndex-1;preview.Source=AnalyticsExport.Preview(page<0?selected:new List<AnalyticsPage>{selected[page]});
   }
   void Hints(){
    if(!ready)return;string value=Convert.ToString(format.SelectedItem);resolution.IsEnabled=(value=="PNG"||value=="JPEG")&&!exporting;
    motionControls.Visibility=IsMotion?Visibility.Visible:Visibility.Collapsed;
-   if(IsMotion){var settings=VideoOptions();var chosen=snapshot==null?null:charts.SelectedIndex==6?pages:charts.SelectedIndex>=0?reportPages[charts.SelectedIndex]:null;int count=chosen==null?0:chosen.Count;motionSummary.Text=(count*settings.SecondsPerChart).ToString("0")+" s · "+count+" scene"+(count==1?"":"s");exportHint.Text="Animated chart reveals and "+settings.Transition.ToLowerInvariant()+" transitions · "+(value=="MP4"?"H.264 MP4 · 24 fps":"Looping GIF · 12 fps")+". Export all tells the story of all six charts, including continuation pages.";return;}
+   ((FrameworkElement)resolution.Parent).Visibility=IsMotion?Visibility.Collapsed:Visibility.Visible;
+   if(IsMotion){var settings=VideoOptions();var chosen=snapshot==null?null:charts.SelectedIndex==6?pages:charts.SelectedIndex>=0?reportPages[charts.SelectedIndex]:null;int count=chosen==null?0:chosen.Count;int w=0,h=0;if(chosen!=null)AnalyticsAnimation.Dimensions(chosen[0],settings.MaximumEdge,out w,out h);motionSummary.Text=(count*settings.SecondsPerChart).ToString("0")+" s · "+count+" scene"+(count==1?"":"s")+" · "+w+" × "+h;exportHint.Text="Animated chart reveals and "+settings.Transition.ToLowerInvariant()+" transitions · "+(value=="MP4"?"H.264 MP4 · 24 fps":"Looping GIF · 12 fps")+". Export all tells the story of all six charts, including continuation pages.";return;}
    string orientation=Convert.ToString(documentLayout.SelectedItem).ToLowerInvariant();bool tall=documentLayout.SelectedIndex==1||documentLayout.SelectedIndex==2||documentLayout.SelectedIndex==5;string sheet=tall?"Multiple pages stack vertically in one sheet.":"Multiple pages combine into one sheet.";
    exportHint.Text=value=="PDF"?"Vector charts and lettering on "+orientation+" pages. Long rankings continue onto extra pages; every target and telescope is included.":value=="SVG"?"Scalable "+orientation+" graphics with an embedded logo. "+sheet:"High-resolution "+orientation+" images in your chosen document theme. "+sheet;
   }

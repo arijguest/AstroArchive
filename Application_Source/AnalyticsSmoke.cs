@@ -79,6 +79,10 @@ namespace AstroArchive {
      else{byte[] bytes=File.ReadAllBytes(path);string container=System.Text.Encoding.ASCII.GetString(bytes);if(!container.Contains("ftyp")||!container.Contains("moov")||!container.Contains("avc1"))throw new Exception("MP4 is not a completed H.264 container.");}
     }
    }
+   foreach(AnalyticsLayout layout in Enum.GetValues(typeof(AnalyticsLayout))){
+    var page=AnalyticsGraphics.Page(data,5,true,layout);int width,height;AnalyticsAnimation.Dimensions(page,720,out width,out height);if(width%2!=0||height%2!=0||Math.Abs(width/(double)height-page.CanvasWidth/page.CanvasHeight)>.000001)throw new Exception("Reduced video size changed the chosen ratio.");
+    var native=new AnalyticsVideoOptions{SecondsPerChart=.125,FramesPerSecond=24};AnalyticsAnimation.Save(Path.Combine(output,"media-native-"+layout+".mp4"),new[]{page},"MP4",native,null,CancellationToken.None);
+   }
    var story=Enumerable.Range(0,6).Select(i=>AnalyticsGraphics.Page(data,i,true,AnalyticsLayout.Vertical)).ToList();var settings=new AnalyticsVideoOptions{SecondsPerChart=1.5,FramesPerSecond=4,MaximumEdge=320,Transition="Zoom"};var sequence=new AnalyticsAnimation(story,settings);if(sequence.Duration!=9)throw new Exception("Story duration omits a chart.");
    foreach(string format in new[]{"MP4","GIF"})AnalyticsAnimation.Save(Path.Combine(output,"media-story."+format.ToLowerInvariant()),story,format,settings,null,CancellationToken.None);
    foreach(string transition in new[]{"Glide","Zoom","Dissolve"}){settings.Transition=transition;var movie=new AnalyticsAnimation(story,settings);AnimationReference(Path.Combine(output,"media-transition-"+transition+".png"),movie,1.75,180,320);}

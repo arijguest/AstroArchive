@@ -64,7 +64,8 @@ namespace AstroArchive {
    var bitmap=new RenderTargetBitmap(width,height,96,96,PixelFormats.Pbgra32);bitmap.Render(visual);var bytes=new byte[width*height*4];bitmap.CopyPixels(bytes,width*4,0);return bytes;
   }
   public static void Dimensions(AnalyticsPage page,int maximumEdge,out int width,out int height){
-   double scale=maximumEdge>0?Math.Min(1,maximumEdge/Math.Max(page.CanvasWidth,page.CanvasHeight)):1;width=Math.Max(2,(int)Math.Round(page.CanvasWidth*scale/2)*2);height=Math.Max(2,(int)Math.Round(page.CanvasHeight*scale/2)*2);
+   int originalWidth=(int)page.CanvasWidth,originalHeight=(int)page.CanvasHeight,a=originalWidth,b=originalHeight;while(b!=0){int next=a%b;a=b;b=next;}int unitWidth=originalWidth/a,unitHeight=originalHeight/a;
+   int multiple=maximumEdge>0?Math.Min(a,maximumEdge/Math.Max(unitWidth,unitHeight)):a;if((unitWidth%2!=0||unitHeight%2!=0)&&multiple%2!=0)multiple--;multiple=Math.Max(2,multiple);width=unitWidth*multiple;height=unitHeight*multiple;
   }
   public static void Save(string destination,IList<AnalyticsPage> pages,string format,AnalyticsVideoOptions options,Action<int,string> progress,CancellationToken cancellation){
    if(format!="MP4"&&format!="GIF")throw new ArgumentException("Choose MP4 or GIF.");var animation=new AnalyticsAnimation(pages,options);int width,height;Dimensions(pages[0],options.MaximumEdge,out width,out height);

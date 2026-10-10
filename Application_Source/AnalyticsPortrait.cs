@@ -14,7 +14,7 @@ namespace AstroArchive {
    if(layout==AnalyticsLayout.Vertical)return PortraitPage(data,index,part,parts,values,dark);
    if(layout==AnalyticsLayout.Widescreen){
     var wide=Page(data,index,part,parts,values,dark,AnalyticsLayout.Landscape);ScaleScene(wide,1.35,150);wide.CanvasWidth=1920;wide.CanvasHeight=1080;
-    wide.Marks[0].X=0;wide.Marks[0].Width=1920;wide.Marks[1].X=0;wide.Marks[1].Width=1920;return wide;
+    wide.Marks[0].X=0;wide.Marks[0].Width=1920;wide.Marks[1].X=0;wide.Marks[1].Width=1920;foreach(var mark in wide.Marks.Where(m=>m.Kind=="rect"&&m.Y==0&&m.Height<20)){mark.X=0;mark.Width=1920;}return wide;
    }
    var p=CompactSocialPage(data,index,part,parts,values,dark,layout==AnalyticsLayout.Square?1080:layout==AnalyticsLayout.Pinterest?1620:1350);
    if(layout==AnalyticsLayout.Pinterest){ScaleScene(p,1000.0/1080,0);p.CanvasWidth=1000;p.CanvasHeight=1500;}return p;

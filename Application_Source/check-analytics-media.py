@@ -52,6 +52,18 @@ def verify(folder):
             ).stdout
             assert len(raw) == 36 * 180 * 320 * 3
         print(f"PASS six-chart {suffix.upper()} story: all 36 frames decode")
+    sizes = {"Landscape": (1200, 800), "Vertical": (1080, 1920),
+             "Portrait": (1080, 1350), "Square": (1080, 1080),
+             "Widescreen": (1920, 1080), "Pinterest": (1000, 1500)}
+    for layout, size in sizes.items():
+        path = folder / f"media-native-{layout}.mp4"
+        raw = subprocess.run(
+            [imageio_ffmpeg.get_ffmpeg_exe(), "-v", "error", "-i", str(path),
+             "-f", "rawvideo", "-pix_fmt", "rgb24", "-"],
+            check=True, capture_output=True,
+        ).stdout
+        assert len(raw) == 3 * size[0] * size[1] * 3, f"Full-size H.264 export failed: {layout}"
+        print(f"PASS full-size {layout} MP4: {size[0]} × {size[1]}, 24 fps")
 
 
 if __name__ == "__main__":

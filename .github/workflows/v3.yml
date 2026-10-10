@@ -54,6 +54,16 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always()
         with:
+          name: astroarchive-analytics-preview
+          path: |
+            release-artifacts/ui-analytics/AstroArchive_Analytics_*.png
+            release-artifacts/ui-analytics/analytics-*-dark-single.png
+            release-artifacts/ui-analytics/media-story.*
+            release-artifacts/ui-analytics/media-transition-*.png
+          if-no-files-found: warn
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
           name: astroarchive-v3-windows
           path: release-artifacts/
           if-no-files-found: warn
