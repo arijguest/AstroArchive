@@ -27,4 +27,5 @@ macos-artifacts/
 Application_Source/SMBLibrary.dll
 
 linux-artifacts/
+linux-release/
 **/TestResults/
