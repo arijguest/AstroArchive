@@ -44,7 +44,7 @@ namespace AstroArchive {
    B("ScreenImportsButton").IsEnabled=!RepositoryOperationBlocked&&repo!=null&&visibleImports.Any(f=>f.Status!="Deleted");
    B("ReviewImportsButton").IsEnabled=!RepositoryOperationBlocked&&repo!=null&&summary.Flagged>0;retry=plan==null?0:retry;B("RetryImportsButton").Content="Retry "+retry+" failed import"+(retry==1?"":"s");B("RetryImportsButton").IsEnabled=!RepositoryOperationBlocked&&repo!=null&&retry>0;
    B("AssignUnknownTargetButton").IsEnabled=!RepositoryOperationBlocked&&UnknownImportSelection().Count>0;
-   B("ImportOptionsButton").IsEnabled=!RepositoryOperationBlocked;
+   B("ImportOptionsButton").IsEnabled=!NetworkImportBlocked;
    L("ScanLabel").Text=source.Count==0&&plan!=null&&plan.FastSkippedFiles>0&&plan.Errors.Count==0?"Nothing new to import · "+plan.FastSkippedFiles+" archived files skipped in "+plan.FastSkippedFolders+" folders":source.Count==0&&plan==null?"Choose a source folder and scan to begin.":summary.Shown+" / "+summary.Total+" shown · "+(summary.Total-summary.Shown)+" hidden by search/filters · "+importFilters.ActiveCount+" active filters"+(SkipFlagged?" · "+summary.SkippedFlagged+" flagged candidates skipped":" · flagged captures included")+(plan!=null&&plan.FastSkippedFiles>0?" · "+plan.FastSkippedFiles+" archived files skipped in "+plan.FastSkippedFolders+" folders":"")+(plan!=null&&plan.IgnoredFailed>0?"  ·  "+plan.IgnoredFailed+" failed filenames ignored":"")+(plan!=null&&plan.IgnoredRaster>0?" · "+plan.IgnoredRaster+" PNG/JPG ignored":"");
   }
   void ScreenFiles(bool imports){

@@ -131,9 +131,9 @@ namespace AstroArchive {
             if (!navigationReady) return;
             string scanTip=settings.RobustImportMatching?"Robust scan checks file changes and missing archive copies.":"Quick scan skips archived filenames and known DWARF sessions. Use Full rescan to check changes.";
             UiHelp.Hint(B("ScanButton"),B("ScanButton").IsEnabled?scanTip:RepositoryOperationBlocked?"Wait for the current operation to finish.":"Choose a repository first.",true);
-            TopMenu("ImportMenu").IsEnabled = !RepositoryOperationBlocked;
+            TopMenu("ImportMenu").IsEnabled = !NetworkImportBlocked;
             TopMenu("ExportMenu").IsEnabled = !RepositoryOperationBlocked && repo != null&&!ActiveSearchBlocked&&!SearchBlocked(((TabControl)Window.FindName("MainTabs")).SelectedIndex==2?"EditedSearchBox":"SearchBox");
-            TopMenu("SettingsMenu").IsEnabled = !RepositoryOperationBlocked;
+            TopMenu("SettingsMenu").IsEnabled = !NetworkImportBlocked;
             B("ImportExportButton").IsEnabled = TopMenu("ExportMenu").IsEnabled;
             B("OpenRepositoryFolderButton").IsEnabled = repo != null;
             if (repo != null) {
@@ -158,6 +158,9 @@ namespace AstroArchive {
             else if (name == "GuideMenu") BuildGuideNavigation(menu);
         }
         void BuildImportNavigation(MenuItem menu) {
+            menu.Items.Add(MenuAction("Connect telescope over network…",()=>{GoToPage(1);OpenRemoteImport();},repo!=null&&!NetworkImportBlocked,false));
+            menu.Items.Add(MenuAction("Telescope import progress…",OpenActivity,remoteSessions.Count>0,false));
+            menu.Items.Add(new Separator());
             foreach(var telescope in usbTelescopes){var device=telescope;menu.Items.Add(MenuAction(UsbImportLabel(device),()=>{GoToPage(1);UploadUsb(device);},repo!=null&&!RepositoryOperationBlocked&&!usbImportPicking));}
             if(usbTelescopes.Count>0)menu.Items.Add(new Separator());
             menu.Items.Add(ButtonAction("Scan source", "ScanButton", 1));
@@ -169,7 +172,7 @@ namespace AstroArchive {
             var tools=Branch("Review and repair", ButtonAction("Review flagged files…", "ReviewImportsButton", 1),ButtonAction("Screen files", "ScreenImportsButton", 1),ButtonAction("Retry failed imports", "RetryImportsButton", 1),MenuAction("Full rescan",()=>{GoToPage(1);Scan(true);},repo!=null),MenuAction("Scan report…",()=>ShowReport("Scan report",plan==null?"Scan a folder first.":plan.ScanReport)));
             tools.Items.Add(new Separator());MoveMenuItems(tools,BuildImportTools(),item=>item is MenuItem&&Convert.ToString(((MenuItem)item).Header)!="Scan report…");tools.IsEnabled=!SearchBlocked("ImportSearchBox");menu.Items.Add(tools);
             menu.Items.Add(Branch("Dump folder",MenuAction("Open folder",()=>{repo.EnsureDumpFolder();OpenFolder(repo.DumpFolder);},repo!=null),MenuAction("Process files",ProcessDumpUi,repo!=null)));
-            menu.Items.Add(new Separator());menu.Items.Add(MenuAction("Import preferences…",ImportPreferences));
+            menu.Items.Add(new Separator());menu.Items.Add(MenuAction("Import preferences…",ImportPreferences,!NetworkImportBlocked,false));
         }
         void BuildExportNavigation(MenuItem menu) {
             if(((TabControl)Window.FindName("MainTabs")).SelectedIndex==2){menu.Items.Add(MenuAction("Export to…",ExportEditedTo,SelectedEditedImages().Count>0));return;}
@@ -178,8 +181,8 @@ namespace AstroArchive {
             menu.Items.Add(new Separator());menu.Items.Add(Branch("Catalogue CSV",MenuAction("Selected / visible files…",()=>ExportSelectionCsv(selected),selected.Count>0),MenuAction("Entire repository…",ExportCatalogue,repo!=null)));
         }
         void BuildRepositoryNavigation(MenuItem menu) {
-            var grouped=MenuAction("Group subs by session",()=>{GoToPage(0);C("LibraryViewBox").SelectedItem=Convert.ToString(C("LibraryViewBox").SelectedItem)=="Session summaries"?"Show all files":"Session summaries";},repo!=null);grouped.IsCheckable=true;grouped.IsChecked=Convert.ToString(C("LibraryViewBox").SelectedItem)=="Session summaries";menu.Items.Add(grouped);
-            menu.Items.Add(MenuAction("Filters…",()=>{GoToPage(0);ShowFilters(false);},repo!=null));
+            var grouped=MenuAction("Group subs by session",()=>{GoToPage(0);C("LibraryViewBox").SelectedItem=Convert.ToString(C("LibraryViewBox").SelectedItem)=="Session summaries"?"Show all files":"Session summaries";},repo!=null,false);grouped.IsCheckable=true;grouped.IsChecked=Convert.ToString(C("LibraryViewBox").SelectedItem)=="Session summaries";menu.Items.Add(grouped);
+            menu.Items.Add(MenuAction("Filters…",()=>{GoToPage(0);ShowFilters(false);},repo!=null,false));
             menu.Items.Add(AnalyticsMenu());
             menu.Items.Add(MenuAction("Back up archive…",BackUpArchive,repo!=null));
             menu.Items.Add(new Separator());menu.Items.Add(Branch("Review and analysis",ButtonAction("Review flagged files…","ReviewLibraryButton",0),ButtonAction("Screen files","ScreenLibraryButton",0),ButtonAction("Identify targets…","SolveButton",0),ButtonAction("Analyse rotation…","RotationButton",0)));

@@ -48,7 +48,7 @@ namespace AstroArchive {
    var dates=dated.Where(d=>d.Date!=null).Select(d=>d.Date.Date).ToList();
    result.DateRange=dates.Count==0?"Acquisition dates unavailable":dates.Min().ToString("dd MMM yyyy",CultureInfo.InvariantCulture)+" – "+dates.Max().ToString("dd MMM yyyy",CultureInfo.InvariantCulture);
    if(bounded)result.Scope+=" · "+(options.From.HasValue?options.From.Value.ToString("dd MMM yyyy",CultureInfo.InvariantCulture):"Beginning")+" to "+(options.To.HasValue?options.To.Value.ToString("dd MMM yyyy",CultureInfo.InvariantCulture):"Latest");
-   string coverage=result.UnknownExposure>0?result.UnknownExposure.ToString("N0",CultureInfo.InvariantCulture)+" light frames have unknown exposure; omitted from time totals.":"All included light frames have known exposure.";
+   string coverage=result.UnknownExposure>0?result.UnknownExposure.ToString("N0",CultureInfo.InvariantCulture)+" frames with unknown exposure omitted.":"";
    var reports=new List<AnalyticsReport>{
     new AnalyticsReport{Id="targets",Title=Titles[0],Description="Your sky, by individual light-frame count",Unit="frames",Style="donut",Values=Groups(lights,f=>f.TargetLabel,false),Note="Light frames only; stacks, video and calibration files are excluded."},
     new AnalyticsReport{Id="timeline",Title=Titles[1],Description="Recorded integration across acquisition dates",Unit="h",Style="columns"},
@@ -64,8 +64,8 @@ namespace AstroArchive {
     DateTime start=groups.Keys.Min(),end=groups.Keys.Max();for(var date=start;date<=end;){double hours;groups.TryGetValue(date,out hours);reports[1].Values.Add(new AnalyticsValue(date.ToString(yearly?"yyyy":"MMM yy",CultureInfo.InvariantCulture),hours));if(date==end)break;date=yearly?date.AddYears(1):date.AddMonths(1);}
     reports[1].Description="Recorded integration by "+(yearly?"year":"month")+" of acquisition";
    }
-   reports[1].Note=coverage+" "+result.UnknownDate.ToString("N0",CultureInfo.InvariantCulture)+" undated frames omitted from timeline. Dates retain their recorded clock.";
-   reports[5].Note+=" Bins include the lower edge and exclude the upper edge.";
+   reports[1].Note=(coverage+(result.UnknownDate>0?" "+result.UnknownDate.ToString("N0",CultureInfo.InvariantCulture)+" undated frames omitted.":"")).Trim();
+   reports[5].Note=(coverage+" Bins include the lower edge.").Trim();
    double[] upper={5,15,30,60,120,300,double.PositiveInfinity};string[] names={"< 5 s","5–15 s","15–30 s","30–60 s","1–2 min","2–5 min","≥ 5 min"};
    for(int i=0;i<upper.Length;i++){double low=i==0?0:upper[i-1],high=upper[i];reports[5].Values.Add(new AnalyticsValue(names[i],timed.Count(f=>f.Exposure.Value>=low&&f.Exposure.Value<high)));}
    result.Reports=reports;return result;

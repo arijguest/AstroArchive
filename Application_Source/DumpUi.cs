@@ -35,7 +35,8 @@ namespace AstroArchive {
    if(repo!=repository||RepositoryOperationBlocked)return;
    OpenDumpProgress();
    ((CheckBox)Window.FindName("DeleteOriginalsCheck")).IsChecked=false;plan=null;BeginLive(true);DumpResult result=null;
-   Run(ct=>{result=repository.ProcessDump(ct,Progress,settings.CopyWorkers,LiveFrame,ignoreFailed,ignoreRaster);return result.Summary;},summary=>{
+   int workers=settings.CopyWorkers;pendingImportRecord=new ImportResumeRecord{Kind="Dump",Title="Dump folder import",Repository=repository.Root,Source=repository.DumpFolder,Workers=workers,IgnoreFailed=ignoreFailed,IgnoreRaster=ignoreRaster,DeleteOriginals=true};
+   Run(ct=>{result=repository.ProcessDump(ct,Progress,workers,LiveFrame,ignoreFailed,ignoreRaster);if(result.Import.Failed+result.Plan.Errors.Count>0)foregroundImportRecord.State="Interrupted";return result.Summary;},summary=>{
     plan=result.Plan;FilterImports();
     L("StatusLabel").Text=summary;
     if(result.NeedsReview)ShowReport("Dump folder: files retained for review",repo.LastReport);

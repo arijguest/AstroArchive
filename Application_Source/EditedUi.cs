@@ -77,6 +77,7 @@ namespace AstroArchive {
   void ShowEditedDetails(){if(ActiveEditedImage!=null)ShowReport(ActiveEditedImage.Filename,ActiveEditedImage.Metadata.Details+(string.IsNullOrEmpty(ActiveEditedImage.MetadataProblem)?"":"\n\nMetadata could not be read: "+ActiveEditedImage.MetadataProblem));}
   void AddEditedImages(){
    if(repo==null||RepositoryOperationBlocked)return;var picker=new OpenFileDialog{Title="Add edited images",Multiselect=true,Filter="Supported images|*.fit;*.fits;*.fts;*.fit.gz;*.fits.gz;*.fts.gz;*.xisf;*.fz;*.ser;*.tif;*.tiff;*.png;*.jpg;*.jpeg;*.bmp;*.gif;*.avi;*.mp4;*.mov;*.m4v;*.wmv;*.mkv;*.dng;*.cr2;*.cr3;*.nef;*.arw;*.raf;*.orf;*.rw2|All files|*.*"};if(picker.ShowDialog(Window)!=true)return;
+   pendingImportRecord=new ImportResumeRecord{Kind="EditedFiles",Title="Edited image import",Repository=repo.Root,Source=Path.GetDirectoryName(picker.FileNames[0]),EditedFiles=picker.FileNames};
    var result=new EditedImportResult();Run(ct=>{var project=repo.AddEditedImages(picker.FileNames,null,"Edited images",ct,Progress,result);return project==null?null:project.Id;},id=>EditedImportComplete(id,result));
   }
   void ImportEditedFolder(){
@@ -97,6 +98,7 @@ namespace AstroArchive {
   }
   void ReviewEditedFolder(EditedImportPlan import){
    DataGrid table;var dialog=EditedImportDialog(import,out table);if(!dialog.Show()){if(reviewingActivity!=null){reviewingActivity.NeedsReview=true;reviewingActivity.Status="Results kept for later review.";}return;}
+   pendingImportRecord=new ImportResumeRecord{Kind="EditedFolder",Title="Edited folder import",Repository=repo.Root,Source=import.Folder,EditedPlan=import};
    var result=new EditedImportResult();Run(ct=>{var project=repo.ImportEditedFolder(import,"Edited images",ct,Progress,result);return project==null?null:project.Id;},id=>EditedImportComplete(id,result));
   }
   DataGrid EditedImportReviewTable(EditedImportPlan import){

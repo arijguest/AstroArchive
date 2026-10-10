@@ -12,7 +12,7 @@ namespace AstroArchive {
  }
  public sealed class AnalyticsPage {
   public const double Width=1200,Height=800;
-  public string Title;public List<AnalyticsMark> Marks=new List<AnalyticsMark>();
+  public string Title,Background="#0C1220";public List<AnalyticsMark> Marks=new List<AnalyticsMark>();
  }
  // One scene supplies preview, raster, SVG and PDF so exported layouts agree.
  public static class AnalyticsGraphics {
@@ -24,20 +24,20 @@ namespace AstroArchive {
   static double TextWidth(string text,double size){return text.Sum(c=>char.IsSurrogate(c)?.6:c>=0x3000?1:"MWmw@%".IndexOf(c)>=0?.95:"ilI.,:;!| '".IndexOf(c)>=0?.3:char.IsUpper(c)?.75:.6)*size;}
   static string Fit(string text,double width,double size){int length=text.Length;while(length>1&&TextWidth(Short(text,length),size)>width)length--;return Short(text,length);}
   static void Lines(AnalyticsPage p,string text,double x,double y,int characters,double size,string colour,int limit,double width=0){
-   var remaining=text;int line=0;while(remaining.Length>0&&line<limit){int count=Math.Min(characters,remaining.Length);if(width>0)while(count>1&&TextWidth(remaining.Substring(0,count),size)>width)count--;if(count<remaining.Length){int space=remaining.LastIndexOf(' ',count-1,count);if(space>count/2)count=space;if(count>0&&char.IsHighSurrogate(remaining[count-1]))count--;}string part=remaining.Substring(0,count);remaining=remaining.Substring(count).TrimStart();if(line==limit-1&&remaining.Length>0){part=Short(part+" "+remaining,characters);if(width>0)part=Fit(part,width,size);}Text(p,part,x,y+line*(size+5),size,colour,false,text);line++;}
+   var remaining=text??"";int line=0;while(remaining.Length>0&&line<limit){int count=Math.Min(characters,remaining.Length);if(width>0)while(count>1&&TextWidth(remaining.Substring(0,count),size)>width)count--;if(count<remaining.Length){int space=remaining.LastIndexOf(' ',count-1,count);if(space>count/2)count=space;if(count>0&&char.IsHighSurrogate(remaining[count-1]))count--;}string part=remaining.Substring(0,count);remaining=remaining.Substring(count).TrimStart();if(line==limit-1&&remaining.Length>0){part=Short(part+" "+remaining,characters);if(width>0)part=Fit(part,width,size);}Text(p,part,x,y+line*(size+5),size,colour,false,text);line++;}
   }
-  public static AnalyticsPage Page(AnalyticsSnapshot data,int index){
-   return Page(data,index,0,1,data.Reports[index].Style=="bars"?data.Reports[index].Values.Take(8).ToList():ArchiveAnalytics.Compact(data.Reports[index].Values,8));
+  public static AnalyticsPage Page(AnalyticsSnapshot data,int index,bool dark=true){
+   return Page(data,index,0,1,data.Reports[index].Style=="bars"?data.Reports[index].Values.Take(8).ToList():ArchiveAnalytics.Compact(data.Reports[index].Values,8),dark);
   }
-  public static List<AnalyticsPage> Pages(AnalyticsSnapshot data,int index){
+  public static List<AnalyticsPage> Pages(AnalyticsSnapshot data,int index,bool dark=true){
    var report=data.Reports[index];int count=report.Style=="bars"?Math.Max(1,(int)Math.Ceiling(report.Values.Count/8.0)):1;
-   return Enumerable.Range(0,count).Select(part=>Page(data,index,part,count,report.Style=="bars"?report.Values.Skip(part*8).Take(8).ToList():ArchiveAnalytics.Compact(report.Values,8))).ToList();
+   return Enumerable.Range(0,count).Select(part=>Page(data,index,part,count,report.Style=="bars"?report.Values.Skip(part*8).Take(8).ToList():ArchiveAnalytics.Compact(report.Values,8),dark)).ToList();
   }
-  static AnalyticsPage Page(AnalyticsSnapshot data,int index,int part,int parts,List<AnalyticsValue> values){
-   var report=data.Reports[index];var p=new AnalyticsPage{Title=report.Title};
+  static AnalyticsPage Page(AnalyticsSnapshot data,int index,int part,int parts,List<AnalyticsValue> values,bool dark){
+   var report=data.Reports[index];var p=new AnalyticsPage{Title=report.Title,Background=dark?"#0C1220":"#FFFFFF"};
    Box(p,0,0,1200,800,"#FFFFFF");Box(p,0,0,1200,8,Accent);
-   p.Marks.Add(new AnalyticsMark{Kind="logo",X=60,Y=30,Width=54,Height=54});
-   Text(p,"AstroArchive",128,38,23,Ink,true);Text(p,"OBSERVATORY NOTES  /  ANALYTICS",128,67,10,Muted,true);
+   p.Marks.Add(new AnalyticsMark{Kind="logo",X=56,Y=24,Width=70,Height=70});
+   Text(p,"AstroArchive",142,46,24,Ink,true);
    Text(p,(index+1).ToString("00",CultureInfo.InvariantCulture)+" / 06"+(parts>1?" · "+(part+1)+"/"+parts:""),parts>1?980:1060,47,17,Accent,true);
    Text(p,report.Title,60,118,34,Ink,true);Text(p,report.Description+(parts>1?" · Groups "+(part*8+1)+"–"+Math.Min((part+1)*8,report.Values.Count)+" of "+report.Values.Count:""),60,165,17,Muted);
    Box(p,60,210,1080,78,"#F5F7FC");
@@ -49,12 +49,19 @@ namespace AstroArchive {
    else if(report.Style=="donut")Donut(p,values,total,report.Unit);
    else if(report.Style=="bars")Bars(p,values,report.Unit,report.Values.Max(v=>v.Value));
    else Columns(p,report.Values,report.Unit);
-   Lines(p,report.Note,60,694,133,12,Muted,2);
+   // Keep interpretation and missing-data caveats, without repeating the brand
+   // or technical export details around the chart.
+   Lines(p,report.Note,60,700,133,12,Muted,2,1080);
    Box(p,60,738,1080,1,"#DCE2EF");
    Lines(p,data.Scope,60,752,108,11,Muted,1,820);
    Text(p,data.DateRange,60,775,10,Muted);
-   Text(p,"astroarchive.arijguest.com",910,752,11,Accent);
-   Text(p,data.GeneratedUtc.ToString("dd MMM yyyy",CultureInfo.InvariantCulture)+" · UTC",988,773,10,Muted);
+   Text(p,"astroarchive.arijguest.com",910,762,11,Accent);
+   if(dark){
+    var colours=new Dictionary<string,string>{{"#FFFFFF",p.Background},{Ink,"#E9EEF8"},{Muted,"#A6B4CC"},{"#F5F7FC","#151E2E"},{"#DCE2EF","#34415A"},{"#E8ECF4","#28354B"}};
+    string[] branded={"#90B8FF","#55DFEA","#C19AFF","#F0C36A","#4F9BFA","#ED9ACB","#9DD7B0","#A6B4CC"};
+    for(int i=0;i<Colours.Length;i++)colours[Colours[i]]=branded[i];
+    foreach(var mark in p.Marks){string replacement;if(mark.Fill!=null&&colours.TryGetValue(mark.Fill,out replacement))mark.Fill=replacement;}
+   }
    return p;
   }
   static void Donut(AnalyticsPage p,List<AnalyticsValue> values,double total,string unit){
@@ -106,7 +113,7 @@ namespace AstroArchive {
     writer.WriteElementString("title",all?"AstroArchive · Analytics collection":pages[0].Title);
     writer.WriteElementString("desc","Individual light-frame analytics. Time is recorded integration, not elapsed observing time. Stacks, videos and calibration files are excluded.");
     writer.WriteStartElement("defs");writer.WriteStartElement("image");writer.WriteAttributeString("id","astroarchive-logo");writer.WriteAttributeString("width","1");writer.WriteAttributeString("height","1");writer.WriteAttributeString("href","http://www.w3.org/1999/xlink","data:image/png;base64,"+logoBase64);writer.WriteEndElement();writer.WriteEndElement();
-    writer.WriteStartElement("rect");writer.WriteAttributeString("width",N(width));writer.WriteAttributeString("height",N(height));writer.WriteAttributeString("fill","#FFFFFF");writer.WriteEndElement();
+    writer.WriteStartElement("rect");writer.WriteAttributeString("width",N(width));writer.WriteAttributeString("height",N(height));writer.WriteAttributeString("fill",pages[0].Background);writer.WriteEndElement();
     for(int i=0;i<pages.Count;i++){
      writer.WriteStartElement("g");writer.WriteAttributeString("transform","translate("+N(all?i%2*AnalyticsPage.Width:0)+","+N(all?i/2*AnalyticsPage.Height:0)+")");
      foreach(var mark in pages[i].Marks){
