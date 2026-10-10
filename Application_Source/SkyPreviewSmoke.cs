@@ -44,10 +44,13 @@ namespace AstroArchive {
   void SmokeSkyResetSizing(PreviewViewport preview,Frame frame){
    var column=(ColumnDefinition)Window.FindName("PreviewColumn");var originalWidth=column.Width;var original=((Image)Window.FindName("PreviewImage")).Source as BitmapSource;var globe=(SkyGlobeView)Window.FindName("PreviewSky");
    try{
-    var fixture=BitmapSource.Create(1200,1280,96,96,PixelFormats.Rgb24,null,new byte[1200*1280*3],1200*3);UpdateCaptureSky("",frame);preview.SetImage(fixture,true);
+    // A loading placeholder leaves ample sky space even on a short CI desktop.
+    // With a portrait image, widening its pane also increases image height and
+    // can shrink the globe, so pane width alone does not prove globe scaling.
+    UpdateCaptureSky("",frame);preview.SetImage(null,true);preview.BeginLoading();
     double smallest=0;
     foreach(double width in new[]{220.0,280,400}){
-     column.Width=new GridLength(width);PumpPopupLayout();preview.Resize();PumpPopupLayout();if(!globe.IsVisible)throw new Exception("Reset sizing fixture has no sky");CheckSkyFit("",preview,1200,1280);
+     column.Width=new GridLength(width);PumpPopupLayout();preview.Resize();PumpPopupLayout();if(!globe.IsVisible)throw new Exception("Reset sizing fixture has no sky");
      var bounds=CheckSkyResetLayout("");if(width==220)smallest=bounds.Width;if(width==400&&bounds.Width<=smallest+3)throw new Exception("Sky reset did not scale with a larger globe");
      globe.ZoomView(2);globe.RotateView(10,5);PumpPopupLayout();UpdateCaptureSky("",frame);PumpPopupLayout();var explored=CheckSkyResetLayout("");
      if(explored!=bounds)throw new Exception("Sky exploration or refresh moved the reset control");
