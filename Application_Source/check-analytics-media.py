@@ -52,6 +52,25 @@ def verify(folder):
             ).stdout
             assert len(raw) == 36 * 180 * 320 * 3
         print(f"PASS six-chart {suffix.upper()} story: all 36 frames decode")
+    for suffix in ("mp4", "gif"):
+        path = folder / f"media-custom-length.{suffix}"
+        if suffix == "gif":
+            with Image.open(path) as gif:
+                assert gif.n_frames == 12 and gif.size == (180, 320)
+                duration = 0
+                for frame in range(gif.n_frames):
+                    gif.seek(frame)
+                    gif.load()
+                    duration += gif.info["duration"]
+                assert duration == 3000, "Custom length drifted across scenes"
+        else:
+            raw = subprocess.run(
+                [imageio_ffmpeg.get_ffmpeg_exe(), "-v", "error", "-i", str(path),
+                 "-f", "rawvideo", "-pix_fmt", "rgb24", "-"],
+                check=True, capture_output=True,
+            ).stdout
+            assert len(raw) == 12 * 180 * 320 * 3
+        print(f"PASS custom-length {suffix.upper()} story: six scenes in exactly 3 seconds")
     sizes = {"Landscape": (1200, 800), "Vertical": (1080, 1920),
              "Portrait": (1080, 1350), "Square": (1080, 1080),
              "Widescreen": (1920, 1080), "Pinterest": (1000, 1500)}

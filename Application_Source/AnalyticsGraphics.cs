@@ -28,21 +28,22 @@ namespace AstroArchive {
   static void Lines(AnalyticsPage p,string text,double x,double y,int characters,double size,string colour,int limit,double width=0,bool bold=false){
    var remaining=text??"";int line=0;while(remaining.Length>0&&line<limit){int count=Math.Min(characters,remaining.Length);if(width>0)while(count>1&&TextWidth(remaining.Substring(0,count),size)>width)count--;if(count<remaining.Length){int space=remaining.LastIndexOf(' ',count-1,count);if(space>count/2)count=space;if(count>0&&char.IsHighSurrogate(remaining[count-1]))count--;}string part=remaining.Substring(0,count);remaining=remaining.Substring(count).TrimStart();if(line==limit-1&&remaining.Length>0){part=Short(part+" "+remaining,characters);if(width>0)part=Fit(part,width,size);}Text(p,part,x,y+line*(size+5),size,colour,bold,text);line++;}
   }
-  public static AnalyticsPage Page(AnalyticsSnapshot data,int index,bool dark=true,AnalyticsLayout layout=AnalyticsLayout.Landscape){
-   return Page(data,index,0,1,data.Reports[index].Style=="bars"?data.Reports[index].Values.Take(8).ToList():ArchiveAnalytics.Compact(data.Reports[index].Values,8),dark,layout);
+  public static AnalyticsPage Page(AnalyticsSnapshot data,int index,bool dark=true,AnalyticsLayout layout=AnalyticsLayout.Landscape,AnalyticsChartOptions options=null){
+   return Pages(data,index,dark,layout,options)[0];
   }
-  public static List<AnalyticsPage> Pages(AnalyticsSnapshot data,int index,bool dark=true,AnalyticsLayout layout=AnalyticsLayout.Landscape){
-   var report=data.Reports[index];int count=report.Style=="bars"?Math.Max(1,(int)Math.Ceiling(report.Values.Count/8.0)):1;
-   return Enumerable.Range(0,count).Select(part=>Page(data,index,part,count,report.Style=="bars"?report.Values.Skip(part*8).Take(8).ToList():ArchiveAnalytics.Compact(report.Values,8),dark,layout)).ToList();
+  public static List<AnalyticsPage> Pages(AnalyticsSnapshot data,int index,bool dark=true,AnalyticsLayout layout=AnalyticsLayout.Landscape,AnalyticsChartOptions options=null){
+   data=Configure(data,index,options);int limit=options!=null&&(options.Categories==4||options.Categories==6)?options.Categories:8;
+   var report=data.Reports[index];int count=report.Style=="bars"?Math.Max(1,(int)Math.Ceiling(report.Values.Count/(double)limit)):1;
+   var pages=Enumerable.Range(0,count).Select(part=>Page(data,index,part,count,report.Style=="bars"?report.Values.Skip(part*limit).Take(limit).ToList():ArchiveAnalytics.Compact(report.Values,limit),dark,layout,limit)).ToList();foreach(var page in pages)ConfigurePalette(page,dark,options);return pages;
   }
-  static AnalyticsPage Page(AnalyticsSnapshot data,int index,int part,int parts,List<AnalyticsValue> values,bool dark,AnalyticsLayout layout){
-   if(layout!=AnalyticsLayout.Landscape)return SocialPage(data,index,part,parts,values,dark,layout);
+  static AnalyticsPage Page(AnalyticsSnapshot data,int index,int part,int parts,List<AnalyticsValue> values,bool dark,AnalyticsLayout layout,int limit=8){
+   if(layout!=AnalyticsLayout.Landscape)return SocialPage(data,index,part,parts,values,dark,layout,limit);
    var report=data.Reports[index];var p=new AnalyticsPage{Title=report.Title,Background=dark?"#0C1220":"#FFFFFF"};
    Box(p,0,0,1200,800,"#FFFFFF");Box(p,0,0,1200,8,Accent);
    p.Marks.Add(new AnalyticsMark{Kind="logo",X=56,Y=24,Width=70,Height=70});
    Text(p,"AstroArchive",142,46,24,Ink,true);
    Text(p,(index+1).ToString("00",CultureInfo.InvariantCulture)+" / 06"+(parts>1?" · "+(part+1)+"/"+parts:""),parts>1?980:1060,47,17,Accent,true);
-   Text(p,report.Title,60,112,42,Ink,true);Text(p,report.Description+(parts>1?" · Groups "+(part*8+1)+"–"+Math.Min((part+1)*8,report.Values.Count)+" of "+report.Values.Count:""),60,165,17,Muted);
+   double titleSize=Math.Max(24,Math.Min(42,1080/Math.Max(1,TextWidth(report.Title,1))));Text(p,Fit(report.Title,1080,titleSize),60,112,titleSize,Ink,true,report.Title);Text(p,Fit(report.Description+(parts>1?" · Groups "+(part*limit+1)+"–"+Math.Min((part+1)*limit,report.Values.Count)+" of "+report.Values.Count:""),1080,17),60,165,17,Muted);
    Box(p,60,210,1080,78,"#F5F7FC");
    string[] metrics={ArchiveAnalytics.Number(data.RepositorySeconds/3600)+" h",data.RepositoryCaptures.ToString("N0",CultureInfo.InvariantCulture),data.RepositoryTargets.ToString("N0",CultureInfo.InvariantCulture)};
    string[] captions={"REPOSITORY INTEGRATION","LIGHT FRAMES IN REPOSITORY","TARGETS IN REPOSITORY"};
@@ -70,12 +71,12 @@ namespace AstroArchive {
    }
   }
   static void Donut(AnalyticsPage p,List<AnalyticsValue> values,double total,string unit){
-   RingTrack(p,265,477,156,110);double angle=-Math.PI/2;int colour=0;foreach(var value in values){
+   const double radius=175,inner=123;RingTrack(p,265,477,radius,inner);double angle=-Math.PI/2;int colour=0;foreach(var value in values){
     double sweep=value.Value/total*2*Math.PI;int steps=Math.Max(2,(int)Math.Ceiling(sweep*60));var points=new List<double>();
-    for(int i=0;i<=steps;i++){double gap=Math.Min(.012,sweep*.12);double a=angle+gap+(sweep-2*gap)*i/steps;points.Add(265+156*Math.Cos(a));points.Add(477+156*Math.Sin(a));}
-    for(int i=steps;i>=0;i--){double gap=Math.Min(.012,sweep*.12);double a=angle+gap+(sweep-2*gap)*i/steps;points.Add(265+110*Math.Cos(a));points.Add(477+110*Math.Sin(a));}
+    for(int i=0;i<=steps;i++){double gap=Math.Min(.012,sweep*.12);double a=angle+gap+(sweep-2*gap)*i/steps;points.Add(265+radius*Math.Cos(a));points.Add(477+radius*Math.Sin(a));}
+    for(int i=steps;i>=0;i--){double gap=Math.Min(.012,sweep*.12);double a=angle+gap+(sweep-2*gap)*i/steps;points.Add(265+inner*Math.Cos(a));points.Add(477+inner*Math.Sin(a));}
     p.Marks.Add(new AnalyticsMark{Kind="polygon",Points=points.ToArray(),Fill=Colours[colour%Colours.Length],Role="chart"});
-    double y=477-values.Count*42/2.0+colour*42;Box(p,485,y+5,12,12,Colours[colour%Colours.Length]);
+    double slot=values.Count<=4?64:42,y=477-values.Count*slot/2.0+colour*slot;Box(p,485,y+5,12,12,Colours[colour%Colours.Length]);
     string label=Fit(Short(value.Label,49),390,15);Text(p,label,510,y,15,Ink,false,value.Label);
     Text(p,ArchiveAnalytics.Number(value.Value)+" "+(unit=="frames"&&value.Value==1?"frame":unit),935,y,15,Ink,true);
     Text(p,(value.Value/total*100).ToString("0.#",CultureInfo.InvariantCulture)+"%",1076,y,13,Muted);
@@ -83,20 +84,20 @@ namespace AstroArchive {
    }
    string centre=ArchiveAnalytics.Number(total);double size=centre.Length>8?28:42;
    Text(p,centre,265-TextWidth(centre,size)/2,440,size,Ink,true);Text(p,unit=="h"?"HOURS":"LIGHT FRAMES",unit=="h"?244:221,493,12,Muted,true);
-   if(values.Any(v=>v.Label.StartsWith("Other (")))Text(p,"Largest 7 groups; remaining groups combined",485,657,12,Muted);
+   if(values.Any(v=>v.Label.StartsWith("Other (")))Text(p,"Remaining groups combined in Other",485,657,12,Muted);
   }
   static double NiceMax(double value){double scale=Math.Pow(10,Math.Floor(Math.Log10(value)));double n=value/scale;return (n<=1?1:n<=2?2:n<=5?5:10)*scale;}
   static void Bars(AnalyticsPage p,List<AnalyticsValue> values,string unit,double maximum){
    double max=NiceMax(maximum);const double start=445,width=580;
    for(int i=0;i<=4;i++){double x=start+width*i/4;Box(p,x,323,1,326,"#E8ECF4");Text(p,ArchiveAnalytics.Number(max*i/4),x-5,659,11,Muted);}
    for(int i=0;i<values.Count;i++){
-    var value=values[i];double slot=326.0/values.Count,barHeight=Math.Min(44,slot*.65),y=323+i*slot+(slot-barHeight)/2;
+    var value=values[i];double slot=326.0/values.Count,barHeight=Math.Min(70,slot*.65),y=323+i*slot+(slot-barHeight)/2;
     Lines(p,value.Label,60,y+barHeight/2-9,value.Label.Length>80?58:40,value.Label.Length>80?11:15,Ink,2,360);
     Box(p,start,y,Math.Max(.5,value.Value/max*width),barHeight,Colours[i%Colours.Length]);
     p.Marks.Last().Animation="bar";
     Text(p,ArchiveAnalytics.Number(value.Value)+" "+unit,1050,y+barHeight/2-8,15,Ink,true);
    }
-   Text(p,"Integration (hours)",60,658,12,Muted);
+   Text(p,unit=="h"?"Integration (hours)":"Light frames",60,658,12,Muted);
   }
   static void Columns(AnalyticsPage p,List<AnalyticsValue> source,string unit){
    var values=source.ToList();if(values.Count>18){int chunk=(int)Math.Ceiling(values.Count/18.0);values=Enumerable.Range(0,(int)Math.Ceiling(values.Count/(double)chunk)).Select(i=>{var bucket=source.Skip(i*chunk).Take(chunk).ToList();return new AnalyticsValue(bucket[0].Label+"–"+bucket.Last().Label,bucket.Sum(v=>v.Value));}).ToList();}

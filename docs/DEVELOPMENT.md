@@ -42,8 +42,12 @@ not repeated full suites.
 
 Analytics checks cover integration accounting, missing metadata, date/telescope
 scoping, histogram boundaries, continuation rankings and SVG/PDF structure. The
+suite also checks saved chart configurations, immutable repository totals, and
+duration-scaled reveals/transitions, including short clips and continuation pages.
 Windows UI switch checks both themes, live scope changes and all six export
 formats, including combined sheets, exact social ratios, animated preview,
+direct Analytics navigation, Document/Video controls, custom-length validation,
+and the live chart customization dialog with saved settings,
 H.264 encoding, GIF decoding, progress and cancellation-safe file replacement.
 The Windows workflow independently decodes MP4/GIF with FFmpeg and Pillow to
 check frame counts, duration, orientation, palette quality and animation:

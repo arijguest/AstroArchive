@@ -146,7 +146,8 @@ branding for the selected frame, with these Social image presets:
 - Pinterest 2:3: 1000 x 1500, for pins.
 Print and Screen resolutions remain available. Preview, PDF and SVG use the same
 selected layout. Social image presets apply to each page.
-Repository > Analytics offers six branded charts: Targets photographed, Imaging
+Repository > Analytics opens the analytics workspace directly, with six charts:
+Targets photographed, Imaging
 timeline, Time per target, Time per telescope, Filter mix and Exposure lengths.
 Select a chart to preview it, or All six charts for the combined preview. Scope
 starts with the entire repository, independently of browsing filters or selection.
@@ -165,6 +166,16 @@ saves the selected chart; Export all saves one document containing all six chart
 PDF uses individual pages in the selected layout; image/SVG exports arrange pages
 on one sheet. Tall collections stack pages vertically; square and wide collections
 use a grid.
+Choose Document or Video / GIF at the top of Analytics. Video exports use MP4
+or a looping GIF in the selected layout. Choose a pace or Custom length (1–300
+seconds for the whole export), a transition, and a video size. Play preview shows
+the motion before saving. Reveals and transitions adapt to the chosen duration;
+headline cards and branding remain steady while the graphs move.
+Customize opens a live preview with per-chart titles, subtitles, colour palettes,
+chart styles, category density and ordering. Apply remembers each chart's choices
+for future exports. Reset defaults restores that chart's standard settings.
+Rankings still include every category; Other preserves remaining donut totals.
+Timeline and exposure bins keep their chronological order.
 Very large collections may need 150 dpi, PDF or SVG. Open export folder appears
 after a successful save. Exports leave the archive and capture files unchanged.
 

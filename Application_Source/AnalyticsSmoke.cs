@@ -17,9 +17,9 @@ namespace AstroArchive {
    try{
     repo=null;if(AnalyticsMenu().IsEnabled)throw new Exception("Analytics is enabled without a repository.");
     using(var fixture=new Repository(Path.Combine(output,"analytics-repository"))){
-     repo=fixture;var menu=AnalyticsMenu();if(!menu.IsEnabled||menu.Items.OfType<MenuItem>().Count()!=7)throw new Exception("Analytics menu does not offer six reports and Export all.");
+     repo=fixture;var menu=AnalyticsMenu();if(!menu.IsEnabled||menu.HasItems)throw new Exception("Analytics does not open directly as a single menu action.");
      foreach(string mode in new[]{"Light","Dark"}){
-      Theme.Apply(Window,mode);var dialog=new AnalyticsWindow(Window,source,"Observatory & field notes",0);
+      Theme.Apply(Window,mode);var customConfigurations=new Dictionary<string,AnalyticsChartOptions>();int configurationSaves=0;var dialog=new AnalyticsWindow(Window,source,"Observatory & field notes",0,customConfigurations,()=>configurationSaves++);
       try{
        dialog.Show();PumpPopupLayout();var image=PopupChildren<Image>(dialog).Single(i=>AutomationProperties.GetName(i)=="Branded analytics export preview");
        var status=PopupChildren<TextBlock>(dialog).Single(t=>AutomationProperties.GetName(t)=="Analytics status");
@@ -39,7 +39,10 @@ namespace AstroArchive {
        double[][] sizes={new[]{1080.0,1920},new[]{1080.0,1350},new[]{1080.0,1080},new[]{1920.0,1080},new[]{1000.0,1500}};
        for(int option=1;option<=5;option++){layout.SelectedIndex=option;PumpPopupLayout();if(Math.Abs(image.Source.Width/image.Source.Height-sizes[option-1][0]/sizes[option-1][1])>0.001||!Convert.ToString(resolution.SelectedItem).StartsWith(sizes[option-1][0].ToString("0")+" × "+sizes[option-1][1].ToString("0")))throw new Exception("Social layout preview or pixel preset is incorrect: "+option);CapturePopup(dialog,Path.Combine(output,"AstroArchive_Analytics_"+mode+"_Social_"+option+".png"));}
        layout.SelectedIndex=0;choices.SelectedIndex=6;documentTheme.SelectedIndex=0;PumpPopupLayout();if(resolution.Items.Count!=2)throw new Exception("Portrait-only resolution remained in the landscape options.");
-       var exportFormat=PopupChildren<ComboBox>(dialog).Single(c=>AutomationProperties.GetName(c)=="Export format");foreach(string motion in new[]{"MP4","GIF"}){exportFormat.SelectedItem=motion;PumpPopupLayout();var play=PopupChildren<Button>(dialog).Single(b=>AutomationProperties.GetName(b)=="Play animation preview");if(!play.IsVisible||!play.IsEnabled||resolution.IsEnabled)throw new Exception("Animated export controls are unavailable or retain image DPI.");play.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));SmokeSearchWait(()=>Convert.ToString(play.Content).Contains("Pause"));PumpPopupLayout();var before=image.Source;SmokeSearchWait(()=>image.Source!=before);play.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));if(!Convert.ToString(play.Content).Contains("Play"))throw new Exception("Animation preview did not pause.");CapturePopup(dialog,Path.Combine(output,"AstroArchive_Analytics_"+mode+"_"+motion+".png"));}exportFormat.SelectedItem="PDF";
+       var outputKind=PopupChildren<ComboBox>(dialog).Single(c=>AutomationProperties.GetName(c)=="Export type");outputKind.SelectedIndex=1;
+       var exportFormat=PopupChildren<ComboBox>(dialog).Single(c=>AutomationProperties.GetName(c)=="Export format");if(exportFormat.Items.Count!=2||Convert.ToString(exportFormat.SelectedItem)!="MP4")throw new Exception("Video choices were not streamlined.");foreach(string motion in new[]{"MP4","GIF"}){exportFormat.SelectedItem=motion;PumpPopupLayout();var play=PopupChildren<Button>(dialog).Single(b=>AutomationProperties.GetName(b)=="Play animation preview");if(!play.IsVisible||!play.IsEnabled||resolution.IsEnabled)throw new Exception("Animated export controls are unavailable or retain image DPI.");play.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));SmokeSearchWait(()=>Convert.ToString(play.Content).Contains("Pause"));PumpPopupLayout();var before=image.Source;SmokeSearchWait(()=>image.Source!=before);play.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));if(!Convert.ToString(play.Content).Contains("Play"))throw new Exception("Animation preview did not pause.");CapturePopup(dialog,Path.Combine(output,"AstroArchive_Analytics_"+mode+"_"+motion+".png"));}
+       var pace=PopupChildren<ComboBox>(dialog).Single(c=>AutomationProperties.GetName(c)=="Pace");var length=PopupChildren<TextBox>(dialog).Single(c=>AutomationProperties.GetName(c)=="Length · seconds");pace.SelectedIndex=3;length.Text="0";PumpPopupLayout();if(PopupChildren<Button>(dialog).Any(b=>Convert.ToString(b.Content).StartsWith("Export")&&b.IsEnabled))throw new Exception("Invalid custom duration remained exportable");length.Text="15";PumpPopupLayout();if(!PopupChildren<TextBlock>(dialog).Any(t=>t.Text.StartsWith("15 s · 6 scenes")))throw new Exception("Custom video length was not reflected in the summary");pace.SelectedIndex=0;outputKind.SelectedIndex=0;if(Convert.ToString(exportFormat.SelectedItem)!="PDF"||exportFormat.Items.Count!=4)throw new Exception("Document choices did not restore after video mode");
+       SmokeAnalyticsCustomization(dialog,output,mode,customConfigurations,()=>configurationSaves);
        PopupChildren<Expander>(dialog).Single().IsExpanded=true;PumpPopupLayout();
        var picker=PopupChildren<ComboBox>(dialog).Single(c=>AutomationProperties.GetName(c)=="Telescope");picker.SelectedIndex=1;
        SmokeSearchWait(()=>status.Text!="Updating analytics…");if(!PopupChildren<TextBlock>(dialog).Any(t=>t.Text.StartsWith("120 light frames")))throw new Exception("Analytics telescope scope did not refresh.");
@@ -65,6 +68,21 @@ namespace AstroArchive {
     File.WriteAllText(Path.Combine(output,"analytics-smoke.txt"),"PASS: Repository menu, six reports, combined preview, landscape default and five social layout selectors, exact social pixel sizes, dark/light document and application themes, single/combined PNG/JPEG/PDF/SVG exports, telescope/date scoping, stale-export prevention, decoding and atomic overwrite checks.");
    }finally{repo=savedRepo;Theme.Apply(Window,theme);}
   }
+  void SmokeAnalyticsCustomization(AnalyticsWindow dialog,string output,string mode,Dictionary<string,AnalyticsChartOptions> configurations,Func<int> saves){
+   var charts=PopupChildren<ListBox>(dialog).Single(c=>AutomationProperties.GetName(c)=="Analytics charts");charts.SelectedIndex=0;PumpPopupLayout();Exception failure=null;bool applied=false;
+   Window.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.ApplicationIdle,new Action(()=>{
+    var form=dialog.OwnedWindows.Cast<Window>().SingleOrDefault(w=>w.Title=="Customize analytics chart");
+    try{
+     if(form==null)throw new Exception("Chart customization did not open");PumpPopupLayout();var title=PopupChildren<TextBox>(form).Single(t=>AutomationProperties.GetName(t)=="Title (blank uses default)");title.Text="My observatory";
+     var style=PopupChildren<ComboBox>(form).Single(c=>AutomationProperties.GetName(c)=="Chart style");style.SelectedItem="Bars";PopupChildren<ComboBox>(form).Single(c=>AutomationProperties.GetName(c)=="Colour palette").SelectedItem="Nebula";PumpPopupLayout();
+     if(PopupChildren<Image>(form).Single(i=>AutomationProperties.GetName(i)=="Custom chart preview").Source==null)throw new Exception("Custom settings have no live preview");CapturePopup(form,Path.Combine(output,"AstroArchive_Analytics_Custom_"+mode+".png"));
+     PopupChildren<Button>(form).Single(b=>Convert.ToString(b.Content)=="Apply").RaiseEvent(new RoutedEventArgs(Button.ClickEvent));applied=true;
+    }catch(Exception error){failure=error;if(form!=null)form.Close();}
+   }));
+   PopupChildren<Button>(dialog).Single(b=>AutomationProperties.GetName(b)=="Customize chart").RaiseEvent(new RoutedEventArgs(Button.ClickEvent));if(failure!=null)throw failure;
+   if(!applied||saves()!=1||configurations["targets"].Title!="My observatory"||configurations["targets"].Style!="Bars")throw new Exception("Custom chart settings were not applied and saved");
+   charts.SelectedIndex=6;PumpPopupLayout();
+  }
   static void AnimationReference(string path,AnalyticsAnimation animation,double time,int width,int height){
    byte[] pixels=animation.Frame(time,width,height);var bitmap=BitmapSource.Create(width,height,96,96,System.Windows.Media.PixelFormats.Bgra32,null,pixels,width*4);var encoder=new PngBitmapEncoder();encoder.Frames.Add(BitmapFrame.Create(bitmap));using(var file=File.Create(path))encoder.Save(file);
   }
@@ -85,6 +103,7 @@ namespace AstroArchive {
    }
    var story=Enumerable.Range(0,6).Select(i=>AnalyticsGraphics.Page(data,i,true,AnalyticsLayout.Vertical)).ToList();var settings=new AnalyticsVideoOptions{SecondsPerChart=1.5,FramesPerSecond=4,MaximumEdge=320,Transition="Zoom"};var sequence=new AnalyticsAnimation(story,settings);if(sequence.Duration!=9)throw new Exception("Story duration omits a chart.");
    foreach(string format in new[]{"MP4","GIF"})AnalyticsAnimation.Save(Path.Combine(output,"media-story."+format.ToLowerInvariant()),story,format,settings,null,CancellationToken.None);
+   var customTiming=new AnalyticsVideoOptions{TotalSeconds=3,FramesPerSecond=4,MaximumEdge=320};var customMovie=new AnalyticsAnimation(story,customTiming);if(customMovie.Duration!=3)throw new Exception("Custom length changed with six scenes");foreach(string format in new[]{"MP4","GIF"})AnalyticsAnimation.Save(Path.Combine(output,"media-custom-length."+format.ToLowerInvariant()),story,format,customTiming,null,CancellationToken.None);
    foreach(string transition in new[]{"Glide","Zoom","Dissolve"}){settings.Transition=transition;var movie=new AnalyticsAnimation(story,settings);AnimationReference(Path.Combine(output,"media-transition-"+transition+".png"),movie,1.75,180,320);}
    foreach(string format in new[]{"MP4","GIF"}){
     string path=Path.Combine(output,"media-cancelled."+format.ToLowerInvariant());File.WriteAllText(path,"preserve previous output");using(var cancelled=new CancellationTokenSource()){bool stopped=false;try{AnalyticsAnimation.Save(path,story,format,settings,(p,m)=>{if(p>5)cancelled.Cancel();},cancelled.Token);}catch(OperationCanceledException){stopped=true;}if(!stopped||File.ReadAllText(path)!="preserve previous output")throw new Exception("Cancelled media export overwrote an existing document.");}

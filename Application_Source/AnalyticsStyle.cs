@@ -29,7 +29,7 @@ namespace AstroArchive {
    decorations.Reverse();page.Marks.InsertRange(1,decorations);
    var additions=new List<AnalyticsMark>();
    foreach(var mark in page.Marks.ToList()){
-    if(mark.Kind=="rect"&&mark.Fill==panel){
+    if(mark.Kind=="rect"&&mark.Fill==panel&&mark.Role=="header"){
      // Separate, softly shaded metric cards rather than a dense statistics strip.
      double gap=12,cell=mark.Width/3;mark.Width=cell-gap;mark.Radius=12;mark.FillEnd=dark?"#202C43":"#EDEFFC";
      for(int i=1;i<3;i++)additions.Add(new AnalyticsMark{Kind="rect",X=mark.X+i*cell,Y=mark.Y,Width=cell-gap,Height=mark.Height,Radius=12,Fill=panel,FillEnd=mark.FillEnd,Role="header"});
@@ -47,11 +47,8 @@ namespace AstroArchive {
    }
    // Cards must be behind their labels; keep the scene's original order otherwise.
    int metric=page.Marks.FindIndex(m=>m.Kind=="rect"&&m.Fill==panel&&m.Radius==12);if(metric>=0)page.Marks.InsertRange(metric+1,additions);
-   // Compact the tall layout's oversized title/metrics gap, freeing space for
-   // the graphic without pushing content into a phone's top or bottom overlays.
-   if(page.CanvasHeight==1920){
-    foreach(var mark in page.Marks){if(mark.Role=="header"&&mark.Y>=510)mark.Y-=100;}
-   }
+   foreach(var mark in page.Marks.Where(m=>m.Role=="chart"&&m.Kind=="rect"&&m.Fill==panel)){mark.FillEnd=dark?"#1B2940":"#EFF0FA";}
+
   }
   static void RingTrack(AnalyticsPage p,double cx,double cy,double radius,double inner){
    foreach(double[] band in new[]{new[]{radius+9,radius+7},new[]{inner-7,inner-8}}){
