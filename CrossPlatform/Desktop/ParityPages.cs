@@ -149,6 +149,14 @@ public sealed partial class MainWindow
         var frame=Classifier.Read(path,Session.RequireArchive().EditedFolder,"Edited","Auto");
         await DisplayFrame(frame,path,ct); tabs.SelectedIndex=0;
     }
+    private Control AnalyticsOptionsPanel() => Section("Chart scope, layout and animation",new StackPanel { Spacing=10,Children={
+        Wrap(Field("AnalyticsTelescope","","Physical telescope (blank = all)",300),Field("AnalyticsFrom","","From date YYYY-MM-DD",240),Field("AnalyticsTo","","Through date YYYY-MM-DD",240)),
+        Wrap(Check("AnalyticsRejected","Include rejected light frames",false),Check("AnalyticsUnknown","Unknown telescope only",false),Button("ApplyAnalyticsScope","Apply chart scope",()=>Run("Filtering analytics",_=>{ Session.SetAnalyticsScope(new AnalyticsOptions { Telescope=Text("AnalyticsTelescope"),From=AnalyticsDate("AnalyticsFrom"),To=AnalyticsDate("AnalyticsTo"),IncludeRejected=Checked("AnalyticsRejected"),UnknownTelescopeOnly=Checked("AnalyticsUnknown"),Caption=Text("AnalyticsTelescope").Length==0?"Repository":Text("AnalyticsTelescope") });return Task.CompletedTask; }))),
+        Wrap(WithLabel("Layout",Select("AnalyticsLayout",Enum.GetNames<AnalyticsLayout>(),"Landscape")),WithLabel("Report theme",Select("AnalyticsTheme",["Light","Dark"],"Light")),WithLabel("Export",Select("AnalyticsFormat",["Documents","GIF","MP4"],"Documents"))),
+        Notice("Every export includes all charts and continuation pages as PDF, PNG, JPEG, SVG and data. GIF/MP4 adds a six-chart animated story. MP4 requires ffmpeg; GIF needs no external encoder."),
+        Wrap(WithLabel("Seconds per chart",Field("AnalyticsSeconds","4","0.25–60",190)),WithLabel("Frames per second",Field("AnalyticsFps","24","1–60",190)),WithLabel("Maximum edge (pixels)",Field("AnalyticsResolution","960","32–3840",210)),WithLabel("Transition",Select("AnalyticsTransition",["Fade","Glide","Zoom"],"Glide")))
+    }});
+    private DateTime? AnalyticsDate(string id) { string value=Text(id);if(value.Length==0)return null;if(!DateTime.TryParseExact(value,"yyyy-MM-dd",CultureInfo.InvariantCulture,DateTimeStyles.None,out var date))throw new ArgumentException("Use YYYY-MM-DD for the chart date range.");return date; }
     private Control AdvancedSettings() => Section("Solvers, observing site, accessibility and capture protection",new StackPanel { Spacing=10,Children={
         Notice("ASTAP requires its star catalogue. Online solving sends detected star coordinates and image dimensions to Astrometry.net after you choose Identify; pixels are not uploaded."),
         Field("StackingPath",Session.Settings.StackingExecutable,"Absolute stacking application executable (Siril or another app)",690),
@@ -162,9 +170,9 @@ public sealed partial class MainWindow
     private string SecretText(string id) => ((TextBox)Controls[id]).Text??"";
     private TextBox SecretField(string id,string hint,double width) { var box=Field(id,"",hint,width); box.PasswordChar='●'; return box; }
     private double? Number(string id,double? minimum,double? maximum) {
-        string value=Text(id); if(value.Length==0) { if(id is "CopyWorkers" or "RemotePort" or "RemotePoll" or "RemoteLimit" or "TextScale") throw new ArgumentException("Enter a value for "+id+"."); return null; }
+        string value=Text(id); if(value.Length==0) { if(id is "CopyWorkers" or "RemotePort" or "RemotePoll" or "RemoteLimit" or "TextScale" or "AnalyticsSeconds" or "AnalyticsFps" or "AnalyticsResolution") throw new ArgumentException("Enter a value for "+id+"."); return null; }
         if(!double.TryParse(value,NumberStyles.Float,CultureInfo.InvariantCulture,out double number)||!double.IsFinite(number)||number<minimum||number>maximum) throw new ArgumentException("Invalid value for "+id+". Use a finite number in the indicated range.");
-        if((id is "CopyWorkers" or "RemotePort" or "RemotePoll" or "EditedSubs")&&number!=Math.Floor(number)) throw new ArgumentException(id+" needs a whole number.");
+        if((id is "CopyWorkers" or "RemotePort" or "RemotePoll" or "EditedSubs" or "AnalyticsFps" or "AnalyticsResolution")&&number!=Math.Floor(number)) throw new ArgumentException(id+" needs a whole number.");
         return number;
     }
 }

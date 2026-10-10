@@ -46,6 +46,8 @@ public sealed partial class ArchiveSession : IDisposable
     public ObservableCollection<DeletedCapture> Deleted { get; } = [];
     public ObservableCollection<EditedImage> Edited { get; } = [];
     public AnalyticsSnapshot Analytics { get; private set; } = ArchiveAnalytics.Build([], new AnalyticsOptions());
+    private AnalyticsOptions analyticsScope=new();
+    public void SetAnalyticsScope(AnalyticsOptions scope) { var snapshot=ArchiveAnalytics.Build(RequireArchive().All(),scope);analyticsScope=scope;Analytics=snapshot; }
     public string LastReport { get; private set; } = "";
     public string LastOutput { get; private set; } = "";
     public string SettingsWarning { get; private set; } = "";
@@ -109,7 +111,7 @@ public sealed partial class ArchiveSession : IDisposable
         Replace(Deleted,RequireArchive().Deletions());
         var projects = RequireArchive().EditedProjects(out var errors);
         Replace(Edited, projects.SelectMany(p => RequireArchive().EditedImages(p).Select(image => { image.Project = p; return image; })));
-        Analytics = ArchiveAnalytics.Build(Captures, new AnalyticsOptions());
+        Analytics = ArchiveAnalytics.Build(Captures, analyticsScope);
         RefreshRecovery();
         if (errors.Count > 0) LastReport = string.Join("\n", errors);
     }
@@ -187,16 +189,17 @@ public sealed partial class ArchiveSession : IDisposable
         LastReport = errors.Count == 0 ? $"Verified {all.Count} archived files. SHA-256 matches the index." : string.Join("\n", errors);
         if (errors.Count > 0) throw new IOException(LastReport);
     }
-    public string ExportAnalytics(string parent, string name, CancellationToken ct)
+    public string ExportAnalytics(string parent, string name, CancellationToken ct,AnalyticsLayout layout=AnalyticsLayout.Landscape,bool dark=false,string animation="Documents",LinuxAnimationOptions? animationOptions=null,Action<int,string>? progress=null)
     {
         var dest = Exporter.Destination(RequireArchive(), new ExportOptions { Parent = parent, Name = name, CreateNewFolder = true });
         ct.ThrowIfCancellationRequested(); Directory.CreateDirectory(dest);
-        var pages = Enumerable.Range(0, Analytics.Reports.Count).SelectMany(i => AnalyticsGraphics.Pages(Analytics, i, false)).ToList();
+        var pages = Enumerable.Range(0, Analytics.Reports.Count).SelectMany(i => AnalyticsGraphics.Pages(Analytics, i, dark,layout)).ToList();
         using var logoStream = typeof(Repository).Assembly.GetManifestResourceStream("AstroArchive_Logo.png")!;
         using var logoBytes = new MemoryStream(); logoStream.CopyTo(logoBytes);
         Exporter.WriteMetadataText(Path.Combine(dest, "analytics.svg"), AnalyticsGraphics.Svg(pages, Convert.ToBase64String(logoBytes.ToArray())), ct);
         Exporter.WriteMetadataText(Path.Combine(dest, "analytics.json"), Util.Serialize(Analytics), ct);
         LinuxAnalyticsExport.Write(dest,pages,logoBytes.ToArray(),ct);
+        if(animation is "GIF" or "MP4")LinuxAnalyticsAnimation.Save(Path.Combine(dest,"analytics-story."+animation.ToLowerInvariant()),pages,logoBytes.ToArray(),animation,animationOptions??new(),ct,progress);
         LastOutput = dest; return dest;
     }
     public static void LaunchEditor(string executable, string path)

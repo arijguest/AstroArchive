@@ -48,7 +48,7 @@ public sealed partial class MainWindow : Window
         brand.Children.Add(new TextBlock { Text = "AstroArchive", FontSize = 28, FontWeight = FontWeight.SemiBold });
         brand.Children.Add(new TextBlock { Text = "Your observations, preserved and ready to process", Opacity = 0.8 });
         title.Children.Add(brand);
-        var badge = new TextBlock { Text = "LINUX PREVIEW 2", Foreground = Brushes.LightSkyBlue, VerticalAlignment = VerticalAlignment.Center };
+        var badge = new TextBlock { Text = "LINUX 3.1.4 PREVIEW", Foreground = Brushes.LightSkyBlue, VerticalAlignment = VerticalAlignment.Center };
         Grid.SetColumn(badge, 1); title.Children.Add(badge); body.Children.Add(title);
 
         archiveBar.Children.Add(Label("Archive"));
@@ -139,8 +139,9 @@ public sealed partial class MainWindow : Window
     private Control AnalyticsPage()
     {
         var top = new StackPanel { Spacing = 10 }; top.Children.Add(summary);
-        top.Children.Add(Notice("Integration totals use individual light frames. Stacks, videos, rejected frames and calibration files are excluded."));
-        top.Children.Add(Row(DestinationFields("Analytics"), Button("ExportAnalytics", "Export PDF / PNG / SVG + data", () => Run("Exporting analytics", ct => { var parent = Text("AnalyticsDestination"); var name = Text("AnalyticsName"); return Task.Run(() => Session.ExportAnalytics(parent, name, ct), ct); }))));
+        top.Children.Add(Notice("Integration totals use individual light frames. Stacks, videos and calibration files are excluded. Repository headline totals remain independent of the chart scope."));
+        top.Children.Add(AnalyticsOptionsPanel());
+        top.Children.Add(Row(DestinationFields("Analytics"), Button("ExportAnalytics", "Export reports / story", () => Run("Exporting analytics", ct => { var parent = Text("AnalyticsDestination"); var name = Text("AnalyticsName");var layout=Enum.Parse<AnalyticsLayout>(Choice("AnalyticsLayout"));bool dark=Choice("AnalyticsTheme")=="Dark";string format=Choice("AnalyticsFormat");var options=new LinuxAnimationOptions { SecondsPerChart=Number("AnalyticsSeconds",.25,60)!.Value,FramesPerSecond=(int)Number("AnalyticsFps",1,60)!.Value,MaximumEdge=(int)Number("AnalyticsResolution",32,3840)!.Value,Transition=Choice("AnalyticsTransition") }; return Task.Run(() => Session.ExportAnalytics(parent, name, ct,layout,dark,format,options,(value,text)=>ReportProgress(new ProgressInfo { Done=value,Total=100,Stage="Analytics export",Text=text })), ct); }))));
         var panel = new StackPanel { Spacing = 18 }; panel.Children.Add(top); panel.Children.Add(charts);
         return new ScrollViewer { Content = panel };
     }

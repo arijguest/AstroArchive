@@ -50,7 +50,7 @@ public static class ParitySmoke
         if(screenshots) {
             foreach(var section in window.Controls.Values.OfType<Expander>()) section.IsExpanded=true;
             var tabs=(TabControl)window.Controls["Pages"];
-            foreach(var item in new[]{(0,"sky-context","SkyGlobe"),(0,"repository-metadata","Section:Detailed metadata editing"),(0,"repository-solving","ApplySolutions"),(1,"import-review","ScreenImports"),(1,"network-import","ListRemote"),(1,"import-recovery","ResumeImport"),(2,"edited-tools","EditFinished"),(4,"solver-settings","SaveAdvanced")}) {
+            foreach(var item in new[]{(0,"sky-context","SkyGlobe"),(0,"repository-metadata","Section:Detailed metadata editing"),(0,"repository-solving","ApplySolutions"),(1,"import-review","ScreenImports"),(1,"network-import","ListRemote"),(1,"import-recovery","ResumeImport"),(2,"edited-tools","EditFinished"),(4,"solver-settings","SaveAdvanced"),(3,"analytics-options","AnalyticsLayout")}) {
                 tabs.SelectedIndex=item.Item1; window.Width=1100; window.Height=720; window.UpdateLayout();
                 await Task.Delay(100); window.UpdateLayout();
                 var scroller=(ScrollViewer)((TabItem)tabs.Items[item.Item1]!).Content!;

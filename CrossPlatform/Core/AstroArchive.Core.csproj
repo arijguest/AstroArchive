@@ -11,6 +11,9 @@
     <Reference Include="SMBLibrary"><HintPath>../../Application_Source/Remote/lib/SMBLibrary.dll</HintPath><Private>true</Private></Reference>
     <Compile Include="../../Application_Source/Analytics.cs" Link="Engine/Analytics.cs" />
     <Compile Include="../../Application_Source/AnalyticsGraphics.cs" Link="Engine/AnalyticsGraphics.cs" />
+    <Compile Include="../../Application_Source/AnalyticsStyle.cs" Link="Engine/AnalyticsStyle.cs" />
+    <Compile Include="../../Application_Source/AnalyticsPortrait.cs" Link="Engine/AnalyticsPortrait.cs" />
+    <Compile Include="../../Application_Source/AnalyticsGif.cs" Link="Engine/AnalyticsGif.cs" />
     <Compile Include="../../Application_Source/AnalyticsPdf.cs" Link="Engine/AnalyticsPdf.cs" />
     <Compile Include="../../Application_Source/EtaEstimate.cs" Link="Engine/EtaEstimate.cs" />
     <Compile Include="../../Application_Source/ArchiveBackup.cs" Link="Engine/ArchiveBackup.cs" />

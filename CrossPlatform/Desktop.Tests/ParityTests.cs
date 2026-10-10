@@ -265,6 +265,29 @@ public sealed class ParityTests : IDisposable
             string finished=Path.Combine(root,"finished","nested","edited_M45.fit");ReleaseFixture.Fits(finished,"M45",51);Put(window,"EditedFolder",Path.Combine(root,"finished"));await Click(window,"ImportEditedFolder");Assert.Single(window.Session.Edited);Assert.Contains("nested",window.Session.Edited[0].RelativePath);window.Session.Verify(Ct,_=>{});
         } finally { window.Close(); }
     }
+    [AvaloniaFact]
+    public async Task AnalyticsScopeLayoutsAndAnimationControlsProduceRealFiles()
+    {
+        var window=new MainWindow(Session());window.Show();
+        try {
+            Import(window.Session);await Click(window,"Refresh");((TabControl)window.Controls["Pages"]).SelectedIndex=3;
+            Put(window,"AnalyticsTelescope","absent scope");await Click(window,"ApplyAnalyticsScope");Assert.Equal(0,window.Session.Analytics.Captures);Assert.Equal(2,window.Session.Analytics.RepositoryCaptures);
+            Put(window,"AnalyticsTelescope","");Put(window,"AnalyticsFrom","2026-10-06");Put(window,"AnalyticsTo","2026-10-06");await Click(window,"ApplyAnalyticsScope");Assert.Equal(2,window.Session.Analytics.Captures);
+            Put(window,"AnalyticsFrom","2026-10-07");((Button)window.Controls["ApplyAnalyticsScope"]).RaiseEvent(new RoutedEventArgs(Button.ClickEvent));await window.LastOperation;Assert.Contains("start date",window.LastError);Assert.Equal(2,window.Session.Analytics.Captures);Put(window,"AnalyticsFrom","2026-10-06");
+            ((ComboBox)window.Controls["AnalyticsLayout"]).SelectedItem="Portrait";((ComboBox)window.Controls["AnalyticsTheme"]).SelectedItem="Dark";((ComboBox)window.Controls["AnalyticsFormat"]).SelectedItem="GIF";
+            Put(window,"AnalyticsSeconds",".5");Put(window,"AnalyticsFps","4");Put(window,"AnalyticsResolution","160");string parent=Path.Combine(root,"analytics");Directory.CreateDirectory(parent);Put(window,"AnalyticsDestination",parent);Put(window,"AnalyticsName","portrait story");await Click(window,"ExportAnalytics");
+            string output=window.Session.LastOutput;Assert.Equal("GIF89a",Encoding.ASCII.GetString(File.ReadAllBytes(Path.Combine(output,"analytics-story.gif")),0,6));
+            using var png=SkiaSharp.SKBitmap.Decode(Path.Combine(output,"analytics-page-1.png"));using var jpeg=SkiaSharp.SKBitmap.Decode(Path.Combine(output,"analytics-page-1.jpg"));Assert.Equal((1080,1350),(png.Width,png.Height));Assert.Equal((png.Width,png.Height),(jpeg.Width,jpeg.Height));Assert.Equal(6,Directory.GetFiles(output,"*.png").Length);Assert.Contains("1080",File.ReadAllText(Path.Combine(output,"analytics.svg")));
+        } finally { window.Close(); }
+    }
+    [Fact]
+    public void CancelledAnimatedExportRemovesItsPartialFile()
+    {
+        using var session=Session();Import(session);using var stream=typeof(Repository).Assembly.GetManifestResourceStream("AstroArchive_Logo.png")!;using var logo=new MemoryStream();stream.CopyTo(logo);Directory.CreateDirectory(root);string destination=Path.Combine(root,"cancelled.gif");using var cancel=new CancellationTokenSource();
+        var pages=new[]{AnalyticsGraphics.Page(session.Analytics,0,true)};
+        Assert.ThrowsAny<OperationCanceledException>(()=>LinuxAnalyticsAnimation.Save(destination,pages,logo.ToArray(),"GIF",new LinuxAnimationOptions { SecondsPerChart=2,FramesPerSecond=4,MaximumEdge=160 },cancel.Token,(percent,_)=>cancel.Cancel()));
+        Assert.False(File.Exists(destination));Assert.Empty(Directory.GetFiles(root,"*.tmp.*"));
+    }
     [Fact]
     public async Task DiscoveryUsesActualUdpRepliesAndReleasesSocketsAfterCancellation()
     {

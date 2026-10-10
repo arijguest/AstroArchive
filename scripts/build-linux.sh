@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 cd "$(dirname "$0")/.."
-release_version=3.1.3-preview.2
+release_version=3.1.4-preview.1
 release_output="${1:-$PWD/linux-artifacts}"
 mkdir -p "$release_output"
 release_output="$(realpath "$release_output")"
@@ -45,7 +45,7 @@ Architecture: amd64
 Maintainer: AstroArchive maintainers
 Homepage: https://github.com/arijguest/AstroArchive
 Depends: libc6 (>= 2.35), libgcc-s1, libstdc++6, libicu70 | libicu72 | libicu74 | libicu76 | libicu78, libssl3 | libssl3t64, libx11-6, libice6, libsm6, libfontconfig1
-Recommends: libzstd1, libcfitsio10 | libcfitsio9, libsecret-tools, xdg-utils
+Recommends: libzstd1, libcfitsio10 | libcfitsio9, libsecret-tools, xdg-utils, ffmpeg
 Description: Astrophotography archive manager for Linux (preview)
  Verified capture imports, exports, Edited working copies and archive analytics.
  Includes its .NET runtime. Windows and Linux share the existing archive format.

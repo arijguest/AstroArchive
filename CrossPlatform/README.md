@@ -1,10 +1,10 @@
-# AstroArchive for Linux — preview 2
+# AstroArchive for Linux — 3.1.4 preview
 
-This is the Linux x64 desktop release based on AstroArchive 3.1.3. It includes its
+This is the Linux x64 desktop release based on AstroArchive 3.1.4. It includes its
 .NET 10 runtime. Supported targets are Ubuntu 22.04/24.04 x64 and Debian 12/13 x64
 with a graphical desktop. Wayland desktops currently use XWayland.
 
-Install the Debian package with `sudo apt install ./astroarchive_3.1.3-preview.2_amd64.deb`,
+Install the Debian package with `sudo apt install ./astroarchive_3.1.4-preview.1_amd64.deb`,
 or extract the tarball and run `./AstroArchive`. Check `SHA256SUMS` before installing.
 The tarball also needs the distribution's ICU, OpenSSL 3, fontconfig and X11 libraries.
 Zstandard and compressed FITS previews use optional distribution libzstd/libcfitsio
@@ -14,7 +14,7 @@ packages. Unavailable codecs report their limitation; original files remain expo
 
 Open the same archive folder on either platform. Capture files, the SQLite schema,
 Microsoft JSON dates, capture paths, sidecars and Edited project format stay compatible
-with Windows 3.1.1–3.1.3. Linux translates Windows separators in memory and writes the
+with Windows 3.1.1–3.1.4. Linux translates Windows separators in memory and writes the
 existing Windows separator convention to disk. Opening on Linux rotates the existing
 archive cache identity before writes so Windows reloads the drive's latest index.
 Keep the entire archive folder, including `.astroarchive`, on the drive.
@@ -43,7 +43,7 @@ Windows before opening the drive on Linux. Backups omit Windows protection setti
   Direct SMB/FTP transfers, live import, and persisted pause/restart recovery.
 - Edited: working copies, selected or recursive finished-image imports, metadata
   overrides, preview/details, verified export, editor handoff and explicit deletion.
-- Analytics: six reports and complete SVG/JSON/PDF/PNG exports.
+- Analytics: six scoped reports; six branded layouts with light/dark themes; complete SVG/JSON/PDF/PNG/JPEG exports and animated GIF/MP4 stories.
 - Settings/Guide: appearance, text scale, observing site, ASTAP/Astrometry.net,
   keyring credentials, Linux capture guard and verified folder/ZIP backups.
 
@@ -70,6 +70,8 @@ saved job after restart. Linux capture protection blocks deletion/relocation wit
 AstroArchive; filesystem tools and Windows do not enforce this Linux application guard.
 Backups omit protection settings. Windows NTFS protection remains separate.
 
+Install `ffmpeg` for H.264 MP4 stories. GIF uses the bundled managed encoder.
+
 Install the next Linux package manually or replace the extracted application folder.
 There is no Linux executable updater. See [FEATURE-PARITY.md](FEATURE-PARITY.md) for
 workflow coverage, remaining presentation/platform differences and hardware limits.
@@ -82,13 +84,13 @@ Install .NET SDK 10.0.401 and the desktop libraries, then from the repository ro
 dotnet run --project CrossPlatform/EngineTests -- /tmp/astroarchive-engine-unique
 dotnet test CrossPlatform/Desktop.Tests
 bash scripts/build-linux.sh
-tar -xzf linux-artifacts/AstroArchive-3.1.3-preview.2-linux-x64.tar.gz -C /tmp
-xvfb-run -a /tmp/AstroArchive-3.1.3-preview.2-linux-x64/AstroArchive --ui-smoke /tmp/astroarchive-ui-unique
+tar -xzf linux-artifacts/AstroArchive-3.1.4-preview.1-linux-x64.tar.gz -C /tmp
+xvfb-run -a /tmp/AstroArchive-3.1.4-preview.1-linux-x64/AstroArchive --ui-smoke /tmp/astroarchive-ui-unique
 ```
 
 `AstroArchive --self-test /tmp/unique-directory` tests the installed executable's
 imports, exports, working copies, backups and reopened index without needing an SDK.
-`--ui-smoke` drives all six actual pages and advanced workflows, saving 20 PNG screenshots; it needs a display.
+`--ui-smoke` drives all six actual pages and advanced workflows, saving 21 PNG screenshots; it needs a display.
 Use a new empty test directory for each invocation. GitHub CI exchanges real fixtures
 between Linux and the Windows Framework engine in both directions.
 
