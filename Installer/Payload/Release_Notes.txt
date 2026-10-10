@@ -1,18 +1,17 @@
-AstroArchive 3.1.1
-Package 3.1.1.1
+AstroArchive 3.1.2
+Package 3.1.2.1
 
-- Live import keeps Connect over network available. Reconnect to choose more
-  captures and download them while the live watcher continues.
-- Import from multiple telescopes simultaneously. Each network session keeps its
-  own progress, telescope identity and stop control in Activity. Use a separate
-  saved telescope name for each physical device.
-- A Live import underway indicator beside the connection button opens Activity
-  and shows when multiple watchers are running. Stop live import or Cancel
-  download affects only that session; Stop all telescope imports stops them all.
-- Different telescope caches download in parallel. Overlapping requests sharing
-  a cache wait safely and can be canceled independently. Archive scans and commits
-  coordinate against the latest index so live/manual overlaps store a capture
-  once, report duplicates correctly and reuse verified local downloads.
-- Stopping imports or closing AstroArchive retains completed archive copies and
-  verified downloads. Telescope originals remain unchanged. The archive closes
-  after active sessions stop; conflicting archive operations wait until then.
+- Pause and resume folder, USB, network/live, Dump and edited-image imports.
+  Unfinished queues survive restarts, crashes and application updates. Resume
+  verifies completed archive copies, skips duplicates and restarts incomplete
+  files. Resume or discard an unfinished queue from Activity.
+- Download from multiple telescopes simultaneously while selecting more files.
+  Each session has independent progress and Pause/Resume controls. Settings,
+  filters, grouping and Analytics remain available during network imports.
+- Network files appear in Import as they arrive, with transfer progress and
+  numeric time estimates based on measured throughput. Live watchers show when
+  they are waiting for captures or reconnecting.
+- Analytics documents default to Dark, with an optional Light theme for every
+  PNG, JPEG, PDF and SVG export. Charts use AstroArchive colours, a larger logo,
+  and cleaner headers and footers. Export all combines the six chart options
+  in one document.

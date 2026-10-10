@@ -28,6 +28,7 @@ Use **Settings → Updates** to install them. [Installation, repair and policy b
 
 ## Latest releases
 
+- **[3.1.2 (package 3.1.2.1)](https://github.com/arijguest/AstroArchive/releases/tag/v3.1.2.1):** pause and recover imports after restarts or updates, keep Settings available during parallel telescope downloads, see arriving files and numeric ETAs, and export dark or light branded Analytics documents.
 - **[3.1.1 (package 3.1.1.1)](https://github.com/arijguest/AstroArchive/releases/tag/v3.1.1.1):** import from multiple telescopes simultaneously, select more captures while live import runs, and stop each session independently in Activity. Overlapping imports reuse verified downloads and archive each capture once.
 - **[3.0.1 (package 3.0.1.1)](https://github.com/arijguest/AstroArchive/releases/tag/v3.0.1.1):** automatic Seestar/DWARF network discovery, selected and live imports, plus six analytics charts with PNG, JPEG, PDF and SVG exports.
 - **[2.1.15 (package 2.1.15.1)](https://github.com/arijguest/AstroArchive/releases/tag/v2.1.15.1):** remembered selections and initial previews, keyboard navigation, optional clearer selection outlines, and maintenance to fill missing metadata. Recent 2.1 releases also added video durations, target exposure totals and batch metadata editing.
@@ -62,8 +63,9 @@ and connect. Choose its saved physical telescope profile or name a new one.
   while the telescope app continues shooting. Existing captures are excluded by default.
 - **Connect over network…** stays available during live import. Reconnect to select
   more files, or connect another telescope using its own saved physical telescope name.
-- **Activity** shows each session's telescope, progress and **Stop live import** or
-  **Cancel download** control. The **Live import underway** indicator opens Activity;
+- **Activity** shows each session's telescope, progress, **Pause** and **Stop live import** or
+  **Cancel download** controls. Paused or interrupted jobs offer **Resume**.
+  The **Live import underway** indicator opens Activity;
   **Stop all telescope imports** stops every network session.
 - **Advanced…** provides manual IP/path access, DWARF FTP credentials, polling,
   transfer limits and an option to include existing files when live import starts.
@@ -72,8 +74,8 @@ Large selections warn that network transfers take longer than USB. Live imports
 wait for stable files and retry incomplete captures or brief disconnects. Originals
 stay on the telescope; local staging needs space as well as the final archive.
 Stopping sessions keeps completed archive copies and verified downloads. Closing
-the app waits for sessions to stop; repository switching and conflicting archive
-operations wait until all network sessions finish. Network sessions in the same
+the app pauses unfinished queues and waits for transfers to stop;
+repository switching and conflicting archive operations wait until all network sessions finish. Network sessions in the same
 AstroArchive instance coordinate their archive writes.
 File access depends on telescope firmware. Seestar access uses its own SMB client
 and does not require changing Windows guest/signing policies.
@@ -99,7 +101,8 @@ it is off by default.
 
 **Repository → Analytics** previews six branded charts: targets photographed,
 imaging timeline, time per target, time per telescope, filter mix and exposure
-lengths. Scope by telescope and acquisition dates, add a document label and optionally
+lengths. Documents default to **Dark**; choose **Light** for a light background.
+Scope by telescope and acquisition dates, add a document label and optionally
 include rejected light frames. Scope starts with the entire repository independently
 of browsing filters and selection. Export **PNG, JPEG, PDF or SVG**, with 150 or
 300 DPI for raster images. **Export all** saves one document; PDF uses landscape pages and image/SVG
