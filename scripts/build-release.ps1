@@ -156,7 +156,7 @@ try {
                 $handle.Dispose()
                 break
             } catch [IO.IOException] {
-                $nativeCode = $_.Exception.HResult -band 0xFFFF
+                $nativeCode = $_.Exception.GetBaseException().HResult -band 0xFFFF
                 if ($nativeCode -notin @(32, 33) -or $releaseClock.Elapsed.TotalSeconds -ge 10) { throw }
                 Start-Sleep -Milliseconds 100
             }
