@@ -1,6 +1,6 @@
-# Linux feature parity with Windows 3.1.4
+# Linux feature parity with Windows 3.1.4.1
 
-3.1.4 preview adds the principal workflows absent from preview 1. The shared C# engine
+3.1.4.1 preview adds the principal workflows absent from preview 1. The shared C# engine
 remains the authority for classification, target matching, calibration matching,
 scientific conversion, import policies, deletion history, and archive records.
 This is a workflow comparison, not a claim that Avalonia reproduces every WPF dialog.
@@ -33,7 +33,7 @@ This is a workflow comparison, not a claim that Avalonia reproduces every WPF di
 | Capture deletion and reimport history | Explicit DELETE confirmation, shared transactional deletion/audit/exclusions and explicit reimport permission | Invalid confirmation changes nothing; native engine rollback tests; real Delete/Audit/Allow buttons |
 | Backup | Verified folder/ZIP snapshot, canonical portable metadata and restore instructions | Hash-verified backup/restore; platform guard settings omitted |
 | Analytics | Six scoped reports, six branded layouts/themes, complete SVG/JSON/PDF/PNG/JPEG exports and GIF/H.264 MP4 stories | Real export button, six-page PDF inspected by independent pdfinfo, every raster page decoded; MP4/GIF independently decoded across all layouts/themes, exact ratios, timing and six-chart stories |
-| Appearance / accessibility | Dark/light/system, saved text scale, wrap/scroll layout, keyboard controls | Real preference buttons; normal/compact native screenshots |
+| Appearance / accessibility | Dark/light/system, saved text scale, wrap/scroll layout, keyboard controls | Real preference buttons; normal/compact/large-text/light native screenshots; saved preferences survive restart |
 | Media playback | Open the selected capture with the system image/video viewer | Safe absolute path argument; requires xdg-utils and an installed viewer |
 
 MP4 story export requires distribution `ffmpeg`; GIF and document exports are self-contained.
@@ -52,8 +52,9 @@ MP4 story export requires distribution `ffmpeg`; GIF and document exports are se
   require Windows to disable protection before Linux capture writes.
 - **Preview presentation:** PNG/GIF/movie playback can use the system viewer.
   The Linux in-app raster preview is a still image; the complete Windows motion
-  player, full-resolution viewport and column-layout/accessibility dialogs are
-  not replicated. Unsupported TIFF layouts use an explicitly display-only
+  player, custom chart configuration editor, total-story-duration control,
+  full-resolution viewport and column-layout/accessibility dialogs are not
+  replicated. Unsupported TIFF layouts use an explicitly display-only
   decode rather than a reduced-precision scientific export.
 - **Automatic analysis/recovery scheduling:** Automatic analysis currently follows
   verified local imports. Live/network imports can be solved/analyzed from the

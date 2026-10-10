@@ -188,12 +188,14 @@ public static class NativeSmoke
         Page(4); Text("BackupDestination",parent); await Click("Backup"); await Click("SaveSettings");
         await ParitySmoke.Run(window,root,screenshots);
         if(screenshots) {
-            foreach(bool compact in new[]{false,true}) {
-            window.Width=compact?1100:1220; window.Height=compact?720:850;
+            foreach(string mode in new[]{"", "-compact", "-large-text", "-light"}) {
+            window.Width=mode.Length>0?1100:1220; window.Height=mode.Length>0?720:850;
+            window.FontSize=mode=="-large-text"?28:14;
+            Application.Current!.RequestedThemeVariant=mode=="-light"?Avalonia.Styling.ThemeVariant.Light:Avalonia.Styling.ThemeVariant.Dark;
             for(int i=0;i<6;i++) {
                 Page(i); if(((TabItem)((TabControl)window.Controls["Pages"]).Items[i]!).Content is ScrollViewer scroller)scroller.Offset=default; window.UpdateLayout(); await Task.Delay(100); window.UpdateLayout();
                 using(var bitmap=new RenderTargetBitmap(new PixelSize((int)window.Width,(int)window.Height),new Vector(96,96))) {
-                    bitmap.Render(window); bitmap.Save(Path.Combine(root,$"page-{i}{(compact?"-compact":"")}.png"),new PngBitmapEncoderOptions());
+                    bitmap.Render(window); bitmap.Save(Path.Combine(root,$"page-{i}{mode}.png"),new PngBitmapEncoderOptions());
                 }
             }
             }

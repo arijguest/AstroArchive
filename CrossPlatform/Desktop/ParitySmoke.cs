@@ -12,6 +12,9 @@ public static class ParitySmoke
         void Put(string id,string value)=>((TextBox)window.Controls[id]).Text=value;
         async Task Click(string id) { ((Button)window.Controls[id]).RaiseEvent(new RoutedEventArgs(Button.ClickEvent)); await window.LastOperation; await Dispatcher.UIThread.InvokeAsync(()=>{},DispatcherPriority.Background); ReleaseFixture.Check(window.LastError==null,"parity command "+id+": "+window.LastError); }
         var captures=(DataGrid)window.Controls["Captures"]; captures.SelectedItem=window.Session.Captures.First();
+        Put("CopyWorkers","3");await Click("SaveImportPreferences");
+        using(var reload=new ArchiveSession(window.Session.ConfigPath))
+            ReleaseFixture.Check(reload.Settings.CopyWorkers==3,"native import preferences survive settings reload");
         await Click("Details"); await Click("ScreenArchive"); await Click("SkyContext"); await Click("ResetSky");
         Put("Meta:Gain","73"); Put("Meta:Binning","1x1"); await Click("Meta:Apply");
         ReleaseFixture.Check(window.Session.Captures.Any(f=>f.Gain==73),"detailed metadata is persisted");

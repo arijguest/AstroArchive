@@ -48,7 +48,7 @@ public sealed partial class MainWindow : Window
         brand.Children.Add(new TextBlock { Text = "AstroArchive", FontSize = 28, FontWeight = FontWeight.SemiBold });
         brand.Children.Add(new TextBlock { Text = "Your observations, preserved and ready to process", Opacity = 0.8 });
         title.Children.Add(brand);
-        var badge = new TextBlock { Text = "LINUX 3.1.4 PREVIEW", Foreground = Brushes.LightSkyBlue, VerticalAlignment = VerticalAlignment.Center };
+        var badge = new TextBlock { Text = "LINUX 3.1.4.1 PREVIEW", Foreground = Brushes.LightSkyBlue, VerticalAlignment = VerticalAlignment.Center };
         Grid.SetColumn(badge, 1); title.Children.Add(badge); body.Children.Add(title);
 
         archiveBar.Children.Add(Label("Archive"));

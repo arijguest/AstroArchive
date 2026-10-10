@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 cd "$(dirname "$0")/.."
-release_version=3.1.4-preview.2
+release_version=3.1.4.1-preview.1
+# Debian's tilde makes preview packages sort below the matching stable version.
+release_package_version=3.1.4.1~preview.1
 release_output="${1:-$PWD/linux-artifacts}"
 mkdir -p "$release_output"
 release_output="$(realpath "$release_output")"
@@ -38,7 +40,7 @@ StartupWMClass=AstroArchive
 EOF
 cat > "$release_stage/deb/DEBIAN/control" <<EOF
 Package: astroarchive
-Version: $release_version
+Version: $release_package_version
 Section: science
 Priority: optional
 Architecture: amd64
@@ -52,6 +54,9 @@ Description: Astrophotography archive manager for Linux (preview)
 EOF
 chmod -R a+rX "$release_stage/deb"
 dpkg-deb --root-owner-group --build "$release_stage/deb" "$release_output/astroarchive_${release_version}_amd64.deb"
+test "$(dpkg-deb -f "$release_output/astroarchive_${release_version}_amd64.deb" Version)" = "$release_package_version"
+dpkg --compare-versions "$release_package_version" gt 3.1.4-preview.2
+dpkg --compare-versions "$release_package_version" lt 3.1.4.1
 python3 - "$release_output" <<'PY'
 import hashlib, pathlib, sys
 folder = pathlib.Path(sys.argv[1])

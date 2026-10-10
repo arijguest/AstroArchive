@@ -69,9 +69,32 @@ public sealed partial class ArchiveSession : IDisposable
         }
         catch (Exception e) when (e is IOException or JsonException or UnauthorizedAccessException)
         { SettingsWarning = "Settings could not be loaded: " + e.Message; }
+        NormalizeSettings();
+    }
+
+    private void NormalizeSettings()
+    {
+        var before = JsonSerializer.Serialize(Settings);
         Settings.Archive ??= ""; Settings.Source ??= ""; Settings.Telescope ??= "My telescope";
-        Settings.Model ??= "Auto"; Settings.ExternalEditor ??= ""; Settings.Telescopes ??= []; Settings.RemoteCredentials ??= [];
-        if(Settings.Theme is not ("Dark" or "Light" or "System")) Settings.Theme="Dark";
+        Settings.Model ??= "Auto"; Settings.ExternalEditor ??= ""; Settings.StackingExecutable ??= "";
+        Settings.Astap ??= PlateSolve.FindAstap(); Settings.StarDatabase ??= ""; Settings.ApiKeyReference ??= "";
+        Settings.Telescopes ??= []; Settings.RemoteCredentials ??= [];
+        Settings.Telescopes = Settings.Telescopes.Where(p => p != null && !string.IsNullOrWhiteSpace(p.Id))
+            .DistinctBy(p => p.Id, StringComparer.OrdinalIgnoreCase).ToList();
+        foreach (var profile in Settings.Telescopes)
+        { profile.Model ??= "Auto"; profile.LastSource ??= ""; profile.SessionIdentity ??= profile.Id; }
+        Settings.RemoteCredentials = Settings.RemoteCredentials.Where(p => !string.IsNullOrEmpty(p.Value)).ToDictionary();
+        if (Settings.Theme is not ("Dark" or "Light" or "System")) Settings.Theme = "Dark";
+        if (Settings.AutoSolve is not ("Off" or "Unknown targets" or "All")) Settings.AutoSolve = "Off";
+        if (Settings.AutoRotation is not ("Off" or "Unknown mounts" or "All")) Settings.AutoRotation = "Off";
+        if (!PreviewData.StretchModes.Contains(Settings.PreviewStretch)) Settings.PreviewStretch = "Auto per channel";
+        if (Settings.CopyWorkers is < 1 or > 8) Settings.CopyWorkers = 2;
+        if (!double.IsFinite(Settings.TextScale) || Settings.TextScale is < 1 or > 2) Settings.TextScale = 1;
+        if (Settings.Latitude is { } latitude && (!double.IsFinite(latitude) || latitude is < -90 or > 90)) Settings.Latitude = null;
+        if (Settings.Longitude is { } longitude && (!double.IsFinite(longitude) || longitude is < -180 or > 180)) Settings.Longitude = null;
+        if (Settings.FieldHeight is { } height && (!double.IsFinite(height) || height <= 0 || height > 180)) Settings.FieldHeight = null;
+        if (before != JsonSerializer.Serialize(Settings) && SettingsWarning.Length == 0)
+            SettingsWarning = "Invalid saved settings were reset. Review your preferences before importing.";
     }
 
     public void SaveSettings()

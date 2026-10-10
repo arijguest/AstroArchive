@@ -82,6 +82,7 @@ public sealed partial class MainWindow
             Wrap(Check("IgnoreFailed","Ignore failed filenames",Session.Settings.IgnoreFailed),Check("IgnoreRaster","Ignore PNG/JPEG/movie inputs",Session.Settings.IgnoreRaster),Field("CopyWorkers",Session.Settings.CopyWorkers.ToString(),"Copy workers (1–8)",160)),
             Button("ImportDump","Import archive Dump folder",()=>Run("Importing Dump inbox",ct=>{ReadImportOptions();return Task.Run(()=>Session.ImportDump(ct,ReportProgress),ct);})),
             Wrap(Label("After verified folder import"),Select("AutoSolve",["Off","Unknown targets","All"],Session.Settings.AutoSolve),Select("AutoRotation",["Off","Unknown mounts","All"],Session.Settings.AutoRotation)),
+            Button("SaveImportPreferences","Save import preferences",()=>Run("Saving import preferences",_=>{ ReadImportOptions(); return Task.CompletedTask; })),
             Notice("Automatic analysis starts off. All targets allows the solver to replace existing target labels. Configure your solver and observing site in Settings first."),
             Wrap(Button("SaveProfile","Save telescope profile",()=>Run("Saving telescope",_=>{ Session.SaveProfile(Text("Telescope"),Text("Model"),Text("SourcePath")); RefreshProfiles(); return Task.CompletedTask; })),Select("Profiles",Session.Settings.Telescopes.Select(p=>p.Id)),
                 Button("LoadProfile","Use saved telescope",()=>Run("Loading telescope",_=>{ var p=Session.Settings.Telescopes.Single(p=>p.Id==Choice("Profiles")); ((TextBox)Controls["Telescope"]).Text=p.Id; ((TextBox)Controls["Model"]).Text=p.Model; ((TextBox)Controls["SourcePath"]).Text=p.LastSource; return Task.CompletedTask; }))),
@@ -90,7 +91,13 @@ public sealed partial class MainWindow
         }});
     }
     private void RefreshProfiles() { var box=(ComboBox)Controls["Profiles"]; box.ItemsSource=Session.Settings.Telescopes.Select(p=>p.Id).ToArray(); }
-    private void ReadImportOptions() { Session.Settings.IgnoreFailed=Checked("IgnoreFailed"); Session.Settings.IgnoreRaster=Checked("IgnoreRaster"); Session.Settings.CopyWorkers=(int)Number("CopyWorkers",1,8)!.Value; Session.Settings.AutoSolve=Choice("AutoSolve"); Session.Settings.AutoRotation=Choice("AutoRotation"); }
+    private void ReadImportOptions()
+    {
+        int workers=(int)Number("CopyWorkers",1,8)!.Value;
+        Session.Settings.IgnoreFailed=Checked("IgnoreFailed"); Session.Settings.IgnoreRaster=Checked("IgnoreRaster");
+        Session.Settings.CopyWorkers=workers; Session.Settings.AutoSolve=Choice("AutoSolve"); Session.Settings.AutoRotation=Choice("AutoRotation");
+        Session.SaveSettings();
+    }
     private Control RemotePanel() {
         var panel=new StackPanel { Spacing=10 };
         panel.Children.Add(Notice("Browse and import directly from DWARF FTP or Seestar Direct SMB. Telescope originals are retained. Passwords stay in memory unless saved to the desktop keyring. Live import waits for stable captures and retries interrupted connections."));
@@ -163,10 +170,21 @@ public sealed partial class MainWindow
         Wrap(Field("AstapPath",Session.Settings.Astap,"Absolute ASTAP executable",350),Field("StarDatabase",Session.Settings.StarDatabase,"ASTAP catalogue folder (optional)",350)),
         Wrap(Check("UseOnline","Use Astrometry.net",Session.Settings.UseOnline),SecretField("ApiKey","Astrometry.net API key (this session)",340),Button("SaveApiKey","Save API key in keyring",()=>Run("Saving solver credential",ct=>{ string key=Text("ApiKey"); return Task.Run(()=>{ Session.Settings.ApiKeyReference=PlateSolve.Protect(key); Session.SaveSettings(); },ct); }))),
         Wrap(WithLabel("Latitude (degrees)",Field("Latitude",Session.Settings.Latitude?.ToString(CultureInfo.InvariantCulture)??"","Latitude (-90…90)",220)),WithLabel("Longitude (degrees)",Field("Longitude",Session.Settings.Longitude?.ToString(CultureInfo.InvariantCulture)??"","Longitude (-180…180)",220)),WithLabel("Field height (degrees)",Field("FieldHeight",Session.Settings.FieldHeight?.ToString(CultureInfo.InvariantCulture)??"","Field height (degrees; optional)",250))),
-        Wrap(WithLabel("Text scale",Field("TextScale",Session.Settings.TextScale.ToString(CultureInfo.InvariantCulture),"Text scale (1…2)",210)),Button("SaveAdvanced","Save solver / site / accessibility settings",()=>Run("Saving preferences",_=>{ Session.Settings.StackingExecutable=Text("StackingPath"); Session.Settings.Astap=Text("AstapPath"); Session.Settings.StarDatabase=Text("StarDatabase"); Session.Settings.UseOnline=Checked("UseOnline"); Session.UseSessionKey(Text("ApiKey")); Session.Settings.Latitude=Number("Latitude",-90,90); Session.Settings.Longitude=Number("Longitude",-180,180); Session.Settings.FieldHeight=Number("FieldHeight",double.Epsilon,180); Session.Settings.TextScale=Number("TextScale",1,2)!.Value; Session.Settings.PreviewStretch=Choice("Stretch"); ReadImportOptions(); Session.SaveSettings(); FontSize=14*Session.Settings.TextScale; return Task.CompletedTask; }))),
+        Wrap(WithLabel("Text scale",Field("TextScale",Session.Settings.TextScale.ToString(CultureInfo.InvariantCulture),"Text scale (1…2)",210)),Button("SaveAdvanced","Save solver / site / accessibility settings",()=>Run("Saving preferences",_=>{ SaveAdvancedSettings(); return Task.CompletedTask; }))),
         Notice("Linux capture protection blocks deletion and relocation within AstroArchive. External filesystem tools and Windows do not enforce this Linux guard. Windows NTFS protection remains separate."),
         Wrap(Button("EnableProtection","Enable Linux capture guard",()=>Run("Enabling capture protection",ct=>Task.Run(()=>Session.RequireArchive().SetOriginalsProtection(true,ct,ReportProgress),ct))),Button("DisableProtection","Disable Linux capture guard",()=>Run("Disabling capture protection",ct=>Task.Run(()=>Session.RequireArchive().SetOriginalsProtection(false,ct,ReportProgress),ct))))
     }});
+    private void SaveAdvancedSettings()
+    {
+        // Validate every input before changing the active solver or preferences.
+        double? latitude=Number("Latitude",-90,90),longitude=Number("Longitude",-180,180),height=Number("FieldHeight",double.Epsilon,180);
+        double scale=Number("TextScale",1,2)!.Value;
+        Session.Settings.StackingExecutable=Text("StackingPath"); Session.Settings.Astap=Text("AstapPath");
+        Session.Settings.StarDatabase=Text("StarDatabase"); Session.Settings.UseOnline=Checked("UseOnline");
+        Session.Settings.Latitude=latitude; Session.Settings.Longitude=longitude; Session.Settings.FieldHeight=height;
+        Session.Settings.TextScale=scale; Session.Settings.PreviewStretch=Choice("Stretch");
+        Session.SaveSettings(); Session.UseSessionKey(Text("ApiKey")); FontSize=14*scale;
+    }
     private string SecretText(string id) => ((TextBox)Controls[id]).Text??"";
     private TextBox SecretField(string id,string hint,double width) { var box=Field(id,"",hint,width); box.PasswordChar='●'; return box; }
     private double? Number(string id,double? minimum,double? maximum) {

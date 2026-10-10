@@ -6,7 +6,7 @@ using Avalonia.Themes.Fluent;
 namespace AstroArchive.Desktop;
 public static class Program {
  [STAThread] public static int Main(string[] args) {
-  if(args.Length>0 && args[0]=="--version") { Console.WriteLine("AstroArchive 3.1.4 Linux preview 2 (x64)"); return 0; }
+  if(args.Length>0 && args[0]=="--version") { Console.WriteLine("AstroArchive 3.1.4.1 Linux preview 1 (x64)"); return 0; }
   if(args.Length>0 && args[0]=="--analytics-media-test") return AnalyticsMediaCheck.Run(args.Skip(1).FirstOrDefault());
   if(args.Length>0 && args[0]=="--keyring-test") return PackageSelfTest.Keyring(args.Skip(1).FirstOrDefault());
   if(args.Length>0 && args[0]=="--self-test") return PackageSelfTest.Run(args.Skip(1).FirstOrDefault());

@@ -30,15 +30,20 @@ assert 'PASS: independently decoded Linux MP4/GIF ratios, themes, timing, colors
 assert 'PARITY BUTTONS PASS:' in (source / 'ui-test.log').read_text()
 assert 'PASS native telescope rows render capture filenames' in (source / 'ui-test.log').read_text()
 assert 'PASS native recovery rows render the paused import title' in (source / 'ui-test.log').read_text()
+assert 'PASS native import preferences survive settings reload' in (source / 'ui-test.log').read_text()
 assert re.search(r'^Pages:\s+6$', (source / 'pdf-test.log').read_text(), re.M)
 parity = sorted((source / 'ui').glob('parity-*.png'))
 assert len(parity) == 9, 'Missing native workflow screenshots'
 screenshots = sorted((source / 'ui').glob('page-*.png'))
-assert len(screenshots) == 12, 'Missing native page screenshots'
+assert len(screenshots) == 24, 'Missing native normal, compact, large-text or light-theme screenshots'
 
 output.mkdir(exist_ok=True)
-for name in ['AstroArchive-3.1.4-preview.2-linux-x64.tar.gz', 'astroarchive_3.1.4-preview.2_amd64.deb']:
+for name in ['AstroArchive-3.1.4.1-preview.1-linux-x64.tar.gz', 'astroarchive_3.1.4.1-preview.1_amd64.deb']:
     shutil.copy2(source / name, output / name)
+package_version = subprocess.check_output(['dpkg-deb', '-f', str(output / 'astroarchive_3.1.4.1-preview.1_amd64.deb'), 'Version'], text=True).strip()
+assert package_version == '3.1.4.1~preview.1', 'Incorrect Debian prerelease metadata'
+subprocess.run(['dpkg', '--compare-versions', package_version, 'gt', '3.1.4-preview.2'], check=True)
+subprocess.run(['dpkg', '--compare-versions', package_version, 'lt', '3.1.4.1'], check=True)
 shutil.copy2('CrossPlatform/README.md', output / 'README.md')
 shutil.copy2('CrossPlatform/FEATURE-PARITY.md', output / 'FEATURE-PARITY.md')
 ci_url = 'https://github.com/' + os.environ['GITHUB_REPOSITORY'] + '/actions/runs/' + os.environ['GITHUB_RUN_ID']
@@ -54,9 +59,9 @@ with zipfile.ZipFile(output / 'AstroArchive-Linux-page-screenshots.zip', 'w', zi
     for screenshot in parity:
         archive.write(screenshot, screenshot.name)
     for screenshot in screenshots:
-        match = re.fullmatch(r'page-(\d+)(-compact)?\.png', screenshot.name)
+        match = re.fullmatch(r'page-(\d+)(-compact|-large-text|-light)?\.png', screenshot.name)
         assert match and 0 <= int(match[1]) < 6
-        name = pages[int(match[1])] + ('-compact.png' if match[2] else '-normal.png')
+        name = pages[int(match[1])] + (match[2] or '-normal') + '.png'
         archive.write(screenshot, name)
 with zipfile.ZipFile(output / 'Linux-validation-logs.zip', 'w', zipfile.ZIP_DEFLATED) as archive:
     for name in ['engine.log', 'package-test.log', 'exfat-drive.log', 'network-test.log', 'keyring-test.log', 'ui-test.log', 'pdf-test.log', 'media-test.log', 'test-results/linux-desktop.trx']:
@@ -71,4 +76,4 @@ def digest(path):
 
 files = sorted(p for p in output.iterdir() if p.is_file() and p.name != 'SHA256SUMS')
 (output / 'SHA256SUMS').write_text(''.join(digest(p) + '  ' + p.name + '\n' for p in files))
-print('Prepared verified packages, 21 native screenshots and CI evidence at', output)
+print('Prepared verified packages, 33 native screenshots and CI evidence at', output)
