@@ -44,8 +44,9 @@ namespace AstroArchive {
     var dismiss=ActivityAction("×",()=>{entry.BannerDismissed=true;RenderProcessSummaries();});dismiss.ToolTip="Dismiss this summary; the process continues in Activity.";AutomationProperties.SetName(dismiss,"Dismiss "+entry.Title+" summary");actions.Children.Add(dismiss);layout.Children.Add(content);
     var border=new Border{Child=layout,CornerRadius=new CornerRadius(6),Padding=new Thickness(12,8,6,8),Margin=new Thickness(0,0,0,4)};border.SetResourceReference(Border.BackgroundProperty,"SurfaceAlt");processSummaryItems.Children.Add(border);processSummaryCards[entry]=card;UpdateProcessSummary(entry,card);
    }
-   processSummaryScroll.MaxHeight=144*Math.Max(1,settings.TextScalePercent/100.0);processSummaryScroll.Visibility=processSummaryCards.Count>0?Visibility.Visible:Visibility.Collapsed;
+   SizeProcessSummaries();processSummaryScroll.Visibility=processSummaryCards.Count>0?Visibility.Visible:Visibility.Collapsed;
   }
+  void SizeProcessSummaries(){if(processSummaryScroll!=null)processSummaryScroll.MaxHeight=Math.Min(144*Math.Max(1,settings.TextScalePercent/100.0),Math.Max(80,(Window.ActualHeight>0?Window.ActualHeight:Window.Height)*0.15));}
   void UpdateProcessSummary(ActivityEntry entry,ProcessSummaryCard card){
    card.Title.Text=ProcessState(entry)+" · "+entry.Title;
    string status=entry.Status??"";int newline=status.IndexOfAny(new[]{'\r','\n'});if(newline>=0)status=status.Substring(0,newline);card.Status.Text=status.Length>180?status.Substring(0,177)+"…":status;

@@ -62,7 +62,7 @@ namespace AstroArchive {
    activityToastTimer=new DispatcherTimer{Interval=TimeSpan.FromSeconds(6)};activityToastTimer.Tick+=(s,e)=>{activityToastTimer.Stop();activityToast.Visibility=Visibility.Collapsed;};
    InitializeProcessSummaries();RenderActivity();
   }
-  void SizeActivity(){if(activityPanel!=null)activityPanel.Width=Math.Min(Math.Max(420,420*Math.Max(1,settings.TextScalePercent/100.0)),Math.Max(320,Window.ActualWidth-48));}
+  void SizeActivity(){if(activityPanel!=null)activityPanel.Width=Math.Min(Math.Max(420,420*Math.Max(1,settings.TextScalePercent/100.0)),Math.Max(320,Window.ActualWidth-48));SizeProcessSummaries();}
   void OpenActivity(){if(activityPanel==null)return;activityToastTimer.Stop();activityToast.Visibility=Visibility.Collapsed;activityPanel.Visibility=Visibility.Visible;foreach(var entry in activities)entry.Unread=false;RenderActivity();activityPanel.MoveFocus(new TraversalRequest(FocusNavigationDirection.First));}
   void CloseActivity(bool restoreFocus=true){if(activityPanel==null)return;activityPanel.Visibility=Visibility.Collapsed;if(restoreFocus)activityBell.Focus();}
   void DismissActivityOutside(DependencyObject source){
