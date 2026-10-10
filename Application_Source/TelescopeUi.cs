@@ -55,7 +55,7 @@ namespace AstroArchive {
   }
   void UpdateTelescopeState(bool busy){
    busy=busy||usbImportPicking;
-   C("SavedTelescopeBox").IsEnabled=!busy;B("RemoteTelescopeButton").IsEnabled=!busy&&repo!=null;B("SaveTelescopeButton").IsEnabled=!busy;B("RenameTelescopeButton").IsEnabled=!busy&&SelectedScope!=null&&!string.IsNullOrEmpty(SelectedScope.Id);B("RebuildTelescopesButton").IsEnabled=!busy&&repo!=null;B("RefreshUsbButton").IsEnabled=!usbChecking&&!busy;
+   C("SavedTelescopeBox").IsEnabled=!busy;B("RemoteTelescopeButton").IsEnabled=repo!=null&&!NetworkImportBlocked&&(!busy||remoteSessions.Count>0);B("SaveTelescopeButton").IsEnabled=!busy;B("RenameTelescopeButton").IsEnabled=!busy&&SelectedScope!=null&&!string.IsNullOrEmpty(SelectedScope.Id);B("RebuildTelescopesButton").IsEnabled=!busy&&repo!=null;B("RefreshUsbButton").IsEnabled=!usbChecking&&!busy;
    var button=B("AutoUploadButton");button.Visibility=usbTelescopes.Count>0||activeUsb!=null?Visibility.Visible:Visibility.Collapsed;button.IsEnabled=!busy&&repo!=null&&usbTelescopes.Count>0;
    button.Content=usbTelescopes.Count==1?UsbImportLabel(usbTelescopes[0]):"Import connected telescope…";
    button.ToolTip=repo==null?"Choose a repository first.":"Choose folders or files to scan and import. Large selections ask for confirmation; originals stay on the telescope.";
@@ -100,7 +100,8 @@ namespace AstroArchive {
    finally{usbImportPicking=false;SetBusy(false);}
    ((CheckBox)Window.FindName("DeleteOriginalsCheck")).IsChecked=false;C("ImportSolveMode").SelectedItem="Off";C("ImportRotationMode").SelectedItem="Off";BeginLive(true);activeUsb=telescope;
    var selectedProfile=Util.Deserialize<TelescopeProfile>(Util.Serialize(picker.Profile));var selection=picker.Selection;var repository=repo;int workers=settings.CopyWorkers;bool ignoreFailed=settings.IgnoreFailed,ignoreRaster=settings.IgnoreRasterImports;AutoUploadResult result=null;
-   Run(ct=>{result=UsbAutoUpload.Run(repository,selectedProfile,selection.SourceRoot,workers,ct,Progress,LiveFrame,p=>{plan=p;},()=>UsbAvailable(telescope),ignoreFailed:ignoreFailed,ignoreRaster:ignoreRaster,robustMatching:true,selection:selection);return result.Summary;},r=>{FilterImports();L("ScanLabel").Text=result.Summary;L("StatusLabel").Text=r;if(result.Import.Errors.Count+result.Import.Warnings.Count>0)ShowReport("USB import report",repo.LastReport);});
+   pendingImportRecord=new ImportResumeRecord{Kind="Usb",Title="USB import · "+selectedProfile.Id,Repository=repository.Root,Source=selection.SourceRoot,Profile=selectedProfile,Selection=selection,Workers=workers,IgnoreFailed=ignoreFailed,IgnoreRaster=ignoreRaster};
+   Run(ct=>{result=UsbAutoUpload.Run(repository,selectedProfile,selection.SourceRoot,workers,ct,Progress,LiveFrame,p=>{plan=p;},()=>UsbAvailable(telescope),ignoreFailed:ignoreFailed,ignoreRaster:ignoreRaster,robustMatching:true,selection:selection);if(result.Import.Failed+result.Plan.Errors.Count>0)foregroundImportRecord.State="Interrupted";return result.Summary;},r=>{FilterImports();L("ScanLabel").Text=result.Summary;L("StatusLabel").Text=r;if(result.Import.Errors.Count+result.Import.Warnings.Count>0)ShowReport("USB import report",repo.LastReport);});
   }
   void RenameScope(){
    var profile=SelectedScope;if(RepositoryOperationBlocked||profile==null||string.IsNullOrEmpty(profile.Id))return;

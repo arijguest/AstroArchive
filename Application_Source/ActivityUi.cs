@@ -12,12 +12,12 @@ using System.Windows.Threading;
 
 namespace AstroArchive {
  public sealed class ActivityEntry {
-  public string Title,Status,ReportTitle,Report,OutputPath,ActionLabel,RepositoryRoot,CancelLabel;
+  public string Title,Status,ReportTitle,Report,OutputPath,ActionLabel,RepositoryRoot,CancelLabel,ImportKind;
   public DateTime StartedUtc=DateTime.UtcNow;
-  public bool Running,Unread,NeedsReview,Failed,Canceled;
+  public bool Running,Unread,NeedsReview,Failed,Canceled,NetworkImport;
   public double? DurationSeconds;
   public ProgressInfo Progress;
-  public Action Review,Cancel;
+  public Action Review,Cancel,Pause,Resume,Discard;public Func<bool> ResumeAvailable;
  }
  public partial class MainUi {
   readonly List<ActivityEntry> activities=new List<ActivityEntry>();
@@ -99,13 +99,16 @@ namespace AstroArchive {
   }
   static string ActivityRate(ActivityEntry entry){
    var p=entry.Progress;if(p==null)return "Started "+entry.StartedUtc.ToLocalTime().ToString("g");
-   string eta=p.Finished||!entry.Running?"":p.Finalising?" · Finalising":p.Stalled?" · "+(p.Activity!=null&&p.Activity.Contains("Cloud availability")?"Waiting for cloud provider":"Waiting for filesystem"):p.RemainingSeconds.HasValue?" · ETA ~"+EtaEstimate.Format(p.RemainingSeconds.Value):" · ETA estimating";
+   string eta=p.Finished||!entry.Running?"":entry.NetworkImport?" · "+RemoteEstimateLabel(p):p.Finalising?" · Finalising":p.Stalled?" · "+(p.Activity!=null&&p.Activity.Contains("Cloud availability")?"Waiting for cloud provider":"Waiting for filesystem"):p.RemainingSeconds.HasValue?" · ETA ~"+EtaEstimate.Format(p.RemainingSeconds.Value):" · ETA estimating";
    return "Elapsed "+PipelineMetrics.Duration(p.ElapsedSeconds)+eta+" · "+(p.TotalKnown?p.Done+" / "+p.Total:p.Done+" inspected · "+p.Total+" discovered")+PipelineMetrics.Reading(p);
   }
   void UpdateActivityCard(ActivityEntry entry,ActivityCard card){
    card.Title.Text=entry.Title;card.Status.Text=entry.Status;card.Rate.Text=ActivityRate(entry);var p=entry.Progress;card.Bar.Visibility=entry.Running||p!=null?Visibility.Visible:Visibility.Collapsed;card.Bar.IsIndeterminate=entry.Running&&!settings.ReducedMotion&&(p==null||!p.TotalKnown&&!p.Finished);card.Bar.Value=p==null?0:Math.Max(0,Math.Min(1,p.ProgressFraction));
    var detail=new StringBuilder(entry.RepositoryRoot==null?"":"Repository: "+entry.RepositoryRoot+"\n");if(p!=null){if(p.Activity!=null)detail.AppendLine(p.Activity);if(p.CopyPhase)detail.AppendLine(p.Workers+" copy workers · "+ImportWorkflow.Size(p.BytesDone)+" / "+ImportWorkflow.Size(p.BytesTotal)+" · "+(p.EffectiveBytesPerSecond/1000000.0).ToString("0.0")+" MB/s");else detail.AppendLine(p.WorkPerSecond.ToString("0.0")+" files/s");if(p.Stages!=null)foreach(var stage in p.Stages)detail.AppendLine(stage.Stage+": "+stage.Files+" files · "+stage.Seconds.ToString("0.0")+"s · "+stage.MBPerSecond.ToString("0.0")+" MB/s");}if(entry.Report!=null)detail.AppendLine("A report is available below.");card.Details.Text=detail.ToString();
    card.Actions.Children.Clear();if(entry.Running&&entry.Cancel!=null)card.Actions.Children.Add(ActivityAction(entry.Canceled?"Canceling…":entry.CancelLabel??"Cancel",()=>{entry.Canceled=true;entry.Cancel();RenderActivity();}));
+   if(entry.Running&&entry.Pause!=null)card.Actions.Children.Add(ActivityAction("Pause",()=>{entry.Pause();RenderActivity();}));
+   if(!entry.Running&&entry.Resume!=null){var resume=ActivityAction("Resume",entry.Resume);resume.IsEnabled=entry.ResumeAvailable==null||entry.ResumeAvailable();resume.ToolTip=resume.IsEnabled?"Verify completed copies and continue this import.":"Finish the conflicting operation or open this import's repository first.";card.Actions.Children.Add(resume);}
+   if(!entry.Running&&entry.Discard!=null)card.Actions.Children.Add(ActivityAction("Cancel import",entry.Discard));
    if(entry.Review!=null){var review=ActivityAction(entry.ActionLabel??"Review results",()=>{if(RepositoryOperationBlocked)return;var action=entry.Review;entry.Review=null;entry.NeedsReview=false;entry.Unread=false;var previous=reviewingActivity;reviewingActivity=entry;try{action();if(entry.NeedsReview||entry.ActionLabel=="View release")entry.Review=action;}catch{entry.Review=action;entry.NeedsReview=true;throw;}finally{reviewingActivity=previous;RenderActivity();}});review.IsEnabled=!RepositoryOperationBlocked;review.ToolTip=review.IsEnabled?null:"Available when the current operation finishes.";card.Actions.Children.Add(review);}
    if(entry.Report!=null)card.Actions.Children.Add(ActivityAction("View report",()=>{activityOpeningReport=true;try{ShowReport(entry.ReportTitle??entry.Title,entry.Report);entry.Unread=false;if(entry.Review==null)entry.NeedsReview=false;}finally{activityOpeningReport=false;RenderActivity();}}));
    if(entry.OutputPath!=null)card.Actions.Children.Add(ActivityAction("Open folder",()=>OpenFolder(entry.OutputPath)));if(!entry.Running&&entry.NeedsReview)card.Actions.Children.Add(ActivityAction("Dismiss",()=>{entry.NeedsReview=false;entry.Unread=false;entry.Review=null;RenderActivity();}));
@@ -117,7 +120,7 @@ namespace AstroArchive {
   }}
   void RecordActivityReport(string title,string text){var entry=completionActivity??AddActivity(title);entry.ReportTitle=title;entry.Report=text;entry.NeedsReview=true;entry.Status="Completed with results to review.";NotifyActivity(entry);}
   void QueueActivityReview(string title,Action review){var entry=completionActivity??AddActivity(title);entry.Title=title;entry.Status="Ready to review";entry.NeedsReview=true;entry.Review=review;entry.ActionLabel="Review results";NotifyActivity(entry);}
-  void DisposeActivity(){activityDisposed=true;if(activityToastTimer!=null)activityToastTimer.Stop();foreach(var entry in activities){entry.Cancel=null;entry.Review=null;}activities.Clear();}
+  void DisposeActivity(){activityDisposed=true;if(activityToastTimer!=null)activityToastTimer.Stop();foreach(var entry in activities){entry.Cancel=null;entry.Review=null;entry.Pause=null;entry.Resume=null;entry.Discard=null;}activities.Clear();}
   static string ActivityTitle(string caller){switch(caller){case "Scan":return "Scanning source folder";case "Import":return "Importing files";case "ProcessDumpUi":return "Processing Dump folder";case "UploadUsb":return "Importing telescope files";case "ImportEditedFolder":return "Scanning edited images";case "ReviewEditedFolder":case "AddEditedImages":return "Importing edited images";case "IdentifyByPlate":return "Identifying targets";case "ApplyIdentifications":return "Applying target metadata";case "Analyze":return "Analysing rotation";case "ScreenSelection":case "ScreenCaptures":return "Screening captures";case "BackUpArchive":return "Backing up archive";case "ChangeArchiveProtection":return "Changing originals protection";case "RunExport":case "ExportFiles":case "ExportProject":case "ExportTo":return "Exporting files";case "ResetArchive":return "Clearing archive";case "DeleteFiles":return "Deleting selected files";case "RenameTelescope":return "Renaming telescope";case "Identify":return "Identifying targets from filenames";case "CreateEditedCopies":return "Creating edited working copies";case "Edit":case "EditEditedMetadata":return "Saving metadata";case "PreviewImage":case "PreviewSelected":case "PreviewEditedImage":return "Loading image preview";default:return "Processing files";}}
  }
 }

@@ -21,7 +21,7 @@ namespace AstroArchive {
   static Geometry Polygon(double[] points){var geometry=new StreamGeometry();using(var context=geometry.Open()){context.BeginFigure(new Point(points[0],points[1]),true,true);context.PolyLineTo(Enumerable.Range(1,points.Length/2-1).Select(i=>new Point(points[i*2],points[i*2+1])).ToList(),true,false);}geometry.Freeze();return geometry;}
   static void Draw(DrawingContext context,IList<AnalyticsPage> pages){
    var logo=Logo();bool all=pages.Count>1;
-   context.DrawRectangle(Brushes.White,null,new Rect(0,0,AnalyticsPage.Width*(all?2:1),AnalyticsPage.Height*(all?Math.Ceiling(pages.Count/2.0):1)));
+   context.DrawRectangle(Brush(pages[0].Background),null,new Rect(0,0,AnalyticsPage.Width*(all?2:1),AnalyticsPage.Height*(all?Math.Ceiling(pages.Count/2.0):1)));
    for(int i=0;i<pages.Count;i++){
     context.PushTransform(new TranslateTransform(all?i%2*AnalyticsPage.Width:0,all?i/2*AnalyticsPage.Height:0));
     foreach(var mark in pages[i].Marks){
@@ -51,8 +51,8 @@ namespace AstroArchive {
     }if(figure.IsClosed)b.Append("h\n");
    }b.Append(geometry.FillRule==FillRule.EvenOdd?"f*\n":"f\n");return b.ToString();
   }
-  static byte[] LogoRgb(){
-   var visual=new DrawingVisual();using(var context=visual.RenderOpen()){context.DrawRectangle(Brushes.White,null,new Rect(0,0,256,256));context.DrawImage(Logo(),new Rect(0,0,256,256));}
+  static byte[] LogoRgb(string background){
+   var visual=new DrawingVisual();using(var context=visual.RenderOpen()){context.DrawRectangle(Brush(background),null,new Rect(0,0,256,256));context.DrawImage(Logo(),new Rect(0,0,256,256));}
    var bitmap=new RenderTargetBitmap(256,256,96,96,PixelFormats.Pbgra32);bitmap.Render(visual);var rgb=new FormatConvertedBitmap(bitmap,PixelFormats.Rgb24,null,0);byte[] bytes=new byte[256*256*3];rgb.CopyPixels(bytes,256*3,0);return bytes;
   }
   public static void Save(string destination,IList<AnalyticsPage> pages,string format,int dpi){
@@ -61,7 +61,7 @@ namespace AstroArchive {
    try{
     using(var output=new FileStream(temporary,FileMode.CreateNew,FileAccess.Write,FileShare.None)){
      if(format=="SVG"){byte[] bytes=new UTF8Encoding(false).GetBytes(AnalyticsGraphics.Svg(pages,Convert.ToBase64String(LogoBytes)));output.Write(bytes,0,bytes.Length);}
-     else if(format=="PDF")AnalyticsPdf.Write(output,pages,LogoRgb(),256,256,OutlinedText);
+     else if(format=="PDF")AnalyticsPdf.Write(output,pages,LogoRgb(pages[0].Background),256,256,OutlinedText);
      else if(format=="PNG"||format=="JPEG"){
       BitmapEncoder encoder=format=="PNG"?(BitmapEncoder)new PngBitmapEncoder():new JpegBitmapEncoder{QualityLevel=96};encoder.Frames.Add(BitmapFrame.Create(Raster(pages,dpi)));encoder.Save(output);
      }else throw new ArgumentException("Choose PNG, JPEG, PDF or SVG.");

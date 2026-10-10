@@ -115,7 +115,28 @@ total integration and filters. Mixed durations show a range; missing values rema
 unknown. Expand the row or turn off Repository > Group subs by session.
 Stacks remain separate. Known counts show Stack (1445); filters still use Stack.
 
+## Pausing and resuming imports
+Pause import keeps your queue and verified copies. Use Activity to pause an
+individual telescope or resume a paused/interrupted import. Pause all imports
+pauses every active network session. Cancel/Stop ends the queue instead.
+Closing AstroArchive preserves active import queues; after a crash or update,
+open Activity and choose Resume. Reconnect the original source and telescope.
+Completed archive copies are verified and skipped; an unfinished file restarts
+from its beginning. Existing live-watch baselines are preserved, so captures
+made while paused are eligible after resuming. Source-removal choices from a
+confirmed file/Dump import remain in effect; USB/network imports keep originals.
+Recovery supports folder, USB, network/live, Dump and edited-image imports.
+
+Settings, filters, grouping and Analytics remain available during network
+imports. Preference changes apply to future imports. Repository switching and
+conflicting file changes remain unavailable until active imports finish/pause.
+Downloads appear in Import as they arrive, with a numeric ETA after transfer
+starts (or immediately when a bandwidth limit is set).
+
 ## Analytics exports
+Documents default to Dark, with a Light option next to Export format. The larger
+AstroArchive logo, midnight/blue/cyan colours, and concise headers/footers appear
+in previews and PNG, JPEG, PDF and SVG exports.
 Repository > Analytics offers six branded charts: Targets photographed, Imaging
 timeline, Time per target, Time per telescope, Filter mix and Exposure lengths.
 Select a chart to preview it, or All six charts for the combined preview. Scope

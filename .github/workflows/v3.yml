@@ -34,13 +34,14 @@ jobs:
       - name: Check network dialog and existing connected-import UI
         shell: powershell
         run: |
-          foreach ($mode in @('remote','connected-import','controls','analytics')) {
+          foreach ($mode in @('remote','connected-import','controls','analytics','full')) {
             $output = Join-Path $pwd "release-artifacts\ui-$mode"
-            $process = Start-Process '.\Application_Source\dist\AstroArchive.exe' -ArgumentList @('--ui-test', $output, "--$mode-only", '--no-updates') -PassThru
-            if (-not $process.WaitForExit(120000)) { $process.Kill(); throw "$mode UI check timed out." }
+            $modeArgument = if ($mode -eq 'full') { @() } else { @("--$mode-only") }
+            $process = Start-Process '.\Application_Source\dist\AstroArchive.exe' -ArgumentList (@('--ui-test', $output, '--no-updates') + $modeArgument) -PassThru
+            if (-not $process.WaitForExit(240000)) { $process.Kill(); throw "$mode UI check timed out." }
             if ($process.ExitCode -ne 0) {
-              $error = Join-Path $output 'ui-smoke-error.txt'
-              if (Test-Path $error) { Get-Content $error }
+              $uiFailureFile = Join-Path $output 'ui-smoke-error.txt'
+              if (Test-Path $uiFailureFile) { Get-Content $uiFailureFile }
               throw "$mode UI check failed."
             }
           }

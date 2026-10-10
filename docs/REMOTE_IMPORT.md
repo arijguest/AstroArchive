@@ -176,3 +176,23 @@ live import, then catch up with Search all. Compare a sample archived file's
 SHA-256 with a separate copy of the telescope original. Check both themes and
 keyboard navigation. Record the model/firmware and results; simulated/loopback
 checks cannot substitute for this device test.
+
+### Pause, recovery and simultaneous transfers
+
+Connect again to select additional files while live import runs, or add another
+telescope. Each active transfer appears in Activity with independent Pause and
+Cancel/Stop controls. Pause all imports affects every active telescope. Settings,
+filters, grouping and Analytics remain available; new preference defaults do not
+change existing queues. Repository switching waits until jobs finish or pause.
+
+Downloads appear in Import before archiving, with downloading/downloaded/error
+status. ETAs use measured bytes and transfer speed (plus the configured bandwidth
+limit), and watchers show “Watching for captures” when no files are pending.
+
+Closing the app preserves queues. After a crash or update, choose Resume in
+Activity and reconnect the same telescope/source. Recovery verifies completed
+archive and cached downloads, restarts incomplete files, and checks duplicates
+again. A resumed live watcher keeps its original baseline, including eligibility
+for captures made while paused. Telescope passwords needed for recovery use
+Windows user encryption. Cancel/Stop discards the queue while keeping completed
+archive copies and telescope originals.

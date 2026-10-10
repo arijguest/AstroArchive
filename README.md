@@ -34,6 +34,18 @@ Use **Settings → Updates** to install them. [Installation, repair and policy b
 
 See the [release history](https://github.com/arijguest/AstroArchive/releases) for full notes.
 
+## Import recovery and Analytics documents
+
+Import queues support Pause and Resume, including recovery after an app restart,
+crash or update. Activity retains unfinished folder, USB, network/live, Dump and
+edited-image imports. Resume verifies completed archive copies and restarts
+incomplete files. Each telescope has independent controls, and Settings, filters,
+grouping and Analytics stay available during simultaneous downloads. Arriving
+network files appear in Import with transfer progress and measured ETAs.
+
+Analytics documents default to Dark with an optional Light theme. All formats
+use the branded palette, larger AstroArchive logo, and concise headers and footers.
+
 ## Network and live imports
 
 Released versions include direct, read-only Seestar and DWARF imports. Install
