@@ -12,9 +12,9 @@ using System.Windows.Threading;
 
 namespace AstroArchive {
  public sealed class ActivityEntry {
-  public string Title,Status,ReportTitle,Report,OutputPath,ActionLabel,RepositoryRoot,CancelLabel,ImportKind;
+  public string Title,Status,ReportTitle,Report,OutputPath,ActionLabel,RepositoryRoot,CancelLabel,ImportKind,ProcessContext,ProcessOutcome;
   public DateTime StartedUtc=DateTime.UtcNow;
-  public bool Running,Unread,NeedsReview,Failed,Canceled,NetworkImport;
+  public bool Running,Unread,NeedsReview,Failed,Canceled,NetworkImport,LiveImport,ProcessTracked,BannerDismissed,ActivityDismissed,WasRunning;
   public double? DurationSeconds;
   public ProgressInfo Progress;
   public Action Review,Cancel,Pause,Resume,Discard;public Func<bool> ResumeAvailable;
@@ -48,7 +48,8 @@ namespace AstroArchive {
    var heading=new DockPanel{Margin=new Thickness(0,0,0,12)};DockPanel.SetDock(heading,Dock.Top);layout.Children.Add(heading);
    var close=new Button{Content="Close",Padding=new Thickness(9,4,9,4)};DockPanel.SetDock(close,Dock.Right);heading.Children.Add(close);heading.Children.Add(new TextBlock{Text="Activity",FontWeight=FontWeights.SemiBold,VerticalAlignment=VerticalAlignment.Center});
    close.Click+=(s,e)=>CloseActivity();activityBell.Click+=(s,e)=>{if(activityPanel.Visibility==Visibility.Visible)CloseActivity();else OpenActivity();};
-   var footer=new Button{Content="Clear completed",HorizontalAlignment=HorizontalAlignment.Left,Margin=new Thickness(0,12,0,0)};DockPanel.SetDock(footer,Dock.Bottom);layout.Children.Add(footer);
+   var footerRow=new WrapPanel{Margin=new Thickness(0,12,0,0)};DockPanel.SetDock(footerRow,Dock.Bottom);layout.Children.Add(footerRow);
+   var footer=new Button{Content="Clear completed"};footerRow.Children.Add(footer);showDismissedActivity=new Button{Content="Show dismissed",Visibility=Visibility.Collapsed};showDismissedActivity.Click+=(s,e)=>RestoreDismissedActivity();footerRow.Children.Add(showDismissedActivity);
    footer.Click+=(s,e)=>{activities.RemoveAll(a=>!a.Running&&!a.NeedsReview&&a.Review==null);RenderActivity();};
    activityItems=new StackPanel();var scroll=new ScrollViewer{Content=activityItems,VerticalScrollBarVisibility=ScrollBarVisibility.Auto,HorizontalScrollBarVisibility=ScrollBarVisibility.Disabled};MenuScrolling.SetEnabled(scroll,true);layout.Children.Add(scroll);
    activityPanel.PreviewKeyDown+=(s,e)=>{if(e.Key==Key.Escape){CloseActivity();e.Handled=true;}};
@@ -59,7 +60,7 @@ namespace AstroArchive {
    activityToast=new Border{CornerRadius=new CornerRadius(6),Padding=new Thickness(12),BorderThickness=new Thickness(1),HorizontalAlignment=HorizontalAlignment.Right,VerticalAlignment=VerticalAlignment.Top,MaxWidth=420,Visibility=Visibility.Collapsed};activityToast.SetResourceReference(Border.BackgroundProperty,"SurfaceAlt");activityToast.SetResourceReference(Border.BorderBrushProperty,"Border");Grid.SetRow(activityToast,2);Panel.SetZIndex(activityToast,19);root.Children.Add(activityToast);
    var toastLayout=new DockPanel();activityToast.Child=toastLayout;var view=new Button{Content="View",Margin=new Thickness(10,0,0,0)};DockPanel.SetDock(view,Dock.Right);toastLayout.Children.Add(view);view.Click+=(s,e)=>OpenActivity();activityToastText=new TextBlock{TextWrapping=TextWrapping.Wrap,VerticalAlignment=VerticalAlignment.Center};AutomationProperties.SetLiveSetting(activityToastText,AutomationLiveSetting.Polite);toastLayout.Children.Add(activityToastText);
    activityToastTimer=new DispatcherTimer{Interval=TimeSpan.FromSeconds(6)};activityToastTimer.Tick+=(s,e)=>{activityToastTimer.Stop();activityToast.Visibility=Visibility.Collapsed;};
-   RenderActivity();
+   InitializeProcessSummaries();RenderActivity();
   }
   void SizeActivity(){if(activityPanel!=null)activityPanel.Width=Math.Min(Math.Max(420,420*Math.Max(1,settings.TextScalePercent/100.0)),Math.Max(320,Window.ActualWidth-48));}
   void OpenActivity(){if(activityPanel==null)return;activityToastTimer.Stop();activityToast.Visibility=Visibility.Collapsed;activityPanel.Visibility=Visibility.Visible;foreach(var entry in activities)entry.Unread=false;RenderActivity();activityPanel.MoveFocus(new TraversalRequest(FocusNavigationDirection.First));}
@@ -71,11 +72,12 @@ namespace AstroArchive {
    CloseActivity(false);
   }
   ActivityEntry AddActivity(string title,bool running=false){
-   var entry=new ActivityEntry{Title=title,Running=running,Status=running?"Preparing…":"",RepositoryRoot=repo==null?null:repo.Root};activities.Insert(0,entry);
+   var entry=new ActivityEntry{Title=title,Running=running,WasRunning=running,ProcessTracked=running&&title!="Loading image preview",Status=running?"Preparing…":"",RepositoryRoot=repo==null?null:repo.Root};activities.Insert(0,entry);
    foreach(var old in activities.Where(a=>!a.Running&&!a.NeedsReview&&a.Review==null).Skip(40).ToList())activities.Remove(old);RenderActivity();return entry;
   }
   void NotifyActivity(ActivityEntry entry){
    if(activityDisposed||closing)return;
+   if(!entry.Running&&entry.WasRunning){entry.WasRunning=false;entry.BannerDismissed=false;entry.ActivityDismissed=false;}
    bool notify=!entry.Running&&entry.DurationSeconds.HasValue&&entry.DurationSeconds.Value>300;
    entry.Unread=notify&&(activityPanel==null||activityPanel.Visibility!=Visibility.Visible);RenderActivity();
    if(!notify)return;
@@ -85,12 +87,13 @@ namespace AstroArchive {
   void RenderActivity(){
    if(activityItems==null)return;activityItems.Children.Clear();activityCards.Clear();
    if(activities.Count==0)activityItems.Children.Add(new TextBlock{Text="No recent activity. Long-running work and release notifications appear here.",TextWrapping=TextWrapping.Wrap});
-   foreach(var entry in activities.OrderByDescending(a=>a.Running).ThenByDescending(a=>a.NeedsReview)){
+   foreach(var entry in OrderedActivities().Where(a=>!a.ActivityDismissed)){
     var panel=new StackPanel();var card=new ActivityCard{Title=new TextBlock{FontWeight=FontWeights.SemiBold,TextWrapping=TextWrapping.Wrap},Status=new TextBlock{TextWrapping=TextWrapping.Wrap,Margin=new Thickness(0,6,0,0)},Rate=new TextBlock{TextWrapping=TextWrapping.Wrap,Margin=new Thickness(0,6,0,0)},Bar=new ProgressBar{Maximum=1,Height=6,Margin=new Thickness(0,10,0,0)},Details=new TextBlock{TextWrapping=TextWrapping.Wrap},Actions=new WrapPanel{Margin=new Thickness(0,8,0,0)}};
-    AutomationProperties.SetName(card.Bar,entry.Title+" progress");panel.Children.Add(card.Title);panel.Children.Add(card.Status);panel.Children.Add(card.Bar);panel.Children.Add(card.Rate);var details=new Expander{Header="Details",Content=card.Details,Margin=new Thickness(0,8,0,0)};panel.Children.Add(details);panel.Children.Add(card.Actions);
-    var border=new Border{Child=panel,BorderThickness=new Thickness(0,0,0,1),Padding=new Thickness(0,8,0,14),Margin=new Thickness(0,0,0,8)};border.SetResourceReference(Border.BorderBrushProperty,"Border");activityItems.Children.Add(border);activityCards[entry]=card;UpdateActivityCard(entry,card);
+    AutomationProperties.SetName(card.Bar,entry.Title+" progress");var cardHeading=new DockPanel();var dismiss=ActivityAction("×",()=>DismissActivitySummary(entry));dismiss.Margin=new Thickness(8,0,0,0);dismiss.ToolTip="Dismiss this card; running work continues. Use Show dismissed to restore it.";AutomationProperties.SetName(dismiss,"Dismiss "+entry.Title+" activity");DockPanel.SetDock(dismiss,Dock.Right);cardHeading.Children.Add(dismiss);cardHeading.Children.Add(card.Title);panel.Children.Add(cardHeading);panel.Children.Add(card.Status);panel.Children.Add(card.Bar);panel.Children.Add(card.Rate);var details=new Expander{Header="Details",Content=card.Details,Margin=new Thickness(0,8,0,0)};panel.Children.Add(details);panel.Children.Add(card.Actions);
+    var border=new Border{Child=panel,BorderThickness=new Thickness(1),CornerRadius=new CornerRadius(6),Padding=new Thickness(12,8,12,10),Margin=new Thickness(0,0,0,8)};border.SetResourceReference(Border.BorderBrushProperty,"Border");border.SetResourceReference(Border.BackgroundProperty,"SurfaceAlt");activityItems.Children.Add(border);activityCards[entry]=card;UpdateActivityCard(entry,card);
    }
-   UpdateActivityBadge();
+   if(showDismissedActivity!=null)showDismissedActivity.Visibility=activities.Any(a=>a.ActivityDismissed||a.BannerDismissed)?Visibility.Visible:Visibility.Collapsed;
+   RenderProcessSummaries();UpdateActivityBadge();
   }
   Button ActivityAction(string label,Action action){var button=new Button{Content=label,Margin=new Thickness(0,0,6,6),Padding=new Thickness(8,4,8,4)};button.Click+=(s,e)=>{try{action();}catch(Exception error){var entry=AddActivity(label);entry.Failed=true;entry.Status=error.Message;NotifyActivity(entry);}};return button;}
   void UpdateActivityBadge(){
@@ -103,7 +106,7 @@ namespace AstroArchive {
    return "Elapsed "+PipelineMetrics.Duration(p.ElapsedSeconds)+eta+" · "+(p.TotalKnown?p.Done+" / "+p.Total:p.Done+" inspected · "+p.Total+" discovered")+PipelineMetrics.Reading(p);
   }
   void UpdateActivityCard(ActivityEntry entry,ActivityCard card){
-   card.Title.Text=entry.Title;card.Status.Text=entry.Status;card.Rate.Text=ActivityRate(entry);var p=entry.Progress;card.Bar.Visibility=entry.Running||p!=null?Visibility.Visible:Visibility.Collapsed;card.Bar.IsIndeterminate=entry.Running&&!settings.ReducedMotion&&(p==null||!p.TotalKnown&&!p.Finished);card.Bar.Value=p==null?0:Math.Max(0,Math.Min(1,p.ProgressFraction));
+   card.Title.Text=(entry.ProcessTracked?ProcessState(entry)+" · ":"")+entry.Title;card.Status.Text=entry.Status;card.Rate.Text=entry.ProcessTracked?ProcessParameters(entry):ActivityRate(entry);var p=entry.Progress;card.Bar.Visibility=entry.Running||p!=null?Visibility.Visible:Visibility.Collapsed;card.Bar.IsIndeterminate=entry.Running&&!settings.ReducedMotion&&(p==null||!p.TotalKnown&&!p.Finished);card.Bar.Value=p==null?0:Math.Max(0,Math.Min(1,p.ProgressFraction));
    var detail=new StringBuilder(entry.RepositoryRoot==null?"":"Repository: "+entry.RepositoryRoot+"\n");if(p!=null){if(p.Activity!=null)detail.AppendLine(p.Activity);if(p.CopyPhase)detail.AppendLine(p.Workers+" copy workers · "+ImportWorkflow.Size(p.BytesDone)+" / "+ImportWorkflow.Size(p.BytesTotal)+" · "+(p.EffectiveBytesPerSecond/1000000.0).ToString("0.0")+" MB/s");else detail.AppendLine(p.WorkPerSecond.ToString("0.0")+" files/s");if(p.Stages!=null)foreach(var stage in p.Stages)detail.AppendLine(stage.Stage+": "+stage.Files+" files · "+stage.Seconds.ToString("0.0")+"s · "+stage.MBPerSecond.ToString("0.0")+" MB/s");}if(entry.Report!=null)detail.AppendLine("A report is available below.");card.Details.Text=detail.ToString();
    card.Actions.Children.Clear();if(entry.Running&&entry.Cancel!=null)card.Actions.Children.Add(ActivityAction(entry.Canceled?"Canceling…":entry.CancelLabel??"Cancel",()=>{entry.Canceled=true;entry.Cancel();RenderActivity();}));
    if(entry.Running&&entry.Pause!=null)card.Actions.Children.Add(ActivityAction("Pause",()=>{entry.Pause();RenderActivity();}));
@@ -115,7 +118,7 @@ namespace AstroArchive {
   }
   void UpdateActivityProgress(ProgressInfo progress){if(currentActivity==null)return;currentActivity.Progress=progress;currentActivity.Status=currentActivity.Canceled?"Canceling after the current operation…":L("StatusLabel").Text;if(currentActivity.Canceled)progress.RemainingSeconds=null;ActivityCard card;if(activityCards.TryGetValue(currentActivity,out card)){
    // Keep focused action controls intact while progress changes.
-   card.Status.Text=currentActivity.Status;card.Rate.Text=ActivityRate(currentActivity);card.Bar.IsIndeterminate=!settings.ReducedMotion&&!progress.TotalKnown&&!progress.Finished;card.Bar.Value=Math.Max(0,Math.Min(1,progress.ProgressFraction));
+   card.Status.Text=currentActivity.Status;card.Rate.Text=ProcessParameters(currentActivity);card.Bar.IsIndeterminate=!settings.ReducedMotion&&!progress.TotalKnown&&!progress.Finished;card.Bar.Value=Math.Max(0,Math.Min(1,progress.ProgressFraction));
    if(progress.Stages!=null)card.Details.Text=(currentActivity.RepositoryRoot??"")+"\n"+L("RateLabel").ToolTip+(progress.CopyPhase?" · "+progress.Workers+" copy workers":"")+"\n"+string.Join("\n",progress.Stages.Select(s=>s.Stage+": "+s.Files+" files · "+s.Seconds.ToString("0.0")+"s · "+s.MBPerSecond.ToString("0.0")+" MB/s"));
   }}
   void RecordActivityReport(string title,string text){var entry=completionActivity??AddActivity(title);entry.ReportTitle=title;entry.Report=text;entry.NeedsReview=true;entry.Status="Completed with results to review.";NotifyActivity(entry);}

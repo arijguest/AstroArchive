@@ -754,12 +754,14 @@
     </ComboBox>
    </StackPanel>
   </Grid>
-  <Border Grid.Row="1" x:Name="UpdateNotice" Visibility="Collapsed" Background="{DynamicResource SurfaceAlt}" Padding="12" Margin="0,8,0,10" CornerRadius="6">
+  <StackPanel Grid.Row="1" x:Name="NotificationBanners">
+  <Border x:Name="UpdateNotice" Visibility="Collapsed" Background="{DynamicResource SurfaceAlt}" Padding="12" Margin="0,8,0,10" CornerRadius="6">
    <DockPanel>
     <Button DockPanel.Dock="Right" x:Name="DismissUpdateNotice" Content="Dismiss" />
     <TextBlock x:Name="UpdateNoticeText" TextWrapping="Wrap" VerticalAlignment="Center" />
    </DockPanel>
   </Border>
+  </StackPanel>
   <TabControl Grid.Row="2" x:Name="MainTabs" Focusable="False">
    <TabControl.Template><ControlTemplate TargetType="TabControl"><Grid KeyboardNavigation.TabNavigation="Local"><ContentPresenter x:Name="PART_SelectedContentHost" ContentSource="SelectedContent"/></Grid></ControlTemplate></TabControl.Template>
    <TabItem Header="Repository">

@@ -74,7 +74,8 @@ namespace AstroArchive {
       DisplayLibrary(presorted:background);WaitForSearches();PumpPopupLayout();
       var ordered=grid.Items.Cast<Frame>().ToList();var expected=RepositoryOrdering.Order(source,SearchSorts("FramesGrid"),System.Globalization.CultureInfo.CurrentCulture,allTargets,layout=="Session summaries",System.Threading.CancellationToken.None);
       if(!ordered.SequenceEqual(expected))throw new Exception("Repository sections differ between sorting paths: "+layout+", background "+background);
-      if(ordered.Take(7).Any(f=>f.Kind!="Video"))throw new Exception("Videos are not above subs in "+layout);
+      var videos=allTargets?ordered.Where(f=>!CaptureSky.IsCalibration(f)).Reverse().Take(7):ordered.Take(7);
+      if(videos.Any(f=>f.Kind!="Video"))throw new Exception("Videos are misplaced in "+layout);
       if(layout=="Session summaries"){
        var groups=((ListCollectionView)grid.ItemsSource).Groups.Cast<CollectionViewGroup>().ToList();
        if(groups.Take(7).Any(g=>!(g.Name is Frame)||((Frame)g.Name).Kind!="Video")||groups.FindIndex(g=>g.Name is SubframeSession)<7)throw new Exception("Rendered session groups appeared above video entries.");

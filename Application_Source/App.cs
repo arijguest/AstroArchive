@@ -95,7 +95,7 @@ namespace AstroArchive {
   void LiveFrame(Frame f){if(foregroundImportRecord!=null)ResumeStore.Completed(foregroundImportRecord,f);if(!string.IsNullOrEmpty(f.SourcePath))incoming[f.SourcePath]=f;}
   void BeginLive(bool scan){importLive=true;importMap.Clear();importRows=new ObservableCollection<Frame>();incoming.Clear();if(!scan&&plan!=null)foreach(var frame in plan.Frames){importMap[frame.SourcePath]=importRows.Count;importRows.Add(frame.Clone());}FilterImports();latestProgress=null;L("RateLabel").Text="Elapsed 00:00:00 · ETA estimating";}
   void LiveTick(bool flushAll=false){
-   TickRemoteImports();
+   TickRemoteImports();TickProcessSummaries();
    bool details=flushAll||(DateTime.UtcNow-lastMetrics).TotalSeconds>=1;var metrics=activeMetrics;var p=metrics==null?latestProgress:metrics.Progress(details);
    if(p!=null){
     L("StatusLabel").Text=(p.Stage==null?"":p.Stage+": ")+p.Text;var bar=(ProgressBar)Window.FindName("ProgressBar");bar.IsIndeterminate=!settings.ReducedMotion&&!p.TotalKnown&&!p.Finished;bar.Maximum=1;bar.Value=p.ProgressFraction;

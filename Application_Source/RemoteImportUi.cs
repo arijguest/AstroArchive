@@ -115,7 +115,7 @@ namespace AstroArchive {
    string cache=Path.Combine(Path.GetDirectoryName(config),"RemoteDownloads");if(remoteSessions.Count==0){T("SourceBox").Text=cache;plan=null;BeginLive(true);}SaveSettings();
    var record=recovery??RemoteImportRecord(request);record.State="Running";ResumeStore.Save(record);
    var session=new RemoteImportSession{Request=request,Record=record,Activity=AddActivity(record.Title,true)};
-   session.Activity.NetworkImport=true;session.Activity.RepositoryRoot=repo.Root;session.Activity.CancelLabel=request.Live?"Stop live import":"Cancel download";
+   session.Activity.LiveImport=request.Live;session.Activity.ProcessContext=request.Profile.Id+" · "+request.Connection.Host;session.Activity.NetworkImport=true;session.Activity.RepositoryRoot=repo.Root;session.Activity.CancelLabel=request.Live?"Stop live import":"Cancel download";
    session.Activity.Pause=()=>PauseRemoteImport(session);session.Activity.Cancel=()=>{session.Record.State="Canceled";session.Cancellation.Cancel();session.Activity.Canceled=true;session.Activity.Status="Stopping this telescope import; completed copies are retained…";};remoteSessions.Add(session);SetBusy(true);
    session.Work=RunRemoteSession(session,repo,cache,record.Workers,record.IgnoreFailed,record.IgnoreRaster,factory);return session.Work;
   }
@@ -130,7 +130,7 @@ namespace AstroArchive {
    catch(OperationCanceledException){canceled=true;status="Stopped. "+session.Imported+" imported; "+session.Duplicates+" already present. Completed copies retained; telescope originals unchanged.";}
    catch(Exception error){session.Activity.Failed=true;session.NeedsReview=true;session.Report=(session.Report??"")+error.Message;status="Import could not finish: "+error.Message;}
    finally{
-    LiveTick(true);session.Clock.Stop();var entry=session.Activity;entry.Running=false;entry.Cancel=null;entry.Pause=null;entry.Canceled=canceled;entry.Status=status;entry.DurationSeconds=session.Clock.Elapsed.TotalSeconds;entry.Progress=null;entry.NeedsReview=session.NeedsReview;entry.Report=session.Report;entry.ReportTitle="Telescope import report · "+request.Profile.Id;
+    LiveTick(true);session.Clock.Stop();var entry=session.Activity;entry.Running=false;entry.Cancel=null;entry.Pause=null;entry.Canceled=canceled;entry.Status=status;entry.DurationSeconds=session.Clock.Elapsed.TotalSeconds;entry.ProcessOutcome=session.Imported+" imported · "+session.Duplicates+" duplicates";if(entry.Progress!=null){entry.Progress.Finished=true;entry.Progress.ElapsedSeconds=entry.DurationSeconds.Value;entry.Progress.RemainingSeconds=null;}entry.NeedsReview=session.NeedsReview;entry.Report=session.Report;entry.ReportTitle="Telescope import report · "+request.Profile.Id;
     remoteSessions.Remove(session);session.Cancellation.Dispose();if(remoteSessions.Count==0){plan=new ImportPlan{Source=cache,Frames=importRows.ToList()};importLive=false;latestProgress=null;((ProgressBar)Window.FindName("ProgressBar")).IsIndeterminate=false;}
     FinishImportRecord(session.Record,entry,!entry.Failed&&!canceled,canceled);SetBusy(false);Refresh();L("StatusLabel").Text=remoteSessions.Count==0?entry.Status:remoteSessions.Count+" telescope imports underway. See Activity for each telescope.";NotifyActivity(entry);if(closing&&remoteSessions.Count==0)Window.Close();
    }
@@ -146,8 +146,9 @@ namespace AstroArchive {
    var estimates=new List<string>();var transfers=new List<ProgressInfo>();
    foreach(var session in remoteSessions){var p=session.Latest;if(p==null)continue;var metrics=p.LiveMetrics;if(metrics!=null)p=metrics.Progress(false);p.ElapsedSeconds=session.Clock.Elapsed.TotalSeconds;session.Activity.Progress=p;
     session.Activity.Status=session.Record.State=="Pausing"?"Pausing safely; verified downloads are retained…":session.Activity.Canceled?"Stopping this telescope import…":(p.Stage==null?"":p.Stage+": ")+p.Text;
+    session.Activity.ProcessOutcome=session.Imported+" imported · "+session.Duplicates+" duplicates";
     estimates.Add(session.Request.Profile.Id+": "+RemoteEstimateLabel(p));if(p.Stage!="Live import")transfers.Add(p);
-    ActivityCard card;if(activityCards.TryGetValue(session.Activity,out card)){card.Status.Text=session.Activity.Status;card.Rate.Text=ActivityRate(session.Activity);card.Bar.IsIndeterminate=!settings.ReducedMotion&&!p.TotalKnown&&!p.Finished;card.Bar.Value=Math.Max(0,Math.Min(1,p.ProgressFraction));}
+    ActivityCard card;if(activityCards.TryGetValue(session.Activity,out card)){card.Status.Text=session.Activity.Status;card.Rate.Text=ProcessParameters(session.Activity);card.Bar.IsIndeterminate=!settings.ReducedMotion&&!p.TotalKnown&&!p.Finished;card.Bar.Value=Math.Max(0,Math.Min(1,p.ProgressFraction));}
    }
    if(remoteSessions.Count>0){L("StatusLabel").Text=remoteSessions.Count+" telescope import"+(remoteSessions.Count==1?"":"s")+" underway. Connect to select more files or add another telescope; view Activity for progress.";L("RateLabel").Text=estimates.Count==0?"Preparing telescope imports…":string.Join(" · ",estimates);var bar=(ProgressBar)Window.FindName("ProgressBar");bar.IsIndeterminate=!settings.ReducedMotion&&transfers.Any(p=>!p.TotalKnown);bar.Maximum=1;bar.Value=transfers.Count==0?0:transfers.Average(p=>p.ProgressFraction);}
   }

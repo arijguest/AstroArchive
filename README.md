@@ -23,6 +23,10 @@ Imports verify copies and skip duplicates. Source originals are kept by default.
 Keep the entire repository, including `.astroarchive` and `Edited`, together when
 moving it. Use one running AstroArchive instance per repository.
 
+Compact dismissible process summaries show progress and completion parameters
+below the menu and in **Activity**. Live imports stay first; lists scroll when needed.
+Dismissing a summary keeps work running, and **Show dismissed** restores its controls.
+
 Updates appear in **Activity** and **Guide → About AstroArchive**.
 Use **Settings → Updates** to install them. [Installation, repair and policy blocks](docs/UPDATES.md).
 
