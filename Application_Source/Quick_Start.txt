@@ -1,5 +1,5 @@
 AstroArchive user guide
-Application 3.1.3; package 3.1.3.1.
+Application 3.1.4; package 3.1.4.1.
 Windows 10/11 x64; .NET Framework 4.8.
 
 START HERE
@@ -137,6 +137,15 @@ starts (or immediately when a bandwidth limit is set).
 Documents default to Dark, with a Light option next to Export format. The larger
 AstroArchive logo, midnight/blue/cyan colours, and concise headers/footers appear
 in previews and PNG, JPEG, PDF and SVG exports.
+Document layout defaults to Landscape. Social layouts rearrange the charts and
+branding for the selected frame, with these Social image presets:
+- Vertical 9:16: 1080 x 1920, for TikTok, Reels and Stories.
+- Portrait 4:5: 1080 x 1350, for Instagram feed posts.
+- Square 1:1: 1080 x 1080, for square posts.
+- Widescreen 16:9: 1920 x 1080, for video and presentations.
+- Pinterest 2:3: 1000 x 1500, for pins.
+Print and Screen resolutions remain available. Preview, PDF and SVG use the same
+selected layout. Social image presets apply to each page.
 Repository > Analytics offers six branded charts: Targets photographed, Imaging
 timeline, Time per target, Time per telescope, Filter mix and Exposure lengths.
 Select a chart to preview it, or All six charts for the combined preview. Scope
@@ -153,7 +162,9 @@ included. Timeline gaps remain zero; longer timelines use years or grouped perio
 Choose PNG or JPEG at 300 dpi for print or 150 dpi for screen. PDF keeps charts and
 lettering as vectors; SVG embeds the logo and keeps graphics scalable. Export chart
 saves the selected chart; Export all saves one document containing all six charts.
-PDF uses individual landscape pages; image/SVG exports arrange pages on one sheet.
+PDF uses individual pages in the selected layout; image/SVG exports arrange pages
+on one sheet. Tall collections stack pages vertically; square and wide collections
+use a grid.
 Very large collections may need 150 dpi, PDF or SVG. Open export folder appears
 after a successful save. Exports leave the archive and capture files unchanged.
 
@@ -382,8 +393,12 @@ an individual target, videos appear above grouped subs.
 Compact process summaries below the menu show active work and completion results.
 Live imports stay first, followed by other running jobs and completed processes.
 Summaries show elapsed time, ETA, counts and transfer details where available.
-Dismiss hides a summary without canceling work; Activity keeps its controls and
-Show dismissed restores hidden cards. Completion shows a fresh result summary.
+Dismiss hides the summary and its Activity card without canceling work.
+Show dismissed in Activity restores manually hidden cards and their controls.
+A manually dismissed process stays hidden when it completes. Other completed
+banners clear after clicks, typing or scrolling elsewhere in the app, or when
+another process completes; their entries remain in Activity. Reading notifications
+keeps the banners visible. Running and paused imports are not cleared automatically.
 Multiple processes scroll only when the available space is filled.
 Activity keeps completed entries, but only processes lasting more than five minutes
 raise an unread count. Opening Activity acknowledges the count; click outside to close.

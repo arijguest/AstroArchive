@@ -30,6 +30,13 @@ jobs:
           $output = Join-Path $PWD 'Application_Source\test-data\analytics-ui'
           $process = Start-Process -FilePath '.\Application_Source\dist\AstroArchive.exe' -ArgumentList @('--ui-test', $output, '--analytics-only', '--no-updates') -Wait -PassThru
           if ($process.ExitCode -ne 0) { throw "Analytics UI checks failed with exit code $($process.ExitCode)." }
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Decode MP4 and GIF exports
+        run: |
+          python -m pip install imageio-ffmpeg==0.6.0 Pillow==11.3.0
+          python Application_Source/check-analytics-media.py Application_Source/test-data/analytics-ui
       - uses: actions/upload-artifact@v4
         if: always()
         with:

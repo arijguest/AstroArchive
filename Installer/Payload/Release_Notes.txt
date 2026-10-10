@@ -1,13 +1,19 @@
-AstroArchive 3.1.3
-Package 3.1.3.1
+AstroArchive 3.1.4
+Package 3.1.4.1
 
-- Compact process summaries appear below the menu and in Activity, with progress,
-  telescope details, file counts, transfer speed, elapsed time and time estimates
-  where available. Completed processes retain their results and key parameters.
-- Live imports stay at the top of process lists. Multiple process summaries scroll
-  only when needed. Dismiss a summary without stopping its work; Show dismissed
-  restores summaries and their controls in Activity.
-- All Targets places videos below still images and above calibrations, including
-  grouped sessions and custom column sorting.
-- Search fields have rounded corners matching the other panels. The Connect over
-  network button matches the height of the saved telescope dropdown.
+- Refined all six Analytics charts with stronger typography, branded gradients,
+  rounded metric cards and cleaner, more compact social layouts. Dark remains
+  the default document theme, with a Light option across all export formats.
+- Headline cards always show the whole repository's light-frame integration,
+  frame count and target count, even when chart filters or continuation pages
+  show only part of the data. Stacks, videos and calibrations are not double counted.
+- Export PNG, JPEG, PDF or SVG in Landscape or social formats: 9:16, 4:5, 1:1,
+  16:9 and 2:3. Social image presets match each layout's native pixel dimensions.
+- Export animated H.264 MP4 or looping GIF charts. Export all creates one story
+  across all six reports, including continuation pages. Preview animated reveals
+  and Glide, Zoom or Dissolve transitions, adjust pacing and choose video size.
+  No separate encoder installation is required. Progress and remaining time are
+  shown; cancelling preserves previous exports and removes unfinished files.
+- Dismissing a process summary hides it from both the main banner and Activity
+  without stopping its work. Completed banners clear after further interaction
+  or another process completes, while their Activity history remains available.

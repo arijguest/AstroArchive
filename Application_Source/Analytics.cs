@@ -7,7 +7,7 @@ namespace AstroArchive {
  // Analytics measures individual light-frame integration, never stack exposure or
  // elapsed session time. This avoids counting the same acquisition twice.
  public sealed class AnalyticsOptions {
-  public string Telescope;public DateTime? From,To;public bool IncludeRejected;
+  public string Telescope;public DateTime? From,To;public bool IncludeRejected,UnknownTelescopeOnly;
   public string Caption="Repository";
  }
  public sealed class AnalyticsValue {
@@ -20,6 +20,8 @@ namespace AstroArchive {
  }
  public sealed class AnalyticsSnapshot {
   public int Captures,Targets,UnknownExposure,UnknownDate,ExcludedRejected,ExcludedUndated;
+  public int RepositoryCaptures,RepositoryTargets,RepositoryUnknownExposure;
+  public double RepositorySeconds;
   public double Seconds;public string Scope,DateRange;public DateTime GeneratedUtc;
   public List<AnalyticsReport> Reports;
  }
@@ -36,8 +38,13 @@ namespace AstroArchive {
   }
   public static AnalyticsSnapshot Build(IEnumerable<Frame> frames,AnalyticsOptions options){
    if(options.From.HasValue&&options.To.HasValue&&options.From.Value.Date>options.To.Value.Date)throw new ArgumentException("The start date must be on or before the end date.");
-   var lights=frames.Where(f=>f!=null&&f.Kind=="Light"&&f.Status!="Deleted"&&(string.IsNullOrEmpty(options.Telescope)||string.Equals(f.Telescope,options.Telescope,StringComparison.OrdinalIgnoreCase))).ToList();
+   var repository=frames.Where(f=>f!=null&&f.Kind=="Light"&&f.Status!="Deleted").ToList();
+   var lights=repository.Where(f=>options.UnknownTelescopeOnly?string.IsNullOrWhiteSpace(f.Telescope):string.IsNullOrEmpty(options.Telescope)||string.Equals(f.Telescope,options.Telescope,StringComparison.OrdinalIgnoreCase)).ToList();
    var result=new AnalyticsSnapshot{Scope=Label(options.Caption,"Repository"),GeneratedUtc=DateTime.UtcNow};
+   // Headline figures describe the whole repository, including rejected and
+   // undated lights. Filters affect chart data only. Never count stacks twice.
+   result.RepositoryCaptures=repository.Count;result.RepositoryTargets=repository.Select(f=>f.TargetLabel).Distinct(StringComparer.OrdinalIgnoreCase).Count();
+   result.RepositorySeconds=repository.Where(KnownExposure).Sum(f=>f.Exposure.Value);result.RepositoryUnknownExposure=repository.Count(f=>!KnownExposure(f));
    result.ExcludedRejected=options.IncludeRejected?0:lights.Count(f=>f.Rejected);if(!options.IncludeRejected)lights=lights.Where(f=>!f.Rejected).ToList();
    var dated=lights.Select(f=>new {Frame=f,Date=CaptureSessions.Date(f)}).ToList();
    bool bounded=options.From.HasValue||options.To.HasValue;
