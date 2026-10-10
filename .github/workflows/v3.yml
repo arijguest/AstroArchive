@@ -1,7 +1,7 @@
 name: V3 Windows validation
 on:
   push:
-    branches: [v3]
+    branches: [v3, temp]
   workflow_dispatch:
 permissions:
   contents: read

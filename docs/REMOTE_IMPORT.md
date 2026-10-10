@@ -46,9 +46,16 @@ watch only that folder, or use **All captures** to watch the full storage.
 
 Growing or incomplete new FITS files remain retryable. Advanced can include existing
 files, change the five-second polling interval and change the 2 MiB/s transfer
-limit. The main operation button becomes **Stop live import**. Completed imports
+limit. A **Live import underway** indicator beside **Connect over network…** opens
+Activity. Reconnect at any time to select additional files, or connect another
+telescope and start a separate live watcher or selected download. Use a distinct
+saved telescope name for each physical device. A device can have one live watcher;
+additional selected downloads use the same saved telescope. Completed imports
 and verified downloads survive cancellation; brief disconnects retry automatically.
-**Cancel** in Activity also stops the operation. Keep AstroArchive open and the PC
+**Stop live import** or **Cancel download** in Activity stops only that session.
+**Stop all telescope imports** on Import stops every network session. Closing the
+app cancels sessions and waits for them to finish before closing the archive.
+Keep AstroArchive open and the PC
 awake. Capture settings and exposure control remain in the telescope app.
 Polling is followed by downloading, checks and archiving, so five seconds is not
 a delivery guarantee. Lower the transfer limit if downloads affect capture/app
@@ -113,6 +120,14 @@ leave an older cached copy as evidence for the next import. Files then enter the
 existing scan, screening, duplicate detection and verified archive import pipeline.
 Telescope originals are retained. Space is needed for both downloads and archive
 copies. These checks do not establish an independent telescope-provided checksum.
+Different telescope caches transfer concurrently. Requests sharing a download
+cache wait for its current batch instead of failing with a file-lock error; the
+wait can be canceled independently. Archive scans and commits are serialized
+against the shared repository, so simultaneous selections and live captures use
+the latest hash-based duplicate checks. An overlapping capture is stored once,
+reported as already present, and marked complete by the live watcher. Verified
+cached downloads are reused. Repository switching and unrelated archive mutations
+remain unavailable until all network sessions finish.
 The cache is under `%LOCALAPPDATA%\AstroArchive\RemoteDownloads` and remains after
 an import, stop or uninstall. Stop imports and close AstroArchive before deleting
 it manually. Deleting cached downloads does not delete completed archive imports;
@@ -139,7 +154,7 @@ The transport checks need Python 3.12 on PATH with impacket 0.13.1 and pyftpdlib
 Loopback ports 24445 and 24421 must be free. The regular full
 application suite also runs the remote integration checks. `.github/workflows/v3.yml`
 builds and validates the application, installer/updater, SMB/FTP archive transfers
-and WPF dialog on Windows without publishing a release.
+and WPF dialog on Windows for `v3` and `temp` without publishing a release.
 
 SMBLibrary is a replaceable DLL with matching source and licence material under
 `Application_Source/Remote/lib`. Application and installer builds include it and

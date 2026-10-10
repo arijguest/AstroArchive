@@ -38,7 +38,11 @@ exposure already visible but still being written. Only new captures are imported
 Files must remain unchanged across two polls and through download; incomplete
 FITS are retried. Capture still runs in
 the telescope app; AstroArchive does not control exposures. Keep AstroArchive open
-and the PC awake. Use Stop live import on Import or Cancel in Activity to stop.
+and the PC awake. Connect over network stays available: choose additional files
+or start imports from other telescopes while live import runs. Each telescope
+needs its own saved name. A Live import underway indicator beside the connection
+button opens Activity, where each watcher has its own Stop live import control.
+Stop all telescope imports on Import stops every network watcher and download.
 Completed imports and verified local downloads remain; originals stay on the telescope.
 A short disconnect retries automatically. To catch files captured while AstroArchive
 was stopped, use Search all or Advanced > Also import existing captures.

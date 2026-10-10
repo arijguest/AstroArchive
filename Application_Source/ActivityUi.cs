@@ -12,7 +12,7 @@ using System.Windows.Threading;
 
 namespace AstroArchive {
  public sealed class ActivityEntry {
-  public string Title,Status,ReportTitle,Report,OutputPath,ActionLabel,RepositoryRoot;
+  public string Title,Status,ReportTitle,Report,OutputPath,ActionLabel,RepositoryRoot,CancelLabel;
   public DateTime StartedUtc=DateTime.UtcNow;
   public bool Running,Unread,NeedsReview,Failed,Canceled;
   public double? DurationSeconds;
@@ -28,7 +28,7 @@ namespace AstroArchive {
   string nextActivityTitle;
   bool activityOpeningReport,activityDisposed;
   sealed class ActivityCard {public TextBlock Title,Status,Rate,Details;public ProgressBar Bar;public WrapPanel Actions;}
-  bool RepositoryOperationBlocked {get{return closing||cancel!=null||dumpChecking||releaseInstalling||usbImportPicking||sourceRemovalConfirming;}}
+  bool RepositoryOperationBlocked {get{return NetworkImportBlocked||remoteSessions.Count>0;}}
   void InitializeActivity(){
    var root=(Grid)Window.Content;
    var menu=(Menu)Window.FindName("MainMenu");
@@ -105,7 +105,7 @@ namespace AstroArchive {
   void UpdateActivityCard(ActivityEntry entry,ActivityCard card){
    card.Title.Text=entry.Title;card.Status.Text=entry.Status;card.Rate.Text=ActivityRate(entry);var p=entry.Progress;card.Bar.Visibility=entry.Running||p!=null?Visibility.Visible:Visibility.Collapsed;card.Bar.IsIndeterminate=entry.Running&&!settings.ReducedMotion&&(p==null||!p.TotalKnown&&!p.Finished);card.Bar.Value=p==null?0:Math.Max(0,Math.Min(1,p.ProgressFraction));
    var detail=new StringBuilder(entry.RepositoryRoot==null?"":"Repository: "+entry.RepositoryRoot+"\n");if(p!=null){if(p.Activity!=null)detail.AppendLine(p.Activity);if(p.CopyPhase)detail.AppendLine(p.Workers+" copy workers · "+ImportWorkflow.Size(p.BytesDone)+" / "+ImportWorkflow.Size(p.BytesTotal)+" · "+(p.EffectiveBytesPerSecond/1000000.0).ToString("0.0")+" MB/s");else detail.AppendLine(p.WorkPerSecond.ToString("0.0")+" files/s");if(p.Stages!=null)foreach(var stage in p.Stages)detail.AppendLine(stage.Stage+": "+stage.Files+" files · "+stage.Seconds.ToString("0.0")+"s · "+stage.MBPerSecond.ToString("0.0")+" MB/s");}if(entry.Report!=null)detail.AppendLine("A report is available below.");card.Details.Text=detail.ToString();
-   card.Actions.Children.Clear();if(entry.Running&&entry.Cancel!=null)card.Actions.Children.Add(ActivityAction(entry.Canceled?"Canceling…":"Cancel",()=>{entry.Canceled=true;entry.Cancel();RenderActivity();}));
+   card.Actions.Children.Clear();if(entry.Running&&entry.Cancel!=null)card.Actions.Children.Add(ActivityAction(entry.Canceled?"Canceling…":entry.CancelLabel??"Cancel",()=>{entry.Canceled=true;entry.Cancel();RenderActivity();}));
    if(entry.Review!=null){var review=ActivityAction(entry.ActionLabel??"Review results",()=>{if(RepositoryOperationBlocked)return;var action=entry.Review;entry.Review=null;entry.NeedsReview=false;entry.Unread=false;var previous=reviewingActivity;reviewingActivity=entry;try{action();if(entry.NeedsReview||entry.ActionLabel=="View release")entry.Review=action;}catch{entry.Review=action;entry.NeedsReview=true;throw;}finally{reviewingActivity=previous;RenderActivity();}});review.IsEnabled=!RepositoryOperationBlocked;review.ToolTip=review.IsEnabled?null:"Available when the current operation finishes.";card.Actions.Children.Add(review);}
    if(entry.Report!=null)card.Actions.Children.Add(ActivityAction("View report",()=>{activityOpeningReport=true;try{ShowReport(entry.ReportTitle??entry.Title,entry.Report);entry.Unread=false;if(entry.Review==null)entry.NeedsReview=false;}finally{activityOpeningReport=false;RenderActivity();}}));
    if(entry.OutputPath!=null)card.Actions.Children.Add(ActivityAction("Open folder",()=>OpenFolder(entry.OutputPath)));if(!entry.Running&&entry.NeedsReview)card.Actions.Children.Add(ActivityAction("Dismiss",()=>{entry.NeedsReview=false;entry.Unread=false;entry.Review=null;RenderActivity();}));

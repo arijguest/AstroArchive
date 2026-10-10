@@ -23,6 +23,50 @@ namespace AstroArchive {
    Repository.LocalIndexBase=Path.Combine(root,"native-indexes");using(var repo=new Repository(Path.Combine(root,ftp?"ftp-archive":"smb-archive"))){var profile=new TelescopeProfile{Id=ftp?"Network DWARF":"Network Seestar",Model=ftp?"Dwarf 3":"Seestar S50",Camera="Auto"};var result=RemoteArchiveImport.Run(repo,profile,c,chosen,Path.Combine(root,"native-cache"),1,CancellationToken.None,p=>{});Check(result.Archive.Import.Imported==1,"real "+(ftp?"FTP":"SMB")+" download imports into the archive");var frame=repo.All().Single();Check(frame.Hash==Util.Hash(file,CancellationToken.None)&&Util.Hash(repo.FilePath(frame),CancellationToken.None)==frame.Hash,"real transport preserves exact original and archived bytes");Check(frame.AssociatedFiles!=null&&frame.AssociatedFiles.Any(a=>!string.IsNullOrEmpty(a.RelativePath)),"real transport preserves adjacent session metadata");var repeat=RemoteArchiveImport.Run(repo,profile,c,chosen,Path.Combine(root,"native-cache"),1,CancellationToken.None,p=>{});Check(repeat.Downloads.Reused==1&&repo.All().Count==1,"real transport retry reuses verified bytes without duplicate archive entries");Check(File.Exists(file)&&repo.Verify(CancellationToken.None,p=>{})==0,"real read-only transport leaves the source unchanged");}
    Console.WriteLine("Native "+(ftp?"FTP":"SMB")+" archive integration passed.");
   }
+  static void ConcurrentImports(string root,RemoteConnection firstConnection){
+   string firstRoot=Path.Combine(root,"parallel-one"),secondRoot=Path.Combine(root,"parallel-two"),firstFile=Path.Combine(firstRoot,"MyWorks","Light_parallel.fit"),secondFile=Path.Combine(secondRoot,"MyWorks","Light_parallel.fit");Fits(firstFile,1700);Directory.CreateDirectory(Path.GetDirectoryName(secondFile));File.Copy(firstFile,secondFile);
+   var secondConnection=Util.Deserialize<RemoteConnection>(Util.Serialize(firstConnection));secondConnection.Host="127.0.0.2";secondConnection.Folder=@"\\127.0.0.2\EMMC Images";
+   var firstProfile=new TelescopeProfile{Id="Parallel S50",Model="Seestar S50",Camera="Auto"};var secondProfile=new TelescopeProfile{Id="Parallel S30",Model="Seestar S30",Camera="Auto"};string cache=Path.Combine(root,"parallel-cache");
+   Func<RemoteConnection,ISource> factory=c=>new Fixture(c.Host==firstConnection.Host?firstRoot:secondRoot,c);
+   List<Entry> first,second;using(var source=factory(firstConnection))first=RemoteCaptureCatalog.Search(source,firstConnection,firstConnection.Folder,CancellationToken.None);using(var source=factory(secondConnection))second=RemoteCaptureCatalog.Search(source,secondConnection,secondConnection.Folder,CancellationToken.None);
+   using(var repo=new Repository(Path.Combine(root,"parallel-archive")))using(var opened=new CountdownEvent(2))using(var release=new ManualResetEvent(false)){
+    Func<RemoteConnection,ISource> blocked=c=>new Fixture(c.Host==firstConnection.Host?firstRoot:secondRoot,c,path=>{if(path.EndsWith(".fit")){opened.Signal();if(!release.WaitOne(10000))throw new IOException("Parallel downloads did not overlap");}});
+    var a=Task.Run(()=>RemoteArchiveImport.Run(repo,firstProfile,firstConnection,first,cache,1,CancellationToken.None,p=>{},sourceFactory:blocked));
+    var b=Task.Run(()=>RemoteArchiveImport.Run(repo,secondProfile,secondConnection,second,cache,1,CancellationToken.None,p=>{},sourceFactory:blocked));
+    bool overlap=opened.Wait(8000);release.Set();Task.WaitAll(a,b);Check(overlap,"different telescopes download simultaneously");
+    Check(a.Result.Archive.Import.Imported+b.Result.Archive.Import.Imported==1&&a.Result.Archive.Import.Duplicates+b.Result.Archive.Import.Duplicates==1&&repo.All().Count==1,"simultaneous identical captures commit once and report the other as a duplicate");
+    Fits(secondFile,1800);using(var source=factory(secondConnection))second=RemoteCaptureCatalog.Search(source,secondConnection,secondConnection.Folder,CancellationToken.None);
+    var unique=RemoteArchiveImport.Run(repo,secondProfile,secondConnection,second,cache,1,CancellationToken.None,p=>{},sourceFactory:factory);
+    Check(unique.Archive.Import.Imported==1&&repo.All().Any(f=>f.Telescope==secondProfile.Id)&&repo.Verify(CancellationToken.None,p=>{})==0,"distinct telescope captures retain their identity and verified archive bytes");
+   }
+   // Force two selections to overlap on one cache, then cancel only the waiter.
+   using(var repo=new Repository(Path.Combine(root,"queue-archive")))using(var transferStarted=new ManualResetEvent(false))using(var release=new ManualResetEvent(false))using(var queued=new ManualResetEvent(false))using(var canceled=new CancellationTokenSource()){
+    string queueCache=Path.Combine(root,"queue-cache");int opens=0;Func<RemoteConnection,ISource> blocked=c=>new Fixture(firstRoot,c,path=>{Interlocked.Increment(ref opens);transferStarted.Set();if(!release.WaitOne(10000))throw new IOException("Fixture transfer timed out");});
+    var a=Task.Run(()=>RemoteArchiveImport.Run(repo,firstProfile,firstConnection,first,queueCache,1,CancellationToken.None,p=>{},sourceFactory:blocked));
+    Check(transferStarted.WaitOne(8000),"first selected download holds its cache lease");
+    var b=Task.Run(()=>RemoteArchiveImport.Run(repo,firstProfile,firstConnection,first,queueCache,1,canceled.Token,p=>{if(p.Stage=="Waiting for telescope download")queued.Set();},sourceFactory:factory));
+    try{Check(queued.WaitOne(8000),"overlapping selections wait without a download-lock error");canceled.Cancel();try{b.GetAwaiter().GetResult();throw new Exception("Queued import ignored cancellation");}catch(OperationCanceledException){Check(!a.IsCompleted,"canceling a queued selection leaves the active download running");}}
+    finally{release.Set();a.GetAwaiter().GetResult();}
+    var repeat=RemoteArchiveImport.Run(repo,firstProfile,firstConnection,first,queueCache,1,CancellationToken.None,p=>{},sourceFactory:factory);
+    Check(opens==1&&repeat.Downloads.Reused==1&&repeat.Archive.Import.Duplicates==1&&repo.All().Count==1,"overlapping retry reuses verified bytes and never duplicates the archive");
+    Check(!Directory.EnumerateFiles(queueCache,"*.partial",SearchOption.AllDirectories).Any()&&repo.Verify(CancellationToken.None,p=>{})==0,"canceled cache waiter leaves no partials or archive corruption");
+   }
+   using(var repo=new Repository(Path.Combine(root,"live-selection-archive")))using(var stopped=new CancellationTokenSource())using(var baseline=new ManualResetEvent(false))using(var batchDone=new ManualResetEvent(false)){
+    string liveCache=Path.Combine(root,"live-selection-cache");int liveImported=0,liveDuplicates=0;
+    var watching=Task.Run(()=>RemoteLiveImport.Run(repo,firstProfile,firstConnection,liveCache,1,stopped.Token,p=>{if(p.Stage=="Live import")baseline.Set();},null,null,false,false,factory,r=>{Interlocked.Add(ref liveImported,r.Archive.Import.Imported);Interlocked.Add(ref liveDuplicates,r.Archive.Import.Duplicates);batchDone.Set();}));
+    try{
+     Check(baseline.WaitOne(8000),"live watcher is running before additional selections");
+     var selected=RemoteArchiveImport.Run(repo,firstProfile,firstConnection,first,liveCache,1,CancellationToken.None,p=>{},sourceFactory:factory);
+     Check(selected.Archive.Import.Imported==1&&!watching.IsCompleted,"existing captures can be downloaded without stopping live import");
+     string fresh=Path.Combine(firstRoot,"MyWorks","Light_manual_then_live.fit");Fits(fresh,1900);
+     List<Entry> freshEntries;using(var source=factory(firstConnection))freshEntries=RemoteCaptureCatalog.Search(source,firstConnection,firstConnection.Folder,CancellationToken.None).Where(e=>e.Name==Path.GetFileName(fresh)).ToList();
+     var manual=RemoteArchiveImport.Run(repo,firstProfile,firstConnection,freshEntries,liveCache,1,CancellationToken.None,p=>{},sourceFactory:factory);
+     Check(batchDone.WaitOne(12000),"live watcher processes a capture also selected manually");
+     Check(manual.Archive.Import.Imported+liveImported==1&&manual.Archive.Import.Duplicates+liveDuplicates==1&&repo.All().Count==2,"manual and live overlap produce exactly one capture with duplicate accounting");
+    }finally{stopped.Cancel();try{watching.GetAwaiter().GetResult();}catch(OperationCanceledException){}}
+    Check(repo.Verify(CancellationToken.None,p=>{})==0&&File.Exists(firstFile),"stopping live import retains selected downloads and original telescope files");
+   }
+  }
   public static void Run(string root){
    string previousIndex=Repository.LocalIndexBase;try{checks=0;root=Path.Combine(root,"remote-integration");Directory.CreateDirectory(root);Repository.LocalIndexBase=Path.Combine(root,"indexes");var c=new RemoteConnection{Kind="Seestar SMB",Host="127.0.0.1",Folder=@"\\127.0.0.1\EMMC Images",LimitMB=0,IncludeExisting=false,PollSeconds=2};string storage=Path.Combine(root,"storage"),cache=Path.Combine(root,"cache"),one=Path.Combine(storage,"MyWorks","M31_sub","Light_M31_0001.fit");Fits(one,1000);File.WriteAllText(Path.Combine(Path.GetDirectoryName(one),"session.json"),"{\"target\":\"M31\"}");File.WriteAllText(Path.Combine(storage,"shotsInfo.json"),"{\"targetName\":\"M31\"}");Directory.CreateDirectory(Path.Combine(storage,".astroarchive"));Fits(Path.Combine(storage,".astroarchive","ignored.fit"),2000);
    Check(RemoteCapturePaths.Relative(c,c.Folder+@"\MyWorks\M31_sub\Light_M31_0001.fit")==Path.Combine("MyWorks","M31_sub","Light_M31_0001.fit"),"capture layout stays relative to telescope storage");Reject(()=>RemoteCapturePaths.Relative(c,@"\\127.0.0.2\EMMC Images\escape.fit"),"another telescope cannot escape selected storage");Reject(()=>RemoteCapturePaths.Relative(c,c.Folder+@"\..\escape.fit"),"remote traversal is rejected before any local write");
@@ -43,6 +87,7 @@ namespace AstroArchive {
     try{Check(baselineSeen.WaitOne(10000),"live importer establishes its baseline");string next=Path.Combine(liveRoot,"MyWorks","Light_M31_live.fit");Fits(next,1300);byte[] complete=File.ReadAllBytes(next);File.WriteAllBytes(next,complete.Take(2880).ToArray());Check(!imported.WaitOne(6500),"live import does not archive an exposure while it is incomplete");File.WriteAllBytes(next,complete);Check(imported.WaitOne(20000),"live importer recovers from disconnect and archives a new capture");}finally{stopped.Cancel();try{task.GetAwaiter().GetResult();}catch(OperationCanceledException){}}
     Check(retries>0&&repo.All().Count==1&&File.Exists(baseline),"live reconnect and stop retain exactly the new archive capture and originals");
    }
+   ConcurrentImports(root,c);
    Console.WriteLine(checks+" remote integration checks passed.");}finally{Repository.LocalIndexBase=previousIndex;}
   }
  }
