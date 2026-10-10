@@ -1,10 +1,10 @@
 # AstroArchive for Linux — preview 1
 
-This is the Linux x64 desktop release based on AstroArchive 3.1.1. It includes its
+This is the Linux x64 desktop release based on AstroArchive 3.1.3. It includes its
 .NET 10 runtime. Supported targets are Ubuntu 22.04/24.04 x64 and Debian 12/13 x64
 with a graphical desktop. Wayland desktops currently use XWayland.
 
-Install the Debian package with `sudo apt install ./astroarchive_3.1.1-preview.1_amd64.deb`,
+Install the Debian package with `sudo apt install ./astroarchive_3.1.3-preview.1_amd64.deb`,
 or extract the tarball and run `./AstroArchive`. Check `SHA256SUMS` before installing.
 The tarball also needs the distribution's ICU, OpenSSL 3, fontconfig and X11 libraries.
 Zstandard and compressed FITS previews use optional distribution libzstd/libcfitsio
@@ -14,7 +14,7 @@ packages. Unavailable codecs report their limitation; original files remain expo
 
 Open the same archive folder on either platform. Capture files, the SQLite schema,
 Microsoft JSON dates, capture paths, sidecars and Edited project format stay compatible
-with Windows 3.1.1. Linux translates Windows separators in memory and writes the
+with Windows 3.1.1–3.1.3. Linux translates Windows separators in memory and writes the
 existing Windows separator convention to disk. Opening on Linux rotates the existing
 archive cache identity before writes so Windows reloads the drive's latest index.
 Keep the entire archive folder, including `.astroarchive`, on the drive.
@@ -62,8 +62,8 @@ Install .NET SDK 10.0.401 and the desktop libraries, then from the repository ro
 dotnet run --project CrossPlatform/EngineTests -- /tmp/astroarchive-engine-unique
 dotnet test CrossPlatform/Desktop.Tests
 bash scripts/build-linux.sh
-tar -xzf linux-artifacts/AstroArchive-3.1.1-preview.1-linux-x64.tar.gz -C /tmp
-xvfb-run -a /tmp/AstroArchive-3.1.1-preview.1-linux-x64/AstroArchive --ui-smoke /tmp/astroarchive-ui-unique
+tar -xzf linux-artifacts/AstroArchive-3.1.3-preview.1-linux-x64.tar.gz -C /tmp
+xvfb-run -a /tmp/AstroArchive-3.1.3-preview.1-linux-x64/AstroArchive --ui-smoke /tmp/astroarchive-ui-unique
 ```
 
 `AstroArchive --self-test /tmp/unique-directory` tests the installed executable's
