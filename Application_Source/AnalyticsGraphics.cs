@@ -12,10 +12,12 @@ namespace AstroArchive {
  }
  public sealed class AnalyticsPage {
   public const double Width=1200,Height=800;
+  public double CanvasWidth=Width,CanvasHeight=Height;
+  public bool Portrait {get{return CanvasHeight>CanvasWidth;}}
   public string Title,Background="#0C1220";public List<AnalyticsMark> Marks=new List<AnalyticsMark>();
  }
  // One scene supplies preview, raster, SVG and PDF so exported layouts agree.
- public static class AnalyticsGraphics {
+ public static partial class AnalyticsGraphics {
   public const string Ink="#202B43",Muted="#5F6D86",Accent="#5951D6";
   static readonly string[] Colours={"#5951D6","#008477","#CB5078","#B37608","#427AB5","#8756A5","#6B813A","#64748B"};
   static void Box(AnalyticsPage p,double x,double y,double w,double h,string colour){p.Marks.Add(new AnalyticsMark{Kind="rect",X=x,Y=y,Width=w,Height=h,Fill=colour});}
@@ -23,17 +25,18 @@ namespace AstroArchive {
   static string Short(string text,int length){if(text.Length<=length)return text;int count=length-1;if(count>0&&char.IsHighSurrogate(text[count-1]))count--;return text.Substring(0,count)+"…";}
   static double TextWidth(string text,double size){return text.Sum(c=>char.IsSurrogate(c)?.6:c>=0x3000?1:"MWmw@%".IndexOf(c)>=0?.95:"ilI.,:;!| '".IndexOf(c)>=0?.3:char.IsUpper(c)?.75:.6)*size;}
   static string Fit(string text,double width,double size){int length=text.Length;while(length>1&&TextWidth(Short(text,length),size)>width)length--;return Short(text,length);}
-  static void Lines(AnalyticsPage p,string text,double x,double y,int characters,double size,string colour,int limit,double width=0){
-   var remaining=text??"";int line=0;while(remaining.Length>0&&line<limit){int count=Math.Min(characters,remaining.Length);if(width>0)while(count>1&&TextWidth(remaining.Substring(0,count),size)>width)count--;if(count<remaining.Length){int space=remaining.LastIndexOf(' ',count-1,count);if(space>count/2)count=space;if(count>0&&char.IsHighSurrogate(remaining[count-1]))count--;}string part=remaining.Substring(0,count);remaining=remaining.Substring(count).TrimStart();if(line==limit-1&&remaining.Length>0){part=Short(part+" "+remaining,characters);if(width>0)part=Fit(part,width,size);}Text(p,part,x,y+line*(size+5),size,colour,false,text);line++;}
+  static void Lines(AnalyticsPage p,string text,double x,double y,int characters,double size,string colour,int limit,double width=0,bool bold=false){
+   var remaining=text??"";int line=0;while(remaining.Length>0&&line<limit){int count=Math.Min(characters,remaining.Length);if(width>0)while(count>1&&TextWidth(remaining.Substring(0,count),size)>width)count--;if(count<remaining.Length){int space=remaining.LastIndexOf(' ',count-1,count);if(space>count/2)count=space;if(count>0&&char.IsHighSurrogate(remaining[count-1]))count--;}string part=remaining.Substring(0,count);remaining=remaining.Substring(count).TrimStart();if(line==limit-1&&remaining.Length>0){part=Short(part+" "+remaining,characters);if(width>0)part=Fit(part,width,size);}Text(p,part,x,y+line*(size+5),size,colour,bold,text);line++;}
   }
-  public static AnalyticsPage Page(AnalyticsSnapshot data,int index,bool dark=true){
-   return Page(data,index,0,1,data.Reports[index].Style=="bars"?data.Reports[index].Values.Take(8).ToList():ArchiveAnalytics.Compact(data.Reports[index].Values,8),dark);
+  public static AnalyticsPage Page(AnalyticsSnapshot data,int index,bool dark=true,bool portrait=false){
+   return Page(data,index,0,1,data.Reports[index].Style=="bars"?data.Reports[index].Values.Take(8).ToList():ArchiveAnalytics.Compact(data.Reports[index].Values,8),dark,portrait);
   }
-  public static List<AnalyticsPage> Pages(AnalyticsSnapshot data,int index,bool dark=true){
+  public static List<AnalyticsPage> Pages(AnalyticsSnapshot data,int index,bool dark=true,bool portrait=false){
    var report=data.Reports[index];int count=report.Style=="bars"?Math.Max(1,(int)Math.Ceiling(report.Values.Count/8.0)):1;
-   return Enumerable.Range(0,count).Select(part=>Page(data,index,part,count,report.Style=="bars"?report.Values.Skip(part*8).Take(8).ToList():ArchiveAnalytics.Compact(report.Values,8),dark)).ToList();
+   return Enumerable.Range(0,count).Select(part=>Page(data,index,part,count,report.Style=="bars"?report.Values.Skip(part*8).Take(8).ToList():ArchiveAnalytics.Compact(report.Values,8),dark,portrait)).ToList();
   }
-  static AnalyticsPage Page(AnalyticsSnapshot data,int index,int part,int parts,List<AnalyticsValue> values,bool dark){
+  static AnalyticsPage Page(AnalyticsSnapshot data,int index,int part,int parts,List<AnalyticsValue> values,bool dark,bool portrait){
+   if(portrait)return PortraitPage(data,index,part,parts,values,dark);
    var report=data.Reports[index];var p=new AnalyticsPage{Title=report.Title,Background=dark?"#0C1220":"#FFFFFF"};
    Box(p,0,0,1200,800,"#FFFFFF");Box(p,0,0,1200,8,Accent);
    p.Marks.Add(new AnalyticsMark{Kind="logo",X=56,Y=24,Width=70,Height=70});
@@ -56,13 +59,15 @@ namespace AstroArchive {
    Lines(p,data.Scope,60,752,108,11,Muted,1,820);
    Text(p,data.DateRange,60,775,10,Muted);
    Text(p,"astroarchive.arijguest.com",910,762,11,Accent);
+   ApplyTheme(p,dark);return p;
+  }
+  static void ApplyTheme(AnalyticsPage p,bool dark){
    if(dark){
     var colours=new Dictionary<string,string>{{"#FFFFFF",p.Background},{Ink,"#E9EEF8"},{Muted,"#A6B4CC"},{"#F5F7FC","#151E2E"},{"#DCE2EF","#34415A"},{"#E8ECF4","#28354B"}};
     string[] branded={"#90B8FF","#55DFEA","#C19AFF","#F0C36A","#4F9BFA","#ED9ACB","#9DD7B0","#A6B4CC"};
     for(int i=0;i<Colours.Length;i++)colours[Colours[i]]=branded[i];
     foreach(var mark in p.Marks){string replacement;if(mark.Fill!=null&&colours.TryGetValue(mark.Fill,out replacement))mark.Fill=replacement;}
    }
-   return p;
   }
   static void Donut(AnalyticsPage p,List<AnalyticsValue> values,double total,string unit){
    double angle=-Math.PI/2;int colour=0;foreach(var value in values){
@@ -106,7 +111,7 @@ namespace AstroArchive {
    Text(p,unit=="h"?"Integration (hours)":"Light frames",60,307,12,Muted);
   }
   public static string Svg(IList<AnalyticsPage> pages,string logoBase64){
-   bool all=pages.Count>1;double width=all?AnalyticsPage.Width*2:AnalyticsPage.Width,height=all?AnalyticsPage.Height*Math.Ceiling(pages.Count/2.0):AnalyticsPage.Height;
+   bool all=pages.Count>1;int columns=SheetColumns(pages);double width,height;SheetSize(pages,out width,out height);
    var b=new StringBuilder();using(var writer=XmlWriter.Create(b,new XmlWriterSettings{OmitXmlDeclaration=true,Indent=true})){
     writer.WriteStartElement("svg","http://www.w3.org/2000/svg");writer.WriteAttributeString("width",N(width));writer.WriteAttributeString("height",N(height));writer.WriteAttributeString("viewBox","0 0 "+N(width)+" "+N(height));
     writer.WriteElementString("title",all?"AstroArchive · Analytics collection":pages[0].Title);
@@ -114,7 +119,7 @@ namespace AstroArchive {
     writer.WriteStartElement("defs");writer.WriteStartElement("image");writer.WriteAttributeString("id","astroarchive-logo");writer.WriteAttributeString("width","1");writer.WriteAttributeString("height","1");writer.WriteAttributeString("href","http://www.w3.org/1999/xlink","data:image/png;base64,"+logoBase64);writer.WriteEndElement();writer.WriteEndElement();
     writer.WriteStartElement("rect");writer.WriteAttributeString("width",N(width));writer.WriteAttributeString("height",N(height));writer.WriteAttributeString("fill",pages[0].Background);writer.WriteEndElement();
     for(int i=0;i<pages.Count;i++){
-     writer.WriteStartElement("g");writer.WriteAttributeString("transform","translate("+N(all?i%2*AnalyticsPage.Width:0)+","+N(all?i/2*AnalyticsPage.Height:0)+")");
+     writer.WriteStartElement("g");writer.WriteAttributeString("transform","translate("+N(i%columns*pages[i].CanvasWidth)+","+N(i/columns*pages[i].CanvasHeight)+")");
      foreach(var mark in pages[i].Marks){
       if(mark.Kind=="logo"){writer.WriteStartElement("use");writer.WriteAttributeString("href","http://www.w3.org/1999/xlink","#astroarchive-logo");writer.WriteAttributeString("transform","translate("+N(mark.X)+","+N(mark.Y)+") scale("+N(mark.Width)+","+N(mark.Height)+")");writer.WriteEndElement();continue;}
       string kind=mark.Kind;writer.WriteStartElement(kind);

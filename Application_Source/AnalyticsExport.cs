@@ -20,10 +20,10 @@ namespace AstroArchive {
   static FormattedText Text(AnalyticsMark mark){return new FormattedText(mark.Text,CultureInfo.InvariantCulture,FlowDirection.LeftToRight,new Typeface(new FontFamily("Arial"),FontStyles.Normal,mark.Bold?FontWeights.Bold:FontWeights.Normal,FontStretches.Normal),mark.Size,Brush(mark.Fill),1.0);}
   static Geometry Polygon(double[] points){var geometry=new StreamGeometry();using(var context=geometry.Open()){context.BeginFigure(new Point(points[0],points[1]),true,true);context.PolyLineTo(Enumerable.Range(1,points.Length/2-1).Select(i=>new Point(points[i*2],points[i*2+1])).ToList(),true,false);}geometry.Freeze();return geometry;}
   static void Draw(DrawingContext context,IList<AnalyticsPage> pages){
-   var logo=Logo();bool all=pages.Count>1;
-   context.DrawRectangle(Brush(pages[0].Background),null,new Rect(0,0,AnalyticsPage.Width*(all?2:1),AnalyticsPage.Height*(all?Math.Ceiling(pages.Count/2.0):1)));
+   var logo=Logo();int columns=AnalyticsGraphics.SheetColumns(pages);double width,height;AnalyticsGraphics.SheetSize(pages,out width,out height);
+   context.DrawRectangle(Brush(pages[0].Background),null,new Rect(0,0,width,height));
    for(int i=0;i<pages.Count;i++){
-    context.PushTransform(new TranslateTransform(all?i%2*AnalyticsPage.Width:0,all?i/2*AnalyticsPage.Height:0));
+    context.PushTransform(new TranslateTransform(i%columns*pages[i].CanvasWidth,i/columns*pages[i].CanvasHeight));
     foreach(var mark in pages[i].Marks){
      if(mark.Kind=="rect")context.DrawRectangle(Brush(mark.Fill),null,new Rect(mark.X,mark.Y,mark.Width,mark.Height));
      else if(mark.Kind=="polygon")context.DrawGeometry(Brush(mark.Fill),null,Polygon(mark.Points));
@@ -34,9 +34,9 @@ namespace AstroArchive {
   }
   public static DrawingImage Preview(IList<AnalyticsPage> pages){var drawing=new DrawingGroup();using(var context=drawing.Open())Draw(context,pages);drawing.Freeze();var image=new DrawingImage(drawing);image.Freeze();return image;}
   static BitmapSource Raster(IList<AnalyticsPage> pages,int dpi){
-   bool all=pages.Count>1;double width=AnalyticsPage.Width*(all?2:1),height=AnalyticsPage.Height*(all?Math.Ceiling(pages.Count/2.0):1);
+   double width,height;AnalyticsGraphics.SheetSize(pages,out width,out height);
    double pixelWidth=Math.Ceiling(width*dpi/96.0),pixelHeight=Math.Ceiling(height*dpi/96.0);
-   if(pixelWidth*pixelHeight>80000000||pixelWidth>32767||pixelHeight>32767)throw new InvalidOperationException("This collection is too large for one image at this resolution. Choose 150 dpi, or export as PDF or SVG.");
+   if(pixelWidth*pixelHeight>80000000||pixelWidth>32767||pixelHeight>32767)throw new InvalidOperationException("This collection is too large for one image at this resolution. Choose a lower image resolution, or export as PDF or SVG.");
    var visual=new DrawingVisual();using(var context=visual.RenderOpen())Draw(context,pages);
    var bitmap=new RenderTargetBitmap((int)pixelWidth,(int)pixelHeight,dpi,dpi,PixelFormats.Pbgra32);bitmap.Render(visual);bitmap.Freeze();return bitmap;
   }

@@ -27,6 +27,13 @@ namespace AstroArchive {
        choices.SelectedIndex=6;PumpPopupLayout();if(!PopupChildren<TextBlock>(dialog).Any(t=>t.Text=="All six charts · Combined preview"))throw new Exception("Combined preview is unavailable.");
        var documentTheme=PopupChildren<ComboBox>(dialog).Single(c=>AutomationProperties.GetName(c)=="Document theme");if(Convert.ToString(documentTheme.SelectedItem)!="Dark")throw new Exception("Analytics document theme did not default to Dark independently of application theme.");
        CapturePopup(dialog,Path.Combine(output,"AstroArchive_Analytics_"+mode+"_DarkDocument.png"));var darkPreview=image.Source;documentTheme.SelectedIndex=1;PumpPopupLayout();if(image.Source==darkPreview)throw new Exception("Light document selection did not redraw the preview.");CapturePopup(dialog,Path.Combine(output,"AstroArchive_Analytics_"+mode+"_LightDocument.png"));documentTheme.SelectedIndex=0;
+       var layout=PopupChildren<ComboBox>(dialog).Single(c=>AutomationProperties.GetName(c)=="Document layout");var resolution=PopupChildren<ComboBox>(dialog).Single(c=>AutomationProperties.GetName(c)=="Image resolution");
+       if(layout.SelectedIndex!=0)throw new Exception("Existing landscape layout is not the default.");
+       layout.SelectedIndex=1;choices.SelectedIndex=0;PumpPopupLayout();
+       if(Math.Abs(image.Source.Width/image.Source.Height-9.0/16)>0.001||resolution.SelectedIndex!=2)throw new Exception("Portrait preview or social resolution did not update.");
+       CapturePopup(dialog,Path.Combine(output,"AstroArchive_Analytics_"+mode+"_Portrait.png"));
+       documentTheme.SelectedIndex=1;PumpPopupLayout();if(Math.Abs(image.Source.Width/image.Source.Height-9.0/16)>0.001)throw new Exception("Light portrait preview lost its composition.");
+       layout.SelectedIndex=0;choices.SelectedIndex=6;documentTheme.SelectedIndex=0;PumpPopupLayout();if(resolution.Items.Count!=2)throw new Exception("Portrait-only resolution remained in the landscape options.");
        PopupChildren<Expander>(dialog).Single().IsExpanded=true;PumpPopupLayout();
        var picker=PopupChildren<ComboBox>(dialog).Single(c=>AutomationProperties.GetName(c)=="Telescope");picker.SelectedIndex=1;
        SmokeSearchWait(()=>status.Text!="Updating analytics…");if(!PopupChildren<TextBlock>(dialog).Any(t=>t.Text.StartsWith("120 light frames")))throw new Exception("Analytics telescope scope did not refresh.");
@@ -37,18 +44,18 @@ namespace AstroArchive {
      }
     }
     var data=ArchiveAnalytics.Build(source,new AnalyticsOptions{Caption="Publication fixture"});var pages=Enumerable.Range(0,6).SelectMany(i=>AnalyticsGraphics.Pages(data,i)).ToList();
-    foreach(bool dark in new[]{true,false})foreach(string format in new[]{"PNG","JPEG","PDF","SVG"})foreach(bool allCharts in new[]{false,true}){
-     var themed=Enumerable.Range(0,6).SelectMany(i=>AnalyticsGraphics.Pages(data,i,dark)).ToList();var chosen=allCharts?themed:new List<AnalyticsPage>{themed[0]};string path=Path.Combine(output,"analytics-"+(dark?"dark-":"light-")+(allCharts?"all":"single")+"."+(format=="JPEG"?"jpg":format.ToLowerInvariant()));
-     AnalyticsExport.Save(path,chosen,format,150);if(new FileInfo(path).Length<100)throw new Exception("Empty analytics export: "+format);
+    foreach(bool portrait in new[]{false,true})foreach(bool dark in new[]{true,false})foreach(string format in new[]{"PNG","JPEG","PDF","SVG"})foreach(bool allCharts in new[]{false,true}){
+     var themed=Enumerable.Range(0,6).SelectMany(i=>AnalyticsGraphics.Pages(data,i,dark,portrait)).ToList();var chosen=allCharts?themed:new List<AnalyticsPage>{themed[0]};string path=Path.Combine(output,"analytics-"+(portrait?"portrait-":"")+(dark?"dark-":"light-")+(allCharts?"all":"single")+"."+(format=="JPEG"?"jpg":format.ToLowerInvariant()));
+     AnalyticsExport.Save(path,chosen,format,portrait?96:150);if(new FileInfo(path).Length<100)throw new Exception("Empty analytics export: "+format);
      if(format=="PNG"||format=="JPEG"){
-      using(var input=File.OpenRead(path)){var image=BitmapDecoder.Create(input,BitmapCreateOptions.None,BitmapCacheOption.OnLoad).Frames[0];if(image.PixelWidth!=(allCharts?3750:1875)||image.PixelHeight!=(allCharts?3750:1250))throw new Exception("Incorrect raster export dimensions.");var rgb=new System.Windows.Media.Imaging.FormatConvertedBitmap(image,System.Windows.Media.PixelFormats.Bgra32,null,0);var pixel=new byte[4];rgb.CopyPixels(new Int32Rect(0,25,1,1),pixel,4,0);if(dark?pixel[2]>20||pixel[1]>25||pixel[0]>40:pixel[2]<250||pixel[1]<250||pixel[0]<250)throw new Exception("Raster export background does not match document theme.");}
+      using(var input=File.OpenRead(path)){var image=BitmapDecoder.Create(input,BitmapCreateOptions.None,BitmapCacheOption.OnLoad).Frames[0];if(image.PixelWidth!=(portrait?1080:allCharts?3750:1875)||image.PixelHeight!=(portrait?1920*chosen.Count:allCharts?3750:1250))throw new Exception("Incorrect raster export dimensions.");var rgb=new System.Windows.Media.Imaging.FormatConvertedBitmap(image,System.Windows.Media.PixelFormats.Bgra32,null,0);var pixel=new byte[4];rgb.CopyPixels(new Int32Rect(0,25,1,1),pixel,4,0);if(dark?pixel[2]>20||pixel[1]>25||pixel[0]>40:pixel[2]<250||pixel[1]<250||pixel[0]<250)throw new Exception("Raster export background does not match document theme.");}
      }else if(format=="SVG"){var svg=XDocument.Load(path);XNamespace ns="http://www.w3.org/2000/svg";if(svg.Root.Elements(ns+"rect").First().Attribute("fill").Value!=chosen[0].Background)throw new Exception("SVG document theme does not match the preview.");}else if(!File.ReadAllText(path).StartsWith("%PDF-1.4"))throw new Exception("Incorrect PDF export header.");
     }
     string overwrite=Path.Combine(output,"analytics-overwrite.png");File.WriteAllText(overwrite,"existing output");AnalyticsExport.Save(overwrite,new[]{pages[0]},"PNG",150);
     using(var input=File.OpenRead(overwrite))BitmapDecoder.Create(input,BitmapCreateOptions.None,BitmapCacheOption.OnLoad);
     File.WriteAllText(overwrite,"keep on failure");bool failed=false;try{AnalyticsExport.Save(overwrite,new[]{pages[0]},"invalid",150);}catch(ArgumentException){failed=true;}
     if(!failed||File.ReadAllText(overwrite)!="keep on failure"||Directory.GetFiles(output,"*.tmp").Length!=0)throw new Exception("Failed export changed the destination or retained partial output.");
-    File.WriteAllText(Path.Combine(output,"analytics-smoke.txt"),"PASS: Repository menu, six reports, combined preview, independent dark/light document and application themes, themed PNG/JPEG/PDF/SVG exports, telescope/date scoping, stale-export prevention, PNG/JPEG decoding, SVG/PDF outputs and atomic overwrite checks.");
+    File.WriteAllText(Path.Combine(output,"analytics-smoke.txt"),"PASS: Repository menu, six reports, combined preview, landscape default and portrait 9:16 selector, exact 1080x1920 social images, dark/light document and application themes, single/combined PNG/JPEG/PDF/SVG exports, telescope/date scoping, stale-export prevention, decoding and atomic overwrite checks.");
    }finally{repo=savedRepo;Theme.Apply(Window,theme);}
   }
  }

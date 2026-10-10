@@ -112,8 +112,11 @@ lengths. Documents default to **Dark**; choose **Light** for a light background.
 Scope by telescope and acquisition dates, add a document label and optionally
 include rejected light frames. Scope starts with the entire repository independently
 of browsing filters and selection. Export **PNG, JPEG, PDF or SVG**, with 150 or
-300 DPI for raster images. **Export all** saves one document; PDF uses landscape pages and image/SVG
-exports use a combined sheet. Long rankings include every target and telescope on
+300 DPI for raster images. **Document layout** offers the current Landscape or a
+**Portrait · 9:16** composition for TikTok, Reels and Stories, including a **1080 × 1920**
+social image preset. **Export all** saves one document; PDF uses the chosen page
+layout and image/SVG exports use a combined sheet, stacked vertically for portrait.
+Long rankings include every target and telescope on
 continuation pages. Time means individual light-frame integration; stacks, videos
 and calibrations are excluded. Unknown exposures and dates are reported.
 Exports leave the archive and capture files unchanged.

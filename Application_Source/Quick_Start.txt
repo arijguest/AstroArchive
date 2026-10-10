@@ -137,6 +137,10 @@ starts (or immediately when a bandwidth limit is set).
 Documents default to Dark, with a Light option next to Export format. The larger
 AstroArchive logo, midnight/blue/cyan colours, and concise headers/footers appear
 in previews and PNG, JPEG, PDF and SVG exports.
+Document layout defaults to Landscape. Choose Portrait · 9:16 for TikTok, Reels
+or Stories. Portrait rearranges the charts, labels and branding for a vertical
+frame. Its Social image preset exports each page at exactly 1080 x 1920 pixels;
+Print and Screen resolutions remain available. The preview uses the chosen layout.
 Repository > Analytics offers six branded charts: Targets photographed, Imaging
 timeline, Time per target, Time per telescope, Filter mix and Exposure lengths.
 Select a chart to preview it, or All six charts for the combined preview. Scope
@@ -153,7 +157,8 @@ included. Timeline gaps remain zero; longer timelines use years or grouped perio
 Choose PNG or JPEG at 300 dpi for print or 150 dpi for screen. PDF keeps charts and
 lettering as vectors; SVG embeds the logo and keeps graphics scalable. Export chart
 saves the selected chart; Export all saves one document containing all six charts.
-PDF uses individual landscape pages; image/SVG exports arrange pages on one sheet.
+PDF uses individual pages in the selected layout; image/SVG exports arrange pages
+on one sheet. Portrait collections stack pages vertically in that sheet.
 Very large collections may need 150 dpi, PDF or SVG. Open export folder appears
 after a successful save. Exports leave the archive and capture files unchanged.
 
