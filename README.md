@@ -78,13 +78,9 @@ Filter by acquisition dates or telescope, add a document label, and choose a
 one document, with 150 or 300 DPI for raster images. Choose Landscape or a social
 layout: **9:16**, **4:5**, **1:1**, **16:9** or **2:3**, with matching pixel presets.
 
-Use **Customize…** to preview and save each chart’s title, subtitle, palette and
-supported display, ordering and density options.
-
-Choose **Video / GIF**, then **MP4** or **GIF**, to share an animated chart or an
-**Export all** story. Preview the chart reveals and Glide, Zoom or Dissolve
-transitions; set 4, 6 or 8 seconds per page or a custom total length, and choose
-original or smaller dimensions. MP4 uses Windows’
+Choose **MP4** or **GIF** to share an animated chart or an **Export all** story.
+Preview the chart reveals and Glide, Zoom or Dissolve transitions; set 4, 6 or 8
+seconds per page and choose original or smaller dimensions. MP4 uses Windows’
 built-in H.264 encoder at 24 fps; GIF loops at 12 fps. Exports show progress and
 remaining time, and cancellation preserves any previous output.
 
@@ -142,15 +138,13 @@ where possible; optional NTFS **Protect originals** is not a substitute for back
 
 ### Fresh from the latest releases
 
-**[3.1.5](https://github.com/arijguest/AstroArchive/releases/tag/v3.1.5.1)** adds
-saved chart customization with live previews, clearer document and video export
-controls, and custom video lengths with smoother, duration-aware transitions.
-More compact charts make better use of social layouts. A narrower Repository
-preview gives the skymap more room, with a reset control that scales and stays
-anchored as the map changes.
-Recent releases added animated MP4/GIF stories, quieter process notifications,
-recoverable import queues, simultaneous telescope sessions, and Dark or Light
-analytics documents.
+**[3.1.4](https://github.com/arijguest/AstroArchive/releases/tag/v3.1.4.1)** brings
+refined Analytics graphics, social layouts, animated MP4/GIF stories and quieter
+process notifications. Manually dismissed summaries disappear from both banners
+and Activity; completed banners clear as you continue using the app while their
+Activity history remains.
+Recent releases added recoverable import queues, simultaneous telescope sessions,
+and Dark or Light analytics documents.
 [See what’s new →](https://github.com/arijguest/AstroArchive/releases)
 
 ## Go further

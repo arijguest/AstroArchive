@@ -22,9 +22,9 @@ offline launch, checksums and Windows policy blocks.
 Replace the filename with your downloaded package:
 
 ```powershell
-.\AstroArchive3.1.5.1.exe --silent
-.\AstroArchive3.1.5.1.exe --update --silent --root "$env:LOCALAPPDATA\Programs\AstroArchive"
-.\AstroArchive3.1.5.1.exe --uninstall --root "$env:LOCALAPPDATA\Programs\AstroArchive"
+.\AstroArchive3.1.4.1.exe --silent
+.\AstroArchive3.1.4.1.exe --update --silent --root "$env:LOCALAPPDATA\Programs\AstroArchive"
+.\AstroArchive3.1.4.1.exe --uninstall --root "$env:LOCALAPPDATA\Programs\AstroArchive"
 ```
 
 `--update` requires an existing installation. `--restart` opens the app after a
@@ -43,9 +43,6 @@ From the repository root, run:
 
 The installer uses `Application_Source/dist/AstroArchive.exe` and the version in
 `Installer/release.json`. Output is written to `Installer/dist`.
-`Installer/Payload` contains maintained notices and release notes only. The build
-copies the current app, quick start and validation text from `Application_Source`
-and compiles the launcher into `Installer/.build/payload` before packaging.
 The payload includes the separate SMBLibrary DLL, matching source archive,
 licences and notice. Do not distribute the application executable alone.
 The [Windows build and release workflow](../.github/workflows/windows.yml) validates
