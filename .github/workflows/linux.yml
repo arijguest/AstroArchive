@@ -24,7 +24,7 @@ jobs:
         with:
           global-json-file: global.json
       - name: Install display and optional scientific codecs
-        run: sudo apt-get update && sudo apt-get install -y xvfb libcfitsio-dev libzstd1 libfontconfig1 libice6 libsm6 exfatprogs
+        run: sudo apt-get update && sudo apt-get install -y xvfb libcfitsio-dev libzstd1 libfontconfig1 libice6 libsm6 exfatprogs desktop-file-utils
       - name: Test archive engine and Linux page workflows
         run: |
           mkdir -p linux-artifacts
@@ -43,6 +43,14 @@ jobs:
           dpkg-deb -x linux-artifacts/astroarchive_3.1.1-preview.1_amd64.deb "$RUNNER_TEMP/deb"
           "$RUNNER_TEMP/deb/usr/lib/astroarchive/AstroArchive" --self-test "$RUNNER_TEMP/deb-test"
           (cd linux-artifacts && sha256sum -c SHA256SUMS)
+      - name: Install the Debian package and validate its desktop launcher
+        run: |
+          sudo apt-get install -y ./linux-artifacts/astroarchive_3.1.1-preview.1_amd64.deb
+          test "$(command -v astroarchive)" = /usr/bin/astroarchive
+          astroarchive --version
+          astroarchive --self-test "$RUNNER_TEMP/installed-test"
+          desktop-file-validate /usr/share/applications/astroarchive.desktop
+          test -s /usr/share/icons/hicolor/256x256/apps/astroarchive.png
       - name: Test a removable exFAT loopback drive and read-only remount
         if: matrix.os == 'ubuntu-22.04'
         run: bash scripts/test-linux-drive.sh | tee linux-artifacts/exfat-drive.log

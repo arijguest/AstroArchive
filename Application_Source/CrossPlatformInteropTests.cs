@@ -10,13 +10,14 @@ namespace AstroArchive {
   static void Check(bool ok,string text){if(!ok)throw new Exception(text);Console.WriteLine("PASS interop: "+text);}
   static void Fits(string path,string target,int seed){Directory.CreateDirectory(Path.GetDirectoryName(path));string[] cards={"SIMPLE  =                    T","BITPIX  =                   16","NAXIS   =                    2","NAXIS1  =                   16","NAXIS2  =                   16","OBJECT  = '"+target+"'","IMAGETYP= 'LIGHT'","DATE-OBS= '2026-10-06T21:00:00'","EXPTIME =                   60","FILTER  = 'L'","END"};var bytes=new byte[5760];Encoding.ASCII.GetBytes(string.Concat(cards.Select(c=>c.PadRight(80))).PadRight(2880)).CopyTo(bytes,0);for(int i=2880;i<3392;i++)bytes[i]=(byte)(i+seed);File.WriteAllBytes(path,bytes);}
   public static int Run(string root,string mode){try{
-   var ct=CancellationToken.None;Action<ProgressInfo> progress=p=>{};string archive=Path.Combine(root,"repository"),source=Path.Combine(root,"source"),exports=Path.Combine(root,"exports");Directory.CreateDirectory(exports);
+   var ct=CancellationToken.None;Action<ProgressInfo> progress=p=>{};string archive=Path.Combine(root,"Travel drive Ω archive"),source=Path.Combine(root,"Capture input Ω"),exports=Path.Combine(root,"exports");Directory.CreateDirectory(exports);
    Repository.LocalIndexBase=Path.Combine(root,"working-indexes");
    if(mode=="--interop-create"){
     Fits(Path.Combine(source,"Light_M31.fit"),"M31",11);Fits(Path.Combine(source,"Light_M45.fit"),"M45",17);File.WriteAllText(Path.Combine(source,"shotsInfo.json"),"{\"targetName\":\"M31\",\"cameraId\":0}");
     using(var repo=new Repository(archive)){
      var result=repo.Import(repo.Scan(source,"Drive scope","Dwarf 3",ct,progress).Frames,ct,progress);Check(result.Imported==2,"creator imports two original captures");
      var project=repo.CreateEditedWorkingCopies(repo.All(),"Portable working copies","Editor",ct,progress);
+     project.CreatedUtc=new DateTime(2025,10,9,8,53,20,DateTimeKind.Utc).AddMilliseconds(123);
      string nested=Path.Combine(repo.EditedProjectFolder(project),"nested");Directory.CreateDirectory(nested);Fits(Path.Combine(nested,"edited_M31.fit"),"M31",23);
      project.MetadataEdits=new Dictionary<string,EditedMetadata>();project.MetadataEdits[Path.Combine("nested","edited_M31.fit")]=new EditedMetadata{Object="M33"};
      Util.AtomicText(Path.Combine(repo.EditedProjectFolder(project),"edited-project.json"),Util.Serialize(project));
@@ -29,6 +30,7 @@ namespace AstroArchive {
      Check(repo.Verify(ct,progress)==0,"all archive hashes survive drive movement");
      Check(repo.All().All(f=>!string.IsNullOrEmpty(f.SidecarRelativePath)&&File.Exists(Path.Combine(repo.Root,f.SidecarRelativePath))),"session metadata remains accessible");
      List<string> errors;var projects=repo.EditedProjects(out errors);Check(errors.Count==0&&projects.Count==1,"Edited project identity and legacy dates survive");
+     Check(projects[0].CreatedUtc.ToUniversalTime()==new DateTime(2025,10,9,8,53,20,DateTimeKind.Utc).AddMilliseconds(123),"Edited timestamps retain exact milliseconds across platforms");
      var images=repo.EditedImages(projects[0]);Check(images.Count==3&&images.Single(i=>i.Filename=="edited_M31.fit").Metadata.Object=="M33","nested Edited paths and metadata overrides survive separators");
      string exported=Exporter.Create(repo,repo.All(),new ExportOptions{Parent=exports,Name="export-"+Guid.NewGuid().ToString("N"),CreateNewFolder=true,Mode="Files",AddMetadata=true},ct,progress);
      Check(Directory.GetFiles(exported,"*.fit",SearchOption.AllDirectories).Length==count,"reader exports every expected original");
