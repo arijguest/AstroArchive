@@ -138,13 +138,13 @@ where possible; optional NTFS **Protect originals** is not a substitute for back
 
 ### Fresh from the latest releases
 
-**[3.1.4](https://github.com/arijguest/AstroArchive/releases/tag/v3.1.4.1)** brings
-refined Analytics graphics, social layouts, animated MP4/GIF stories and quieter
-process notifications. Manually dismissed summaries disappear from both banners
-and Activity; completed banners clear as you continue using the app while their
-Activity history remains.
-Recent releases added recoverable import queues, simultaneous telescope sessions,
-and Dark or Light analytics documents.
+**[3.1.6](https://github.com/arijguest/AstroArchive/releases/tag/v3.1.6.1)** brings
+centered Analytics metrics and corrected exposure totals, more reliable
+calibration-frame matching and simpler stacking exports. The Repository preview
+keeps its full-size controls in maximized windows, and opt-in error reports open
+a sanitized, reviewable GitHub issue draft.
+Earlier releases added animated analytics stories, recoverable import queues
+and simultaneous telescope sessions.
 [See what’s new →](https://github.com/arijguest/AstroArchive/releases)
 
 ## Go further

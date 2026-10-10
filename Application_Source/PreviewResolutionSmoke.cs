@@ -19,7 +19,7 @@ namespace AstroArchive {
    Directory.CreateDirectory(output);Window.Show();GoToPage(0);settings.ShowPreview=true;SetPreviewVisibility();PumpPopupLayout();
    var previewColumn=(ColumnDefinition)Window.FindName("PreviewColumn");var previewHost=(Grid)Window.FindName("PreviewHost");WindowState originalWindowState=Window.WindowState;
    Window.WindowState=WindowState.Maximized;PumpPopupLayout();
-   if(previewColumn.Width.Value!=320||previewHost.ActualWidth<290||((Border)Window.FindName("PreviewPane")).Padding.Left!=8)throw new Exception("Fullscreen Repository preview is too narrow for the full-size toolbar.");
+   if(previewColumn.Width.Value!=340||previewHost.ActualWidth<310||((Border)Window.FindName("PreviewPane")).Padding.Left!=8)throw new Exception("Fullscreen Repository preview is too narrow for the full-size toolbar.");
    Window.WindowState=originalWindowState;PumpPopupLayout();
    string fixture=Path.Combine(Path.GetTempPath(),"AstroArchive-preview-resolution-"+Guid.NewGuid().ToString("N"));Directory.CreateDirectory(fixture);string path=Path.Combine(fixture,"native.png");
    int width=1604,height=1200;var bytes=new byte[width*height*3];for(int y=0;y<height;y++)for(int x=0;x<width;x++){int p=(y*width+x)*3;bytes[p]=(byte)(x%256);bytes[p+1]=(byte)(y%256);bytes[p+2]=(byte)((x+y)%256);}
@@ -38,7 +38,7 @@ namespace AstroArchive {
    if(!subframeSessions.Single().Label.Contains("2 subs · 60s · 2 min 0 s total"))throw new Exception("Condensed view omitted sub exposure or total.");
    var project=new EditedProject{Id=Guid.NewGuid().ToString("N"),Name="Target appearance"};editedImages=new List<EditedImage>{new EditedImage{Project=project,RelativePath="one.png",Filename="one.png",Metadata=new EditedMetadata{Object="M31",ImageClass="Edited image"}}};FilterEditedImages();
    foreach(string theme in new[]{"Light","Dark"}){Theme.Apply(Window,theme);GoToPage(2);CheckAllTargetsRow(EditedTargets);GoToPage(0);CheckAllTargetsRow(Targets);LoadPreview(path,true,capture);WaitPreview(()=>previewData!=null&&L("PreviewMessage").Visibility==Visibility.Collapsed,"Themed inline preview did not load.");PumpPopupLayout();CheckSkyFit("",previewViewport,1200,1604);Capture(Path.Combine(output,"AstroArchive_Wider_Repository_"+theme+".png"));}
-   File.WriteAllText(Path.Combine(output,"preview-resolution-smoke.txt"),"PASS: 320px fullscreen Repository preview with full-size toolbar and adaptive sky; sampled inline bitmap/cache and SER frames; native-size raster/SER popups and exact raster pixels; unchanged source bytes; per-sub exposure in condensed rows; bold All Targets theme backgrounds and selection feedback in Repository/Edited, light/dark.");
+   File.WriteAllText(Path.Combine(output,"preview-resolution-smoke.txt"),"PASS: 340px fullscreen Repository preview with full-size toolbar and adaptive sky; sampled inline bitmap/cache and SER frames; native-size raster/SER popups and exact raster pixels; unchanged source bytes; per-sub exposure in condensed rows; bold All Targets theme backgrounds and selection feedback in Repository/Edited, light/dark.");
   }
  }
 }
