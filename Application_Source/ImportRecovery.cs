@@ -19,9 +19,9 @@ namespace AstroArchive {
   public readonly List<string> Warnings=new List<string>();
   public ImportResumeStore(string root){this.root=Path.GetFullPath(root);Directory.CreateDirectory(this.root);Paths.CheckLinks(this.root,Path.GetDirectoryName(this.root));}
   string PathFor(string id,string extension){Guid value;if(!Guid.TryParseExact(id,"N",out value))throw new IOException("Invalid import recovery identifier.");string path=Path.Combine(root,id+extension);Paths.CheckLinks(path,root);return path;}
-  public void Save(ImportResumeRecord record){lock(sync){if(record.Connection!=null&&!string.IsNullOrEmpty(record.Connection.Password))throw new IOException("Import recovery credentials must be encrypted before saving.");record.UpdatedUtc=DateTime.UtcNow;Util.AtomicText(PathFor(record.Id,".json"),Util.Serialize(record));}}
+  public void Save(ImportResumeRecord record){lock(sync){if(record.Connection!=null&&!string.IsNullOrEmpty(record.Connection.Password))throw new IOException("Import recovery credentials must be encrypted before saving.");record.UpdatedUtc=DateTime.UtcNow;string path=PathFor(record.Id,".json"),temporary=PathFor(record.Id,"."+Guid.NewGuid().ToString("N")+".tmp");try{byte[] bytes=Encoding.UTF8.GetBytes(Util.Serialize(record));using(var output=new FileStream(temporary,FileMode.CreateNew,FileAccess.Write,FileShare.None)){output.Write(bytes,0,bytes.Length);output.Flush(true);}if(File.Exists(path))File.Replace(temporary,path,null);else File.Move(temporary,path);}finally{Repository.TryRemove(temporary);}}}
   public List<ImportResumeRecord> Load(){lock(sync){Warnings.Clear();var result=new List<ImportResumeRecord>();foreach(string path in Directory.EnumerateFiles(root,"*.json")){try{Paths.CheckLinks(path,root);var record=Util.Deserialize<ImportResumeRecord>(File.ReadAllText(path));if(record==null||PathFor(record.Id,".json")!=path||string.IsNullOrEmpty(record.Repository)||!Path.IsPathRooted(record.Repository)||!new[]{"Files","Usb","Dump","RemoteFiles","RemoteLive","EditedFiles","EditedFolder"}.Contains(record.Kind))throw new IOException("Invalid recovery record.");if(record.State=="Running"||record.State=="Pausing"){record.State="Interrupted";Save(record);}result.Add(record);}catch(Exception e){Warnings.Add(Path.GetFileName(path)+": "+e.Message);}}return result.OrderByDescending(r=>r.UpdatedUtc).ToList();}}
-  public void Remove(ImportResumeRecord record){lock(sync){File.Delete(PathFor(record.Id,".json"));File.Delete(PathFor(record.Id,".completed"));}}
+  public void Remove(ImportResumeRecord record){lock(sync){File.Delete(PathFor(record.Id,".json"));File.Delete(PathFor(record.Id,".json.bak"));File.Delete(PathFor(record.Id,".completed"));}}
   static string Key(Frame frame){return frame.SourcePath+"|"+frame.ImageKey+"|"+frame.ImageIndex;}
   sealed class Completion {public string Key,Hash;}
   public void Completed(ImportResumeRecord record,Frame frame){
@@ -35,7 +35,7 @@ namespace AstroArchive {
     if(completed.TryGetValue(Key(frame),out hash))retained=repository.Find(hash);
     else if(!string.IsNullOrEmpty(frame.Hash))retained=repository.Find(frame.Hash);
     else retained=archived.FirstOrDefault(f=>Key(f).Equals(Key(frame),StringComparison.OrdinalIgnoreCase)&&f.SourceStamp!=null&&frame.SourceStamp!=null&&f.SourceStamp.ContentSame(frame.SourceStamp));
-    if(retained!=null)try{repository.ValidateCapture(retained,ct);continue;}catch(OperationCanceledException){throw;}catch(IOException){}
+    if(retained!=null)try{repository.ValidateCapture(retained,ct);continue;}catch(OperationCanceledException){throw;}catch(IOException){}catch(InvalidDataException){}
     var pending=frame.Clone();pending.Status="New";pending.TransferIssue=null;result.Add(pending);
    }return result;
   }
