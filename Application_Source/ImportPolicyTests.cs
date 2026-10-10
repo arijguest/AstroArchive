@@ -26,7 +26,7 @@ namespace AstroArchive {
    Test("Dump imports and duplicate retries retain calibration originals",()=>{
     using(var repo=new Repository(Path.Combine(root,"keep-calibration-dump-repo"))){repo.EnsureDumpFolder();string path=Path.Combine(repo.DumpFolder,"dark.fit");Write(path,64,48,(x,y)=>2300,new Dictionary<string,string>{{"IMAGETYP","'DARK'"}});string hash=Util.Hash(path,ct);
      var first=repo.ProcessDump(ct,NoProgress);var repeat=repo.ProcessDump(ct,NoProgress);
-     Check(first.Import.Imported==1&&repeat.Import.Imported==0&&repeat.Import.Duplicates==1&&new[]{first,repeat}.All(r=>r.Import.OriginalsDeleted==0&&r.Import.OriginalsKept==1&&r.Import.CleanupErrors.Count==0),"Dump removed a calibration or reported intentional retention as failure");
+     Check(first.Import.Imported==1&&repeat.Import.Imported==0&&repeat.Import.Duplicates==1&&new[]{first,repeat}.All(r=>r.Import.OriginalsDeleted==0&&r.Import.OriginalsKept==(Environment.OSVersion.Platform==PlatformID.Win32NT?1:0)&&r.Import.CleanupErrors.Count==0),"Dump removed a calibration or reported intentional retention as failure");
      Check(File.Exists(path)&&Util.Hash(path,ct)==hash&&repo.All().Count==1&&Util.Hash(repo.FilePath(repo.All().Single()),ct)==hash,"Dump calibration bytes or archive index changed");
     }
    });

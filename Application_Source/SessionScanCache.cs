@@ -7,10 +7,10 @@ using System.Threading;
 namespace AstroArchive {
  internal sealed class SessionScanCache {
   readonly string root,volume,identity,model;readonly Dictionary<string,SourceManifest> manifests;readonly Dictionary<string,Frame> archive;readonly Repository repository;
-  readonly HashSet<string> folders=new HashSet<string>(StringComparer.OrdinalIgnoreCase),ancestors=new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-  readonly Dictionary<string,FileStamp> sidecars=new Dictionary<string,FileStamp>(StringComparer.OrdinalIgnoreCase);
-  string currentFolder;readonly Dictionary<string,FileInfo> adjacent=new Dictionary<string,FileInfo>(StringComparer.OrdinalIgnoreCase);
-  readonly Dictionary<string,string> shots=new Dictionary<string,string>(StringComparer.OrdinalIgnoreCase);
+  readonly HashSet<string> folders=new HashSet<string>(Util.PathComparer),ancestors=new HashSet<string>(Util.PathComparer);
+  readonly Dictionary<string,FileStamp> sidecars=new Dictionary<string,FileStamp>(Util.PathComparer);
+  string currentFolder;readonly Dictionary<string,FileInfo> adjacent=new Dictionary<string,FileInfo>(Util.PathComparer);
+  readonly Dictionary<string,string> shots=new Dictionary<string,string>(Util.PathComparer);
   public SessionScanCache(Repository repository,string root,string identity,string model,Dictionary<string,SourceManifest> manifests,Dictionary<string,Frame> archive){
    this.repository=repository;this.root=root;this.identity=identity;this.model=model;this.manifests=manifests;this.archive=archive;volume=FileStamp.VolumeIdentity(root);
    foreach(var item in manifests.Values.Where(m=>m.Status=="Complete"&&m.Path!=null&&Util.Within(m.Path,root))){string directory=Path.GetDirectoryName(item.Path);folders.Add(directory);for(string p=directory;p!=null&&Util.Within(p,root);p=Path.GetDirectoryName(p))ancestors.Add(p);}
@@ -31,14 +31,14 @@ namespace AstroArchive {
     !entry.Enumerated.Cloud&&!old.Source.Cloud&&entry.Enumerated.ContentSame(old.Source)&&
     (!old.Source.Reliable||current!=null&&current.VerifiedUnchanged(old.Source));
   }
-  FileStamp Sidecar(string path){FileStamp stamp;if(sidecars.TryGetValue(path,out stamp))return stamp;if(string.Equals(Path.GetDirectoryName(path),currentFolder,StringComparison.OrdinalIgnoreCase)){FileInfo info;stamp=adjacent.TryGetValue(path,out info)?FileStamp.Read(info):null;}else stamp=File.Exists(path)?FileStamp.Read(path):null;sidecars[path]=stamp;return stamp;}
+  FileStamp Sidecar(string path){FileStamp stamp;if(sidecars.TryGetValue(path,out stamp))return stamp;if(string.Equals(Path.GetDirectoryName(path),currentFolder,Util.PathComparison)){FileInfo info;stamp=adjacent.TryGetValue(path,out info)?FileStamp.Read(info):null;}else stamp=File.Exists(path)?FileStamp.Read(path):null;sidecars[path]=stamp;return stamp;}
   static bool Unchanged(FileStamp current,FileStamp previous){return current!=null&&previous!=null&&!current.Cloud&&!previous.Cloud&&(previous.Reliable?current.VerifiedUnchanged(previous):current.ContentSame(previous));}
-  string ShotsPath(string directory){string found;if(shots.TryGetValue(directory,out found))return found;string p=directory;for(int i=0;i<4&&p!=null&&Util.Within(p,root);i++,p=Path.GetDirectoryName(p)){string candidate=Path.Combine(p,"shotsInfo.json");if(string.Equals(p,currentFolder,StringComparison.OrdinalIgnoreCase)?adjacent.ContainsKey(candidate):File.Exists(candidate)){found=candidate;break;}}shots[directory]=found;return found;}
+  string ShotsPath(string directory){string found;if(shots.TryGetValue(directory,out found))return found;string p=directory;for(int i=0;i<4&&p!=null&&Util.Within(p,root);i++,p=Path.GetDirectoryName(p)){string candidate=Path.Combine(p,"shotsInfo.json");if(string.Equals(p,currentFolder,Util.PathComparison)?adjacent.ContainsKey(candidate):File.Exists(candidate)){found=candidate;break;}}shots[directory]=found;return found;}
   bool MetadataUnchanged(SourceManifest old,ScanEntry entry){
    var frame=old.Metadata;string nearest=ShotsPath(Path.GetDirectoryName(entry.Path));
-   if(!string.Equals(nearest,frame.SourceMetadataPath,StringComparison.OrdinalIgnoreCase)||nearest!=null&&!Unchanged(Sidecar(nearest),frame.SourceMetadataStamp))return false;
+   if(!string.Equals(nearest,frame.SourceMetadataPath,Util.PathComparison)||nearest!=null&&!Unchanged(Sidecar(nearest),frame.SourceMetadataStamp))return false;
    var previous=frame.AssociatedFiles??new List<AssociatedFile>();int count=0;
-   foreach(string name in AssociatedMetadata.Names(entry.Path)){string path=Path.Combine(Path.GetDirectoryName(entry.Path),name);FileStamp current=Sidecar(path);if(current==null||current.Size>16*1024*1024)continue;count++;var prior=previous.FirstOrDefault(a=>string.Equals(a.SourcePath,path,StringComparison.OrdinalIgnoreCase));if(prior==null||!Unchanged(current,prior.Stamp))return false;}
+   foreach(string name in AssociatedMetadata.Names(entry.Path)){string path=Path.Combine(Path.GetDirectoryName(entry.Path),name);FileStamp current=Sidecar(path);if(current==null||current.Size>16*1024*1024)continue;count++;var prior=previous.FirstOrDefault(a=>string.Equals(a.SourcePath,path,Util.PathComparison));if(prior==null||!Unchanged(current,prior.Stamp))return false;}
    return count==previous.Count;
   }
   public bool TrySkip(ScanEntry entry){

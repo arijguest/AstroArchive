@@ -1,0 +1,173 @@
+name: Linux release and Windows drive compatibility
+on:
+  pull_request:
+  push:
+    branches: [main]
+    tags: ['linux-v*']
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: linux-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  linux:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-22.04, ubuntu-24.04]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-dotnet@v5
+        with:
+          global-json-file: global.json
+      - name: Install display and optional scientific codecs
+        run: sudo apt-get update && sudo apt-get install -y xvfb libcfitsio-dev libzstd1 libfontconfig1 libice6 libsm6 exfatprogs exfat-fuse desktop-file-utils libsecret-tools gnome-keyring dbus-x11 poppler-utils python3-venv ffmpeg
+      - name: Test a removable exFAT loopback drive and read-only remount
+        run: |
+          mkdir -p linux-artifacts
+          set -o pipefail
+          bash scripts/test-linux-drive.sh | tee linux-artifacts/exfat-drive.log
+      - name: Test archive engine and Linux page workflows
+        run: |
+          mkdir -p linux-artifacts
+          set -o pipefail
+          dotnet run --project CrossPlatform/EngineTests -- "$RUNNER_TEMP/engine" | tee linux-artifacts/engine.log
+          dotnet test CrossPlatform/Desktop.Tests --logger 'trx;LogFileName=linux-desktop.trx' --results-directory linux-artifacts/test-results
+      - name: Build self-contained tarball and Debian package
+        run: bash scripts/build-linux.sh
+      - name: Test native Linux FTP and SMB transports
+        run: |
+          set -euo pipefail
+          python3 -m venv "$RUNNER_TEMP/network-venv"
+          "$RUNNER_TEMP/network-venv/bin/pip" install pyftpdlib==2.1.0 impacket==0.13.1 Pillow==11.3.0
+          ASTROARCHIVE_NETWORK_PYTHON="$RUNNER_TEMP/network-venv/bin/python" bash scripts/test-linux-network.sh "$RUNNER_TEMP/network-test" | tee linux-artifacts/network-test.log
+      - name: Test extracted application and rendered pages without an SDK
+        run: |
+          set -euo pipefail
+          mkdir "$RUNNER_TEMP/extracted"
+          tar -xzf linux-artifacts/AstroArchive-3.1.4.1-preview.1-linux-x64.tar.gz -C "$RUNNER_TEMP/extracted"
+          app="$RUNNER_TEMP/extracted/AstroArchive-3.1.4.1-preview.1-linux-x64/AstroArchive"
+          "$app" --self-test "$RUNNER_TEMP/extracted-test"
+          xvfb-run -a "$app" --ui-smoke "$PWD/linux-artifacts/ui" | tee linux-artifacts/ui-test.log
+          "$app" --analytics-media-test "$PWD/linux-artifacts/media" | tee linux-artifacts/media-create.log
+          "$RUNNER_TEMP/network-venv/bin/python" scripts/check-linux-analytics-media.py "$PWD/linux-artifacts/media" | tee linux-artifacts/media-test.log
+          pdfinfo "$PWD/linux-artifacts/ui/exports/reports/analytics.pdf" | tee linux-artifacts/pdf-test.log
+          grep -Eq '^Pages:[[:space:]]+6$' linux-artifacts/pdf-test.log
+          dbus-run-session -- bash scripts/test-linux-keyring.sh "$app" "$RUNNER_TEMP/keyring-test" | tee linux-artifacts/keyring-test.log
+          dpkg-deb -x linux-artifacts/astroarchive_3.1.4.1-preview.1_amd64.deb "$RUNNER_TEMP/deb"
+          "$RUNNER_TEMP/deb/usr/lib/astroarchive/AstroArchive" --self-test "$RUNNER_TEMP/deb-test"
+          (cd linux-artifacts && sha256sum -c SHA256SUMS)
+      - name: Install the Debian package and validate its desktop launcher
+        run: |
+          sudo apt-get install -y ./linux-artifacts/astroarchive_3.1.4.1-preview.1_amd64.deb
+          test "$(command -v astroarchive)" = /usr/bin/astroarchive
+          astroarchive --version
+          astroarchive --self-test "$RUNNER_TEMP/installed-test"
+          desktop-file-validate /usr/share/applications/astroarchive.desktop
+          test -s /usr/share/icons/hicolor/256x256/apps/astroarchive.png
+      - name: Create Linux archive for the Windows engine
+        if: matrix.os == 'ubuntu-22.04'
+        run: dotnet run --project CrossPlatform/EngineTests -- "$PWD/interop/linux" --interop-create
+      - uses: actions/upload-artifact@v4
+        if: matrix.os == 'ubuntu-22.04' && success()
+        with:
+          name: linux-drive-fixture
+          path: interop/linux/
+          include-hidden-files: true
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: linux-release-${{ matrix.os }}
+          path: linux-artifacts/
+          include-hidden-files: true
+          if-no-files-found: warn
+  windows:
+    needs: linux
+    runs-on: windows-2022
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+      - name: Compile the Windows Framework engine
+        shell: powershell
+        run: .\Application_Source\test.ps1 -CompileOnly
+      - uses: actions/download-artifact@v4
+        with:
+          name: linux-drive-fixture
+          path: C:\AstroArchiveInterop\linux
+      - name: Read and update Linux archive; create a native Windows archive
+        shell: powershell
+        run: |
+          & .\Application_Source\AstroArchiveTests.exe C:\AstroArchiveInterop\linux --interop-update
+          if ($LASTEXITCODE -ne 0) { throw 'Linux to Windows interoperability failed.' }
+          & .\Application_Source\AstroArchiveTests.exe C:\AstroArchiveInterop\windows --interop-create
+          if ($LASTEXITCODE -ne 0) { throw 'Windows fixture creation failed.' }
+      - uses: actions/upload-artifact@v4
+        with:
+          name: windows-drive-fixtures
+          path: C:\AstroArchiveInterop\
+          include-hidden-files: true
+  linux-return:
+    needs: windows
+    runs-on: ubuntu-22.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-dotnet@v5
+        with:
+          global-json-file: global.json
+      - uses: actions/download-artifact@v4
+        with:
+          name: windows-drive-fixtures
+          path: interop/
+      - name: Verify Linux to Windows to Linux; update Windows archive
+        run: |
+          dotnet run --project CrossPlatform/EngineTests -- "$PWD/interop/linux" --interop-verify
+          dotnet run --no-build --project CrossPlatform/EngineTests -- "$PWD/interop/windows" --interop-update
+      - uses: actions/upload-artifact@v4
+        with:
+          name: windows-return-fixture
+          path: interop/windows/
+          include-hidden-files: true
+  windows-return:
+    needs: linux-return
+    runs-on: windows-2022
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+      - name: Compile the Windows Framework engine
+        shell: powershell
+        run: .\Application_Source\test.ps1 -CompileOnly
+      - uses: actions/download-artifact@v4
+        with:
+          name: windows-return-fixture
+          path: C:\AstroArchiveInterop\windows
+      - name: Verify Windows to Linux to the same Windows path with its old cache present
+        shell: powershell
+        run: |
+          & .\Application_Source\AstroArchiveTests.exe C:\AstroArchiveInterop\windows --interop-verify
+          if ($LASTEXITCODE -ne 0) { throw 'Windows return trip or cache invalidation failed.' }
+  publish:
+    if: startsWith(github.ref, 'refs/tags/linux-v')
+    needs: windows-return
+    runs-on: ubuntu-22.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/download-artifact@v4
+        with:
+          name: linux-release-ubuntu-22.04
+          path: linux-artifacts/
+      - name: Prepare validated packages, screenshots and release evidence
+        run: python3 scripts/prepare-linux-release.py
+      - name: Publish Linux prerelease
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          test "$GITHUB_REF_NAME" = linux-v3.1.4.1-preview.1
+          gh release create "$GITHUB_REF_NAME" linux-release/* \
+            --target "$GITHUB_SHA" --title 'AstroArchive 3.1.4.1 — Linux preview 1' \
+            --prerelease --latest=false --notes-file CrossPlatform/RELEASE-NOTES.md

@@ -12,6 +12,7 @@ using System.Diagnostics;
 using System.Security.Cryptography;
 
 namespace AstroArchive {
+#if !PORTABLE
  public sealed class Database:IDisposable {
   IntPtr db;readonly object sync=new object();readonly string databasePath;long generation;public long Generation{get{lock(sync)return generation;}}
   [DefaultDllImportSearchPaths(DllImportSearchPath.System32)][DllImport("winsqlite3.dll",CallingConvention=CallingConvention.Cdecl)]static extern int sqlite3_open_v2(byte[] name,out IntPtr db,int flags,IntPtr vfs);
@@ -39,25 +40,84 @@ namespace AstroArchive {
   public void Dispose(){lock(sync){if(db!=IntPtr.Zero){int code=sqlite3_close(db);if(code!=0)throw new IOException("SQLite close failed: "+Error());db=IntPtr.Zero;}}}
 
  }
+#endif
  public sealed partial class Repository:IDisposable {
-  public string Root{get;private set;} public string Meta{get;private set;} Database db;Mutex mutex;bool held;
+  public string Root{get;private set;} public string Meta{get;private set;} Database db;
+#if !PORTABLE
+  Mutex mutex;bool held;
+#endif
+#if PORTABLE
+  FileStream archiveLock;
+#endif
   public static string LocalIndexBase;
-  public string WorkingIndex{get;private set;}public string LastReport="";DateTime checkpoint=DateTime.MinValue;long checkpointGeneration=-1;FileStamp checkpointStamp;
-  public Repository(string root){Root=Path.GetFullPath(root);Directory.CreateDirectory(Root);Meta=Path.Combine(Root,".astroarchive");CheckManagedPath(Meta,Root);Directory.CreateDirectory(Meta);
+  public string WorkingIndex{get;private set;}public string LastReport="";DateTime checkpoint=DateTime.MinValue;
+#if !PORTABLE
+  long checkpointGeneration=-1;FileStamp checkpointStamp;
+#endif
+  public Repository(string root){Root=Path.GetFullPath(root);Directory.CreateDirectory(Root);Meta=Path.Combine(Root,".astroarchive");
+#if PORTABLE
+   var metadataFolders=Directory.EnumerateDirectories(Root).Where(d=>Path.GetFileName(d).Equals(".astroarchive",StringComparison.OrdinalIgnoreCase)).ToList();
+   if(metadataFolders.Count>1)throw new IOException("Archive contains ambiguous metadata folder casing.");
+   if(metadataFolders.Count==1)Meta=metadataFolders[0];
+#endif
+   CheckManagedPath(Meta,Root);Directory.CreateDirectory(Meta);
+#if PORTABLE
+   try {
+    string lockPath=Path.Combine(Meta,"writer.lock");CheckManagedPath(lockPath,Root);
+    // FileShare.None uses a kernel lock on Linux; keep the inode until close.
+    archiveLock=new FileStream(lockPath,FileMode.OpenOrCreate,FileAccess.ReadWrite,FileShare.None);
+    WorkingIndex=Path.Combine(Meta,"index.sqlite");CheckManagedPath(WorkingIndex,Root);
+    protection=new ArchiveProtection(Root,Meta);
+    db=new Database(WorkingIndex);
+    // Existing Windows releases key their local cache by this identity. Rotate
+    // before any Linux write so returning to Windows always loads this drive's DB.
+    string identity=Path.Combine(Meta,BackupIdentityName);CheckManagedPath(identity,Root);
+    Util.AtomicText(identity,Guid.NewGuid().ToString("N"));
+    RecoverTelescopeRename();NormalizeStoredMetadata();
+   }catch{Dispose();throw;}
+  }
+  public void Checkpoint(CancellationToken ct){ct.ThrowIfCancellationRequested();checkpoint=DateTime.UtcNow;}
+  public void Dispose(){editedHeaders.Clear();try{if(db!=null){db.Dispose();db=null;}}finally{if(archiveLock!=null){archiveLock.Dispose();archiveLock=null;}}}
+#else
    mutex=new Mutex(false,"Local\\AstroArchive_"+Util.HashText(Root.ToLowerInvariant()));try{held=mutex.WaitOne(0);}catch(AbandonedMutexException){held=true;}if(!held){mutex.Dispose();throw new IOException("This repository is already open in another AstroArchive window.");}
    string local=Path.Combine(LocalIndexBase??Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),"AstroArchive","repositories"),Util.HashText(Root.ToLowerInvariant()+BackupIdentity()));Directory.CreateDirectory(local);WorkingIndex=Path.Combine(local,"index.sqlite");
    try{string portable=Path.Combine(Meta,"index.sqlite");if(!File.Exists(WorkingIndex)&&File.Exists(portable)){using(var original=new Database(portable))original.BackupTo(WorkingIndex,CancellationToken.None);}db=new Database(WorkingIndex);db.ManifestSchema();protection=new ArchiveProtection(Root,Meta);RecoverTelescopeRename();NormalizeStoredMetadata();}catch{Dispose();throw;}
   }
   public void Checkpoint(CancellationToken ct){ct.ThrowIfCancellationRequested();if(db.Generation==checkpointGeneration&&File.Exists(Path.Combine(Meta,"index.sqlite"))&&FileStamp.Read(Path.Combine(Meta,"index.sqlite")).VerifiedUnchanged(checkpointStamp)){return;}long snapshotGeneration=db.Generation;string local=WorkingIndex+"."+Guid.NewGuid().ToString("N")+".snapshot",target=Path.Combine(Meta,"index.sqlite"),temp=target+"."+Guid.NewGuid().ToString("N")+".partial";try{db.BackupTo(local,ct);string hash=Util.Hash(local,ct);CopyVerified(local,temp,hash,ct);CommitTemporary(temp,target,ct);checkpoint=DateTime.UtcNow;checkpointGeneration=snapshotGeneration;checkpointStamp=FileStamp.Read(target);}finally{TryRemove(local);TryRemove(local+"-wal");TryRemove(local+"-shm");TryRemove(temp);}}
   public void Dispose(){editedHeaders.Clear();if(db!=null){try{Checkpoint(CancellationToken.None);}catch{}db.Dispose();db=null;}if(held){mutex.ReleaseMutex();held=false;}if(mutex!=null)mutex.Dispose();}
+#endif
   public List<Frame> All(){var frames=db.Query("SELECT data FROM files").Select(Util.Deserialize<Frame>).ToList();return frames;}
   public Frame Find(string hash){string data=db.Query("SELECT data FROM files WHERE hash=?",hash).FirstOrDefault();return data==null?null:Util.Deserialize<Frame>(data);}
   public void Save(Frame f){f.Target=ObservationTargets.CanonicalSolar(f.Target);db.Exec("INSERT OR REPLACE INTO files(hash,data) VALUES(?,?)",f.Hash,Util.Serialize(f));RememberImportName(f);}
-  public void Refile(Frame f,CancellationToken ct){string old=FilePath(f),rel=Destination(f),dest=Path.Combine(Root,rel);if(string.Equals(old,dest,StringComparison.OrdinalIgnoreCase)){Save(f);return;}if(!File.Exists(old))throw new IOException("Repository file missing: "+old);if(Util.Hash(old,ct)!=f.Hash)throw new IOException("Repository file has changed; metadata was not applied: "+old);CheckManagedPath(dest,Root);Directory.CreateDirectory(Path.GetDirectoryName(dest));CheckManagedPath(dest,Root);bool moved=false;string previous=f.RelativePath;
+  public void Refile(Frame f,CancellationToken ct){
+#if PORTABLE
+   protection.CheckCaptureWrite();
+#endif
+string old=FilePath(f),rel=Destination(f),dest=Path.Combine(Root,rel);if(string.Equals(old,dest,Util.PathComparison)){Save(f);return;}if(!File.Exists(old))throw new IOException("Repository file missing: "+old);if(Util.Hash(old,ct)!=f.Hash)throw new IOException("Repository file has changed; metadata was not applied: "+old);CheckManagedPath(dest,Root);Directory.CreateDirectory(Path.GetDirectoryName(dest));CheckManagedPath(dest,Root);bool moved=false;string previous=f.RelativePath;
    if(File.Exists(dest)){if(Util.Hash(dest,ct)!=f.Hash)throw new IOException("Conflicting destination file.");}else{MoveCapture(old,dest);moved=true;}try{f.RelativePath=rel;f.RepositoryStamp=FileStamp.Read(dest);Save(f);}catch{f.RelativePath=previous;if(moved)MoveCapture(dest,old);throw;}
   }
   public void SaveRotation(RotationResult r){db.Exec("INSERT OR REPLACE INTO sessions(id,data) VALUES(?,?)",r.Session,Util.Serialize(r));}
-  public string FilePath(Frame f){string p=Path.GetFullPath(Path.Combine(Root,f.RelativePath??""));CheckManagedPath(p,Root);return p;}
+  public string FilePath(Frame f){return ResolveArchivePath(f.RelativePath);}
+  public string ResolveArchivePath(string relative){
+#if PORTABLE
+   relative=(relative??"").Replace('\\',Path.DirectorySeparatorChar);
+#endif
+   string full=Path.GetFullPath(Path.Combine(Root,relative??""));CheckManagedPath(full,Root);
+#if PORTABLE
+   if(OperatingSystem.IsLinux()){
+    string current=Root;foreach(string component in full.Substring(Root.TrimEnd(Path.DirectorySeparatorChar).Length+1).Split(Path.DirectorySeparatorChar)){
+     string next=Path.Combine(current,component);
+     if(!File.Exists(next)&&!Directory.Exists(next)&&Directory.Exists(current)){
+      var matches=Directory.EnumerateFileSystemEntries(current).Where(p=>Path.GetFileName(p).Equals(component,StringComparison.OrdinalIgnoreCase)).ToList();
+      if(matches.Count>1)throw new IOException("Archive contains an ambiguous Windows path: "+relative);
+      if(matches.Count==1)next=matches[0];
+     }
+     CheckManagedPath(next,Root);current=next;
+    }return current;
+   }
+#endif
+   return full;
+  }
   sealed class Scanned {public Frame Frame;public long Bytes;public bool CacheHit,HeaderHit;public string Error;}
   Scanned ScanOne(ScanEntry entry,string source,string telescope,string model,bool reindex,bool deferHash,bool cloudSource,string telescopeIdentity,Dictionary<string,SourceManifest> cached,HashSet<string> deleted,Dictionary<string,Classifier.ShotsMetadata> shots,MetadataHeaderCache headers,PipelineMetrics metrics,CancellationToken ct,Dictionary<string,Frame> archive,bool fullScan,bool scopedArchive){
    var item=new Scanned();string name=Path.GetFileName(entry.Path);
@@ -93,7 +153,7 @@ namespace AstroArchive {
        f=existing.Clone();f.SourcePath=entry.Path;f.SourceStamp=stamp;f.Status=present?"Duplicate":"Restore";
        // A mirror/card path can be new even when its content is already archived.
        // Remember checksum-proven matches with this source's metadata context.
-       if(present&&!reindex&&!source.Equals(DumpFolder,StringComparison.OrdinalIgnoreCase)){detected.Hash=hash;detected.SourceRoot=source;detected.RelativePath=existing.RelativePath;detected.RepositoryStamp=after;detected.Status="Duplicate";Manifest(new SourceManifest{Root=source,Path=entry.Path,Hash=hash,Destination=existing.RelativePath,Status="Complete",Source=stamp,Copy=after,Metadata=detected});}
+       if(present&&!reindex&&!source.Equals(DumpFolder,Util.PathComparison)){detected.Hash=hash;detected.SourceRoot=source;detected.RelativePath=existing.RelativePath;detected.RepositoryStamp=after;detected.Status="Duplicate";Manifest(new SourceManifest{Root=source,Path=entry.Path,Hash=hash,Destination=existing.RelativePath,Status="Complete",Source=stamp,Copy=after,Metadata=detected});}
       }else f.Hash=hash;check.Complete();
      }}
     }
@@ -109,15 +169,15 @@ namespace AstroArchive {
    source=Path.GetFullPath(source);if(!Directory.Exists(source))throw new DirectoryNotFoundException(source);if(dump)ValidateDumpFolder();else if(!reindex&&(Util.Within(source,Root)||Util.Within(Root,source)))throw new IOException("Source and repository must be separate folders, with neither inside the other.");
    if(selection!=null){if(reindex||dump||!Util.Within(selection.SourceRoot,source)||!Util.Within(source,selection.SourceRoot))throw new IOException("The import selection does not match this source.");selection=ImportSelection.Create(source,selection.Paths);}
    filenameMatching=filenameMatching&&!fullScan&&!reindex&&!dump;var plan=new ImportPlan{Source=source,Selection=selection,Metrics=metrics,FilenameMatching=filenameMatching};Dictionary<string,SourceManifest> cached;Dictionary<string,Frame> archive;
-   using(var index=metrics.Begin("Index loading","Loading previous imports for this source")){cached=filenameMatching||fullScan?new Dictionary<string,SourceManifest>(StringComparer.OrdinalIgnoreCase):SourceHistory(source);archive=filenameMatching||selection!=null&&fullScan?new Dictionary<string,Frame>():SourceArchive(source,fullScan||!quickScan||cloudSource||reindex||dump);index.Complete();}
+   using(var index=metrics.Begin("Index loading","Loading previous imports for this source")){cached=filenameMatching||fullScan?new Dictionary<string,SourceManifest>(Util.PathComparer):SourceHistory(source);archive=filenameMatching||selection!=null&&fullScan?new Dictionary<string,Frame>():SourceArchive(source,fullScan||!quickScan||cloudSource||reindex||dump);index.Complete();}
    if(dump)cached.Clear();
    var deleted=DeletedHashes();var filenames=filenameMatching?new FilenameScanCache(ImportNames(telescopeIdentity??telescope,deleted,ct),deleted):null;
    // One source-scoped snapshot avoids loading unrelated captures or querying each known file.
    bool fast=quickScan&&!filenameMatching&&!fullScan&&!cloudSource&&!reindex&&!dump;
    var sessions=fast?new SessionScanCache(this,source,telescopeIdentity??telescope,model,cached,archive):null;
-   var workerCache=fullScan||fast?new Dictionary<string,SourceManifest>(StringComparer.OrdinalIgnoreCase):cached;
+   var workerCache=fullScan||fast?new Dictionary<string,SourceManifest>(Util.PathComparer):cached;
    if(fullScan)deferHash=false;
-   var shots=new Dictionary<string,Classifier.ShotsMetadata>(StringComparer.OrdinalIgnoreCase);var seen=new HashSet<string>();
+   var shots=new Dictionary<string,Classifier.ShotsMetadata>(Util.PathComparer);var seen=new HashSet<string>();
    var headers=new MetadataHeaderCache(Path.GetDirectoryName(WorkingIndex),source);int workers=cloudSource?1:metadataWorkers>0?Math.Min(4,metadataWorkers):Math.Min(2,Math.Max(1,Environment.ProcessorCount));
    using(var queue=new BlockingCollection<ScanEntry>(128))using(var overflow=new ScanOverflow(Path.GetDirectoryName(WorkingIndex)))using(var linked=CancellationTokenSource.CreateLinkedTokenSource(ct)){
     var producer=Task.Run(()=>{
@@ -126,7 +186,7 @@ namespace AstroArchive {
       while(stack.Count>0){linked.Token.ThrowIfCancellationRequested();var directory=stack.Pop();try{
       int knownFiles;long knownBytes;if(filenames!=null&&filenames.TrySkipFolder(directory,linked.Token,out knownFiles,out knownBytes)){plan.FastSessionFolders++;plan.FastSkippedFolders++;plan.FastSkippedFiles+=knownFiles;plan.FastSkippedBytes+=knownBytes;for(int i=0;i<knownFiles;i++){metrics.Discover(0);metrics.Complete(0);}continue;}
       using(var discovery=metrics.Begin("Discovery",directory.FullName)){long files=0;int skipped=0;var children=new List<DirectoryInfo>();if(sessions!=null)sessions.BeginFolder(directory,linked.Token);foreach(var info in directory.EnumerateFileSystemInfos()){
-       linked.Token.ThrowIfCancellationRequested();metrics.Advance();if((info.Attributes&FileAttributes.Directory)!=0){if(!SessionScanCache.SystemFolder(info.Name)&&!(reindex&&info.FullName.Equals(DumpFolder,StringComparison.OrdinalIgnoreCase))){if(FileStamp.CanTraverse((DirectoryInfo)info))children.Add((DirectoryInfo)info);else lock(plan.Errors)plan.Errors.Add("Skipped linked or unresolvable directory: "+info.FullName);}}
+       linked.Token.ThrowIfCancellationRequested();metrics.Advance();if((info.Attributes&FileAttributes.Directory)!=0){if(!SessionScanCache.SystemFolder(info.Name)&&!(reindex&&info.FullName.Equals(DumpFolder,Util.PathComparison))){if(FileStamp.CanTraverse((DirectoryInfo)info))children.Add((DirectoryInfo)info);else lock(plan.Errors)plan.Errors.Add("Skipped linked or unresolvable directory: "+info.FullName);}}
        else if(Util.IsImageAsset(info.Name)){if(selection!=null&&(info.Attributes&FileAttributes.ReparsePoint)!=0){lock(plan.Errors)plan.Errors.Add("Skipped linked capture: "+info.FullName);continue;}if(ignoreFailed&&Util.FailedFilename(info.Name)){plan.IgnoredFailed++;continue;}if(ignoreRaster&&ImportPolicy.RasterFilename(info.Name)){plan.IgnoredRaster++;continue;}bool excluded;if(filenames!=null&&filenames.TrySkip(info.FullName,out excluded)){if(excluded)plan.FastDeletedFiles++;else plan.FastSkippedFiles++;skipped++;metrics.Discover(0);metrics.Complete(0);files++;continue;}var entry=ScanEntry.From((FileInfo)info);metrics.Discover(entry.Enumerated.Size);files++;
         if(sessions!=null&&sessions.TrySkip(entry)){plan.FastSkippedFiles++;plan.FastSkippedBytes+=entry.Enumerated.Size;skipped++;metrics.Complete(entry.Enumerated.Size);continue;}
         if(!queue.TryAdd(entry))overflow.Add(entry);}

@@ -29,8 +29,8 @@ namespace AstroArchive {
    lock(sync){byte[] bytes=Encoding.UTF8.GetBytes(Util.Serialize(new Completion{Key=Key(frame),Hash=frame.Hash})+"\n");using(var output=new FileStream(PathFor(record.Id,".completed"),FileMode.Append,FileAccess.Write,FileShare.Read)){output.Write(bytes,0,bytes.Length);output.Flush(true);}}
   }
   public List<Frame> Remaining(ImportResumeRecord record,Repository repository,CancellationToken ct){
-   var completed=new Dictionary<string,string>(StringComparer.OrdinalIgnoreCase);lock(sync){string path=PathFor(record.Id,".completed");if(File.Exists(path))foreach(string line in File.ReadLines(path)){try{var item=Util.Deserialize<Completion>(line);if(item!=null&&!string.IsNullOrEmpty(item.Key)&&!string.IsNullOrEmpty(item.Hash))completed[item.Key]=item.Hash;}catch{ /* A crash may truncate the final acknowledgement; archive verification still deduplicates it. */ }}}
-   var archived=repository.All().GroupBy(Key,StringComparer.OrdinalIgnoreCase).ToDictionary(g=>g.Key,g=>g.ToList(),StringComparer.OrdinalIgnoreCase);var result=new List<Frame>();foreach(var frame in record.Frames??new List<Frame>()){
+   var completed=new Dictionary<string,string>(Util.PathComparer);lock(sync){string path=PathFor(record.Id,".completed");if(File.Exists(path))foreach(string line in File.ReadLines(path)){try{var item=Util.Deserialize<Completion>(line);if(item!=null&&!string.IsNullOrEmpty(item.Key)&&!string.IsNullOrEmpty(item.Hash))completed[item.Key]=item.Hash;}catch{ /* A crash may truncate the final acknowledgement; archive verification still deduplicates it. */ }}}
+   var archived=repository.All().GroupBy(Key,Util.PathComparer).ToDictionary(g=>g.Key,g=>g.ToList(),Util.PathComparer);var result=new List<Frame>();foreach(var frame in record.Frames??new List<Frame>()){
     ct.ThrowIfCancellationRequested();string hash;Frame retained=null;
     if(completed.TryGetValue(Key(frame),out hash))retained=repository.Find(hash);
     else if(!string.IsNullOrEmpty(frame.Hash))retained=repository.Find(frame.Hash);

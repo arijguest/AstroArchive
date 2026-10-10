@@ -21,7 +21,7 @@ namespace AstroArchive {
  internal sealed class HeaderCacheEntry {public FileStamp Stamp;public FitsHeader Header;public AssetInfo Asset;public string Version;}
  internal sealed class MetadataHeaderCache {
   const int Limit=2048,MaxBytes=16*1024*1024;readonly string path;readonly object gate=new object();
-  readonly Dictionary<string,string> entries=new Dictionary<string,string>(StringComparer.OrdinalIgnoreCase);readonly Queue<string> order=new Queue<string>();int bytes;bool dirty;
+  readonly Dictionary<string,string> entries=new Dictionary<string,string>(Util.PathComparer);readonly Queue<string> order=new Queue<string>();int bytes;bool dirty;
   public MetadataHeaderCache(string directory,string root){path=Path.Combine(directory,"headers180-"+Util.HashText(root.ToLowerInvariant())+".json");try{if(File.Exists(path)&&new FileInfo(path).Length<=MaxBytes){var stored=Util.Deserialize<Dictionary<string,string>>(File.ReadAllText(path));foreach(var pair in stored.Take(Limit)){entries[pair.Key]=pair.Value;order.Enqueue(pair.Key);bytes+=pair.Key.Length*2+pair.Value.Length*2;}}}catch{entries.Clear();order.Clear();bytes=0;}}
   public FitsHeader Get(string name,FileStamp stamp){var asset=GetAsset(name,stamp);return asset==null?null:asset.Header;}
   public void Put(string name,FileStamp stamp,FitsHeader header){PutAsset(name,stamp,new AssetInfo{Format="FITS",Header=header});}

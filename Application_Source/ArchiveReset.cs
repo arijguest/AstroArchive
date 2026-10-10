@@ -8,14 +8,14 @@ namespace AstroArchive {
  public sealed partial class Repository {
   public static void CheckManagedPath(string path,string root){
    string full=Path.GetFullPath(path),boundary=Path.GetFullPath(root).TrimEnd(Path.DirectorySeparatorChar,Path.AltDirectorySeparatorChar);
-   if(!Util.Within(full,root)||full.TrimEnd(Path.DirectorySeparatorChar,Path.AltDirectorySeparatorChar).Equals(boundary,StringComparison.OrdinalIgnoreCase))throw new IOException("Path is outside the archive.");
+   if(!Util.Within(full,root)||full.TrimEnd(Path.DirectorySeparatorChar,Path.AltDirectorySeparatorChar).Equals(boundary,Util.PathComparison))throw new IOException("Path is outside the archive.");
    // Inspect the leaf as well as its parents, including dangling links. Cloud
    // placeholders remain supported; name-surrogate reparse tags redirect paths.
    for(string item=full;item!=null;item=Path.GetDirectoryName(item)){
     FileAttributes attributes=0;bool exists=true;
     try{attributes=File.GetAttributes(item);}catch(FileNotFoundException){exists=false;}catch(DirectoryNotFoundException){exists=false;}
     if(exists){FileSystemInfo entry=(attributes&FileAttributes.Directory)!=0?(FileSystemInfo)new DirectoryInfo(item):new FileInfo(item);if(!FileStamp.CanAccess(entry))throw new IOException("Archive paths cannot follow a linked file or directory: "+item);}
-    if(item.TrimEnd(Path.DirectorySeparatorChar,Path.AltDirectorySeparatorChar).Equals(boundary,StringComparison.OrdinalIgnoreCase))return;
+    if(item.TrimEnd(Path.DirectorySeparatorChar,Path.AltDirectorySeparatorChar).Equals(boundary,Util.PathComparison))return;
    }
    throw new IOException("Path is outside the archive.");
   }

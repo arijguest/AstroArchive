@@ -38,6 +38,7 @@ namespace AstroArchive {
    WindowsTest("Backups handle metadata folder casing without duplicate database entries",()=>{
     using(var repo=SafetyFixture("backup-case")){string intermediate=Path.Combine(repo.Root,"case-change");Directory.Move(repo.Meta,intermediate);Directory.Move(intermediate,Path.Combine(repo.Root,".ASTROARCHIVE"));var result=repo.CreateBackup(Path.Combine(root,"case-backups"),true,ct,NoProgress);string restored=Path.Combine(root,"case-restored");ZipFile.ExtractToDirectory(result.Path,restored);var manifest=Util.Deserialize<BackupManifest>(File.ReadAllText(Path.Combine(restored,"backup.json")));Check(manifest.Files.Count(f=>f.Path.Equals("Repository/.astroarchive/index.sqlite",StringComparison.OrdinalIgnoreCase))==1,"Backup duplicated its database with different casing");using(var recovered=new Repository(Path.Combine(restored,"Repository")))Check(recovered.All().Count==1,"Mixed-case metadata folder did not restore");}
    });
+#if !PORTABLE
    WindowsTest("NTFS protection blocks Explorer-style deletion and rename, keeps working folders writable",()=>{
     using(var repo=SafetyFixture("protection-ntfs")){string path=repo.FilePath(repo.All().Single()),parent=Path.GetDirectoryName(path);var original=SafetyAcl(File.GetAccessControl(path));var originalParent=SafetyAcl(Directory.GetAccessControl(parent));
      try{repo.SetOriginalsProtection(true,ct,NoProgress);Check(repo.OriginalsProtected,"Protection not enabled");Expect(()=>File.Delete(path),"Protected file could be deleted through parent DELETE_CHILD");Expect(()=>File.Move(path,path+".renamed"),"Protected file could be renamed");Expect(()=>Directory.Delete(Path.Combine(repo.Root,"Targets"),true),"Protected originals could be deleted recursively");Check(Util.Hash(path,ct)==repo.All().Single().Hash,"Read access or original bytes changed");string copy=Path.Combine(root,"protection-copy.fit");File.Copy(path,copy);File.Delete(copy);
@@ -66,6 +67,7 @@ namespace AstroArchive {
    WindowsTest("Unrelated explicit Windows rules are preserved when protection is removed",()=>{
     using(var repo=SafetyFixture("protection-existing")){string path=repo.FilePath(repo.All().Single());var acl=File.GetAccessControl(path);string sid;using(var user=WindowsIdentity.GetCurrent())sid=user.User.Value;var unrelated=new FileSystemAccessRule(new SecurityIdentifier(sid),FileSystemRights.ExecuteFile,AccessControlType.Deny);acl.AddAccessRule(unrelated);File.SetAccessControl(path,acl);string before=SafetyAcl(File.GetAccessControl(path));try{repo.SetOriginalsProtection(true,ct,NoProgress);repo.SetOriginalsProtection(false,ct,NoProgress);Check(SafetyAcl(File.GetAccessControl(path))==before,"Unrelated deny rule was removed");}finally{repo.SetOriginalsProtection(false,ct,NoProgress);acl=File.GetAccessControl(path);acl.RemoveAccessRuleSpecific(unrelated);File.SetAccessControl(path,acl);}}
    });
+#endif
   }
  }
 }

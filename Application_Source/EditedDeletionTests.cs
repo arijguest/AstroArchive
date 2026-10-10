@@ -39,8 +39,11 @@ namespace AstroArchive {
    Test("Edited deletion rolls back moved files when project metadata cannot be saved",()=>{
     string file=Path.Combine(root,"edited-delete-rollback-source","image.fit");Write(file,64,48,(x,y)=>2000,new Dictionary<string,string>());
     using(var repo=new Repository(Path.Combine(root,"edited-delete-rollback-repo"))){var project=repo.AddEditedImages(new[]{file},null,"Rollback",ct,NoProgress);var row=EditedGallery.Read(repo,new string[0],ct).Images.Single();string path=repo.EditedPath(project,row.RelativePath),hash=Util.Hash(path,ct),manifest=Path.Combine(repo.EditedProjectFolder(project),"edited-project.json"),before=File.ReadAllText(manifest);FileDeletionResult result;
-     // Reading is allowed for preflight; replacing the manifest is denied after staging.
-     using(var locked=new FileStream(manifest,FileMode.Open,FileAccess.Read,FileShare.Read))result=repo.DeleteEditedImages(new[]{row},ct,NoProgress);
+     // Preflight reads the manifest; an obstructing directory then forces the
+     // metadata commit to fail after the image moves, on both operating systems.
+     string saved=manifest+".fixture-original";
+     try{result=repo.DeleteEditedImages(new[]{row},ct,p=>{if(p.Done==0){File.Move(manifest,saved);Directory.CreateDirectory(manifest);}});}
+     finally{if(Directory.Exists(manifest))Directory.Delete(manifest);if(File.Exists(saved))File.Move(saved,manifest);}
      Check(result.Deleted==0&&result.Errors.Count==1&&File.Exists(path)&&Util.Hash(path,ct)==hash&&File.ReadAllText(manifest)==before,"Manifest failure lost image bytes or reported success");
      Check(!Directory.EnumerateDirectories(Path.Combine(repo.Meta,"staging"),"delete-edited-*").Any(),"Rollback left staged files");
     }

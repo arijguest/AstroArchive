@@ -139,6 +139,9 @@ namespace AstroArchive {
             Register(new FitsAssetReader(),".fit",".fits",".fts",".fz");
             Register(new XisfReader(),".xisf");
             Register(new SerReader(),".ser");
+#if PORTABLE
+            Register(new LinuxRasterReader(),".png",".jpg",".jpeg",".tif",".tiff",".gif");
+#endif
         }
         public static void Register(IAssetReader reader,params string[] extensions) {
             foreach(string ext in extensions)readers[ext]=reader;
