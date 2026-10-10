@@ -32,6 +32,7 @@ Use **Settings → Updates** to install them. [Installation, repair and policy b
 
 ## Latest releases
 
+- **[3.1.3 (package 3.1.3.1)](https://github.com/arijguest/AstroArchive/releases/tag/v3.1.3.1):** dismissible process summaries below the menu and in Activity, live imports first, completion results, videos above calibrations in All Targets, and refined search and network controls.
 - **[3.1.2 (package 3.1.2.1)](https://github.com/arijguest/AstroArchive/releases/tag/v3.1.2.1):** pause and recover imports after restarts or updates, keep Settings available during parallel telescope downloads, see arriving files and numeric ETAs, and export dark or light branded Analytics documents.
 - **[3.1.1 (package 3.1.1.1)](https://github.com/arijguest/AstroArchive/releases/tag/v3.1.1.1):** import from multiple telescopes simultaneously, select more captures while live import runs, and stop each session independently in Activity. Overlapping imports reuse verified downloads and archive each capture once.
 - **[3.0.1 (package 3.0.1.1)](https://github.com/arijguest/AstroArchive/releases/tag/v3.0.1.1):** automatic Seestar/DWARF network discovery, selected and live imports, plus six analytics charts with PNG, JPEG, PDF and SVG exports.

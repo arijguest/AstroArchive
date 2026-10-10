@@ -1,17 +1,13 @@
-AstroArchive 3.1.2
-Package 3.1.2.1
+AstroArchive 3.1.3
+Package 3.1.3.1
 
-- Pause and resume folder, USB, network/live, Dump and edited-image imports.
-  Unfinished queues survive restarts, crashes and application updates. Resume
-  verifies completed archive copies, skips duplicates and restarts incomplete
-  files. Resume or discard an unfinished queue from Activity.
-- Download from multiple telescopes simultaneously while selecting more files.
-  Each session has independent progress and Pause/Resume controls. Settings,
-  filters, grouping and Analytics remain available during network imports.
-- Network files appear in Import as they arrive, with transfer progress and
-  numeric time estimates based on measured throughput. Live watchers show when
-  they are waiting for captures or reconnecting.
-- Analytics documents default to Dark, with an optional Light theme for every
-  PNG, JPEG, PDF and SVG export. Charts use AstroArchive colours, a larger logo,
-  and cleaner headers and footers. Export all combines the six chart options
-  in one document.
+- Compact process summaries appear below the menu and in Activity, with progress,
+  telescope details, file counts, transfer speed, elapsed time and time estimates
+  where available. Completed processes retain their results and key parameters.
+- Live imports stay at the top of process lists. Multiple process summaries scroll
+  only when needed. Dismiss a summary without stopping its work; Show dismissed
+  restores summaries and their controls in Activity.
+- All Targets places videos below still images and above calibrations, including
+  grouped sessions and custom column sorting.
+- Search fields have rounded corners matching the other panels. The Connect over
+  network button matches the height of the saved telescope dropdown.
