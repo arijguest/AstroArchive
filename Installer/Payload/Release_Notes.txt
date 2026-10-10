@@ -1,19 +1,18 @@
-AstroArchive 3.1.4
-Package 3.1.4.1
+AstroArchive 3.1.5
+Package 3.1.5.1
 
-- Refined all six Analytics charts with stronger typography, branded gradients,
-  rounded metric cards and cleaner, more compact social layouts. Dark remains
-  the default document theme, with a Light option across all export formats.
-- Headline cards always show the whole repository's light-frame integration,
-  frame count and target count, even when chart filters or continuation pages
-  show only part of the data. Stacks, videos and calibrations are not double counted.
-- Export PNG, JPEG, PDF or SVG in Landscape or social formats: 9:16, 4:5, 1:1,
-  16:9 and 2:3. Social image presets match each layout's native pixel dimensions.
-- Export animated H.264 MP4 or looping GIF charts. Export all creates one story
-  across all six reports, including continuation pages. Preview animated reveals
-  and Glide, Zoom or Dissolve transitions, adjust pacing and choose video size.
-  No separate encoder installation is required. Progress and remaining time are
-  shown; cancelling preserves previous exports and removes unfinished files.
-- Dismissing a process summary hides it from both the main banner and Activity
-  without stopping its work. Completed banners clear after further interaction
-  or another process completes, while their Activity history remains available.
+- Repository > Analytics opens directly into the Analytics workspace. Clear
+  Document and Video / GIF controls group the available export formats.
+- Customize each chart's title, subtitle and palette with a live preview. Choose
+  supported chart styles, category ordering and density; save configurations for
+  future sessions or reset to defaults. Repository headline totals remain complete.
+- Set a custom total video length alongside the existing pacing presets. Chart
+  reveals and Glide, Zoom or Dissolve transitions adapt to the available reading
+  time. MP4 stories finish cleanly; GIF stories loop smoothly into their first chart.
+- Refined social layouts use larger focal charts, more compact headers and fuller
+  plot areas. PNG, JPEG, PDF, SVG, MP4 and GIF share the customized chart styling.
+- The Repository preview opens narrower, giving the skymap more space. Its reset
+  control scales with the globe and stays anchored through resizing, rotation,
+  zooming and refresh, in both themes and at different display scales.
+- Removed verified unused code and stale generated installer payload copies.
+  Installer builds package fresh application files; existing features are retained.
