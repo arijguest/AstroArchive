@@ -75,7 +75,14 @@ Where have you spent your imaging time? Which targets are ready for another pass
 
 Filter by acquisition dates or telescope, add a document label, and choose a
 **Dark or Light** report. Export **PNG, JPEG, PDF or SVG**—one chart or all six in
-one document, with 150 or 300 DPI for raster images.
+one document, with 150 or 300 DPI for raster images. Choose Landscape or a social
+layout: **9:16**, **4:5**, **1:1**, **16:9** or **2:3**, with matching pixel presets.
+
+Choose **MP4** or **GIF** to share an animated chart or an **Export all** story.
+Preview the chart reveals and Glide, Zoom or Dissolve transitions; set 4, 6 or 8
+seconds per page and choose original or smaller dimensions. MP4 uses Windows’
+built-in H.264 encoder at 24 fps; GIF loops at 12 fps. Exports show progress and
+remaining time, and cancellation preserves any previous output.
 
 <details>
 <summary><strong>What the analytics measure</strong></summary>
@@ -84,7 +91,11 @@ Time means individual light-frame integration. Stacks, videos and calibrations
 are excluded to avoid double counting; missing dates and exposures are reported.
 The report starts with the entire repository independently of browsing filters.
 Including rejected lights is optional. Long rankings continue across pages so
-every target and telescope remains represented.
+every target and telescope remains represented. Headline cards always show the
+whole repository’s light-frame integration, frame count and target count, including
+rejected and undated lights. Chart filters affect the plot and its footer totals.
+PDF gives each chart its own page; image/SVG collections stack tall layouts or
+use a grid for square and wide pages.
 
 </details>
 
@@ -127,7 +138,11 @@ where possible; optional NTFS **Protect originals** is not a substitute for back
 
 ### Fresh from the latest releases
 
-**[3.1.3](https://github.com/arijguest/AstroArchive/releases/tag/v3.1.3.1)** brings compact, dismissible process summaries and clearer repository layouts.
+**[3.1.4](https://github.com/arijguest/AstroArchive/releases/tag/v3.1.4.1)** brings
+refined Analytics graphics, social layouts, animated MP4/GIF stories and quieter
+process notifications. Manually dismissed summaries disappear from both banners
+and Activity; completed banners clear as you continue using the app while their
+Activity history remains.
 Recent releases added recoverable import queues, simultaneous telescope sessions,
 and Dark or Light analytics documents.
 [See what’s new →](https://github.com/arijguest/AstroArchive/releases)

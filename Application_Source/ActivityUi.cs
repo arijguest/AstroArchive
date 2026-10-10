@@ -14,7 +14,7 @@ namespace AstroArchive {
  public sealed class ActivityEntry {
   public string Title,Status,ReportTitle,Report,OutputPath,ActionLabel,RepositoryRoot,CancelLabel,ImportKind,ProcessContext,ProcessOutcome;
   public DateTime StartedUtc=DateTime.UtcNow;
-  public bool Running,Unread,NeedsReview,Failed,Canceled,NetworkImport,LiveImport,ProcessTracked,BannerDismissed,ActivityDismissed,WasRunning;
+  public bool Running,Unread,NeedsReview,Failed,Canceled,NetworkImport,LiveImport,ProcessTracked,BannerDismissed,BannerAutoHidden,ActivityDismissed,WasRunning;
   public double? DurationSeconds;
   public ProgressInfo Progress;
   public Action Review,Cancel,Pause,Resume,Discard;public Func<bool> ResumeAvailable;
@@ -77,8 +77,8 @@ namespace AstroArchive {
   }
   void NotifyActivity(ActivityEntry entry){
    if(activityDisposed||closing)return;
-   if(!entry.Running&&entry.WasRunning){entry.WasRunning=false;entry.BannerDismissed=false;entry.ActivityDismissed=false;}
-   bool notify=!entry.Running&&entry.DurationSeconds.HasValue&&entry.DurationSeconds.Value>300;
+   if(!entry.Running&&entry.WasRunning){entry.WasRunning=false;entry.BannerAutoHidden=false;if(entry.ProcessTracked)RetireCompletedProcessSummaries(entry);}
+   bool notify=!entry.ActivityDismissed&&!entry.Running&&entry.DurationSeconds.HasValue&&entry.DurationSeconds.Value>300;
    entry.Unread=notify&&(activityPanel==null||activityPanel.Visibility!=Visibility.Visible);RenderActivity();
    if(!notify)return;
    if(activityToast==null||activityPanel.Visibility==Visibility.Visible||!Window.IsVisible||Window.WindowState==WindowState.Minimized)return;
@@ -86,7 +86,7 @@ namespace AstroArchive {
   }
   void RenderActivity(){
    if(activityItems==null)return;activityItems.Children.Clear();activityCards.Clear();
-   if(activities.Count==0)activityItems.Children.Add(new TextBlock{Text="No recent activity. Long-running work and release notifications appear here.",TextWrapping=TextWrapping.Wrap});
+   if(activities.All(a=>a.ActivityDismissed))activityItems.Children.Add(new TextBlock{Text="No recent activity. Long-running work and release notifications appear here.",TextWrapping=TextWrapping.Wrap});
    foreach(var entry in OrderedActivities().Where(a=>!a.ActivityDismissed)){
     var panel=new StackPanel();var card=new ActivityCard{Title=new TextBlock{FontWeight=FontWeights.SemiBold,TextWrapping=TextWrapping.Wrap},Status=new TextBlock{TextWrapping=TextWrapping.Wrap,Margin=new Thickness(0,6,0,0)},Rate=new TextBlock{TextWrapping=TextWrapping.Wrap,Margin=new Thickness(0,6,0,0)},Bar=new ProgressBar{Maximum=1,Height=6,Margin=new Thickness(0,10,0,0)},Details=new TextBlock{TextWrapping=TextWrapping.Wrap},Actions=new WrapPanel{Margin=new Thickness(0,8,0,0)}};
     AutomationProperties.SetName(card.Bar,entry.Title+" progress");var cardHeading=new DockPanel();var dismiss=ActivityAction("×",()=>DismissActivitySummary(entry));dismiss.Margin=new Thickness(8,0,0,0);dismiss.ToolTip="Dismiss this card; running work continues. Use Show dismissed to restore it.";AutomationProperties.SetName(dismiss,"Dismiss "+entry.Title+" activity");DockPanel.SetDock(dismiss,Dock.Right);cardHeading.Children.Add(dismiss);cardHeading.Children.Add(card.Title);panel.Children.Add(cardHeading);panel.Children.Add(card.Status);panel.Children.Add(card.Bar);panel.Children.Add(card.Rate);var details=new Expander{Header="Details",Content=card.Details,Margin=new Thickness(0,8,0,0)};panel.Children.Add(details);panel.Children.Add(card.Actions);
@@ -97,7 +97,7 @@ namespace AstroArchive {
   }
   Button ActivityAction(string label,Action action){var button=new Button{Content=label,Margin=new Thickness(0,0,6,6),Padding=new Thickness(8,4,8,4)};button.Click+=(s,e)=>{try{action();}catch(Exception error){var entry=AddActivity(label);entry.Failed=true;entry.Status=error.Message;NotifyActivity(entry);}};return button;}
   void UpdateActivityBadge(){
-   if(activityBell==null)return;int unread=activities.Count(a=>a.Unread),running=activities.Count(a=>a.Running),review=activities.Count(a=>a.NeedsReview);activityBadge.Text=unread.ToString();activityBadge.Visibility=unread==0?Visibility.Collapsed:Visibility.Visible;
+   if(activityBell==null)return;int unread=activities.Count(a=>!a.ActivityDismissed&&a.Unread),running=activities.Count(a=>a.Running),review=activities.Count(a=>!a.ActivityDismissed&&a.NeedsReview);activityBadge.Text=unread.ToString();activityBadge.Visibility=unread==0?Visibility.Collapsed:Visibility.Visible;
    string description="Activity: "+running+" running, "+unread+" unread, "+review+" need attention";AutomationProperties.SetName(activityBell,description);activityBell.ToolTip=description+" (Ctrl+Shift+N)";
   }
   static string ActivityRate(ActivityEntry entry){

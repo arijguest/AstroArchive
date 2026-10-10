@@ -21,7 +21,7 @@ jobs:
         with:
           python-version: '3.12'
       - name: Install read-only loopback fixture dependencies
-        run: python -m pip install impacket==0.13.1 pyftpdlib==2.2.0
+        run: python -m pip install impacket==0.13.1 pyftpdlib==2.2.0 imageio-ffmpeg==0.6.0 Pillow==11.3.0
       - name: Check discovery, guest SMB and FTP archive integration
         shell: powershell
         run: .\Application_Source\test-remote-transports.ps1
@@ -38,7 +38,7 @@ jobs:
             $output = Join-Path $pwd "release-artifacts\ui-$mode"
             $modeArgument = if ($mode -eq 'full') { @() } else { @("--$mode-only") }
             $process = Start-Process '.\Application_Source\dist\AstroArchive.exe' -ArgumentList (@('--ui-test', $output, '--no-updates') + $modeArgument) -PassThru
-            if (-not $process.WaitForExit(240000)) { $process.Kill(); throw "$mode UI check timed out." }
+            if (-not $process.WaitForExit(360000)) { $process.Kill(); throw "$mode UI check timed out." }
             if ($process.ExitCode -ne 0) {
               $uiFailureFile = Join-Path $output 'ui-smoke-error.txt'
               if (Test-Path $uiFailureFile) { Get-Content $uiFailureFile }
@@ -46,9 +46,21 @@ jobs:
             }
           }
           Get-Content '.\release-artifacts\ui-remote\remote-ui-passed.txt'
+      - name: Decode exported analytics videos and animations independently
+        run: python Application_Source/check-analytics-media.py release-artifacts/ui-analytics
       - name: Package the portable preview
         shell: powershell
         run: Compress-Archive -Path '.\Application_Source\dist\*' -DestinationPath '.\release-artifacts\AstroArchive-v3-Windows-x64.zip'
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: astroarchive-analytics-preview
+          path: |
+            release-artifacts/ui-analytics/AstroArchive_Analytics_*.png
+            release-artifacts/ui-analytics/analytics-*-dark-single.png
+            release-artifacts/ui-analytics/media-story.*
+            release-artifacts/ui-analytics/media-transition-*.png
+          if-no-files-found: warn
       - uses: actions/upload-artifact@v4
         if: always()
         with:

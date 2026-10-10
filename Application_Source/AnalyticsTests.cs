@@ -11,6 +11,24 @@ namespace AstroArchive {
    return new Frame{Target=target,Kind="Light",Exposure=seconds,AcquisitionDate=date,Telescope=telescope,Filter="L"};
   }
   static void AnalyticsTests(){
+   Test("Repository headline totals survive every chart scope and missing date",()=>{
+    var rejected=AnalyticsLight("M45",3600,"2025-01-01","Scope B");rejected.Rejected=true;
+    var deleted=AnalyticsLight("M51",7200);deleted.Status="Deleted";
+    var source=new[]{AnalyticsLight("M31",1800),rejected,AnalyticsLight("M42",900,null,null),AnalyticsLight("M81",null),deleted,new Frame{Target="M31",Kind="Stack",Exposure=9000},new Frame{Kind="Video",Exposure=9000}};
+    foreach(var options in new[]{new AnalyticsOptions(),new AnalyticsOptions{Telescope="Scope A",From=new DateTime(2026,10,1)},new AnalyticsOptions{UnknownTelescopeOnly=true},new AnalyticsOptions{IncludeRejected=true},new AnalyticsOptions{To=new DateTime(2000,1,1)}}){
+     var data=ArchiveAnalytics.Build(source,options);Check(data.RepositoryCaptures==4&&data.RepositoryTargets==4&&data.RepositorySeconds==6300&&data.RepositoryUnknownExposure==1,"Repository headline changed with chart scope or counted non-light/deleted files");
+     foreach(AnalyticsLayout layout in Enum.GetValues(typeof(AnalyticsLayout)))foreach(int index in Enumerable.Range(0,6)){var page=AnalyticsGraphics.Page(data,index,true,layout);Check(page.Marks.Any(m=>m.Role=="header"&&m.Text=="1.75 h")&&page.Marks.Count(m=>m.Role=="header"&&m.Text=="4")==2,"Headline does not show whole-repository figures");}
+    }
+    var unknown=ArchiveAnalytics.Build(source,new AnalyticsOptions{UnknownTelescopeOnly=true});Check(unknown.Captures==1&&unknown.Seconds==900,"Unknown telescope scope lost its own chart data");
+   });
+   Test("Styled charts share vector gradients and rounded cards in both themes",()=>{
+    var data=ArchiveAnalytics.Build(new[]{AnalyticsLight("M31",3600),AnalyticsLight("M42",600)},new AnalyticsOptions());
+    foreach(bool dark in new[]{true,false}){
+     var pages=Enumerable.Range(0,6).Select(i=>AnalyticsGraphics.Page(data,i,dark)).ToList();var svg=XDocument.Parse(AnalyticsGraphics.Svg(pages,""));XNamespace ns="http://www.w3.org/2000/svg";var ids=svg.Descendants(ns+"linearGradient").Select(e=>e.Attribute("id").Value).ToList();Check(ids.Count>6&&ids.Distinct().Count()==ids.Count,"Vector gradients missing or collide across pages");foreach(var element in svg.Descendants().Where(e=>e.Attribute("fill")!=null&&e.Attribute("fill").Value.StartsWith("url(#"))){string id=element.Attribute("fill").Value.Substring(5).TrimEnd(')');Check(ids.Contains(id),"SVG refers to a missing gradient");}
+     Check(pages.All(p=>p.Marks.Count(m=>m.Role=="header"&&m.Kind=="rect"&&m.Radius==12)==3),"Metrics did not receive consistent rounded cards");
+     using(var output=new MemoryStream()){AnalyticsPdf.Write(output,pages,new byte[]{0,0,0},1,1,m=>"0 0 1 1 re f\n");Check(Encoding.ASCII.GetString(output.ToArray()).Contains("/ShadingType 2"),"PDF lost vector gradient shading");}
+    }
+   });
    Test("Analytics measures light-frame integration without double counting",()=>{
     var rows=new List<Frame>{AnalyticsLight("M31",3600),AnalyticsLight("M31",1800),AnalyticsLight("M45",null),AnalyticsLight("M45",double.NaN),AnalyticsLight("M45",double.PositiveInfinity),AnalyticsLight("M45",-1),AnalyticsLight("M45",0),new Frame{Target="M31",Kind="Stack",Exposure=5400,StackCount=90},new Frame{Kind="Dark",Exposure=60},new Frame{Kind="Video",Exposure=120}};
     var rejected=AnalyticsLight("M45",600);rejected.Rejected=true;rows.Add(rejected);var deleted=AnalyticsLight("M45",300);deleted.Status="Deleted";rows.Add(deleted);
@@ -76,10 +94,39 @@ namespace AstroArchive {
     var data=ArchiveAnalytics.Build(new Frame[0],new AnalyticsOptions());Check(data.Captures==0&&data.Seconds==0&&data.UnknownExposure==0,"Empty totals incorrect");
     var pages=Enumerable.Range(0,6).Select(i=>AnalyticsGraphics.Page(data,i)).ToList();string svg=AnalyticsGraphics.Svg(pages,"");Check(!svg.Contains("NaN")&&!svg.Contains("Infinity")&&svg.Contains("No light frames in this scope"),"Empty chart geometry invalid");XDocument.Parse(svg);
    });
+   Test("Portrait analytics reflows all charts into branded 9:16 pages",()=>{
+    var rows=Enumerable.Range(0,25).Select(i=>AnalyticsLight("Custom target "+i,(i+1)*60,"2026-10-01","Physical telescope "+i)).ToList();
+    var data=ArchiveAnalytics.Build(rows,new AnalyticsOptions{Caption="Portrait observatory"});
+    foreach(bool dark in new[]{true,false})foreach(int index in Enumerable.Range(0,6)){
+     var pages=AnalyticsGraphics.Pages(data,index,dark,AnalyticsLayout.Vertical);
+     foreach(var page in pages){
+      Check(page.CanvasWidth==1080&&page.CanvasHeight==1920&&page.Portrait,"Portrait dimensions are not 9:16");
+      Check(page.Marks[0].Fill==(dark?"#0C1220":"#FFFFFF")&&page.Marks.Single(m=>m.Kind=="logo").Width==88,"Portrait branding or document theme lost");
+      Check(page.Marks.All(m=>m.Kind=="polygon"?Enumerable.Range(0,m.Points.Length/2).All(i=>m.Points[i*2]>=0&&m.Points[i*2]<1080&&m.Points[i*2+1]>=0&&m.Points[i*2+1]<1920):m.X>=0&&m.Y>=0&&m.X+m.Width<=1080&&m.Y+m.Height<=1920),"Portrait chart geometry escaped its page");
+     }
+     if(index==2||index==3){Check(pages.Count==4,"Portrait ranking dropped continuation pages");foreach(var value in data.Reports[index].Values)Check(pages.SelectMany(p=>p.Marks).Any(m=>m.Detail==value.Label),"Portrait ranking lost a category");Check(pages.Select(p=>p.Marks.Where(m=>m.Kind=="text"&&m.Y==1480).Last().Text).Distinct().Count()==1,"Portrait ranking scales differ across pages");}
+    }
+    var collection=Enumerable.Range(0,6).SelectMany(i=>AnalyticsGraphics.Pages(data,i,true,AnalyticsLayout.Vertical)).ToList();var document=XDocument.Parse(AnalyticsGraphics.Svg(collection,""));
+    Check(document.Root.Attribute("viewBox").Value=="0 0 1080 "+(collection.Count*1920),"Portrait SVG collection is not stacked vertically");
+    using(var output=new MemoryStream()){AnalyticsPdf.Write(output,collection,new byte[]{0,0,0},1,1,mark=>"0 0 1 1 re f\n");var pdf=Encoding.ASCII.GetString(output.ToArray());Check(pdf.Contains("/MediaBox [0 0 810 1440]")&&pdf.Contains("/Count "+collection.Count),"PDF lost portrait page dimensions or continuation pages");}
+    var empty=Enumerable.Range(0,6).Select(i=>AnalyticsGraphics.Page(ArchiveAnalytics.Build(new Frame[0],new AnalyticsOptions()),i,true,AnalyticsLayout.Vertical)).ToList();var svg=AnalyticsGraphics.Svg(empty,"");Check(svg.Contains("No light frames in this scope")&&!svg.Contains("NaN")&&!svg.Contains("Infinity"),"Empty portrait charts have invalid geometry");
+    rows[0].Telescope=new string('W',80)+" 🌌 "+new string('W',100);rows[0].Filter=rows[0].Telescope;XDocument.Parse(AnalyticsGraphics.Svg(Enumerable.Range(0,6).SelectMany(i=>AnalyticsGraphics.Pages(ArchiveAnalytics.Build(rows,new AnalyticsOptions()),i,true,AnalyticsLayout.Vertical)).ToList(),""));
+   });
    Test("Long Unicode analytics labels remain valid across publication exports",()=>{
     var frame=AnalyticsLight("M31",60);frame.Filter=new string('W',40)+" 🌌 "+new string('W',100);frame.Telescope=new string('W',39)+"🌌 "+new string('W',100);
     var data=ArchiveAnalytics.Build(new[]{frame},new AnalyticsOptions{Caption=new string('W',107)+"🌌 Observatory"});
     XDocument.Parse(AnalyticsGraphics.Svg(Enumerable.Range(0,6).SelectMany(i=>AnalyticsGraphics.Pages(data,i)).ToList(),""));
+   });
+   Test("Common social layouts retain branding, chart categories and exact page ratios",()=>{
+    double[][] sizes={new[]{1200.0,800},new[]{1080.0,1920},new[]{1080.0,1350},new[]{1080.0,1080},new[]{1920.0,1080},new[]{1000.0,1500}};
+    var data=ArchiveAnalytics.Build(Enumerable.Range(0,18).Select(i=>AnalyticsLight("Target "+i,600,"2026-10-01","Instrument "+i)).ToList(),new AnalyticsOptions());
+    foreach(AnalyticsLayout layout in Enum.GetValues(typeof(AnalyticsLayout)))foreach(int index in Enumerable.Range(0,6)){
+     var pages=AnalyticsGraphics.Pages(data,index,true,layout);var size=sizes[(int)layout];
+     foreach(var page in pages){Check(page.CanvasWidth==size[0]&&page.CanvasHeight==size[1],"Social page dimensions differ from the selected format");Check(page.Marks.Single(m=>m.Kind=="logo").Width>0&&page.Marks.Any(m=>m.Text=="AstroArchive"),"Social format lost the branding");Check(page.Marks.Where(m=>m.Kind=="rect"||m.Kind=="logo").All(m=>m.X>=0&&m.Y>=0&&m.X+m.Width<=page.CanvasWidth+.01&&m.Y+m.Height<=page.CanvasHeight+.01),"Social layout clipped a graphic");}
+     if(index==2||index==3)foreach(var value in data.Reports[index].Values)Check(pages.SelectMany(p=>p.Marks).Any(m=>m.Detail==value.Label),"Social ranking lost a category");
+     var svg=XDocument.Parse(AnalyticsGraphics.Svg(new[]{pages[0]},""));Check(svg.Root.Attribute("viewBox").Value=="0 0 "+AnalyticsGraphics.N(size[0])+" "+AnalyticsGraphics.N(size[1]),"Social SVG size does not match the page");
+     using(var output=new MemoryStream()){AnalyticsPdf.Write(output,pages,new byte[]{0,0,0},1,1,mark=>"0 0 1 1 re f\n");Check(Encoding.ASCII.GetString(output.ToArray()).Contains("/MediaBox [0 0 "+AnalyticsGraphics.N(size[0]*.75)+" "+AnalyticsGraphics.N(size[1]*.75)+"]"),"Social PDF page aspect is incorrect");}
+    }
    });
   }
  }

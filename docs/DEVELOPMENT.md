@@ -42,8 +42,11 @@ not repeated full suites.
 
 Analytics checks cover integration accounting, missing metadata, date/telescope
 scoping, histogram boundaries, continuation rankings and SVG/PDF structure. The
-Windows UI switch checks both themes, live scope changes and all four export
-formats, including combined sheets, image decoding and safe file replacement:
+Windows UI switch checks both themes, live scope changes and all six export
+formats, including combined sheets, exact social ratios, animated preview,
+H.264 encoding, GIF decoding, progress and cancellation-safe file replacement.
+The Windows workflow independently decodes MP4/GIF with FFmpeg and Pillow to
+check frame counts, duration, orientation, palette quality and animation:
 
 ~~~powershell
 .\Application_Source\test.ps1 -AnalyticsOnly
