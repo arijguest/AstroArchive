@@ -11,6 +11,24 @@ namespace AstroArchive {
    return new Frame{Target=target,Kind="Light",Exposure=seconds,AcquisitionDate=date,Telescope=telescope,Filter="L"};
   }
   static void AnalyticsTests(){
+   Test("Repository headline totals survive every chart scope and missing date",()=>{
+    var rejected=AnalyticsLight("M45",3600,"2025-01-01","Scope B");rejected.Rejected=true;
+    var deleted=AnalyticsLight("M51",7200);deleted.Status="Deleted";
+    var source=new[]{AnalyticsLight("M31",1800),rejected,AnalyticsLight("M42",900,null,null),AnalyticsLight("M81",null),deleted,new Frame{Target="M31",Kind="Stack",Exposure=9000},new Frame{Kind="Video",Exposure=9000}};
+    foreach(var options in new[]{new AnalyticsOptions(),new AnalyticsOptions{Telescope="Scope A",From=new DateTime(2026,10,1)},new AnalyticsOptions{UnknownTelescopeOnly=true},new AnalyticsOptions{IncludeRejected=true},new AnalyticsOptions{To=new DateTime(2000,1,1)}}){
+     var data=ArchiveAnalytics.Build(source,options);Check(data.RepositoryCaptures==4&&data.RepositoryTargets==4&&data.RepositorySeconds==6300&&data.RepositoryUnknownExposure==1,"Repository headline changed with chart scope or counted non-light/deleted files");
+     foreach(AnalyticsLayout layout in Enum.GetValues(typeof(AnalyticsLayout)))foreach(int index in Enumerable.Range(0,6)){var page=AnalyticsGraphics.Page(data,index,true,layout);Check(page.Marks.Any(m=>m.Role=="header"&&m.Text=="1.75 h")&&page.Marks.Count(m=>m.Role=="header"&&m.Text=="4")==2,"Headline does not show whole-repository figures");}
+    }
+    var unknown=ArchiveAnalytics.Build(source,new AnalyticsOptions{UnknownTelescopeOnly=true});Check(unknown.Captures==1&&unknown.Seconds==900,"Unknown telescope scope lost its own chart data");
+   });
+   Test("Styled charts share vector gradients and rounded cards in both themes",()=>{
+    var data=ArchiveAnalytics.Build(new[]{AnalyticsLight("M31",3600),AnalyticsLight("M42",600)},new AnalyticsOptions());
+    foreach(bool dark in new[]{true,false}){
+     var pages=Enumerable.Range(0,6).Select(i=>AnalyticsGraphics.Page(data,i,dark)).ToList();var svg=XDocument.Parse(AnalyticsGraphics.Svg(pages,""));XNamespace ns="http://www.w3.org/2000/svg";var ids=svg.Descendants(ns+"linearGradient").Select(e=>e.Attribute("id").Value).ToList();Check(ids.Count>6&&ids.Distinct().Count()==ids.Count,"Vector gradients missing or collide across pages");foreach(var element in svg.Descendants().Where(e=>e.Attribute("fill")!=null&&e.Attribute("fill").Value.StartsWith("url(#"))){string id=element.Attribute("fill").Value.Substring(5).TrimEnd(')');Check(ids.Contains(id),"SVG refers to a missing gradient");}
+     Check(pages.All(p=>p.Marks.Count(m=>m.Role=="header"&&m.Kind=="rect"&&m.Radius==12)==3),"Metrics did not receive consistent rounded cards");
+     using(var output=new MemoryStream()){AnalyticsPdf.Write(output,pages,new byte[]{0,0,0},1,1,m=>"0 0 1 1 re f\n");Check(Encoding.ASCII.GetString(output.ToArray()).Contains("/ShadingType 2"),"PDF lost vector gradient shading");}
+    }
+   });
    Test("Analytics measures light-frame integration without double counting",()=>{
     var rows=new List<Frame>{AnalyticsLight("M31",3600),AnalyticsLight("M31",1800),AnalyticsLight("M45",null),AnalyticsLight("M45",double.NaN),AnalyticsLight("M45",double.PositiveInfinity),AnalyticsLight("M45",-1),AnalyticsLight("M45",0),new Frame{Target="M31",Kind="Stack",Exposure=5400,StackCount=90},new Frame{Kind="Dark",Exposure=60},new Frame{Kind="Video",Exposure=120}};
     var rejected=AnalyticsLight("M45",600);rejected.Rejected=true;rows.Add(rejected);var deleted=AnalyticsLight("M45",300);deleted.Status="Deleted";rows.Add(deleted);

@@ -17,18 +17,23 @@ namespace AstroArchive {
   }
   static BitmapSource Logo(){using(var input=new MemoryStream(LogoBytes)){var image=new BitmapImage();image.BeginInit();image.CacheOption=BitmapCacheOption.OnLoad;image.StreamSource=input;image.EndInit();image.Freeze();return image;}}
   static Brush Brush(string colour){var brush=new SolidColorBrush((Color)ColorConverter.ConvertFromString(colour));brush.Freeze();return brush;}
+  static Brush Fill(AnalyticsMark mark){if(mark.FillEnd==null)return Brush(mark.Fill);var brush=new LinearGradientBrush((Color)ColorConverter.ConvertFromString(mark.Fill),(Color)ColorConverter.ConvertFromString(mark.FillEnd),mark.VerticalGradient?90:0);brush.Freeze();return brush;}
   static FormattedText Text(AnalyticsMark mark){return new FormattedText(mark.Text,CultureInfo.InvariantCulture,FlowDirection.LeftToRight,new Typeface(new FontFamily("Arial"),FontStyles.Normal,mark.Bold?FontWeights.Bold:FontWeights.Normal,FontStretches.Normal),mark.Size,Brush(mark.Fill),1.0);}
   static Geometry Polygon(double[] points){var geometry=new StreamGeometry();using(var context=geometry.Open()){context.BeginFigure(new Point(points[0],points[1]),true,true);context.PolyLineTo(Enumerable.Range(1,points.Length/2-1).Select(i=>new Point(points[i*2],points[i*2+1])).ToList(),true,false);}geometry.Freeze();return geometry;}
+  internal static void DrawMark(DrawingContext context,AnalyticsMark mark,BitmapSource logo){
+   if(mark.Kind=="rect")context.DrawRoundedRectangle(Fill(mark),null,new Rect(mark.X,mark.Y,mark.Width,mark.Height),mark.Radius,mark.Radius);
+   else if(mark.Kind=="polygon")context.DrawGeometry(Fill(mark),null,Polygon(mark.Points));
+   else if(mark.Kind=="text")context.DrawText(Text(mark),new Point(mark.X,mark.Y));
+   else if(mark.Kind=="logo")context.DrawImage(logo,new Rect(mark.X,mark.Y,mark.Width,mark.Height));
+  }
+  internal static BitmapSource BrandLogo(){return Logo();}
   static void Draw(DrawingContext context,IList<AnalyticsPage> pages){
    var logo=Logo();int columns=AnalyticsGraphics.SheetColumns(pages);double width,height;AnalyticsGraphics.SheetSize(pages,out width,out height);
    context.DrawRectangle(Brush(pages[0].Background),null,new Rect(0,0,width,height));
    for(int i=0;i<pages.Count;i++){
     context.PushTransform(new TranslateTransform(i%columns*pages[i].CanvasWidth,i/columns*pages[i].CanvasHeight));
     foreach(var mark in pages[i].Marks){
-     if(mark.Kind=="rect")context.DrawRectangle(Brush(mark.Fill),null,new Rect(mark.X,mark.Y,mark.Width,mark.Height));
-     else if(mark.Kind=="polygon")context.DrawGeometry(Brush(mark.Fill),null,Polygon(mark.Points));
-     else if(mark.Kind=="text")context.DrawText(Text(mark),new Point(mark.X,mark.Y));
-     else if(mark.Kind=="logo")context.DrawImage(logo,new Rect(mark.X,mark.Y,mark.Width,mark.Height));
+     DrawMark(context,mark,logo);
     }context.Pop();
    }
   }

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Windows;
 using System.Windows.Automation;
 using System.Windows.Controls;
@@ -38,6 +39,7 @@ namespace AstroArchive {
        double[][] sizes={new[]{1080.0,1920},new[]{1080.0,1350},new[]{1080.0,1080},new[]{1920.0,1080},new[]{1000.0,1500}};
        for(int option=1;option<=5;option++){layout.SelectedIndex=option;PumpPopupLayout();if(Math.Abs(image.Source.Width/image.Source.Height-sizes[option-1][0]/sizes[option-1][1])>0.001||!Convert.ToString(resolution.SelectedItem).StartsWith(sizes[option-1][0].ToString("0")+" × "+sizes[option-1][1].ToString("0")))throw new Exception("Social layout preview or pixel preset is incorrect: "+option);CapturePopup(dialog,Path.Combine(output,"AstroArchive_Analytics_"+mode+"_Social_"+option+".png"));}
        layout.SelectedIndex=0;choices.SelectedIndex=6;documentTheme.SelectedIndex=0;PumpPopupLayout();if(resolution.Items.Count!=2)throw new Exception("Portrait-only resolution remained in the landscape options.");
+       var exportFormat=PopupChildren<ComboBox>(dialog).Single(c=>AutomationProperties.GetName(c)=="Export format");foreach(string motion in new[]{"MP4","GIF"}){exportFormat.SelectedItem=motion;PumpPopupLayout();var play=PopupChildren<Button>(dialog).Single(b=>AutomationProperties.GetName(b)=="Play animation preview");if(!play.IsVisible||!play.IsEnabled||resolution.IsEnabled)throw new Exception("Animated export controls are unavailable or retain image DPI.");play.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));SmokeSearchWait(()=>Convert.ToString(play.Content).Contains("Pause"));PumpPopupLayout();var before=image.Source;SmokeSearchWait(()=>image.Source!=before);play.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));if(!Convert.ToString(play.Content).Contains("Play"))throw new Exception("Animation preview did not pause.");CapturePopup(dialog,Path.Combine(output,"AstroArchive_Analytics_"+mode+"_"+motion+".png"));}exportFormat.SelectedItem="PDF";
        PopupChildren<Expander>(dialog).Single().IsExpanded=true;PumpPopupLayout();
        var picker=PopupChildren<ComboBox>(dialog).Single(c=>AutomationProperties.GetName(c)=="Telescope");picker.SelectedIndex=1;
        SmokeSearchWait(()=>status.Text!="Updating analytics…");if(!PopupChildren<TextBlock>(dialog).Any(t=>t.Text.StartsWith("120 light frames")))throw new Exception("Analytics telescope scope did not refresh.");
@@ -59,8 +61,31 @@ namespace AstroArchive {
     using(var input=File.OpenRead(overwrite))BitmapDecoder.Create(input,BitmapCreateOptions.None,BitmapCacheOption.OnLoad);
     File.WriteAllText(overwrite,"keep on failure");bool failed=false;try{AnalyticsExport.Save(overwrite,new[]{pages[0]},"invalid",150);}catch(ArgumentException){failed=true;}
     if(!failed||File.ReadAllText(overwrite)!="keep on failure"||Directory.GetFiles(output,"*.tmp").Length!=0)throw new Exception("Failed export changed the destination or retained partial output.");
+    SmokeAnalyticsMedia(output,data);
     File.WriteAllText(Path.Combine(output,"analytics-smoke.txt"),"PASS: Repository menu, six reports, combined preview, landscape default and five social layout selectors, exact social pixel sizes, dark/light document and application themes, single/combined PNG/JPEG/PDF/SVG exports, telescope/date scoping, stale-export prevention, decoding and atomic overwrite checks.");
    }finally{repo=savedRepo;Theme.Apply(Window,theme);}
+  }
+  static void AnimationReference(string path,AnalyticsAnimation animation,double time,int width,int height){
+   byte[] pixels=animation.Frame(time,width,height);var bitmap=BitmapSource.Create(width,height,96,96,System.Windows.Media.PixelFormats.Bgra32,null,pixels,width*4);var encoder=new PngBitmapEncoder();encoder.Frames.Add(BitmapFrame.Create(bitmap));using(var file=File.Create(path))encoder.Save(file);
+  }
+  static void SmokeAnalyticsMedia(string output,AnalyticsSnapshot data){
+   foreach(AnalyticsLayout layout in Enum.GetValues(typeof(AnalyticsLayout)))foreach(bool dark in new[]{true,false}){
+    var page=AnalyticsGraphics.Page(data,2,dark,layout);var selected=new[]{page};var options=new AnalyticsVideoOptions{SecondsPerChart=2,FramesPerSecond=4,MaximumEdge=320};var animation=new AnalyticsAnimation(selected,options);int width,height;AnalyticsAnimation.Dimensions(page,options.MaximumEdge,out width,out height);
+    string prefix=Path.Combine(output,"media-"+layout+"-"+(dark?"dark":"light"));AnimationReference(prefix+"-reference.png",animation,1.75,width,height);
+    foreach(string format in new[]{"MP4","GIF"}){
+     string path=prefix+"."+format.ToLowerInvariant();int last=-1;AnalyticsAnimation.Save(path,selected,format,options,(percent,message)=>{if(percent<last)throw new Exception("Video progress moved backwards.");last=percent;},CancellationToken.None);
+     if(last!=100||new FileInfo(path).Length<100)throw new Exception("Animated export did not finish.");
+     if(format=="GIF")using(var input=File.OpenRead(path)){var gif=BitmapDecoder.Create(input,BitmapCreateOptions.None,BitmapCacheOption.OnLoad);if(gif.Frames.Count!=8||gif.Frames.Any(f=>f.PixelWidth!=width||f.PixelHeight!=height))throw new Exception("GIF frames or dimensions incorrect.");foreach(var frame in gif.Frames){var bytes=new byte[width*height*4];new FormatConvertedBitmap(frame,System.Windows.Media.PixelFormats.Bgra32,null,0).CopyPixels(bytes,width*4,0);}}
+     else{byte[] bytes=File.ReadAllBytes(path);string container=System.Text.Encoding.ASCII.GetString(bytes);if(!container.Contains("ftyp")||!container.Contains("moov")||!container.Contains("avc1"))throw new Exception("MP4 is not a completed H.264 container.");}
+    }
+   }
+   var story=Enumerable.Range(0,6).Select(i=>AnalyticsGraphics.Page(data,i,true,AnalyticsLayout.Vertical)).ToList();var settings=new AnalyticsVideoOptions{SecondsPerChart=1.5,FramesPerSecond=4,MaximumEdge=320,Transition="Zoom"};var sequence=new AnalyticsAnimation(story,settings);if(sequence.Duration!=9)throw new Exception("Story duration omits a chart.");
+   foreach(string format in new[]{"MP4","GIF"})AnalyticsAnimation.Save(Path.Combine(output,"media-story."+format.ToLowerInvariant()),story,format,settings,null,CancellationToken.None);
+   foreach(string transition in new[]{"Glide","Zoom","Dissolve"}){settings.Transition=transition;var movie=new AnalyticsAnimation(story,settings);AnimationReference(Path.Combine(output,"media-transition-"+transition+".png"),movie,1.75,180,320);}
+   foreach(string format in new[]{"MP4","GIF"}){
+    string path=Path.Combine(output,"media-cancelled."+format.ToLowerInvariant());File.WriteAllText(path,"preserve previous output");using(var cancelled=new CancellationTokenSource()){bool stopped=false;try{AnalyticsAnimation.Save(path,story,format,settings,(p,m)=>{if(p>5)cancelled.Cancel();},cancelled.Token);}catch(OperationCanceledException){stopped=true;}if(!stopped||File.ReadAllText(path)!="preserve previous output")throw new Exception("Cancelled media export overwrote an existing document.");}
+   }
+   if(Directory.GetFiles(output,"*.tmp.*").Length!=0)throw new Exception("Media export retained partial output.");File.WriteAllText(Path.Combine(output,"analytics-media-smoke.txt"),"PASS: H.264 MP4 and looping GIF exports, all six ratios, both themes, complete six-chart stories, transition preview, timing, progress, streaming GIF decoding and atomic cancellation.");
   }
  }
 }

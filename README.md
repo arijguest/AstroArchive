@@ -112,7 +112,7 @@ lengths. Documents default to **Dark**; choose **Light** for a light background.
 Scope by telescope and acquisition dates, add a document label and optionally
 include rejected light frames. Scope starts with the entire repository independently
 of browsing filters and selection. Export **PNG, JPEG, PDF or SVG**, with 150 or
-300 DPI for raster images. **Document layout** offers the current Landscape or a
+300 DPI for raster images. **Document layout** offers Landscape or these
 social compositions: **9:16** (1080 × 1920), **4:5** (1080 × 1350), **1:1**
 (1080 × 1080), **16:9** (1920 × 1080), and **2:3** (1000 × 1500). Each has a
 matching social image preset for TikTok/Reels/Stories, Instagram, video or Pinterest. **Export all** saves one document; PDF uses the chosen page
@@ -120,6 +120,17 @@ layout and image/SVG exports use a combined sheet, stacked vertically for tall p
 Long rankings include every target and telescope on
 continuation pages. Time means individual light-frame integration; stacks, videos
 and calibrations are excluded. Unknown exposures and dates are reported.
+The headline cards always show the whole repository's light-frame integration,
+frame count and target count, including rejected and undated lights. Chart filters
+affect the plot and its footer totals, while the headline remains consistent.
+
+Choose **MP4** or **GIF** for animated charts or an **Export all** story. Each chart
+reveals its data before a Glide, Zoom or Dissolve transition. Set 4, 6 or 8 seconds
+per page, choose the layout/ratio and original or smaller pixel dimensions, and
+play the preview before exporting. MP4 uses Windows' built-in H.264 encoder at
+24 fps; GIF uses a shared palette and loops at 12 fps. No additional encoder
+installation is needed. Exports show progress and remaining time; **Cancel export**
+removes the unfinished file and preserves any previous version.
 Exports leave the archive and capture files unchanged.
 
 ## Edited files and export
