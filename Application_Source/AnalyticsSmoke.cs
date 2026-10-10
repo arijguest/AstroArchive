@@ -32,6 +32,8 @@ namespace AstroArchive {
        layout.SelectedIndex=1;choices.SelectedIndex=0;PumpPopupLayout();
        if(Math.Abs(image.Source.Width/image.Source.Height-9.0/16)>0.001||resolution.SelectedIndex!=2)throw new Exception("Portrait preview or social resolution did not update.");
        CapturePopup(dialog,Path.Combine(output,"AstroArchive_Analytics_"+mode+"_Portrait.png"));
+       choices.SelectedIndex=6;PumpPopupLayout();if(Math.Abs(image.Source.Width/image.Source.Height-9.0/16)>0.001)throw new Exception("Portrait collection preview did not start with a readable page.");
+       var pageChoice=PopupChildren<ComboBox>(dialog).Single(c=>AutomationProperties.GetName(c)=="Preview page");pageChoice.SelectedIndex=0;PumpPopupLayout();if(Math.Abs(image.Source.Width/image.Source.Height-9.0/96)>0.001)throw new Exception("Portrait collection's combined preview lost a chart.");choices.SelectedIndex=0;PumpPopupLayout();
        documentTheme.SelectedIndex=1;PumpPopupLayout();if(Math.Abs(image.Source.Width/image.Source.Height-9.0/16)>0.001)throw new Exception("Light portrait preview lost its composition.");
        layout.SelectedIndex=0;choices.SelectedIndex=6;documentTheme.SelectedIndex=0;PumpPopupLayout();if(resolution.Items.Count!=2)throw new Exception("Portrait-only resolution remained in the landscape options.");
        PopupChildren<Expander>(dialog).Single().IsExpanded=true;PumpPopupLayout();

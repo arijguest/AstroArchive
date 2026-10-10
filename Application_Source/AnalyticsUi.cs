@@ -117,8 +117,8 @@ namespace AstroArchive {
   void BuildPages(){reportPages=Enumerable.Range(0,6).Select(i=>AnalyticsGraphics.Pages(snapshot,i,documentTheme.SelectedIndex==0,documentLayout.SelectedIndex==1)).ToArray();pages=reportPages.SelectMany(p=>p).ToList();paper.Background=new SolidColorBrush((Color)ColorConverter.ConvertFromString(pages[0].Background));}
   void RenderPreview(){
    if(!ready||snapshot==null||charts.SelectedIndex<0)return;bool all=charts.SelectedIndex==6;
-   var selected=all?pages:reportPages[charts.SelectedIndex];previewPage.Items.Clear();previewPage.Items.Add("All pages");for(int i=0;i<selected.Count;i++)previewPage.Items.Add(new ComboBoxItem{Content="Page "+(i+1)+" of "+selected.Count,ToolTip=selected[i].Title});previewPage.Visibility=selected.Count>1?Visibility.Visible:Visibility.Collapsed;previewPage.SelectedIndex=all?0:1;
-   previewTitle.Text=all?"All six charts · Combined preview":ArchiveAnalytics.Titles[charts.SelectedIndex]+" · Export preview";
+   var selected=all?pages:reportPages[charts.SelectedIndex];previewPage.Items.Clear();previewPage.Items.Add("All pages");for(int i=0;i<selected.Count;i++)previewPage.Items.Add(new ComboBoxItem{Content="Page "+(i+1)+" of "+selected.Count,ToolTip=selected[i].Title});previewPage.Visibility=selected.Count>1?Visibility.Visible:Visibility.Collapsed;previewPage.SelectedIndex=all&&documentLayout.SelectedIndex==0?0:1;
+   previewTitle.Text=all?(documentLayout.SelectedIndex==1?"All six charts · Portrait pages":"All six charts · Combined preview"):ArchiveAnalytics.Titles[charts.SelectedIndex]+" · Export preview";
    export.Content=all?"Export all…":"Export chart…";exportAll.Visibility=all?Visibility.Collapsed:Visibility.Visible;export.IsEnabled=exportAll.IsEnabled=snapshot.Captures>0&&!exporting;Hints();
   }
   void DrawPreview(){
