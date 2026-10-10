@@ -1,29 +1,18 @@
-AstroArchive 3.0.1
-Package 3.0.1.1
+AstroArchive 3.1.1
+Package 3.1.1.1
 
-- Repository > Analytics offers six branded, publication-ready charts: targets
-  photographed, imaging timeline, imaging time per target, imaging time per
-  telescope, filter mix and exposure lengths.
-- Preview charts with date and telescope filters, a document label and optional
-  rejected-light inclusion. Export PNG, JPEG, PDF or SVG. Export all combines the
-  six charts into one document; PDF preserves separate pages and raster exports
-  offer 150 or 300 DPI. Long rankings continue across pages without losing targets.
-- Analytics use individual light frames to avoid counting stacks, videos and
-  calibration frames as additional imaging time. Missing dates and exposure
-  metadata are reported in the charts.
-
-- Connect over network beside Saved telescope automatically finds Seestar and DWARF
-  devices on the active local networks. Manual addresses and custom storage paths
-  are available under Advanced.
-- Once connected, choose individual captures or Search all. Network imports use
-  the existing verified archive workflow and retain originals on the telescope.
-- Large selections warn that importing over the network takes longer than USB.
-- Start live import to watch the displayed folder and its subfolders. New captures
-  must remain unchanged over two observations and complete a validated transfer.
-  Stop keeps completed imports. Brief connection failures retry automatically.
-- Advanced controls live polling, transfer limits and whether to include existing
-  captures. Verified local downloads are reused on retry.
-- Seestar uses direct guest SMB access without changing Windows security policies;
-  DWARF uses read-only FTP. Compatible file access must be exposed by the firmware.
-- The separate SMBLibrary DLL, matching source and licence notices are bundled
-  with portable and installed builds.
+- Live import keeps Connect over network available. Reconnect to choose more
+  captures and download them while the live watcher continues.
+- Import from multiple telescopes simultaneously. Each network session keeps its
+  own progress, telescope identity and stop control in Activity. Use a separate
+  saved telescope name for each physical device.
+- A Live import underway indicator beside the connection button opens Activity
+  and shows when multiple watchers are running. Stop live import or Cancel
+  download affects only that session; Stop all telescope imports stops them all.
+- Different telescope caches download in parallel. Overlapping requests sharing
+  a cache wait safely and can be canceled independently. Archive scans and commits
+  coordinate against the latest index so live/manual overlaps store a capture
+  once, report duplicates correctly and reuse verified local downloads.
+- Stopping imports or closing AstroArchive retains completed archive copies and
+  verified downloads. Telescope originals remain unchanged. The archive closes
+  after active sessions stop; conflicting archive operations wait until then.
