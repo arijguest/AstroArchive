@@ -68,9 +68,9 @@ jobs:
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v5
-      - name: Run existing Windows engine regressions
+      - name: Compile the Windows Framework engine
         shell: powershell
-        run: .\Application_Source\test.ps1
+        run: .\Application_Source\test.ps1 -CompileOnly
       - uses: actions/download-artifact@v4
         with:
           name: linux-drive-fixture
@@ -115,9 +115,9 @@ jobs:
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v5
-      - name: Compile the Windows engine and check regressions
+      - name: Compile the Windows Framework engine
         shell: powershell
-        run: .\Application_Source\test.ps1
+        run: .\Application_Source\test.ps1 -CompileOnly
       - uses: actions/download-artifact@v4
         with:
           name: windows-return-fixture

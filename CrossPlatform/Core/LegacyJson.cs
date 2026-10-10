@@ -34,13 +34,19 @@ public sealed class JavaScriptSerializer
     {
         if (text.Length > MaxJsonLength) throw new ArgumentException("JSON exceeds the configured limit.");
         if (typeof(T) == typeof(Dictionary<string, object>) || typeof(T) == typeof(object))
-            return (T)Untyped(JToken.Parse(text, new JsonLoadSettings { DuplicatePropertyNameHandling = DuplicatePropertyNameHandling.Error }))!;
+        {
+            using var input = new IO.StringReader(text);
+            using var reader = new JsonTextReader(input) { DateParseHandling = DateParseHandling.None, MaxDepth = RecursionLimit };
+            return (T)Untyped(JToken.Load(reader, new JsonLoadSettings { DuplicatePropertyNameHandling = DuplicatePropertyNameHandling.Error }))!;
+        }
         return JsonConvert.DeserializeObject<T>(text, Settings)!;
     }
     private static object? Untyped(JToken token) => token switch
     {
         JObject o => o.Properties().ToDictionary(p => p.Name, p => Untyped(p.Value)),
         JArray a => a.Select(Untyped).ToArray(),
+        JValue v when v.Value is string value && Regex.IsMatch(value, @"^/Date\((-?\d+)(?:[+-]\d{4})?\)/$") =>
+            DateTimeOffset.FromUnixTimeMilliseconds(long.Parse(Regex.Match(value, @"^/Date\((-?\d+)").Groups[1].Value, Globalization.CultureInfo.InvariantCulture)).UtcDateTime,
         JValue v => v.Value,
         _ => null
     };
@@ -75,7 +81,8 @@ public sealed class JavaScriptSerializer
     private sealed class LegacyDateConverter : JsonConverter<DateTime>
     {
         public override void WriteJson(JsonWriter writer, DateTime value, JsonSerializer serializer) =>
-            writer.WriteValue("/Date(" + new DateTimeOffset(value.ToUniversalTime()).ToUnixTimeMilliseconds() + ")/");
+            // JavaScriptSerializer recognises dates by the escaped JSON slashes.
+            writer.WriteRawValue("\"\\/Date(" + new DateTimeOffset(value.ToUniversalTime()).ToUnixTimeMilliseconds() + ")\\/\"");
         public override DateTime ReadJson(JsonReader reader, Type type, DateTime existing, bool hasExisting, JsonSerializer serializer)
         {
             string text = Convert.ToString(reader.Value, Globalization.CultureInfo.InvariantCulture) ?? "";

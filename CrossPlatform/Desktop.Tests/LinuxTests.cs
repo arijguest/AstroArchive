@@ -128,6 +128,11 @@ public sealed class LinuxTests : IDisposable
         Assert.True(project.MetadataEdits.ContainsKey("nested/a.fit"));
         Assert.Equal(1760000000123, new DateTimeOffset(project.CreatedUtc).ToUnixTimeMilliseconds());
         Assert.Contains("nested\\\\a.fit",Util.Serialize(project));
+        Assert.Contains(@"\/Date(1760000000123)\/",Util.Serialize(project));
+        var untyped=(Dictionary<string,object>)Util.Json().DeserializeObject(Util.Serialize(project));
+        Assert.IsType<DateTime>(untyped["CreatedUtc"]);
+        var iso=Util.Deserialize<Dictionary<string,object>>("{\"date\":\"2026-10-06T21:00:00+01:00\"}");
+        Assert.Equal("2026-10-06T21:00:00+01:00",Assert.IsType<string>(iso["date"]));
     }
     [Fact]
     public void LinuxOpenRotatesWindowsCacheIdentityWithoutChangingCaptures()
