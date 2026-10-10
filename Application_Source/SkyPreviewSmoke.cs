@@ -31,12 +31,13 @@ namespace AstroArchive {
    }
    preview.SmokeGestures();
   }
+  static int SkyGestureFixtureWidth(FrameworkElement host){return Math.Max(1200,(int)Math.Ceiling(1280*host.ActualWidth/Math.Max(1,host.ActualHeight-PreviewViewport.ToolbarSpace-100)));}
   void SmokeSkyNavigation(string prefix,PreviewViewport preview,Frame frame){
    var globe=(SkyGlobeView)Window.FindName(prefix+"PreviewSky");var host=(Grid)Window.FindName(prefix+"PreviewHost");var original=((Image)Window.FindName(prefix+"PreviewImage")).Source as BitmapSource;
    try{
     // The runner desktop and visible process banners can constrain preview height.
     // Fit a gesture fixture that reserves actual space for the globe.
-    if(!globe.IsVisible){int fixtureWidth=Math.Max(1200,(int)Math.Ceiling(1280*host.ActualWidth/Math.Max(1,host.ActualHeight-PreviewViewport.ToolbarSpace-100)));preview.SetImage(BitmapSource.Create(fixtureWidth,1280,96,96,PixelFormats.Rgb24,null,new byte[fixtureWidth*1280*3],fixtureWidth*3),true);PumpPopupLayout();preview.Resize();PumpPopupLayout();}
+    if(!globe.IsVisible){int fixtureWidth=SkyGestureFixtureWidth(host);preview.SetImage(BitmapSource.Create(fixtureWidth,1280,96,96,PixelFormats.Rgb24,null,new byte[fixtureWidth*1280*3],fixtureWidth*3),true);PumpPopupLayout();preview.Resize();PumpPopupLayout();}
     if(!globe.IsVisible||globe.ActualHeight<50)throw new Exception("Sky gesture fixture has no visible globe: "+prefix+", host "+host.RenderSize);
     int visibleLabels=0,hiddenLabels=0;
     foreach(double yawAngle in new[]{0.0,45,90,135,180,225,270,315})foreach(double tiltAngle in new[]{0.0,25,70}){
@@ -85,7 +86,7 @@ namespace AstroArchive {
       }
       Window.Height=1000;PumpPopupLayout();preview.SetImage(image,true);PumpPopupLayout();// Collapsed WPF elements can retain their previous RenderSize. Compare the
       // allocated height, and verify the newly visible drawing bounds separately.
-      double first=panel.Height;preview.SetImage(BitmapSource.Create(1200,1280,96,96,PixelFormats.Rgb24,null,new byte[1200*1280*3],1200*3),true);PumpPopupLayout();preview.Resize();PumpPopupLayout();CheckSkyFit(prefix,preview,1200,1280);if(panel.Height<=first)throw new Exception("Sky did not grow when image aspect left more space: "+prefix+", old "+first+", new "+panel.Height+", host "+host.RenderSize+", stage "+stage.RenderSize);
+      double first=panel.Height;int skyWidth=SkyGestureFixtureWidth(host);preview.SetImage(BitmapSource.Create(skyWidth,1280,96,96,PixelFormats.Rgb24,null,new byte[skyWidth*1280*3],skyWidth*3),true);PumpPopupLayout();preview.Resize();PumpPopupLayout();CheckSkyFit(prefix,preview,skyWidth,1280);if(panel.Height<=first)throw new Exception("Sky did not grow when image aspect left more space: "+prefix+", old "+first+", new "+panel.Height+", host "+host.RenderSize+", stage "+stage.RenderSize);
       foreach(string kind in new[]{"Dark","Master dark","Dark flat","Master flat","Bias","Master bias"}){
        var calibration=frame.Clone();calibration.Kind=kind;var imageSize=stage.RenderSize;UpdateCaptureSky(prefix,calibration);PumpPopupLayout();preview.Resize();PumpPopupLayout();if(panel.IsVisible||stage.RenderSize!=imageSize)throw new Exception("Calibration sky is visible or changed image fit: "+kind);
       }
