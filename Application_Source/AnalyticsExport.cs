@@ -19,11 +19,12 @@ namespace AstroArchive {
   static Brush Brush(string colour){var brush=new SolidColorBrush((Color)ColorConverter.ConvertFromString(colour));brush.Freeze();return brush;}
   static Brush Fill(AnalyticsMark mark){if(mark.FillEnd==null)return Brush(mark.Fill);var brush=new LinearGradientBrush((Color)ColorConverter.ConvertFromString(mark.Fill),(Color)ColorConverter.ConvertFromString(mark.FillEnd),mark.VerticalGradient?90:0);brush.Freeze();return brush;}
   static FormattedText Text(AnalyticsMark mark){return new FormattedText(mark.Text,CultureInfo.InvariantCulture,FlowDirection.LeftToRight,new Typeface(new FontFamily("Arial"),FontStyles.Normal,mark.Bold?FontWeights.Bold:FontWeights.Normal,FontStretches.Normal),mark.Size,Brush(mark.Fill),1.0);}
+  static Point TextOrigin(AnalyticsMark mark){var text=Text(mark);return new Point(mark.Centered?mark.X-text.Width/2:mark.X,mark.Y);}
   static Geometry Polygon(double[] points){var geometry=new StreamGeometry();using(var context=geometry.Open()){context.BeginFigure(new Point(points[0],points[1]),true,true);context.PolyLineTo(Enumerable.Range(1,points.Length/2-1).Select(i=>new Point(points[i*2],points[i*2+1])).ToList(),true,false);}geometry.Freeze();return geometry;}
   internal static void DrawMark(DrawingContext context,AnalyticsMark mark,BitmapSource logo){
    if(mark.Kind=="rect")context.DrawRoundedRectangle(Fill(mark),null,new Rect(mark.X,mark.Y,mark.Width,mark.Height),mark.Radius,mark.Radius);
    else if(mark.Kind=="polygon")context.DrawGeometry(Fill(mark),null,Polygon(mark.Points));
-   else if(mark.Kind=="text")context.DrawText(Text(mark),new Point(mark.X,mark.Y));
+   else if(mark.Kind=="text")context.DrawText(Text(mark),TextOrigin(mark));
    else if(mark.Kind=="logo")context.DrawImage(logo,new Rect(mark.X,mark.Y,mark.Width,mark.Height));
   }
   internal static BitmapSource BrandLogo(){return Logo();}
@@ -46,7 +47,7 @@ namespace AstroArchive {
    var bitmap=new RenderTargetBitmap((int)pixelWidth,(int)pixelHeight,dpi,dpi,PixelFormats.Pbgra32);bitmap.Render(visual);bitmap.Freeze();return bitmap;
   }
   static string OutlinedText(AnalyticsMark mark){
-   var geometry=Text(mark).BuildGeometry(new Point(mark.X,mark.Y)).GetFlattenedPathGeometry(.05,ToleranceType.Absolute);var b=new StringBuilder();
+   var geometry=Text(mark).BuildGeometry(TextOrigin(mark)).GetFlattenedPathGeometry(.05,ToleranceType.Absolute);var b=new StringBuilder();
    foreach(var figure in geometry.Figures){
     b.Append(AnalyticsGraphics.N(figure.StartPoint.X)+" "+AnalyticsGraphics.N(figure.StartPoint.Y)+" m\n");
     foreach(var segment in figure.Segments){

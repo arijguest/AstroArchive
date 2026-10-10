@@ -21,7 +21,7 @@ namespace AstroArchive {
   void ShowAnalytics(int index){
    if(repo==null||NetworkImportBlocked)return;
    // Freeze only the metadata needed by analytics. No files are opened or decoded.
-   var frames=all.Where(f=>f.Kind=="Light"&&f.Status!="Deleted").Select(f=>new Frame{Target=f.Target,Telescope=f.Telescope,Filter=f.Filter,Kind=f.Kind,Exposure=f.Exposure,Rejected=f.Rejected,AcquisitionDate=f.AcquisitionDate,AcquisitionDateSource=f.AcquisitionDateSource,Observed=f.Observed,TimeSource=f.TimeSource,OriginalName=f.OriginalName}).ToList();
+   var frames=all.Where(f=>(f.Kind=="Light"||f.Kind=="Stack")&&f.Status!="Deleted").Select(f=>new Frame{Target=f.Target,Telescope=f.Telescope,Filter=f.Filter,Kind=f.Kind,Exposure=f.Exposure,Rejected=f.Rejected,Session=f.Session,AcquisitionDate=f.AcquisitionDate,AcquisitionDateSource=f.AcquisitionDateSource,Observed=f.Observed,TimeSource=f.TimeSource,OriginalName=f.OriginalName}).ToList();
    string caption=new DirectoryInfo(repo.Root).Name;
    if(settings.AnalyticsCharts==null)settings.AnalyticsCharts=new Dictionary<string,AnalyticsChartOptions>();
    new AnalyticsWindow(Window,frames,caption,index,settings.AnalyticsCharts,SaveSettings).ShowDialog();
@@ -54,7 +54,7 @@ namespace AstroArchive {
    AddField(filters,"Telescope",telescope);AddField(filters,"From (inclusive)",from);AddField(filters,"To (inclusive)",to);AddField(filters,"Document label",caption);
    rejected=new CheckBox{Content="Include rejected light frames",Margin=new Thickness(0,25,18,0),VerticalAlignment=VerticalAlignment.Center};AccessibleName(rejected,"Include rejected light frames");filters.Children.Add(rejected);
    UiHelp.Hint(from,"Start acquisition date, inclusive. Undated captures are excluded when a date range is set.");UiHelp.Hint(to,"End acquisition date, inclusive. Clear both dates to include undated captures.");
-   UiHelp.Hint(rejected,"Off excludes rejected frames from charts. Headline cards always show all repository light frames, including rejected and undated captures. Unknown exposures are never guessed.");
+   UiHelp.Hint(rejected,"Off excludes rejected light frames and stacks from charts. Headline cards always show the whole-repository integration, including rejected and undated images. Stacks with matching light subframes are counted only once.");
    var reset=new Button{Content="Reset scope",Margin=new Thickness(0,24,0,0),VerticalAlignment=VerticalAlignment.Center};filters.Children.Add(reset);
    reset.Click+=(s,e)=>{telescope.SelectedIndex=0;from.SelectedDate=null;to.SelectedDate=null;from.Text="";to.Text="";rejected.IsChecked=false;caption.Text=repositoryName;Schedule();};
    body=new Grid();Grid.SetRow(body,2);root.Children.Add(body);body.ColumnDefinitions.Add(new ColumnDefinition{Width=new GridLength(240)});body.ColumnDefinitions.Add(new ColumnDefinition());
@@ -91,7 +91,7 @@ namespace AstroArchive {
    play=new Button{Content="▶ Play preview",Margin=new Thickness(0,22,12,0),VerticalAlignment=VerticalAlignment.Bottom};AccessibleName(play,"Play animation preview");motionControls.Children.Add(play);motionSummary=Label("",12);motionSummary.Margin=new Thickness(0,26,0,0);Theme.Bind(motionSummary,TextBlock.ForegroundProperty,"Muted");motionControls.Children.Add(motionSummary);footer.Children.Add(exportActions);
    UiHelp.Hint(pace,"Includes a smooth chart reveal and a readable hold. Every continuation page receives the same time.");UiHelp.Hint(videoSize,"Original pixels follows the selected layout. Smaller sizes preserve its ratio. MP4 uses H.264 at 24 fps; GIF loops at 12 fps with a shared palette.");
    progress=new ProgressBar{Minimum=0,Maximum=100,Height=4,Margin=new Thickness(0,10,0,0),Visibility=Visibility.Collapsed};AccessibleName(progress,"Video export progress");footer.Children.Add(progress);
-   status=Label("Time totals use individual light-frame exposures. Stacks, videos and calibrations are excluded.",12);status.Margin=new Thickness(0,10,0,0);Theme.Bind(status,TextBlock.ForegroundProperty,"Muted");AccessibleName(status,"Analytics status");AutomationProperties.SetLiveSetting(status,AutomationLiveSetting.Polite);footer.Children.Add(status);
+   status=Label("Integration includes standalone stacks; stacks with matching subframes, videos and calibrations are excluded.",12);status.Margin=new Thickness(0,10,0,0);Theme.Bind(status,TextBlock.ForegroundProperty,"Muted");AccessibleName(status,"Analytics status");AutomationProperties.SetLiveSetting(status,AutomationLiveSetting.Polite);footer.Children.Add(status);
    var open=new Button{Content="Open export folder",HorizontalAlignment=HorizontalAlignment.Left,Visibility=Visibility.Collapsed,Margin=new Thickness(0,8,0,0)};footer.Children.Add(open);
    open.Click+=(s,e)=>{try{System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(Path.GetDirectoryName(lastOutput)){UseShellExecute=true});}catch(Exception error){status.Text=error.Message;}};
    debounce=new DispatcherTimer{Interval=TimeSpan.FromMilliseconds(250)};debounce.Tick+=(s,e)=>{debounce.Stop();RefreshData();};
@@ -130,7 +130,7 @@ namespace AstroArchive {
     var result=await Task.Run(()=>ArchiveAnalytics.Build(source,options));if(closed||request!=generation)return;snapshot=result;BuildPages();
     summary.Text=result.Captures.ToString("N0")+" light frames · "+ArchiveAnalytics.Number(result.Seconds/3600)+" h integration · "+result.Targets+" targets";
     scope.Header="Scope · "+(selected==null?"All telescopes":Convert.ToString(selected.Content))+(options.From.HasValue||options.To.HasValue?" · Date range":" · All dates");
-    status.Text=result.Captures==0?"No light frames match this scope. Adjust the telescope or date range.":result.UnknownExposure+" unknown exposures · "+result.UnknownDate+" undated frames · "+result.ExcludedRejected+" rejected frames excluded"+(result.ExcludedUndated>0?" · "+result.ExcludedUndated+" undated frames excluded by date range":"")+". Integration excludes stacks, videos and calibrations.";
+    status.Text=result.Captures==0?(result.Seconds>0?"No light frames match this scope; standalone stack integration is included.":"No light frames match this scope. Adjust the telescope or date range."):result.UnknownExposure+" images with unknown exposure · "+result.UnknownDate+" undated light frames · "+result.ExcludedRejected+" rejected light frames excluded"+(result.ExcludedUndated>0?" · "+result.ExcludedUndated+" undated light frames excluded by date range":"")+". Integration includes standalone stacks; matching stacks, videos and calibrations are excluded.";
     RenderPreview();
    }catch(Exception error){if(closed||request!=generation)return;status.Text=error.Message;}
   }
@@ -139,7 +139,7 @@ namespace AstroArchive {
    if(!ready||snapshot==null||charts.SelectedIndex<0)return;StopPlayback();bool all=charts.SelectedIndex==6;customize.IsEnabled=!exporting;
    var selected=all?pages:reportPages[charts.SelectedIndex];previewPage.Items.Clear();previewPage.Items.Add("All pages");for(int i=0;i<selected.Count;i++)previewPage.Items.Add(new ComboBoxItem{Content="Page "+(i+1)+" of "+selected.Count,ToolTip=selected[i].Title});previewPage.Visibility=selected.Count>1?Visibility.Visible:Visibility.Collapsed;previewPage.SelectedIndex=all&&documentLayout.SelectedIndex==0&&!IsMotion?0:1;
    previewTitle.Text=all?(documentLayout.SelectedIndex>0?"All six charts · Social pages":"All six charts · Combined preview"):ArchiveAnalytics.Titles[charts.SelectedIndex]+" · Export preview";
-   export.Content=all?"Export all…":"Export chart…";exportAll.Visibility=all?Visibility.Collapsed:Visibility.Visible;export.IsEnabled=exportAll.IsEnabled=play.IsEnabled=snapshot.Captures>0&&!exporting;Hints();
+   export.Content=all?"Export all…":"Export chart…";exportAll.Visibility=all?Visibility.Collapsed:Visibility.Visible;export.IsEnabled=exportAll.IsEnabled=play.IsEnabled=(snapshot.Captures>0||snapshot.RepositorySeconds>0)&&!exporting;Hints();
   }
   void DrawPreview(){
    if(!ready||snapshot==null||charts.SelectedIndex<0||previewPage.SelectedIndex<0)return;
@@ -151,7 +151,7 @@ namespace AstroArchive {
    motionControls.Visibility=IsMotion?Visibility.Visible:Visibility.Collapsed;
    ((FrameworkElement)resolution.Parent).Visibility=IsMotion?Visibility.Collapsed:Visibility.Visible;
    ((FrameworkElement)duration.Parent).Visibility=pace.SelectedIndex==3?Visibility.Visible:Visibility.Collapsed;
-   bool valid=!IsMotion||pace.SelectedIndex!=3||CustomDuration()>0;if(snapshot!=null)export.IsEnabled=exportAll.IsEnabled=play.IsEnabled=snapshot.Captures>0&&!exporting&&valid;
+   bool valid=!IsMotion||pace.SelectedIndex!=3||CustomDuration()>0;if(snapshot!=null)export.IsEnabled=exportAll.IsEnabled=play.IsEnabled=(snapshot.Captures>0||snapshot.RepositorySeconds>0)&&!exporting&&valid;
    if(!valid){motionSummary.Text="Enter a length from 1 to 300 seconds.";exportHint.Text="The chosen length covers every chart and continuation page.";return;}
    if(IsMotion){var settings=VideoOptions();var chosen=snapshot==null?null:charts.SelectedIndex==6?pages:charts.SelectedIndex>=0?reportPages[charts.SelectedIndex]:null;int count=chosen==null?0:chosen.Count;int w=0,h=0;if(chosen!=null)AnalyticsAnimation.Dimensions(chosen[0],settings.MaximumEdge,out w,out h);motionSummary.Text=(settings.TotalSeconds>0?settings.TotalSeconds:count*settings.SecondsPerChart).ToString("0.##")+" s · "+count+" scene"+(count==1?"":"s")+" · "+w+" × "+h;exportHint.Text=(value=="GIF"?"Looping animation":"Video")+" · "+settings.Transition+" transitions. Export all includes every chart and continuation page.";return;}
    string orientation=Convert.ToString(documentLayout.SelectedItem).ToLowerInvariant();bool tall=documentLayout.SelectedIndex==1||documentLayout.SelectedIndex==2||documentLayout.SelectedIndex==5;string sheet=tall?"Multiple pages stack vertically in one sheet.":"Multiple pages combine into one sheet.";

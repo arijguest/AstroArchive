@@ -7,8 +7,8 @@ using System.Xml.Linq;
 
 namespace AstroArchive {
  public partial class Tests {
-  static Frame AnalyticsLight(string target,double? seconds,string date="2026-10-01",string telescope="Scope A"){
-   return new Frame{Target=target,Kind="Light",Exposure=seconds,AcquisitionDate=date,Telescope=telescope,Filter="L"};
+  static Frame AnalyticsLight(string target,double? seconds,string date="2026-10-01",string telescope="Scope A",string session=null){
+   return new Frame{Target=target,Kind="Light",Exposure=seconds,AcquisitionDate=date,Telescope=telescope,Filter="L",Session=session};
   }
   static void AnalyticsTests(){
    Test("Custom chart configurations preserve repository totals categories and chronology",()=>{
@@ -35,10 +35,18 @@ namespace AstroArchive {
     var deleted=AnalyticsLight("M51",7200);deleted.Status="Deleted";
     var source=new[]{AnalyticsLight("M31",1800),rejected,AnalyticsLight("M42",900,null,null),AnalyticsLight("M81",null),deleted,new Frame{Target="M31",Kind="Stack",Exposure=9000},new Frame{Kind="Video",Exposure=9000}};
     foreach(var options in new[]{new AnalyticsOptions(),new AnalyticsOptions{Telescope="Scope A",From=new DateTime(2026,10,1)},new AnalyticsOptions{UnknownTelescopeOnly=true},new AnalyticsOptions{IncludeRejected=true},new AnalyticsOptions{To=new DateTime(2000,1,1)}}){
-     var data=ArchiveAnalytics.Build(source,options);Check(data.RepositoryCaptures==4&&data.RepositoryTargets==4&&data.RepositorySeconds==6300&&data.RepositoryUnknownExposure==1,"Repository headline changed with chart scope or counted non-light/deleted files");
-     foreach(AnalyticsLayout layout in Enum.GetValues(typeof(AnalyticsLayout)))foreach(int index in Enumerable.Range(0,6)){var page=AnalyticsGraphics.Page(data,index,true,layout);Check(page.Marks.Any(m=>m.Role=="header"&&m.Text=="1.75 h")&&page.Marks.Count(m=>m.Role=="header"&&m.Text=="4")==2,"Headline does not show whole-repository figures");}
+    var data=ArchiveAnalytics.Build(source,options);Check(data.RepositoryCaptures==4&&data.RepositoryTargets==4&&data.RepositorySeconds==15300&&data.RepositoryUnknownExposure==1,"Repository headline changed with chart scope or failed to include standalone stacks");
+    foreach(AnalyticsLayout layout in Enum.GetValues(typeof(AnalyticsLayout)))foreach(int index in Enumerable.Range(0,6)){
+     var page=AnalyticsGraphics.Page(data,index,true,layout);Check(page.Marks.Any(m=>m.Role=="header"&&m.Text=="4.25 h")&&page.Marks.Count(m=>m.Role=="header"&&m.Text=="4")==2,"Headline does not show whole-repository figures");
+     string[] metrics={"4.25 h","4","4"},captions={"REPOSITORY INTEGRATION",layout==AnalyticsLayout.Landscape||layout==AnalyticsLayout.Widescreen?"LIGHT FRAMES IN REPOSITORY":"LIGHT FRAMES",layout==AnalyticsLayout.Landscape||layout==AnalyticsLayout.Widescreen?"TARGETS IN REPOSITORY":"REPOSITORY TARGETS"};
+     for(int i=0;i<3;i++){
+      double expected=layout==AnalyticsLayout.Landscape?240+i*360:layout==AnalyticsLayout.Widescreen?(240+i*360)*1.35+150:layout==AnalyticsLayout.Pinterest?(220+i*320)*1000.0/1080:layout==AnalyticsLayout.Vertical?80+(i+.5)*920/3:220+i*320;
+      foreach(string text in new[]{metrics[i],captions[i]}){var matches=page.Marks.Where(m=>m.Role=="header"&&m.Text==text&&Math.Abs(m.X-expected)<.01).ToList();Check(matches.Count==1,"Metric header text did not land at its centered position for "+layout+" / "+text+" / "+expected+"; found "+string.Join(", ",page.Marks.Where(m=>m.Role=="header"&&m.Text==text).Select(m=>m.X)));Check(matches[0].Centered,"Metric header text is not centered in its card: "+text);}
+     }
+     var svg=XDocument.Parse(AnalyticsGraphics.Svg(new[]{page},""));XNamespace ns="http://www.w3.org/2000/svg";Check(svg.Descendants(ns+"text").Where(e=>e.Value=="REPOSITORY INTEGRATION").Single().Attribute("text-anchor").Value=="middle","SVG metric caption is not center-anchored");
     }
-    var unknown=ArchiveAnalytics.Build(source,new AnalyticsOptions{UnknownTelescopeOnly=true});Check(unknown.Captures==1&&unknown.Seconds==900,"Unknown telescope scope lost its own chart data");
+    }
+    var unknown=ArchiveAnalytics.Build(source,new AnalyticsOptions{UnknownTelescopeOnly=true});Check(unknown.Captures==1&&unknown.Seconds==9900,"Unknown telescope scope lost its own chart data");
    });
    Test("Styled charts share vector gradients and rounded cards in both themes",()=>{
     var data=ArchiveAnalytics.Build(new[]{AnalyticsLight("M31",3600),AnalyticsLight("M42",600)},new AnalyticsOptions());
@@ -49,13 +57,32 @@ namespace AstroArchive {
     }
    });
    Test("Analytics measures light-frame integration without double counting",()=>{
-    var rows=new List<Frame>{AnalyticsLight("M31",3600),AnalyticsLight("M31",1800),AnalyticsLight("M45",null),AnalyticsLight("M45",double.NaN),AnalyticsLight("M45",double.PositiveInfinity),AnalyticsLight("M45",-1),AnalyticsLight("M45",0),new Frame{Target="M31",Kind="Stack",Exposure=5400,StackCount=90},new Frame{Kind="Dark",Exposure=60},new Frame{Kind="Video",Exposure=120}};
+    var rows=new List<Frame>{AnalyticsLight("M31",3600,session:"shared"),AnalyticsLight("M31",1800,session:"shared"),AnalyticsLight("M45",null),AnalyticsLight("M45",double.NaN),AnalyticsLight("M45",double.PositiveInfinity),AnalyticsLight("M45",-1),AnalyticsLight("M45",0),new Frame{Target="M31",Kind="Stack",Exposure=5400,StackCount=90,Session="shared"},new Frame{Kind="Dark",Exposure=60},new Frame{Kind="Video",Exposure=120}};
     var rejected=AnalyticsLight("M45",600);rejected.Rejected=true;rows.Add(rejected);var deleted=AnalyticsLight("M45",300);deleted.Status="Deleted";rows.Add(deleted);
     var data=ArchiveAnalytics.Build(rows,new AnalyticsOptions());Check(data.Captures==7&&data.Targets==2&&data.Seconds==5400&&data.UnknownExposure==5&&data.ExcludedRejected==1,"Light-only totals or metadata coverage incorrect");
     Check(data.Reports.Count==6&&data.Reports[0].Values.Sum(v=>v.Value)==7,"Six reports or target counts incorrect");
     foreach(int index in new[]{1,2,3,4})Check(Math.Abs(data.Reports[index].Values.Sum(v=>v.Value)-1.5)<1e-10,"Time totals disagree for chart "+index);
     Check(data.Reports[5].Values.Sum(v=>v.Value)==2,"Unknown exposure entered histogram");
     Check(ArchiveAnalytics.Build(rows,new AnalyticsOptions{IncludeRejected=true}).Seconds==6000,"Including rejected frames failed");
+   });
+   Test("Analytics metric cards center their text in every output layout",()=>{
+    var data=ArchiveAnalytics.Build(new[]{AnalyticsLight("M31",3600)},new AnalyticsOptions());
+    foreach(AnalyticsLayout layout in Enum.GetValues(typeof(AnalyticsLayout))){
+     var page=AnalyticsGraphics.Page(data,0,true,layout);var label=page.Marks.Single(m=>m.Role=="header"&&m.Text=="REPOSITORY INTEGRATION");
+     Check(label.Centered,"Repository integration label lacks centered alignment for "+layout);
+     var svg=XDocument.Parse(AnalyticsGraphics.Svg(new[]{page},""));XNamespace ns="http://www.w3.org/2000/svg";
+     Check(svg.Descendants(ns+"text").Single(e=>e.Value=="REPOSITORY INTEGRATION").Attribute("text-anchor").Value=="middle","SVG text is not centered for "+layout);
+    }
+   });
+   Test("Standalone stack integration is counted unless two light subframes share its session and target",()=>{
+    var rows=new List<Frame>{AnalyticsLight("M31",600,"2026-10-01","Scope A","shared"),AnalyticsLight("M31",900,"2026-10-01","Scope A","shared"),new Frame{Target="M31",Kind="Stack",Exposure=1500,Session="shared"},AnalyticsLight("M42",120,"2026-10-02","Scope A","single"),new Frame{Target="M42",Kind="Stack",Exposure=1200,Session="single",AcquisitionDate="2026-10-02"},new Frame{Target="M42",Kind="Stack",Exposure=1800,Session="other",AcquisitionDate="2026-10-02"},new Frame{Target="M31",Kind="Stack",Exposure=2400,AcquisitionDate="2026-10-02"}};
+    var data=ArchiveAnalytics.Build(rows,new AnalyticsOptions());Check(data.RepositorySeconds==7020&&data.Seconds==7020,"Matched stack was double-counted or standalone stack exposure was omitted");
+    foreach(int index in new[]{1,2,3,4})Check(Math.Abs(data.Reports[index].Values.Sum(v=>v.Value)-data.Seconds/3600)<1e-10,"An integration chart disagrees with the total at index "+index);
+    Check(data.Reports[5].Values.Sum(v=>v.Value)==3,"Stack images were counted as individual light frames in the exposure-length histogram");
+    var oneSub=new[]{AnalyticsLight("M31",600,"2026-10-01","Scope A","one"),new Frame{Target="M31",Kind="Stack",Exposure=900,Session="one"}};
+    Check(CaptureGroups.ExposureFrames(oneSub).Count==2,"One light frame incorrectly suppressed its stack");
+    var differentTarget=new[]{AnalyticsLight("M31",600,"2026-10-01","Scope A","same"),AnalyticsLight("M31",900,"2026-10-01","Scope A","same"),new Frame{Target="M42",Kind="Stack",Exposure=1800,Session="same"}};
+    Check(CaptureGroups.ExposureFrames(differentTarget).Count==3,"Subframes for a different target incorrectly suppressed a stack");
    });
    Test("Analytics filters use inclusive acquisition dates and physical telescope",()=>{
     var rows=new[]{AnalyticsLight("M31",60,"2026-09-30"),AnalyticsLight("M31",60,"2026-10-01"),AnalyticsLight("M31",60,"2026-10-02"),AnalyticsLight("M31",60,"2026-10-02","Scope B"),AnalyticsLight("M31",60,null)};

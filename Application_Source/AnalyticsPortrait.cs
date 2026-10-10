@@ -28,7 +28,7 @@ namespace AstroArchive {
    Text(p,"AstroArchive",140,44,26,Ink,true);Text(p,(index+1).ToString("00")+" / 06"+(parts>1?" · "+(part+1)+"/"+parts:""),parts>1?850:932,50,16,Accent,true);
    double titleSize=Math.Max(26,Math.Min(44,960/Math.Max(1,TextWidth(report.Title,1))));Text(p,Fit(report.Title,960,titleSize),60,120,titleSize,Ink,true,report.Title);Lines(p,report.Description+(parts>1?" · Groups "+(part*limit+1)+"–"+Math.Min((part+1)*limit,report.Values.Count)+" of "+report.Values.Count:""),60,180,120,18,Muted,2,960);
    Box(p,60,244,960,86,"#F5F7FC");string[] metrics={ArchiveAnalytics.Number(data.RepositorySeconds/3600)+" h",data.RepositoryCaptures.ToString("N0",CultureInfo.InvariantCulture),data.RepositoryTargets.ToString("N0",CultureInfo.InvariantCulture)},captions={"REPOSITORY INTEGRATION","LIGHT FRAMES","REPOSITORY TARGETS"};
-   for(int i=0;i<3;i++){Text(p,metrics[i],80+i*320,254,28,Ink,true);Text(p,captions[i],80+i*320,298,13,Muted,true);}
+   for(int i=0;i<3;i++){double center=220+i*320;CenteredText(p,metrics[i],center,254,28,Ink,true);CenteredText(p,captions[i],center,298,13,Muted,true);}
    p.Role="chart";double total=report.Values.Sum(v=>v.Value);
    if(total<=0){Lines(p,data.Captures==0?"No light frames in this scope":"No known exposure data for this chart",60,490,70,28,Ink,2,960);Lines(p,"Try another telescope or date range, or complete missing capture metadata.",60,575,110,19,Muted,3,960);}
    else if(report.Style=="donut")PortraitDonut(p,values,total,report.Unit,true);
@@ -54,7 +54,7 @@ namespace AstroArchive {
    Box(p,80,400,920,112,"#F5F7FC");
    string[] metrics={ArchiveAnalytics.Number(data.RepositorySeconds/3600)+" h",data.RepositoryCaptures.ToString("N0",CultureInfo.InvariantCulture),data.RepositoryTargets.ToString("N0",CultureInfo.InvariantCulture)};
    string[] captions={"REPOSITORY INTEGRATION","LIGHT FRAMES","REPOSITORY TARGETS"};
-   for(int i=0;i<3;i++){double x=100+i*306;double size=TextWidth(metrics[i],38)>270?28:38;Text(p,metrics[i],x,420,size,Ink,true);Text(p,captions[i],x,475,16,Muted,true);}
+   for(int i=0;i<3;i++){double center=80+(i+.5)*920/3;double size=TextWidth(metrics[i],38)>270?28:38;CenteredText(p,metrics[i],center,420,size,Ink,true);CenteredText(p,captions[i],center,475,16,Muted,true);}
    p.Role="chart";double total=report.Values.Sum(v=>v.Value);
    if(total<=0){
     Lines(p,data.Captures==0?"No light frames in this scope":"No known exposure data for this chart",80,900,60,32,Ink,2,920);

@@ -7,7 +7,7 @@ using System.Xml;
 
 namespace AstroArchive {
  public sealed class AnalyticsMark {
-  public string Kind,Fill,FillEnd,Text,Detail,Role,Animation;public double X,Y,Width,Height,Size,Radius;public bool Bold,VerticalGradient;
+  public string Kind,Fill,FillEnd,Text,Detail,Role,Animation;public double X,Y,Width,Height,Size,Radius;public bool Bold,VerticalGradient,Centered;
   public double[] Points;
  }
  public sealed class AnalyticsPage {
@@ -22,6 +22,7 @@ namespace AstroArchive {
   static readonly string[] Colours={"#5951D6","#008477","#CB5078","#B37608","#427AB5","#8756A5","#6B813A","#64748B"};
   static void Box(AnalyticsPage p,double x,double y,double w,double h,string colour){p.Marks.Add(new AnalyticsMark{Kind="rect",X=x,Y=y,Width=w,Height=h,Fill=colour,Role=p.Role});}
   static void Text(AnalyticsPage p,string text,double x,double y,double size,string colour,bool bold=false,string detail=null){p.Marks.Add(new AnalyticsMark{Kind="text",Text=text,X=x,Y=y,Size=size,Fill=colour,Bold=bold,Detail=detail,Role=p.Role});}
+  static void CenteredText(AnalyticsPage p,string text,double center,double y,double size,string colour,bool bold=false){p.Marks.Add(new AnalyticsMark{Kind="text",Text=text,X=center,Y=y,Size=size,Fill=colour,Bold=bold,Centered=true,Role=p.Role});}
   static string Short(string text,int length){if(text.Length<=length)return text;int count=length-1;if(count>0&&char.IsHighSurrogate(text[count-1]))count--;return text.Substring(0,count)+"…";}
   static double TextWidth(string text,double size){return text.Sum(c=>char.IsSurrogate(c)?.6:c>=0x3000?1:"MWmw@%".IndexOf(c)>=0?.95:"ilI.,:;!| '".IndexOf(c)>=0?.3:char.IsUpper(c)?.75:.6)*size;}
   static string Fit(string text,double width,double size){int length=text.Length;while(length>1&&TextWidth(Short(text,length),size)>width)length--;return Short(text,length);}
@@ -49,7 +50,7 @@ namespace AstroArchive {
    Box(p,60,210,1080,78,"#F5F7FC");
    string[] metrics={ArchiveAnalytics.Number(data.RepositorySeconds/3600)+" h",data.RepositoryCaptures.ToString("N0",CultureInfo.InvariantCulture),data.RepositoryTargets.ToString("N0",CultureInfo.InvariantCulture)};
    string[] captions={"REPOSITORY INTEGRATION","LIGHT FRAMES IN REPOSITORY","TARGETS IN REPOSITORY"};
-   for(int i=0;i<3;i++){Text(p,metrics[i],80+i*360,220,26,Ink,true);Text(p,captions[i],80+i*360,258,10,Muted,true);}
+   for(int i=0;i<3;i++){double center=240+i*360;CenteredText(p,metrics[i],center,220,26,Ink,true);CenteredText(p,captions[i],center,258,10,Muted,true);}
    p.Role="chart";double total=report.Values.Sum(v=>v.Value);
    if(total<=0){Text(p,data.Captures==0?"No light frames in this scope":"No known exposure data for this chart",60,390,26,Ink,true);Text(p,"Try another telescope or date range, or complete missing capture metadata.",60,433,17,Muted);}
    else if(report.Style=="donut")Donut(p,values,total,report.Unit);
@@ -119,7 +120,7 @@ namespace AstroArchive {
    var b=new StringBuilder();using(var writer=XmlWriter.Create(b,new XmlWriterSettings{OmitXmlDeclaration=true,Indent=true})){
     writer.WriteStartElement("svg","http://www.w3.org/2000/svg");writer.WriteAttributeString("width",N(width));writer.WriteAttributeString("height",N(height));writer.WriteAttributeString("viewBox","0 0 "+N(width)+" "+N(height));
     writer.WriteElementString("title",all?"AstroArchive · Analytics collection":pages[0].Title);
-    writer.WriteElementString("desc","Individual light-frame analytics. Time is recorded integration, not elapsed observing time. Stacks, videos and calibration files are excluded.");
+    writer.WriteElementString("desc","Recorded light-frame and standalone stack integration, not elapsed observing time. Stacks with corresponding light subframes, videos and calibration files are excluded.");
     writer.WriteStartElement("defs");writer.WriteStartElement("image");writer.WriteAttributeString("id","astroarchive-logo");writer.WriteAttributeString("width","1");writer.WriteAttributeString("height","1");writer.WriteAttributeString("href","http://www.w3.org/1999/xlink","data:image/png;base64,"+logoBase64);writer.WriteEndElement();
     for(int page=0;page<pages.Count;page++)for(int m=0;m<pages[page].Marks.Count;m++){var mark=pages[page].Marks[m];if(mark.FillEnd==null)continue;writer.WriteStartElement("linearGradient");writer.WriteAttributeString("id","g"+page+"-"+m);writer.WriteAttributeString("x2",mark.VerticalGradient?"0%":"100%");writer.WriteAttributeString("y2",mark.VerticalGradient?"100%":"0%");foreach(bool end in new[]{false,true}){writer.WriteStartElement("stop");writer.WriteAttributeString("offset",end?"100%":"0%");writer.WriteAttributeString("stop-color",end?mark.FillEnd:mark.Fill);writer.WriteEndElement();}writer.WriteEndElement();}writer.WriteEndElement();
     writer.WriteStartElement("rect");writer.WriteAttributeString("width",N(width));writer.WriteAttributeString("height",N(height));writer.WriteAttributeString("fill",pages[0].Background);writer.WriteEndElement();
@@ -129,7 +130,7 @@ namespace AstroArchive {
       if(mark.Kind=="logo"){writer.WriteStartElement("use");writer.WriteAttributeString("href","http://www.w3.org/1999/xlink","#astroarchive-logo");writer.WriteAttributeString("transform","translate("+N(mark.X)+","+N(mark.Y)+") scale("+N(mark.Width)+","+N(mark.Height)+")");writer.WriteEndElement();continue;}
       string kind=mark.Kind;writer.WriteStartElement(kind);
       if(kind=="polygon"){var points=new StringBuilder();for(int j=0;j<mark.Points.Length;j+=2)points.Append(N(mark.Points[j])+","+N(mark.Points[j+1])+" ");writer.WriteAttributeString("points",points.ToString().Trim());}
-      else{writer.WriteAttributeString("x",N(mark.X));writer.WriteAttributeString("y",N(kind=="text"?mark.Y+mark.Size*.91:mark.Y));}
+      else{writer.WriteAttributeString("x",N(mark.X));writer.WriteAttributeString("y",N(kind=="text"?mark.Y+mark.Size*.91:mark.Y));if(kind=="text"&&mark.Centered)writer.WriteAttributeString("text-anchor","middle");}
       if(kind=="rect"){writer.WriteAttributeString("width",N(mark.Width));writer.WriteAttributeString("height",N(mark.Height));if(mark.Radius>0)writer.WriteAttributeString("rx",N(mark.Radius));}
       writer.WriteAttributeString("fill",mark.FillEnd==null?mark.Fill:"url(#g"+i+"-"+m+")");
       if(kind=="text"){writer.WriteAttributeString("font-family","Arial, sans-serif");writer.WriteAttributeString("font-size",N(mark.Size));writer.WriteAttributeString("font-weight",mark.Bold?"700":"400");}
