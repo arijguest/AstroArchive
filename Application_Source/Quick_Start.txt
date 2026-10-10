@@ -382,8 +382,12 @@ an individual target, videos appear above grouped subs.
 Compact process summaries below the menu show active work and completion results.
 Live imports stay first, followed by other running jobs and completed processes.
 Summaries show elapsed time, ETA, counts and transfer details where available.
-Dismiss hides a summary without canceling work; Activity keeps its controls and
-Show dismissed restores hidden cards. Completion shows a fresh result summary.
+Dismiss hides the summary and its Activity card without canceling work.
+Show dismissed in Activity restores manually hidden cards and their controls.
+A manually dismissed process stays hidden when it completes. Other completed
+banners clear after clicks, typing or scrolling elsewhere in the app, or when
+another process completes; their entries remain in Activity. Reading notifications
+keeps the banners visible. Running and paused imports are not cleared automatically.
 Multiple processes scroll only when the available space is filled.
 Activity keeps completed entries, but only processes lasting more than five minutes
 raise an unread count. Opening Activity acknowledges the count; click outside to close.

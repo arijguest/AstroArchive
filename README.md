@@ -25,7 +25,9 @@ moving it. Use one running AstroArchive instance per repository.
 
 Compact dismissible process summaries show progress and completion parameters
 below the menu and in **Activity**. Live imports stay first; lists scroll when needed.
-Dismissing a summary keeps work running, and **Show dismissed** restores its controls.
+Dismissing a summary hides it from both places while keeping work running;
+**Show dismissed** in Activity restores its controls. Completed banners clear when
+you continue using the app or another process completes; their Activity history remains.
 
 Updates appear in **Activity** and **Guide → About AstroArchive**.
 Use **Settings → Updates** to install them. [Installation, repair and policy blocks](docs/UPDATES.md).
