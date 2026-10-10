@@ -54,7 +54,13 @@ namespace AstroArchive {
 #if !PORTABLE
   long checkpointGeneration=-1;FileStamp checkpointStamp;
 #endif
-  public Repository(string root){Root=Path.GetFullPath(root);Directory.CreateDirectory(Root);Meta=Path.Combine(Root,".astroarchive");CheckManagedPath(Meta,Root);Directory.CreateDirectory(Meta);
+  public Repository(string root){Root=Path.GetFullPath(root);Directory.CreateDirectory(Root);Meta=Path.Combine(Root,".astroarchive");
+#if PORTABLE
+   var metadataFolders=Directory.EnumerateDirectories(Root).Where(d=>Path.GetFileName(d).Equals(".astroarchive",StringComparison.OrdinalIgnoreCase)).ToList();
+   if(metadataFolders.Count>1)throw new IOException("Archive contains ambiguous metadata folder casing.");
+   if(metadataFolders.Count==1)Meta=metadataFolders[0];
+#endif
+   CheckManagedPath(Meta,Root);Directory.CreateDirectory(Meta);
 #if PORTABLE
    try {
     string lockPath=Path.Combine(Meta,"writer.lock");CheckManagedPath(lockPath,Root);
@@ -83,11 +89,35 @@ namespace AstroArchive {
   public List<Frame> All(){var frames=db.Query("SELECT data FROM files").Select(Util.Deserialize<Frame>).ToList();return frames;}
   public Frame Find(string hash){string data=db.Query("SELECT data FROM files WHERE hash=?",hash).FirstOrDefault();return data==null?null:Util.Deserialize<Frame>(data);}
   public void Save(Frame f){f.Target=ObservationTargets.CanonicalSolar(f.Target);db.Exec("INSERT OR REPLACE INTO files(hash,data) VALUES(?,?)",f.Hash,Util.Serialize(f));RememberImportName(f);}
-  public void Refile(Frame f,CancellationToken ct){string old=FilePath(f),rel=Destination(f),dest=Path.Combine(Root,rel);if(string.Equals(old,dest,Util.PathComparison)){Save(f);return;}if(!File.Exists(old))throw new IOException("Repository file missing: "+old);if(Util.Hash(old,ct)!=f.Hash)throw new IOException("Repository file has changed; metadata was not applied: "+old);CheckManagedPath(dest,Root);Directory.CreateDirectory(Path.GetDirectoryName(dest));CheckManagedPath(dest,Root);bool moved=false;string previous=f.RelativePath;
+  public void Refile(Frame f,CancellationToken ct){
+#if PORTABLE
+   protection.CheckCaptureWrite();
+#endif
+string old=FilePath(f),rel=Destination(f),dest=Path.Combine(Root,rel);if(string.Equals(old,dest,Util.PathComparison)){Save(f);return;}if(!File.Exists(old))throw new IOException("Repository file missing: "+old);if(Util.Hash(old,ct)!=f.Hash)throw new IOException("Repository file has changed; metadata was not applied: "+old);CheckManagedPath(dest,Root);Directory.CreateDirectory(Path.GetDirectoryName(dest));CheckManagedPath(dest,Root);bool moved=false;string previous=f.RelativePath;
    if(File.Exists(dest)){if(Util.Hash(dest,ct)!=f.Hash)throw new IOException("Conflicting destination file.");}else{MoveCapture(old,dest);moved=true;}try{f.RelativePath=rel;f.RepositoryStamp=FileStamp.Read(dest);Save(f);}catch{f.RelativePath=previous;if(moved)MoveCapture(dest,old);throw;}
   }
   public void SaveRotation(RotationResult r){db.Exec("INSERT OR REPLACE INTO sessions(id,data) VALUES(?,?)",r.Session,Util.Serialize(r));}
-  public string FilePath(Frame f){string p=Path.GetFullPath(Path.Combine(Root,f.RelativePath??""));CheckManagedPath(p,Root);return p;}
+  public string FilePath(Frame f){return ResolveArchivePath(f.RelativePath);}
+  public string ResolveArchivePath(string relative){
+#if PORTABLE
+   relative=(relative??"").Replace('\\',Path.DirectorySeparatorChar);
+#endif
+   string full=Path.GetFullPath(Path.Combine(Root,relative??""));CheckManagedPath(full,Root);
+#if PORTABLE
+   if(OperatingSystem.IsLinux()){
+    string current=Root;foreach(string component in full.Substring(Root.TrimEnd(Path.DirectorySeparatorChar).Length+1).Split(Path.DirectorySeparatorChar)){
+     string next=Path.Combine(current,component);
+     if(!File.Exists(next)&&!Directory.Exists(next)&&Directory.Exists(current)){
+      var matches=Directory.EnumerateFileSystemEntries(current).Where(p=>Path.GetFileName(p).Equals(component,StringComparison.OrdinalIgnoreCase)).ToList();
+      if(matches.Count>1)throw new IOException("Archive contains an ambiguous Windows path: "+relative);
+      if(matches.Count==1)next=matches[0];
+     }
+     CheckManagedPath(next,Root);current=next;
+    }return current;
+   }
+#endif
+   return full;
+  }
   sealed class Scanned {public Frame Frame;public long Bytes;public bool CacheHit,HeaderHit;public string Error;}
   Scanned ScanOne(ScanEntry entry,string source,string telescope,string model,bool reindex,bool deferHash,bool cloudSource,string telescopeIdentity,Dictionary<string,SourceManifest> cached,HashSet<string> deleted,Dictionary<string,Classifier.ShotsMetadata> shots,MetadataHeaderCache headers,PipelineMetrics metrics,CancellationToken ct,Dictionary<string,Frame> archive,bool fullScan,bool scopedArchive){
    var item=new Scanned();string name=Path.GetFileName(entry.Path);

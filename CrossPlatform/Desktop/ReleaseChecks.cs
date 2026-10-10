@@ -44,6 +44,7 @@ public static class PackageSelfTest
     {
         string root = Path.GetFullPath(directory ?? Path.Combine(Path.GetTempPath(), "astroarchive-check-"+Guid.NewGuid().ToString("N")));
         try {
+            if(Directory.Exists(root)&&Directory.EnumerateFileSystemEntries(root).Any()) throw new IOException("Choose a new empty test directory.");
             string source = ReleaseFixture.Prepare(root); Directory.CreateDirectory(Path.Combine(root,"exports"));
             string archive = Path.Combine(root,"archive");
             using (var session = new ArchiveSession(Path.Combine(root,"config","settings.json"))) {
@@ -66,9 +67,40 @@ public static class PackageSelfTest
                 reopened.Open(archive); ReleaseFixture.Check(reopened.Captures.Count==2 && reopened.Edited.Count==2,"installed app reopens durable index and Edited records");
                 reopened.Verify(CancellationToken.None,_=>{});
             }
+            CrashRecovery(Path.Combine(root,"crash-recovery"));
             File.WriteAllText(Path.Combine(root,"package-check.txt"),"PASS: installed executable import/export/backup/reopen");
             Console.WriteLine("Package checks passed at " + root); return 0;
         } catch(Exception e) { Console.Error.WriteLine(e); return 1; }
+    }
+    public static int CrashWorker(string root)
+    {
+        string source=ReleaseFixture.Prepare(root);
+        using var repo=new Repository(Path.Combine(root,"archive"));
+        var scan=repo.Scan(source,"Crash scope","Auto",CancellationToken.None,_=>{});
+        repo.Import(scan.Frames,CancellationToken.None,_=>{},new ImportOptions { SourceRoot=source, Workers=1, OnFrame=frame=> {
+            if(frame.Status=="Imported") {
+                File.WriteAllText(Path.Combine(root,"committed"),frame.Hash);
+                Thread.Sleep(Timeout.Infinite); // Parent kills this process after the durable commit.
+            }
+        }});
+        return 1;
+    }
+    private static void CrashRecovery(string root)
+    {
+        var start=new System.Diagnostics.ProcessStartInfo(Environment.ProcessPath!) { UseShellExecute=false, RedirectStandardOutput=true, RedirectStandardError=true };
+        if(Path.GetFileNameWithoutExtension(Environment.ProcessPath)=="dotnet") start.ArgumentList.Add(typeof(Program).Assembly.Location);
+        start.ArgumentList.Add("--crash-test-worker"); start.ArgumentList.Add(root);
+        using var process=System.Diagnostics.Process.Start(start)!;
+        try {
+            bool committed=SpinWait.SpinUntil(()=>File.Exists(Path.Combine(root,"committed"))||process.HasExited,TimeSpan.FromSeconds(15));
+            if(!committed||process.HasExited) throw new IOException("Crash fixture failed before commit: "+(process.HasExited?process.StandardError.ReadToEnd():"timeout"));
+            process.Kill(true); process.WaitForExit();
+            using var repo=new Repository(Path.Combine(root,"archive"));
+            ReleaseFixture.Check(repo.All().Count==1 && repo.Verify(CancellationToken.None,_=>{})==0,"forced process termination retains the committed capture and releases its writer lock");
+            var scan=repo.Scan(Path.Combine(root,"source with spaces Ω"),"Crash scope","Auto",CancellationToken.None,_=>{});
+            var result=repo.Import(scan.Frames,CancellationToken.None,_=>{});
+            ReleaseFixture.Check(result.Imported==1 && repo.All().Count==2,"rescan after a crash resumes without duplicate or lost captures");
+        } finally { if(!process.HasExited) { process.Kill(true); process.WaitForExit(); } }
     }
 }
 
@@ -78,6 +110,7 @@ public static class NativeSmoke
     public static int Run(string? directory)
     {
         Root=Path.GetFullPath(directory ?? Path.Combine(Path.GetTempPath(),"astroarchive-ui-"+Guid.NewGuid().ToString("N")));
+        if(Directory.Exists(Root)&&Directory.EnumerateFileSystemEntries(Root).Any()) { Console.Error.WriteLine("Choose a new empty UI test directory."); return 1; }
         Directory.CreateDirectory(Root);
         return Program.BuildAvaloniaApp().StartWithClassicDesktopLifetime([]);
     }
@@ -87,6 +120,7 @@ public static class NativeSmoke
         void Text(string id,string value) => ((TextBox)window.Controls[id]).Text=value;
         void Page(int index) { ((TabControl)window.Controls["Pages"]).SelectedIndex=index; window.UpdateLayout(); }
         async Task Click(string id) {
+            window.Controls[id].BringIntoView(); window.UpdateLayout();
             ((Button)window.Controls[id]).RaiseEvent(new RoutedEventArgs(Button.ClickEvent)); await window.LastOperation;
             await Dispatcher.UIThread.InvokeAsync(()=>{},DispatcherPriority.Background);
             ReleaseFixture.Check(window.LastError==null,"page command " + id + " completes: " + window.LastError);
@@ -114,11 +148,14 @@ public static class NativeSmoke
         ReleaseFixture.Check(window.Session.Analytics.Reports.Count==6 && window.Session.Analytics.Seconds==120,"Analytics shows all six reports with exact integration");
         Page(4); Text("BackupDestination",parent); await Click("Backup"); await Click("SaveSettings");
         if(screenshots) {
+            foreach(bool compact in new[]{false,true}) {
+            window.Width=compact?1100:1220; window.Height=compact?720:850;
             for(int i=0;i<6;i++) {
                 Page(i); window.UpdateLayout(); await Task.Delay(100); window.UpdateLayout();
                 using(var bitmap=new RenderTargetBitmap(new PixelSize((int)window.Width,(int)window.Height),new Vector(96,96))) {
-                    bitmap.Render(window); bitmap.Save(Path.Combine(root,$"page-{i}.png"),new PngBitmapEncoderOptions());
+                    bitmap.Render(window); bitmap.Save(Path.Combine(root,$"page-{i}{(compact?"-compact":"")}.png"),new PngBitmapEncoderOptions());
                 }
+            }
             }
         }
         ReleaseFixture.Check(Directory.GetFiles(source,"*.fit").Length==3,"all page workflows preserve source originals");

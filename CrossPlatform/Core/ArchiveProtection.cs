@@ -7,6 +7,7 @@ public sealed class ProtectionRecord { public string Kind = "", Id = ""; public 
 
 public sealed class ArchiveProtection
 {
+    private readonly bool windowsProtected;
     public bool Enabled => false;
     public string Availability => "Filesystem deletion protection is available in the Windows application. Linux imports retain source originals.";
     public ArchiveProtection(string root, string meta)
@@ -16,11 +17,16 @@ public sealed class ArchiveProtection
         var state = Util.Deserialize<ProtectionState>(File.ReadAllText(path));
         if (state == null || (state.Mode != "Off" && state.Mode != "Enabled"))
             throw new IOException("This archive has an interrupted Windows protection change. Open it on Windows to complete recovery before using it on Linux.");
+        windowsProtected = state.Mode == "Enabled";
+    }
+    public void CheckCaptureWrite()
+    {
+        if (windowsProtected) throw new PlatformNotSupportedException("This archive has Windows deletion protection. Disable it in AstroArchive on Windows before importing or moving captures on Linux. Browsing, export, working copies and backups remain available.");
     }
     public void ProtectCapture(string path) { }
     public void Enable(IEnumerable<string> files, CancellationToken ct, Action<ProgressInfo>? progress) => throw new PlatformNotSupportedException(Availability);
     public void Disable(CancellationToken ct, Action<ProgressInfo>? progress) { ct.ThrowIfCancellationRequested(); }
-    public IDisposable Unlock(string source, string? destination, bool capture = true) => new Scope();
+    public IDisposable Unlock(string source, string? destination, bool capture = true) { if(capture) CheckCaptureWrite(); return new Scope(); }
     private sealed class Scope : IDisposable { public void Dispose() { } }
 }
 

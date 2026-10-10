@@ -24,7 +24,7 @@ jobs:
         with:
           global-json-file: global.json
       - name: Install display and optional scientific codecs
-        run: sudo apt-get update && sudo apt-get install -y xvfb libcfitsio-dev libzstd1 libfontconfig1 libice6 libsm6
+        run: sudo apt-get update && sudo apt-get install -y xvfb libcfitsio-dev libzstd1 libfontconfig1 libice6 libsm6 exfatprogs
       - name: Test archive engine and Linux page workflows
         run: |
           mkdir -p linux-artifacts
@@ -43,6 +43,9 @@ jobs:
           dpkg-deb -x linux-artifacts/astroarchive_3.1.1-preview.1_amd64.deb "$RUNNER_TEMP/deb"
           "$RUNNER_TEMP/deb/usr/lib/astroarchive/AstroArchive" --self-test "$RUNNER_TEMP/deb-test"
           (cd linux-artifacts && sha256sum -c SHA256SUMS)
+      - name: Test a removable exFAT loopback drive and read-only remount
+        if: matrix.os == 'ubuntu-22.04'
+        run: bash scripts/test-linux-drive.sh | tee linux-artifacts/exfat-drive.log
       - name: Create Linux archive for the Windows engine
         if: matrix.os == 'ubuntu-22.04'
         run: dotnet run --project CrossPlatform/EngineTests -- "$PWD/interop/linux" --interop-create

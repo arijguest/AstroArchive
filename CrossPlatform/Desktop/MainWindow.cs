@@ -181,6 +181,8 @@ public sealed class MainWindow : Window
     private async Task PreviewSelected(CancellationToken ct)
     {
         var frame = Selected<Frame>("Captures").Single(); string path = Session.RequireArchive().FilePath(frame);
+        preview.Source=null; previewBitmap?.Dispose(); previewBitmap=null; previewText.Text="Preview: "+frame.OriginalName;
+
         var data = await Task.Run(() => Assets.Display(frame, path, frame.ImageIndex ?? 0, ct), ct);
         byte[] pixels = await Task.Run(() => data.Render("Auto per channel", ct), ct);
         var bitmap = new WriteableBitmap(new PixelSize(data.Width, data.Height), new Vector(96,96), PixelFormat.Bgra8888, AlphaFormat.Opaque);
@@ -189,7 +191,7 @@ public sealed class MainWindow : Window
         using (var locked = bitmap.Lock())
             for (int y=0; y<data.Height; y++) Marshal.Copy(bgra, y*data.Width*4, locked.Address+y*locked.RowBytes, data.Width*4);
         preview.Source = bitmap; previewBitmap?.Dispose(); previewBitmap = bitmap;
-        previewText.Text = data.Description + " · display stretch only";
+        previewText.Text = frame.OriginalName + " · " + data.Description + " · display stretch only";
     }
     public Task Run(string title, Func<CancellationToken, Task> operation)
     {
@@ -256,5 +258,5 @@ public sealed class MainWindow : Window
     private static TextBlock Heading(string text) => new() { Text = text, FontSize = 18, FontWeight = FontWeight.SemiBold };
     private static TextBlock Notice(string text) => new() { Text = text, TextWrapping = TextWrapping.Wrap, Opacity = 0.8 };
     private static StackPanel Row(params Control[] children) { var row = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8 }; foreach (var child in children) row.Children.Add(child); return row; }
-    private static Grid Layout(Control top, Control center, Control bottom) { var grid = new Grid { RowDefinitions = new RowDefinitions("Auto,*,Auto") }; grid.Children.Add(top); center.Margin = new Thickness(0,12,0,0); Grid.SetRow(center, 1); grid.Children.Add(center); Grid.SetRow(bottom, 2); bottom.Margin = new Thickness(0,12,0,0); grid.Children.Add(bottom); return grid; }
+    private static Control Layout(Control top, Control center, Control bottom) { center.Height = 260; var grid = new Grid { RowDefinitions = new RowDefinitions("Auto,Auto,Auto") }; grid.Children.Add(top); center.Margin = new Thickness(0,12,0,0); Grid.SetRow(center, 1); grid.Children.Add(center); Grid.SetRow(bottom, 2); bottom.Margin = new Thickness(0,12,0,0); grid.Children.Add(bottom); return new ScrollViewer { Content = grid }; }
 }

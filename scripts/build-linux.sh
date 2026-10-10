@@ -8,7 +8,7 @@ release_output="$(realpath "$release_output")"
 release_stage="$(mktemp -d)"
 trap 'rm -rf "$release_stage"' EXIT
 dotnet publish CrossPlatform/Desktop/AstroArchive.Desktop.csproj -c Release -r linux-x64 --self-contained true \
-  -p:PublishSingleFile=false -p:PublishTrimmed=false -o "$release_stage/app"
+  -p:PublishSingleFile=false -p:PublishTrimmed=false -p:RestoreLockedMode=true -o "$release_stage/app"
 cp LICENSE "$release_stage/app/LICENSE" 2>/dev/null || cp LICENSE.md "$release_stage/app/LICENSE"
 cp CrossPlatform/README.md "$release_stage/app/README.md"
 python3 scripts/linux-notices.py "$release_stage/app"
@@ -55,6 +55,12 @@ python3 - "$release_output" <<'PY'
 import hashlib, pathlib, sys
 folder = pathlib.Path(sys.argv[1])
 files = sorted([*folder.glob('*.deb'), *folder.glob('*.tar.gz')])
-(folder/'SHA256SUMS').write_text(''.join(hashlib.file_digest(p.open('rb'), 'sha256').hexdigest()+'  '+p.name+'\n' for p in files))
+def digest(path):
+    value = hashlib.sha256()
+    with path.open('rb') as stream:
+        for chunk in iter(lambda: stream.read(1024*1024), b''):
+            value.update(chunk)
+    return value.hexdigest()
+(folder/'SHA256SUMS').write_text(''.join(digest(p)+'  '+p.name+'\n' for p in files))
 PY
 printf 'Linux packages written to %s\n' "$release_output"

@@ -27,7 +27,9 @@ Use one writer at a time. A writable local mount is required; network and cloud-
 archives are outside this preview's tested support.
 
 Windows deletion protection is a Windows feature. Its settings are preserved on Linux;
-Linux does not enforce its NTFS rules. Complete any interrupted protection change on
+Linux does not enforce its NTFS rules. Protected archives permit browsing, exports,
+working copies and backups; disable protection on Windows before importing or moving
+captures on Linux. Complete any interrupted protection change on
 Windows before opening the drive on Linux. Backups omit Windows protection settings.
 
 ## Available workflows

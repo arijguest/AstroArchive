@@ -49,6 +49,9 @@ public sealed class ArchiveSession : IDisposable
         }
         catch (Exception e) when (e is IOException or JsonException or UnauthorizedAccessException)
         { SettingsWarning = "Settings could not be loaded: " + e.Message; }
+        Settings.Archive ??= ""; Settings.Source ??= ""; Settings.Telescope ??= "My telescope";
+        Settings.Model ??= "Auto"; Settings.ExternalEditor ??= "";
+        if(Settings.Theme is not ("Dark" or "Light" or "System")) Settings.Theme="Dark";
     }
 
     public void SaveSettings()
@@ -155,7 +158,7 @@ public sealed class ArchiveSession : IDisposable
         {
             ct.ThrowIfCancellationRequested();
             try { RequireArchive().ValidateCapture(frame, ct); }
-            catch (IOException e) { errors.Add(frame.OriginalName + ": " + e.Message); }
+            catch (Exception e) when (e is IOException or InvalidDataException) { errors.Add(frame.OriginalName + ": " + e.Message); }
             progress(new ProgressInfo { Done = ++done, Total = all.Count, Text = frame.OriginalName, Stage = "Verifying archive" });
         }
         LastReport = errors.Count == 0 ? $"Verified {all.Count} archived files. SHA-256 matches the index." : string.Join("\n", errors);
@@ -166,7 +169,9 @@ public sealed class ArchiveSession : IDisposable
         var dest = Exporter.Destination(RequireArchive(), new ExportOptions { Parent = parent, Name = name, CreateNewFolder = true });
         ct.ThrowIfCancellationRequested(); Directory.CreateDirectory(dest);
         var pages = Enumerable.Range(0, Analytics.Reports.Count).SelectMany(i => AnalyticsGraphics.Pages(Analytics, i, false)).ToList();
-        Exporter.WriteMetadataText(Path.Combine(dest, "analytics.svg"), AnalyticsGraphics.Svg(pages, ""), ct);
+        using var logoStream = typeof(Repository).Assembly.GetManifestResourceStream("AstroArchive_Logo.png")!;
+        using var logoBytes = new MemoryStream(); logoStream.CopyTo(logoBytes);
+        Exporter.WriteMetadataText(Path.Combine(dest, "analytics.svg"), AnalyticsGraphics.Svg(pages, Convert.ToBase64String(logoBytes.ToArray())), ct);
         Exporter.WriteMetadataText(Path.Combine(dest, "analytics.json"), Util.Serialize(Analytics), ct);
         LastOutput = dest; return dest;
     }
