@@ -19,11 +19,11 @@ Linux preserves Windows deletion-protection settings. Disable protection on Wind
 Verify the downloaded package against `SHA256SUMS`.
 
 ```sh
-sudo apt install ./astroarchive_3.1.4-preview.1_amd64.deb
+sudo apt install ./astroarchive_3.1.4-preview.2_amd64.deb
 astroarchive
 ```
 
-Alternatively, extract `AstroArchive-3.1.4-preview.1-linux-x64.tar.gz` and launch `AstroArchive` inside its folder. The tarball requires the distribution's ICU, OpenSSL 3, fontconfig and X11 libraries. Optional libcfitsio/libzstd enable their scientific codecs.
+Alternatively, extract `AstroArchive-3.1.4-preview.2-linux-x64.tar.gz` and launch `AstroArchive` inside its folder. The tarball requires the distribution's ICU, OpenSSL 3, fontconfig and X11 libraries. Optional libcfitsio/libzstd enable their scientific codecs.
 
 ### Validation and preview scope
 

@@ -268,10 +268,27 @@ public sealed partial class MainWindow : Window
     private Control DestinationFields(string prefix) => Row(Field(prefix+"Destination", "", "Existing destination folder", 310), Field(prefix+"Name", prefix+" project", "New folder / project name", 210));
     private DataGrid Table<T>(string name, IEnumerable<T> items, params (string title, string path)[] columns) {
         var grid = new DataGrid { Name = name, ItemsSource = items, AutoGenerateColumns = false, IsReadOnly = true, SelectionMode = DataGridSelectionMode.Extended, GridLinesVisibility = DataGridGridLinesVisibility.Horizontal, MinHeight = 140 };
-        foreach (var column in columns) grid.Columns.Add(new DataGridTextColumn { Header = column.title, Binding = new Binding(column.path), Width = new DataGridLength(1, DataGridLengthUnitType.Star) });
+        foreach (var column in columns) {
+            // Avalonia reflection bindings resolve properties. Several shared
+            // Windows engine records intentionally expose public fields.
+            bool fields=ColumnHasFields(typeof(T),column.path);
+            grid.Columns.Add(new DataGridTextColumn { Header = column.title,
+                Binding = fields?new Binding { Converter=new Avalonia.Data.Converters.FuncValueConverter<T,object?>(value=>ColumnValue(value,column.path)) }:new Binding(column.path),
+                SortMemberPath=column.path,CustomSortComparer=fields?new ColumnComparer(column.path):null,
+                Width = new DataGridLength(1, DataGridLengthUnitType.Star) });
+        }
         Controls[name] = grid; return grid;
     }
     private static TabItem Page(string title, Control content) => new() { Header = title, Content = content, Padding = new Thickness(14,10,14,10) };
+    private static bool ColumnHasFields(Type type,string path) {
+        bool fields=false;foreach(string member in path.Split('.')) { var property=type.GetProperty(member);if(property!=null){type=property.PropertyType;continue;}var field=type.GetField(member)??throw new InvalidOperationException("Unknown table member: "+path);fields=true;type=field.FieldType; }return fields;
+    }
+    private static object? ColumnValue(object? value,string path) {
+        foreach(string member in path.Split('.')) { if(value==null)return null;var type=value.GetType();value=type.GetProperty(member)?.GetValue(value)??type.GetField(member)?.GetValue(value); }return value;
+    }
+    private sealed class ColumnComparer(string path):System.Collections.IComparer {
+        public int Compare(object? x,object? y)=>System.Collections.Comparer.DefaultInvariant.Compare(ColumnValue(x,path),ColumnValue(y,path));
+    }
     private static TextBlock Label(string text) => new() { Text = text, VerticalAlignment = VerticalAlignment.Center };
     private static TextBlock Heading(string text) => new() { Text = text, FontSize = 18, FontWeight = FontWeight.SemiBold };
     private static TextBlock Notice(string text) => new() { Text = text, TextWrapping = TextWrapping.Wrap, Opacity = 0.8 };

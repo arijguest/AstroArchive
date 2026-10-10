@@ -4,7 +4,7 @@ This is the Linux x64 desktop release based on AstroArchive 3.1.4. It includes i
 .NET 10 runtime. Supported targets are Ubuntu 22.04/24.04 x64 and Debian 12/13 x64
 with a graphical desktop. Wayland desktops currently use XWayland.
 
-Install the Debian package with `sudo apt install ./astroarchive_3.1.4-preview.1_amd64.deb`,
+Install the Debian package with `sudo apt install ./astroarchive_3.1.4-preview.2_amd64.deb`,
 or extract the tarball and run `./AstroArchive`. Check `SHA256SUMS` before installing.
 The tarball also needs the distribution's ICU, OpenSSL 3, fontconfig and X11 libraries.
 Zstandard and compressed FITS previews use optional distribution libzstd/libcfitsio
@@ -84,8 +84,8 @@ Install .NET SDK 10.0.401 and the desktop libraries, then from the repository ro
 dotnet run --project CrossPlatform/EngineTests -- /tmp/astroarchive-engine-unique
 dotnet test CrossPlatform/Desktop.Tests
 bash scripts/build-linux.sh
-tar -xzf linux-artifacts/AstroArchive-3.1.4-preview.1-linux-x64.tar.gz -C /tmp
-xvfb-run -a /tmp/AstroArchive-3.1.4-preview.1-linux-x64/AstroArchive --ui-smoke /tmp/astroarchive-ui-unique
+tar -xzf linux-artifacts/AstroArchive-3.1.4-preview.2-linux-x64.tar.gz -C /tmp
+xvfb-run -a /tmp/AstroArchive-3.1.4-preview.2-linux-x64/AstroArchive --ui-smoke /tmp/astroarchive-ui-unique
 ```
 
 `AstroArchive --self-test /tmp/unique-directory` tests the installed executable's

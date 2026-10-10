@@ -3,6 +3,7 @@ using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Media.Imaging;
 using Avalonia.Threading;
+using Avalonia.VisualTree;
 namespace AstroArchive.Desktop;
 public static class ParitySmoke
 {
@@ -23,7 +24,11 @@ public static class ParitySmoke
         await Click("Rotation"); ReleaseFixture.Check(window.Session.LastReport.Contains("five timestamped"),"rotation reports insufficient evidence without inventing a mount result");
         Put("Telescope","Smoke scope"); await Click("SaveProfile"); ((ComboBox)window.Controls["Profiles"]).SelectedItem="Smoke scope"; await Click("LoadProfile"); await Click("RecoverProfiles");
         ((ComboBox)window.Controls["RemoteKind"]).SelectedItem="Local simulator"; Put("RemoteFolder",Path.Combine(root,"source with spaces Ω")); Put("RemoteLimit","0");
-        await Click("ListRemote"); var remote=(DataGrid)window.Controls["RemoteFiles"]; foreach(var file in window.Session.RemoteFiles.Where(e=>e.Name!="broken.fit")) remote.SelectedItems.Add(file);
+        await Click("ListRemote"); var remote=(DataGrid)window.Controls["RemoteFiles"];
+        ((TabControl)window.Controls["Pages"]).SelectedIndex=1;((Expander)window.Controls["Section:Telescope network imports"]).IsExpanded=true;window.UpdateLayout();await Task.Delay(100);window.UpdateLayout();
+        remote.BringIntoView();window.UpdateLayout();await Task.Delay(100);window.UpdateLayout();
+        ReleaseFixture.Check(remote.GetVisualDescendants().OfType<TextBlock>().Any(t=>t.Text=="Light_M31.fit"),"native telescope rows render capture filenames");
+        foreach(var file in window.Session.RemoteFiles.Where(e=>e.Name!="broken.fit")) remote.SelectedItems.Add(file);
         await Click("ImportRemote"); ReleaseFixture.Check(window.Session.Captures.Count==2,"remote imports deduplicate existing captures");
         var edited=(DataGrid)window.Controls["EditedImages"]; edited.SelectedItem=window.Session.Edited.First(); Put("EditedObject","M45"); Put("EditedSubs","20"); Put("EditedSeconds","1200"); await Click("EditFinished"); await Click("EditedDetails"); await Click("EditedPreview");
         ReleaseFixture.Check(window.Session.Edited.Any(i=>i.Metadata.Subs==20&&i.Metadata.TotalExposure==1200),"Edited overrides are saved without changing image bytes");
@@ -48,6 +53,7 @@ public static class ParitySmoke
         ReleaseFixture.Check(window.Session.Edited.Count==3&&window.Session.Edited.Any(i=>i.RelativePath.Contains("nested")),"recursive finished-image import retains relative paths");
         window.Session.Verify(CancellationToken.None,_=>{});
         if(screenshots) {
+            recovery.Id=Guid.NewGuid().ToString("N");recovery.Title="Paused local import";recovery.State="Paused";store.Save(recovery);window.Session.RefreshRecovery();
             foreach(var section in window.Controls.Values.OfType<Expander>()) section.IsExpanded=true;
             var tabs=(TabControl)window.Controls["Pages"];
             foreach(var item in new[]{(0,"sky-context","SkyGlobe"),(0,"repository-metadata","Section:Detailed metadata editing"),(0,"repository-solving","ApplySolutions"),(1,"import-review","ScreenImports"),(1,"network-import","ListRemote"),(1,"import-recovery","ResumeImport"),(2,"edited-tools","EditFinished"),(4,"solver-settings","SaveAdvanced"),(3,"analytics-options","AnalyticsLayout")}) {
@@ -57,9 +63,11 @@ public static class ParitySmoke
                 var position=window.Controls[item.Item3].TranslatePoint(default,(Visual)scroller.Content!);
                 if(position.HasValue)scroller.Offset=new Vector(0,Math.Max(0,position.Value.Y-(item.Item2 is "sky-context" or "repository-metadata"?8:scroller.Viewport.Height*.55)));
                 await Task.Delay(100);window.UpdateLayout();
+                if(item.Item2=="import-recovery")ReleaseFixture.Check(window.Controls["RecoverableImports"].GetVisualDescendants().OfType<TextBlock>().Any(t=>t.Text=="Paused local import"),"native recovery rows render the paused import title");
                 using var bitmap=new RenderTargetBitmap(new PixelSize((int)window.Width,(int)window.Height),new Vector(96,96)); bitmap.Render(window); bitmap.Save(Path.Combine(root,"parity-"+item.Item2+".png"));
             }
             foreach(var section in window.Controls.Values.OfType<Expander>()) section.IsExpanded=false;
+            store.Remove(recovery);window.Session.RefreshRecovery();
         }
         Console.WriteLine("PARITY BUTTONS PASS: metadata, filters, screening, ASTAP protocol, reviewed target, rotation, profiles, remote import, Edited overrides/preview, capture guard, recovery, deletion audit/reimport, Dump and finished folders");
     }

@@ -288,6 +288,20 @@ public sealed class ParityTests : IDisposable
         Assert.ThrowsAny<OperationCanceledException>(()=>LinuxAnalyticsAnimation.Save(destination,pages,logo.ToArray(),"GIF",new LinuxAnimationOptions { SecondsPerChart=2,FramesPerSecond=4,MaximumEdge=160 },cancel.Token,(percent,_)=>cancel.Cancel()));
         Assert.False(File.Exists(destination));Assert.Empty(Directory.GetFiles(root,"*.tmp.*"));
     }
+    [AvaloniaFact]
+    public async Task RemoteAndRecoveryTablesRenderPublicFieldsAndSortNumericValues()
+    {
+        var window=new MainWindow(Session());window.Show();
+        try {
+            ReleaseFixture.Prepare(root);((TabControl)window.Controls["Pages"]).SelectedIndex=1;((ComboBox)window.Controls["RemoteKind"]).SelectedItem="Local simulator";Put(window,"RemoteFolder",Path.Combine(root,"source with spaces Ω"));await Click(window,"ListRemote");
+            ((Expander)window.Controls["Section:Telescope network imports"]).IsExpanded=true;window.UpdateLayout();await Dispatcher.UIThread.InvokeAsync(()=>{},DispatcherPriority.Background);window.UpdateLayout();
+            var grid=(DataGrid)window.Controls["RemoteFiles"];Assert.Contains(grid.GetVisualDescendants().OfType<TextBlock>(),t=>t.Text=="Light_M31.fit");Assert.Contains(grid.GetVisualDescendants().OfType<TextBlock>(),t=>t.Text==new FileInfo(Path.Combine(root,"source with spaces Ω","Light_M31.fit")).Length.ToString());
+            var comparer=grid.Columns[1].CustomSortComparer;Assert.True(comparer.Compare(new Entry{Size=2},new Entry{Size=10})<0);
+            var record=new ImportResumeRecord { Kind="Files",Title="Visible paused import",State="Paused",Repository=window.Session.RequireArchive().Root,Frames=[] };new ImportResumeStore(Path.Combine(Path.GetDirectoryName(window.Session.ConfigPath)!,"import-jobs")).Save(record);await Click(window,"Refresh");
+            ((Expander)window.Controls["Section:Paused and interrupted imports"]).IsExpanded=true;window.UpdateLayout();await Dispatcher.UIThread.InvokeAsync(()=>{},DispatcherPriority.Background);window.UpdateLayout();
+            var recovery=(DataGrid)window.Controls["RecoverableImports"];Assert.Contains(recovery.GetVisualDescendants().OfType<TextBlock>(),t=>t.Text=="Visible paused import");Assert.Contains(recovery.GetVisualDescendants().OfType<TextBlock>(),t=>t.Text=="Paused");
+        } finally { window.Close(); }
+    }
     [Fact]
     public async Task DiscoveryUsesActualUdpRepliesAndReleasesSocketsAfterCancellation()
     {

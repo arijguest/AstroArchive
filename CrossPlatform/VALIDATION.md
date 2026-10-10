@@ -1,7 +1,7 @@
 # AstroArchive Linux 3.1.4 preview — release validation
 
 Source: branch `codex/linux-release`, commit `@SOURCE_SHA@`.
-Date: 10 October 2026. Version: `3.1.4-preview.1`, Linux x64.
+Date: 10 October 2026. Version: `3.1.4-preview.2`, Linux x64.
 Build: self-contained Ubuntu 22.04 artifacts from the release tag, published only after all workflow gates pass.
 Review: https://github.com/arijguest/AstroArchive/pull/41
 

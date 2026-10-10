@@ -28,6 +28,8 @@ assert 'PASS: native Linux FTP and SMB list/download, sidecars, verified retry a
 assert 'PASS: actual Linux Secret Service persistence, private settings and credential removal' in (source / 'keyring-test.log').read_text()
 assert 'PASS: independently decoded Linux MP4/GIF ratios, themes, timing, colors, full resolutions and six-chart stories' in (source / 'media-test.log').read_text()
 assert 'PARITY BUTTONS PASS:' in (source / 'ui-test.log').read_text()
+assert 'PASS native telescope rows render capture filenames' in (source / 'ui-test.log').read_text()
+assert 'PASS native recovery rows render the paused import title' in (source / 'ui-test.log').read_text()
 assert re.search(r'^Pages:\s+6$', (source / 'pdf-test.log').read_text(), re.M)
 parity = sorted((source / 'ui').glob('parity-*.png'))
 assert len(parity) == 9, 'Missing native workflow screenshots'
@@ -35,7 +37,7 @@ screenshots = sorted((source / 'ui').glob('page-*.png'))
 assert len(screenshots) == 12, 'Missing native page screenshots'
 
 output.mkdir(exist_ok=True)
-for name in ['AstroArchive-3.1.4-preview.1-linux-x64.tar.gz', 'astroarchive_3.1.4-preview.1_amd64.deb']:
+for name in ['AstroArchive-3.1.4-preview.2-linux-x64.tar.gz', 'astroarchive_3.1.4-preview.2_amd64.deb']:
     shutil.copy2(source / name, output / name)
 shutil.copy2('CrossPlatform/README.md', output / 'README.md')
 shutil.copy2('CrossPlatform/FEATURE-PARITY.md', output / 'FEATURE-PARITY.md')
