@@ -72,13 +72,12 @@ namespace AstroArchive {
     p.Marks.Add(new AnalyticsMark{Kind="polygon",Points=points.ToArray(),Fill=Colours[colour%Colours.Length]});
     double y=477-values.Count*42/2.0+colour*42;Box(p,485,y+5,12,12,Colours[colour%Colours.Length]);
     string label=Fit(Short(value.Label,49),390,15);Text(p,label,510,y,15,Ink,false,value.Label);
-    Text(p,ArchiveAnalytics.Number(value.Value)+" "+unit,935,y,15,Ink,true);
+    Text(p,ArchiveAnalytics.Number(value.Value)+" "+(unit=="frames"&&value.Value==1?"frame":unit),935,y,15,Ink,true);
     Text(p,(value.Value/total*100).ToString("0.#",CultureInfo.InvariantCulture)+"%",1076,y,13,Muted);
     angle+=sweep;colour++;
    }
    string centre=ArchiveAnalytics.Number(total);double size=centre.Length>8?24:34;
    Text(p,centre,265-centre.Length*size*.28,447,size,Ink,true);Text(p,unit=="h"?"HOURS":"LIGHT FRAMES",unit=="h"?244:221,493,12,Muted,true);
-   Text(p,"Share of "+(unit=="h"?"recorded integration":"light frames"),60,657,12,Muted);
    if(values.Any(v=>v.Label.StartsWith("Other (")))Text(p,"Largest 7 groups; remaining groups combined",485,657,12,Muted);
   }
   static double NiceMax(double value){double scale=Math.Pow(10,Math.Floor(Math.Log10(value)));double n=value/scale;return (n<=1?1:n<=2?2:n<=5?5:10)*scale;}

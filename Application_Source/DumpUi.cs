@@ -20,7 +20,7 @@ namespace AstroArchive {
   void OpenDumpProgress(string title="Processing Dump folder"){nextActivityTitle=title;}
   void CloseDumpProgress(){nextActivityTitle=null;}
   async void ProcessDumpUi(){
-   if(repo==null||RepositoryOperationBlocked)return;
+   if(repo==null||RepositoryOperationBlocked||activities.Any(a=>a.Resume!=null&&a.ImportKind=="Dump"&&string.Equals(a.RepositoryRoot,repo.Root,StringComparison.OrdinalIgnoreCase)))return;
    var repository=repo;bool ignoreFailed=settings.IgnoreFailed,ignoreRaster=settings.IgnoreRasterImports;
    bool pending=false;dumpChecking=true;dumpCheckCancel=new CancellationTokenSource();var token=dumpCheckCancel.Token;SetBusy(true);
    try{pending=await Task.Run(()=>repository.HasPendingDumpFiles(token,ignoreFailed,ignoreRaster));}

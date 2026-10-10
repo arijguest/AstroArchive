@@ -12,7 +12,7 @@ using System.Windows.Threading;
 
 namespace AstroArchive {
  public sealed class ActivityEntry {
-  public string Title,Status,ReportTitle,Report,OutputPath,ActionLabel,RepositoryRoot,CancelLabel;
+  public string Title,Status,ReportTitle,Report,OutputPath,ActionLabel,RepositoryRoot,CancelLabel,ImportKind;
   public DateTime StartedUtc=DateTime.UtcNow;
   public bool Running,Unread,NeedsReview,Failed,Canceled,NetworkImport;
   public double? DurationSeconds;
