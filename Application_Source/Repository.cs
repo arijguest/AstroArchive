@@ -12,6 +12,7 @@ using System.Diagnostics;
 using System.Security.Cryptography;
 
 namespace AstroArchive {
+#if !PORTABLE
  public sealed class Database:IDisposable {
   IntPtr db;readonly object sync=new object();readonly string databasePath;long generation;public long Generation{get{lock(sync)return generation;}}
   [DefaultDllImportSearchPaths(DllImportSearchPath.System32)][DllImport("winsqlite3.dll",CallingConvention=CallingConvention.Cdecl)]static extern int sqlite3_open_v2(byte[] name,out IntPtr db,int flags,IntPtr vfs);
@@ -39,6 +40,7 @@ namespace AstroArchive {
   public void Dispose(){lock(sync){if(db!=IntPtr.Zero){int code=sqlite3_close(db);if(code!=0)throw new IOException("SQLite close failed: "+Error());db=IntPtr.Zero;}}}
 
  }
+#endif
  public sealed partial class Repository:IDisposable {
   public string Root{get;private set;} public string Meta{get;private set;} Database db;Mutex mutex;bool held;
   public static string LocalIndexBase;

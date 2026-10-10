@@ -18,4 +18,10 @@ Application_Source/RasterTests.exe*
 # Python build-script caches.
 __pycache__/
 
+# SDK-based desktop builds and isolated cross-platform verification.
+**/bin/
+**/obj/
+CrossPlatform/TestResults/
+macos-artifacts/
+
 Application_Source/SMBLibrary.dll
