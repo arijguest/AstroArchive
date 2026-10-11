@@ -41,7 +41,27 @@ namespace AstroArchive {
    "Preparing for a very late bedtime…",
    "Asking the Pleiades to stay together…",
    "Turning cosmic chaos into a collection…",
-   "Saving your place among the stars…"
+   "Saving your place among the stars…",
+   "Hmm, where did I put that one?",
+   "Opening final_final_really_final.fit…",
+   "Looking for M31 under ‘miscellaneous’…",
+   "Moving ‘sort these later’ slightly closer to later…",
+   "Searching for the lens cap. It’s on the lens…",
+   "Explaining to the cat that this is not a heated bed…",
+   "Checking whether ‘just one more sub’ was a promise…",
+   "Translating ‘five minutes’ from astronomer time…",
+   "Finding a USB port that hasn’t been claimed…",
+   "Wondering why the best frame was the test shot…",
+   "Remembering the password to the telescope’s Wi-Fi…",
+   "Admiring the galaxy behind your satellite trail…",
+   "Reclassifying that meteor as an aeroplane…",
+   "Convincing the hard drive that space is infinite…",
+   "Locating the image you definitely didn’t delete…",
+   "Trying to pronounce Zubenelgenubi…",
+   "Discovering that the red torch has rolled away…",
+   "Wondering if the smudge is dust or a discovery…",
+   "Checking the histogram. Pretending to understand it…",
+   "Organising the archive before it becomes a black hole…"
   };
   public static readonly string[] Hints={
    "Did you know you can press F1 to open AstroArchive’s offline guide?",

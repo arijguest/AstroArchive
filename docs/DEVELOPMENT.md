@@ -35,7 +35,7 @@ Example:
 .\Application_Source\dist\AstroArchive.exe --ui-test .\Application_Source\test-data\target-checks --targets-only --no-updates
 ~~~
 
-`Application_Source/test-startup.ps1` checks all 30 shuffled remarks, hints and
+`Application_Source/test-startup.ps1` checks all 50 shuffled remarks, hints and
 facts, then builds the application and captures the Rosette splash at normal and
 smaller sizes, including high contrast. Its Windows smoke checks exercise the
 independent splash dispatcher, cancellation, executable version label, progress,
