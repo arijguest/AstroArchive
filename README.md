@@ -138,6 +138,9 @@ where possible; optional NTFS **Protect originals** is not a substitute for back
 
 ### Fresh from the latest releases
 
+**[3.1.9](https://github.com/arijguest/AstroArchive/releases/tag/v3.1.9.1)** opens
+where you left it, remembering window position, size and monitor, and greets you with a
+Rosette Nebula startup window showing loading progress, hints and celestial facts.
 **[3.1.8](https://github.com/arijguest/AstroArchive/releases/tag/v3.1.8.1)** makes
 stacking exports find the right calibration files, including master bias and flat
 frames from Siril, PixInsight and DSS. Network imports gain folder selection,

@@ -4,8 +4,11 @@ using System.Reflection;
 using System.Windows.Media.Imaging;
 namespace AstroArchive {
  public static class ApplicationIcon {
-  static readonly Lazy<BitmapFrame> image=new Lazy<BitmapFrame>(Load);
-  public static BitmapFrame Image{get{return image.Value;}}
+  // Frozen frames still retain a decoder whose size variants are dispatcher-bound.
+  // WPF reads that decoder when it creates native icons, so each UI thread needs
+  // its own ICO decoder (the splash and main window run on different threads).
+  [ThreadStatic]static BitmapFrame image;
+  public static BitmapFrame Image{get{if(image==null)image=Load();return image;}}
   static BitmapFrame Load(){
    using(var stream=Assembly.GetExecutingAssembly().GetManifestResourceStream("AstroArchive.ico")){
     if(stream==null)throw new InvalidDataException("The application icon is missing.");
