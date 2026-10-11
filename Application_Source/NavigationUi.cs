@@ -177,7 +177,7 @@ namespace AstroArchive {
         void BuildExportNavigation(MenuItem menu) {
             if(((TabControl)Window.FindName("MainTabs")).SelectedIndex==2){menu.Items.Add(MenuAction("Export to…",ExportEditedTo,SelectedEditedImages().Count>0));return;}
             var selected=Context();menu.Items.Add(new MenuItem{Header=selected.Count+" files"+(SelectedFiles().Count==0?" in view":" selected"),IsEnabled=false});
-            menu.Items.Add(MenuAction("Export to…",()=>ExportTo(selected),selected.Count>0));menu.Items.Add(MenuAction("Export files…",()=>ExportFiles(selected),selected.Count>0));menu.Items.Add(MenuAction("Stacking folder…",()=>ExportProject(selected,false),selected.Any(f=>f.Kind=="Light"||f.Kind=="Stack")));
+            menu.Items.Add(MenuAction("Export files…",()=>ExportFiles(selected),selected.Count>0));menu.Items.Add(MenuAction("Export to…",()=>ExportTo(selected),selected.Count>0));menu.Items.Add(MenuAction("Stacking folder…",()=>ExportProject(selected,false),selected.Any(f=>f.Kind=="Light"||f.Kind=="Stack")));
             menu.Items.Add(new Separator());menu.Items.Add(Branch("Catalogue CSV",MenuAction("Selected / visible files…",()=>ExportSelectionCsv(selected),selected.Count>0),MenuAction("Entire repository…",ExportCatalogue,repo!=null)));
         }
         void BuildRepositoryNavigation(MenuItem menu) {
