@@ -24,6 +24,7 @@ or packaging this folder. The embedded offline guide comes from
 | Preview resolution, layout, sub exposure labels | `test.ps1 -PreviewOnly` | `--preview-only` |
 | Analytics calculations, layout and export | `test.ps1 -AnalyticsOnly` | `--analytics-only` |
 | Checkbox, focus, disabled or theme states | Build the app | `--controls-only` |
+| Startup splash, rotating content or window restoration | `test-startup.ps1` | `--startup-only` (included by the script) |
 | Network discovery, selected transfers, live imports | `test.ps1 -RemoteOnly`; transport checks below | `--remote-only` |
 | Broader engine changes or release preparation | `test.ps1` | Full UI suite |
 
@@ -33,6 +34,18 @@ Example:
 .\Application_Source\test.ps1 -TargetsOnly
 .\Application_Source\dist\AstroArchive.exe --ui-test .\Application_Source\test-data\target-checks --targets-only --no-updates
 ~~~
+
+`Application_Source/test-startup.ps1` checks all 30 shuffled remarks, hints and
+facts, then builds the application and captures the Rosette splash at normal and
+smaller sizes, including high contrast. Its Windows smoke checks exercise the
+independent splash dispatcher, cancellation, executable version label, progress,
+window size/position restoration, maximized/minimized state, disconnected displays
+and invalid saved state. Screenshots are written to `test-data/startup`.
+
+Normal launches store window placement in
+`%LOCALAPPDATA%\AstroArchive\window-placement.json`, separately from repository
+settings and versioned installations. Placement is saved after movement settles,
+on close, and before an update handoff. UI tests use isolated fixture files.
 
 Use the corresponding preview/control switch and a separate output folder for
 those checks. UI runs use isolated settings and generated fixtures; they save

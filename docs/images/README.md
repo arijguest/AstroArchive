@@ -1,5 +1,9 @@
 # README image sources
 
+The application startup window embeds `rosette.jpg` from this directory, with
+the same **Rosette Nebula · Ari J. Guest** credit as the website. The photograph
+is bundled in the executable and does not require a network request at startup.
+
 These images are copied unchanged from the public
 [AstroArchive website](https://astroarchive.arijguest.com). The application
 screenshots show Ari J. Guest's real captures, not generated test images or

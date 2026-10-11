@@ -1,0 +1,31 @@
+name: Startup window checks
+on:
+  pull_request:
+    paths:
+      - 'Application_Source/Startup*'
+      - 'Application_Source/MainWindowPlacement.cs'
+      - 'Application_Source/App.cs'
+      - 'Application_Source/ReleaseMonitorUi.cs'
+      - 'Application_Source/build.ps1'
+      - 'Application_Source/test-startup.ps1'
+      - '.github/workflows/startup.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  startup:
+    runs-on: windows-2022
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - name: Check startup content, WPF splash and saved window placement
+        shell: powershell
+        run: .\Application_Source\test-startup.ps1
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: astroarchive-startup-preview
+          path: |
+            Application_Source/test-data/startup/
+            Application_Source/dist/
+          retention-days: 7

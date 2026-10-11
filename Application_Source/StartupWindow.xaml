@@ -1,0 +1,98 @@
+<Window xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Opening AstroArchive" Width="880" Height="590" WindowStartupLocation="CenterScreen"
+        WindowStyle="None" ResizeMode="NoResize" Background="#0C1220" Foreground="#EDF2FC"
+        FontFamily="Segoe UI" UseLayoutRounding="True" SnapsToDevicePixels="True">
+  <Window.Resources>
+    <SolidColorBrush x:Key="Canvas" Color="#0C1220"/>
+    <SolidColorBrush x:Key="Surface" Color="#141D2E"/>
+    <SolidColorBrush x:Key="Border" Color="#2A3851"/>
+    <SolidColorBrush x:Key="Text" Color="#EDF2FC"/>
+    <SolidColorBrush x:Key="Muted" Color="#94A5C0"/>
+    <SolidColorBrush x:Key="Accent" Color="#7772EE"/>
+    <SolidColorBrush x:Key="HeadingAccent" Color="#B7B4FF"/>
+    <SolidColorBrush x:Key="Focus" Color="#FBBF24"/>
+    <Style TargetType="TextBlock">
+      <Setter Property="Foreground" Value="{DynamicResource Text}"/>
+      <Setter Property="TextWrapping" Value="Wrap"/>
+    </Style>
+    <Style x:Key="CloseButton" TargetType="Button">
+      <Setter Property="Foreground" Value="{DynamicResource Muted}"/>
+      <Setter Property="Background" Value="Transparent"/>
+      <Setter Property="Template">
+        <Setter.Value>
+          <ControlTemplate TargetType="Button">
+            <Border x:Name="Surface" Background="{TemplateBinding Background}" BorderThickness="1" BorderBrush="Transparent" CornerRadius="4">
+              <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+            </Border>
+            <ControlTemplate.Triggers>
+              <Trigger Property="IsMouseOver" Value="True"><Setter TargetName="Surface" Property="Background" Value="{DynamicResource Border}"/></Trigger>
+              <Trigger Property="IsKeyboardFocused" Value="True"><Setter TargetName="Surface" Property="BorderBrush" Value="{DynamicResource Focus}"/></Trigger>
+            </ControlTemplate.Triggers>
+          </ControlTemplate>
+        </Setter.Value>
+      </Setter>
+    </Style>
+  </Window.Resources>
+  <Viewbox Stretch="Uniform" StretchDirection="DownOnly">
+    <Border Width="880" Height="590" BorderBrush="{DynamicResource Border}" BorderThickness="1" Background="{DynamicResource Canvas}">
+      <Grid>
+        <Grid.RowDefinitions>
+          <RowDefinition Height="64"/><RowDefinition Height="300"/><RowDefinition Height="100"/><RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <Border x:Name="Header" BorderBrush="{DynamicResource Border}" BorderThickness="0,0,0,1" Padding="24,0,16,0">
+          <Grid>
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+              <Image x:Name="BrandLogo" Width="34" Height="34" Margin="0,0,12,0"/>
+              <TextBlock Text="AstroArchive" FontSize="21" FontWeight="SemiBold" VerticalAlignment="Center"/>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+              <TextBlock x:Name="VersionLabel" Foreground="{DynamicResource Muted}" FontSize="11" VerticalAlignment="Center" Margin="0,0,16,0"/>
+              <Button x:Name="CancelStartup" Content="×" Width="30" Height="30" FontSize="22" Style="{StaticResource CloseButton}" ToolTip="Cancel opening AstroArchive" AutomationProperties.Name="Cancel opening AstroArchive"/>
+            </StackPanel>
+          </Grid>
+        </Border>
+        <Grid Grid.Row="1" ClipToBounds="True">
+          <Image x:Name="NebulaImage" Margin="220,0,0,0" Stretch="UniformToFill" Opacity="0.92"/>
+          <Border x:Name="HeroShade">
+            <Border.Background>
+              <LinearGradientBrush StartPoint="0,0.5" EndPoint="1,0.5">
+                <GradientStop Color="#0C1220" Offset="0.05"/><GradientStop Color="#EF0C1220" Offset="0.25"/>
+                <GradientStop Color="#8A0C1220" Offset="0.49"/><GradientStop Color="#120C1220" Offset="0.78"/>
+              </LinearGradientBrush>
+            </Border.Background>
+          </Border>
+          <Border x:Name="HeroFloorShade">
+            <Border.Background><LinearGradientBrush StartPoint="0.5,1" EndPoint="0.5,0"><GradientStop Color="#0C1220" Offset="0"/><GradientStop Color="#000C1220" Offset="0.4"/></LinearGradientBrush></Border.Background>
+          </Border>
+          <StackPanel Margin="36,46,0,0" HorizontalAlignment="Left" Width="370">
+            <TextBlock Text="Astrophotography," FontSize="36" FontWeight="SemiBold"/>
+            <TextBlock Text="organised." Foreground="{DynamicResource HeadingAccent}" FontSize="36" FontWeight="SemiBold" Margin="0,0,0,18"/>
+            <TextBlock Text="Your nights under the stars,&#xA;together in one place." Foreground="{DynamicResource Text}" FontSize="15" LineHeight="25"/>
+          </StackPanel>
+          <TextBlock Text="Rosette Nebula · Ari J. Guest" Foreground="{DynamicResource Muted}" FontSize="11" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,24,12"/>
+        </Grid>
+        <Grid Grid.Row="2" Margin="36,10,36,16">
+          <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+          <TextBlock x:Name="RemarkLabel" FontSize="17" FontWeight="SemiBold" Margin="0,0,48,12"/>
+          <TextBlock x:Name="PercentLabel" Foreground="{DynamicResource Muted}" FontSize="12" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+          <ProgressBar x:Name="LoadingProgress" Grid.Row="1" Height="6" Minimum="0" Maximum="100" Foreground="{DynamicResource Accent}" Background="{DynamicResource Border}" AutomationProperties.Name="Application startup progress">
+            <ProgressBar.Template>
+              <ControlTemplate TargetType="ProgressBar">
+                <Grid><Border x:Name="PART_Track" Background="{TemplateBinding Background}" CornerRadius="3"/>
+                  <Border x:Name="PART_Indicator" Background="{TemplateBinding Foreground}" CornerRadius="3" HorizontalAlignment="Left"/>
+                </Grid>
+              </ControlTemplate>
+            </ProgressBar.Template>
+          </ProgressBar>
+          <TextBlock x:Name="StageLabel" Grid.Row="2" Foreground="{DynamicResource Muted}" FontSize="12" Margin="0,10,0,0"/>
+        </Grid>
+        <Border Grid.Row="3" Background="{DynamicResource Surface}" BorderBrush="{DynamicResource Border}" BorderThickness="0,1,0,0" Padding="36,15,36,14">
+          <StackPanel>
+            <TextBlock x:Name="NoteHeading" Foreground="{DynamicResource HeadingAccent}" FontSize="10" FontWeight="SemiBold" Margin="0,0,0,8"/>
+            <TextBlock x:Name="NoteLabel" FontSize="13" LineHeight="21"/>
+          </StackPanel>
+        </Border>
+      </Grid>
+    </Border>
+  </Viewbox>
+</Window>
