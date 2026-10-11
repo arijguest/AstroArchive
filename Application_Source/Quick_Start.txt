@@ -24,10 +24,11 @@ LAN (or join the telescope hotspot). Discovery starts
 automatically. Select the telescope and Connect; no IP entry is needed.
 
 Choose a saved physical telescope for the import or keep the suggested new name.
-Select files opens capture folders; double-click folders or press Enter. Tick files,
-or use Search all to find supported captures throughout the selected storage.
-Review the count and import. Large batches warn that network transfers take longer
-than USB. Originals stay on the telescope. Adjacent sidecars and DWARF session
+Browse files opens capture folders. Click to select files or folders (a folder
+includes its subfolders); Ctrl or Shift adds more, Esc clears. Double-click a folder
+to open it; selections are kept across folders. Search all selects every supported
+capture. Review the total files and size, then import. Network imports first remind
+you that transfers take longer than USB. Originals stay on the telescope. Adjacent sidecars and DWARF session
 metadata are downloaded with captures; normal archive checks and duplicates apply.
 
 ## Import as the telescope shoots
