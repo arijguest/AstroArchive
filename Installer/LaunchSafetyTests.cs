@@ -83,6 +83,18 @@ static class LaunchSafetyTests {
    Check(!result.Blocked&&InstallCore.Read(root).ActiveDirectory=="app-1.3.0-r1"&&!LaunchSafety.IsBlocked(root,"1.3.0.1")&&LaunchSafety.ReadBlock(root)==null,"Reinstalled package stayed blocked");
    new InstallCore().Uninstall(root);Check(!Directory.Exists(Path.Combine(root,"app-1.2.0-r1"))&&!Directory.Exists(Path.Combine(root,"app-1.3.0-r1")),"Uninstall left restored or blocked versions");
   });
+  test("Damaged executables are rejected without asking Windows to start them",()=>{
+   string folder=Path.Combine(scratch,"headers");Directory.CreateDirectory(folder);
+   var pe=new byte[256];pe[0]=(byte)'M';pe[1]=(byte)'Z';BitConverter.GetBytes(128).CopyTo(pe,0x3c);pe[128]=(byte)'P';pe[129]=(byte)'E';
+   string valid=Path.Combine(folder,"valid.exe");File.WriteAllBytes(valid,pe);
+   string text=Path.Combine(folder,"text.exe");File.WriteAllText(text,"Simulated launcher that Windows refuses to start");
+   string truncated=Path.Combine(folder,"truncated.exe");File.WriteAllBytes(truncated,pe.Take(40).ToArray());
+   var outside=(byte[])pe.Clone();BitConverter.GetBytes(4096).CopyTo(outside,0x3c);string offset=Path.Combine(folder,"offset.exe");File.WriteAllBytes(offset,outside);
+   Check(LaunchSafety.IsWindowsExecutable(valid),"A PE header was rejected");
+   Check(!LaunchSafety.IsWindowsExecutable(text)&&!LaunchSafety.IsWindowsExecutable(truncated)&&!LaunchSafety.IsWindowsExecutable(offset),"A damaged executable was accepted");
+   // Text is rejected before CreateProcess, which would otherwise show a modal 16-bit dialog.
+   Check(LaunchSafety.NativeProbe(text)==193&&LaunchSafety.NativeProbe(Path.Combine(folder,"missing.exe"))==2,"Damaged or missing executables did not report Windows error codes");
+  });
   test("Damaged block records never prevent updates",()=>{
    string root=Installed("rollback-damaged","1.2.0");File.WriteAllText(Path.Combine(root,"launch-blocked.json"),"{not json");
    Check(!LaunchSafety.IsBlocked(root,"1.2.0.1")&&Feed(Manifest("1.3.0")).Check(InstallCore.Read(root),root)!=null,"Damaged block record suppressed updates");

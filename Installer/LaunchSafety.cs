@@ -128,18 +128,40 @@ namespace AstroArchive.Installation {
    block.NoticePending=false;WriteBlock(root,block);return block;
   }
 
+  // True when the file has DOS and PE headers. Windows treats anything else as a 16-bit
+  // program and opens a modal "Unsupported 16-Bit Application" dialog, which would stall
+  // a silent setup, so damaged files are rejected before Windows is asked to start them.
+  public static bool IsWindowsExecutable(string path){
+   using(var file=new FileStream(path,FileMode.Open,FileAccess.Read,FileShare.ReadWrite|FileShare.Delete)){
+    var header=new byte[64];if(file.Read(header,0,64)!=64||header[0]!='M'||header[1]!='Z')return false;
+    int offset=BitConverter.ToInt32(header,0x3c);if(offset<64||offset>file.Length-4)return false;
+    var signature=new byte[4];file.Position=offset;
+    return file.Read(signature,0,4)==4&&signature[0]=='P'&&signature[1]=='E'&&signature[2]==0&&signature[3]==0;
+   }
+  }
+
   // Creates the process suspended and terminates it before any of its code runs. Windows
   // Code Integrity (Smart App Control and App Control policies) is enforced at creation,
   // so this reports the same block a real launch would, without opening a window.
   public static int NativeProbe(string path){
+   try{if(!IsWindowsExecutable(path))return BadExecutableFormat;}
+   catch(UnauthorizedAccessException){return 5;}
+   catch(IOException error){return error.HResult&0xffff;}
    var startup=new StartupInfo{cb=Marshal.SizeOf(typeof(StartupInfo))};ProcessInformation process;
    var command=new StringBuilder("\""+path+"\" --launch-probe");
-   if(!CreateProcessW(path,command,IntPtr.Zero,IntPtr.Zero,false,CreateSuspended|CreateNoWindow,IntPtr.Zero,Path.GetDirectoryName(path),ref startup,out process))return Marshal.GetLastWin32Error();
+   // Report failures as error codes; never let Windows show an error dialog to a silent setup.
+   uint previous,ignored;SetThreadErrorMode(FailCriticalErrors|NoGpFaultErrorBox|NoOpenFileErrorBox,out previous);
+   try{
+    if(!CreateProcessW(path,command,IntPtr.Zero,IntPtr.Zero,false,CreateSuspended|CreateNoWindow,IntPtr.Zero,Path.GetDirectoryName(path),ref startup,out process))return Marshal.GetLastWin32Error();
+   }finally{SetThreadErrorMode(previous,out ignored);}
    try{TerminateProcess(process.hProcess,0);WaitForSingleObject(process.hProcess,5000);}
    finally{CloseHandle(process.hThread);CloseHandle(process.hProcess);}
    return 0;
   }
+  const int BadExecutableFormat=193;
   const uint CreateSuspended=0x00000004,CreateNoWindow=0x08000000;
+  const uint FailCriticalErrors=0x0001,NoGpFaultErrorBox=0x0002,NoOpenFileErrorBox=0x8000;
+  [DllImport("kernel32.dll",SetLastError=true)]static extern bool SetThreadErrorMode(uint mode,out uint previous);
   [StructLayout(LayoutKind.Sequential,CharSet=CharSet.Unicode)]
   struct StartupInfo{public int cb;public string lpReserved,lpDesktop,lpTitle;public int dwX,dwY,dwXSize,dwYSize,dwXCountChars,dwYCountChars,dwFillAttribute,dwFlags;public short wShowWindow,cbReserved2;public IntPtr lpReserved2,hStdInput,hStdOutput,hStdError;}
   [StructLayout(LayoutKind.Sequential)]
