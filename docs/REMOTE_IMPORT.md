@@ -37,8 +37,9 @@ folders. **Up** moves to the parent and **All captures** returns to the storage 
 **Skip “failed” files** and **Skip PNG/JPG/MP4** sit beside **Select files** and **Search all**.
 They filter files before transfer, are saved as import preferences shared with folder, USB and
 Dump imports, and keep the current selection. Clearing one shows the files it hid. Copy workers
-stay in Preferences → Import; network imports always keep originals and skip target and rotation analysis. A selection of 100 files or 1 GiB displays an inline
-network/USB notice and a confirmation before starting the batch.
+stay in Preferences → Import; network imports always keep originals and skip target and rotation analysis. Every network import, including live import, first shows a short
+notice that network imports take longer than a wired connection and that USB is
+recommended for large numbers of files.
 
 ## Live imports
 
