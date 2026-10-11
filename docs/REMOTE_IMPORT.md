@@ -34,8 +34,10 @@ eligible captures recursively across the configured storage root and selects the
 for review. Double-click folders or press Enter to open them; tick individual files
 or press Space to toggle the current row. Selected files remain selected across
 folders. **Up** moves to the parent and **All captures** returns to the storage root.
-**Import preferences…** opens the existing import settings without losing the selection.
-Import preferences filter files before transfer. A selection of 100 files or 1 GiB displays an inline
+**Skip “failed” files** and **Skip PNG/JPG/MP4** sit beside **Select files** and **Search all**.
+They filter files before transfer, are saved as import preferences shared with folder, USB and
+Dump imports, and keep the current selection. Clearing one shows the files it hid. Copy workers
+stay in Preferences → Import; network imports always keep originals and skip target and rotation analysis. A selection of 100 files or 1 GiB displays an inline
 network/USB notice and a confirmation before starting the batch.
 
 ## Live imports
@@ -97,7 +99,7 @@ manual address/path to connect and check access.
   settings are not prerequisites. Older tester Windows-share errors do not require
   weakening those settings for this client.
 - **Captures missing:** enable Seestar **Save Each Frame** for individual exposures,
-  check the displayed storage scope and **Import preferences…**, then **Search all**.
+  check the displayed storage scope and the **Skip** options, then **Search all**.
   Failed/raster exclusions still apply. Live mode excludes existing files by default.
 - **Repeated retry or incomplete imports:** keep the connection and PC awake,
   allow captures to finish writing, and check free space for staging and repository
