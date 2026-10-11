@@ -37,7 +37,7 @@
     <Border Width="880" Height="590" BorderBrush="{DynamicResource Border}" BorderThickness="1" Background="{DynamicResource Canvas}">
       <Grid>
         <Grid.RowDefinitions>
-          <RowDefinition Height="64"/><RowDefinition Height="300"/><RowDefinition Height="100"/><RowDefinition Height="*"/>
+          <RowDefinition Height="64"/><RowDefinition Height="338"/><RowDefinition Height="100"/><RowDefinition Height="*"/>
         </Grid.RowDefinitions>
         <Border x:Name="Header" BorderBrush="{DynamicResource Border}" BorderThickness="0,0,0,1" Padding="24,0,16,0">
           <Grid>
@@ -86,10 +86,10 @@
           </ProgressBar>
           <TextBlock x:Name="StageLabel" Grid.Row="2" Foreground="{DynamicResource Muted}" FontSize="12" Margin="0,10,0,0"/>
         </Grid>
-        <Border Grid.Row="3" Background="{DynamicResource Surface}" BorderBrush="{DynamicResource Border}" BorderThickness="0,1,0,0" Padding="36,15,36,14">
+        <Border x:Name="NoteBar" Grid.Row="3" Background="{DynamicResource Surface}" BorderBrush="{DynamicResource Border}" BorderThickness="0,1,0,0" Padding="36,10,36,10">
           <StackPanel>
-            <TextBlock x:Name="NoteHeading" Foreground="{DynamicResource HeadingAccent}" FontSize="10" FontWeight="SemiBold" Margin="0,0,0,8"/>
-            <TextBlock x:Name="NoteLabel" FontSize="13" LineHeight="21"/>
+            <TextBlock x:Name="NoteHeading" Foreground="{DynamicResource HeadingAccent}" FontSize="10" FontWeight="SemiBold" Margin="0,0,0,6"/>
+            <TextBlock x:Name="NoteLabel" FontSize="13" LineHeight="20"/>
           </StackPanel>
         </Border>
       </Grid>

@@ -35,12 +35,13 @@ Example:
 .\Application_Source\dist\AstroArchive.exe --ui-test .\Application_Source\test-data\target-checks --targets-only --no-updates
 ~~~
 
-`Application_Source/test-startup.ps1` checks all 50 shuffled remarks, hints and
-facts, then builds the application and captures the Rosette splash at normal and
+`Application_Source/test-startup.ps1` checks all 50 shuffled remarks, 12 hints and
+32 facts, then builds the application and captures the Rosette splash at normal and
 smaller sizes, including high contrast. Its Windows smoke checks exercise the
 independent splash dispatcher, cancellation, executable version label, progress,
 window size/position restoration, maximized/minimized state, disconnected displays
 and invalid saved state. Screenshots are written to `test-data/startup`.
+Sources for the additional celestial-object facts are in [STARTUP_FACTS.md](STARTUP_FACTS.md).
 
 Normal launches store window placement in
 `%LOCALAPPDATA%\AstroArchive\window-placement.json`, separately from repository

@@ -89,7 +89,27 @@ namespace AstroArchive {
    "Flat frames help correct vignetting and dust shadows when captured with the same optical setup.",
    "Dithering shifts the framing between exposures, helping stacking reject hot pixels and reduce pattern noise.",
    "The Moon’s apparent width is about half a degree. Many deep-sky targets cover much more sky.",
-   "The stars in a constellation can be at very different distances, even when they look like neighbours."
+   "The stars in a constellation can be at very different distances, even when they look like neighbours.",
+   "The Crab Nebula, M1, is the aftermath of a supernova recorded by astronomers in 1054.",
+   "The Ring Nebula, M57, has a three-dimensional structure: a football-shaped cloud piercing a doughnut of gas.",
+   "The Dumbbell Nebula, M27, was the first planetary nebula discovered, spotted by Charles Messier in 1764.",
+   "The Veil Nebula’s delicate filaments are debris from a massive star that exploded thousands of years ago.",
+   "The Eagle Nebula’s Pillars of Creation are towers of gas and dust where new stars are forming.",
+   "The Horsehead Nebula is a dark cloud silhouetted against brighter, glowing gas behind it.",
+   "The Whirlpool Galaxy, M51, is interacting with a smaller galaxy, helping trigger new star formation.",
+   "The Sombrero Galaxy, M104, gets its hat-like appearance from a bright central bulge and a dark dust lane.",
+   "The Hercules Cluster, M13, packs hundreds of thousands of stars into a ball held together by gravity.",
+   "Omega Centauri looks like a fuzzy star to the naked eye, but contains millions of stars.",
+   "The Cigar Galaxy, M82, is a starburst galaxy: interactions with nearby M81 fuel unusually rapid star formation.",
+   "The Triangulum Galaxy, M33, is the Local Group’s third-largest galaxy, after Andromeda and the Milky Way.",
+   "Sirius has a tiny companion, Sirius B, a white dwarf roughly the size of Earth.",
+   "Polaris, our North Star, belongs to a triple-star system. Its brightest member is also a variable star.",
+   "Betelgeuse is a red supergiant so large that, in the Sun’s place, it would extend beyond the orbit of Mars.",
+   "The Double Cluster in Perseus is two neighbouring open star clusters, NGC 869 and NGC 884.",
+   "Jupiter spins once in about ten hours, giving the Solar System’s biggest planet its shortest day.",
+   "Saturn’s rings are made mostly of water ice, with pieces ranging from tiny grains to enormous chunks.",
+   "Venus takes about 243 Earth days to spin once, longer than its 225-day journey around the Sun.",
+   "Uranus is tipped almost onto its side, with an axial tilt of about 98 degrees."
   };
  }
 }
