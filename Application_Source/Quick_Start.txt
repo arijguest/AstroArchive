@@ -270,7 +270,7 @@ integration divided by filename per-sub exposure supplies a count only when
 the result is a whole number. Existing cached records gain the same count.
 Explicit/manual counts take precedence. Other unspecified EXPTIME stays reported exposure;
 it is not assumed to be per-sub or total. Unknown/conflicting values need review.
-Image details and the Exposure tooltip show evidence. Sub-summary integration
+The Exposure tooltip shows the evidence. Sub-summary integration
 counts acquisition subs only, excluding stacks.
 
 GIF AND VIDEO PREVIEWS

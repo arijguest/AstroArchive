@@ -864,9 +864,13 @@
           <Border Width="340" Padding="12" CornerRadius="6" Background="{DynamicResource Surface}" BorderBrush="{DynamicResource Border}" BorderThickness="1" Focusable="True" KeyboardNavigation.TabNavigation="Cycle">
            <ScrollViewer MaxHeight="310" VerticalScrollBarVisibility="Auto" local:MenuScrolling.Enabled="True">
             <StackPanel>
-             <TextBlock x:Name="PreviewInfo" Foreground="{DynamicResource Muted}" FontSize="{DynamicResource UiFontSmall}" TextWrapping="Wrap"/>
-             <TextBlock x:Name="LibrarySummaryLabel" Foreground="{DynamicResource Muted}" FontSize="{DynamicResource UiFontSmall}" TextWrapping="Wrap" Margin="0,6,0,0"/>
-             <TextBlock x:Name="DetailsLabel" Text="Select a capture to view metadata." Foreground="{DynamicResource Text}" FontSize="{DynamicResource UiFontSmall}" TextWrapping="Wrap" Margin="0,6,0,0"/>
+             <StackPanel.Resources><Style x:Key="DetailsLine" TargetType="TextBlock"><Setter Property="TextWrapping" Value="Wrap"/><Style.Triggers><Trigger Property="Text" Value=""><Setter Property="Visibility" Value="Collapsed"/></Trigger></Style.Triggers></Style></StackPanel.Resources>
+             <TextBlock x:Name="DetailsTitle" Text="No capture selected" Style="{StaticResource DetailsLine}" FontWeight="SemiBold" Foreground="{DynamicResource Text}" FontSize="{DynamicResource UiFontBody}"/>
+             <TextBlock x:Name="PreviewInfo" Style="{StaticResource DetailsLine}" Foreground="{DynamicResource Muted}" FontSize="{DynamicResource UiFontSmall}" Margin="0,2,0,0"/>
+             <Grid x:Name="DetailsFacts" Margin="0,10,0,0"><Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions></Grid>
+             <TextBlock x:Name="DetailsLabel" Text="Select a capture to view its details." Style="{StaticResource DetailsLine}" Foreground="{DynamicResource Text}" FontSize="{DynamicResource UiFontSmall}" Margin="0,6,0,0"/>
+             <Border Height="1" Background="{DynamicResource Border}" Margin="0,10,0,8"/>
+             <TextBlock x:Name="LibrarySummaryLabel" Style="{StaticResource DetailsLine}" Foreground="{DynamicResource Muted}" FontSize="{DynamicResource UiFontCaption}"/>
             </StackPanel>
            </ScrollViewer>
           </Border>
