@@ -33,7 +33,7 @@ namespace AstroArchive {
     if(args.Length>1&&args[0]=="--ui-test"){Directory.CreateDirectory(args[1]);File.WriteAllText(Path.Combine(args[1],"ui-current-stage.txt"),"Initializing application");}
     AstroArchive.Installation.ShellIdentity.InitializeProcess();
     bool test=args.Length>0&&args[0]=="--ui-test";if(test&&args.Length<2)throw new ArgumentException("Output directory required.");
-    if(!test)startup=new StartupSplash();
+    if(!test||Array.IndexOf(args,"--startup-only")>=0)startup=new StartupSplash();
     Assets.Register(new RasterReader(),".tif",".tiff",".png",".jpg",".jpeg");var app=new Application{ShutdownMode=ShutdownMode.OnExplicitShutdown};var ui=new MainUi(test,Array.IndexOf(args,"--no-updates")>=0,test?args[1]:null,startup==null?(Action<int,string>)null:startup.Report);app.MainWindow=ui.Window;app.ShutdownMode=ShutdownMode.OnMainWindowClose;
     if(startup!=null){startup.Report(95,"Restoring your window and preparing the first view…");EventHandler rendered=null;rendered=(s,e)=>{ui.Window.ContentRendered-=rendered;if(startup.Cancelled)ui.Window.Close();else startup.Complete();};ui.Window.ContentRendered+=rendered;}
     app.DispatcherUnhandledException+=(s,e)=>{if(args.Length>1&&args[0]=="--ui-test"){Directory.CreateDirectory(args[1]);File.WriteAllText(Path.Combine(args[1],"ui-smoke-error.txt"),e.Exception.ToString());Environment.Exit(1);}AppErrorReportingUi.Report(e.Exception,"Unhandled application error",ui.Window);MessageBox.Show(ui.Window,e.Exception.Message,"AstroArchive",MessageBoxButton.OK,MessageBoxImage.Error);e.Handled=true;};
