@@ -26,7 +26,7 @@ namespace AstroArchive {
    });
    Test("Concise target rows keep identity counts and honest exposure totals in tooltips",()=>{
     var rows=new[]{new Frame{Target="M42",Kind="Light",Exposure=3600},new Frame{Target="M42",Kind="Light",Exposure=60},new Frame{Target="M42",Kind="Light"},new Frame{Target="M42",Kind="Stack",Exposure=7200},new Frame{Target="M42",Kind="Dark",Exposure=900}};
-    var target=TargetNavigation.Build(rows).Single(s=>s.Name=="M42");Check(target.DisplayName=="M42 - Orion Nebula"&&target.FileCount=="5"&&target.Subline==TargetNavigation.Identifier("M42")+" · 3h 1m + ?","Short row lost identity or failed to include standalone stack exposure");
+    var target=TargetNavigation.Build(rows).Single(s=>s.Name=="M42");Check(target.DisplayName=="M42 - Orion Nebula"&&target.FileCount=="5"&&target.Subline==TargetNavigation.Identifier("M42")+" · 3h 1m + 1 unknown","Short row lost identity or failed to include standalone stack exposure");
     Check(target.Tooltip.StartsWith("M42\n3 subs · 1 stack\n")&&target.Tooltip.Contains("3 h 1 min total")&&target.Tooltip.Contains("exposure unknown")&&!target.Tooltip.Contains("files")&&!target.Tooltip.Contains("Nebula")&&!target.Tooltip.Contains("sessions"),"Concise tooltip lost counts/total or retained names, types or file counts");
     var stack=TargetNavigation.Build(new[]{new Frame{Target="C/2023 A3",Kind="Stack",Exposure=7200}})[1];Check(stack.Subline=="2h"&&stack.Tooltip.Contains("2 h 0 min total"),"Standalone stack total was omitted");
     Check(TargetNavigation.Exposure(20)=="20s"&&TargetNavigation.Exposure(90)=="1m 30s"&&TargetNavigation.Exposure(3600)=="1h","Compact exposure labels misleading");
