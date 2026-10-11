@@ -1,28 +1,12 @@
-AstroArchive 3.1.8
-Package 3.1.8.1
+AstroArchive 3.1.9
+Package 3.1.9.1
 
-- Calibration matching is far more reliable, especially for master bias and flat
-  frames. Values recorded on both files must still agree (telescope, camera,
-  gain, offset, geometry, binning, Bayer, filter; exposure and temperature for
-  darks). Masters missing some headers are used when nothing matches exactly,
-  and the export lists each such choice. Each group gets the nearest-night set
-  (closest temperature for darks). Seestar and DWARF flats can come from the
-  nearest night within 30 days. XISF and 16/32-bit TIFF masters now count as
-  linear data.
-- Lights of any identified target except the Milky Way count as the telephoto
-  camera, so their calibration frames are found.
-- Network imports: select files and whole folders (including subfolders) by
-  highlighting them, with Ctrl and Shift for more. Selections are kept between
-  folders, Esc clears them, and a summary shows the total files and size. The
-  Skip "failed" files and Skip PNG/JPG/MP4 options now sit in the import window,
-  existing saved telescopes are offered more reliably, and a short reminder that
-  network imports are slower than USB appears before each one.
-- Stacks show their sub count when it can be worked out exactly from the total
-  and per-sub exposure.
-- The Capture details panel is shorter: only known facts, no explanations.
-- The preview pane's folder button now shows the previewed file in File Explorer.
-- Comets show their proper names (for example 169P/NEAT). Target rows show only
-  the known exposure total, and target tooltips show sub and stack counts.
-- The gold focus box appears only with Clearer selections turned on.
-- Export menus list Export files… before Export to…, and the large USB import
-  notice no longer quotes a file count.
+- AstroArchive now opens where you left it: the main window remembers its
+  position, size, monitor and maximized state, including after updates. If that
+  display is no longer connected, the window moves onto an available screen.
+- A new startup window shows the Rosette Nebula, the installed version and
+  loading progress, with astrophotography remarks, practical hints and
+  celestial-object facts while your archive loads.
+- Includes the 3.1.8 changes: more reliable calibration matching for master bias
+  and flat frames, folder and multi-file selection for network imports, and a
+  shorter Capture details panel.
