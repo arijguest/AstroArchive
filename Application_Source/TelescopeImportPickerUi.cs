@@ -53,12 +53,10 @@ namespace AstroArchive {
  }
  internal static class TelescopeImportConfirmation {
   internal static FormWindow Create(Window owner,ImportSelection selection,string make,Action<Window> importPreferences=null){
-   var dialog=new FormWindow(owner,"Large telescope import",580,450);
+   // Shown only once the selection is known to hold many captures; the count itself is not quoted.
+   var dialog=new FormWindow(owner,"Large telescope import",540,300);
    dialog.Text("Import from "+ImportSelection.TelescopeBrand(make)+"?",true);
-   dialog.Text(selection.Folders.Count==0?selection.Files.Count.ToString("N0")+" capture files selected":"At least "+ImportSelection.LargeFileSelection.ToString("N0")+" capture files selected",true);
-   if(selection.Folders.Count>0)dialog.Text("Selection: "+selection.Summary+".");
-   dialog.Text("Large imports can take a while. Choose fewer folders or files for a quicker import.");
-   dialog.Text("• Scan, check and copy eligible captures.\n• Keep originals on the telescope.\n• Cancel anytime; completed copies are retained.");
+   dialog.Text("A large number of files is selected, so this import may take a while. You can cancel at any time; completed copies are kept.");
    var preferences=dialog.FooterButton("Import preferences…",()=>{if(importPreferences!=null)importPreferences(dialog.Window);});preferences.IsEnabled=importPreferences!=null;
    dialog.Accept("Import",()=>true);return dialog;
   }
