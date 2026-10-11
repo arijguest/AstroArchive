@@ -101,7 +101,7 @@ namespace AstroArchive {
    {"ImportClearButton","Clear import search and filters."},
    {"ScreenImportsButton","Check visible captures for rejection or damaged FITS data."},
    {"ScreenLibraryButton","Check selected captures, or visible ones, for rejection or damaged FITS data."},
-   {"OpenPreviewButton","Open image."},
+   {"OpenPreviewButton","Show this file in File Explorer, in the repository."},
    {"StretchMode","Display stretch; image data stays unchanged."},
    {"CoffeeButton","Support AstroArchive on Ko-fi."},
    {"ThemeButton","Switch light/dark theme."},

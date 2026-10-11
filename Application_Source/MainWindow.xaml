@@ -857,7 +857,7 @@
          <Button Grid.Column="2" x:Name="PreviewDetailsButton" Width="28" Height="28" Padding="6" Margin="4,0,0,0" ToolTip="Capture details" AutomationProperties.Name="Capture details">
           <Viewbox><Path Data="{StaticResource PreviewDetailsIcon}" Stroke="{DynamicResource Text}" StrokeThickness="1.6" StrokeStartLineCap="Round" StrokeEndLineCap="Round"/></Viewbox>
          </Button>
-         <Button Grid.Column="3" x:Name="OpenPreviewButton" Width="28" Height="28" Padding="6" Margin="4,0,0,0" ToolTip="Open image" AutomationProperties.Name="Open image">
+         <Button Grid.Column="3" x:Name="OpenPreviewButton" Width="28" Height="28" Padding="6" Margin="4,0,0,0" ToolTip="Show in File Explorer" AutomationProperties.Name="Show in File Explorer">
           <Viewbox><Path Data="{StaticResource PreviewOpenIcon}" Stroke="{DynamicResource Text}" StrokeThickness="1.6" StrokeLineJoin="Round"/></Viewbox>
          </Button>
          <Popup x:Name="PreviewDetailsPopup" Placement="Bottom" PlacementTarget="{Binding ElementName=PreviewDetailsButton}" AllowsTransparency="True" StaysOpen="False" PopupAnimation="None">
@@ -880,7 +880,7 @@
         <Grid Grid.Row="2" x:Name="PreviewHost" ClipToBounds="True">
          <Grid x:Name="PreviewStage" ClipToBounds="True" HorizontalAlignment="Center" VerticalAlignment="Top">
           <Image x:Name="PreviewImage"/>
-          <TextBlock x:Name="PreviewMessage" Text="Select a capture or open an image." Foreground="{DynamicResource Muted}" HorizontalAlignment="Center" VerticalAlignment="Center" TextWrapping="Wrap" TextAlignment="Center" Margin="18"/>
+          <TextBlock x:Name="PreviewMessage" Text="Select a capture to preview it." Foreground="{DynamicResource Muted}" HorizontalAlignment="Center" VerticalAlignment="Center" TextWrapping="Wrap" TextAlignment="Center" Margin="18"/>
          </Grid>
          <Grid x:Name="PreviewSkyPanel" VerticalAlignment="Top" Visibility="Collapsed">
           <local:SkyGlobeView x:Name="PreviewSky" Margin="4"/>
