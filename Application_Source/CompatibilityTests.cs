@@ -452,6 +452,8 @@ namespace AstroArchive {
                 Check(Exporter.CalibrationFor(new[]{light},new List<Frame>{old1,old2,master},false).Single()==master,"Nearer master lost to an older raw set");
                 Frame warm=CalibrationFixture("Dark",30),cool=CalibrationFixture("Dark",30);warm.Temperature=-8;cool.Temperature=-10;warm.Night=cool.Night="2026-10-02";warm.Hash="warm";cool.Hash="cool";cool.Night="2026-09-20";
                 Check(Exporter.CalibrationFor(new[]{light},new List<Frame>{warm,cool},false).Single()==cool,"Closest dark temperature was not preferred");
+                Frame near=CalibrationFixture("Dark",30),closer=CalibrationFixture("Dark",30);near.Temperature=-11.4;near.Night="2026-10-06";near.Hash="near-night";closer.Temperature=-10.6;closer.Night="2026-09-01";closer.Hash="closer-temperature";
+                Check(Exporter.CalibrationFor(new[]{light},new List<Frame>{near,closer},false).Single()==closer,"A nearer night outranked a closer dark temperature");
             });
             Test("Flats prefer the same night and use a nearby night only for fixed-optics telescopes",()=> {
                 var light=CalibrationFixture("Light",10);light.Calibration="Uncalibrated";light.Make="Seestar";light.Night="2026-10-06";light.OpticalConfiguration=null;

@@ -129,7 +129,8 @@ namespace AstroArchive {
      try{var files=await Task.Run(()=>{using(var source=sourceFactory(c))return RemoteCaptureCatalog.Search(source,c,path,ct);},ct);if(c!=connection)return;folderContents[path]=files;folderErrors.Remove(path);}
      catch(OperationCanceledException){return;}catch(Exception e){if(c!=connection||closed)return;folderErrors[path]=e.Message;folderContents[path]=new List<Entry>();Error.Text="Couldn't read "+RemoteCapturePaths.Relative(c,path)+": "+e.Message;}
      if(!closed){SyncGrid();UpdateActions();}}}
-   finally{counting=false;if(!closed&&c==connection)UpdateActions();}
+   // A counter cancelled by a telescope change may exit after new folders were queued for the current connection.
+   finally{counting=false;if(!closed&&connection!=null&&pendingCounts.Count>0)CountFolders();else if(!closed&&c==connection)UpdateActions();}
   }
   // Every file the import would take: chosen files plus the contents of chosen folders, without duplicates.
   internal List<Entry> SelectedFiles(){var all=new Dictionary<string,Entry>(StringComparer.OrdinalIgnoreCase);foreach(var e in basket.Values.Where(include))all[e.Path]=e;foreach(var path in folders.Keys){List<Entry> files;if(folderContents.TryGetValue(path,out files))foreach(var e in files.Where(include))all[e.Path]=e;}return all.Values.ToList();}

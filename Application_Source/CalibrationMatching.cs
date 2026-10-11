@@ -159,7 +159,7 @@ namespace AstroArchive {
             Func<List<Frame>,double> temperatureGap=set=> {
                 if(!dark)return 0;
                 var known=set.Where(c=>c.Temperature.HasValue).Select(c=>c.Temperature.Value).ToList();
-                return known.Count==0?double.MaxValue:Math.Round(Math.Abs(known.Average()-targetTemperature));
+                return known.Count==0?double.MaxValue:Math.Round(Math.Abs(known.Average()-targetTemperature),1);
             };
             Func<List<Frame>,int> nightGap=set=> {
                 int best=int.MaxValue;
