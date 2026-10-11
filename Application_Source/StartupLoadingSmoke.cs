@@ -29,7 +29,7 @@ namespace AstroArchive {
    }
    // Block this UI thread as real startup does; the splash must still rotate.
    using(var splash=new StartupSplash()){
-    if(!splash.IsAlive)throw new Exception("The independent splash dispatcher failed.");
+    if(!splash.IsAlive)throw new Exception("The independent splash dispatcher failed.",splash.Failure);
     string before=null;splash.Inspect(v=>before=((TextBlock)v.Window.FindName("RemarkLabel")).Text);
     Thread.Sleep(4300);
     splash.Inspect(v=>{if(before==((TextBlock)v.Window.FindName("RemarkLabel")).Text)throw new Exception("The splash froze while the application thread was busy.");});

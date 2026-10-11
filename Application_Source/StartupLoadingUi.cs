@@ -66,6 +66,7 @@ namespace AstroArchive {
   readonly Thread thread;readonly ManualResetEventSlim ready=new ManualResetEventSlim();
   Dispatcher dispatcher;StartupLoadingWindow view;bool finishing;volatile bool cancelled;int disposed;
   public bool Cancelled{get{return cancelled;}}
+  internal Exception Failure{get;private set;}
   internal bool IsAlive{get{return thread.IsAlive;}}
   public StartupSplash(){
    thread=new Thread(Run){IsBackground=true,Name="AstroArchive startup window"};thread.SetApartmentState(ApartmentState.STA);thread.Start();
@@ -78,7 +79,7 @@ namespace AstroArchive {
     view.Window.ContentRendered+=(s,e)=>ready.Set();
     view.Window.Closed+=(s,e)=>{if(!finishing)cancelled=true;dispatcher.BeginInvokeShutdown(DispatcherPriority.Normal);};
     view.Window.Show();Dispatcher.Run();
-   }catch(Exception error){Debug.WriteLine("Startup window: "+error);}
+   }catch(Exception error){Failure=error;Debug.WriteLine("Startup window: "+error);}
    finally{ready.Set();}
   }
   public void Report(int percent,string stage){if(cancelled)throw new OperationCanceledException("Opening AstroArchive was cancelled.");Post(()=>view.SetProgress(percent,stage));}
