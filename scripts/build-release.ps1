@@ -90,6 +90,7 @@ function Run-Checked([string]$File, [string[]]$Arguments, [int]$ExpectedExit = 0
     } elseif (-not $process.WaitForExit(180000)) {
         # A hidden modal dialog would otherwise stall the job until its timeout. Name it.
         Get-Process | Where-Object { $_.MainWindowTitle } | ForEach-Object { Write-Output ("Open window: " + $_.ProcessName + " [" + $_.Id + "] " + $_.MainWindowTitle) }
+        Get-CimInstance Win32_Process | Where-Object { $_.Name -match 'AstroArchive|Start\.exe' } | ForEach-Object { Write-Output ("Process: [" + $_.ProcessId + "] parent " + $_.ParentProcessId + " " + $_.CommandLine) }
         $setupError = Join-Path ([IO.Path]::GetTempPath()) 'AstroArchive-setup-error.txt'
         if (Test-Path $setupError) { Get-Content $setupError | Write-Output }
         $process.Kill()
@@ -144,6 +145,7 @@ try {
     Run-Checked $installer @('--verify-launch', '--silent', '--root', ('"' + $smokeRoot + '"'))
     # Simulate Windows refusing to start an update (as Smart App Control did for 3.1.6):
     # setup must restore the newest earlier installed version and repoint its shortcuts.
+    Write-Output 'Smoke: preparing a simulated blocked launcher'
     $active = $record.ActiveDirectory
     $fallback = 'app-0.0.1-r1'
     $blockedRecord = Get-Content (Join-Path $smokeRoot 'install.json') -Raw | ConvertFrom-Json
@@ -161,6 +163,7 @@ try {
     Run-Checked $installer @('--verify-launch', '--silent', '--root', ('"' + $smokeRoot + '"')) 3
     $restored = Get-Content (Join-Path $smokeRoot 'install.json') -Raw | ConvertFrom-Json
     if ($restored.ActiveDirectory -ne $fallback) { throw 'A blocked launcher did not restore the earlier installed version.' }
+    Write-Output 'Smoke: checking restored record and shortcuts'
     $desktopLink = Join-Path ([Environment]::GetFolderPath('DesktopDirectory')) 'AstroArchive.lnk'
     if ((Shortcut-Target $desktopLink) -ne (Join-Path $smokeRoot "$fallback\Start.exe")) { throw 'Shortcuts still open the blocked version.' }
     $block = Get-Content (Join-Path $smokeRoot 'launch-blocked.json') -Raw | ConvertFrom-Json
