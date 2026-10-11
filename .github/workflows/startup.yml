@@ -5,6 +5,7 @@ on:
       - 'Application_Source/Startup*'
       - 'Application_Source/MainWindowPlacement.cs'
       - 'Application_Source/App.cs'
+      - 'Application_Source/ApplicationIcon.cs'
       - 'Application_Source/ReleaseMonitorUi.cs'
       - 'Application_Source/build.ps1'
       - 'Application_Source/test-startup.ps1'
