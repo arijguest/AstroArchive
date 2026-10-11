@@ -88,8 +88,8 @@
         </Grid>
         <Border x:Name="NoteBar" Grid.Row="3" Background="{DynamicResource Surface}" BorderBrush="{DynamicResource Border}" BorderThickness="0,1,0,0" Padding="36,10,36,10">
           <StackPanel VerticalAlignment="Center">
-            <TextBlock x:Name="NoteHeading" Foreground="{DynamicResource HeadingAccent}" FontSize="10" FontWeight="SemiBold" Margin="0,0,0,6" TextAlignment="Center"/>
-            <TextBlock x:Name="NoteLabel" FontSize="13" LineHeight="20" TextAlignment="Center"/>
+            <TextBlock x:Name="NoteHeading" Foreground="{DynamicResource HeadingAccent}" FontSize="10" FontWeight="SemiBold" Margin="0,0,0,6"/>
+            <TextBlock x:Name="NoteLabel" FontSize="13" LineHeight="20"/>
           </StackPanel>
         </Border>
       </Grid>
