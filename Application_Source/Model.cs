@@ -96,7 +96,7 @@ namespace AstroArchive {
   public string Group{get{return TargetNavigation.Group(Name);}}
   public string DisplayName{get{return TargetNavigation.ShortName(Name);}}
   public string FileCount{get{return Files.ToString("N0");}}
-  public string Subline{get{string id=TargetNavigation.Identifier(Name);string exposure=ExposureSeconds>0?TargetNavigation.Exposure(ExposureSeconds)+(UnknownExposure>0?" + "+UnknownExposure+" unknown":""):UnknownExposure>0?"exposure unknown":"";return string.Join(" · ",new[]{id,exposure}.Where(s=>s.Length>0));}}
+  public string Subline{get{string id=TargetNavigation.Identifier(Name);string exposure=ExposureSeconds>0?TargetNavigation.Exposure(ExposureSeconds):"";return string.Join(" · ",new[]{id,exposure}.Where(s=>s.Length>0));}}
   public string Detail{get{return Subs+" subs"+(Videos>0?"  ·  "+Videos+" video"+(Videos==1?"":"s"):"")+"  ·  "+Stacks+" stacks  ·  "+Sessions+" sessions\n"+CaptureGroups.ExposureLabel(ExposureSeconds,UnknownExposure);}}
   public string Tooltip{get{return TargetNavigation.TargetId(Name)+"\n"+Subs+" sub"+(Subs==1?"":"s")+(Videos>0?" · "+Videos+" video"+(Videos==1?"":"s"):"")+" · "+Stacks+" stack"+(Stacks==1?"":"s")+(ExposureSeconds>0||UnknownExposure>0?"\n"+CaptureGroups.ExposureLabel(ExposureSeconds,UnknownExposure):"");}}
  }
