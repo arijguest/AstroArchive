@@ -73,6 +73,7 @@ function Shortcut-Target([string]$Path) {
     }
 }
 function Run-Checked([string]$File, [string[]]$Arguments, [int]$ExpectedExit = 0) {
+    Write-Output ("Smoke: " + [IO.Path]::GetFileName($File) + " " + ($Arguments -join ' '))
     $process = Start-Process -FilePath $File -ArgumentList $Arguments -PassThru
     # Wait for setup itself; PowerShell -Wait also waits for the restarted app.
     if ($Arguments -contains '--ui-test') {
@@ -86,7 +87,14 @@ function Run-Checked([string]$File, [string[]]$Arguments, [int]$ExpectedExit = 0
             }
             if ($uiClock.Elapsed.TotalMinutes -ge 5) { $process.Kill(); throw ("Windows UI smoke did not complete within five minutes. Last stage: " + $lastUiStage) }
         }
-    } else { $process.WaitForExit() }
+    } elseif (-not $process.WaitForExit(180000)) {
+        # A hidden modal dialog would otherwise stall the job until its timeout. Name it.
+        Get-Process | Where-Object { $_.MainWindowTitle } | ForEach-Object { Write-Output ("Open window: " + $_.ProcessName + " [" + $_.Id + "] " + $_.MainWindowTitle) }
+        $setupError = Join-Path ([IO.Path]::GetTempPath()) 'AstroArchive-setup-error.txt'
+        if (Test-Path $setupError) { Get-Content $setupError | Write-Output }
+        $process.Kill()
+        throw "$File did not finish within three minutes."
+    }
     if ($process.ExitCode -ne $ExpectedExit) {
         $smokeError = Join-Path $OutputDirectory 'ui-preview\ui-smoke-error.txt'
         if (Test-Path $smokeError) { Get-Content $smokeError | Write-Output }
