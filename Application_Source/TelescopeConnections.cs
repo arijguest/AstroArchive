@@ -32,7 +32,7 @@ namespace AstroArchive {
     if(Find(settings,group.Key)!=null)continue;
     var models=group.Select(f=>Model(f.Model)).Where(m=>m!="Auto").Distinct().ToList();var makes=group.Select(f=>f.MakeText).Where(m=>m=="Seestar"||m=="DWARFLAB").Distinct().ToList();
     var identities=group.Select(f=>f.TelescopeIdentity??f.Telescope).Distinct(StringComparer.OrdinalIgnoreCase).ToList();
-    settings.Telescopes.Add(new TelescopeProfile{Id=group.Key,SessionIdentity=identities.Count==1?identities[0]:group.Key,Model=models.Count==1&&makes.Count<=1?models[0]:"Auto",Camera="Auto"});added++;
+    settings.Telescopes.Add(new TelescopeProfile{Id=group.Key,SessionIdentity=identities.Count==1?identities[0]:group.Key,Model=models.Count==1&&makes.Count<=1?models[0]:"Auto",SourceMake=makes.Count==1?makes[0]:null,Camera="Auto"});added++;
    }
    return added;
   }

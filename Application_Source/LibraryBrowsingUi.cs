@@ -25,7 +25,7 @@ namespace AstroArchive {
    changingSessionSelection=true;try{
     SetRows("FramesGrid",view,presorted);
    }finally{changingSessionSelection=false;}SelectOpeningRow("FramesGrid");Details();
-   var summary=preparedSummary??CaptureGroups.Summarize(displayed);L("LibrarySummaryLabel").Text=summary.Detail;
+   var summary=preparedSummary??CaptureGroups.Summarize(displayed);L("LibrarySummaryLabel").Text="In view: "+summary.Detail;
   }
  }
  // Target/session groups must not merge separate capture sections back together.

@@ -1,5 +1,5 @@
 AstroArchive user guide
-Application 3.1.7; package 3.1.7.1.
+Application 3.1.8; package 3.1.8.1.
 Windows 10/11 x64; .NET Framework 4.8.
 
 START HERE
@@ -24,10 +24,11 @@ LAN (or join the telescope hotspot). Discovery starts
 automatically. Select the telescope and Connect; no IP entry is needed.
 
 Choose a saved physical telescope for the import or keep the suggested new name.
-Select files opens capture folders; double-click folders or press Enter. Tick files,
-or use Search all to find supported captures throughout the selected storage.
-Review the count and import. Large batches warn that network transfers take longer
-than USB. Originals stay on the telescope. Adjacent sidecars and DWARF session
+Browse files opens capture folders. Click to select files or folders (a folder
+includes its subfolders); Ctrl or Shift adds more, Esc clears. Double-click a folder
+to open it; selections are kept across folders. Search all selects every supported
+capture. Review the total files and size, then import. Network imports first remind
+you that transfers take longer than USB. Originals stay on the telescope. Adjacent sidecars and DWARF session
 metadata are downloaded with captures; normal archive checks and duplicates apply.
 
 ## Import as the telescope shoots
@@ -270,7 +271,7 @@ integration divided by filename per-sub exposure supplies a count only when
 the result is a whole number. Existing cached records gain the same count.
 Explicit/manual counts take precedence. Other unspecified EXPTIME stays reported exposure;
 it is not assumed to be per-sub or total. Unknown/conflicting values need review.
-Image details and the Exposure tooltip show evidence. Sub-summary integration
+The Exposure tooltip shows the evidence. Sub-summary integration
 counts acquisition subs only, excluding stacks.
 
 GIF AND VIDEO PREVIEWS
@@ -324,10 +325,13 @@ spreadsheet execution; numeric columns retain their values.
 
 CALIBRATION AND FITS CONVERSION
 
-Matching labels candidates Accepted, Needs review or Rejected.
-Camera/device identity, gain, geometry, binning, Bayer and processing state must
-be compatible. Darks need matching exposure and known temperatures within 3°C.
-Flats need compatible filter/night/optics. Processed subs get no extra calibration.
+Matching labels candidates Accepted, Partial match, Needs review or Rejected.
+Values recorded on both files must agree (device, camera, gain, geometry, binning,
+Bayer, offset, readout, filter). Darks need matching exposure and temperatures within
+3°C. A master missing some headers is a Partial match, used only if nothing matches
+fully, and is listed as an export warning. Each group gets the nearest-night set
+(closest temperature for darks). Seestar/DWARF flats may come from the nearest night
+within 30 days. Processed subs get no extra calibration.
 Dark flats match raw-flat exposure; do not subtract both bias and dark flat.
 
 Convert supported images to FITS is explicit and requires confirmed linear data.

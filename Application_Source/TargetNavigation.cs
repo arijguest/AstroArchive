@@ -42,7 +42,8 @@ namespace AstroArchive {
     if(common.EndsWith(suffix,StringComparison.OrdinalIgnoreCase))common=common.Substring(0,common.Length-suffix.Length);
     return id+" - "+common;
    }
-   if(CometTargets.IsComet(name)){var match=CometName(name);if(match.Success&&match.Groups[2].Value.Length>0)return match.Groups[1].Value.Trim()+" - "+match.Groups[2].Value.Trim('(',')',' ');if(name.StartsWith("Comet ",StringComparison.OrdinalIgnoreCase))return name.Substring(6).Trim();}return name;
+   // Comets keep IAU styling (169P/NEAT, C/2023 A3 (Tsuchinshan-ATLAS)) rather than the catalogue "ID - name" layout.
+   if(CometTargets.IsComet(name)){var match=CometName(name);if(match.Success&&match.Groups[2].Value.Length>0){string id=match.Groups[1].Value.Trim(),discoverer=match.Groups[2].Value.Trim('(',')',' ');return char.IsDigit(id[0])?id+"/"+discoverer:id+" ("+discoverer+")";}if(name.StartsWith("Comet ",StringComparison.OrdinalIgnoreCase))return name.Substring(6).Trim();}return name;
   }
   public static string Identifier(string name){if(name=="All targets")return "";var ids=Catalog.CatalogueIds(name);if(ids.Length>0)return string.Join(" · ",ids.Where(id=>id!=PreferredId(name)));return "";}
   public static string TargetId(string name){if(name=="All targets")return "All Targets";string id=PreferredId(name);if(id.Length>0)return id;var comet=CometName(name);return comet.Success?comet.Groups[1].Value.Trim():name;}

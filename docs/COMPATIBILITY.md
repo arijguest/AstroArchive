@@ -72,12 +72,23 @@ from total integration. Mixed or missing durations remain explicit.
 
 ## Calibration and conversion
 
-Calibration candidates are **Accepted**, **Needs review** or **Rejected**.
-Identity, camera, gain, dimensions, binning and Bayer pattern must be compatible.
-Available offset, readout, ROI and optical data also affect matching. Flats need
-compatible filter/night; darks need matching exposure and known temperatures within 3°C.
-Missing or conflicting evidence requires review. Processed lights receive no extra
-calibration; unknown calibration state is opt-in.
+Calibration candidates are **Accepted**, **Partial match**, **Needs review** or **Rejected**.
+Any value recorded on both the light and the calibration must agree: telescope, make,
+camera channel, dimensions, Bayer pattern, binning, gain, offset, camera ID/model,
+readout, ROI and (for flats) filter and optical configuration. Telescope, binning and
+gain must be known; darks also need a known exposure and a temperature within 3°C.
+Descriptive values missing on only one file (common in masters from Siril, PixInsight
+or DSS) make a **Partial match**, used only when no fully accepted calibration exists;
+the export lists each one as a warning. Lights of an identified target other than the
+Milky Way count as the telephoto camera.
+
+Each export group gets one set per calibration type: darks with the closest temperature,
+then the nearest night; flats and biases from the nearest night. Raw frames from one
+night form a set and win a tie with a master. Flats come from the same night; Seestar and
+DWARF (fixed optics), or rigs recording the same optical configuration, may use the
+nearest night within 30 days. XISF and 16/32-bit TIFF calibration masters are treated as
+linear unless marked otherwise. Conflicting evidence requires review. Processed lights
+receive no extra calibration; unknown calibration state is opt-in.
 
 Dark flats match raw-flat exposure in separate sets;
 do not subtract both a bias and a dark flat from the same flat.

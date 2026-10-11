@@ -145,6 +145,7 @@
    </ControlTemplate></Setter.Value></Setter>
   </Style>
   <Style x:Key="DisclosureToggle" TargetType="ToggleButton">
+   <Setter Property="FocusVisualStyle" Value="{DynamicResource KeyboardFocusOutline}" />
    <Setter Property="Foreground" Value="{DynamicResource Text}"/><Setter Property="Cursor" Value="Hand"/><Setter Property="ToolTipService.ShowOnDisabled" Value="True"/>
    <Setter Property="Template"><Setter.Value><ControlTemplate TargetType="ToggleButton">
     <Grid x:Name="DisclosureRoot">
@@ -157,11 +158,13 @@
     <ControlTemplate.Triggers>
      <Trigger Property="IsChecked" Value="True"><Setter TargetName="DisclosureArrow" Property="RenderTransform"><Setter.Value><RotateTransform Angle="90"/></Setter.Value></Setter></Trigger>
      <MultiTrigger><MultiTrigger.Conditions><Condition Property="IsMouseOver" Value="True"/><Condition Property="IsEnabled" Value="True"/></MultiTrigger.Conditions><Setter TargetName="DisclosureSurface" Property="Background" Value="{DynamicResource SurfaceAlt}"/></MultiTrigger>
-     <Trigger Property="IsKeyboardFocused" Value="True"><Setter TargetName="DisclosureFocus" Property="Visibility" Value="Visible"/></Trigger>
-     <Trigger Property="IsPressed" Value="True"><Setter TargetName="DisclosureFocus" Property="Visibility" Value="Visible"/><Setter TargetName="DisclosureRoot" Property="RenderTransform"><Setter.Value><TranslateTransform Y="1"/></Setter.Value></Setter></Trigger>
+     <MultiTrigger><MultiTrigger.Conditions><Condition Property="IsKeyboardFocused" Value="True"/><Condition Property="local:SelectionAppearance.Enabled" Value="True"/></MultiTrigger.Conditions><Setter TargetName="DisclosureFocus" Property="Visibility" Value="Visible"/></MultiTrigger>
+     <MultiTrigger><MultiTrigger.Conditions><Condition Property="IsPressed" Value="True"/><Condition Property="local:SelectionAppearance.Enabled" Value="True"/></MultiTrigger.Conditions><Setter TargetName="DisclosureFocus" Property="Visibility" Value="Visible"/></MultiTrigger>
+     <Trigger Property="IsPressed" Value="True"><Setter TargetName="DisclosureRoot" Property="RenderTransform"><Setter.Value><TranslateTransform Y="1"/></Setter.Value></Setter></Trigger>
      <Trigger Property="IsEnabled" Value="False"><Setter TargetName="DisclosureSurface" Property="Background" Value="{DynamicResource DisabledSurface}"/><Setter TargetName="DisclosureArrow" Property="Stroke" Value="{DynamicResource DisabledText}"/><Setter TargetName="DisclosureLabel" Property="TextElement.Foreground" Value="{DynamicResource DisabledText}"/><Setter TargetName="DisclosureFocus" Property="Visibility" Value="Hidden"/><Setter Property="Cursor" Value="Arrow"/></Trigger>
     </ControlTemplate.Triggers>
    </ControlTemplate></Setter.Value></Setter>
+   <Style.Triggers><Trigger Property="local:SelectionAppearance.Enabled" Value="True"><Setter Property="FocusVisualStyle" Value="{x:Null}" /></Trigger></Style.Triggers>
   </Style>
   <Style TargetType="ProgressBar">
    <Setter Property="Foreground" Value="{DynamicResource Accent}" />
@@ -192,6 +195,7 @@
    </Setter>
   </Style>
   <Style TargetType="Button">
+   <Setter Property="FocusVisualStyle" Value="{DynamicResource KeyboardFocusOutline}" />
    <Setter Property="ToolTipService.ShowOnDisabled" Value="True" />
    <Setter Property="HorizontalContentAlignment" Value="Center" />
    <Setter Property="Padding" Value="12,7" />
@@ -217,13 +221,13 @@
        </MultiTrigger>
        <Trigger Property="IsPressed" Value="True">
         <Setter TargetName="ButtonRoot" Property="RenderTransform"><Setter.Value><TranslateTransform Y="1"/></Setter.Value></Setter>
-        <Setter TargetName="ButtonFocus" Property="Visibility" Value="Visible" />
        </Trigger>
-       <Trigger Property="IsKeyboardFocused" Value="True">
+       <!-- The persistent focus box is a Clearer selections choice; otherwise only keyboard navigation draws FocusVisualStyle. -->
+       <MultiTrigger><MultiTrigger.Conditions><Condition Property="IsPressed" Value="True"/><Condition Property="local:SelectionAppearance.Enabled" Value="True"/></MultiTrigger.Conditions>
         <Setter TargetName="ButtonFocus" Property="Visibility" Value="Visible" />
-       </Trigger>
-       <MultiTrigger><MultiTrigger.Conditions><Condition Property="Tag" Value="SelectSession"/><Condition Property="local:SelectionAppearance.Enabled" Value="False"/></MultiTrigger.Conditions>
-        <Setter TargetName="ButtonFocus" Property="Visibility" Value="Hidden" />
+       </MultiTrigger>
+       <MultiTrigger><MultiTrigger.Conditions><Condition Property="IsKeyboardFocused" Value="True"/><Condition Property="local:SelectionAppearance.Enabled" Value="True"/></MultiTrigger.Conditions>
+        <Setter TargetName="ButtonFocus" Property="Visibility" Value="Visible" />
        </MultiTrigger>
        <Trigger Property="IsEnabled" Value="False">
         <Setter TargetName="Surface" Property="Background" Value="{DynamicResource DisabledSurface}" />
@@ -237,6 +241,7 @@
      </ControlTemplate>
     </Setter.Value>
    </Setter>
+   <Style.Triggers><Trigger Property="local:SelectionAppearance.Enabled" Value="True"><Setter Property="FocusVisualStyle" Value="{x:Null}" /></Trigger></Style.Triggers>
   </Style>
   <Style TargetType="TextBox">
    <Setter Property="ToolTipService.ShowOnDisabled" Value="True" />
@@ -272,6 +277,7 @@
    <Setter Property="CaretBrush" Value="{DynamicResource Text}" />
   </Style>
   <Style TargetType="ComboBox">
+   <Setter Property="FocusVisualStyle" Value="{DynamicResource KeyboardFocusOutline}" />
    <Setter Property="ToolTipService.ShowOnDisabled" Value="True" />
    <Setter Property="Padding" Value="9,7" />
    <Setter Property="Foreground" Value="{DynamicResource Text}" />
@@ -311,15 +317,16 @@
         <Setter TargetName="PART_EditableTextBox" Property="Foreground" Value="{DynamicResource DisabledText}" />
         <Setter Property="Cursor" Value="Arrow" />
        </Trigger>
-       <Trigger Property="IsKeyboardFocusWithin" Value="True">
+       <MultiTrigger><MultiTrigger.Conditions><Condition Property="IsKeyboardFocusWithin" Value="True"/><Condition Property="local:SelectionAppearance.Enabled" Value="True"/></MultiTrigger.Conditions>
         <Setter TargetName="ComboFocus" Property="BorderBrush" Value="{DynamicResource Focus}" />
-       </Trigger>
+       </MultiTrigger>
        <Trigger Property="IsDropDownOpen" Value="True"><Setter TargetName="ComboFocus" Property="BorderBrush" Value="{DynamicResource Focus}"/></Trigger>
        <Trigger Property="IsEditable" Value="True"><Setter TargetName="ComboSelection" Property="Visibility" Value="Collapsed"/><Setter TargetName="PART_EditableTextBox" Property="Visibility" Value="Visible"/></Trigger>
       </ControlTemplate.Triggers>
      </ControlTemplate>
     </Setter.Value>
    </Setter>
+   <Style.Triggers><Trigger Property="local:SelectionAppearance.Enabled" Value="True"><Setter Property="FocusVisualStyle" Value="{x:Null}" /></Trigger></Style.Triggers>
   </Style>
   <Style TargetType="ComboBoxItem">
    <Setter Property="Foreground" Value="{DynamicResource Text}" />
@@ -342,6 +349,7 @@
    </Setter>
   </Style>
   <Style TargetType="CheckBox">
+   <Setter Property="FocusVisualStyle" Value="{DynamicResource KeyboardFocusOutline}" />
    <Setter Property="Foreground" Value="{DynamicResource Text}" />
    <Setter Property="VerticalContentAlignment" Value="Center" />
    <Setter Property="Cursor" Value="Hand" />
@@ -364,10 +372,11 @@
      <Trigger Property="IsChecked" Value="{x:Null}"><Setter TargetName="ChoiceBox" Property="Background" Value="{DynamicResource Accent}"/><Setter TargetName="ChoiceBox" Property="BorderBrush" Value="{DynamicResource Accent}"/><Setter TargetName="MixedMark" Property="Visibility" Value="Visible"/></Trigger>
      <MultiTrigger><MultiTrigger.Conditions><Condition Property="IsMouseOver" Value="True"/><Condition Property="IsEnabled" Value="True"/></MultiTrigger.Conditions><Setter TargetName="ChoiceBox" Property="BorderBrush" Value="{DynamicResource Focus}"/></MultiTrigger>
      <Trigger Property="IsPressed" Value="True"><Setter TargetName="ChoiceRoot" Property="RenderTransform"><Setter.Value><TranslateTransform Y="1"/></Setter.Value></Setter></Trigger>
-     <Trigger Property="IsKeyboardFocused" Value="True"><Setter TargetName="ChoiceFocus" Property="Visibility" Value="Visible"/></Trigger>
+     <MultiTrigger><MultiTrigger.Conditions><Condition Property="IsKeyboardFocused" Value="True"/><Condition Property="local:SelectionAppearance.Enabled" Value="True"/></MultiTrigger.Conditions><Setter TargetName="ChoiceFocus" Property="Visibility" Value="Visible"/></MultiTrigger>
      <Trigger Property="IsEnabled" Value="False"><Setter TargetName="ChoiceBox" Property="Background" Value="{DynamicResource DisabledSurface}"/><Setter TargetName="ChoiceBox" Property="BorderBrush" Value="{DynamicResource DisabledBorder}"/><Setter TargetName="Checkmark" Property="Stroke" Value="{DynamicResource DisabledText}"/><Setter TargetName="MixedMark" Property="Fill" Value="{DynamicResource DisabledText}"/><Setter TargetName="ChoiceLabel" Property="TextElement.Foreground" Value="{DynamicResource DisabledText}"/><Setter TargetName="ChoiceFocus" Property="Visibility" Value="Hidden"/><Setter Property="Cursor" Value="Arrow"/></Trigger>
     </ControlTemplate.Triggers>
    </ControlTemplate></Setter.Value></Setter>
+   <Style.Triggers><Trigger Property="local:SelectionAppearance.Enabled" Value="True"><Setter Property="FocusVisualStyle" Value="{x:Null}" /></Trigger></Style.Triggers>
   </Style>
   <Style TargetType="DataGrid">
    <Setter Property="ClipToBounds" Value="True" />
@@ -848,16 +857,20 @@
          <Button Grid.Column="2" x:Name="PreviewDetailsButton" Width="28" Height="28" Padding="6" Margin="4,0,0,0" ToolTip="Capture details" AutomationProperties.Name="Capture details">
           <Viewbox><Path Data="{StaticResource PreviewDetailsIcon}" Stroke="{DynamicResource Text}" StrokeThickness="1.6" StrokeStartLineCap="Round" StrokeEndLineCap="Round"/></Viewbox>
          </Button>
-         <Button Grid.Column="3" x:Name="OpenPreviewButton" Width="28" Height="28" Padding="6" Margin="4,0,0,0" ToolTip="Open image" AutomationProperties.Name="Open image">
+         <Button Grid.Column="3" x:Name="OpenPreviewButton" Width="28" Height="28" Padding="6" Margin="4,0,0,0" ToolTip="Show in File Explorer" AutomationProperties.Name="Show in File Explorer">
           <Viewbox><Path Data="{StaticResource PreviewOpenIcon}" Stroke="{DynamicResource Text}" StrokeThickness="1.6" StrokeLineJoin="Round"/></Viewbox>
          </Button>
          <Popup x:Name="PreviewDetailsPopup" Placement="Bottom" PlacementTarget="{Binding ElementName=PreviewDetailsButton}" AllowsTransparency="True" StaysOpen="False" PopupAnimation="None">
           <Border Width="340" Padding="12" CornerRadius="6" Background="{DynamicResource Surface}" BorderBrush="{DynamicResource Border}" BorderThickness="1" Focusable="True" KeyboardNavigation.TabNavigation="Cycle">
            <ScrollViewer MaxHeight="310" VerticalScrollBarVisibility="Auto" local:MenuScrolling.Enabled="True">
             <StackPanel>
-             <TextBlock x:Name="PreviewInfo" Foreground="{DynamicResource Muted}" FontSize="{DynamicResource UiFontSmall}" TextWrapping="Wrap"/>
-             <TextBlock x:Name="LibrarySummaryLabel" Foreground="{DynamicResource Muted}" FontSize="{DynamicResource UiFontSmall}" TextWrapping="Wrap" Margin="0,6,0,0"/>
-             <TextBlock x:Name="DetailsLabel" Text="Select a capture to view metadata." Foreground="{DynamicResource Text}" FontSize="{DynamicResource UiFontSmall}" TextWrapping="Wrap" Margin="0,6,0,0"/>
+             <StackPanel.Resources><Style x:Key="DetailsLine" TargetType="TextBlock"><Setter Property="TextWrapping" Value="Wrap"/><Style.Triggers><Trigger Property="Text" Value=""><Setter Property="Visibility" Value="Collapsed"/></Trigger></Style.Triggers></Style></StackPanel.Resources>
+             <TextBlock x:Name="DetailsTitle" Text="No capture selected" Style="{StaticResource DetailsLine}" FontWeight="SemiBold" Foreground="{DynamicResource Text}" FontSize="{DynamicResource UiFontBody}"/>
+             <TextBlock x:Name="PreviewInfo" Style="{StaticResource DetailsLine}" Foreground="{DynamicResource Muted}" FontSize="{DynamicResource UiFontSmall}" Margin="0,2,0,0"/>
+             <Grid x:Name="DetailsFacts" Margin="0,10,0,0"><Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions></Grid>
+             <TextBlock x:Name="DetailsLabel" Text="Select a capture to view its details." Style="{StaticResource DetailsLine}" Foreground="{DynamicResource Text}" FontSize="{DynamicResource UiFontSmall}" Margin="0,6,0,0"/>
+             <Border Height="1" Background="{DynamicResource Border}" Margin="0,10,0,8"/>
+             <TextBlock x:Name="LibrarySummaryLabel" Style="{StaticResource DetailsLine}" Foreground="{DynamicResource Muted}" FontSize="{DynamicResource UiFontCaption}"/>
             </StackPanel>
            </ScrollViewer>
           </Border>
@@ -867,7 +880,7 @@
         <Grid Grid.Row="2" x:Name="PreviewHost" ClipToBounds="True">
          <Grid x:Name="PreviewStage" ClipToBounds="True" HorizontalAlignment="Center" VerticalAlignment="Top">
           <Image x:Name="PreviewImage"/>
-          <TextBlock x:Name="PreviewMessage" Text="Select a capture or open an image." Foreground="{DynamicResource Muted}" HorizontalAlignment="Center" VerticalAlignment="Center" TextWrapping="Wrap" TextAlignment="Center" Margin="18"/>
+          <TextBlock x:Name="PreviewMessage" Text="Select a capture to preview it." Foreground="{DynamicResource Muted}" HorizontalAlignment="Center" VerticalAlignment="Center" TextWrapping="Wrap" TextAlignment="Center" Margin="18"/>
          </Grid>
          <Grid x:Name="PreviewSkyPanel" VerticalAlignment="Top" Visibility="Collapsed">
           <local:SkyGlobeView x:Name="PreviewSky" Margin="4"/>

@@ -138,13 +138,13 @@ where possible; optional NTFS **Protect originals** is not a substitute for back
 
 ### Fresh from the latest releases
 
-**[3.1.7](https://github.com/arijguest/AstroArchive/releases/tag/v3.1.7.1)** makes
-updates safe to roll back: if Windows blocks a new version from starting, AstroArchive
-automatically returns to the previous working version. It also brings the 3.1.6
-improvements: centered Analytics metrics and corrected exposure totals, more reliable
-calibration-frame matching and simpler stacking exports. The Repository preview
-keeps its full-size controls in maximized windows, and opt-in error reports open
-a sanitized, reviewable GitHub issue draft.
+**[3.1.8](https://github.com/arijguest/AstroArchive/releases/tag/v3.1.8.1)** makes
+stacking exports find the right calibration files, including master bias and flat
+frames from Siril, PixInsight and DSS. Network imports gain folder selection,
+Ctrl/Shift multi-select and a running total of files and size. The Capture details
+panel is shorter, comets show their proper names, and the preview's folder button
+shows the file in File Explorer. 3.1.7 made updates roll back automatically if
+Windows blocks a new version from starting.
 Earlier releases added animated analytics stories, recoverable import queues
 and simultaneous telescope sessions.
 [See what’s new →](https://github.com/arijguest/AstroArchive/releases)

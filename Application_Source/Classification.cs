@@ -148,7 +148,25 @@ namespace AstroArchive {
    frame.StackCount=count;if(frame.Facts==null)frame.Facts=new Dictionary<string,MetadataFact>();
    StackFact(frame,"StackCount",new MetadataFact{Value=count.ToString(CultureInfo.InvariantCulture),Raw=frame.OriginalName,Source="DWARF stack integration: "+Util.Num(total)+" s total / "+Util.Num(seconds)+" s per sub"});return true;
   }
-  public static bool ApplyStackMetadata(Frame frame){return ApplySeestarStackExposure(frame)|ApplyDwarfStackCount(frame);}
+  public static bool ApplyStackMetadata(Frame frame){return ApplySeestarStackExposure(frame)|ApplyDwarfStackCount(frame)|ApplyExposureStackCount(frame);}
+  // Any stack with a total and a per-sub exposure but no recorded count: the count is total ÷ sub, used only when it is a whole number.
+  public static bool ExposureStackCount(double? total,double? sub,out int count){
+   count=0;if(!total.HasValue||!sub.HasValue||total.Value<=0||sub.Value<=0||double.IsNaN(total.Value)||double.IsNaN(sub.Value)||double.IsInfinity(total.Value)||double.IsInfinity(sub.Value))return false;
+   double ratio=total.Value/sub.Value,rounded=Math.Round(ratio);if(rounded<2||rounded>int.MaxValue||Math.Abs(ratio-rounded)>0.000001*Math.Max(1,rounded))return false;
+   count=(int)rounded;return true;
+  }
+  public static bool ApplyExposureStackCount(Frame frame){
+   if(frame.Kind!="Stack"||frame.StackCount>0||UserMetadata(frame,"StackCount"))return false;
+   var image=frame.Images==null?null:frame.Images.FirstOrDefault(i=>i.Key==frame.ImageKey)??frame.Images.FirstOrDefault();var header=image==null?new FitsHeader():new FitsHeader{Values=image.Headers??new Dictionary<string,string>(),Comments=image.Comments??new Dictionary<string,string>()};
+   // A declared count that was rejected (e.g. fractional) is not replaced by a derived one.
+   if(!string.IsNullOrWhiteSpace(header.Get("NCOMBINE","STACKCNT","NSTACK","STACKNUM","NSUBS","SUBCOUNT")))return false;
+   string comment;header.Comments.TryGetValue("EXPTIME",out comment);bool perSubExptime=Regex.IsMatch(comment??"",@"per[ _-]?(sub|frame)|individual|single",RegexOptions.IgnoreCase);
+   double? total=header.Number("TOTALEXP","TOTEXP","EXPTOTAL","INTTIME","INTEGRAT");if(!total.HasValue&&!perSubExptime&&!Regex.IsMatch(comment??"",@"milliseconds?|\[ms\]",RegexOptions.IgnoreCase))total=frame.Exposure;
+   double? sub=header.Number("SUBEXP","SUBEXPT","EXPOSUB","EXP_SUB","SUBTIME"),gain;if(!sub.HasValue&&perSubExptime)sub=header.Number("EXPTIME");if(!sub.HasValue)FilenameExposureGain(frame.OriginalName,out sub,out gain);
+   int count;if(!ExposureStackCount(total,sub,out count))return false;
+   frame.StackCount=count;if(frame.Facts==null)frame.Facts=new Dictionary<string,MetadataFact>();
+   StackFact(frame,"StackCount",new MetadataFact{Value=count.ToString(CultureInfo.InvariantCulture),Raw=frame.OriginalName,Source="Total exposure ÷ sub exposure: "+Util.Num(total.Value)+" s / "+Util.Num(sub.Value)+" s"});return true;
+  }
   static bool UserMetadata(Frame frame,string field){MetadataFact fact;return frame.Facts!=null&&frame.Facts.TryGetValue(field,out fact)&&fact!=null&&fact.Source=="User";}
   static bool StackFact(Frame frame,string field,MetadataFact fact){MetadataFact old;if(frame.Facts.TryGetValue(field,out old)&&old!=null&&old.Value==fact.Value&&old.Raw==fact.Raw&&old.Source==fact.Source&&old.Unit==fact.Unit)return false;frame.Facts[field]=fact;return true;}
   public static bool ApplySeestarStackExposure(Frame frame){

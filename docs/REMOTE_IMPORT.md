@@ -29,14 +29,21 @@ device identity helps select the right profile. Passwords are never saved.
    bound to a different discovered device cannot be selected for this telescope.
 5. Choose files to import now or start live import as described below.
 
-After connecting, **Select files** opens capture folders. **Search all** lists
-eligible captures recursively across the configured storage root and selects them
-for review. Double-click folders or press Enter to open them; tick individual files
-or press Space to toggle the current row. Selected files remain selected across
-folders. **Up** moves to the parent and **All captures** returns to the storage root.
-**Import preferences…** opens the existing import settings without losing the selection.
-Import preferences filter files before transfer. A selection of 100 files or 1 GiB displays an inline
-network/USB notice and a confirmation before starting the batch.
+After connecting, **Browse files** opens capture folders. Click a file or folder to
+select it; Ctrl-click adds or removes single rows and Shift-click selects a range.
+A selected folder includes every capture in its subfolders. Double-click a folder or
+press Enter to open it, and Backspace or **Up** to go back; **All captures** returns to
+the storage root. Selections are kept as you move between folders. A plain click starts
+a new selection, and Esc or **Clear selection** clears it. The bar under the list shows
+the total files and size, counting selected folders in the background; import starts once
+counting finishes. **Search all** lists every eligible capture across the storage root and
+selects them all for review.
+**Skip “failed” files** and **Skip PNG/JPG/MP4** sit beside **Browse files** and **Search all**.
+They filter files before transfer, are saved as import preferences shared with folder, USB and
+Dump imports, and keep the current selection. Clearing one shows the files it hid. Copy workers
+stay in Preferences → Import; network imports always keep originals and skip target and rotation analysis. Every network import, including live import, first shows a short
+notice that network imports take longer than a wired connection and that USB is
+recommended for large numbers of files.
 
 ## Live imports
 
@@ -97,7 +104,7 @@ manual address/path to connect and check access.
   settings are not prerequisites. Older tester Windows-share errors do not require
   weakening those settings for this client.
 - **Captures missing:** enable Seestar **Save Each Frame** for individual exposures,
-  check the displayed storage scope and **Import preferences…**, then **Search all**.
+  check the displayed storage scope and the **Skip** options, then **Search all**.
   Failed/raster exclusions still apply. Live mode excludes existing files by default.
 - **Repeated retry or incomplete imports:** keep the connection and PC awake,
   allow captures to finish writing, and check free space for staging and repository

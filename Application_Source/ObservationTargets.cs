@@ -32,7 +32,7 @@ namespace AstroArchive {
   // once to recover duration; their video payloads are never decoded or hashed here.
   void NormalizeStoredMetadata(){
    db.Transaction(()=>{
-    var frames=All();foreach(var frame in frames){bool changed=MediaFiles.ApplyVideoType(frame)|Classifier.ApplyStackMetadata(frame)|CameraDetection.DefaultForTarget(frame);
+    var frames=All();foreach(var frame in frames){bool changed=MediaFiles.ApplyVideoType(frame)|Classifier.ApplyStackMetadata(frame)|CameraDetection.DefaultForTarget(frame)|MetadataProfiles.ApplyCalibrationLinearity(frame);
      if(frame.Kind=="Video"&&frame.ClassificationVersion!=Assets.ClassificationVersion){
       AssetInfo asset=null;try{string path=FilePath(frame);var before=FileStamp.Read(path);asset=Assets.Inspect(path);if(!before.ContentSame(FileStamp.Read(path)))asset=null;}
       catch(IOException){}catch(UnauthorizedAccessException){}catch(NotSupportedException){}

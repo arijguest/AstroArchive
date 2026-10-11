@@ -41,7 +41,6 @@ namespace AstroArchive {
     if(progress!=null)progress(result.Count);
    }return result;
   }
-  public static bool WarnForNetwork(IEnumerable<Entry> files){var list=files.ToList();return list.Count>=100||list.Sum(e=>Math.Max(0,e.Size))>=1073741824;}
  }
  public sealed class RemoteReceipt {public long Size;public long Modified;public string Hash;}
  public sealed class RemoteStagingResult {
