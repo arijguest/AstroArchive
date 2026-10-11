@@ -1,18 +1,28 @@
-AstroArchive 3.1.7
-Package 3.1.7.1
+AstroArchive 3.1.8
+Package 3.1.8.1
 
-- Fix updates leaving AstroArchive unable to open when Windows Smart App Control
-  or SmartScreen blocks the new version's Start.exe, as happened with 3.1.6.
-  After every install or update, setup checks that Windows will start the
-  launcher and app. If Windows blocks them, AstroArchive automatically returns
-  to the newest earlier installed version that starts, repoints its shortcuts,
-  and explains what happened. The blocked package is not offered again.
-- Installations stuck on a blocked 3.1.6: run this installer once. If Windows
-  also blocks 3.1.7, setup restores your earlier working version instead.
-- If Windows blocks the app itself, the launcher also restores the previous
-  working version. Repositories, images and settings are never changed.
-- Release checks now simulate a blocked update and fail if Windows Code Integrity
-  rejects any installed executable.
-- Includes the 3.1.6 changes: wider maximized Repository preview, centered
-  Analytics metrics with corrected stack exposure totals, broader
-  calibration-frame detection and opt-in sanitized error reports.
+- Calibration matching is far more reliable, especially for master bias and flat
+  frames. Values recorded on both files must still agree (telescope, camera,
+  gain, offset, geometry, binning, Bayer, filter; exposure and temperature for
+  darks). Masters missing some headers are used when nothing matches exactly,
+  and the export lists each such choice. Each group gets the nearest-night set
+  (closest temperature for darks). Seestar and DWARF flats can come from the
+  nearest night within 30 days. XISF and 16/32-bit TIFF masters now count as
+  linear data.
+- Lights of any identified target except the Milky Way count as the telephoto
+  camera, so their calibration frames are found.
+- Network imports: select files and whole folders (including subfolders) by
+  highlighting them, with Ctrl and Shift for more. Selections are kept between
+  folders, Esc clears them, and a summary shows the total files and size. The
+  Skip "failed" files and Skip PNG/JPG/MP4 options now sit in the import window,
+  existing saved telescopes are offered more reliably, and a short reminder that
+  network imports are slower than USB appears before each one.
+- Stacks show their sub count when it can be worked out exactly from the total
+  and per-sub exposure.
+- The Capture details panel is shorter: only known facts, no explanations.
+- The preview pane's folder button now shows the previewed file in File Explorer.
+- Comets show their proper names (for example 169P/NEAT). Target rows show only
+  the known exposure total, and target tooltips show sub and stack counts.
+- The gold focus box appears only with Clearer selections turned on.
+- Export menus list Export files… before Export to…, and the large USB import
+  notice no longer quotes a file count.
