@@ -382,7 +382,8 @@ namespace AstroArchive {
                 dark.Offset=11;
                 Check(CalibrationMatching.Evaluate(light,dark).Reasons.Any(r=>r.Contains("Offset differs")),"Offset not checked");
                 dark.Offset=null;
-                Check(CalibrationMatching.Evaluate(light,dark).Status=="Needs review","Missing offset auto-matched");
+                var missingOffset=CalibrationMatching.Evaluate(light,dark);
+                Check(missingOffset.Status=="Partial match"&&!missingOffset.Accepted&&missingOffset.Usable,"Missing offset was not treated as a partial match");
                 dark.Offset=10;
                 dark.CameraId="Other";
                 Check(!Exporter.MatchesCalibration(light,dark),"Different serial matched");
@@ -429,6 +430,51 @@ namespace AstroArchive {
                     flatA,flatB,darkA,darkB
                 },false);
                 Check(matched.Count==4&&matched.Contains(darkA)&&matched.Contains(darkB),"An exposure-specific flat recipe was dropped");
+            });
+            Test("Calibration choice falls back to partial master matches only when no exact set exists",()=> {
+                var light=CalibrationFixture("Light",30);light.Calibration="Uncalibrated";
+                var partial=CalibrationFixture("Master bias",0);partial.Hash="bias-partial";partial.Bayer="";partial.CameraId=null;partial.Offset=null;partial.ReadoutMode=null;partial.Camera="Unknown";partial.Make=null;
+                var decision=CalibrationMatching.Evaluate(light,partial);
+                Check(decision.Status=="Partial match"&&decision.Usable,"Master bias missing descriptive headers was rejected: "+string.Join(" ",decision.Reasons));
+                Check(Exporter.CalibrationFor(new[]{light},new List<Frame>{partial},false).Single()==partial,"Partial master bias was not used when it was the only candidate");
+                var exact=CalibrationFixture("Master bias",0);exact.Hash="bias-exact";
+                Check(Exporter.CalibrationFor(new[]{light},new List<Frame>{partial,exact},false).Single()==exact,"Partial master chosen over an exact one");
+                var gain=partial.Clone();gain.Gain=200;Check(!CalibrationMatching.Evaluate(light,gain).Usable,"Recorded gain difference was tolerated");
+                var bayer=exact.Clone();bayer.Bayer="BGGR";Check(!CalibrationMatching.Evaluate(light,bayer).Usable,"Recorded Bayer difference was tolerated");
+                var unknownGain=partial.Clone();unknownGain.Gain=null;Check(!CalibrationMatching.Evaluate(light,unknownGain).Usable,"Unknown gain was tolerated");
+            });
+            Test("Calibration sets come from the nearest night, raw frames before an equal master",()=> {
+                var light=CalibrationFixture("Light",30);light.Calibration="Uncalibrated";light.Night="2026-10-06";
+                Frame old1=CalibrationFixture("Bias",0),old2=CalibrationFixture("Bias",0),recent=CalibrationFixture("Bias",0),master=CalibrationFixture("Master bias",0);
+                old1.Night=old2.Night="2026-10-01";recent.Night="2026-10-05";master.Night="2026-10-05";old1.Hash="old-1";old2.Hash="old-2";recent.Hash="recent";master.Hash="master";
+                Check(Exporter.CalibrationFor(new[]{light},new List<Frame>{old1,old2,recent},false).Single()==recent,"Nearest-night bias set was not chosen");
+                Check(Exporter.CalibrationFor(new[]{light},new List<Frame>{old1,recent,master},false).Single()==recent,"Raw set did not win a tie with a master");
+                Check(Exporter.CalibrationFor(new[]{light},new List<Frame>{old1,old2,master},false).Single()==master,"Nearer master lost to an older raw set");
+                Frame warm=CalibrationFixture("Dark",30),cool=CalibrationFixture("Dark",30);warm.Temperature=-8;cool.Temperature=-10;warm.Night=cool.Night="2026-10-02";warm.Hash="warm";cool.Hash="cool";cool.Night="2026-09-20";
+                Check(Exporter.CalibrationFor(new[]{light},new List<Frame>{warm,cool},false).Single()==cool,"Closest dark temperature was not preferred");
+            });
+            Test("Flats prefer the same night and use a nearby night only for fixed-optics telescopes",()=> {
+                var light=CalibrationFixture("Light",10);light.Calibration="Uncalibrated";light.Make="Seestar";light.Night="2026-10-06";light.OpticalConfiguration=null;
+                var near=CalibrationFixture("Flat",0.5);near.Make="Seestar";near.Night="2026-10-04";near.OpticalConfiguration=null;near.Hash="near";
+                var far=near.Clone();far.Night="2026-08-01";far.Hash="far";var same=near.Clone();same.Night="2026-10-06";same.Hash="same";
+                Check(Exporter.CalibrationFor(new[]{light},new List<Frame>{near,far,same},false).Single()==same,"Same-night flat was not preferred");
+                Check(Exporter.CalibrationFor(new[]{light},new List<Frame>{near,far},false).Single()==near,"Nearest nearby-night flat was not chosen");
+                Check(!CalibrationMatching.Evaluate(light,far).Usable,"Flat more than "+CalibrationMatching.FlatNightWindow+" days away was used");
+                var filter=same.Clone();filter.Filter="Ha";Check(!CalibrationMatching.Evaluate(light,filter).Usable,"Different filter flat was used");
+                light.Make="Other";near.Make="Other";Check(!CalibrationMatching.Evaluate(light,near).Usable,"Another night's flat was used on a rig whose optics may have changed");
+                light.OpticalConfiguration=near.OpticalConfiguration="Rig-L-01";Check(CalibrationMatching.Evaluate(light,near).Status=="Partial match","A recorded, identical optical configuration did not allow a nearby night's flat");
+            });
+            Test("Identified targets count as telephoto for calibration matching",()=> {
+                var light=CalibrationFixture("Light",30);light.Calibration="Uncalibrated";light.Target="M31";light.Camera="Unknown";CameraDetection.DefaultForTarget(light);
+                Frame tele=CalibrationFixture("Dark",30),unknown=CalibrationFixture("Dark",30),wide=CalibrationFixture("Dark",30);tele.Camera="Telephoto";unknown.Camera="Unknown";wide.Camera="Wide";
+                Check(light.Camera=="Telephoto"&&CalibrationMatching.Evaluate(light,tele).Accepted&&CalibrationMatching.Evaluate(light,unknown).Status=="Partial match"&&!CalibrationMatching.Evaluate(light,wide).Usable,"Telephoto default was not applied to calibration matching");
+            });
+            Test("Calibration masters without a LINEAR keyword are linear when their format allows it",()=> {
+                var xisf=new Frame{Kind="Master flat",Format="XISF"};Check(MetadataProfiles.ApplyCalibrationLinearity(xisf)&&xisf.LinearData==true,"XISF master was not linear");
+                var tiff=new Frame{Kind="Master bias",Format="TIFF",Images=new List<ImageDescriptor>{new ImageDescriptor{Key="tiff",Bitpix=-32}}};Check(MetadataProfiles.ApplyCalibrationLinearity(tiff)&&tiff.LinearData==true,"Float TIFF master was not linear");
+                var tiff8=new Frame{Kind="Master bias",Format="TIFF",Images=new List<ImageDescriptor>{new ImageDescriptor{Key="tiff",Bitpix=8}}};Check(!MetadataProfiles.ApplyCalibrationLinearity(tiff8)&&!tiff8.LinearData.HasValue,"8-bit TIFF was assumed linear");
+                var lightXisf=new Frame{Kind="Light",Format="XISF"};Check(!MetadataProfiles.ApplyCalibrationLinearity(lightXisf),"XISF light was assumed linear");
+                var stated=new Frame{Kind="Master flat",Format="XISF",LinearData=false};Check(!MetadataProfiles.ApplyCalibrationLinearity(stated)&&stated.LinearData==false,"Explicitly non-linear master was overridden");
             });
             Test("Calibration conflicts require review until a user resolves the affected field",()=> {
                 var light=CalibrationFixture("Light",30);

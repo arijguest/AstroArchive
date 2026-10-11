@@ -6,11 +6,13 @@ namespace AstroArchive {public static class CameraDetection {
  foreach(Match marker in Regex.Matches(context??"",@"(?:^|[/\\_ .-])(cam[_-]?[01]|telephoto|tele|wide(?:[_-]?angle)?)(?=$|[/\\_ .-])",RegexOptions.IgnoreCase)){string camera=Camera(marker.Groups[1].Value);if(camera!=null){cameras.Add(camera);evidence.Add("Folder/filename "+marker.Groups[1].Value);}}
  string json=Camera(sidecar);if(json!=null){cameras.Add(json);evidence.Add("shotsInfo camera ID");}f.Camera=cameras.Count==1?cameras.First():"Unknown";f.CameraEvidence=cameras.Count>1?"Conflicting camera markers; manual review required":cameras.Count==0?"No camera marker; dimensions alone are insufficient":string.Join("; ",evidence.Distinct());if(cameras.Count>1)f.Notes+="Conflicting tele/wide metadata. ";
  }
+ public static bool WideField(string target){return Regex.IsMatch(target??"",@"\bmilky\s*way\b|\bgalactic\s+(?:core|cent(?:er|re))\b",RegexOptions.IgnoreCase|RegexOptions.CultureInvariant);}
  public static bool DefaultForTarget(Frame frame){
   if(frame==null||(!string.IsNullOrWhiteSpace(frame.Camera)&&!frame.Camera.Equals("Unknown",StringComparison.OrdinalIgnoreCase))||ImportPolicy.CalibrationOriginal(frame))return false;
   MetadataFact fact;if(frame.Facts!=null&&frame.Facts.TryGetValue("Camera",out fact)&&fact!=null&&(fact.Source??"").StartsWith("User",StringComparison.OrdinalIgnoreCase))return false;
   if(Regex.IsMatch(frame.CameraEvidence??"",@"conflict|^User|^Saved",RegexOptions.IgnoreCase)||(frame.MetadataConflicts??new List<string>()).Any(c=>c.StartsWith("Camera:",StringComparison.OrdinalIgnoreCase)))return false;
-  string group=TargetNavigation.Group(frame.Target);if(!new[]{"Solar system","Nebulae","Galaxies","Star clusters"}.Contains(group))return false;
+  // Any identified object is shot with the telephoto camera; the Milky Way (and meteors) are wide-field subjects.
+  string group=TargetNavigation.Group(frame.Target);if(Catalog.IsAmbiguous(frame.Target)||Regex.IsMatch(frame.Target??"",@"^\s*unidentified\b",RegexOptions.IgnoreCase)||new[]{"","Calibration","Unidentified","Meteors"}.Contains(group)||WideField(frame.Target))return false;
   frame.Camera="Telephoto";frame.CameraEvidence="Target-based default: "+TargetNavigation.TargetId(frame.Target)+" (not a detected camera marker)";
   if(frame.Facts==null)frame.Facts=new Dictionary<string,MetadataFact>();frame.Facts["Camera"]=new MetadataFact{Value=frame.Camera,Raw=frame.Target,Source=frame.CameraEvidence};
   return true;

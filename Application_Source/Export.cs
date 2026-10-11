@@ -13,13 +13,16 @@ namespace AstroArchive {
  public sealed class StackingInputGroup {public List<Frame> Inputs=new List<Frame>();public List<Frame> Calibrations=new List<Frame>();}
  public static partial class Exporter {
   public static bool MatchesCalibration(Frame light,Frame cal){return CalibrationMatching.Evaluate(light,cal).Accepted;}
+  // Chosen calibrations may be partial matches (see CalibrationMatching.Choose); placement must accept those too.
+  static bool UsableCalibration(Frame target,Frame cal){return CalibrationMatching.Evaluate(target,cal).Usable;}
   public static List<Frame> ExistingCalibrations(Repository repo,IEnumerable<Frame> frames){return frames.Where(f=>Assets.IsCalibration(f.Kind)&&!f.Rejected&&!CaptureScreening.FileProblem(f)&&f.Status!="Failed"&&File.Exists(repo.FilePath(f))).ToList();}
   public static List<Frame> CalibrationFor(IEnumerable<Frame> inputs,List<Frame> all,bool allowUnknown){
    var lights=inputs.ToList();if(lights.Count==0)return new List<Frame>();Frame light=lights[0];
    if(light.Calibration!="Uncalibrated"&&!(light.Calibration=="Unknown"&&allowUnknown))return new List<Frame>();
-   var cals=all.Where(c=>!c.Rejected&&Assets.IsCalibration(c.Kind)&&lights.All(f=>MatchesCalibration(f,c))).ToList();
-   foreach(string kind in new[]{"Dark","Flat","Bias"}){var raw=cals.Where(c=>c.Kind==kind).ToList();var masters=cals.Where(c=>c.Kind=="Master "+kind.ToLowerInvariant()).OrderBy(c=>Math.Abs((c.Temperature??0)-(light.Temperature??0))).ThenByDescending(c=>c.StackCount).ToList();if(raw.Count>0)cals.RemoveAll(c=>c.Kind=="Master "+kind.ToLowerInvariant());else if(masters.Count>1){var keep=masters.First();cals.RemoveAll(c=>c.Kind==keep.Kind&&c.Hash!=keep.Hash);}}
-   var flatInputs=cals.Where(c=>c.Kind=="Flat"||c.Kind=="Master flat").ToList();foreach(var flatGroup in flatInputs.GroupBy(f=>f.Group)){var darkFlats=all.Where(c=>(c.Kind=="Dark flat"||c.Kind=="Master dark flat")&&flatGroup.All(flat=>MatchesCalibration(flat,c))).ToList();if(darkFlats.Any(c=>c.Kind=="Dark flat"))darkFlats.RemoveAll(c=>c.Kind=="Master dark flat");else darkFlats=darkFlats.OrderByDescending(c=>c.StackCount).Take(1).ToList();foreach(var darkFlat in darkFlats)if(!cals.Any(c=>c.Hash==darkFlat.Hash))cals.Add(darkFlat);}return cals;
+   // One best-matching set per calibration type (see CalibrationMatching.Choose), then dark flats for each chosen flat exposure.
+   var cals=new List<Frame>();foreach(string kind in new[]{"Dark","Flat","Bias"})cals.AddRange(CalibrationMatching.Choose(lights,all,kind));
+   foreach(var flatGroup in cals.Where(c=>c.Kind=="Flat"||c.Kind=="Master flat").GroupBy(f=>f.Group).ToList())foreach(var darkFlat in CalibrationMatching.Choose(flatGroup.ToList(),all,"Dark flat"))if(!cals.Any(c=>c.Hash==darkFlat.Hash))cals.Add(darkFlat);
+   return cals;
   }
   public static List<StackingInputGroup> StackingGroups(IEnumerable<Frame> selection,List<Frame> all,bool separateSessions,bool allowUnknown,bool includeCalibration){
    var result=new List<StackingInputGroup>();
@@ -75,11 +78,12 @@ namespace AstroArchive {
      foreach(var f in g)copy.Add(Tuple.Create(f,group));
      var cals=new List<Frame>();if(includeCals) {
       cals=planned.Calibrations;
-      foreach(var c in cals){if(c.Kind=="Dark flat"||c.Kind=="Master dark flat")foreach(var flats in cals.Where(f=>f.Kind=="Flat"||f.Kind=="Master flat").GroupBy(f=>f.Group).Where(flatSet=>flatSet.All(f=>MatchesCalibration(f,c))))copy.Add(Tuple.Create(c,Path.Combine(calibrationDirectory,"dark-flats",FlatBucket(flats.First()))));else copy.Add(Tuple.Create(c,Path.Combine(calibrationDirectory,c.Kind.StartsWith("Master")?"masters":c.Kind=="Dark"?"darks":c.Kind=="Flat"?Path.Combine("flats",FlatBucket(c)):"biases")));}
+      foreach(var c in cals){if(c.Kind=="Dark flat"||c.Kind=="Master dark flat")foreach(var flats in cals.Where(f=>f.Kind=="Flat"||f.Kind=="Master flat").GroupBy(f=>f.Group).Where(flatSet=>flatSet.All(f=>UsableCalibration(f,c))))copy.Add(Tuple.Create(c,Path.Combine(calibrationDirectory,"dark-flats",FlatBucket(flats.First()))));else copy.Add(Tuple.Create(c,Path.Combine(calibrationDirectory,c.Kind.StartsWith("Master")?"masters":c.Kind=="Dark"?"darks":c.Kind=="Flat"?Path.Combine("flats",FlatBucket(c)):"biases")));}
      }
      if(light.Calibration=="Unknown")warnings.Add(group+": calibration status is unknown. Confirm before applying darks/flats/biases.");if(light.Calibration=="Calibrated")warnings.Add(group+": already calibrated; additional calibration files were not supplied.");
+     foreach(var c in cals.Where(c=>c.Kind!="Dark flat"&&c.Kind!="Master dark flat")){var decision=CalibrationMatching.Evaluate(light,c);if(!decision.Accepted)warnings.Add(group+": "+c.Kind.ToLowerInvariant()+" "+c.OriginalName+" is the closest available match, not an exact one: "+string.Join(" ",decision.Reasons));}
      if(options.IncludeCalibration&&light.Calibration=="Uncalibrated"&&!cals.Any(c=>c.Kind=="Dark"||c.Kind=="Master dark"))warnings.Add(group+": no darks with verified matching identity, exposure, gain, dimensions and temperature were found.");
-     recipes.Add(new{Group=group,CalibrationDirectory=calibrationDirectory,FlatPreparation=cals.Where(c=>c.Kind=="Flat"||c.Kind=="Master flat").GroupBy(f=>f.Group).Select(flats=>new{Directory=FlatBucket(flats.First()),Flats=flats.Select(f=>f.Hash).ToList(),DarkFlats=cals.Where(c=>(c.Kind=="Dark flat"||c.Kind=="Master dark flat")&&flats.All(f=>MatchesCalibration(f,c))).Select(c=>c.Hash).ToList()}).ToList(),Inputs=g.Select(f=>f.Hash).ToList(),Calibration=cals.Select(c=>new{c.Hash,c.Kind,AppliesTo=c.Kind=="Dark flat"||c.Kind=="Master dark flat"?"flats":"lights",Decision=CalibrationMatching.Evaluate(c.Kind=="Dark flat"||c.Kind=="Master dark flat"?cals.First(f=>(f.Kind=="Flat"||f.Kind=="Master flat")&&MatchesCalibration(f,c)):light,c)}).ToList()});
+     recipes.Add(new{Group=group,CalibrationDirectory=calibrationDirectory,FlatPreparation=cals.Where(c=>c.Kind=="Flat"||c.Kind=="Master flat").GroupBy(f=>f.Group).Select(flats=>new{Directory=FlatBucket(flats.First()),Flats=flats.Select(f=>f.Hash).ToList(),DarkFlats=cals.Where(c=>(c.Kind=="Dark flat"||c.Kind=="Master dark flat")&&flats.All(f=>UsableCalibration(f,c))).Select(c=>c.Hash).ToList()}).ToList(),Inputs=g.Select(f=>f.Hash).ToList(),Calibration=cals.Select(c=>new{c.Hash,c.Kind,AppliesTo=c.Kind=="Dark flat"||c.Kind=="Master dark flat"?"flats":"lights",Decision=CalibrationMatching.Evaluate(c.Kind=="Dark flat"||c.Kind=="Master dark flat"?cals.First(f=>(f.Kind=="Flat"||f.Kind=="Master flat")&&UsableCalibration(f,c)):light,c)}).ToList()});
      workflows.Add(Tuple.Create(group,light.Calibration));
     }
    }

@@ -82,6 +82,14 @@ namespace AstroArchive {
             }
             return "";
         }
+        // Calibration frames are linear by nature. PixInsight (XISF) and other (16/32-bit TIFF) masters carry no
+        // LINEAR keyword, so without this they fail the linear-data requirement for stacking exports.
+        public static bool ApplyCalibrationLinearity(Frame f) {
+            if(f==null||f.LinearData.HasValue||!Assets.IsCalibration(f.Kind))return false;
+            var image=f.Images==null?null:f.Images.FirstOrDefault(i=>i.Key==f.ImageKey)??f.Images.FirstOrDefault();
+            if(f.Format=="XISF"||f.Format=="TIFF"&&image!=null&&(image.Bitpix>=16||image.Bitpix<0)){f.LinearData=true;return true;}
+            return false;
+        }
         public static void Apply(Frame f,FitsHeader h,AssetInfo asset) {
             f.Format=asset.Format;
             f.Images=asset.Images;
@@ -146,6 +154,7 @@ namespace AstroArchive {
             if(linear=="T"||linear=="true"||linear=="1")f.LinearData=true;
             else if(linear=="F"||linear=="false"||linear=="0")f.LinearData=false;
             if(f.Format=="JPEG"||f.Format=="JPG")f.LinearData=false;
+            ApplyCalibrationLinearity(f);
             string stretch=h.Get("STRETCHED","NONLINEAR");
             if(stretch=="T")f.LinearData=false;
             f.RegistrationState=f.Calibration=="Registered"?"Registered":"Unknown";

@@ -325,10 +325,13 @@ spreadsheet execution; numeric columns retain their values.
 
 CALIBRATION AND FITS CONVERSION
 
-Matching labels candidates Accepted, Needs review or Rejected.
-Camera/device identity, gain, geometry, binning, Bayer and processing state must
-be compatible. Darks need matching exposure and known temperatures within 3°C.
-Flats need compatible filter/night/optics. Processed subs get no extra calibration.
+Matching labels candidates Accepted, Partial match, Needs review or Rejected.
+Values recorded on both files must agree (device, camera, gain, geometry, binning,
+Bayer, offset, readout, filter). Darks need matching exposure and temperatures within
+3°C. A master missing some headers is a Partial match, used only if nothing matches
+fully, and is listed as an export warning. Each group gets the nearest-night set
+(closest temperature for darks). Seestar/DWARF flats may come from the nearest night
+within 30 days. Processed subs get no extra calibration.
 Dark flats match raw-flat exposure; do not subtract both bias and dark flat.
 
 Convert supported images to FITS is explicit and requires confirmed linear data.
