@@ -22,6 +22,13 @@ The package version combines `application_version` and `installer_revision` from
 
 Run `scripts/build-release.ps1` on a disposable Windows test account. It runs
 engine, Windows codec, installer/updater, UI and install/repair/uninstall checks.
+It also checks that Windows starts the installed launcher and app, simulates a
+blocked update to confirm the automatic rollback to the earlier version, and fails
+if Windows Code Integrity logged a block for any installed executable.
+
+Unsigned builds can pass these checks on the runner but still be blocked on users'
+PCs by Smart App Control, which judges new unsigned files by reputation. The
+rollback protects users in that case. Only publisher signing prevents the block.
 See [development](DEVELOPMENT.md) for isolated commands.
 
 For v3 network changes, also run the remote transport and `--remote-only` UI

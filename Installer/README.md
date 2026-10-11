@@ -22,13 +22,17 @@ offline launch, checksums and Windows policy blocks.
 Replace the filename with your downloaded package:
 
 ```powershell
-.\AstroArchive3.1.6.1.exe --silent
-.\AstroArchive3.1.6.1.exe --update --silent --root "$env:LOCALAPPDATA\Programs\AstroArchive"
-.\AstroArchive3.1.6.1.exe --uninstall --root "$env:LOCALAPPDATA\Programs\AstroArchive"
+.\AstroArchive3.1.7.1.exe --silent
+.\AstroArchive3.1.7.1.exe --update --silent --root "$env:LOCALAPPDATA\Programs\AstroArchive"
+.\AstroArchive3.1.7.1.exe --uninstall --root "$env:LOCALAPPDATA\Programs\AstroArchive"
 ```
 
 `--update` requires an existing installation. `--restart` opens the app after a
-successful silent installation. Exit code 0 means success; 1 means failure or incomplete setup.
+successful silent installation. `--verify-launch` checks that Windows will start the
+installed version and restores the newest earlier version that starts if it will not.
+Exit code 0 means success; 1 means failure or incomplete setup; 3 means Windows blocked
+the new version and an earlier installed version was restored; 4 means Windows blocked
+it and no earlier version could be restored.
 Errors are written to `%TEMP%\AstroArchive-setup-error.txt`.
 
 ## Build

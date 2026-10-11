@@ -22,7 +22,7 @@ namespace AstroArchive.Installation {
    bool accepted = false;
    UpdateManifest update=null;string setup=null;DateTime attemptedUtc=DateTime.MinValue;
    try {
-    var client = new UpdateClient();var monitor=new ReleaseMonitor(root,record,()=>client.Check(record));update=monitor.CheckAsync().GetAwaiter().GetResult();monitor.MarkNotified();
+    var client = new UpdateClient();var monitor=new ReleaseMonitor(root,record,()=>client.Check(record,root));update=monitor.CheckAsync().GetAwaiter().GetResult();monitor.MarkNotified();
     if (update == null) {
      if (explicitCheck) MessageBox.Show("AstroArchive is up to date.", "AstroArchive updates");
      return false;
@@ -59,6 +59,10 @@ namespace AstroArchive.Installation {
    }
   }
 
+  static Process StartApplication(string executable, string[] args) {
+   return Process.Start(new ProcessStartInfo(executable,Array.IndexOf(args,"--no-updates")>=0?"--no-updates":"") { WorkingDirectory = Path.GetDirectoryName(executable), UseShellExecute = false });
+  }
+
   [STAThread] static int Main(string[] args) {
    try {
     Application.EnableVisualStyles();
@@ -76,9 +80,15 @@ namespace AstroArchive.Installation {
       if (explicitCheck) return 0;
       string executable = InstallCore.Managed(root, record.ActiveDirectory + "\\AstroArchive.exe");
       if (!File.Exists(executable)) throw new IOException("Application is missing. Run the installer again to repair it.");
-      using (var process = Process.Start(new ProcessStartInfo(executable,Array.IndexOf(args,"--no-updates")>=0?"--no-updates":"") { WorkingDirectory = Path.GetDirectoryName(executable), UseShellExecute = false })) {
-       process.WaitForExit(); return process.ExitCode;
+      Process process;
+      try { process = StartApplication(executable, args); }
+      catch (System.ComponentModel.Win32Exception) {
+       // Windows refused this version: restore the newest installed version it will start.
+       var recovery = LaunchSafety.Recover(root, LaunchSafety.NativeProbe, WindowsIntegration.Register);
+       if (!recovery.RolledBack) throw;
+       process = StartApplication(InstallCore.Managed(root, recovery.Record.ActiveDirectory + "\\AstroArchive.exe"), args);
       }
+      using (process) { process.WaitForExit(); return process.ExitCode; }
      } finally { if (held) mutex.ReleaseMutex(); }
     }
    } catch (Exception error) {

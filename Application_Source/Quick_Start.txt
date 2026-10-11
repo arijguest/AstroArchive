@@ -1,5 +1,5 @@
 AstroArchive user guide
-Application 3.1.6; package 3.1.6.1.
+Application 3.1.7; package 3.1.7.1.
 Windows 10/11 x64; .NET Framework 4.8.
 
 START HERE
@@ -431,6 +431,8 @@ Settings > Updates checks releases, shows notes and offers Install and restart.
 Automatic checks run after startup and every six hours while open; Activity and
 Guide > About AstroArchive show availability. Disable checks in Settings > Updates.
 Downloads show progress/Cancel in Activity. Failed downloads retain the current app.
+If Windows blocks a new version from starting, setup restores the newest earlier
+version that starts and does not offer the blocked package again.
 Manual installation works offline; Start.exe --no-updates skips automatic checks.
 Uninstall through Windows Installed Apps; user data and codecs remain.
 

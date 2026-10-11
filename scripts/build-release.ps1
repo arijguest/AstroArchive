@@ -63,7 +63,16 @@ Copy-Item (Join-Path $root 'Installer\Payload\Release_Notes.txt') (Join-Path $Ou
 $smokeRoot = Join-Path ([IO.Path]::GetTempPath()) ('AstroArchive-smoke-' + [Guid]::NewGuid().ToString('N'))
 $installed = $false
 $pinnedFixture = Join-Path ([Environment]::GetFolderPath('ApplicationData')) ('Microsoft\Internet Explorer\Quick Launch\User Pinned\TaskBar\AstroArchive-smoke-' + [Guid]::NewGuid().ToString('N') + '.lnk')
-function Run-Checked([string]$File, [string[]]$Arguments) {
+$smokeStarted = Get-Date
+function Shortcut-Target([string]$Path) {
+    $shell = New-Object -ComObject WScript.Shell
+    $link = $shell.CreateShortcut($Path)
+    try { return $link.TargetPath } finally {
+        [Runtime.InteropServices.Marshal]::FinalReleaseComObject($link) | Out-Null
+        [Runtime.InteropServices.Marshal]::FinalReleaseComObject($shell) | Out-Null
+    }
+}
+function Run-Checked([string]$File, [string[]]$Arguments, [int]$ExpectedExit = 0) {
     $process = Start-Process -FilePath $File -ArgumentList $Arguments -PassThru
     # Wait for setup itself; PowerShell -Wait also waits for the restarted app.
     if ($Arguments -contains '--ui-test') {
@@ -78,7 +87,7 @@ function Run-Checked([string]$File, [string[]]$Arguments) {
             if ($uiClock.Elapsed.TotalMinutes -ge 5) { $process.Kill(); throw ("Windows UI smoke did not complete within five minutes. Last stage: " + $lastUiStage) }
         }
     } else { $process.WaitForExit() }
-    if ($process.ExitCode -ne 0) {
+    if ($process.ExitCode -ne $ExpectedExit) {
         $smokeError = Join-Path $OutputDirectory 'ui-preview\ui-smoke-error.txt'
         if (Test-Path $smokeError) { Get-Content $smokeError | Write-Output }
         $setupError = Join-Path ([IO.Path]::GetTempPath()) 'AstroArchive-setup-error.txt'
@@ -86,7 +95,7 @@ function Run-Checked([string]$File, [string[]]$Arguments) {
         Get-WinEvent -FilterHashtable @{LogName='Application'; StartTime=(Get-Date).AddMinutes(-2)} -ErrorAction SilentlyContinue |
             Where-Object { $_.ProviderName -eq '.NET Runtime' -and $_.Message -match 'AstroArchive' } |
             ForEach-Object { $_.Message | Write-Output }
-        throw "$File exited with $($process.ExitCode)."
+        throw "$File exited with $($process.ExitCode); expected $ExpectedExit."
     }
 }
 try {
@@ -123,6 +132,37 @@ try {
     [IO.File]::WriteAllText($fixture, 'preserve this fixture')
     Run-Checked $installer @('--silent', '--root', ('"' + $smokeRoot + '"'))
     if ([IO.File]::ReadAllText($fixture) -ne 'preserve this fixture') { throw 'Repair changed fixture data.' }
+    # Windows must be able to start the installed launcher and application.
+    Run-Checked $installer @('--verify-launch', '--silent', '--root', ('"' + $smokeRoot + '"'))
+    # Simulate Windows refusing to start an update (as Smart App Control did for 3.1.6):
+    # setup must restore the newest earlier installed version and repoint its shortcuts.
+    $active = $record.ActiveDirectory
+    $fallback = 'app-0.0.1-r1'
+    $blockedRecord = Get-Content (Join-Path $smokeRoot 'install.json') -Raw | ConvertFrom-Json
+    [IO.Directory]::CreateDirectory((Join-Path $smokeRoot $fallback)) | Out-Null
+    $fallbackFiles = @()
+    foreach ($relative in @($blockedRecord.Files)) {
+        if ($relative.Split('\/')[0] -ne $active) { continue }
+        $name = Split-Path $relative -Leaf
+        Copy-Item (Join-Path $smokeRoot $relative) (Join-Path $smokeRoot "$fallback\$name")
+        $fallbackFiles += "$fallback\$name"
+    }
+    $blockedRecord.Files = @($blockedRecord.Files) + $fallbackFiles
+    [IO.File]::WriteAllText((Join-Path $smokeRoot 'install.json'), ($blockedRecord | ConvertTo-Json -Depth 4), (New-Object Text.UTF8Encoding($false)))
+    [IO.File]::WriteAllText((Join-Path $smokeRoot "$active\Start.exe"), 'Simulated launcher that Windows refuses to start')
+    Run-Checked $installer @('--verify-launch', '--silent', '--root', ('"' + $smokeRoot + '"')) 3
+    $restored = Get-Content (Join-Path $smokeRoot 'install.json') -Raw | ConvertFrom-Json
+    if ($restored.ActiveDirectory -ne $fallback) { throw 'A blocked launcher did not restore the earlier installed version.' }
+    $desktopLink = Join-Path ([Environment]::GetFolderPath('DesktopDirectory')) 'AstroArchive.lnk'
+    if ((Shortcut-Target $desktopLink) -ne (Join-Path $smokeRoot "$fallback\Start.exe")) { throw 'Shortcuts still open the blocked version.' }
+    $block = Get-Content (Join-Path $smokeRoot 'launch-blocked.json') -Raw | ConvertFrom-Json
+    if (@($block.BlockedPackages) -notcontains $package -or -not $block.NoticePending) { throw 'The blocked package was not recorded for the update check and notice.' }
+    # A working reinstall of the same package becomes active again and is no longer suppressed.
+    Run-Checked $installer @('--silent', '--root', ('"' + $smokeRoot + '"'))
+    $repaired = Get-Content (Join-Path $smokeRoot 'install.json') -Raw | ConvertFrom-Json
+    if ($repaired.ActiveDirectory -ne $active -or (Shortcut-Target $desktopLink) -ne (Join-Path $smokeRoot "$active\Start.exe")) { throw 'Repair did not reactivate the working package.' }
+    if (Test-Path (Join-Path $smokeRoot 'launch-blocked.json')) { throw 'A package that starts again is still suppressed.' }
+    Write-Output 'PASS launch verification and automatic rollback from a blocked update'
     # Exercise the native update handoff, process wait and offline restart.
     $waitProcess = Start-Process -FilePath 'powershell.exe' -ArgumentList @('-NoProfile', '-Command', 'Start-Sleep -Seconds 5') -PassThru
     $handoffClock = [Diagnostics.Stopwatch]::StartNew()
@@ -163,6 +203,12 @@ try {
         }
     }
     Write-Output 'PASS native update handoff, process wait, offline restart and archive preservation'
+    # Fail the release if Windows Code Integrity rejected any AstroArchive executable during validation.
+    $integrity = @(Get-WinEvent -FilterHashtable @{LogName='Microsoft-Windows-CodeIntegrity/Operational'; Id=3033,3034,3076,3077; StartTime=$smokeStarted} -ErrorAction SilentlyContinue |
+        Where-Object { $_.Message -match 'AstroArchive|Start\.exe' })
+    $integrity | ForEach-Object { Write-Output ("Code Integrity event " + $_.Id + ": " + $_.Message) }
+    if (@($integrity | Where-Object { $_.Id -in @(3033, 3077) }).Count -gt 0) { throw 'Windows Code Integrity blocked an AstroArchive executable during validation.' }
+    Write-Output 'PASS no Windows Code Integrity blocks for the installed executables'
     Run-Checked $installer @('--uninstall', '--silent', '--root', ('"' + $smokeRoot + '"'))
     $installed = $false
     if ((Test-Path (Join-Path $smokeRoot 'install.json')) -or -not (Test-Path $fixture)) { throw 'Uninstall smoke failed.' }

@@ -31,6 +31,29 @@ with progress and Cancel; closing Activity leaves the download running. The
 verified installer runs after AstroArchive saves state and closes, then restarts
 the app. A failed or canceled download leaves the current installation available.
 
+### If Windows blocks a new version
+
+After every install, update or repair, setup checks that Windows will start the
+new `Start.exe` and `AstroArchive.exe` before opening the app. Earlier versions
+remain installed after an update. If Smart App Control, SmartScreen or an App
+Control policy refuses the new version, setup automatically:
+
+1. activates the newest earlier installed version that Windows starts,
+2. points the desktop, Start menu and pinned shortcuts back to it,
+3. opens it with a notice naming the blocked and restored packages, and
+4. stops offering the blocked package as an update on that PC.
+
+The launcher does the same if Windows later refuses the app itself. Repositories,
+images and settings are never changed. The blocked package's files stay installed,
+so a later repair or uninstall still manages them. If the blocked package starts
+again later, for example after it is signed, reinstalling it reactivates it and
+it is offered again.
+
+If an installation is already stuck on a blocked version (for example 3.1.6),
+run a newer installer, or run an installer with `--verify-launch`, to restore the
+newest working version. Setup exits with code 3 when it restores an earlier
+version and code 4 when no earlier installed version will start.
+
 Manual installation and repair work offline. To open without automatic checks,
 run `Start.exe --no-updates` or `AstroArchive.exe --no-updates`. The launcher opens
 the app immediately; its explicit `--updates` command still supports manual
@@ -71,6 +94,10 @@ Logs:
 A SmartScreen reputation warning and **“An Application Control policy has blocked
 this file”** have different causes. Check the package's signing status. Signing
 identifies the publisher but does not guarantee acceptance by every Windows policy.
+
+Setup and the launcher check whether Windows will start a new version and restore
+the previous working version when it will not. See
+[If Windows blocks a new version](#if-windows-blocks-a-new-version).
 
 On a personal PC, inspect Windows Security → App & browser control. On a managed
 PC, provide the error and log to the administrator for publisher approval.

@@ -19,7 +19,7 @@ namespace AstroArchive {
   }
   async Task<ReleaseMonitor> EnsureReleaseMonitor(){
    if(releaseMonitor!=null)return releaseMonitor;
-   if(releaseMonitorLoading==null)releaseMonitorLoading=Task.Run(()=>{var target=ReleaseTarget();return new ReleaseMonitor(target.Root,target.Comparison,()=>new UpdateClient().Check(target.Comparison));});
+   if(releaseMonitorLoading==null)releaseMonitorLoading=Task.Run(()=>{var target=ReleaseTarget();return new ReleaseMonitor(target.Root,target.Comparison,()=>new UpdateClient().Check(target.Comparison,target.Root));});
    try{var monitor=await releaseMonitorLoading;if(releaseMonitorDisposed)return monitor;releaseMonitor=monitor;monitor.SetAutomatic(!settings.DisableAutomaticReleaseChecks);PublishReleaseState();return monitor;}
    finally{releaseMonitorLoading=null;}
   }

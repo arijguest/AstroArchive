@@ -79,7 +79,9 @@ namespace AstroArchive {
    return UpdateClient.ResolveTarget(executable,Assembly.GetExecutingAssembly().GetName().Version.ToString(3),WindowsIntegration.RegisteredRoot(),FileVersionInfo.GetVersionInfo(executable).FileVersion);
   }
   void CheckUpdateNotice(){
-   try{var target=ReleaseTarget();var receipt=UpdateClient.ConsumeInstalledUpdate(target.Root,target.Running.PackageVersion);if(receipt==null)return;
+   try{var target=ReleaseTarget();var recovery=LaunchSafety.ConsumeNotice(target.Root,target.Running.PackageVersion);
+    if(recovery!=null){L("UpdateNoticeText").Text="Windows did not allow package "+recovery.BlockedPackage+" to start, so AstroArchive restored package "+recovery.RestoredPackage+". It will not be offered again.";((FrameworkElement)Window.FindName("UpdateNotice")).Visibility=Visibility.Visible;return;}
+    var receipt=UpdateClient.ConsumeInstalledUpdate(target.Root,target.Running.PackageVersion);if(receipt==null)return;
     L("UpdateNoticeText").Text="Update complete: AstroArchive package "+receipt.PackageVersion+" is installed.";((FrameworkElement)Window.FindName("UpdateNotice")).Visibility=Visibility.Visible;
    }catch{ /* Update confirmation must not prevent the application opening. */ }
   }

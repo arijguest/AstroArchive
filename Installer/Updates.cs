@@ -160,13 +160,15 @@ namespace AstroArchive.Installation {
   }
   static string Quote(string path){if(path.IndexOf('"')>=0)throw new IOException("Quotes are not supported in the installation path.");return "\""+path+"\"";}
 
-  public UpdateManifest Check(InstallRecord installed) {
+  // Packages that Windows refused to start on this installation are not offered again.
+  public UpdateManifest Check(InstallRecord installed,string root=null) {
    byte[] bytes = Fetch(new Uri(Feed), 64 * 1024);
    if (bytes == null || bytes.Length > 64 * 1024) throw new IOException("Update feed is too large.");
    var manifest = InstallCore.Json().Deserialize<UpdateManifest>(Encoding.UTF8.GetString(bytes));
    Validate(manifest);
    if (InstallCore.Parse(manifest.application_version) < InstallCore.Parse(installed.Version) ||
-    InstallCore.Parse(manifest.package_version) <= InstallCore.Parse(installed.PackageVersion ?? installed.Version)) return null;
+    InstallCore.Parse(manifest.package_version) <= InstallCore.Parse(installed.PackageVersion ?? installed.Version) ||
+    LaunchSafety.IsBlocked(root, manifest.package_version)) return null;
    return manifest;
   }
 

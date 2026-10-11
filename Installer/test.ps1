@@ -6,8 +6,8 @@ $testDirectory = Join-Path ([IO.Path]::GetTempPath()) ('AstroArchive-installer-t
 try {
     $executable = Join-Path $testDirectory 'InstallerTests.exe'
     $arguments = @('/nologo', '/langversion:5', '/target:exe', '/platform:x64', "/out:$executable",
-        '/r:System.Core.dll', '/r:System.Web.Extensions.dll', "$PSScriptRoot\InstallCore.cs",
-        "$PSScriptRoot\Updates.cs", "$PSScriptRoot\ReleaseMonitor.cs", "$PSScriptRoot\ReleaseMonitorTests.cs", "$PSScriptRoot\UpdateTests.cs", "$PSScriptRoot\Tests.cs")
+        '/r:System.Core.dll', '/r:System.Web.Extensions.dll', "$PSScriptRoot\InstallCore.cs", "$PSScriptRoot\LaunchSafety.cs",
+        "$PSScriptRoot\Updates.cs", "$PSScriptRoot\ReleaseMonitor.cs", "$PSScriptRoot\ReleaseMonitorTests.cs", "$PSScriptRoot\UpdateTests.cs", "$PSScriptRoot\LaunchSafetyTests.cs", "$PSScriptRoot\Tests.cs")
     & $Compiler @arguments
     if ($LASTEXITCODE -ne 0) { throw 'Test compilation failed.' }
     $results = & $executable (Join-Path $testDirectory 'fixtures')

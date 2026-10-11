@@ -138,8 +138,10 @@ where possible; optional NTFS **Protect originals** is not a substitute for back
 
 ### Fresh from the latest releases
 
-**[3.1.6](https://github.com/arijguest/AstroArchive/releases/tag/v3.1.6.1)** brings
-centered Analytics metrics and corrected exposure totals, more reliable
+**[3.1.7](https://github.com/arijguest/AstroArchive/releases/tag/v3.1.7.1)** makes
+updates safe to roll back: if Windows blocks a new version from starting, AstroArchive
+automatically returns to the previous working version. It also brings the 3.1.6
+improvements: centered Analytics metrics and corrected exposure totals, more reliable
 calibration-frame matching and simpler stacking exports. The Repository preview
 keeps its full-size controls in maximized windows, and opt-in error reports open
 a sanitized, reviewable GitHub issue draft.
