@@ -11,6 +11,8 @@ Cleaner text: tooltips that only repeated their label are gone, dialog introduct
 
 Moon and lunar stacks: lunar and solar stacks from colour cameras no longer preview green, and Seestar stacks with millisecond timestamps in their names show their Stack() count again. Moon captures whose clock has no timezone, or only a date, now show the Moon on the sky map at an approximate position.
 
+Network live import: Start live import now opens a setup dialog like Watch a capture folder, with the check interval, transfer limit and the option to also import captures already in the telescope folder.
+
 Backups and notifications: a small indicator beside the repository path shows when a backup is running, even after its notice is dismissed. The notifications menu always lists every notification, including dismissed ones, and its bell shows when a process is active.
 
 Includes everything in 3.2.3: eclipse detection, daytime and lunar sky maps, in-depth target overviews and image-quality scoring.
