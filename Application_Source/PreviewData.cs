@@ -58,10 +58,16 @@ namespace AstroArchive {
    if(linear){
     DisplayMode="Linear"+(SkipStretch?" · solar / planetary":"");
     for(int c=0;c<Channels;c++){black[c]=Minimum;white[c]=Maximum;mid[c]=0.5;if(!(white[c]>black[c]))white[c]=black[c]+Math.Max(1,Math.Abs(black[c])*0.001);}
-    if(Mosaic&&SkipStretch&&Channels==3){
-     // Unbalanced Bayer samples look green; match each channel's bright end so a grey Moon stays grey.
-     var highs=GetStatistics(ct).Colours.Select(s=>s.High-Minimum).ToArray();double top=highs.Max();
-     if(top>0&&highs.All(h=>h>0)){for(int c=0;c<3;c++)white[c]=black[c]+(white[c]-black[c])*highs[c]/top;DisplayMode+=" · mosaic balanced";}
+    if(SkipStretch){
+     // Sun, Moon and planet captures often fill a small part of the sample range
+     // (short solar exposures, 12-bit sensors in 16-bit files). Scale linearly to
+     // the brightest samples so the disc is visible; no curve is applied.
+     var highs=GetStatistics(ct).Colours.Select(s=>s.Count>0?s.High-Minimum:0).ToArray();double top=highs.Max(),range=Maximum-Minimum;
+     if(top>0&&top<range){for(int c=0;c<Channels;c++)white[c]=black[c]+top;DisplayMode+=" · scaled to data";}
+     if(Mosaic&&Channels==3&&top>0&&highs.All(h=>h>0)){
+      // Unbalanced Bayer samples look green; match each channel's bright end so a grey Moon stays grey.
+      for(int c=0;c<3;c++)white[c]=black[c]+(white[c]-black[c])*highs[c]/top;DisplayMode+=" · mosaic balanced";
+     }
     }
     return RenderPixels(black,white,mid,true,ct);
    }

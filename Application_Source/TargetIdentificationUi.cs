@@ -8,7 +8,7 @@ using System.Windows.Controls;
 using System.Windows.Data;
 namespace AstroArchive {
  public partial class MainUi {
-  volatile IdentificationProgress identificationProgress;
+  volatile IdentificationProgress identificationProgress;readonly EtaEstimate identificationEta=new EtaEstimate();
   void ShowTargetReviewWhenReady(Action review){if(!closing)QueueActivityReview("Target identification results",review);}
   void IdentificationStage(IdentificationProgress value){identificationProgress=value;var metrics=activeMetrics;if(metrics!=null){metrics.Stage=value.Stage;metrics.UpdateLegacy(value.Completed,value.Total,value.Detail);}}
   SolveResult SolveIdentification(Frame sample,bool imported,CancellationToken ct,Action<string> progress){

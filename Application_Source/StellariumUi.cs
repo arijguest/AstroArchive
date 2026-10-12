@@ -1,8 +1,8 @@
 using System;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
 using System.Windows;
-using Microsoft.Win32;
 
 namespace AstroArchive {
  public partial class MainUi {
@@ -18,14 +18,15 @@ namespace AstroArchive {
    string script=Stellarium.Script(view);
    if(Stellarium.TrySend(script,Stellarium.RemotePort,700))return;
    string executable=Stellarium.Resolve(settings);
-   if(executable==null){
-    var picker=new OpenFileDialog{Title="Locate Stellarium — application could not be found automatically",Filter="Stellarium application|stellarium.exe",CheckFileExists=true};
-    if(picker.ShowDialog(Window)!=true)return;
-    if(!Stellarium.IsExecutable(picker.FileName)){LocalizedMessage.Show("Choose stellarium.exe from your Stellarium folder.","Open in Stellarium",MessageBoxButton.OK,MessageBoxImage.Information);return;}
-    Stellarium.Configure(settings,picker.FileName);SaveSettings();executable=picker.FileName;
-   }
+   if(executable==null){OpenStellariumWeb(view);return;}
    try{Stellarium.Launch(executable,script);}
    catch(Exception error){if(!(error is IOException||error is Win32Exception||error is UnauthorizedAccessException))throw;LocalizedMessage.Show("Could not start Stellarium.\n\n"+error.Message,"Open in Stellarium",MessageBoxButton.OK,MessageBoxImage.Warning);}
+  }
+  // Stellarium is not installed, so show the same view in Stellarium Web in the default browser.
+  void OpenStellariumWeb(StellariumView view){
+   string url=Stellarium.WebUrl(view);
+   try{Process.Start(new ProcessStartInfo(url){UseShellExecute=true});}
+   catch(Exception error){if(!(error is Win32Exception||error is InvalidOperationException))throw;LocalizedMessage.Show("Stellarium is not installed and your browser could not open Stellarium Web. Visit "+url+"\n\n"+error.Message,"Open in Stellarium",MessageBoxButton.OK,MessageBoxImage.Information);}
   }
  }
 }

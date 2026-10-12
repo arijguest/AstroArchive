@@ -104,18 +104,28 @@ namespace AstroArchive {
     if(CometInfo.ShowsPerihelionDate(orbit))AddFact(facts,"Perihelion date",CometInfo.PerihelionDate(orbit),CometInfo.SourceTitle);
     if(orbit.PeriodYears>0)AddFact(facts,"Orbital period",CometInfo.Period(orbit),CometInfo.SourceTitle);
     AddFact(facts,"Eccentricity",CometInfo.Eccentricity(orbit),"0 is a circle; 1 or more is an open orbit. "+CometInfo.SourceTitle);
+    if(CometInfo.HasSemiMajorAxis(orbit))AddFact(facts,"Semi-major axis",CometInfo.SemiMajorAxis(orbit),"Average distance from the Sun. "+CometInfo.SourceTitle);
+    AddFact(facts,"Perihelion speed",CometInfo.PerihelionSpeed(orbit),"Speed at closest approach to the Sun, from the orbit. "+CometInfo.SourceTitle);
+    if(CometInfo.ShowsEscapeSpeed(orbit))AddFact(facts,"Speed at infinity",CometInfo.EscapeSpeed(orbit),"Speed left once far from the Sun on an open orbit. "+CometInfo.SourceTitle);
     return;
    }
    var set=card.domain=="solar_system"?TargetParameters.For(card.id):null;if(set==null)return;
    if(set.HasOrbit)AddFact(facts,"Orbit",TargetParameters.Orbit(set),"NASA Planetary Fact Sheet");
    AddFact(facts,"Diameter",TargetParameters.Diameter(set),set.HasOrbit?"Mean or equatorial diameter. NASA Planetary Fact Sheet":"Nominal solar diameter. IAU 2015 Resolution B3");
    AddFact(facts,"Mass",TargetParameters.Mass(set),set.HasOrbit?"NASA Planetary Fact Sheet":"Nominal solar mass. IAU 2015 Resolution B3");
+   if(set.PerigeeKm>0)AddFact(facts,"Distance range",TargetParameters.DistanceRange(set),"Closest and farthest distance from Earth. NASA Moon Fact Sheet");
+   if(set.Gravity>0)AddFact(facts,"Surface gravity",TargetParameters.Gravity(set),"NASA Planetary Fact Sheet");
+   if(TargetParameters.ShowsMoonCount(set))AddFact(facts,"Known moons",set.MoonCount.ToString(CultureInfo.InvariantCulture),"Confirmed moons. NASA Solar System Exploration");
    if(set.Moons.Length>0)AddFact(facts,"Major moons",TargetParameters.Moons(set),null);
   }
+  // One quiet credit line under the picture: the creator and licence, both linked. The full
+  // attribution and any processing note stay in the tooltip.
   void AddImageCredit(TargetInfoImage image){
-   string credit=TargetInfoPresentation.Credit(image);bool longCredit=credit.Length>120||credit.Contains("://");
-   var line=Text("","Muted","UiFontCaption");line.ToolTip=Data(image.attribution+"\n"+image.modifications,"Text","UiFontSmall");line.Inlines.Add(Linked(longCredit&&!string.IsNullOrWhiteSpace(image.creator)?image.creator:credit,image.file_page_url));line.Inlines.Add(new Run(" · "));line.Inlines.Add(Linked(image.licence,image.licence_url));content.Children.Add(line);
-   if(longCredit){var full=new StackPanel();full.Children.Add(Data(image.attribution,"Muted","UiFontCaption"));content.Children.Add(Disclosure("Full image credit",full));}
+   string credit=TargetInfoPresentation.Credit(image);string who=!string.IsNullOrWhiteSpace(image.creator)?image.creator:credit.Length>0&&credit.Length<=60&&!credit.Contains("://")?credit:"Wikimedia Commons";
+   var line=Text("","Muted","UiFontCaption");line.TextAlignment=TextAlignment.Center;line.ToolTip=Data((image.attribution+"\n"+image.modifications).Trim(),"Text","UiFontSmall");
+   line.Inlines.Add(new Run("Image: "));line.Inlines.Add(Linked(who,image.file_page_url));
+   if(!string.IsNullOrWhiteSpace(image.licence)){line.Inlines.Add(new Run(" · "));line.Inlines.Add(Linked(image.licence,image.licence_url));}
+   content.Children.Add(line);
    string caption=TargetInfoPresentation.Caption(image.representation);if(caption.Length>0)content.Children.Add(Data(caption,"Muted","UiFontCaption"));
   }
   // Sections share a quiet caption and divider so the pane reads as distinct parts.
