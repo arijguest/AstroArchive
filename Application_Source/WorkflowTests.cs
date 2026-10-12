@@ -28,6 +28,8 @@ namespace AstroArchive {
     var summary=ImportWorkflow.Summarize(rows,rows,true);Check(summary.Ready==2&&summary.ReadyBytes==500&&summary.Duplicates==1&&summary.Deleted==1&&summary.Rejected==1&&summary.Unreadable==1&&summary.TransferFailed==1,"Summary counts differ from import selection");
     summary=ImportWorkflow.Summarize(rows,rows.Take(2),true);Check(summary.Total==7&&summary.Shown==2&&summary.Ready==1&&summary.ReadyBytes==100&&summary.SkippedFlagged==1,"Hidden candidates included in total size");
     Check(ImportWorkflow.Select(rows,false).Count==4&&ImportWorkflow.Select(rows,true,true).Single()==rows[5],"Retry or flagged opt-in scope differs");
+    var clean=new[]{new Frame{Status="New",Bytes=100,Screened=true}};string text=ImportWorkflow.Summarize(clean,clean,true).Text;Check(text=="1 ready (100 bytes)","Import summary lists empty categories: "+text);
+    Check(ImportWorkflow.Summarize(clean,new Frame[0],true).Text=="","Import summary shown for an empty table");
    });
    Test("Review distinguishes rejection, integrity and transfer problems including overlaps",()=>{
     var rejected=new Frame{Status="New",Rejected=true,RejectionReason="CAPSTAT: FAILED"};var broken=new Frame{Status="Unreadable",IntegrityIssue="truncated FITS"};var transfer=new Frame{Status="Failed",TransferIssue="access denied"};
