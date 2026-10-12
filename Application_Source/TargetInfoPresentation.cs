@@ -7,6 +7,8 @@ namespace AstroArchive {
  public sealed class TargetInfoSource {public string Title,Url;}
  public static class TargetInfoPresentation {
   public static string Constellation(string value){
+   if(new[]{"Ser","Se1","Se2","Serpens","Serpens Caput","Serpens Cauda"}.Any(v=>string.Equals(v,value,StringComparison.OrdinalIgnoreCase)))return "Serpens";
+   if(new[]{"CrA","Corona Austrina","Corona Australis"}.Any(v=>string.Equals(v,value,StringComparison.OrdinalIgnoreCase)))return "Corona Australis";
    var figure=SkyFigures.Figures.FirstOrDefault(f=>string.Equals(f.Id,value,StringComparison.OrdinalIgnoreCase)||string.Equals(f.Name,value,StringComparison.OrdinalIgnoreCase));
    return figure==null?null:figure.Name;
   }
@@ -14,7 +16,7 @@ namespace AstroArchive {
    string summary=card.summary??"";
    // Catalogue summaries use IAU abbreviations. Resolve the actual value rather
    // than showing the schema annotation or changing reviewed narrative prose.
-   return Regex.Replace(summary,@"\b([A-Za-z]{3}) \(IAU constellation code\)",m=>Constellation(m.Groups[1].Value)??m.Groups[1].Value);
+   return Regex.Replace(summary,@"\b([A-Za-z][A-Za-z0-9]{2}) \(IAU constellation code\)",m=>Constellation(m.Groups[1].Value)??m.Groups[1].Value);
   }
   public static string Caption(string value){
    string text=value??"";

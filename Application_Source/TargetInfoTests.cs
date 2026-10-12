@@ -36,6 +36,7 @@ namespace AstroArchive {
     var ic=catalog.Find("IC434",CancellationToken.None).Cards.Single();var horse=catalog.Find("B33",CancellationToken.None).Cards.Single();
     Check(ic.id!=horse.id&&ic.image.object_id==ic.id&&ic.Thumbnail.SequenceEqual(horse.Thumbnail),"IC 434 image sharing changed identity or duplicated different imagery");
     Check(TargetInfoPresentation.Constellation("Ori")=="Orion"&&TargetInfoPresentation.Constellation("Orion")=="Orion"&&TargetInfoPresentation.Summary(ic).Contains("Orion")&&!TargetInfoPresentation.Summary(ic).Contains("IAU constellation code"),"Constellation metadata leaked into the overview");
+    Check(TargetInfoPresentation.Constellation("Se1")=="Serpens"&&TargetInfoPresentation.Constellation("Se2")=="Serpens"&&TargetInfoPresentation.Constellation("CrA")=="Corona Australis"&&TargetInfoPresentation.Summary(catalog.Find("M5",CancellationToken.None).Cards.Single()).Contains("Serpens"),"Split Serpens codes or alternate southern constellation name were not resolved");
     Check(TargetInfoPresentation.Caption("Astronomical observation; filter bands and colour processing unspecified.")==""&&TargetInfoPresentation.Caption("Radar map.")=="Radar map.","Meaningless image caption remains or meaningful modality was lost");
     var sources=TargetInfoPresentation.Sources(catalog.Find("M31",CancellationToken.None).Cards.Single());Check(sources.Count==1,"Duplicate or draft OpenNGC references remain");
    });

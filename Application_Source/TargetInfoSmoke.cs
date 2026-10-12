@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Documents;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 
@@ -42,7 +43,7 @@ namespace AstroArchive {
      // Collapsed expanders have no rendered content in WPF. Open the credit
      // before checking the text the user can actually read.
      foreach(var expander in PopupChildren<Expander>(state.View))expander.IsExpanded=true;PumpPopupLayout();
-     if(!PopupChildren<TextBlock>(state.View).Any(t=>t.Text.Contains(loadedCard.image.creator)))throw new Exception("Image creator credit is missing.");
+     if(!PopupChildren<TextBlock>(state.View).Any(t=>new TextRange(t.ContentStart,t.ContentEnd).Text.Contains(loadedCard.image.creator)))throw new Exception("Image creator credit is missing.");
      foreach(var expander in PopupChildren<Expander>(state.View))expander.IsExpanded=false;PumpPopupLayout();
      if((tab==0?librarySelection.Count:editedSelection.Count)!=0||G(tab==0?"FramesGrid":"EditedGrid").SelectedItems.Count!=0)throw new Exception("Info action retained visible/hidden file selection.");
      if(((FrameworkElement)Window.FindName(prefix+"PreviewHost")).Visibility!=Visibility.Collapsed)throw new Exception("Image preview still occupies target information space.");
