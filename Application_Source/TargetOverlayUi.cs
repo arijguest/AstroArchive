@@ -35,7 +35,7 @@ namespace AstroArchive {
    bool flip=TargetOverlay.DisplayFlip(previewData.FlipY,previewFrame.Sky,previewFrame.Format);string key=previewFrame.Hash+"|"+flip+"|"+previewFrame.Target+"|"+(previewFrame.Sky==null?"":Util.Serialize(previewFrame.Sky));
    if(targetOverlay==null||key!=targetOverlayKey){targetOverlayKey=key;targetOverlay=TargetOverlay.For(previewFrame,flip);}
    var frame=previewFrame;
-   if(targetOverlay.CanSolve&&repo!=null)previewViewport.SetTargets(targetOverlay.Marks,targetOverlay.Note,()=>SolveForTargets(frame),"Plate solve…");else previewViewport.SetTargets(targetOverlay.Marks,targetOverlay.Note);
+   if(targetOverlay.CanSolve)previewViewport.SetTargets(targetOverlay.Marks,targetOverlay.Note,()=>SolveForTargets(frame),"Plate solve…");else previewViewport.SetTargets(targetOverlay.Marks,targetOverlay.Note);
   }
   // Uses the normal Identify target flow, so the solution is reviewed and stored like any other; the overlay refreshes when it is applied.
   void SolveForTargets(Frame frame){

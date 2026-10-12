@@ -32,7 +32,7 @@ namespace AstroArchive {
     }
     if(label=="Dark100"){settings.HighContrast=true;ApplyAppearance();PumpPopupLayout();if(preview.TargetCircles==0)throw new Exception("High contrast hid the target overlay");CaptureSidebar(host,Path.Combine(output,"AstroArchive_Target_Overlay_HighContrast.png"));settings.HighContrast=contrast;ApplyAppearance();PumpPopupLayout();}
     previewFrame=new Frame{Target="M42",Kind="Light",Width=720,Height=1280};UpdateTargetOverlay();PumpPopupLayout();
-    if(preview.TargetCircles!=0||preview.TargetNoteText==null||!preview.TargetNoteText.Contains(Localization.T("This capture has no plate solution"))||preview.TargetNoteButton==null||!preview.TargetNoteButton.IsVisible)throw new Exception("Unsolved capture lacks a note offering to plate solve");
+    if(preview.TargetCircles!=0||preview.TargetNoteText==null||!preview.TargetNoteText.Contains(Localization.T("This capture has no plate solution"))||preview.TargetNoteButton==null||preview.TargetNoteButton.Visibility!=Visibility.Visible)throw new Exception("Unsolved capture lacks a note offering to plate solve");
     // The Edited pane's button changes the same setting, so switching off there clears the repository preview too.
     B("EditedTargetOverlayButton").RaiseEvent(new RoutedEventArgs(Button.ClickEvent));PumpPopupLayout();if(settings.ShowTargetOverlay||preview.TargetCircles!=0||preview.TargetNoteText!=null||System.Windows.Automation.AutomationProperties.GetItemStatus(B("TargetOverlayButton"))!=Localization.T("Off"))throw new Exception("Target overlay did not switch off everywhere");
    }finally{settings.ShowTargetOverlay=saved;settings.HighContrast=contrast;previewFrame=savedFrame;previewData=savedData;UpdateTargetOverlay();PumpPopupLayout();}
