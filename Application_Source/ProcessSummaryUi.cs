@@ -12,7 +12,6 @@ namespace AstroArchive {
  public partial class MainUi {
   ScrollViewer processSummaryScroll;
   StackPanel processSummaryItems;
-  Button showDismissedActivity;
   bool processSummaryRefreshQueued;
   readonly Dictionary<ActivityEntry,ProcessSummaryCard> processSummaryCards=new Dictionary<ActivityEntry,ProcessSummaryCard>();
   sealed class ProcessSummaryCard {public TextBlock Title,Status,Parameters;public ProgressBar Bar;}
@@ -48,7 +47,7 @@ namespace AstroArchive {
     var content=new StackPanel();content.Children.Add(card.Title);content.Children.Add(card.Status);content.Children.Add(card.Parameters);content.Children.Add(card.Bar);
     var layout=new DockPanel();var actions=new StackPanel{Orientation=Orientation.Horizontal,VerticalAlignment=VerticalAlignment.Top};DockPanel.SetDock(actions,Dock.Right);layout.Children.Add(actions);
     var view=ActivityAction("Activity",OpenActivity);actions.Children.Add(view);
-    var dismiss=ActivityAction("×",()=>DismissActivitySummary(entry));dismiss.ToolTip="Dismiss from the banner and Activity; running work continues. Use Show dismissed in Activity to restore it.";AutomationProperties.SetName(dismiss,"Dismiss "+entry.Title+" summary");actions.Children.Add(dismiss);layout.Children.Add(content);
+    var dismiss=ActivityAction("×",()=>DismissActivitySummary(entry));dismiss.ToolTip="Dismiss from the banner; running work continues and stays listed in Activity.";AutomationProperties.SetName(dismiss,"Dismiss "+entry.Title+" summary");actions.Children.Add(dismiss);layout.Children.Add(content);
     var border=new Border{Child=layout,CornerRadius=new CornerRadius(6),Padding=new Thickness(12,8,6,8),Margin=new Thickness(0,0,0,4)};border.SetResourceReference(Border.BackgroundProperty,"SurfaceAlt");processSummaryItems.Children.Add(border);processSummaryCards[entry]=card;UpdateProcessSummary(entry,card);
    }
    SizeProcessSummaries();processSummaryScroll.Visibility=processSummaryCards.Count>0?Visibility.Visible:Visibility.Collapsed;
@@ -70,7 +69,6 @@ namespace AstroArchive {
    // Apply the layout change after the activating input has finished routing.
    processSummaryRefreshQueued=true;Window.Dispatcher.BeginInvoke(DispatcherPriority.Background,new Action(()=>{processSummaryRefreshQueued=false;if(!activityDisposed&&!closing)RenderProcessSummaries();}));
   }
-  void DismissActivitySummary(ActivityEntry entry){entry.BannerDismissed=true;entry.ActivityDismissed=true;entry.Unread=false;RenderActivity();}
-  void RestoreDismissedActivity(){foreach(var entry in activities){entry.ActivityDismissed=false;entry.BannerDismissed=false;}RenderActivity();}
+  void DismissActivitySummary(ActivityEntry entry){entry.BannerDismissed=true;entry.Unread=false;RenderActivity();}
  }
 }

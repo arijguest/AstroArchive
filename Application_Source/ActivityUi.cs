@@ -14,7 +14,7 @@ namespace AstroArchive {
  public sealed class ActivityEntry {
   public string Title,Status,ReportTitle,Report,OutputPath,ActionLabel,RepositoryRoot,CancelLabel,ImportKind,ProcessContext,ProcessOutcome;
   public DateTime StartedUtc=DateTime.UtcNow;
-  public bool Running,Unread,NeedsReview,Failed,Canceled,NetworkImport,LiveImport,ProcessTracked,BannerDismissed,BannerAutoHidden,ActivityDismissed,WasRunning;
+  public bool Running,Unread,NeedsReview,Failed,Canceled,NetworkImport,LiveImport,ProcessTracked,BannerDismissed,BannerAutoHidden,WasRunning;
   public double? DurationSeconds;
   public ProgressInfo Progress;
   public Action Review,Cancel,Pause,Resume,Discard;public Func<bool> ResumeAvailable;
@@ -23,7 +23,7 @@ namespace AstroArchive {
   readonly List<ActivityEntry> activities=new List<ActivityEntry>();
   readonly Dictionary<ActivityEntry,ActivityCard> activityCards=new Dictionary<ActivityEntry,ActivityCard>();
   ActivityEntry currentActivity,completionActivity,reviewingActivity;
-  Border activityPanel,activityToast;StackPanel activityItems;Button activityBell;TextBlock activityBadge,activityToastText;
+  Border activityPanel,activityToast;StackPanel activityItems;Button activityBell;TextBlock activityBadge,activityToastText;System.Windows.Shapes.Ellipse activityRunning;
   DispatcherTimer activityToastTimer;
   string nextActivityTitle;
   bool activityOpeningReport,activityDisposed;
@@ -40,7 +40,7 @@ namespace AstroArchive {
    foreach(var property in new[]{FrameworkElement.HeightProperty,FrameworkElement.WidthProperty})activityBell.SetBinding(property,new Binding("ActualHeight"){Source=TopMenu("CoffeeMenu")});
    var icon=new Grid();icon.SetResourceReference(FrameworkElement.WidthProperty,"UiToolbarIconSize");icon.SetResourceReference(FrameworkElement.HeightProperty,"UiToolbarIconSize");
    var bell=new System.Windows.Shapes.Path{Data=Geometry.Parse("M18,8 C18,4.7 15.3,2 12,2 C8.7,2 6,4.7 6,8 C6,15 3,15 3,17 L21,17 C21,15 18,15 18,8 Z M10,21 C11,22.3 13,22.3 14,21"),StrokeThickness=1.6,StrokeStartLineCap=PenLineCap.Round,StrokeEndLineCap=PenLineCap.Round,StrokeLineJoin=PenLineJoin.Round,Stretch=Stretch.Uniform};bell.SetResourceReference(System.Windows.Shapes.Shape.StrokeProperty,"Text");icon.Children.Add(bell);
-   activityBadge=new TextBlock{Margin=new Thickness(0,-6,-6,0),HorizontalAlignment=HorizontalAlignment.Right,VerticalAlignment=VerticalAlignment.Top,FontWeight=FontWeights.Bold,Visibility=Visibility.Collapsed};activityBadge.SetResourceReference(TextBlock.FontSizeProperty,"UiFontCaption");activityBadge.SetResourceReference(TextBlock.ForegroundProperty,"Accent");activityBadge.SetResourceReference(TextBlock.BackgroundProperty,"SurfaceAlt");icon.Children.Add(activityBadge);activityBell.Content=icon;
+   activityBadge=new TextBlock{Margin=new Thickness(0,-6,-6,0),HorizontalAlignment=HorizontalAlignment.Right,VerticalAlignment=VerticalAlignment.Top,FontWeight=FontWeights.Bold,Visibility=Visibility.Collapsed};activityBadge.SetResourceReference(TextBlock.FontSizeProperty,"UiFontCaption");activityBadge.SetResourceReference(TextBlock.ForegroundProperty,"Accent");activityBadge.SetResourceReference(TextBlock.BackgroundProperty,"SurfaceAlt");icon.Children.Add(activityBadge);activityRunning=new System.Windows.Shapes.Ellipse{Width=8,Height=8,StrokeThickness=1.5,HorizontalAlignment=HorizontalAlignment.Right,VerticalAlignment=VerticalAlignment.Bottom,Margin=new Thickness(0,0,-3,-3),IsHitTestVisible=false,Visibility=Visibility.Collapsed};activityRunning.SetResourceReference(System.Windows.Shapes.Shape.FillProperty,"Accent");activityRunning.SetResourceReference(System.Windows.Shapes.Shape.StrokeProperty,"SurfaceAlt");icon.Children.Add(activityRunning);activityBell.Content=icon;
    AutomationProperties.SetName(activityBell,"Activity and notifications");UiHelp.Hint(activityBell,"Activity and notifications (Ctrl+Shift+N)");Grid.SetColumn(activityBell,1);toolbar.Children.Add(activityBell);
    activityPanel=new Border{Padding=new Thickness(18),CornerRadius=new CornerRadius(8),BorderThickness=new Thickness(1),HorizontalAlignment=HorizontalAlignment.Right,VerticalAlignment=VerticalAlignment.Stretch,Visibility=Visibility.Collapsed,Margin=new Thickness(0,0,0,6)};
    activityPanel.SetResourceReference(Border.BackgroundProperty,"Surface");activityPanel.SetResourceReference(Border.BorderBrushProperty,"Border");Grid.SetRow(activityPanel,2);Panel.SetZIndex(activityPanel,20);root.Children.Add(activityPanel);
@@ -49,7 +49,7 @@ namespace AstroArchive {
    var close=new Button{Content="Close",Padding=new Thickness(9,4,9,4)};DockPanel.SetDock(close,Dock.Right);heading.Children.Add(close);heading.Children.Add(new TextBlock{Text="Activity",FontWeight=FontWeights.SemiBold,VerticalAlignment=VerticalAlignment.Center});
    close.Click+=(s,e)=>CloseActivity();activityBell.Click+=(s,e)=>{if(activityPanel.Visibility==Visibility.Visible)CloseActivity();else OpenActivity();};
    var footerRow=new WrapPanel{Margin=new Thickness(0,12,0,0)};DockPanel.SetDock(footerRow,Dock.Bottom);layout.Children.Add(footerRow);
-   var footer=new Button{Content="Clear completed"};footerRow.Children.Add(footer);showDismissedActivity=new Button{Content="Show dismissed",Visibility=Visibility.Collapsed};showDismissedActivity.Click+=(s,e)=>RestoreDismissedActivity();footerRow.Children.Add(showDismissedActivity);
+   var footer=new Button{Content="Clear completed"};footerRow.Children.Add(footer);
    footer.Click+=(s,e)=>{activities.RemoveAll(a=>!a.Running&&!a.NeedsReview&&a.Review==null);RenderActivity();};
    activityItems=new StackPanel();var scroll=new ScrollViewer{Content=activityItems,VerticalScrollBarVisibility=ScrollBarVisibility.Auto,HorizontalScrollBarVisibility=ScrollBarVisibility.Disabled};MenuScrolling.SetEnabled(scroll,true);layout.Children.Add(scroll);
    activityPanel.PreviewKeyDown+=(s,e)=>{if(e.Key==Key.Escape){CloseActivity();e.Handled=true;}};
@@ -78,7 +78,7 @@ namespace AstroArchive {
   void NotifyActivity(ActivityEntry entry){
    if(activityDisposed||closing)return;
    if(!entry.Running&&entry.WasRunning){entry.WasRunning=false;entry.BannerAutoHidden=false;if(entry.ProcessTracked)RetireCompletedProcessSummaries(entry);}
-   bool notify=!entry.ActivityDismissed&&!entry.Running&&entry.DurationSeconds.HasValue&&entry.DurationSeconds.Value>300;
+   bool notify=!entry.BannerDismissed&&!entry.Running&&entry.DurationSeconds.HasValue&&entry.DurationSeconds.Value>300;
    entry.Unread=notify&&(activityPanel==null||activityPanel.Visibility!=Visibility.Visible);RenderActivity();
    if(!notify)return;
    if(activityToast==null||activityPanel.Visibility==Visibility.Visible||!Window.IsVisible||Window.WindowState==WindowState.Minimized)return;
@@ -86,20 +86,21 @@ namespace AstroArchive {
   }
   void RenderActivity(){
    if(activityItems==null)return;activityItems.Children.Clear();activityCards.Clear();
-   if(activities.All(a=>a.ActivityDismissed))activityItems.Children.Add(new TextBlock{Text="No recent activity. Long-running work and release notifications appear here.",TextWrapping=TextWrapping.Wrap});
-   foreach(var entry in OrderedActivities().Where(a=>!a.ActivityDismissed)){
+   if(activities.Count==0)activityItems.Children.Add(new TextBlock{Text="No recent activity. Long-running work and release notifications appear here.",TextWrapping=TextWrapping.Wrap});
+   foreach(var entry in OrderedActivities()){
     var panel=new StackPanel();var card=new ActivityCard{Title=new TextBlock{FontWeight=FontWeights.SemiBold,TextWrapping=TextWrapping.Wrap},Status=new TextBlock{TextWrapping=TextWrapping.Wrap,Margin=new Thickness(0,6,0,0)},Rate=new TextBlock{TextWrapping=TextWrapping.Wrap,Margin=new Thickness(0,6,0,0)},Bar=new ProgressBar{Maximum=1,Height=6,Margin=new Thickness(0,10,0,0)},Details=new TextBlock{TextWrapping=TextWrapping.Wrap},Actions=new WrapPanel{Margin=new Thickness(0,8,0,0)}};
-    AutomationProperties.SetName(card.Bar,entry.Title+" progress");var cardHeading=new DockPanel();var dismiss=ActivityAction("×",()=>DismissActivitySummary(entry));dismiss.Margin=new Thickness(8,0,0,0);dismiss.ToolTip="Dismiss this card; running work continues. Use Show dismissed to restore it.";AutomationProperties.SetName(dismiss,"Dismiss "+entry.Title+" activity");DockPanel.SetDock(dismiss,Dock.Right);cardHeading.Children.Add(dismiss);cardHeading.Children.Add(card.Title);panel.Children.Add(cardHeading);panel.Children.Add(card.Status);panel.Children.Add(card.Bar);panel.Children.Add(card.Rate);var details=new Expander{Header="Details",Content=card.Details,Margin=new Thickness(0,8,0,0)};panel.Children.Add(details);panel.Children.Add(card.Actions);
+    AutomationProperties.SetName(card.Bar,entry.Title+" progress");panel.Children.Add(card.Title);panel.Children.Add(card.Status);panel.Children.Add(card.Bar);panel.Children.Add(card.Rate);var details=new Expander{Header="Details",Content=card.Details,Margin=new Thickness(0,8,0,0)};panel.Children.Add(details);panel.Children.Add(card.Actions);
     var border=new Border{Child=panel,BorderThickness=new Thickness(1),CornerRadius=new CornerRadius(6),Padding=new Thickness(12,8,12,10),Margin=new Thickness(0,0,0,8)};border.SetResourceReference(Border.BorderBrushProperty,"Border");border.SetResourceReference(Border.BackgroundProperty,"SurfaceAlt");activityItems.Children.Add(border);activityCards[entry]=card;UpdateActivityCard(entry,card);
    }
-   if(showDismissedActivity!=null)showDismissedActivity.Visibility=activities.Any(a=>a.ActivityDismissed||a.BannerDismissed)?Visibility.Visible:Visibility.Collapsed;
    RenderProcessSummaries();UpdateActivityBadge();
   }
   Button ActivityAction(string label,Action action){var button=new Button{Content=label,Margin=new Thickness(0,0,6,6),Padding=new Thickness(8,4,8,4)};button.Click+=(s,e)=>{try{action();}catch(Exception error){var entry=AddActivity(label);entry.Failed=true;entry.Status=error.Message;NotifyActivity(entry);}};return button;}
   void UpdateActivityBadge(){
-   if(activityBell==null)return;int unread=activities.Count(a=>!a.ActivityDismissed&&a.Unread),running=activities.Count(a=>a.Running),review=activities.Count(a=>!a.ActivityDismissed&&a.NeedsReview);activityBadge.Text=unread.ToString();activityBadge.Visibility=unread==0?Visibility.Collapsed:Visibility.Visible;
+   if(activityBell==null)return;int unread=activities.Count(a=>a.Unread),running=activities.Count(a=>a.Running),review=activities.Count(a=>a.NeedsReview);bool backup=activities.Any(a=>a.Running&&IsBackupActivity(a));activityBadge.Text=unread.ToString();activityBadge.Visibility=unread==0?Visibility.Collapsed:Visibility.Visible;
+   activityRunning.Visibility=running==0?Visibility.Collapsed:Visibility.Visible;var backupIcon=Window.FindName("BackupRunningIcon") as UIElement;if(backupIcon!=null)backupIcon.Visibility=backup?Visibility.Visible:Visibility.Collapsed;
    string description="Activity: "+running+" running, "+unread+" unread, "+review+" need attention";AutomationProperties.SetName(activityBell,description);activityBell.ToolTip=description+" (Ctrl+Shift+N)";
   }
+  static bool IsBackupActivity(ActivityEntry entry){return entry.Title=="Backing up archive"||entry.Title=="Automatic backup";}
   static string ActivityRate(ActivityEntry entry){
    var p=entry.Progress;if(p==null)return "Started "+entry.StartedUtc.ToLocalTime().ToString("g");
    string eta=p.Finished||!entry.Running?"":entry.NetworkImport?" · "+RemoteEstimateLabel(p):p.Finalising?" · Finalising":p.Stalled?" · "+(p.Activity!=null&&p.Activity.Contains("Cloud availability")?"Waiting for cloud provider":"Waiting for filesystem"):p.RemainingSeconds.HasValue?" · ETA ~"+EtaEstimate.Format(p.RemainingSeconds.Value):" · ETA estimating";
