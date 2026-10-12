@@ -35,8 +35,8 @@ namespace AstroArchive {
    if(p!=null){
     if((entry.Running||entry.ProcessOutcome==null))parts.Add(p.TotalKnown?p.Done+" / "+p.Total+" files":p.Done+" inspected");
     if(p.CopyPhase&&(!entry.LiveImport||entry.Running)){parts.Add(ImportWorkflow.Size(p.BytesDone)+(p.BytesTotal>0?" / "+ImportWorkflow.Size(p.BytesTotal):""));if(entry.Running&&p.EffectiveBytesPerSecond>0)parts.Add((p.EffectiveBytesPerSecond/1000000.0).ToString("0.0")+" MB/s");}
-    if(entry.Running&&p.RemainingSeconds.HasValue&&!p.Finished)parts.Add("ETA ~"+EtaEstimate.Format(p.RemainingSeconds.Value));
-   }
+    if(entry.Running&&!p.Finished)parts.Add(entry.NetworkImport?RemoteEstimateLabel(p):p.RemainingSeconds.HasValue?"ETA ~"+EtaEstimate.Format(p.RemainingSeconds.Value):p.Finalising?"Finalising":"ETA estimating");
+   }else if(entry.Running)parts.Add("ETA estimating");
    return string.Join(" · ",parts);
   }
   void RenderProcessSummaries(){
