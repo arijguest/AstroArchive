@@ -1,5 +1,6 @@
-// Offline "Open in Stellarium": builds a small Stellarium script from a capture's sky context and hands it to a running
-// copy (Remote Control on this PC) or to a newly started copy. Nothing is sent beyond 127.0.0.1.
+// "Open in Stellarium": builds a small Stellarium script from a capture's sky context and hands it to a running copy
+// (Remote Control on this PC) or to a newly started copy. Only when Stellarium is not installed does the view go to
+// Stellarium Web, as URL parameters.
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -12,7 +13,7 @@ using Microsoft.Win32;
 
 namespace AstroArchive {
  public sealed class StellariumView {
-  public double RA,Dec;public double? FieldDegrees,Latitude,Longitude;public DateTime? Utc;public bool Approximate;
+  public double RA,Dec;public double? FieldDegrees,Latitude,Longitude,Altitude,Azimuth;public DateTime? Utc;public bool Approximate;public string Name;
  }
  public static class Stellarium {
   public const string Id="stellarium";
@@ -25,7 +26,8 @@ namespace AstroArchive {
    if(sky==null||frame==null||CaptureSky.IsCalibration(frame)||!sky.HasPosition||!CaptureSky.Finite(sky.RA)||!CaptureSky.Finite(sky.Dec))return null;
    var view=new StellariumView{RA=sky.RA,Dec=sky.Dec,Approximate=sky.ApproximatePosition,FieldDegrees=Field(frame)};
    if(sky.Utc.HasValue)view.Utc=sky.Utc.Value.Kind==DateTimeKind.Utc?sky.Utc.Value:sky.Utc.Value.ToUniversalTime();
-   if(sky.HasHorizon&&ObservingCities.ValidCoordinates(sky.Latitude,sky.Longitude)){view.Latitude=sky.Latitude;view.Longitude=sky.Longitude;}
+   if(sky.HasHorizon&&ObservingCities.ValidCoordinates(sky.Latitude,sky.Longitude)){view.Latitude=sky.Latitude;view.Longitude=sky.Longitude;view.Altitude=sky.Altitude;view.Azimuth=sky.Azimuth;}
+   if(!Catalog.IsAmbiguous(frame.Target))view.Name=Catalog.CanonicalTarget(frame.Target);
    return view;
   }
   // The larger side of the solved or WCS footprint, with a little margin; null when the frame has no field of view.
@@ -67,6 +69,16 @@ namespace AstroArchive {
    text.Append("core.moveToRaDecJ2000(\"").Append(Hours(view.RA)).Append("\", \"").Append(Degrees(view.Dec)).Append("\", 0);\n");
    text.Append("StelMovementMgr.zoomTo(").Append(Number(view.FieldDegrees ?? DefaultFieldDegrees)).Append(", 0);\n");
    return text.ToString();
+  }
+  public const string WebAddress="https://stellarium-web.org/";
+  // Stellarium Web reads date, lat/lng, az/alt (view direction, degrees) and fov from the query, and selects the object
+  // named in a /skysource/ path. It has no RA/Dec parameter, so pointing needs the capture horizon or a catalogue name.
+  public static string WebUrl(StellariumView view){
+   var query=new List<string>{"fov="+Number(view.FieldDegrees ?? DefaultFieldDegrees)};
+   if(view.Utc.HasValue)query.Add("date="+view.Utc.Value.ToString("yyyy-MM-dd'T'HH:mm:ss'Z'",CultureInfo.InvariantCulture));
+   if(view.Latitude.HasValue&&view.Longitude.HasValue){query.Add("lat="+Number(view.Latitude.Value));query.Add("lng="+Number(view.Longitude.Value));}
+   if(view.Altitude.HasValue&&view.Azimuth.HasValue){query.Add("az="+Number(view.Azimuth.Value));query.Add("alt="+Number(view.Altitude.Value));}
+   return WebAddress+(string.IsNullOrWhiteSpace(view.Name)?"":"skysource/"+Uri.EscapeDataString(view.Name.Trim()))+"?"+string.Join("&",query);
   }
   // Remote Control is off by default, so a refused connection is the normal "not running" answer.
   public static bool TrySend(string script,int port,int timeoutMs){
