@@ -1779,6 +1779,85 @@ Partial match	Coincidencia parcial
 Rejected	Rechazado
 Registered	Registrado
 Starred files	Archivos destacados
+Open in app	Abrir en una aplicación
+AstroBin CSV	CSV de AstroBin
+Files…	Archivos…
+Open in app…	Abrir en una aplicación…
+Export options	Opciones de exportación
+Choose folder	Elegir carpeta
+Create new folder	Crear carpeta nueva
+Select files to export.	Selecciona los archivos que quieras exportar.
+Copies the original files byte for byte and verifies every copy. Existing files are kept; duplicate names receive a numbered suffix.	Copia los archivos originales byte a byte y verifica cada copia. Se conservan los archivos existentes; los nombres duplicados reciben un sufijo numérico.
+Add metadata	Agregar metadatos
+Groups lights by compatible capture settings, adds matching calibration files when chosen, and verifies every copy. Stacking happens in your processing software.	Agrupa las tomas de luz por configuración de captura compatible, agrega los archivos de calibración coincidentes si lo eliges y verifica cada copia. El apilado se realiza en tu software de procesado.
+Select lights or stacks to prepare a stacking folder.	Selecciona tomas de luz o apilados para preparar una carpeta de apilado.
+Add AstroBin acquisition CSV	Agregar CSV de adquisición de AstroBin
+Writes astrobin_acquisition.csv and notes from the original metadata of the exported lights, stacks and calibration frames.	Escribe astrobin_acquisition.csv y notas a partir de los metadatos originales de las tomas de luz, los apilados y las tomas de calibración exportados.
+AstroBin acquisition notes	Notas de adquisición de AstroBin
+Opens verified copies in PixInsight, Siril, DSS and other processing apps.	Abre copias verificadas en PixInsight, Siril, DSS y otras aplicaciones de procesado.
+Copies and verifies the original files, then opens your chosen app.	Copia y verifica los archivos originales y luego abre la aplicación elegida.
+No destination supports this selection. Files can copy the originals; convert to a supported format or select fewer images to open them in an app.	Ningún destino admite esta selección. La opción Archivos puede copiar los originales; convierte a un formato compatible o selecciona menos imágenes para abrirlas en una aplicación.
+Application settings…	Configuración de aplicaciones…
+Select Edited files to export.	Selecciona los archivos de Edited que quieras exportar.
+Copies the selected images in their original format and verifies every copy. Existing files are kept; duplicate names receive a numbered suffix.	Copia las imágenes seleccionadas en su formato original y verifica cada copia. Se conservan los archivos existentes; los nombres duplicados reciben un sufijo numérico.
+Save CSV…	Guardar CSV…
+Builds AstroBin's acquisition table from the original archive metadata, keeping details that processing can lose. No image files are exported.	Crea la tabla de adquisición de AstroBin a partir de los metadatos originales del archivo y conserva detalles que el procesado puede perder. No se exporta ningún archivo de imagen.
+Select lights, stacks or recordings to describe their acquisition.	Selecciona tomas de luz, apilados o grabaciones para describir su adquisición.
+Count matching calibration frames	Contar las tomas de calibración coincidentes
+Counts archived darks, flats, flat darks and bias frames that match the selected subs. Each frame is counted once.	Cuenta los darks, flats, dark flats y bias archivados que coinciden con las subexposiciones seleccionadas. Cada toma se cuenta una sola vez.
+Each target needs its own AstroBin image. Planetary recordings use AstroBin's video columns.	Cada objeto necesita su propia imagen en AstroBin. Las grabaciones planetarias usan las columnas de vídeo de AstroBin.
+AstroBin CSV preview	Vista previa del CSV de AstroBin
+Copy CSV	Copiar CSV
+Copy the CSV to paste into AstroBin's acquisition import.	Copia el CSV para pegarlo en la importación de adquisiciones de AstroBin.
+Copy notes	Copiar notas
+Copy the notes about blank or uncertain values.	Copia las notas sobre valores en blanco o inciertos.
+No acquisition rows.	No hay filas de adquisición.
+No blank or uncertain values.	No hay valores en blanco ni inciertos.
+CSV copied. Paste it into AstroBin's acquisition CSV import.	CSV copiado. Pégalo en la importación CSV de adquisiciones de AstroBin.
+Notes copied.	Notas copiadas.
+AstroBin filter IDs	ID de filtros de AstroBin
+AstroBin identifies filters by number. Paste the filter's AstroBin page address or its number. IDs are remembered.	AstroBin identifica los filtros por número. Pega la dirección de la página del filtro en AstroBin o su número. Los ID se recuerdan.
+No acquisition rows can be written. See the notes above.	No se puede escribir ninguna fila de adquisición. Consulta las notas anteriores.
+A spreadsheet of archive metadata: targets, equipment, exposures, dates, checksums and paths, for searching or record keeping. No image files are exported.	Una hoja de cálculo con los metadatos del archivo (objetos, equipo, exposiciones, fechas, sumas de comprobación y rutas) para búsquedas o registros. No se exporta ningún archivo de imagen.
+Selected files	Archivos seleccionados
+Files in view	Archivos en la vista
+Rows	Filas
+Export…	Exportar…
+Copy and verify grouped inputs into a ready-to-stack folder.	Copia y verifica las entradas agrupadas en una carpeta lista para apilar.
+Build AstroBin's acquisition CSV from archived metadata; no images are copied.	Crea el CSV de adquisición de AstroBin a partir de los metadatos archivados; no se copia ninguna imagen.
+Save CSV	Guardar CSV
+Choose where to save this CSV.	Elige dónde guardar este CSV.
+Export preferences	Preferencias de exportación
+Default export folder, Siril and application locations.	Carpeta de exportación predeterminada, Siril y ubicaciones de las aplicaciones.
+Choose an existing folder outside the repository.	Elige una carpeta existente fuera del repositorio.
+Application settings	Configuración de aplicaciones
+Open Export for selected files, or all visible files if none selected.	Abre Exportar para los archivos seleccionados o, si no hay ninguno, para todos los visibles.
+Open Export with an option chosen.	Abre Exportar con una opción ya elegida.
+Select captures, then choose **Export**: copy originals, prepare a ready-to-stack folder, open them in an app, or create an AstroBin acquisition CSV.	Selecciona capturas y elige **Exportar**: copia los originales, prepara una carpeta lista para apilar, ábrelas en una aplicación o crea un CSV de adquisición de AstroBin.
+No files selected	No hay archivos seleccionados
+AstroBin CSV…	CSV de AstroBin…
+Catalogue CSV…	Catálogo CSV…
+Inputs with different calibration sets use separate folders.	Las entradas con distintos conjuntos de calibración usan carpetas separadas.
+Export selection: {0}	Selección para exportar: {0}
+{#0} selected files	{0} archivos seleccionados
+{#0} selected file	{0} archivo seleccionado
+{#0} file in view	{0} archivo en la vista
+{#0} calibration frames	{0} tomas de calibración
+{#0} calibration frame	{0} toma de calibración
+{#0} other files	{0} otros archivos
+{#0} other file	{0} otro archivo
+{#0} recordings	{0} grabaciones
+{#0} recording	{0} grabación
+{0} and {#1} more targets	{0} y {1} objetos más
+Entire repository ({0})	Todo el repositorio ({0})
+{#0} catalogue rows exported.	Se exportaron {0} filas del catálogo.
+AstroBin CSV saved: {0}	CSV de AstroBin guardado: {0}
+Exported to {0}	Exportado a {0}
+{#0} selected Edited files	{0} archivos de Edited seleccionados
+1 selected Edited file	1 archivo de Edited seleccionado
+{#0} matching calibration files.	{0} archivos de calibración coincidentes.
+{#0} matching calibration file.	{0} archivo de calibración coincidente.
+{#0} subs have unknown processing state. Confirm they are uncalibrated to include their calibration files.	{0} subexposiciones tienen un estado de procesamiento desconocido. Confirma que no están calibradas para incluir sus archivos de calibración.
 Theme|Light	Claro
 Theme|Dark	Oscuro
 Theme|System	Sistema

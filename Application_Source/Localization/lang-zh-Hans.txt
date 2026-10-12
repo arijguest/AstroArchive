@@ -1785,6 +1785,83 @@ Partial match	部分匹配
 Rejected	已拒绝
 Registered	已配准
 Starred files	已加星标的文件
+Open in app	在应用中打开
+Files…	文件…
+Open in app…	在应用中打开…
+Export options	导出选项
+Choose folder	选择文件夹
+Create new folder	新建文件夹
+Select files to export.	请选择要导出的文件。
+Copies the original files byte for byte and verifies every copy. Existing files are kept; duplicate names receive a numbered suffix.	逐字节复制原始文件，并验证每个副本。现有文件将保留；重名文件将添加数字后缀。
+Add metadata	添加元数据
+Groups lights by compatible capture settings, adds matching calibration files when chosen, and verifies every copy. Stacking happens in your processing software.	按兼容的拍摄设置对亮场分组，在选择时添加匹配的校准文件，并验证每个副本。叠加需在你的处理软件中进行。
+Select lights or stacks to prepare a stacking folder.	请选择亮场或叠加图以准备叠加文件夹。
+Add AstroBin acquisition CSV	添加 AstroBin 采集 CSV
+Writes astrobin_acquisition.csv and notes from the original metadata of the exported lights, stacks and calibration frames.	根据导出的亮场、叠加图和校准帧的原始元数据，写入 astrobin_acquisition.csv 和说明。
+AstroBin acquisition notes	AstroBin 采集说明
+Opens verified copies in PixInsight, Siril, DSS and other processing apps.	在 PixInsight、Siril、DSS 和其他处理应用中打开已验证的副本。
+Copies and verifies the original files, then opens your chosen app.	复制并验证原始文件，然后打开你选择的应用。
+No destination supports this selection. Files can copy the originals; convert to a supported format or select fewer images to open them in an app.	没有目标位置支持此选择。“文件”可以复制原始文件；若要在应用中打开，请转换为受支持的格式或选择较少的图像。
+Application settings…	应用程序设置…
+Select Edited files to export.	请选择要导出的 Edited 文件。
+Copies the selected images in their original format and verifies every copy. Existing files are kept; duplicate names receive a numbered suffix.	以原始格式复制所选图像，并验证每个副本。现有文件将保留；重名文件将添加数字后缀。
+Save CSV…	保存 CSV…
+Builds AstroBin's acquisition table from the original archive metadata, keeping details that processing can lose. No image files are exported.	根据存档的原始元数据生成 AstroBin 采集数据表，保留处理过程中可能丢失的细节。不会导出任何图像文件。
+Select lights, stacks or recordings to describe their acquisition.	请选择亮场、叠加图或录像以描述其采集信息。
+Count matching calibration frames	统计匹配的校准帧
+Counts archived darks, flats, flat darks and bias frames that match the selected subs. Each frame is counted once.	统计与所选子帧匹配的已归档暗场、平场、暗平场和偏置帧。每帧只计一次。
+Each target needs its own AstroBin image. Planetary recordings use AstroBin's video columns.	每个目标都需要单独的 AstroBin 图像。行星录像使用 AstroBin 的视频列。
+AstroBin CSV preview	AstroBin CSV 预览
+Copy CSV	复制 CSV
+Copy the CSV to paste into AstroBin's acquisition import.	复制 CSV，以粘贴到 AstroBin 的采集数据导入中。
+Copy notes	复制说明
+Copy the notes about blank or uncertain values.	复制有关空白值或不确定值的说明。
+No acquisition rows.	没有采集数据行。
+No blank or uncertain values.	没有空白值或不确定值。
+CSV copied. Paste it into AstroBin's acquisition CSV import.	CSV 已复制。请将其粘贴到 AstroBin 的采集 CSV 导入中。
+Notes copied.	说明已复制。
+AstroBin filter IDs	AstroBin 滤镜 ID
+AstroBin identifies filters by number. Paste the filter's AstroBin page address or its number. IDs are remembered.	AstroBin 按编号识别滤镜。请粘贴该滤镜的 AstroBin 页面地址或其编号。系统会记住这些 ID。
+No acquisition rows can be written. See the notes above.	无法写入任何采集数据行。请参阅上方的说明。
+A spreadsheet of archive metadata: targets, equipment, exposures, dates, checksums and paths, for searching or record keeping. No image files are exported.	包含存档元数据（目标、设备、曝光、日期、校验和及路径）的电子表格，可用于搜索或记录保存。不会导出任何图像文件。
+Selected files	所选文件
+Files in view	视图中的文件
+Rows	行
+Export…	导出…
+Copy and verify grouped inputs into a ready-to-stack folder.	将分组的输入文件复制到可直接叠加的文件夹并进行验证。
+Build AstroBin's acquisition CSV from archived metadata; no images are copied.	根据已归档的元数据生成 AstroBin 采集 CSV；不复制任何图像。
+Save CSV	保存 CSV
+Choose where to save this CSV.	请选择此 CSV 的保存位置。
+Export preferences	导出首选项
+Default export folder, Siril and application locations.	默认导出文件夹、Siril 和应用程序位置。
+Choose an existing folder outside the repository.	请选择存储库以外的现有文件夹。
+Application settings	应用程序设置
+Open Export for selected files, or all visible files if none selected.	为所选文件打开“导出”；如果未选择任何文件，则为所有可见文件打开。
+Open Export with an option chosen.	打开“导出”并预先选定一个选项。
+Select captures, then choose **Export**: copy originals, prepare a ready-to-stack folder, open them in an app, or create an AstroBin acquisition CSV.	选择拍摄文件，然后选择**导出**：复制原始文件、准备可直接叠加的文件夹、在应用中打开，或创建 AstroBin 采集 CSV。
+No files selected	未选择文件
+Catalogue CSV…	目录 CSV…
+Inputs with different calibration sets use separate folders.	校准文件组不同的输入文件将使用不同的文件夹。
+Export selection: {0}	导出内容：{0}
+{#0} selected files	{0} 个所选文件
+{#0} selected file	{0} 个所选文件
+{#0} file in view	视图中有 {0} 个文件
+{#0} calibration frames	{0} 个校准帧
+{#0} calibration frame	{0} 个校准帧
+{#0} other files	{0} 个其他文件
+{#0} other file	{0} 个其他文件
+{#0} recordings	{0} 个录像
+{#0} recording	{0} 个录像
+{0} and {#1} more targets	{0} 及另外 {1} 个目标
+Entire repository ({0})	整个存储库（{0}）
+{#0} catalogue rows exported.	已导出 {0} 行目录数据。
+AstroBin CSV saved: {0}	AstroBin CSV 已保存：{0}
+Exported to {0}	已导出到 {0}
+{#0} selected Edited files	{0} 个所选 Edited 文件
+1 selected Edited file	1 个所选 Edited 文件
+{#0} matching calibration files.	{0} 个匹配的校准文件。
+{#0} matching calibration file.	{0} 个匹配的校准文件。
+{#0} subs have unknown processing state. Confirm they are uncalibrated to include their calibration files.	{0} 个子帧的处理状态未知。请确认它们未经校准，以便包括其校准文件。
 Theme|Light	浅色
 Theme|Dark	深色
 Theme|System	跟随系统
