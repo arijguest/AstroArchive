@@ -94,6 +94,7 @@ namespace AstroArchive {
     frame.Exposure=180;frame.Facts.Remove("Exposure");Classifier.ApplySeestarStackExposure(frame);Check(!Classifier.ApplySeestarStackExposure(frame),"Repeated correction changed metadata");
    });
    Test("Seestar stacked count parsing rejects invalid numbers and leaves other captures unchanged",()=>{
+    int msCount;double msSeconds;Check(Classifier.SeestarStackFilename("Stacked_48_Moon_12ms_IRCUT_20261001-210000.fit",out msCount,out msSeconds)&&msCount==48&&Math.Abs(msSeconds-0.012)<1e-9,"Millisecond lunar stack name not read");
     int count;double seconds;foreach(string name in new[]{"Stacked_0_M31_5s.fit","Stacked_-36_M31_5s.fit","Stacked_36.5_M31_5s.fit","Stacked_2147483648_M31_5s.fit","Stacked_36_M31_0s.fit","Light_36_M31_5s.fit","Stacked_M31_5s.fit","Stacked_36_M31_5s40.fit"})Check(!Classifier.SeestarStackFilename(name,out count,out seconds),"Invalid count/duration accepted: "+name);
     Check(Classifier.SeestarStackFilename("stacked_1_Heart_Nebula_0.5s_20260906.fit",out count,out seconds)&&count==1&&seconds==0.5,"Case or decimal/single-sub stack lost");
     var dwarf=new Frame{Make="DWARFLAB",Kind="Stack",OriginalName="Stacked_36_NGC 7000_5.0s_LP.fit",Exposure=123};Check(!Classifier.ApplySeestarStackExposure(dwarf)&&dwarf.Exposure==123&&dwarf.StackCount==0,"Other device exposure changed");var light=new Frame{Make="Seestar",Kind="Light",OriginalName=dwarf.OriginalName,Exposure=5};Check(!Classifier.ApplySeestarStackExposure(light)&&light.Exposure==5,"Individual sub exposure changed");

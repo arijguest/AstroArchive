@@ -124,8 +124,9 @@ namespace AstroArchive {
   static string CleanStem(string s){return Regex.Replace(s,@"\.(fit|fits|fts)(\.gz)?$","",RegexOptions.IgnoreCase);}
   // Seestar records a real sub count before the target, and seconds per sub after it.
   public static bool SeestarStackFilename(string filename,out int count,out double seconds){
-   count=0;seconds=0;var match=Regex.Match(Path.GetFileName(filename??""),@"^Stacked_(\d+)_.+?_(\d+(?:\.\d+)?)s(?=[_. -]|$)",RegexOptions.IgnoreCase|RegexOptions.CultureInvariant);
-   return match.Success&&int.TryParse(match.Groups[1].Value,NumberStyles.None,CultureInfo.InvariantCulture,out count)&&count>0&&double.TryParse(match.Groups[2].Value,NumberStyles.AllowDecimalPoint,CultureInfo.InvariantCulture,out seconds)&&seconds>0&&!double.IsInfinity(seconds)&&!double.IsInfinity(count*seconds);
+   count=0;seconds=0;var match=Regex.Match(Path.GetFileName(filename??""),@"^Stacked_(\d+)_.+?_(\d+(?:\.\d+)?)(m?)s(?=[_. -]|$)",RegexOptions.IgnoreCase|RegexOptions.CultureInvariant);
+   // Lunar and solar modes name very short subs in milliseconds, e.g. 12ms.
+   return match.Success&&int.TryParse(match.Groups[1].Value,NumberStyles.None,CultureInfo.InvariantCulture,out count)&&count>0&&double.TryParse(match.Groups[2].Value,NumberStyles.AllowDecimalPoint,CultureInfo.InvariantCulture,out seconds)&&(match.Groups[3].Length==0||(seconds/=1000)>=0)&&seconds>0&&!double.IsInfinity(seconds)&&!double.IsInfinity(count*seconds);
   }
   public static bool DwarfStackCount(string filename,FitsHeader header,string make,out int count,out double total,out double seconds){
    count=0;total=seconds=0;double? sub,gain;
