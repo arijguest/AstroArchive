@@ -27,6 +27,28 @@ namespace AstroArchive {
   string size;public string Size{get{return size??(Entry.Directory?"Folder":ImportWorkflow.Size(Entry.Size));}set{if(value==size)return;size=value;if(PropertyChanged!=null)PropertyChanged(this,new PropertyChangedEventArgs("Size"));}}
   public event PropertyChangedEventHandler PropertyChanged;
  }
+ // Options shown before a network live import starts, matching Watch a capture folder; the network advice replaces the separate notice.
+ internal sealed class NetworkLiveSetup {
+  internal static readonly string[] Limits={"1 MB/s","2 MB/s","5 MB/s","Unlimited"};
+  internal readonly FormWindow Dialog;internal readonly ComboBox Interval,Limit;internal readonly CheckBox Existing;
+  internal NetworkLiveSetup(Window owner,string source,int poll,double limit,bool includeExisting){
+   Dialog=new FormWindow(owner,"Live import",640,600);
+   Dialog.Text("Import new captures as they are saved",true);
+   Dialog.Text("AstroArchive checks this telescope folder and its subfolders, and imports each new capture once the telescope has finished saving it. Capture continues in the telescope app; originals stay on the telescope.");
+   var caption=new TextBlock{Text="Telescope folder",Margin=new Thickness(0,6,0,5)};caption.SetResourceReference(TextBlock.FontSizeProperty,"UiFontBody");Dialog.Add(caption);
+   var where=new TextBox{Text=source,IsReadOnly=true,Margin=new Thickness(0,0,0,5)};System.Windows.Automation.AutomationProperties.SetName(where,"Telescope folder");Dialog.Add(where);
+   string interval=MainUi.WatchIntervalLabel(poll);Interval=Dialog.Select("Check for new captures every",MainUi.WatchIntervals.Contains(interval)?MainUi.WatchIntervals:MainUi.WatchIntervals.Concat(new[]{interval}).ToArray(),interval);
+   Limit=Dialog.Select("Transfer limit",Limits,limit<=0?"Unlimited":Limits.FirstOrDefault(l=>l==limit+" MB/s")??"2 MB/s");
+   Existing=Dialog.Check("Also import captures already in this folder",includeExisting);
+   var note=new TextBlock{Text="Off: only captures saved after live import starts are imported. Select earlier captures and choose Import selected.",TextWrapping=TextWrapping.Wrap,Margin=new Thickness(24,2,0,4)};note.SetResourceReference(TextBlock.FontSizeProperty,"UiFontSmall");Theme.Bind(note,TextBlock.ForegroundProperty,"Muted");Dialog.Add(note);
+   var footer=new TextBlock{Text="Network imports take longer than a wired connection. For large numbers of files, a wired USB connection is highly recommended.\nKeep AstroArchive open and this PC awake while capturing. Stop live import from Activity at any time; completed imports are kept.",TextWrapping=TextWrapping.Wrap,Margin=new Thickness(0,14,0,0)};footer.SetResourceReference(TextBlock.FontSizeProperty,"UiFontSmall");Theme.Bind(footer,TextBlock.ForegroundProperty,"Muted");Dialog.Add(footer);
+   Dialog.Accept("Start live import",()=>true);
+  }
+  internal int PollSeconds{get{return MainUi.WatchSeconds(Convert.ToString(Interval.SelectedItem));}}
+  internal double LimitMB{get{string rate=Convert.ToString(Limit.SelectedItem);return rate=="Unlimited"?0:double.Parse(rate.Split(' ')[0],System.Globalization.CultureInfo.InvariantCulture);}}
+  internal bool IncludeExisting{get{return Existing.IsChecked==true;}}
+  internal bool Show(){return Dialog.Show();}
+ }
  internal sealed class RemoteImportDialog {
   internal readonly FormWindow Dialog;internal readonly DataGrid Devices,Files;internal readonly StackPanel DiscoveryPanel,ConnectedPanel,BrowserPanel;internal readonly Button ConnectButton,ImportButton,LiveButton,AdvancedButton,SearchButton,SelectButton,FindButton,CancelButton,UpButton,RootButton;
   internal readonly ProgressBar BusyProgress;internal readonly TextBlock Status,ConnectedText,FolderText,SelectionText,SelectionDetail,LiveScopeText,Error;internal readonly Button ClearButton;internal readonly ComboBox Profiles;internal readonly TextBox Name;
@@ -141,7 +163,8 @@ namespace AstroArchive {
    var parts=new List<string>();if(folders.Count>0)parts.Add(folders.Count.ToString("N0")+" folder"+(folders.Count==1?"":"s")+" (with subfolders)");if(basket.Count>0)parts.Add(basket.Count.ToString("N0")+" file"+(basket.Count==1?"":"s"));
    SelectionDetail.Text=string.Join(" and ",parts)+" selected"+(pending>0?" · counting "+pending+" folder"+(pending==1?"":"s")+"…":"")+(failed>0?" · couldn't read "+failed+" folder"+(failed==1?"":"s")+"; deselect "+(failed==1?"it":"them")+" to continue":"");}
   void Accept(bool live){if(busy||connection==null)return;try{var selected=Profiles.SelectedItem as TelescopeProfile;var profile=selected!=null&&!string.IsNullOrEmpty(selected.Id)?Util.Deserialize<TelescopeProfile>(Util.Serialize(selected)):new TelescopeProfile{Id=Name.Text.Trim(),SessionIdentity=Name.Text.Trim(),Model=ModelFromDiscovery(device.Name),Camera="Auto"};if(string.IsNullOrWhiteSpace(profile.Id))throw new IOException("Enter a name for this physical telescope.");if((selected==null||string.IsNullOrEmpty(selected.Id))&&saved.Any(p=>p.Id.Equals(profile.Id,StringComparison.OrdinalIgnoreCase)))throw new IOException("That telescope is already saved. Select it above or choose another name.");if(!string.IsNullOrEmpty(profile.RemoteIdentity)&&!string.IsNullOrEmpty(device.Identity)&&profile.RemoteIdentity!=device.Identity)throw new IOException("That saved telescope is linked to another device. Choose a new name for this telescope.");var files=SelectedFiles();if(!live&&(files.Count==0||PendingFolders>0))return;
-    if(!NetworkImportNotice(Dialog.Window,live).Show())return;
+    if(live){var setup=new NetworkLiveSetup(Dialog.Window,device.Name+" · "+RemoteCapturePaths.SourceLabel(connection)+" · "+folder,poll,limit,includeExisting);if(!setup.Show())return;poll=setup.PollSeconds;limit=setup.LimitMB;includeExisting=setup.IncludeExisting;}
+    else if(!NetworkImportNotice(Dialog.Window,false).Show())return;
     var c=Util.Deserialize<RemoteConnection>(Util.Serialize(connection));c.IncludeExisting=includeExisting;c.PollSeconds=poll;c.LimitMB=limit;if(live)c.Folder=folder;profile.SourceMake=c.Kind=="Seestar SMB"?"Seestar":"DWARFLAB";if(!string.IsNullOrEmpty(device.Identity))profile.RemoteIdentity=device.Identity;var request=new RemoteImportRequest{Connection=c,Profile=profile,Files=files,Live=live};string issue=validateRequest==null?null:validateRequest(request);if(issue!=null)throw new IOException(issue);Request=request;Dialog.Window.DialogResult=true;
    }catch(Exception e){Error.Text=e.Message;}}
   static string ModelFromDiscovery(string name){string normalized=(name??"").Replace("S50P","S50 Pro").Replace("S30P","S30 Pro");return TelescopeProfiles.Models.FirstOrDefault(m=>m!="Auto"&&m!="Other"&&normalized.IndexOf(m,StringComparison.OrdinalIgnoreCase)>=0)??"Auto";}

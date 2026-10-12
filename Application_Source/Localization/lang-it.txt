@@ -817,6 +817,11 @@ Skip “failed” files	Salta i file “failed”
 Skip PNG/JPG/MP4	Salta PNG/JPG/MP4
 Saved import preference. Also applies to folder, USB, network and Dump imports.	Preferenza di importazione salvata. Si applica anche alle importazioni da cartella, USB, rete e Dump.
 Keep AstroArchive open and this PC awake while capturing. Stop watching from Activity at any time; completed imports are kept.	Durante le riprese tieni aperto AstroArchive e impedisci la sospensione del PC. Puoi interrompere il monitoraggio da Attività in qualsiasi momento; le importazioni completate vengono mantenute.
+AstroArchive checks this telescope folder and its subfolders, and imports each new capture once the telescope has finished saving it. Capture continues in the telescope app; originals stay on the telescope.	AstroArchive controlla questa cartella del telescopio e le sue sottocartelle e importa ogni nuova acquisizione non appena il telescopio ha finito di salvarla. L'acquisizione prosegue nell'app del telescopio; gli originali restano sul telescopio.
+Telescope folder	Cartella del telescopio
+Check for new captures every	Cerca nuove acquisizioni ogni
+Off: only captures saved after live import starts are imported. Select earlier captures and choose Import selected.	Disattivato: vengono importate solo le acquisizioni salvate dopo l'avvio dell'importazione in tempo reale. Seleziona le acquisizioni precedenti e scegli Importa selezionati.
+Keep AstroArchive open and this PC awake while capturing. Stop live import from Activity at any time; completed imports are kept.	Durante le riprese tieni aperto AstroArchive e impedisci la sospensione del PC. Puoi interrompere l'importazione in tempo reale da Attività in qualsiasi momento; le importazioni completate vengono mantenute.
 Start watching	Avvia monitoraggio
 Local folder	Cartella locale
 Folder watch could not start	Impossibile avviare il monitoraggio della cartella

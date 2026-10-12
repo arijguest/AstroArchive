@@ -833,6 +833,11 @@ Skip “failed” files	“failed” ファイルをスキップ
 Skip PNG/JPG/MP4	PNG/JPG/MP4 をスキップ
 Saved import preference. Also applies to folder, USB, network and Dump imports.	インポート設定として保存されます。フォルダー、USB、ネットワーク、Dump からのインポートにも適用されます。
 Keep AstroArchive open and this PC awake while capturing. Stop watching from Activity at any time; completed imports are kept.	撮影中は AstroArchive を開いたままにし、この PC がスリープしないようにしてください。監視はアクティビティからいつでも停止でき、完了したインポートは保持されます。
+AstroArchive checks this telescope folder and its subfolders, and imports each new capture once the telescope has finished saving it. Capture continues in the telescope app; originals stay on the telescope.	AstroArchive はこの望遠鏡フォルダーとそのサブフォルダーを確認し、望遠鏡が保存を終えた新しいキャプチャを順にインポートします。撮影は望遠鏡アプリで続行され、元のファイルは望遠鏡に残ります。
+Telescope folder	望遠鏡フォルダー
+Check for new captures every	新しいキャプチャを確認する間隔
+Off: only captures saved after live import starts are imported. Select earlier captures and choose Import selected.	オフ: ライブ インポートの開始後に保存されたキャプチャのみがインポートされます。以前のキャプチャは選択して [選択項目をインポート] を選びます。
+Keep AstroArchive open and this PC awake while capturing. Stop live import from Activity at any time; completed imports are kept.	撮影中は AstroArchive を開いたままにし、この PC がスリープしないようにしてください。ライブ インポートはアクティビティからいつでも停止でき、完了したインポートは保持されます。
 Start watching	監視を開始
 Local folder	ローカル フォルダー
 Folder watch could not start	フォルダーの監視を開始できませんでした

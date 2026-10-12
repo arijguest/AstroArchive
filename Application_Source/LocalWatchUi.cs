@@ -12,8 +12,10 @@ namespace AstroArchive {
  // share (N.I.N.A., SharpCap, ASIAIR, Ekos…). It runs as a live telescope session,
  // so Activity, pause, stop and restart recovery behave exactly as for network imports.
  public partial class MainUi {
-  static readonly string[] WatchIntervals={"2 seconds","5 seconds","10 seconds","30 seconds","1 minute"};
-  internal static int WatchSeconds(string label){return label=="2 seconds"?2:label=="10 seconds"?10:label=="30 seconds"?30:label=="1 minute"?60:5;}
+  internal static readonly string[] WatchIntervals={"2 seconds","5 seconds","10 seconds","30 seconds","1 minute"};
+  // Labels round-trip any whole number of seconds, so a custom interval from Advanced telescope access keeps its value.
+  internal static int WatchSeconds(string label){if(label=="1 minute")return 60;int seconds;var parts=(label??"").Split(' ');return parts.Length==2&&parts[1]=="seconds"&&int.TryParse(parts[0],out seconds)&&seconds>0?seconds:5;}
+  internal static string WatchIntervalLabel(int seconds){return seconds==60?"1 minute":seconds>0?seconds+" seconds":"5 seconds";}
   internal static string WatchFolderIssue(string folder,string repositoryRoot){
    if(string.IsNullOrWhiteSpace(folder))return "Choose the folder your capture software saves to.";
    string full;try{if(!Path.IsPathRooted(folder))return "Choose a complete folder path, such as D:\\Astrophotography\\Captures.";full=Path.GetFullPath(folder);}catch(Exception e){if(e is ArgumentException||e is NotSupportedException||e is PathTooLongException||e is System.Security.SecurityException)return "This folder path is not valid.";throw;}
