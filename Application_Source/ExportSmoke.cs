@@ -43,10 +43,10 @@ namespace AstroArchive {
    }finally{settings.AstroBinFilterIds=filterIds;Theme.Apply(Window,"Dark");}
    File.WriteAllText(Path.Combine(output,"export-ui-smoke.txt"),"PASS: one Export window opens on the requested option; header counts files and targets; destination shows only for folder exports; new-folder and metadata extras default off; Siril eligibility; AstroBin CSV offered by default with stacking folders; app handoff explains unsupported selections; AstroBin preview and notes without exporting images; catalogue scopes; light/dark labels.");
   }
-  // Each label is checked against the opaque surface actually behind it: buttons and selected options paint their own.
+  // Each label is checked against the opaque surface painted behind it: button and selected-option templates paint their own.
   static Brush ExportLabelSurface(DependencyObject node,Brush fallback){
    for(var current=VisualTreeHelper.GetParent(node);current!=null;current=VisualTreeHelper.GetParent(current)){
-    Brush brush=current is Panel?((Panel)current).Background:current is Border?((Border)current).Background:current is Control?((Control)current).Background:null;
+    Brush brush=current is Panel?((Panel)current).Background:current is Border?((Border)current).Background:current is Window?((Window)current).Background:null;
     var solid=brush as SolidColorBrush;if(solid!=null&&solid.Color.A==255)return solid;
    }
    return fallback;
