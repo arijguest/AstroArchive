@@ -44,7 +44,7 @@ namespace AstroArchive {
    catch(Exception e){
     if(!(e is System.IO.IOException||e is UnauthorizedAccessException))throw;
     // Keep the screen honest: restore what is actually saved.
-    annotations=before;CaptureAnnotations.Apply(list,annotations);MessageBox.Show(Window,"Stars, tags and notes could not be saved: "+e.Message,"AstroArchive",MessageBoxButton.OK,MessageBoxImage.Warning);return false;
+    annotations=before;CaptureAnnotations.Apply(list,annotations);LocalizedMessage.Show(Window,"Stars, tags and notes could not be saved: "+e.Message,"AstroArchive",MessageBoxButton.OK,MessageBoxImage.Warning);return false;
    }
    if(changed>0)AnnotationsChanged(list);return true;
   }

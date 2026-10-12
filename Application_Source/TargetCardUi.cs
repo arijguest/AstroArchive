@@ -56,7 +56,7 @@ namespace AstroArchive {
   }
   static double Filters(DrawingContext dc,TargetCardData data,Rect area,Palette p,bool dark,double scale){
    if(data.Filters.Count==0||data.Seconds<=0)return 0;
-   var label=Text("FILTERS",18*scale,p.Muted,false,true);dc.DrawText(label,new Point(area.X,area.Y));double y=area.Y+label.Height+10*scale,x=area.X,total=data.Filters.Sum(f=>f.Value);
+   var label=Text(Localization.T("FILTERS"),18*scale,p.Muted,false,true);dc.DrawText(label,new Point(area.X,area.Y));double y=area.Y+label.Height+10*scale,x=area.X,total=data.Filters.Sum(f=>f.Value);
    var bar=new Rect(area.X,y,area.Width,16*scale);dc.PushClip(new RectangleGeometry(bar,bar.Height/2,bar.Height/2));dc.DrawRectangle(Solid(p.Border),null,bar);
    for(int i=0;i<data.Filters.Count;i++){double w=bar.Width*data.Filters[i].Value/total;dc.DrawRectangle(Solid(FilterColour(data.Filters[i].Label,i,dark)),null,new Rect(x,bar.Y,Math.Max(0,w-(i<data.Filters.Count-1?2:0)),bar.Height));x+=w;}
    dc.Pop();y=bar.Bottom+14*scale;x=area.X;
@@ -83,11 +83,11 @@ namespace AstroArchive {
     double y=info.Y;var title=Fit(data.Title,(wide?96:86)*scale,p.Ink,info.Width,true,40);dc.DrawText(title,new Point(info.X,y-10*scale));y+=title.Height-6*scale;
     if(!string.IsNullOrEmpty(data.Subtitle)){var subtitle=Fit(data.Subtitle,38*scale,p.Muted,info.Width);dc.DrawText(subtitle,new Point(info.X,y));y+=subtitle.Height;}
     y+=26*scale;double gap=16*scale,tileHeight=(layout==TargetCardLayout.Square?112:128)*scale;
-    string countLabel=data.Lights>0?"Light frames":"Stacks";int count=data.Lights>0?data.Lights:data.Stacks;
-    var tiles=new[]{new{V=TargetCards.Duration(data.Seconds),L="Integration",C=p.Second},new{V=count.ToString("N0",CultureInfo.CurrentCulture),L=countLabel,C=p.Accent},new{V=data.Nights.ToString("N0",CultureInfo.CurrentCulture),L=data.Nights==1?"Night":"Nights",C=FilterColour("",2,dark)}};
+    string countLabel=Localization.T(data.Lights>0?"Light frames":"Stacks");int count=data.Lights>0?data.Lights:data.Stacks;
+    var tiles=new[]{new{V=TargetCards.Duration(data.Seconds),L=Localization.T("Integration"),C=p.Second},new{V=count.ToString("N0",CultureInfo.CurrentCulture),L=countLabel,C=p.Accent},new{V=data.Nights.ToString("N0",CultureInfo.CurrentCulture),L=Localization.T(data.Nights==1?"Night":"Nights"),C=FilterColour("",2,dark)}};
     if(wide){for(int i=0;i<3;i++)Metric(dc,new Rect(info.X,y+i*(tileHeight+gap),info.Width,tileHeight),tiles[i].V,tiles[i].L,p,tiles[i].C,scale);y+=3*(tileHeight+gap)+12;}
     else{double tileWidth=(info.Width-2*gap)/3;for(int i=0;i<3;i++)Metric(dc,new Rect(info.X+i*(tileWidth+gap),y,tileWidth,tileHeight),tiles[i].V,tiles[i].L,p,tiles[i].C,scale);y+=tileHeight+30*scale;}
-    var footer=Text(string.IsNullOrWhiteSpace(credit)?"Made with AstroArchive":credit.Trim(),24*scale,p.Muted,false,true);double footerTop=height-margin*0.75-footer.Height;
+    var footer=Text(string.IsNullOrWhiteSpace(credit)?Localization.T("Made with AstroArchive"):credit.Trim(),24*scale,p.Muted,false,true);double footerTop=height-margin*0.75-footer.Height;
     if(!string.IsNullOrEmpty(data.Equipment)){var equipment=Fit(data.Equipment,24*scale,p.Muted,info.Width-(wide?0:footer.Width+24*scale));double equipmentTop=wide?footerTop-equipment.Height-10:footerTop;if(equipmentTop>y+40*scale||wide)dc.DrawText(equipment,new Point(info.X,equipmentTop));}
     Filters(dc,data,new Rect(info.X,y,info.Width,Math.Max(0,footerTop-y-(wide&&!string.IsNullOrEmpty(data.Equipment)?50:16)*scale)),p,dark,scale);
     var credited=Fit(footer.Text,24*scale,p.Muted,wide?info.Width:info.Width*0.6,false);dc.DrawText(credited,new Point(wide?info.X:width-margin-credited.Width,footerTop+(wide?18:0)));
@@ -137,7 +137,7 @@ namespace AstroArchive {
    var choices=new List<CardImage>{new CardImage{Label="No image (star field)"}};choices.AddRange(images);
    var imageBox=(ComboBox)labelled("Image",new ComboBox{ItemsSource=choices,SelectedIndex=images.Count>0?1:0,MaxDropDownHeight=320});
    var layoutBox=(ComboBox)labelled("Layout",new ComboBox{ItemsSource=TargetCards.LayoutLabels,SelectedIndex=Math.Max(0,Math.Min(TargetCards.LayoutLabels.Length-1,settings.CardLayout))});
-   var themeBox=(ComboBox)labelled("Theme",new ComboBox{ItemsSource=new[]{"Dark","Light"},SelectedItem=settings.CardTheme=="Light"?"Light":"Dark"});
+   var themeBox=(ComboBox)labelled("Theme",new ComboBox{ItemsSource=new[]{"Dark","Light"},SelectedItem=settings.CardTheme=="Light"?"Light":"Dark"});LocalizedInterface.SetContext(themeBox,"Theme");
    var fill=new CheckBox{Content=new TextBlock{Text="Fill the frame (crop edges)",TextWrapping=TextWrapping.Wrap},IsChecked=settings.CardFill,Margin=new Thickness(0,2,0,12)};AutomationProperties.SetName(fill,"Fill the frame");options.Children.Add(fill);
    var credit=(TextBox)labelled("Credit line (optional)",new TextBox{Text=settings.CardCredit??"",MaxLength=80});UiHelp.Hint(credit,"For example, your name or handle. Leave blank for “Made with AstroArchive”.");
    var format=(ComboBox)labelled("Format",new ComboBox{ItemsSource=new[]{"PNG","JPEG"},SelectedItem=settings.CardFormat=="JPEG"?"JPEG":"PNG"});
@@ -163,7 +163,7 @@ namespace AstroArchive {
     var picker=new Microsoft.Win32.SaveFileDialog{FileName="AstroArchive_"+Util.Safe(data.Title).Replace(' ','_')+"_card"+(jpeg?".jpg":".png"),Filter=jpeg?"JPEG image|*.jpg":"PNG image|*.png",InitialDirectory=settings.ExportWorkingDirectory!=null&&Directory.Exists(settings.ExportWorkingDirectory)?settings.ExportWorkingDirectory:null};
     if(picker.ShowDialog(d.Window)!=true)return;
     try{TargetCardRenderer.Save(card,picker.FileName,jpeg);remember();status.Text="Saved "+Path.GetFileName(picker.FileName)+".";L("StatusLabel").Text="Target card saved: "+picker.FileName;}
-    catch(Exception error){if(!(error is IOException||error is UnauthorizedAccessException||error is NotSupportedException))throw;MessageBox.Show(d.Window,"The card could not be saved: "+error.Message,"Target card",MessageBoxButton.OK,MessageBoxImage.Warning);}
+    catch(Exception error){if(!(error is IOException||error is UnauthorizedAccessException||error is NotSupportedException))throw;LocalizedMessage.Show(d.Window,"The card could not be saved: "+error.Message,"Target card",MessageBoxButton.OK,MessageBoxImage.Warning);}
    };
    var copy=new Button{Content="Copy image",Margin=new Thickness(0,0,8,8)};UiHelp.For(copy,"Copy image");buttons.Children.Add(copy);
    copy.Click+=(s,e)=>{if(card==null)return;try{Clipboard.SetImage(card);remember();status.Text="Copied. Paste it into a post or message.";}catch(Exception error){if(!(error is System.Runtime.InteropServices.ExternalException||error is InvalidOperationException))throw;status.Text="The clipboard is busy. Try again.";}};

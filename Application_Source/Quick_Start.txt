@@ -101,6 +101,14 @@ Robust file matching revisits same-name edits, sidecars and missing archive copi
 Import > Review and repair > Full rescan reads and hashes every source file.
 Cancel keeps completed imports. Changed sources need a new scan.
 
+## Watch a capture folder
+Import > Watch a capture folder… (or Watch folder… beside Scan folder) imports
+captures from N.I.N.A., SharpCap, ASIAIR or other software as they are saved.
+Choose the folder your capture software writes to and a physical telescope ID.
+Each file is imported once it stops changing; incomplete FITS are retried.
+Earlier captures stay put unless you include them; Scan folder imports them later.
+Originals stay in the capture folder. Stop watching from Activity at any time.
+
 LIBRARY WORKFLOW
 
 ## Find and select files
@@ -109,6 +117,21 @@ device details. Combine terms: M45 Dwarflab, M45 S50 Pro, M45 stack.
 Quotes or file: search literal filename text. Clear resets search and filters.
 Selections survive target changes. The top-right counter shows the batch total;
 click it or press Escape to clear. Ctrl-click toggles; Shift-click selects a range.
+The path strip shows the repository's total size; hover it for a breakdown of
+captures, Edited, Dump and archive data.
+
+## Stars, tags and notes
+Press S, or right-click > Star, to star files, a session row or a whole selection.
+Starred rows carry a subtle tint and a ★ in Repository and Edited.
+Right-click > Tags and notes… adds personal tags and a note to the selection.
+Search starred, a tag or note text, or use Filters > Starred and Tag.
+They are saved with the repository and never change the files themselves.
+
+## Target cards
+Right-click a target > Create target card… makes a shareable image with your best
+image of the target, its integration, light frames, nights and filters.
+Choose the image (starred Edited images are offered first), a layout for posts,
+stories or video, Dark or Light, and an optional credit line. Save PNG/JPEG or Copy.
 
 ## Condensed subs
 Repeated Lights share a collapsed session row with dates, count, per-sub exposure,
@@ -205,6 +228,16 @@ a verified folder or lossless ZIP outside the archive. Prefer a separate drive.
 Close other writers/editors. Cancel removes the incomplete backup, keeping earlier
 backups. Restore by selecting the backup's Repository folder; Restore.txt and
 backup.json contain instructions and checksums.
+Settings > Backups > Restore a backup… verifies every file while restoring into a
+new folder, then offers to open the restored archive.
+
+## Incremental and automatic backups
+The first backup in a folder is complete. Later folder backups share unchanged
+files with the previous one (NTFS hard links), so each stays complete on its own.
+Later ZIPs hold only what changed and restore through the earlier ZIPs they need.
+After a backup, AstroArchive offers to repeat it daily, weekly or monthly; change
+this in Settings > Backups. Keep removes older backups but never one still needed.
+If the backup drive is missing when a backup is due, Activity reminds you.
 
 ## Protect originals
 Settings > Backups > Protect originals can prevent accidental deletion/renaming
@@ -219,6 +252,9 @@ load its preview. Returning to a view keeps its selection for this session.
 
 ## Preview
 Select a file for the sidebar; open Preview image for a larger window.
+The i button above the preview opens Capture details. With a known capture time
+and observing town/city, it lists the target and Moon elevations, the Moon's
+phase and illumination, and how far the Moon was from the target.
 Repository's wider preview pane is adjustable by dragging its divider.
 Sidebars sample still images, normally to 1,400 pixels on the longest edge.
 Large still/SER windows decode native pixels within format limits.
@@ -467,6 +503,9 @@ Enable Clearer selections for prominent outlines around focused targets, files a
 sub groups. It is off by default; selected entries retain their usual highlight.
 Alt reveals menu access keys; arrows navigate menus; Tab moves between controls.
 The purple selector switches Repository/Edited/Import; Ctrl+1–3 selects a page.
+Settings > General > Language shows AstroArchive in English, Deutsch, Español,
+Français, Italiano, 日本語 or 简体中文, or follows Windows. It applies after a
+restart; this guide stays in English.
 
 The Activity bell beside Buy Me a Coffee (Ctrl+Shift+N) shows progress, ETA, Cancel,
 reports and review actions. Closing it leaves work running; cancellation waits for

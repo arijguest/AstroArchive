@@ -97,7 +97,7 @@ namespace AstroArchive {
    dialog.Button("Choose backup folder…",()=>{string path=Folder("Choose a backup destination outside the archive",folderInput.Text,dialog.Window);if(path!=null)folderInput.Text=path;});
    compress=dialog.Check("Compress as ZIP (lossless)",settings.CompressBackup);dialog.Text("Without compression, the backup is a normal folder. ZIP compression preserves every image byte, including resolution and metadata.");
    incremental=dialog.Check("Copy only new and changed files (incremental)",settings.BackupIncremental);dialog.Text("The first backup in a folder is complete. Later backups copy only what changed since the previous backup there, yet each folder backup stays complete on its own.");
-   dialog.Accept("Create backup",()=>{try{if(string.IsNullOrWhiteSpace(folderInput.Text))throw new IOException("Choose a backup folder first.");Repository.ValidateBackupDestination(folderInput.Text,repo.Root);return true;}catch(Exception error){MessageBox.Show(dialog.Window,error.Message,"Choose a backup folder",MessageBoxButton.OK,MessageBoxImage.Information);return false;}});
+   dialog.Accept("Create backup",()=>{try{if(string.IsNullOrWhiteSpace(folderInput.Text))throw new IOException("Choose a backup folder first.");Repository.ValidateBackupDestination(folderInput.Text,repo.Root);return true;}catch(Exception error){LocalizedMessage.Show(dialog.Window,error.Message,"Choose a backup folder",MessageBoxButton.OK,MessageBoxImage.Information);return false;}});
    return dialog;
   }
   // Offered once a manual backup succeeds, while no schedule is set.
@@ -115,7 +115,7 @@ namespace AstroArchive {
    if(NetworkImportBlocked||cancel!=null)return;
    var picker=new Microsoft.Win32.OpenFileDialog{Title="Choose a backup to restore",Filter="AstroArchive backups (backup.json, *.zip)|backup.json;*.zip",CheckFileExists=true};if(picker.ShowDialog(Window)!=true)return;
    string backup=picker.FileName;BackupManifest manifest;
-   try{manifest=BackupSets.ReadManifest(backup);if(manifest==null||manifest.Files==null)throw new InvalidDataException("This backup lists no files.");}catch(Exception e){if(!(e is IOException||e is InvalidDataException||e is UnauthorizedAccessException||e is ArgumentException||e is InvalidOperationException))throw;MessageBox.Show(Window,"This is not a readable AstroArchive backup: "+e.Message,"Restore a backup",MessageBoxButton.OK,MessageBoxImage.Warning);return;}
+   try{manifest=BackupSets.ReadManifest(backup);if(manifest==null||manifest.Files==null)throw new InvalidDataException("This backup lists no files.");}catch(Exception e){if(!(e is IOException||e is InvalidDataException||e is UnauthorizedAccessException||e is ArgumentException||e is InvalidOperationException))throw;LocalizedMessage.Show(Window,"This is not a readable AstroArchive backup: "+e.Message,"Restore a backup",MessageBoxButton.OK,MessageBoxImage.Warning);return;}
    bool zip=backup.EndsWith(".zip",StringComparison.OrdinalIgnoreCase);string source=zip?backup:Path.GetDirectoryName(backup);DateTime created;DateTime.TryParse(manifest.CreatedUtc,CultureInfo.InvariantCulture,DateTimeStyles.AdjustToUniversal|DateTimeStyles.AssumeUniversal,out created);
    var d=new FormWindow(Window,"Restore a backup",600,520);d.Text("Restore "+(manifest.Archive??"archive"),true);
    d.Text((created==default(DateTime)?"":"Backed up "+created.ToLocalTime().ToString("d MMM yyyy HH:mm",CultureInfo.CurrentCulture)+" · ")+manifest.Files.Count.ToString("N0")+" files · "+ImportWorkflow.Size(manifest.Files.Sum(f=>f.Bytes))+(zip&&manifest.Chain!=null&&manifest.Chain.Count>1?" · builds on "+(manifest.Chain.Count-1)+" earlier ZIP"+(manifest.Chain.Count==2?"":"s")+" in the same folder":""));
@@ -127,13 +127,13 @@ namespace AstroArchive {
    var name=d.Input("New folder name",suggested);string target=null;
    d.Accept("Restore",()=>{
     try{if(string.IsNullOrWhiteSpace(parent.Text)||!Directory.Exists(parent.Text))throw new IOException("Choose an existing folder to restore into.");string folder=Util.Safe(name.Text.Trim());target=Path.Combine(parent.Text,folder);if(Directory.Exists(target)&&Directory.EnumerateFileSystemEntries(target).Any())throw new IOException("A folder named "+folder+" already exists there. Choose another name.");if(!zip&&Util.Within(target,source))throw new IOException("Restore outside the backup folder.");return true;}
-    catch(Exception e){if(!(e is IOException||e is ArgumentException||e is UnauthorizedAccessException))throw;MessageBox.Show(d.Window,e.Message,"Restore a backup",MessageBoxButton.OK,MessageBoxImage.Information);return false;}
+    catch(Exception e){if(!(e is IOException||e is ArgumentException||e is UnauthorizedAccessException))throw;LocalizedMessage.Show(d.Window,e.Message,"Restore a backup",MessageBoxButton.OK,MessageBoxImage.Information);return false;}
    });
    if(!d.Show()||target==null)return;BackupRestoreResult restored=null;
    cancellationMessage="Restore canceled. The backup is unchanged and the incomplete restore was removed.";OpenDumpProgress("Restoring backup");
    Run(ct=>{restored=BackupSets.Restore(source,target,ct,Progress);return "Restored and verified "+restored.Files.ToString("N0")+" files into "+restored.Repository+".";},message=>{
     L("StatusLabel").Text=message;if(completionActivity!=null)completionActivity.OutputPath=restored.Repository;string repository=restored.Repository;
-    Window.Dispatcher.BeginInvoke(DispatcherPriority.Background,new Action(()=>{if(closing||RepositoryOperationBlocked)return;if(MessageBox.Show(Window,message+"\n\nOpen the restored archive now?","Backup restored",MessageBoxButton.YesNo,MessageBoxImage.Information)==MessageBoxResult.Yes){try{OpenRepository(repository);}catch(Exception e){MessageBox.Show(Window,e.Message,"Restored archive could not open",MessageBoxButton.OK,MessageBoxImage.Warning);}}}));
+    Window.Dispatcher.BeginInvoke(DispatcherPriority.Background,new Action(()=>{if(closing||RepositoryOperationBlocked)return;if(LocalizedMessage.Show(Window,message+"\n\nOpen the restored archive now?","Backup restored",MessageBoxButton.YesNo,MessageBoxImage.Information)==MessageBoxResult.Yes){try{OpenRepository(repository);}catch(Exception e){LocalizedMessage.Show(Window,e.Message,"Restored archive could not open",MessageBoxButton.OK,MessageBoxImage.Warning);}}}));
    },"Restoring backup");
   }
   // Automatic schedule: checked every few minutes; runs only when nothing else is happening.

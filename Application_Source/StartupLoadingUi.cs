@@ -1,6 +1,7 @@
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Windows;
@@ -22,11 +23,13 @@ namespace AstroArchive {
    var assembly=Assembly.GetExecutingAssembly();
    using(var stream=assembly.GetManifestResourceStream("StartupWindow.xaml"))Window=(Window)XamlReader.Load(stream);
    Window.Icon=ApplicationIcon.Image;
+   // The splash opens before the application-wide translation hooks, so translate its fixed text here.
+   if(!Localization.English)Translate(Window);
    ((Image)Window.FindName("BrandLogo")).Source=LoadImage("AstroArchive_Logo.png",68);
    ((Image)Window.FindName("NebulaImage")).Source=LoadImage("StartupRosette.jpg",1320);
    Label("VersionLabel").Text="v"+FileVersionInfo.GetVersionInfo(assembly.Location).FileVersion;
    var random=new Random();remarks=new StartupMessageDeck(StartupMessages.Remarks,random);hints=new StartupMessageDeck(StartupMessages.Hints,random);facts=new StartupMessageDeck(StartupMessages.Facts,random);
-   Label("RemarkLabel").Text=remarks.Next();fact=random.Next(2)==0;NextNote();SetProgress(0,"Preparing your workspace…");
+   Label("RemarkLabel").Text=Localization.T(remarks.Next());fact=random.Next(2)==0;NextNote();SetProgress(0,"Preparing your workspace…");
    AutomationProperties.SetLiveSetting(Label("StageLabel"),AutomationLiveSetting.Polite);
    var area=SystemParameters.WorkArea;Window.Width=Math.Min(880,Math.Max(1,area.Width-24));Window.Height=Math.Min(590,Math.Max(1,area.Height-24));
    if(highContrast??SystemParameters.HighContrast){
@@ -45,6 +48,13 @@ namespace AstroArchive {
    timer=new DispatcherTimer{Interval=TimeSpan.FromSeconds(4)};timer.Tick+=(s,e)=>Rotate();
    Window.Loaded+=(s,e)=>timer.Start();Window.Closed+=(s,e)=>timer.Stop();
   }
+  static void Translate(DependencyObject node){
+   var text=node as TextBlock;if(text!=null&&!string.IsNullOrEmpty(text.Text)&&text.Inlines.Count<=1)text.Text=Localization.T(text.Text);
+   var control=node as ContentControl;if(control!=null&&control.Content is string)control.Content=Localization.T((string)control.Content);
+   var element=node as FrameworkElement;if(element!=null&&element.ToolTip is string)element.ToolTip=Localization.T((string)element.ToolTip);
+   var name=node.ReadLocalValue(AutomationProperties.NameProperty) as string;if(!string.IsNullOrEmpty(name))AutomationProperties.SetName(node,Localization.T(name));
+   foreach(var child in LogicalTreeHelper.GetChildren(node).OfType<DependencyObject>())Translate(child);
+  }
   static BitmapImage LoadImage(string name,int width){
    using(var stream=Assembly.GetExecutingAssembly().GetManifestResourceStream(name)){
     if(stream==null)throw new InvalidDataException("Missing startup image: "+name);
@@ -53,11 +63,11 @@ namespace AstroArchive {
   }
   public void SetProgress(int percent,string stage){
    var bar=(ProgressBar)Window.FindName("LoadingProgress");bar.Value=Math.Max(bar.Value,Math.Min(100,Math.Max(0,percent)));
-   Label("PercentLabel").Text=bar.Value.ToString("0")+"%";Label("StageLabel").Text=stage;
-   if(bar.Value==100){timer.Stop();Label("RemarkLabel").Text="Wishing you a clear night";}
+   Label("PercentLabel").Text=bar.Value.ToString("0")+"%";Label("StageLabel").Text=Localization.T(stage);
+   if(bar.Value==100){timer.Stop();Label("RemarkLabel").Text=Localization.T("Wishing you a clear night");}
   }
-  internal void Rotate(){Label("RemarkLabel").Text=remarks.Next();if(++ticks%2==0)NextNote();}
-  void NextNote(){Label("NoteHeading").Text=fact?"A LITTLE COSMIC PERSPECTIVE":"MAKE THE MOST OF ASTROARCHIVE";Label("NoteLabel").Text=fact?facts.Next():hints.Next();fact=!fact;}
+  internal void Rotate(){Label("RemarkLabel").Text=Localization.T(remarks.Next());if(++ticks%2==0)NextNote();}
+  void NextNote(){Label("NoteHeading").Text=Localization.T(fact?"A LITTLE COSMIC PERSPECTIVE":"MAKE THE MOST OF ASTROARCHIVE");Label("NoteLabel").Text=Localization.T(fact?facts.Next():hints.Next());fact=!fact;}
  }
 
  // The splash has its own dispatcher: slow repository I/O on the application

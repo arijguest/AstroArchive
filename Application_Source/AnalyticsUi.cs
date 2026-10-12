@@ -72,7 +72,7 @@ namespace AstroArchive {
    var footer=new StackPanel{Margin=new Thickness(0,18,0,0)};Grid.SetRow(footer,3);root.Children.Add(footer);
    var actions=new WrapPanel{VerticalAlignment=VerticalAlignment.Center};footer.Children.Add(actions);
    format=new ComboBox{ItemsSource=new[]{"PNG","JPEG","PDF","SVG","MP4","GIF"},SelectedIndex=2,Width=105};resolution=new ComboBox{ItemsSource=new[]{"300 dpi · Print","150 dpi · Screen"},SelectedIndex=0,Width=190};
-   documentTheme=new ComboBox{ItemsSource=new[]{"Dark","Light"},SelectedIndex=0,Width=100};
+   documentTheme=new ComboBox{ItemsSource=new[]{"Dark","Light"},SelectedIndex=0,Width=100};LocalizedInterface.SetContext(documentTheme,"Theme");
    documentLayout=new ComboBox{ItemsSource=new[]{"Landscape · Current","Vertical · 9:16","Portrait · 4:5","Square · 1:1","Widescreen · 16:9","Pinterest · 2:3"},SelectedIndex=0,Width=200};
    AddField(actions,"Document layout",documentLayout);AddField(actions,"Document theme",documentTheme);AddField(actions,"Export format",format);AddField(actions,"Image resolution",resolution);
    UiHelp.Hint(documentLayout,"Landscape keeps the current document layout. Social layouts cover TikTok/Reels/Stories (9:16), Instagram feed (4:5), square posts (1:1), video (16:9) and Pinterest (2:3), in every export format.");

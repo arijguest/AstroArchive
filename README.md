@@ -34,6 +34,7 @@ from a folder or USB, or connect to **Seestar and DWARF over your local network*
 [![Network import showing three real Orion Nebula subframes selected from a Seestar S50 Pro](docs/images/network-import.png)](docs/images/network-import.png)
 
 - **Let captures come to you.** Live import watches for completed files while the telescope app keeps shooting.
+- **Watch your capture folder.** Point AstroArchive at the folder N.I.N.A., SharpCap or ASIAIR saves to, and each finished capture is archived as it lands.
 - **Run more than one telescope.** Each device has its own progress and controls; select extra files while live imports continue.
 - **Pick up where you left off.** Pause and resume imports, including unfinished queues after a restart or update.
 - **Keep track of the night.** Compact process summaries show progress, transfer speeds and results without interrupting your work.
@@ -58,6 +59,11 @@ your captures, then prepare files for the processing software you already use.
 
 Stacking and calibration run in your processing software.
 [Explore processing handoffs →](docs/PROCESSOR_HANDOFFS.md)
+
+**Star the keepers.** Star files, sessions or Edited images, and add your own tags
+and notes; starred rows carry a subtle tint in every theme, and search and filters
+find them again. Capture details show the Moon’s phase, illumination and elevation
+at capture time, and how far it sat from your target.
 
 ## See the bigger picture
 
@@ -84,6 +90,10 @@ seconds per page and choose original or smaller dimensions. MP4 uses Windows’
 built-in H.264 encoder at 24 fps; GIF loops at 12 fps. Exports show progress and
 remaining time, and cancellation preserves any previous output.
 
+**Share a target.** Right-click any target to create a card with your best image
+of it and its integration, light frames, nights and filters, sized for posts,
+stories or video, in Dark or Light.
+
 <details>
 <summary><strong>What the analytics measure</strong></summary>
 
@@ -105,7 +115,8 @@ use a grid for square and wide pages.
 
 - Ordinary imports and exports preserve image bytes; source originals are kept by default.
 - Preview stretches affect the display. Metadata edits update indexed labels, while **Fill missing metadata** previews supported additions without replacing existing values or user edits.
-- Verified folder or lossless ZIP backups include images, Edited files and the database.
+- Verified folder or lossless ZIP backups include images, Edited files and the database. Later backups copy only what changed, can repeat daily, weekly or monthly, and restore with every file verified.
+- The repository path shows your archive’s total size, with a breakdown on hover.
 
 <details>
 <summary><strong>Formats and archive care</strong></summary>
@@ -133,6 +144,9 @@ where possible; optional NTFS **Protect originals** is not a substitute for back
 2. **Choose your archive:** **Settings → General → Choose repository**.
 3. **Bring in your captures:** choose a folder and saved physical telescope on **Import**, then scan and review; or choose **Connect over network…**.
 4. **Make it yours:** browse **Repository**, prepare an export, or open **Analytics**.
+
+AstroArchive speaks English, Deutsch, Español, Français, Italiano, 日本語 and 简体中文.
+It follows your Windows language, or choose one in **Settings → General → Language**.
 
 **Need a hand?** Press **F1** in the app, follow the [offline guide](Application_Source/Quick_Start.txt), or [report an issue](https://github.com/arijguest/AstroArchive/issues).
 

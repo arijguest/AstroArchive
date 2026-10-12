@@ -51,7 +51,7 @@ namespace AstroArchive {
     var candidate=Util.Deserialize<Settings>(Util.Serialize(settings));var profile=TelescopeProfiles.Save(candidate,T("TelescopeBox").Text,Convert.ToString(C("ModelBox").SelectedItem),Convert.ToString(C("CameraBox").SelectedItem),T("SourceBox").Text,usbVolumes);
     candidate.LastSource=T("SourceBox").Text;candidate.Telescope=profile.Id;candidate.Model=profile.Model;Directory.CreateDirectory(Path.GetDirectoryName(config));Util.AtomicText(config,Util.Serialize(candidate));settings=candidate;pendingUsb=null;ReloadScopes(profile.Id,false);usbGeneration++;RefreshUsb();
     L("StatusLabel").Text="Saved "+profile.Id+". Select it from Saved telescope on your next import.";
-   }catch(Exception e){MessageBox.Show(Window,e.Message,"Telescope could not be saved",MessageBoxButton.OK,MessageBoxImage.Warning);}
+   }catch(Exception e){LocalizedMessage.Show(Window,e.Message,"Telescope could not be saved",MessageBoxButton.OK,MessageBoxImage.Warning);}
   }
   void UpdateTelescopeState(bool busy){
    busy=busy||usbImportPicking;
@@ -96,7 +96,7 @@ namespace AstroArchive {
     var candidate=Util.Deserialize<Settings>(Util.Serialize(settings));var selected=TelescopeProfiles.Save(candidate,picker.Profile.Id,picker.Profile.Model,picker.Profile.Camera,picker.Selection.SourceRoot,new[]{telescope.Volume});
     selected.SourceMake=telescope.Make;selected.LastImportSelection=picker.Selection.Paths.Select(p=>p.Substring(picker.Selection.SourceRoot.TrimEnd('\\','/').Length).TrimStart('\\','/')).ToList();
     candidate.LastSource=picker.Selection.SourceRoot;candidate.Telescope=selected.Id;candidate.Model=selected.Model;Directory.CreateDirectory(Path.GetDirectoryName(config));Util.AtomicText(config,Util.Serialize(candidate));settings=candidate;telescope.ProfileId=selected.Id;pendingUsb=null;ReloadScopes(selected.Id,true);T("SourceBox").Text=picker.Selection.SourceRoot;SaveSettings();
-   }catch(OperationCanceledException){return;}catch(Exception e){MessageBox.Show(Window,e.Message,"Telescope import could not start",MessageBoxButton.OK,MessageBoxImage.Warning);return;}
+   }catch(OperationCanceledException){return;}catch(Exception e){LocalizedMessage.Show(Window,e.Message,"Telescope import could not start",MessageBoxButton.OK,MessageBoxImage.Warning);return;}
    finally{usbImportPicking=false;SetBusy(false);}
    ((CheckBox)Window.FindName("DeleteOriginalsCheck")).IsChecked=false;C("ImportSolveMode").SelectedItem="Off";C("ImportRotationMode").SelectedItem="Off";BeginLive(true);activeUsb=telescope;
    var selectedProfile=Util.Deserialize<TelescopeProfile>(Util.Serialize(picker.Profile));var selection=picker.Selection;var repository=repo;int workers=settings.CopyWorkers;bool ignoreFailed=settings.IgnoreFailed,ignoreRaster=settings.IgnoreRasterImports;AutoUploadResult result=null;
@@ -106,7 +106,7 @@ namespace AstroArchive {
   void RenameScope(){
    var profile=SelectedScope;if(RepositoryOperationBlocked||profile==null||string.IsNullOrEmpty(profile.Id))return;
    var d=new FormWindow(Window,"Rename telescope",570,370);d.Text("Rename "+profile.Id,true);d.Text("Update this saved telescope and all its indexed captures and archive paths in the selected repository. FITS bytes and acquisition sessions are preserved.");var name=d.Input("New telescope name",profile.Id);string newName=null;
-   d.Accept("Rename",()=>{newName=name.Text.Trim();if(newName.Length==0){MessageBox.Show(d.Window,"Enter a telescope name.");return false;}var existing=TelescopeProfiles.Find(settings,newName);if(existing!=null&&!string.Equals(existing.Id,profile.Id,StringComparison.OrdinalIgnoreCase)){MessageBox.Show(d.Window,"That name is already saved. Choose a unique name.");return false;}return true;});if(!d.Show()||newName==profile.Id)return;
+   d.Accept("Rename",()=>{newName=name.Text.Trim();if(newName.Length==0){LocalizedMessage.Show(d.Window,"Enter a telescope name.");return false;}var existing=TelescopeProfiles.Find(settings,newName);if(existing!=null&&!string.Equals(existing.Id,profile.Id,StringComparison.OrdinalIgnoreCase)){LocalizedMessage.Show(d.Window,"That name is already saved. Choose a unique name.");return false;}return true;});if(!d.Show()||newName==profile.Id)return;
    SaveSettings();var candidate=Util.Deserialize<Settings>(Util.Serialize(settings));TelescopeProfiles.Rename(candidate,profile.Id,newName);
    string originalSettings=Util.Serialize(settings),renamedSettings=Util.Serialize(candidate);TelescopeRenameResult result=null;var repository=repo;cancellationMessage="Canceled. The telescope name and repository records are unchanged.";
    Run(ct=>{result=repository==null?new TelescopeRenameResult():repository.RenameTelescope(profile.Id,newName,ct,Progress,null,config,originalSettings,renamedSettings);if(repository==null)Util.AtomicText(config,renamedSettings);return "Renamed telescope to "+newName+"; "+result.Files+" repository files updated.";},r=>{settings=candidate;ReloadScopes(newName,true);usbGeneration++;RefreshUsb();L("StatusLabel").Text=r;if(!string.IsNullOrEmpty(result.Warning))ShowReport("Telescope rename",result.Warning);});

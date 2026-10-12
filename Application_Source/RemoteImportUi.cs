@@ -174,7 +174,7 @@ namespace AstroArchive {
    if(NetworkImportBlocked||repo==null)return;RemoteImportRequest request=null;usbImportPicking=true;SetBusy(true);
    try{var dialog=new RemoteImportDialog(Window,settings.Telescopes,SelectedScope,new RemoteImportFilters{IgnoreFailed=settings.IgnoreFailed,IgnoreRaster=settings.IgnoreRasterImports,Changed=SaveRemoteImportFilters},isLiveActive:HasLiveImport,validate:ValidateRemoteRequest);if(dialog.Show())request=dialog.Request;}
    finally{usbImportPicking=false;SetBusy(false);}if(request==null||repo==null||closing)return;
-   try{await StartRemoteImport(request);}catch(Exception error){MessageBox.Show(Window,error.Message,"Telescope import could not start",MessageBoxButton.OK,MessageBoxImage.Warning);}
+   try{await StartRemoteImport(request);}catch(Exception error){LocalizedMessage.Show(Window,error.Message,"Telescope import could not start",MessageBoxButton.OK,MessageBoxImage.Warning);}
   }
   internal Task StartRemoteImport(RemoteImportRequest request,Func<RemoteConnection,ISource> factory=null,ImportResumeRecord recovery=null){
    if(NetworkImportBlocked||repo==null)throw new InvalidOperationException("Wait for the current operation before starting a telescope import.");string issue=ValidateRemoteRequest(request);if(issue!=null)throw new IOException(issue);

@@ -60,11 +60,11 @@ namespace AstroArchive {
         }
         public void SetStep(int index) {
             StepIndex = Math.Max(0, Math.Min(steps.Length - 1, index));
-            var step = steps[StepIndex]; Heading.Text = step.Title; Body.ShowText(step.Body); Try.Content = step.Action;
+            var step = steps[StepIndex]; Heading.Text = step.Title; Body.ShowText(Localization.T(step.Body)); Try.Content = step.Action;
             Count.Text = "STEP " + (StepIndex + 1) + " OF " + steps.Length;
             Back.IsEnabled = StepIndex > 0; Next.Content = StepIndex == steps.Length - 1 ? "Finish" : "Next";
             AutomationProperties.SetName(Heading, Count.Text + ": " + step.Title);
-            AutomationProperties.SetHelpText(Next, HelpCatalog.PlainText(step.Body));
+            AutomationProperties.SetHelpText(Next, HelpCatalog.PlainText(Localization.T(step.Body)));
             select(step); Next.Focus();
         }
     }

@@ -55,7 +55,7 @@ namespace AstroArchive {
      try{c.Validate(false);}catch(ArgumentException e){issue=e.Message;}
      if(issue==null)issue=ValidateRemoteRequest(new RemoteImportRequest{Connection=c,Profile=profile,Live=true});
     }
-    if(issue!=null){MessageBox.Show(d.Window,issue,"Watch a capture folder",MessageBoxButton.OK,MessageBoxImage.Information);return false;}
+    if(issue!=null){LocalizedMessage.Show(d.Window,issue,"Watch a capture folder",MessageBoxButton.OK,MessageBoxImage.Information);return false;}
     request=new RemoteImportRequest{Connection=c,Profile=profile,Live=true,Files=new List<Entry>()};return true;
    });
    if(!d.Show()||request==null||repo==null||closing)return;
@@ -64,7 +64,7 @@ namespace AstroArchive {
    StartLocalWatch(request);
   }
   async void StartLocalWatch(RemoteImportRequest request){
-   try{await StartRemoteImport(request);}catch(Exception error){MessageBox.Show(Window,error.Message,"Folder watch could not start",MessageBoxButton.OK,MessageBoxImage.Warning);}
+   try{await StartRemoteImport(request);}catch(Exception error){LocalizedMessage.Show(Window,error.Message,"Folder watch could not start",MessageBoxButton.OK,MessageBoxImage.Warning);}
   }
  }
 }

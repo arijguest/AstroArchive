@@ -27,7 +27,7 @@ namespace AstroArchive {
    cancel.Click+=(s,e)=>dialog.Close();
    open.Click+=(s,e)=>{
     try{Process.Start(new ProcessStartInfo(AppErrorReporting.IssueUrl(diagnostics)){UseShellExecute=true});dialog.Close();}
-    catch(Exception launchError){MessageBox.Show(dialog,"Could not open GitHub. The report has not been sent.\n\n"+launchError.Message,"Report a problem",MessageBoxButton.OK,MessageBoxImage.Warning);}
+    catch(Exception launchError){LocalizedMessage.Show(dialog,"Could not open GitHub. The report has not been sent.\n\n"+launchError.Message,"Report a problem",MessageBoxButton.OK,MessageBoxImage.Warning);}
    };
    buttons.Children.Add(cancel);buttons.Children.Add(open);Grid.SetRow(buttons,2);layout.Children.Add(buttons);
    dialog.Content=layout;dialog.ShowDialog();

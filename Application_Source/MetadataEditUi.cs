@@ -46,7 +46,7 @@ namespace AstroArchive {
    foreach(string name in new[]{"Field","Value","Source"}){var style=new Style(typeof(TextBlock));style.Setters.Add(new Setter(FrameworkElement.ToolTipProperty,new System.Windows.Data.Binding(name)));style.Setters.Add(new Setter(UiHelp.OnlyWhenTruncatedProperty,true));details.Columns.Add(new DataGridTextColumn{Header=name,Binding=new System.Windows.Data.Binding(name),ElementStyle=style,Width=new DataGridLength(name=="Value"?2:1,DataGridLengthUnitType.Star)});}
    details.ItemsSource=MetadataDetail.For(selected[0]);picker.SelectionChanged+=(s,e)=>{if(picker.SelectedIndex>=0)details.ItemsSource=MetadataDetail.For(selected[picker.SelectedIndex]);};Form.Add(details);
    Form.SelectTab(0);UpdateSummary();
-   Form.Accept("Save metadata",()=>{string error=Model.Patch().Validate();if(error==null)return true;MessageBox.Show(Form.Window,error,"Check metadata",MessageBoxButton.OK,MessageBoxImage.Information);return false;});
+   Form.Accept("Save metadata",()=>{string error=Model.Patch().Validate();if(error==null)return true;LocalizedMessage.Show(Form.Window,error,"Check metadata",MessageBoxButton.OK,MessageBoxImage.Information);return false;});
   }
   FrameworkElement Field(MetadataEditValue value,List<Frame> selected){
    var panel=new StackPanel();var caption=new TextBlock{Text=value.Field.Label,TextWrapping=TextWrapping.Wrap,Margin=new Thickness(0,8,0,5)};caption.SetResourceReference(TextBlock.FontSizeProperty,"UiFontBody");panel.Children.Add(caption);

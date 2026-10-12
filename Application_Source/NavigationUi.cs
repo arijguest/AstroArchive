@@ -196,11 +196,11 @@ menu.Items.Add(MenuAction("Watch a capture folder…",()=>{GoToPage(1);OpenLocal
         void OpenRepositoryFolder() { if (repo != null) OpenFolder(repo.Root); }
         void OpenFolder(string path) {
             try { Process.Start(new ProcessStartInfo("explorer.exe", "\"" + path + "\"") { UseShellExecute = true }); }
-            catch (Exception ex) { MessageBox.Show(Window, ex.Message, "Folder could not be opened", MessageBoxButton.OK, MessageBoxImage.Warning); }
+            catch (Exception ex) { LocalizedMessage.Show(Window, ex.Message, "Folder could not be opened", MessageBoxButton.OK, MessageBoxImage.Warning); }
         }
         void OpenWebsite(string url) {
             try { Process.Start(new ProcessStartInfo(url) { UseShellExecute = true }); }
-            catch (Exception ex) { MessageBox.Show(Window, "Visit " + url + "\n\n" + ex.Message, "Browser could not be opened", MessageBoxButton.OK, MessageBoxImage.Information); }
+            catch (Exception ex) { LocalizedMessage.Show(Window, "Visit " + url + "\n\n" + ex.Message, "Browser could not be opened", MessageBoxButton.OK, MessageBoxImage.Information); }
         }
         void ExportCatalogue() {
             var dialog = new Microsoft.Win32.SaveFileDialog { FileName = "AstroArchive_catalog.csv", Filter = "CSV catalogue|*.csv" };

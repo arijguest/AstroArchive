@@ -29,7 +29,7 @@ namespace AstroArchive {
    fields.Aliases=dialog.Input("Other names (one per line)",saved==null?"":string.Join(Environment.NewLine,saved.Aliases??new List<string>()));fields.Aliases.AcceptsReturn=true;fields.Aliases.TextWrapping=TextWrapping.Wrap;fields.Aliases.MinHeight=100;fields.Aliases.MaxHeight=160;fields.Aliases.VerticalScrollBarVisibility=ScrollBarVisibility.Auto;
    if(id.Length>0)dialog.Text("Catalogue IDs: "+string.Join(" · ",Catalog.CatalogueIds(id)));
    var controls=fields;dialog.Button("Use built-in names",()=>{controls.Common.Text="";controls.Aliases.Text="";});
-   dialog.Accept("Save names",()=>{try{Catalog.ChangeNames(settings.TargetNames,controls.Values());return true;}catch(ArgumentException error){MessageBox.Show(dialog.Window,error.Message,"Check target names",MessageBoxButton.OK,MessageBoxImage.Information);return false;}});return dialog;
+   dialog.Accept("Save names",()=>{try{Catalog.ChangeNames(settings.TargetNames,controls.Values());return true;}catch(ArgumentException error){LocalizedMessage.Show(dialog.Window,error.Message,"Check target names",MessageBoxButton.OK,MessageBoxImage.Information);return false;}});return dialog;
   }
   void ApplyTargetNames(List<TargetNameRule> rules,bool persist=true){
    Catalog.ValidateNames(rules);var previous=settings.TargetNames;settings.TargetNames=rules;
@@ -43,7 +43,7 @@ namespace AstroArchive {
   void EditTargetNames(string target){
    if(RepositoryOperationBlocked||ActiveSearchBlocked)return;TargetNameFields fields;var dialog=TargetNameDialog(target,out fields);if(!dialog.Show())return;
    try{ApplyTargetNames(Catalog.ChangeNames(settings.TargetNames,fields.Values()));L("StatusLabel").Text="Target names saved.";}
-   catch(Exception error){MessageBox.Show(Window,error.Message,"Names could not be saved",MessageBoxButton.OK,MessageBoxImage.Error);}
+   catch(Exception error){LocalizedMessage.Show(Window,error.Message,"Names could not be saved",MessageBoxButton.OK,MessageBoxImage.Error);}
   }
  }
 }

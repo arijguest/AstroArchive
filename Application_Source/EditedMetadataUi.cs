@@ -24,7 +24,7 @@ namespace AstroArchive {
    fields.ImageClass=dialog.Select("Image class",new[]{"Keep existing","Edited image","Starless","Stars only","GIF","Meteor","Unknown (conflicting labels)"},selected.Select(i=>i.Metadata.ImageClass).Distinct().Count()==1?selected[0].Metadata.ImageClass:"Keep existing");
    fields.TotalExposure=dialog.Input("Total exposure seconds (optional)",shared(m=>m.TotalExposure.HasValue?m.TotalExposure.Value.ToString("G",CultureInfo.InvariantCulture):""));fields.Subs=dialog.Input("Sub count (optional)",shared(m=>m.Subs.HasValue?m.Subs.Value.ToString(CultureInfo.InvariantCulture):""));fields.SubExposure=dialog.Input("Exposure per sub in seconds (optional)",shared(m=>m.SubExposure.HasValue?m.SubExposure.Value.ToString("G",CultureInfo.InvariantCulture):""));
    fields.RA=dialog.Input("RA (as recorded, optional)",shared(m=>m.RA));fields.Dec=dialog.Input("Dec (as recorded, optional)",shared(m=>m.Dec));fields.Remember();var controls=fields;
-   dialog.Accept("Save metadata",()=>{try{controls.Values();return true;}catch(ArgumentException e){MessageBox.Show(dialog.Window,e.Message);return false;}});return dialog;
+   dialog.Accept("Save metadata",()=>{try{controls.Values();return true;}catch(ArgumentException e){LocalizedMessage.Show(dialog.Window,e.Message);return false;}});return dialog;
   }
   void EditEditedMetadata(){EditEditedMetadata(SelectedEditedImages());}
   async void EditEditedMetadata(List<EditedImage> selection){

@@ -18,7 +18,12 @@ namespace AstroArchive {
    if(seconds<=0)return "0 m";if(seconds<60)return Math.Round(seconds).ToString("0",CultureInfo.InvariantCulture)+" s";
    double minutes=Math.Round(seconds/60);int hours=(int)(minutes/60),rest=(int)(minutes%60);return hours==0?rest+" m":rest==0?hours+" h":hours+" h "+rest+" m";
   }
-  static string Day(DateTime date,bool year){return date.ToString(year?"d MMM yyyy":"d MMM",CultureInfo.InvariantCulture);}
+  // Month names follow the interface language; English keeps the invariant "1 Oct 2026".
+  static string Day(DateTime date,bool year){
+   string code=Localization.Current;if(code=="ja"||code=="zh-Hans")return date.ToString(year?"yyyy年M月d日":"M月d日",CultureInfo.InvariantCulture);
+   var culture=Localization.English||Localization.Pseudo?CultureInfo.InvariantCulture:CultureInfo.GetCultureInfo(code);
+   return date.ToString(code=="de"?(year?"d. MMM yyyy":"d. MMM"):(year?"d MMM yyyy":"d MMM"),culture);
+  }
   public static TargetCardData Build(IEnumerable<Frame> frames,string target){
    string key=Catalog.CanonicalTarget(target);
    var rows=frames.Where(f=>f!=null&&f.Target==key&&f.Status!="Deleted"&&!f.Rejected&&(f.Kind=="Light"||f.Kind=="Stack")).ToList();
