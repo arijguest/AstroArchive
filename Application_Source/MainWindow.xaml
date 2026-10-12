@@ -847,6 +847,7 @@
           <DataGridTextColumn Header="EXPOSURE" Binding="{Binding ExposureText}" Width="88" />
           <DataGridTextColumn Header="GAIN" Binding="{Binding GainText}" Width="54" />
           <DataGridTextColumn Header="FILTER" Binding="{Binding Filter}" Width="88" />
+          <DataGridTextColumn Header="QUALITY" Binding="{Binding QualityText}" Width="84" />
          </DataGrid.Columns>
         </DataGrid>
         <StackPanel x:Name="EmptyState" IsHitTestVisible="False" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="20">
@@ -1150,6 +1151,7 @@
    <Button x:Name="ReviewLibraryButton" Content="Review flagged" />
    <Button x:Name="ScreenLibraryButton" Content="Screen for failures" ToolTip="Check selected or visible captures for rejection or damaged FITS data." />
    <Button x:Name="RotationButton" Content="Rotation" Padding="10,5" />
+   <Button x:Name="AnalyzeQualityButton" Content="Analyse image quality" ToolTip="Measure star sharpness or disc detail in the captures in view and score them against similar frames." />
    <Button x:Name="SolveButton" Content="Identify target" Padding="10,5" />
    <Button x:Name="EditButton" Content="Edit metadata" Padding="10,5" Margin="0" />
    <Button x:Name="SaveTelescopeButton" Content="Save telescope" Padding="10,6" />

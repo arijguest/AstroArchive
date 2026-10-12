@@ -1930,3 +1930,25 @@ Images & documents	画像とドキュメント
 Video & GIF	動画とGIF
 Not out (below the horizon)	地平線の下にあります
 Output	出力
+QUALITY	品質
+EXPOSURE FIT	露出の適正度
+Analyse image quality…	画質を解析…
+Re-measure image quality…	画質を再測定…
+Analyse image quality	画質を解析
+Quality rank	品質ランク
+Exposure fit	露出の適正度
+Quality score (0 to 100)	品質スコア（0〜100）
+Top 10%	上位10%
+Top 25%	上位25%
+Top half	上位半分
+Bottom half	下位半分
+Weakest 25%	下位25%
+Has quality flags	品質の警告あり
+Not scored	未評価
+Under	露出不足
+Good	適正
+Over	露出過多
+Image quality	画質
+Measure image quality after each import	インポートごとに画質を測定する
+Compare deep-sky frames across the whole target instead of each session	ディープスカイのフレームをセッションごとではなく対象全体で比較する
+Nothing to measure	測定するものがありません

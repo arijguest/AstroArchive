@@ -11,6 +11,7 @@ namespace AstroArchive {
   void SmokeColumnLayouts(){
    SmokeColumnResizing();
    SmokeColumnLabelsFit();
+   SmokeQualityColumns();
    foreach(string name in new[]{"FramesGrid","ImportGrid","EditedGrid"})foreach(var column in G(name).Columns){
     string id=ColumnId(column),expected=id=="ObjectId"||id=="Metadata.ObjectId"?"ID":id=="TargetName"||id=="Metadata.TargetName"?"OBJECT":id=="Kind"&&name!="EditedGrid"?"TYPE":id=="AcquisitionDateLabel"?"DATE":null;
     if(expected!=null&&Convert.ToString(column.Header)!=expected)throw new Exception("Concise table header missing: "+name+" / "+id);
@@ -36,6 +37,23 @@ namespace AstroArchive {
     }
    }finally{settings.TableLayouts=Util.Deserialize<System.Collections.Generic.Dictionary<string,ColumnLayout>>(saved);foreach(string name in new[]{"FramesGrid","ImportGrid"})ApplyColumnLayout(name,SavedColumnLayout(name));testingColumnLayouts=false;}
   }
+  // Quality columns, their colour bands and the commands that fill them.
+  void SmokeQualityColumns(){
+   var grid=G("FramesGrid");var quality=grid.Columns.FirstOrDefault(c=>ColumnId(c)=="QualityText");var fit=grid.Columns.FirstOrDefault(c=>ColumnId(c)=="ExposureFitText");
+   if(quality==null||quality.Visibility!=Visibility.Visible||Convert.ToString(quality.Header)!="QUALITY"||quality.SortMemberPath!="QualityOrder")throw new Exception("Quality column is missing, hidden or does not sort by score.");
+   if(fit==null||fit.Visibility!=Visibility.Collapsed||fit.SortMemberPath!="ExposureOrder")throw new Exception("Exposure fit column is missing, shown by default or does not sort by its score.");
+   foreach(var column in new[]{quality,fit}){var style=((DataGridBoundColumn)column).ElementStyle;if(style==null||style.Triggers.Count!=3||!style.Setters.OfType<Setter>().Any(s=>s.Property==FrameworkElement.ToolTipProperty))throw new Exception("Score colour bands or explanation tooltip are missing: "+column.Header);}
+   if(G("ImportGrid").Columns.Any(c=>ColumnId(c)=="QualityText"))throw new Exception("Import table shows scores for files that are not in the repository.");
+   if(B("AnalyzeQualityButton")==null)throw new Exception("Analyse image quality command is missing.");
+   foreach(string background in new[]{"Surface","Selection"})foreach(string key in new[]{"QualityHigh","QualityMid","QualityLow"}){
+    var fore=Window.TryFindResource(key) as SolidColorBrush;var back=Window.TryFindResource(background) as SolidColorBrush;if(fore==null||back==null)throw new Exception("Quality colour missing from the theme: "+key);
+    double a=RelativeLuminance(fore.Color),b=RelativeLuminance(back.Color);double ratio=(Math.Max(a,b)+0.05)/(Math.Min(a,b)+0.05);
+    if(ratio<4.5)throw new Exception("Score colour "+key+" is hard to read on "+background+" ("+ratio.ToString("0.0",CultureInfo.InvariantCulture)+":1).");
+   }
+   var good=new Frame{QualityScore=82};var weak=new Frame{QualityScore=31,QualityFlags="Soft"};
+   if(good.QualityBand!="High"||weak.QualityBand!="Low"||weak.QualityText!="31 ⚑"||new Frame().QualityText!="-")throw new Exception("Score text or band wrong.");
+  }
+  static double RelativeLuminance(Color c){Func<byte,double> f=v=>{double s=v/255.0;return s<=0.03928?s/12.92:Math.Pow((s+0.055)/1.055,2.4);};return 0.2126*f(c.R)+0.7152*f(c.G)+0.0722*f(c.B);}
   void SmokeColumnLabelsFit(){
    int previousScale=settings.TextScalePercent;
    try{foreach(int scale in new[]{100,150}){

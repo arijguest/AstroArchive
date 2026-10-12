@@ -126,6 +126,7 @@ namespace AstroArchive {
    {"ImportColumnsButton","Choose columns; drag headers to reorder."},
    {"ExportButton","Open Export for selected files, or all visible files if none selected."},
    {"RotationButton","Assess mount mode from rotation in acquisition subs."},
+   {"AnalyzeQualityButton","Score the light frames in view for sharpness against similar frames. Stacks, calibration frames and recordings are skipped."},
    {"SolveButton","Solve selected Light groups and stacks; review batch target matches."},
    {"EditButton","Edit selected files, or all visible files if none selected."},
    {"MoreButton","Archive tools."},
