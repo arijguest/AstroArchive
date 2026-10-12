@@ -89,3 +89,5 @@ sign setup, then run `-Stage Finalize` with the same signing options. Without st
 signing, the script produces an unsigned local build.
 
 For user-facing Windows policy troubleshooting, see [installation and updates](UPDATES.md#smartscreen-and-application-control).
+
+To publish a prerelease from a development branch, manually run **Windows build and release** on that branch with **prerelease** enabled. It runs the same package validation, publishes the matching package tag as a prerelease, and leaves the latest stable release unchanged. Do not push a version tag first: tag pushes use the stable publication path.

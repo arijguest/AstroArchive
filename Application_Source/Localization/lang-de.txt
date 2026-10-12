@@ -1858,3 +1858,34 @@ New telescope...	Neues Teleskop...
 {#0} transfer failures	{0} Übertragungsfehler
 {#0} not screened	{0} nicht geprüft
 Share {0}	{0} teilen
+
+# Offline target information controls
+TARGET INFO	ZIELINFO
+Target information	Zielinformationen
+Show target info	Zielinformationen anzeigen
+LOCATION IN THE SKY	POSITION AM HIMMEL
+Reset sky view	Himmelsansicht zurücksetzen
+Sources and catalogue details	Quellen und Katalogdetails
+Image credit · {0}	Bildnachweis · {0}
+Original image and full credit	Originalbild und vollständiger Nachweis
+Object source	Objektquelle
+Catalogue names: {0}	Katalognamen: {0}
+Source for: {0}	Quelle für: {0}
+Parent	Übergeordneter Körper
+RA (J2000)	RA (J2000)
+Dec (J2000)	Dekl. (J2000)
+Apparent size	Scheinbare Größe
+Magnitude ({0})	Helligkeit ({0})
+Explore your targets	Ziele erkunden
+Loading target information…	Zielinformationen werden geladen…
+Select a file to return to its image preview.	Wähle eine Datei, um zur Bildvorschau zurückzukehren.
+Catalogue position · drag to rotate. Scroll or pinch over the map to zoom.	Katalogposition · Zum Drehen ziehen. Zum Zoomen über der Karte scrollen oder zwei Finger verwenden.
+Catalogue coordinates are not available for this target.	Für dieses Ziel sind keine Katalogkoordinaten verfügbar.
+Catalogue summary only. The extended description is awaiting review.	Nur Katalogzusammenfassung. Die ausführliche Beschreibung wird noch geprüft.
+Description checked against its cited sources.	Beschreibung anhand der angegebenen Quellen geprüft.
+A checked overview is not available for this target yet.	Für dieses Ziel ist noch keine geprüfte Übersicht verfügbar.
+Historical designation · identity is disputed.	Historische Bezeichnung · Identität ist umstritten.
+Choose a target on the left to see its overview and sky location. Select a file to preview your image.	Wähle links ein Ziel, um seine Übersicht und Himmelsposition zu sehen. Wähle eine Datei für die Bildvorschau.
+Calibration frames do not have a celestial target. Select a file to preview it.	Kalibrierungsbilder haben kein Himmelsziel. Wähle eine Datei für die Vorschau.
+Identify this target to see its catalogue information. Select a file to preview it.	Identifiziere dieses Ziel, um seine Kataloginformationen zu sehen. Wähle eine Datei für die Vorschau.
+Target information is unavailable. You can still select and preview your files.	Zielinformationen sind nicht verfügbar. Du kannst weiterhin Dateien auswählen und ansehen.

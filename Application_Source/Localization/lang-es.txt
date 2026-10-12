@@ -1884,3 +1884,34 @@ New telescope...	Nuevo telescopio...
 {#0} transfer failures	{0} errores de transferencia
 {#0} not screened	{0} sin comprobar
 Share {0}	Compartir {0}
+
+# Offline target information controls
+TARGET INFO	INFORMACIÓN DEL OBJETO
+Target information	Información del objeto
+Show target info	Mostrar información del objeto
+LOCATION IN THE SKY	UBICACIÓN EN EL CIELO
+Reset sky view	Restablecer vista del cielo
+Sources and catalogue details	Fuentes y detalles del catálogo
+Image credit · {0}	Crédito de imagen · {0}
+Original image and full credit	Imagen original y crédito completo
+Object source	Fuente del objeto
+Catalogue names: {0}	Nombres del catálogo: {0}
+Source for: {0}	Fuente de: {0}
+Parent	Cuerpo principal
+RA (J2000)	AR (J2000)
+Dec (J2000)	Dec (J2000)
+Apparent size	Tamaño aparente
+Magnitude ({0})	Magnitud ({0})
+Explore your targets	Explora tus objetos
+Loading target information…	Cargando información del objeto…
+Select a file to return to its image preview.	Selecciona un archivo para volver a su vista previa.
+Catalogue position · drag to rotate. Scroll or pinch over the map to zoom.	Posición del catálogo · Arrastra para girar. Desplázate o pellizca sobre el mapa para ampliar.
+Catalogue coordinates are not available for this target.	No hay coordenadas del catálogo para este objeto.
+Catalogue summary only. The extended description is awaiting review.	Solo resumen del catálogo. La descripción ampliada está pendiente de revisión.
+Description checked against its cited sources.	Descripción verificada con las fuentes citadas.
+A checked overview is not available for this target yet.	Aún no hay un resumen verificado de este objeto.
+Historical designation · identity is disputed.	Designación histórica · Identidad discutida.
+Choose a target on the left to see its overview and sky location. Select a file to preview your image.	Elige un objeto a la izquierda para ver su resumen y ubicación en el cielo. Selecciona un archivo para ver su imagen.
+Calibration frames do not have a celestial target. Select a file to preview it.	Los fotogramas de calibración no tienen un objeto celeste. Selecciona un archivo para verlo.
+Identify this target to see its catalogue information. Select a file to preview it.	Identifica este objeto para ver su información del catálogo. Selecciona un archivo para verlo.
+Target information is unavailable. You can still select and preview your files.	La información del objeto no está disponible. Puedes seguir seleccionando y viendo tus archivos.

@@ -1890,3 +1890,34 @@ New telescope...	新望远镜...
 {#0} transfer failures	{0} 个传输失败
 {#0} not screened	{0} 个未筛查
 Share {0}	分享 {0}
+
+# Offline target information controls
+TARGET INFO	目标信息
+Target information	目标信息
+Show target info	显示目标信息
+LOCATION IN THE SKY	天空位置
+Reset sky view	重置星图
+Sources and catalogue details	来源和星表详情
+Image credit · {0}	图片署名 · {0}
+Original image and full credit	原始图片和完整署名
+Object source	天体来源
+Catalogue names: {0}	星表名称：{0}
+Source for: {0}	来源对应：{0}
+Parent	主天体
+RA (J2000)	赤经 (J2000)
+Dec (J2000)	赤纬 (J2000)
+Apparent size	视大小
+Magnitude ({0})	星等（{0}）
+Explore your targets	探索目标
+Loading target information…	正在加载目标信息…
+Select a file to return to its image preview.	选择文件即可返回图像预览。
+Catalogue position · drag to rotate. Scroll or pinch over the map to zoom.	星表位置 · 拖动可旋转。在星图上滚动或双指缩放。
+Catalogue coordinates are not available for this target.	此目标没有可用的星表坐标。
+Catalogue summary only. The extended description is awaiting review.	仅显示星表概要。详细描述有待审核。
+Description checked against its cited sources.	描述已根据所引来源核验。
+A checked overview is not available for this target yet.	此目标尚无经过核验的概述。
+Historical designation · identity is disputed.	历史名称 · 身份存在争议。
+Choose a target on the left to see its overview and sky location. Select a file to preview your image.	在左侧选择目标以查看概述和天空位置。选择文件以预览图像。
+Calibration frames do not have a celestial target. Select a file to preview it.	校准帧没有天体目标。选择文件以预览。
+Identify this target to see its catalogue information. Select a file to preview it.	识别此目标以查看星表信息。选择文件以预览。
+Target information is unavailable. You can still select and preview your files.	目标信息不可用。你仍可选择和预览文件。

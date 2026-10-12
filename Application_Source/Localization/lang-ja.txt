@@ -1891,3 +1891,34 @@ New telescope...	新しい望遠鏡...
 {#0} transfer failures	転送の失敗 {0} 件
 {#0} not screened	未スクリーニング {0} 件
 Share {0}	{0} を共有
+
+# Offline target information controls
+TARGET INFO	天体情報
+Target information	天体情報
+Show target info	天体情報を表示
+LOCATION IN THE SKY	空での位置
+Reset sky view	星図をリセット
+Sources and catalogue details	出典とカタログの詳細
+Image credit · {0}	画像クレジット · {0}
+Original image and full credit	元画像とクレジット全文
+Object source	天体の出典
+Catalogue names: {0}	カタログ名: {0}
+Source for: {0}	出典の対象: {0}
+Parent	主天体
+RA (J2000)	赤経 (J2000)
+Dec (J2000)	赤緯 (J2000)
+Apparent size	見かけの大きさ
+Magnitude ({0})	等級 ({0})
+Explore your targets	天体を調べる
+Loading target information…	天体情報を読み込み中…
+Select a file to return to its image preview.	ファイルを選択すると画像プレビューに戻ります。
+Catalogue position · drag to rotate. Scroll or pinch over the map to zoom.	カタログ上の位置 · ドラッグで回転。星図上でスクロールまたはピンチすると拡大・縮小できます。
+Catalogue coordinates are not available for this target.	この天体のカタログ座標はありません。
+Catalogue summary only. The extended description is awaiting review.	カタログの概要のみです。詳細な説明は確認待ちです。
+Description checked against its cited sources.	説明は引用元と照合済みです。
+A checked overview is not available for this target yet.	この天体の確認済みの概要はまだありません。
+Historical designation · identity is disputed.	歴史的な名称 · 同定には議論があります。
+Choose a target on the left to see its overview and sky location. Select a file to preview your image.	左側で天体を選択すると概要と空での位置が表示されます。ファイルを選択すると画像をプレビューできます。
+Calibration frames do not have a celestial target. Select a file to preview it.	キャリブレーション画像には天体がありません。ファイルを選択してプレビューしてください。
+Identify this target to see its catalogue information. Select a file to preview it.	この天体を同定するとカタログ情報が表示されます。ファイルを選択してプレビューしてください。
+Target information is unavailable. You can still select and preview your files.	天体情報を利用できません。ファイルの選択とプレビューは引き続き可能です。

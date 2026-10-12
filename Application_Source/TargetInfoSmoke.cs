@@ -30,6 +30,11 @@ namespace AstroArchive {
      if(!PopulateTargetMenu(list))throw new Exception("Target info menu missing.");
      var action=list.ContextMenu.Items.OfType<MenuItem>().Single(i=>Convert.ToString(i.Header)=="Show target info");action.RaiseEvent(new RoutedEventArgs(MenuItem.ClickEvent));
      var state=tab==0?libraryInfo:editedInfo;string prefix=tab==0?"":"Edited";WaitForTargetInformation(state,"M31");
+     PumpPopupLayout();
+     var loadedCard=targetInformation.Find("M31",CancellationToken.None).Cards.Single();
+     var labels=PopupChildren<TextBlock>(state.View).Select(t=>t.Text).ToList();
+     if(!labels.Contains(Localization.T("TARGET INFO"))||!labels.Contains(Localization.T("Sources and catalogue details")))throw new Exception("Info controls did not use the selected language.");
+     if(!labels.Contains(loadedCard.name)||!labels.Contains(loadedCard.summary)||!labels.Contains(loadedCard.image.attribution))throw new Exception("Translation changed catalogue data or image attribution.");
      if((tab==0?librarySelection.Count:editedSelection.Count)!=0||G(tab==0?"FramesGrid":"EditedGrid").SelectedItems.Count!=0)throw new Exception("Info action retained visible/hidden file selection.");
      if(((FrameworkElement)Window.FindName(prefix+"PreviewHost")).Visibility!=Visibility.Collapsed)throw new Exception("Image preview still occupies target information space.");
      foreach(string theme in new[]{"Light","Dark"})foreach(int textScale in new[]{100,150})foreach(double paneWidth in new[]{240.0,570.0}){
@@ -56,7 +61,9 @@ namespace AstroArchive {
      LoadTargetInformation(prefix,"M45",null);LoadTargetInformation(prefix,"M31",null);WaitForTargetInformation(state,"M31");
      var southern=targetInformation.Find("NGC6744",CancellationToken.None).Cards.Single();state.View.ShowCard(southern);PumpPopupLayout();var southMap=PopupChildren<SkyGlobeView>(state.View).Single();southMap.BringIntoView();PumpPopupLayout();if(!southMap.TargetMarkerDrawn)throw new Exception("Southern target is hidden behind the default globe view.");state.View.ShowCard(targetInformation.Find("M31",CancellationToken.None).Cards.Single());
     }
-    File.WriteAllText(Path.Combine(output,"target-info-smoke.txt"),"PASS Repository/Edited context actions clear visible and retained selections; image/info transitions; offline map; short and narrow layouts; light/dark and 100/150% text; credits reachable without horizontal scrolling.");
+    libraryInfo.View.ShowCard(targetInformation.Find("Moon",CancellationToken.None).Cards.Single());PumpPopupLayout();
+    if(!PopupChildren<TextBlock>(libraryInfo.View).Any(t=>t.Text=="Moon"))throw new Exception("A catalogue name was translated as an interface label.");
+    File.WriteAllText(Path.Combine(output,"target-info-smoke.txt"),"PASS "+Localization.Current+": Repository/Edited context actions clear visible and retained selections; image/info transitions; offline map; short and narrow layouts; light/dark and 100/150% text; translated controls, unchanged catalogue data/attribution; credits reachable without horizontal scrolling.");
    }finally{CancelPreview();CancelEditedPreview();HideTargetInformation("");HideTargetInformation("Edited");if(repo!=null&&repo!=previousRepo)repo.Dispose();repo=previousRepo;all=previousRows;editedImages=previousEdited;librarySelection.Clear();editedSelection.Clear();C("LibraryViewBox").SelectedItem=previousView;Window.Width=width;Window.Height=height;settings.ThemeMode=mode;settings.TextScalePercent=scale;settings.ShowPreview=shown;editedPreviewManualWidth=manualWidth;ApplyAppearance();SetPreviewVisibility();Filter(true);FilterEditedImages();WaitForSearches();GoToPage(page);}
   }
  }

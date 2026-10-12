@@ -1,12 +1,12 @@
-AstroArchive 3.1.9
-Package 3.1.9.1
+AstroArchive 3.2.1 — prerelease
+Package 3.2.1.1
 
-- AstroArchive now opens where you left it: the main window remembers its
-  position, size, monitor and maximized state, including after updates. If that
-  display is no longer connected, the window moves onto an available screen.
-- A new startup window shows the Rosette Nebula, the installed version and
-  loading progress, with astrophotography remarks, practical hints and
-  celestial-object facts while your archive loads.
-- Includes the 3.1.8 changes: more reliable calibration matching for master bias
-  and flat frames, folder and multi-file selection for network imports, and a
-  shorter Capture details panel.
+Offline target information in Library and Edited previews when no files are selected, with thumbnails for 325 target entries and a DSO sky map. Right-click a target and choose Show target info to open it. The pane adapts to narrow windows and larger text; image credits and sources remain accessible.
+
+Interface language options: English, German, Spanish, French, Italian, Japanese and Simplified Chinese. Info-pane controls use the selected language; catalogue descriptions, scientific names and source credits remain in their original language.
+
+Correct planetary sky locations from capture dates and times for the Moon, Sun and seven planets, including AVI and other supported recordings. When capture metadata has no timezone, the saved observing town/city supplies it using the capture date's daylight-saving rules.
+
+Includes temp2 at d499896: translation tables, export options and AstroBin CSV handoffs, plus sky-preview layout fixes.
+
+This is a prerelease for testing. Stable releases remain available separately.

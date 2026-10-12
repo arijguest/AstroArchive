@@ -34,7 +34,8 @@ namespace AstroArchive {
     AstroArchive.Installation.ShellIdentity.InitializeProcess();
     bool test=args.Length>0&&args[0]=="--ui-test";if(test&&args.Length<2)throw new ArgumentException("Output directory required.");
     // Choose the interface language before any window, including the splash, is created.
-    Localization.Use(test?"en":MainUi.SavedLanguage());
+    int languageArgument=Array.IndexOf(args,"--language");
+    Localization.Use(test?(languageArgument>=0&&languageArgument+1<args.Length?args[languageArgument+1]:"en"):MainUi.SavedLanguage());
     if(!test||Array.IndexOf(args,"--startup-only")>=0)startup=new StartupSplash();
     Assets.Register(new RasterReader(),".tif",".tiff",".png",".jpg",".jpeg");var app=new Application{ShutdownMode=ShutdownMode.OnExplicitShutdown};var ui=new MainUi(test,Array.IndexOf(args,"--no-updates")>=0,test?args[1]:null,startup==null?(Action<int,string>)null:startup.Report);app.MainWindow=ui.Window;app.ShutdownMode=ShutdownMode.OnMainWindowClose;
     if(startup!=null){startup.Report(95,"Restoring your window and preparing the first view…");EventHandler rendered=null;rendered=(s,e)=>{ui.Window.ContentRendered-=rendered;if(startup.Cancelled)ui.Window.Close();else startup.Complete();};ui.Window.ContentRendered+=rendered;}
