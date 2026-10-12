@@ -59,26 +59,24 @@ namespace AstroArchive {
   void InitializeCardChoices(Panel parent){
    if(cards==null)cards=new AnalyticsCardSource{Frames=frames};
    if(cards.InitialTargets!=null&&cards.InitialTargets.Count>0)chosenTargets=cards.InitialTargets.ToList();
-   cardTargets=new Button{HorizontalAlignment=HorizontalAlignment.Stretch,HorizontalContentAlignment=HorizontalAlignment.Left,Padding=new Thickness(10,7,10,7),Visibility=Visibility.Collapsed};AccessibleName(cardTargets,"Choose card targets");
+   cardTargets=new Button{HorizontalAlignment=HorizontalAlignment.Stretch,HorizontalContentAlignment=HorizontalAlignment.Left,Padding=new Thickness(10,7,10,7),Margin=new Thickness(0,0,0,12)};AccessibleName(cardTargets,"Choose card targets");
    UiHelp.Hint(cardTargets,"Make cards for your top imaged targets, or choose the targets yourself.");cardTargets.Click+=(s,e)=>ChooseCardTargets();parent.Children.Add(cardTargets);UpdateTargetsLabel();
+   cardLayout=new ComboBox{ItemsSource=TargetCards.LayoutLabels,SelectedIndex=Math.Max(0,Math.Min(TargetCards.LayoutLabels.Length-1,cards.Layout))};cardLayoutField=Field(parent,"Card layout",cardLayout);
+   cardLayout.SelectionChanged+=(s,e)=>{if(IsCards&&!exporting)RenderCards();};
+   cardCredit=new TextBox{Text=cards.Credit??"",MaxLength=80};cardCreditField=Field(parent,"Card credit (optional)",cardCredit);UiHelp.Hint(cardCredit,"For example, your name or handle. Leave blank for “Made with AstroArchive”.");
   }
   void InitializeCardHeader(DockPanel header){
    adjustCard=new Button{Content="Adjust image…",Margin=new Thickness(12,0,0,0),Visibility=Visibility.Collapsed};AccessibleName(adjustCard,"Adjust card image");DockPanel.SetDock(adjustCard,Dock.Right);header.Children.Add(adjustCard);
    UiHelp.Hint(adjustCard,"Choose another image of this target, including any Edited image, and adjust its zoom and position.");adjustCard.Click+=(s,e)=>AdjustCurrentCard();
   }
-  void InitializeCardLayout(Panel actions){
-   cardLayout=new ComboBox{ItemsSource=TargetCards.LayoutLabels,SelectedIndex=Math.Max(0,Math.Min(TargetCards.LayoutLabels.Length-1,cards.Layout)),Width=200};cardLayoutField=AddField(actions,"Card layout",cardLayout);cardLayoutField.Visibility=Visibility.Collapsed;
-   cardLayout.SelectionChanged+=(s,e)=>{if(IsCards&&!exporting)RenderCards();};
-  }
   void InitializeCardOptions(Panel advanced){
-   cardResolution=new ComboBox{ItemsSource=TargetCardRenderer.ResolutionLabels,SelectedIndex=0,Width=210};cardResolutionField=AddField(advanced,"Card resolution",cardResolution);cardResolutionField.Visibility=Visibility.Collapsed;
+   cardResolution=new ComboBox{ItemsSource=TargetCardRenderer.ResolutionLabels,SelectedIndex=0};cardResolutionField=Field(advanced,"Card resolution",cardResolution);cardResolutionField.Visibility=Visibility.Collapsed;
    UiHelp.Hint(cardResolution,"Standard matches the layout's social size. High doubles it for print or large screens. Sharing makes smaller files for messages.");cardResolution.SelectionChanged+=(s,e)=>Hints();
-   cardCredit=new TextBox{Text=cards.Credit??"",MaxLength=80,Width=240};cardCreditField=AddField(advanced,"Card credit (optional)",cardCredit);cardCreditField.Visibility=Visibility.Collapsed;UiHelp.Hint(cardCredit,"For example, your name or handle. Leave blank for “Made with AstroArchive”.");
    cardDebounce=new DispatcherTimer{Interval=TimeSpan.FromMilliseconds(400)};cardDebounce.Tick+=(s,e)=>{cardDebounce.Stop();if(IsCards&&!exporting)RenderCards();};cardCredit.TextChanged+=(s,e)=>{if(!IsCards)return;cardDebounce.Stop();cardDebounce.Start();};
   }
   void UpdateCardControls(){
    if(cardTargets==null||layoutField==null)return;bool active=IsCards;
-   cardTargets.Visibility=cardLayoutField.Visibility=cardCreditField.Visibility=active?Visibility.Visible:Visibility.Collapsed;layoutField.Visibility=active?Visibility.Collapsed:Visibility.Visible;
+   cardSection.Visibility=active?Visibility.Visible:Visibility.Collapsed;layoutField.Visibility=active?Visibility.Collapsed:Visibility.Visible;
    cardResolutionField.Visibility=active&&!IsMotion?Visibility.Visible:Visibility.Collapsed;adjustCard.Visibility=active&&cards.Adjust!=null?Visibility.Visible:Visibility.Collapsed;
   }
   void SetCardControlsEnabled(bool enabled){foreach(var control in new Control[]{cardTargets,adjustCard,cardLayout,cardResolution,cardCredit})control.IsEnabled=enabled;}
@@ -124,7 +122,7 @@ namespace AstroArchive {
   }
   string CardHint(){
    var layout=CurrentCardLayout();double factor=TargetCardRenderer.ResolutionScale(Math.Max(0,cardResolution.SelectedIndex),layout);int w,h;TargetCards.Size(layout,out w,out h);
-   return "Each card is a "+Math.Round(w*factor)+" × "+Math.Round(h*factor)+" pixel image. "+(cardJobs.Count>1?"Several cards save together as a ZIP of individual images.":"Choose targets on the left; adjust any card's image above the preview.");
+   return "Each card is a "+Math.Round(w*factor)+" × "+Math.Round(h*factor)+" pixel image. "+(cardJobs.Count>1?"Several cards save together as a ZIP of individual images.":"Choose targets in the options panel; adjust any card's image above the preview.");
   }
   int CurrentCardIndex(){int index=previewPage.SelectedIndex-1;return Math.Max(0,Math.Min(cardJobs.Count-1,index));}
   void AdjustCurrentCard(){

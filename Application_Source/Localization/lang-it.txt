@@ -1992,3 +1992,53 @@ Show the latest scan and import reports.	Mostra gli ultimi report di scansione e
 Complete metadata, verify checksums, reindex and review deletions.	Completa i metadati, verifica i checksum, reindicizza e rivedi le eliminazioni.
 Permanently delete failed, non-raw or all archive files.	Elimina definitivamente i file non riusciti, non raw o tutti i file dell'archivio.
 Show timings and status for the last operation.	Mostra durata e stato dell'ultima operazione.
+# Analytics options panel, remembered choices and chart customisation
+Combined document	Documento combinato
+All six charts in one document	Tutti e sei i grafici in un documento
+{#0} of 6 charts in one document	{0} grafici su 6 in un documento
+{#0} of 6 charts	{0} grafici su 6
+{#0} of 6 charts · Combined preview	{0} grafici su 6 · Anteprima combinata
+{#0} of 6 charts · Social pages	{0} grafici su 6 · Pagine social
+Combined preview	Anteprima combinata
+Social pages	Pagine social
+Export preview	Anteprima di esportazione
+Customised	Personalizzato
+This chart	Questo grafico
+Charts in the document	Grafici nel documento
+Document	Documento
+Your choices	Le tue scelte
+Order	Ordine
+Largest first	Prima i più grandi
+Smallest first	Prima i più piccoli
+A–Z	A–Z
+Chart title	Titolo del grafico
+Chart subtitle	Sottotitolo del grafico
+Reset this chart	Reimposta questo grafico
+Colour palette	Tavolozza colori
+Nebula	Nebulosa
+Aurora	Aurora
+Colour-blind safe	Adatta al daltonismo
+Hide options	Nascondi opzioni
+Show options	Mostra opzioni
+Reset all options…	Reimposta tutte le opzioni…
+Reset all options	Reimposta tutte le opzioni
+Keep at least one chart in the combined document.	Lascia almeno un grafico nel documento combinato.
+Options reset to their defaults.	Opzioni riportate ai valori predefiniti.
+Exported all six charts	Esportati tutti e sei i grafici
+Exported {#0} of 6 charts	Esportati {0} grafici su 6
+Exported chart	Grafico esportato
+Rank groups by size or alphabetically. Donuts and columns keep the largest groups and gather the rest into Other.	Ordina i gruppi per dimensione o alfabeticamente. Anelli e colonne mantengono i gruppi più grandi e raggruppano il resto.
+Leave blank to use the standard title.	Lascia vuoto per usare il titolo standard.
+Leave blank to use the standard description.	Lascia vuoto per usare la descrizione standard.
+Return this chart's type, order, title and subtitle to their defaults.	Riporta tipo, ordine, titolo e sottotitolo di questo grafico ai valori predefiniti.
+Choose the charts that go into the combined document and Export all. At least one chart stays included.	Scegli i grafici da includere nel documento combinato e in Esporta tutto. Almeno un grafico resta incluso.
+Shown in each chart's footer and in exported file details. It starts as the repository folder name.	Appare nel piè di pagina di ogni grafico e nei dettagli dei file esportati. All'inizio è il nome della cartella dell'archivio.
+Colours for chart series in the preview and every export. Colour-blind safe uses the Okabe–Ito hues. Lettering keeps the document theme's colours.	Colori delle serie nell'anteprima e in ogni esportazione. Adatta al daltonismo usa le tonalità di Okabe–Ito. Il testo mantiene i colori del tema del documento.
+Give the preview the whole width, or bring back the chart, document and export options.	Dai all'anteprima tutta la larghezza o mostra di nuovo le opzioni di grafico, documento ed esportazione.
+Save the charts chosen for the combined document in one file, using the same telescope and date scope.	Salva in un file i grafici scelti per il documento combinato, con lo stesso telescopio e intervallo di date.
+Return every chart, document and export choice to its default. The telescope and date scope are not changed.	Riporta tutte le scelte di grafico, documento ed esportazione ai valori predefiniti. Telescopio e intervallo di date non cambiano.
+Return every chart, document and export choice to its default? The telescope and date scope are not changed.	Riportare tutte le scelte di grafico, documento ed esportazione ai valori predefiniti? Telescopio e intervallo di date non cambiano.
+Chart types, titles, order, palette, document and export choices are remembered for next time. Ctrl+E exports; Ctrl+Shift+E exports the combined document.	Tipi di grafico, titoli, ordine, tavolozza e scelte di documento ed esportazione vengono ricordati per la prossima volta. Ctrl+E esporta; Ctrl+Shift+E esporta il documento combinato.
+Choose targets in the options panel; adjust any card's image above the preview.	Scegli gli oggetti nel pannello delle opzioni; regola l'immagine di qualsiasi scheda sopra l'anteprima.
+Export options · Resolution	Opzioni di esportazione · Risoluzione
+Export options · Timing and video size	Opzioni di esportazione · Tempi e dimensione del video

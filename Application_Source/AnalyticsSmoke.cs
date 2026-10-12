@@ -68,6 +68,32 @@ namespace AstroArchive {
       }finally{dialog.Close();}
      }
     }
+    // Chart, document and output choices come back the next time Analytics opens.
+    var remembered=AnalyticsPreferences.Defaults();int saves=0;
+    Func<AnalyticsWindow,string,ComboBox> combo=(window,name)=>PopupChildren<ComboBox>(window).Single(c=>AutomationProperties.GetName(c)==name);
+    var first=new AnalyticsWindow(Window,source,"Remembered choices",0,null,remembered,()=>saves++);
+    try{
+     first.Show();PumpPopupLayout();var firstImage=PopupChildren<Image>(first).Single(i=>AutomationProperties.GetName(i)=="Branded analytics export preview");SmokeSearchWait(()=>firstImage.Source!=null);
+     combo(first,"Chart type").SelectedIndex=2;combo(first,"Order").SelectedIndex=2;combo(first,"Colour palette").SelectedIndex=3;combo(first,"Document theme").SelectedIndex=1;PumpPopupLayout();
+     PopupChildren<TextBox>(first).Single(t=>AutomationProperties.GetName(t)=="Chart title").Text="Favourite targets";SmokeSearchWait(()=>PopupChildren<TextBlock>(first).Any(t=>t.Text=="Favourite targets · Export preview"));
+     if(!PopupChildren<TextBlock>(first).Any(t=>t.Text=="Share of light frames · Customised"))throw new Exception("The chart list does not show a customised chart.");
+     CapturePopup(first,Path.Combine(output,"AstroArchive_Analytics_Customised.png"));
+     var list=PopupChildren<ListBox>(first).Single(c=>AutomationProperties.GetName(c)=="Analytics charts");list.SelectedIndex=AnalyticsWindow.CombinedIndex;PumpPopupLayout();
+     PopupChildren<CheckBox>(first).Single(c=>AutomationProperties.GetName(c)=="Include "+ArchiveAnalytics.Titles[1]).IsChecked=false;PumpPopupLayout();
+     if(!PopupChildren<TextBlock>(first).Any(t=>t.Text=="5 of 6 charts · Combined preview"))throw new Exception("The combined document did not leave out an unticked chart.");
+     var hide=PopupChildren<Button>(first).Single(b=>AutomationProperties.GetName(b)=="Show or hide options");var paper=(FrameworkElement)firstImage.Parent;double wide=paper.ActualWidth;hide.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));PumpPopupLayout();
+     if(combo(first,"Document theme").IsVisible||paper.ActualWidth<=wide+100)throw new Exception("Hiding options did not give the preview more room.");hide.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));PumpPopupLayout();
+     CapturePopup(first,Path.Combine(output,"AstroArchive_Analytics_Combined_Choice.png"));
+    }finally{first.Close();}
+    if(saves!=1||remembered.Item!="combined"||!remembered.LightDocument||remembered.Palette!="Colour-blind safe"||remembered.Chart(0).Title!="Favourite targets"||remembered.Chart(0).Style!="columns"||remembered.Chart(0).Order!="A–Z"||remembered.IncludedCharts().Count!=5||remembered.OptionsHidden)throw new Exception("Analytics choices were not remembered when the window closed.");
+    var second=new AnalyticsWindow(Window,source,"Remembered choices",-1,null,remembered,null);
+    try{
+     second.Show();PumpPopupLayout();var secondImage=PopupChildren<Image>(second).Single(i=>AutomationProperties.GetName(i)=="Branded analytics export preview");SmokeSearchWait(()=>secondImage.Source!=null);
+     var list=PopupChildren<ListBox>(second).Single(c=>AutomationProperties.GetName(c)=="Analytics charts");if(list.SelectedIndex!=AnalyticsWindow.CombinedIndex||combo(second,"Document theme").SelectedIndex!=1||combo(second,"Colour palette").SelectedIndex!=3)throw new Exception("Analytics did not reopen with the remembered chart and document.");
+     list.SelectedIndex=0;PumpPopupLayout();if(combo(second,"Chart type").SelectedIndex!=2||combo(second,"Order").SelectedIndex!=2||PopupChildren<TextBox>(second).Single(t=>AutomationProperties.GetName(t)=="Chart title").Text!="Favourite targets")throw new Exception("Analytics did not restore the chart's customisation.");
+     PopupChildren<Button>(second).Single(b=>Convert.ToString(b.Content)=="Reset this chart").RaiseEvent(new RoutedEventArgs(Button.ClickEvent));PumpPopupLayout();
+     if(combo(second,"Chart type").SelectedIndex!=0||PopupChildren<TextBox>(second).Single(t=>AutomationProperties.GetName(t)=="Chart title").Text!="")throw new Exception("Reset this chart kept its customisation.");
+    }finally{second.Close();}
     var data=ArchiveAnalytics.Build(source,new AnalyticsOptions{Caption="Publication fixture"});var pages=Enumerable.Range(0,6).SelectMany(i=>AnalyticsGraphics.Pages(data,i)).ToList();
     foreach(AnalyticsLayout layout in Enum.GetValues(typeof(AnalyticsLayout)))foreach(bool dark in new[]{true,false})foreach(string format in new[]{"PNG","JPEG","PDF","SVG"})foreach(bool allCharts in new[]{false,true}){
      var themed=Enumerable.Range(0,6).SelectMany(i=>AnalyticsGraphics.Pages(data,i,dark,layout)).ToList();var chosen=allCharts?themed:new List<AnalyticsPage>{themed[0]};string path=Path.Combine(output,"analytics-"+(layout==AnalyticsLayout.Landscape?"":layout.ToString().ToLowerInvariant()+"-")+(dark?"dark-":"light-")+(allCharts?"all":"single")+"."+(format=="JPEG"?"jpg":format.ToLowerInvariant()));

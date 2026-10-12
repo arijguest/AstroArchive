@@ -1976,3 +1976,54 @@ Show the latest scan and import reports.	Die neuesten Scan- und Importberichte a
 Complete metadata, verify checksums, reindex and review deletions.	Metadaten ergänzen, Prüfsummen verifizieren, neu indizieren und Löschungen prüfen.
 Permanently delete failed, non-raw or all archive files.	Fehlgeschlagene, Nicht-RAW- oder alle Archivdateien endgültig löschen.
 Show timings and status for the last operation.	Dauer und Status des letzten Vorgangs anzeigen.
+# Analytics options panel, remembered choices and chart customisation
+Combined document	Kombiniertes Dokument
+All six charts in one document	Alle sechs Diagramme in einem Dokument
+{#0} of 6 charts in one document	{0} von 6 Diagrammen in einem Dokument
+{#0} of 6 charts	{0} von 6 Diagrammen
+{#0} of 6 charts · Combined preview	{0} von 6 Diagrammen · Kombinierte Vorschau
+{#0} of 6 charts · Social pages	{0} von 6 Diagrammen · Social-Media-Seiten
+Combined preview	Kombinierte Vorschau
+Social pages	Social-Media-Seiten
+Export preview	Exportvorschau
+Customised	Angepasst
+This chart	Dieses Diagramm
+Charts in the document	Diagramme im Dokument
+Document	Dokument
+Export	Export
+Your choices	Ihre Auswahl
+Order	Reihenfolge
+Largest first	Größte zuerst
+Smallest first	Kleinste zuerst
+A–Z	A–Z
+Chart title	Diagrammtitel
+Chart subtitle	Diagrammuntertitel
+Reset this chart	Dieses Diagramm zurücksetzen
+Colour palette	Farbpalette
+Nebula	Nebel
+Aurora	Polarlicht
+Colour-blind safe	Farbenblind-sicher
+Hide options	Optionen ausblenden
+Show options	Optionen einblenden
+Reset all options…	Alle Optionen zurücksetzen…
+Reset all options	Alle Optionen zurücksetzen
+Keep at least one chart in the combined document.	Mindestens ein Diagramm muss im kombinierten Dokument bleiben.
+Options reset to their defaults.	Optionen auf die Standardwerte zurückgesetzt.
+Exported all six charts	Alle sechs Diagramme exportiert
+Exported {#0} of 6 charts	{0} von 6 Diagrammen exportiert
+Exported chart	Diagramm exportiert
+Rank groups by size or alphabetically. Donuts and columns keep the largest groups and gather the rest into Other.	Gruppen nach Größe oder alphabetisch ordnen. Ringe und Säulen behalten die größten Gruppen und fassen den Rest zusammen.
+Leave blank to use the standard title.	Leer lassen, um den Standardtitel zu verwenden.
+Leave blank to use the standard description.	Leer lassen, um die Standardbeschreibung zu verwenden.
+Return this chart's type, order, title and subtitle to their defaults.	Typ, Reihenfolge, Titel und Untertitel dieses Diagramms auf die Standardwerte zurücksetzen.
+Choose the charts that go into the combined document and Export all. At least one chart stays included.	Wählen Sie die Diagramme für das kombinierte Dokument und „Alle exportieren“. Mindestens ein Diagramm bleibt enthalten.
+Shown in each chart's footer and in exported file details. It starts as the repository folder name.	Erscheint in der Fußzeile jedes Diagramms und in den Details exportierter Dateien. Anfangs ist es der Name des Repository-Ordners.
+Colours for chart series in the preview and every export. Colour-blind safe uses the Okabe–Ito hues. Lettering keeps the document theme's colours.	Farben der Diagrammreihen in der Vorschau und in jedem Export. Farbenblind-sicher verwendet die Okabe–Ito-Farbtöne. Die Schrift behält die Farben des Dokumentdesigns.
+Give the preview the whole width, or bring back the chart, document and export options.	Der Vorschau die volle Breite geben oder die Diagramm-, Dokument- und Exportoptionen wieder einblenden.
+Save the charts chosen for the combined document in one file, using the same telescope and date scope.	Die für das kombinierte Dokument gewählten Diagramme in einer Datei speichern, mit demselben Teleskop- und Datumsumfang.
+Return every chart, document and export choice to its default. The telescope and date scope are not changed.	Alle Diagramm-, Dokument- und Exporteinstellungen auf die Standardwerte zurücksetzen. Teleskop- und Datumsumfang bleiben unverändert.
+Return every chart, document and export choice to its default? The telescope and date scope are not changed.	Alle Diagramm-, Dokument- und Exporteinstellungen auf die Standardwerte zurücksetzen? Teleskop- und Datumsumfang bleiben unverändert.
+Chart types, titles, order, palette, document and export choices are remembered for next time. Ctrl+E exports; Ctrl+Shift+E exports the combined document.	Diagrammtypen, Titel, Reihenfolge, Palette, Dokument- und Exporteinstellungen werden für das nächste Mal gespeichert. Ctrl+E exportiert; Ctrl+Shift+E exportiert das kombinierte Dokument.
+Choose targets in the options panel; adjust any card's image above the preview.	Wählen Sie die Ziele im Optionsbereich; passen Sie das Bild einer Karte über der Vorschau an.
+Export options · Resolution	Exportoptionen · Auflösung
+Export options · Timing and video size	Exportoptionen · Zeitablauf und Videogröße

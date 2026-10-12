@@ -26,7 +26,7 @@ namespace AstroArchive {
    var report=data.Reports[index];var p=new AnalyticsPage{Title=report.Title,CanvasWidth=1080,CanvasHeight=height,Background=dark?"#0C1220":"#FFFFFF"};
    Box(p,0,0,1080,height,"#FFFFFF");Box(p,0,0,1080,6,Accent);p.Marks.Add(new AnalyticsMark{Kind="logo",X=60,Y=28,Width=64,Height=64});
    Text(p,"AstroArchive",140,44,26,Ink,true);Text(p,(index+1).ToString("00")+" / 06"+(parts>1?" · "+(part+1)+"/"+parts:""),parts>1?850:932,50,16,Accent,true);
-   Text(p,report.Title,60,120,44,Ink,true);Lines(p,report.Description+(parts>1?" · Groups "+(part*8+1)+"–"+Math.Min((part+1)*8,report.Values.Count)+" of "+report.Values.Count:""),60,180,120,18,Muted,2,960);
+   Text(p,Fit(report.Title,960,44),60,120,44,Ink,true,report.Title);Lines(p,report.Description+(parts>1?" · Groups "+(part*8+1)+"–"+Math.Min((part+1)*8,report.Values.Count)+" of "+report.Values.Count:""),60,180,120,18,Muted,2,960);
    Box(p,60,244,960,86,"#F5F7FC");string[] metrics={ArchiveAnalytics.Number(data.RepositorySeconds/3600)+" h",data.RepositoryCaptures.ToString("N0",CultureInfo.InvariantCulture),data.RepositoryTargets.ToString("N0",CultureInfo.InvariantCulture)},captions={"REPOSITORY INTEGRATION","LIGHT FRAMES","REPOSITORY TARGETS"};
    for(int i=0;i<3;i++){double center=220+i*320;CenteredText(p,metrics[i],center,254,28,Ink,true);CenteredText(p,captions[i],center,298,13,Muted,true);}
    p.Role="chart";double total=report.Values.Sum(v=>v.Value);

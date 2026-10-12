@@ -174,11 +174,44 @@ Downloads appear in Import as they arrive, with a numeric ETA after transfer
 starts (or immediately when a bandwidth limit is set).
 
 ## Analytics exports
-Documents default to Dark, with a Light option next to Export format. The larger
-AstroArchive logo, midnight/blue/cyan colours, and concise headers/footers appear
-in previews and PNG, JPEG, PDF and SVG exports.
-Document layout defaults to Landscape. Social layouts rearrange the charts and
-branding for the selected frame, with these Social image presets:
+Repository > Analytics offers six branded charts: Targets photographed, Imaging
+timeline, Time per target, Time per telescope, Filter mix and Exposure lengths.
+The window has three parts: the chart list on the left, the preview in the middle
+and the options panel on the right. Hide options gives the preview the full width.
+Select a chart to preview it, Combined document for one document of several
+charts, or Target cards. Analytics reopens on the chart you viewed last.
+Scope starts with the entire repository, independently of browsing filters or
+selection. Expand Scope to choose a physical telescope, inclusive acquisition
+dates, or whether to include rejected light frames. Reset scope restores the
+entire repository. Undated frames are excluded only when a date range is set.
+Time is recorded individual light-frame integration, not elapsed observing time.
+Calibrations are excluded. A stack counts only when no sub of its target was
+saved in the same session or on the same date, so it never doubles those subs;
+the same rule applies to target and session totals. Missing exposures and dates
+remain unknown and are reported with the chart.
+
+The options panel shows only what applies to the item you selected:
+- Output: Images & documents (PNG, JPEG, PDF, SVG) or Video & GIF (MP4, GIF).
+- This chart: Chart type (donut, bars or columns), Order (Largest first,
+  Smallest first or A-Z for rankings), and your own title and subtitle. Blank
+  titles use the standard wording. Reset this chart restores its defaults, and
+  customised charts say so in the chart list. Every group is still included; the
+  timeline and exposure lengths keep their own order.
+- Charts in the document: tick the charts that go into the combined document and
+  Export all. At least one chart stays included.
+- Target cards: the targets, card layout and optional credit line.
+- Document: layout, Dark or Light theme, colour palette and the document label.
+  Palettes are AstroArchive, Nebula, Aurora and Colour-blind safe (Okabe-Ito).
+  Lettering keeps the theme's colours.
+- Export: format, then Export options for resolution, video timing and size.
+Your chart, document and export choices are remembered for next time. Reset all
+options returns them to their defaults without changing the scope. Ctrl+E exports
+what is shown; Ctrl+Shift+E exports the combined document.
+
+Documents default to Dark. The larger AstroArchive logo, midnight/blue/cyan
+colours, and concise headers/footers appear in previews and PNG, JPEG, PDF and
+SVG exports. Document layout defaults to Landscape. Social layouts rearrange the
+charts and branding for the selected frame, with these Social image presets:
 - Vertical 9:16: 1080 x 1920, for TikTok, Reels and Stories.
 - Portrait 4:5: 1080 x 1350, for Instagram feed posts.
 - Square 1:1: 1080 x 1080, for square posts.
@@ -186,28 +219,12 @@ branding for the selected frame, with these Social image presets:
 - Pinterest 2:3: 1000 x 1500, for pins.
 Print and Screen resolutions remain available. Preview, PDF and SVG use the same
 selected layout. Social image presets apply to each page.
-Repository > Analytics offers six branded charts: Targets photographed, Imaging
-timeline, Time per target, Time per telescope, Filter mix and Exposure lengths.
-Select a chart to preview it, or All six charts for the combined preview. Scope
-starts with the entire repository, independently of browsing filters or selection.
-Expand Scope to choose a physical telescope, inclusive acquisition dates, a
-document label, or whether to include rejected light frames. Reset scope restores
-the entire repository. Undated frames are excluded only when a date range is set.
-Time is recorded individual light-frame integration, not elapsed observing time.
-Calibrations are excluded. A stack counts only when no sub of its target was
-saved in the same session or on the same date, so it never doubles those subs;
-the same rule applies to target and session totals. Missing exposures and dates
-remain unknown and are reported with the chart.
 Target/filter shares show the largest seven categories plus Other when needed.
-Chart type, below the chart list, shows a chart as a donut, bars or columns; every
-group is still included and the timeline stays in date order. Export as offers
-Images & documents or Video & GIF. Resolution, video timing and size, and card
-credit are under Export options. The AstroArchive wordmark matches the logo.
 Time rankings continue onto additional pages so every target and telescope is
 included. Timeline gaps remain zero; longer timelines use years or grouped periods.
 Choose PNG or JPEG at 300 dpi for print or 150 dpi for screen. PDF keeps charts and
 lettering as vectors; SVG embeds the logo and keeps graphics scalable. Export chart
-saves the selected chart; Export all saves one document containing all six charts.
+saves the selected chart; Export all saves the combined document.
 PDF uses individual pages in the selected layout; image/SVG exports arrange pages
 on one sheet. Tall collections stack pages vertically; square and wide collections
 use a grid.
