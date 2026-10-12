@@ -1958,7 +1958,13 @@ Compare deep-sky frames across the whole target instead of each session	Deep-Sky
 Nothing to measure	Nichts zu messen
 OVERVIEW	ÜBERBLICK
 IMAGING NOTES	AUFNAHMEHINWEISE
-AT A GLANCE	AUF EINEN BLICK
+PARAMETERS	PARAMETER
+Orbit	Umlaufbahn
+Diameter	Durchmesser
+Mass	Masse
+Major moons	Große Monde
+{0} AU from the Sun · {1} days	{0} AE von der Sonne · {1} Tage
+{0} AU from the Sun · {1} years	{0} AE von der Sonne · {1} Jahre
 SOURCES	QUELLEN
 Solar eclipse	Sonnenfinsternis
 Lunar eclipse	Mondfinsternis

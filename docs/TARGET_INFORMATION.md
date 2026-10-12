@@ -36,7 +36,7 @@ written overview and imaging notes, replacing generated catalogue sentences such
 "NGC 7000 is a h ii region in Cyg". Distances are rounded published values. Each
 curated card links SIMBAD and, for Messier objects, NASA's Hubble Messier page.
 A `Not:` line hides catalogue names the pack wrongly attaches (IC 434 is not the
-Flame Nebula). The pane is divided into Overview, Imaging notes, At a glance,
+Flame Nebula). The pane is divided into Overview, Imaging notes, Parameters,
 Location in the sky and Sources, and the object ID appears once: in the heading
 when the object has no other name, otherwise in the line beneath it.
 
