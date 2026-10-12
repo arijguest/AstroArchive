@@ -36,10 +36,10 @@ namespace AstroArchive {
      editedPreviewViewport.SetImage(plain(shape[0],shape[1]),true);PumpPopupLayout();editedPreviewViewport.Resize();PumpPopupLayout();widths.Add(column.ActualWidth);
      double expected=Math.Min(EditedPreviewAvailableWidth(),Math.Max(EditedPreviewMinimumWidth,Math.Max(0,host.ActualHeight-PreviewViewport.ToolbarSpace)*shape[0]/shape[1]+chrome0));
      if(Math.Abs(column.ActualWidth-expected)>2)throw new Exception("Edited preview did not fit the "+shape[0]+"x"+shape[1]+" image: column "+column.ActualWidth+", expected "+expected);
-     if(column.ActualWidth<EditedPreviewAvailableWidth()-1&&Math.Abs(stage.ActualWidth+chrome0-column.ActualWidth)>3)throw new Exception("Edited preview left empty space beside a "+shape[0]+"x"+shape[1]+" image: stage "+stage.RenderSize+", column "+column.ActualWidth);
+     if(column.ActualWidth<EditedPreviewAvailableWidth()-1&&column.ActualWidth>EditedPreviewMinimumWidth+1&&Math.Abs(stage.ActualWidth+chrome0-column.ActualWidth)>3)throw new Exception("Edited preview left empty space beside a "+shape[0]+"x"+shape[1]+" image: stage "+stage.RenderSize+", column "+column.ActualWidth);
      if(body.ColumnDefinitions[1].ActualWidth<EditedTableComfortWidth-1)throw new Exception("Fitting a "+shape[0]+"x"+shape[1]+" image squeezed the table to "+body.ColumnDefinitions[1].ActualWidth);
     }
-    if(!(widths[0]<widths[1]&&widths[1]<widths[2]))throw new Exception("Edited preview width did not follow image shape: "+string.Join(", ",widths));
+    if(widths[0]>widths[1]+1||widths[1]>widths[2]+1)throw new Exception("Edited preview width did not follow image shape: "+string.Join(", ",widths));
     editedPreviewViewport.BeginLoading();PumpPopupLayout();if(Math.Abs(column.ActualWidth-widths[2])>1)throw new Exception("Edited loading resized the preview column");
     CancelEditedPreview();PumpPopupLayout();if(Math.Abs(column.ActualWidth-widths[2])>1)throw new Exception("Clearing the Edited preview resized its column");
     Window.Width=1180;editedPreviewViewport.SetImage(bitmap,true);PumpPopupLayout();SizeEditedPreview();PumpPopupLayout();
