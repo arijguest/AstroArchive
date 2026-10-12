@@ -5,6 +5,7 @@ using System.Linq;
 using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media;
 namespace AstroArchive {
  public partial class MainUi {
   static void SelectExportCategory(ExportWindowFields fields,ExportCategory category){int index=fields.Pages.FindIndex(p=>p.Category==category);if(index<0)throw new Exception("Export option is missing: "+category);fields.Dialog.SelectTab(index);PumpPopupLayout();if(fields.Page.Category!=category)throw new Exception("Export option did not open: "+category);}
@@ -42,7 +43,15 @@ namespace AstroArchive {
    }finally{settings.AstroBinFilterIds=filterIds;Theme.Apply(Window,"Dark");}
    File.WriteAllText(Path.Combine(output,"export-ui-smoke.txt"),"PASS: one Export window opens on the requested option; header counts files and targets; destination shows only for folder exports; new-folder and metadata extras default off; Siril eligibility; AstroBin CSV offered by default with stacking folders; app handoff explains unsupported selections; AstroBin preview and notes without exporting images; catalogue scopes; light/dark labels.");
   }
-  void CheckExportLabels(FormWindow dialog,string label){foreach(var text in PopupChildren<TextBlock>(dialog.Window))if(text.IsVisible&&!string.IsNullOrWhiteSpace(text.Text))Readable(text.Foreground,dialog.Window.Background,label+" export label");}
+  // Each label is checked against the opaque surface actually behind it: buttons and selected options paint their own.
+  static Brush ExportLabelSurface(DependencyObject node,Brush fallback){
+   for(var current=VisualTreeHelper.GetParent(node);current!=null;current=VisualTreeHelper.GetParent(current)){
+    Brush brush=current is Panel?((Panel)current).Background:current is Border?((Border)current).Background:current is Control?((Control)current).Background:null;
+    var solid=brush as SolidColorBrush;if(solid!=null&&solid.Color.A==255)return solid;
+   }
+   return fallback;
+  }
+  void CheckExportLabels(FormWindow dialog,string label){foreach(var text in PopupChildren<TextBlock>(dialog.Window))if(text.IsVisible&&!string.IsNullOrWhiteSpace(text.Text))Readable(text.Foreground,ExportLabelSurface(text,dialog.Window.Background),label+" export label \""+text.Text+"\"");}
   void SmokeGroupedCalibrationOptions(string output){
    WaitForSearches();var previousRepo=repo;var previousRows=all;var previousGroups=subframeSessions;var previousSelection=G("FramesGrid").SelectedItems.Cast<object>().ToList();var previousLibrarySelection=librarySelection.Items;string theme=settings.ThemeMode;int scale=settings.TextScalePercent;string root=Path.Combine(output,"grouped-calibration-dialog-fixture");Repository temporary=null;
    try{
