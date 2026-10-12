@@ -94,6 +94,17 @@ namespace AstroArchive {
    }
    return null;
   }
+  // Menu and button labels mark their access key with "_". The translation keeps the
+  // same key where its letter appears; Japanese and Chinese add it as "(_I)", as Windows does.
+  public static string AccessText(string english){
+   string shown=T(english);if(shown!=english||string.IsNullOrEmpty(english))return shown;
+   int mark=english.IndexOf('_');if(mark<0||mark==english.Length-1||english[mark+1]=='_')return english;
+   char key=char.ToUpperInvariant(english[mark+1]);string plain=english.Remove(mark,1),translated=T(plain);if(translated==plain)return english;
+   translated=translated.Replace("_","__");
+   if(current=="ja"||current=="zh-Hans")return translated+"(_"+key+")";
+   for(int i=0;i<translated.Length;i++)if(char.ToUpperInvariant(translated[i])==key)return translated.Insert(i,"_");
+   return "_"+translated;
+  }
   public static bool Has(string english){string value;return !English&&(table.TryGetValue(english,out value)||patterns.Any(p=>p.Match.IsMatch(english)));}
   public static string F(string english,params object[] args){return string.Format(CultureInfo.CurrentCulture,T(english),args);}
  }

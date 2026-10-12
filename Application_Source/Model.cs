@@ -102,7 +102,7 @@ namespace AstroArchive {
  }
  public class TargetSummary {
   public string Name{get;set;}public int Files{get;set;}public int Subs{get;set;}public int Videos{get;set;}public int Stacks{get;set;}public int Sessions{get;set;}public double ExposureSeconds{get;set;}public int UnknownExposure{get;set;}
-  public string Label{get{return Name=="All targets"?"All Targets":Catalog.Label(Name);}}
+  public string Label{get{return Name=="All targets"?Localization.T("All Targets"):Catalog.Label(Name);}}
   public string Group{get{return TargetNavigation.Group(Name);}}
   public string DisplayName{get{return TargetNavigation.ShortName(Name);}}
   public string FileCount{get{return Files.ToString("N0");}}

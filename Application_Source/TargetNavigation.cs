@@ -35,7 +35,7 @@ namespace AstroArchive {
   }
   static Match CometName(string name){return Regex.Match(name??"",@"^([CPDXAI]\s*/?\s*\d{4}\s*[A-Z]{1,2}\d{1,3}\b|\d{1,4}\s*[PDI]\b)\s*[/ -]?\s*(.*)$",RegexOptions.IgnoreCase|RegexOptions.CultureInvariant);}
   public static string ShortName(string name){
-   if(name=="All targets")return "All Targets";string common=Catalog.CommonName(name);
+   if(name=="All targets")return Localization.T("All Targets");string common=Catalog.CommonName(name);
    if(common.Length>0){
     string id=PreferredId(name),suffix=" ("+id+")";
     // The row already starts with this ID; keep qualified names in the resolver.
@@ -46,7 +46,7 @@ namespace AstroArchive {
    if(CometTargets.IsComet(name)){var match=CometName(name);if(match.Success&&match.Groups[2].Value.Length>0){string id=match.Groups[1].Value.Trim(),discoverer=match.Groups[2].Value.Trim('(',')',' ');return char.IsDigit(id[0])?id+"/"+discoverer:id+" ("+discoverer+")";}if(name.StartsWith("Comet ",StringComparison.OrdinalIgnoreCase))return name.Substring(6).Trim();}return name;
   }
   public static string Identifier(string name){if(name=="All targets")return "";var ids=Catalog.CatalogueIds(name);if(ids.Length>0)return string.Join(" · ",ids.Where(id=>id!=PreferredId(name)));return "";}
-  public static string TargetId(string name){if(name=="All targets")return "All Targets";string id=PreferredId(name);if(id.Length>0)return id;var comet=CometName(name);return comet.Success?comet.Groups[1].Value.Trim():name;}
+  public static string TargetId(string name){if(name=="All targets")return Localization.T("All Targets");string id=PreferredId(name);if(id.Length>0)return id;var comet=CometName(name);return comet.Success?comet.Groups[1].Value.Trim():name;}
   public static string WithoutObjectType(string title){return Regex.Replace(title??"",@"\s+(?:(?:planetary|emission|reflection|dark)\s+nebula|(?:open|globular|star)\s+cluster|supernova\s+remnant|nebula|galaxy|cluster)$","",RegexOptions.IgnoreCase|RegexOptions.CultureInvariant);}
   public static string PreferredId(string name){return Catalog.CatalogueIds(name).OrderBy(id=>id.StartsWith("M",StringComparison.Ordinal)?0:id.StartsWith("NGC",StringComparison.Ordinal)?1:id.StartsWith("IC",StringComparison.Ordinal)?2:id.StartsWith("C",StringComparison.Ordinal)?3:4).FirstOrDefault()??"";}
   static TargetSummary Summarize(string name,IEnumerable<Frame> frames,CancellationToken token){var summary=CaptureGroups.Summarize(frames,token);return new TargetSummary{Name=name,Files=summary.Captures,Subs=summary.Subs,Videos=summary.Videos,Stacks=summary.Stacks,Sessions=summary.Sessions,ExposureSeconds=summary.ExposureSeconds,UnknownExposure=summary.UnknownExposure};}
