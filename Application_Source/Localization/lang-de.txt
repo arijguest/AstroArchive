@@ -1983,3 +1983,4 @@ Encke-type	Encke-Typ
 Long-period	Langperiodisch
 Near-parabolic	Nahezu parabolisch
 Hyperbolic (interstellar)	Hyperbolisch (interstellar)
+Aphelion	Aphel

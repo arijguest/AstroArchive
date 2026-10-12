@@ -1999,3 +1999,4 @@ Encke-type	Tipo Encke
 Long-period	Lungo periodo
 Near-parabolic	Quasi parabolica
 Hyperbolic (interstellar)	Iperbolica (interstellare)
+Aphelion	Afelio

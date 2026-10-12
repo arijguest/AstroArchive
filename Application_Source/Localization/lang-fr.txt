@@ -1979,3 +1979,4 @@ Encke-type	Type Encke
 Long-period	Longue période
 Near-parabolic	Quasi parabolique
 Hyperbolic (interstellar)	Hyperbolique (interstellaire)
+Aphelion	Aphélie

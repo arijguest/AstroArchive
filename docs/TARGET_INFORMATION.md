@@ -48,7 +48,7 @@ well-known comets, so `CometInfo.cs` supplies the rest. A target such as
 and a comet the pack lacks gets a page built from that designation. Overviews for
 about 30 well-known comets sit in `TargetDescriptions.txt` under their designation;
 any other comet's overview explains what its designation records (type and
-discovery half-month). Parameters show the orbit type, perihelion distance, period
+discovery half-month). Parameters show the orbit type, perihelion distance, aphelion (periodic comets), period
 and eccentricity from the NASA/JPL Small-Body Database, with the perihelion date for
 one-off and long-period passages. Imaging notes describe comet-aligned stacking.
 Comets have no fixed sky position, so their pages have no map, and they cite JPL

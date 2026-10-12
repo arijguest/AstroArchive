@@ -85,6 +85,10 @@ namespace AstroArchive {
   }
   public static string Perihelion(CometOrbit orbit){return Localization.F("{0} AU from the Sun",orbit.Q.ToString("0.0##",CultureInfo.InvariantCulture));}
   public static string Period(CometOrbit orbit){return Localization.F("{0} years per orbit",orbit.PeriodYears.ToString(orbit.PeriodYears<100?"0.##":"#,##0",CultureInfo.InvariantCulture));}
+  // Farthest point from the Sun, shown for periodic comets only: for long-period
+  // orbits it depends too strongly on the rounded eccentricity.
+  public static bool ShowsAphelion(CometOrbit orbit){return orbit.PeriodYears>0&&orbit.PeriodYears<=200;}
+  public static string Aphelion(CometOrbit orbit){double q=orbit.Q*(1+orbit.E)/(1-orbit.E);return Localization.F("{0} AU from the Sun",q.ToString(q<10?"0.0#":"0.#",CultureInfo.InvariantCulture));}
   public static string Eccentricity(CometOrbit orbit){return orbit.E.ToString("0.0###",CultureInfo.InvariantCulture);}
   // Short-period orbits are solved near an older perihelion, so only one-off and
   // long-period passages show a date.

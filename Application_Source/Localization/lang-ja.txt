@@ -2015,3 +2015,4 @@ Encke-type	エンケ型
 Long-period	長周期
 Near-parabolic	ほぼ放物線
 Hyperbolic (interstellar)	双曲線（恒星間）
+Aphelion	遠日点

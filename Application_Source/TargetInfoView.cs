@@ -100,6 +100,7 @@ namespace AstroArchive {
    if(orbit!=null){
     AddFact(facts,"Orbit type",Localization.T(CometInfo.ClassLabel(orbit)),CometInfo.SourceTitle);
     AddFact(facts,"Perihelion",CometInfo.Perihelion(orbit),"Closest distance to the Sun. "+CometInfo.SourceTitle);
+    if(CometInfo.ShowsAphelion(orbit))AddFact(facts,"Aphelion",CometInfo.Aphelion(orbit),"Farthest distance from the Sun. "+CometInfo.SourceTitle);
     if(CometInfo.ShowsPerihelionDate(orbit))AddFact(facts,"Perihelion date",CometInfo.PerihelionDate(orbit),CometInfo.SourceTitle);
     if(orbit.PeriodYears>0)AddFact(facts,"Orbital period",CometInfo.Period(orbit),CometInfo.SourceTitle);
     AddFact(facts,"Eccentricity",CometInfo.Eccentricity(orbit),"0 is a circle; 1 or more is an open orbit. "+CometInfo.SourceTitle);
