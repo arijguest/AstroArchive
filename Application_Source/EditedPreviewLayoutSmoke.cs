@@ -14,10 +14,10 @@ namespace AstroArchive {
    for(int y=0;y<960;y++)for(int x=0;x<720;x++)Array.Copy(colours[(y<480?0:2)+(x<360?0:1)],0,rgb,(y*720+x)*3,3);
    var bitmap=BitmapSource.Create(720,960,96,96,PixelFormats.Rgb24,null,rgb,720*3);bitmap.Freeze();
    try{
-    CancelEditedPreview();GoToPage(2);CancelAutomaticEditedRefresh();editedPreviewManualWidth=null;L("EditedPreviewMessage").Visibility=Visibility.Collapsed;
+    CancelEditedPreview();GoToPage(2);CancelAutomaticEditedRefresh();HideTargetInformation("Edited");editedPreviewManualWidth=null;L("EditedPreviewMessage").Visibility=Visibility.Collapsed;
     foreach(string removed in new[]{"EditedPreviewSkyPanel","EditedPreviewSky","EditedPreviewSkyResetButton","EditedStretchMode","EditedPreviewDetailsButton","EditedPreviewDetailsPopup"})if(Window.FindName(removed)!=null)throw new Exception("Edited preview retains removed control: "+removed);
     foreach(string mode in new[]{"Dark","Light"})foreach(int textScale in new[]{100,150})foreach(var size in new[]{new[]{1180.0,850},new[]{1060.0,650},new[]{1180.0,1000}}){
-     settings.ThemeMode=mode;settings.TextScalePercent=textScale;ApplyAppearance();Window.Width=size[0];Window.Height=size[1];editedPreviewViewport.SetImage(bitmap,true);PumpPopupLayout();SizeEditedPreview();PumpPopupLayout();editedPreviewViewport.Resize();PumpPopupLayout();
+     settings.ThemeMode=mode;settings.TextScalePercent=textScale;ApplyAppearance();Window.Width=size[0];Window.Height=size[1];HideTargetInformation("Edited");editedPreviewViewport.SetImage(bitmap,true);PumpPopupLayout();SizeEditedPreview();PumpPopupLayout();editedPreviewViewport.Resize();PumpPopupLayout();
      double availableHeight=Math.Max(0,host.ActualHeight-PreviewViewport.ToolbarSpace),chrome=pane.Padding.Left+pane.Padding.Right+pane.BorderThickness.Left+pane.BorderThickness.Right;
      double availableWidth=body.ActualWidth-body.ColumnDefinitions[0].ActualWidth-body.ColumnDefinitions[2].ActualWidth-body.ColumnDefinitions[1].MinWidth;
      if(availableHeight*0.75+chrome<=availableWidth&&Math.Abs(stage.ActualHeight-availableHeight)>2)throw new Exception("3:4 Edited portrait is width-limited: "+stage.RenderSize+", available height "+availableHeight+", column "+column.ActualWidth);
