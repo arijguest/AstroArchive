@@ -58,7 +58,8 @@ namespace AstroArchive {
    string summary=TargetInfoPresentation.DisplaySummary(card);string factText=curated!=null&&!string.IsNullOrWhiteSpace(curated.Fact)?curated.Fact:card.fact;
    article.Children.Add(Section("OVERVIEW",true));article.Children.Add(string.IsNullOrWhiteSpace(summary)?Text("No information is available for this target.","Muted"):Data(summary));
    if(!string.IsNullOrWhiteSpace(factText))article.Children.Add(Callout(Data(factText)));
-   if(curated!=null&&!string.IsNullOrWhiteSpace(curated.Imaging)){article.Children.Add(Section("IMAGING NOTES"));article.Children.Add(Callout(Data(curated.Imaging)));}
+   string imaging=TargetInfoPresentation.Imaging(card);
+   if(!string.IsNullOrWhiteSpace(imaging)){article.Children.Add(Section("IMAGING NOTES"));article.Children.Add(Callout(Data(imaging)));}
    article.Children.Add(Section("PARAMETERS"));var facts=Facts();article.Children.Add(facts);
    if(!string.IsNullOrEmpty(card.parent_body))AddFact(facts,"Parent",card.parent_body,null);
    var measurements=card.measurements??new TargetInfoMeasurement[0];
@@ -93,7 +94,18 @@ namespace AstroArchive {
    content.Children.Add(Text("Select a file to return to its image preview.","Muted","UiFontCaption"));ArrangeBody();
   }
   // Planets, the largest dwarf planets and the Sun carry fixed physical parameters; the Sun shows only size and mass.
+  // Comets show their orbit instead.
   static void AddParameters(Grid facts,TargetInfoCard card){
+   var orbit=CometInfo.IsComet(card)?CometInfo.Orbit(card.id):null;
+   if(orbit!=null){
+    AddFact(facts,"Orbit type",Localization.T(CometInfo.ClassLabel(orbit)),CometInfo.SourceTitle);
+    AddFact(facts,"Perihelion",CometInfo.Perihelion(orbit),"Closest distance to the Sun. "+CometInfo.SourceTitle);
+    if(CometInfo.ShowsAphelion(orbit))AddFact(facts,"Aphelion",CometInfo.Aphelion(orbit),"Farthest distance from the Sun. "+CometInfo.SourceTitle);
+    if(CometInfo.ShowsPerihelionDate(orbit))AddFact(facts,"Perihelion date",CometInfo.PerihelionDate(orbit),CometInfo.SourceTitle);
+    if(orbit.PeriodYears>0)AddFact(facts,"Orbital period",CometInfo.Period(orbit),CometInfo.SourceTitle);
+    AddFact(facts,"Eccentricity",CometInfo.Eccentricity(orbit),"0 is a circle; 1 or more is an open orbit. "+CometInfo.SourceTitle);
+    return;
+   }
    var set=card.domain=="solar_system"?TargetParameters.For(card.id):null;if(set==null)return;
    if(set.HasOrbit)AddFact(facts,"Orbit",TargetParameters.Orbit(set),"NASA Planetary Fact Sheet");
    AddFact(facts,"Diameter",TargetParameters.Diameter(set),set.HasOrbit?"Mean or equatorial diameter. NASA Planetary Fact Sheet":"Nominal solar diameter. IAU 2015 Resolution B3");

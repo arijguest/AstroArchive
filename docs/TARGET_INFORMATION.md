@@ -40,6 +40,21 @@ Flame Nebula). The pane is divided into Overview, Imaging notes, Parameters,
 Location in the sky and Sources, and the object ID appears once: in the heading
 when the object has no other name, otherwise in the line beneath it.
 
+## Comets
+
+Every comet target has a page. The information pack holds only name stubs for 21
+well-known comets, so `CometInfo.cs` supplies the rest. A target such as
+"C/2023 A3 (Tsuchinshan-ATLAS)" or "12P/Pons-Brooks" is looked up by its designation,
+and a comet the pack lacks gets a page built from that designation. Overviews for
+about 30 well-known comets sit in `TargetDescriptions.txt` under their designation;
+any other comet's overview explains what its designation records (type and
+discovery half-month). Parameters show the orbit type, perihelion distance, aphelion (periodic comets), period
+and eccentricity from the NASA/JPL Small-Body Database, with the perihelion date for
+one-off and long-period passages. Imaging notes describe comet-aligned stacking.
+Comets have no fixed sky position, so their pages have no map, and they cite JPL
+instead of SIMBAD. The pack has no comet images yet; a comet card shows one as soon
+as the pack carries an approved image for it.
+
 ## Offline data
 
 `Application_Source/TargetInfo.zip` is a runtime projection of AstroArchive database

@@ -80,6 +80,10 @@ namespace AstroArchive {
     }
     stage="IC 434 image";var ic434=targetInformation.Find("IC434",CancellationToken.None).Cards.Single();editedInfo.View.ShowCard(ic434);PumpPopupLayout();if(!PopupChildren<Image>(editedInfo.View).Any(i=>i.Source is BitmapSource)||!PopupChildren<TextBlock>(editedInfo.View).Any(t=>t.Text.Contains("Orion")))throw new Exception("IC 434 has no visible credited image or full constellation name.");Capture(Path.Combine(output,"AstroArchive_Info_IC434.png"));
     stage="catalogue name preservation";GoToPage(0);WaitForSearches();OpenTargetInformation(Targets);WaitForTargetInformation(libraryInfo,"M31");
+    stage="comet page";libraryInfo.View.ShowCard(targetInformation.Find("C/2023 A3 (Tsuchinshan-ATLAS)",CancellationToken.None).Cards.Single());PumpPopupLayout();
+    var cometLabels=PopupChildren<TextBlock>(libraryInfo.View).Select(t=>t.Text).ToList();
+    if(!cometLabels.Contains(Localization.T("Orbit type"))||!cometLabels.Contains(Localization.T("IMAGING NOTES"))||PopupChildren<SkyGlobeView>(libraryInfo.View).Any())throw new Exception("Comet page lacks its orbit or imaging notes, or shows a fixed sky position.");
+    stage="catalogue name preservation";
     libraryInfo.View.ShowCard(targetInformation.Find("Moon",CancellationToken.None).Cards.Single());PumpPopupLayout();
     if(!PopupChildren<TextBlock>(libraryInfo.View).Any(t=>t.Text=="Moon"))throw new Exception("A catalogue name was translated as an interface label.");
     File.WriteAllText(Path.Combine(output,"target-info-smoke.txt"),"PASS "+Localization.Current+": Repository/Edited context actions clear visible and retained selections; image/info transitions; offline map; short and narrow layouts; light/dark and 100/150% text; translated controls, unchanged catalogue data/attribution; credits reachable without horizontal scrolling.");

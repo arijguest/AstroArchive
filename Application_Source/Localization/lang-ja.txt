@@ -1968,3 +1968,17 @@ Solar eclipse	日食
 Lunar eclipse	月食
 Solar Eclipse	日食
 Lunar Eclipse	月食
+Orbit type	軌道の種類
+Perihelion	近日点
+Perihelion date	近日点通過日
+Orbital period	公転周期
+Eccentricity	離心率
+{0} AU from the Sun	太陽から{0} au
+{0} years per orbit	{0}年で1周
+Halley-type	ハレー型
+Jupiter-family	木星族
+Encke-type	エンケ型
+Long-period	長周期
+Near-parabolic	ほぼ放物線
+Hyperbolic (interstellar)	双曲線（恒星間）
+Aphelion	遠日点

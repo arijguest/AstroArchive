@@ -20,6 +20,8 @@ namespace AstroArchive {
    if(name.Success)return name.Value;
    return Regex.IsMatch(text,@"^(?:Comet\s+)?ATLAS$",RegexOptions.IgnoreCase)?"ATLAS":null;
   }
+  // The IAU designation without the discoverer's name: "C/2023 A3", "12P" or "2I".
+  public static string Designation(string name){var match=Regex.Match(FromLabel(name)??"",@"^(?:[CPDXAI]/\d{4} [A-Z]{1,2}\d{1,3}|\d{1,4}[PDI])(?![A-Z0-9])");return match.Success?match.Value:null;}
   public static bool IsComet(string name){return FromLabel(name)!=null||Regex.IsMatch(name??"",@"\bcomet\b",RegexOptions.IgnoreCase);}
  }
 }

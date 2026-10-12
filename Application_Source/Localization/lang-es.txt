@@ -1961,3 +1961,17 @@ Solar eclipse	Eclipse solar
 Lunar eclipse	Eclipse lunar
 Solar Eclipse	Eclipse solar
 Lunar Eclipse	Eclipse lunar
+Orbit type	Tipo de órbita
+Perihelion	Perihelio
+Perihelion date	Fecha del perihelio
+Orbital period	Período orbital
+Eccentricity	Excentricidad
+{0} AU from the Sun	{0} UA del Sol
+{0} years per orbit	{0} años por órbita
+Halley-type	Tipo Halley
+Jupiter-family	Familia de Júpiter
+Encke-type	Tipo Encke
+Long-period	Largo período
+Near-parabolic	Casi parabólica
+Hyperbolic (interstellar)	Hiperbólica (interestelar)
+Aphelion	Afelio

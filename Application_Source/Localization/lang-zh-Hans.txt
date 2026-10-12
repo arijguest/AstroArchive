@@ -1967,3 +1967,17 @@ Solar eclipse	日食
 Lunar eclipse	月食
 Solar Eclipse	日食
 Lunar Eclipse	月食
+Orbit type	轨道类型
+Perihelion	近日点
+Perihelion date	过近日点日期
+Orbital period	公转周期
+Eccentricity	偏心率
+{0} AU from the Sun	距太阳 {0} AU
+{0} years per orbit	{0} 年绕行一周
+Halley-type	哈雷型
+Jupiter-family	木星族
+Encke-type	恩克型
+Long-period	长周期
+Near-parabolic	近抛物线
+Hyperbolic (interstellar)	双曲线（星际）
+Aphelion	远日点

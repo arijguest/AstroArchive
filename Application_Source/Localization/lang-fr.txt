@@ -1932,3 +1932,17 @@ Solar eclipse	Éclipse solaire
 Lunar eclipse	Éclipse lunaire
 Solar Eclipse	Éclipse solaire
 Lunar Eclipse	Éclipse lunaire
+Orbit type	Type d'orbite
+Perihelion	Périhélie
+Perihelion date	Date du périhélie
+Orbital period	Période orbitale
+Eccentricity	Excentricité
+{0} AU from the Sun	{0} UA du Soleil
+{0} years per orbit	{0} ans par orbite
+Halley-type	Type Halley
+Jupiter-family	Famille de Jupiter
+Encke-type	Type Encke
+Long-period	Longue période
+Near-parabolic	Quasi parabolique
+Hyperbolic (interstellar)	Hyperbolique (interstellaire)
+Aphelion	Aphélie

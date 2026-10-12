@@ -1935,3 +1935,17 @@ Solar eclipse	Sonnenfinsternis
 Lunar eclipse	Mondfinsternis
 Solar Eclipse	Sonnenfinsternis
 Lunar Eclipse	Mondfinsternis
+Orbit type	Bahntyp
+Perihelion	Perihel
+Perihelion date	Periheldatum
+Orbital period	Umlaufzeit
+Eccentricity	Exzentrizität
+{0} AU from the Sun	{0} AE von der Sonne
+{0} years per orbit	{0} Jahre pro Umlauf
+Halley-type	Halley-Typ
+Jupiter-family	Jupiter-Familie
+Encke-type	Encke-Typ
+Long-period	Langperiodisch
+Near-parabolic	Nahezu parabolisch
+Hyperbolic (interstellar)	Hyperbolisch (interstellar)
+Aphelion	Aphel
