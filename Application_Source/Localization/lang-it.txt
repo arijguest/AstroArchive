@@ -1986,3 +1986,28 @@ Solar eclipse	Eclissi solare
 Lunar eclipse	Eclissi lunare
 Solar Eclipse	Eclissi solare
 Lunar Eclipse	Eclissi lunare
+# Sky map clicks and eclipse details
+Total solar eclipse	Eclissi solare totale
+Annular solar eclipse	Eclissi solare anulare
+Partial solar eclipse	Eclissi solare parziale
+Total lunar eclipse	Eclissi lunare totale
+Partial lunar eclipse	Eclissi lunare parziale
+Penumbral lunar eclipse	Eclissi lunare di penombra
+Sun covered at capture	Sole coperto al momento della ripresa
+Moon in Earth's shadow at capture	Luna nell’ombra della Terra al momento della ripresa
+Moon in Earth's outer shadow at capture	Luna nella penombra della Terra al momento della ripresa
+Maximum	Massimo
+Began	Inizio
+Ended	Fine
+Duration	Durata
+Partial phase	Fase parziale
+Totality	Totalità
+Annularity	Fase anulare
+{#0}% at {1}	{0}% alle {1}
+Click a constellation to name it, or the Moon, Sun or target for capture details.	Fai clic su una costellazione per vederne il nome, oppure sulla Luna, sul Sole o sul soggetto per i dettagli della ripresa.
+Coverage from first to last contact.	Copertura dal primo all’ultimo contatto.
+The marker shows the capture.	Il segno indica la ripresa.
+Eclipse coverage over time	Copertura dell’eclissi nel tempo
+Eclipse times are for the observing location.	Gli orari dell’eclissi si riferiscono al luogo di osservazione.
+Eclipse times run from the Moon entering Earth's outer shadow to leaving it.	Gli orari dell’eclissi vanno dall’ingresso della Luna nella penombra della Terra alla sua uscita.
+Eclipse coverage comes from the bundled Moon and Sun models at the recorded time; check the capture clock if it looks wrong.	La copertura deriva dai modelli lunare e solare inclusi all’ora registrata; controlla l’orologio della ripresa se sembra errata.

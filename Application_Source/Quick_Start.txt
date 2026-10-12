@@ -142,9 +142,12 @@ image, a ZIP of images, or an MP4/GIF slideshow.
 ## Eclipses
 Sun and Moon captures taken during an eclipse list under Solar Eclipse or Lunar
 Eclipse in the target list; files and folders are unchanged. Capture details show
-how much of the Sun (or of the Moon, in Earth's shadow) was covered, and the sky
-map adds a close-up of both discs. Solar eclipses need an observing town / city
-or capture location; both need a correct capture time and timezone.
+how much of the Sun (or of the Moon, in Earth's shadow) was covered at the capture,
+with a curve of the whole eclipse, its maximum, when it began and ended, how long
+it lasted and any totality, in the capture's timezone. Solar times are for your
+site; lunar times run from the Moon entering Earth's outer shadow to leaving it.
+The sky map adds a close-up of both discs. Solar eclipses need an observing town /
+city or capture location; both need a correct capture time and timezone.
 
 ## Condensed subs
 Repeated Lights share a collapsed session row with dates, count, per-sub exposure,
@@ -292,6 +295,9 @@ observing town/city timezone, including daylight saving at the capture date.
 A timezone or UTC time in capture metadata takes priority. The metadata editor
 lets you set a capture timezone explicitly. The map uses your observing location
 for the local horizon.
+Click a constellation on the sky map to show its name; click it, the name or
+empty sky again, or press Escape, to hide it. Click the Moon, Sun or target marker
+(or press Enter on the map) to open Capture details.
 Repository's wider preview pane is adjustable by dragging its divider.
 Sidebars sample still images, normally to 1,400 pixels on the longest edge.
 Large still/SER windows decode native pixels within format limits.
