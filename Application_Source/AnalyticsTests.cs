@@ -27,6 +27,14 @@ namespace AstroArchive {
     var natural=AnalyticsGraphics.Pages(data,2,true,AnalyticsLayout.Landscape,null);Check(natural.Count==AnalyticsGraphics.Pages(data,2).Count,"Default chart type changed the pages");
     var invalid=AnalyticsGraphics.Pages(data,1,true,AnalyticsLayout.Landscape,"donut");Check(invalid.Count==AnalyticsGraphics.Pages(data,1).Count&&!invalid.SelectMany(p=>p.Marks).Any(m=>m.Kind=="polygon"&&m.Role=="chart"),"The timeline accepted an unordered chart type");
    });
+   Test("Target card choices survive saving and are repaired when out of range",()=>{
+    var saved=Util.Deserialize<Settings>(Util.Serialize(new Settings{CardChoices=new Dictionary<string,TargetCardMemory>{{"M31",new TargetCardMemory{Path="",Fill=true,Zoom=9,PanX=.5,PanY=-3,Rotation=-90,Description="First light"}}}}));
+    var memory=saved.CardChoices["M31"];var placement=memory.Placement();
+    Check(memory.Path==""&&memory.Fill&&memory.Description=="First light","Target card image, fill or description was not remembered");
+    Check(placement.Zoom==4&&placement.PanX==.5&&placement.PanY==-1&&placement.Rotation==270,"Remembered framing was not repaired");
+    Check(TargetCards.QuarterTurn(450)==90&&TargetCards.QuarterTurn(-180)==180&&TargetCards.QuarterTurn(0)==0,"Rotation is not kept to quarter turns");
+    Check(Util.Deserialize<Settings>(Util.Serialize(new Settings())).CardChoices==null,"Settings without card choices gained some");
+   });
    Test("Analytics preferences repair saved values and migrate 3.1.5 chart choices",()=>{
     var fresh=AnalyticsPreferences.Load(Util.Deserialize<Settings>("{}").Analytics,null);
     Check(fresh.ImageFormat=="PDF"&&fresh.CardFormat=="PNG"&&fresh.VideoFormat=="MP4"&&fresh.Layout==0&&!fresh.LightDocument&&!fresh.Video&&fresh.Palette==null&&fresh.Item==null&&fresh.Charts.Count==0&&fresh.IncludedCharts().Count==6,"Old settings did not start from the familiar defaults");

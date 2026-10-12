@@ -2064,3 +2064,19 @@ Rotate left	Pivoter à gauche
 Rotate right	Pivoter à droite
 Turn the image a quarter turn anticlockwise.	Fait pivoter l’image d’un quart de tour dans le sens antihoraire.
 Turn the image a quarter turn clockwise.	Fait pivoter l’image d’un quart de tour dans le sens horaire.
+Set capture town / city…	Définir la ville de prise de vue…
+Capture town / city	Ville de prise de vue
+Choose where these files were captured. A chosen town or city replaces any capture location recorded in the files. Without a choice, the recorded location is used, then your observing town / city from Settings.	Choisissez où ces fichiers ont été capturés. Une ville choisie remplace tout lieu de capture enregistré dans les fichiers. Sans choix, le lieu enregistré est utilisé, puis votre ville d'observation des Paramètres.
+Location used for sky views, Stellarium and eclipse times.	Lieu utilisé pour les vues du ciel, Stellarium et les heures d'éclipse.
+Use default location	Utiliser le lieu par défaut
+Default location	Lieu par défaut
+Save location	Enregistrer le lieu
+Mixed	Mixte
+Not set	Non défini
+Recorded in file metadata	Enregistré dans les métadonnées du fichier
+Settings default	Par défaut des Paramètres
+Chosen capture town / city	Ville de prise de vue choisie
+Target below horizon	Cible sous l'horizon
+Set the capture town / city for this file (right-click › Set capture town / city…), or correct the capture timezone in metadata.	Définissez la ville de prise de vue de ce fichier (clic droit › Définir la ville de prise de vue…) ou corrigez le fuseau horaire de capture dans les métadonnées.
+Set capture town / city for selected…	Définir la ville de prise de vue de la sélection…
+Targets below the horizon at the predicted capture time usually need the capture town / city or timezone set.	Les cibles sous l'horizon à l'heure de capture estimée nécessitent généralement la ville ou le fuseau horaire de capture.

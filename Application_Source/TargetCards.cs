@@ -10,6 +10,17 @@ namespace AstroArchive {
   public string Target,Title,Subtitle,DateRange,Equipment;public double Seconds;public int Lights,Stacks,Nights,UnknownExposure;
   public List<AnalyticsValue> Filters=new List<AnalyticsValue>();
  }
+ // Zoom (1–4×), pan (-1 to 1 across the overhang) and clockwise quarter turns.
+ public sealed class TargetCardPlacement {
+  public double Zoom=1,PanX,PanY;public int Rotation;
+  public TargetCardPlacement Copy(){return (TargetCardPlacement)MemberwiseClone();}
+ }
+ // A target's last card choices, so its image and framing come back next time.
+ // An empty Path means the star field was chosen; null Path keeps the default image.
+ public sealed class TargetCardMemory {
+  public string Path{get;set;}public bool Fill{get;set;}public double Zoom{get;set;}public double PanX{get;set;}public double PanY{get;set;}public int Rotation{get;set;}public string Description{get;set;}
+  public TargetCardPlacement Placement(){return new TargetCardPlacement{Zoom=Math.Max(1,Math.Min(4,double.IsNaN(Zoom)?1:Zoom)),PanX=Math.Max(-1,Math.Min(1,double.IsNaN(PanX)?0:PanX)),PanY=Math.Max(-1,Math.Min(1,double.IsNaN(PanY)?0:PanY)),Rotation=TargetCards.QuarterTurn(Rotation)};}
+ }
  public sealed class TargetCardChoice {public string Target,Label;public double Seconds;public int Lights;public override string ToString(){return Label;}}
  public enum TargetCardLayout {Portrait,Vertical,Square,Widescreen}
  public static class TargetCards {
@@ -25,6 +36,7 @@ namespace AstroArchive {
    var culture=Localization.English||Localization.Pseudo?CultureInfo.InvariantCulture:CultureInfo.GetCultureInfo(code);
    return date.ToString(code=="de"?(year?"d. MMM yyyy":"d. MMM"):(year?"d MMM yyyy":"d MMM"),culture);
   }
+  public static int QuarterTurn(int degrees){return ((int)Math.Round(degrees/90.0)%4+4)%4*90;}
   public static bool Eligible(string target){return !string.IsNullOrWhiteSpace(target)&&target!="All targets"&&target!="Calibration"&&!Catalog.IsAmbiguous(target);}
   // Imaged targets, most integration (or most light frames) first. Target keeps
   // the stored name so it matches the archive and the target list.

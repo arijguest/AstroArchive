@@ -74,10 +74,10 @@ namespace AstroArchive {
   }
  }
  public partial class MainUi {
-  // Eclipse times follow the capture's own timezone, then the observing town's, then UTC.
+  // Eclipse times follow the capture's own timezone, then its chosen or observing town's, then UTC.
   TimeZoneInfo EclipseZone(Frame frame){
    if(frame!=null&&!string.IsNullOrEmpty(frame.TimeZoneId)&&!string.Equals(frame.TimeZoneId,"UTC",StringComparison.OrdinalIgnoreCase))try{return TimeZoneInfo.FindSystemTimeZoneById(frame.TimeZoneId);}catch(TimeZoneNotFoundException){}catch(InvalidTimeZoneException){}
-   if(settings!=null&&settings.ObservingCityId.HasValue)try{var zone=CityTimeZones.ForCity(settings.ObservingCityId.Value);if(zone!=null)return zone;}catch(Exception error){if(!(error is TimeZoneNotFoundException||error is InvalidTimeZoneException||error is System.IO.InvalidDataException))throw;}
+   int? city=CaptureSite.ZoneCity(frame,settings);if(city.HasValue)try{var zone=CityTimeZones.ForCity(city.Value);if(zone!=null)return zone;}catch(Exception error){if(!(error is TimeZoneNotFoundException||error is InvalidTimeZoneException||error is System.IO.InvalidDataException))throw;}
    return TimeZoneInfo.Utc;
   }
   internal static string ZoneLabel(TimeZoneInfo zone,DateTime utc){

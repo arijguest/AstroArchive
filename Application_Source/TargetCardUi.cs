@@ -14,16 +14,6 @@ using System.Windows.Media.Imaging;
 namespace AstroArchive {
  // Shareable target cards: the best image of a target with its integration,
  // filters and nights, in the Analytics palette and social sizes.
- public sealed class TargetCardPlacement {
-  public double Zoom=1,PanX,PanY;public int Rotation;
-  public TargetCardPlacement Copy(){return (TargetCardPlacement)MemberwiseClone();}
- }
- // A target's last card choices, so its image and framing come back next time.
- // An empty Path means the star field was chosen; null Path keeps the default image.
- public sealed class TargetCardMemory {
-  public string Path{get;set;}public bool Fill{get;set;}public double Zoom{get;set;}public double PanX{get;set;}public double PanY{get;set;}public int Rotation{get;set;}public string Description{get;set;}
-  public TargetCardPlacement Placement(){return new TargetCardPlacement{Zoom=Math.Max(1,Math.Min(4,double.IsNaN(Zoom)?1:Zoom)),PanX=Math.Max(-1,Math.Min(1,double.IsNaN(PanX)?0:PanX)),PanY=Math.Max(-1,Math.Min(1,double.IsNaN(PanY)?0:PanY)),Rotation=TargetCardRenderer.QuarterTurn(Rotation)};}
- }
  public static class TargetCardRenderer {
   sealed class Palette {public Color Top,Bottom,Ink,Muted,Accent,Second,Panel,PanelEnd,Border,Matte;}
   static Palette Colours(bool dark){
@@ -67,7 +57,7 @@ namespace AstroArchive {
    return new Size(hero.PixelWidth*scale,hero.PixelHeight*scale);
   }
   // How far, in card pixels, a pan from the centre to either edge moves the image.
-  public static int QuarterTurn(int degrees){return ((int)Math.Round(degrees/90.0)%4+4)%4*90;}
+  public static int QuarterTurn(int degrees){return TargetCards.QuarterTurn(degrees);}
   // The image turned clockwise by whole quarter turns.
   static BitmapSource Oriented(BitmapSource hero,int rotation){
    int turn=QuarterTurn(rotation);if(hero==null||turn==0)return hero;var turned=new TransformedBitmap(hero,new RotateTransform(turn));turned.Freeze();return turned;

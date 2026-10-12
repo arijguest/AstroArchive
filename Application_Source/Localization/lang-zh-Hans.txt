@@ -2098,3 +2098,19 @@ Rotate left	向左旋转
 Rotate right	向右旋转
 Turn the image a quarter turn anticlockwise.	将图像逆时针旋转 90°。
 Turn the image a quarter turn clockwise.	将图像顺时针旋转 90°。
+Set capture town / city…	设置拍摄城镇/城市…
+Capture town / city	拍摄城镇/城市
+Choose where these files were captured. A chosen town or city replaces any capture location recorded in the files. Without a choice, the recorded location is used, then your observing town / city from Settings.	选择这些文件的拍摄地点。所选城镇或城市会替代文件中记录的拍摄位置。未选择时，使用记录的位置，然后使用设置中的观测城镇/城市。
+Location used for sky views, Stellarium and eclipse times.	用于星空视图、Stellarium 和食相时间的位置。
+Use default location	使用默认位置
+Default location	默认位置
+Save location	保存位置
+Mixed	混合
+Not set	未设置
+Recorded in file metadata	记录在文件元数据中
+Settings default	设置中的默认值
+Chosen capture town / city	所选拍摄城镇/城市
+Target below horizon	目标位于地平线以下
+Set the capture town / city for this file (right-click › Set capture town / city…), or correct the capture timezone in metadata.	请为此文件设置拍摄城镇/城市（右键 › 设置拍摄城镇/城市…），或在元数据中更正拍摄时区。
+Set capture town / city for selected…	为所选项设置拍摄城镇/城市…
+Targets below the horizon at the predicted capture time usually need the capture town / city or timezone set.	在推测拍摄时间位于地平线以下的目标，通常需要设置拍摄城镇/城市或时区。

@@ -40,14 +40,19 @@ namespace AstroArchive {
     foreach(string filter in new[]{"CLP","LPiece","RGB","Standard"})Check(!PreviewData.FilterColourCompensation(filter),"Substring mistaken for optical filter: "+filter);
    });
    Test("Solar lunar and planetary previews stay linear with their original colour",()=>{
-    var data=new PreviewData{Width=3,Height=1,Channels=3,Filter="LP",Pixels=new[]{0.2,0.3,0.1,0.4,0.6,0.2,0.6,0.9,0.3}};var expected=data.Render("Linear",ct);
+    var data=new PreviewData{Width=3,Height=1,Channels=3,Filter="LP",Pixels=new[]{0.2,0.3,0.1,0.4,0.6,0.2,0.6,0.9,0.3}};data.Target="Sun";var expected=data.Render("Linear",ct);Check(expected[0]<expected[1]&&expected[2]<expected[0]&&expected[7]==255,"Bright body colour or linear scaling lost");
     foreach(string target in new[]{"Sun","Solar","solar","Moon","Jupiter","Saturn","Mars","Venus","Mercury","Uranus","Neptune","Planetary"}){data.Target=target;foreach(string mode in PreviewData.StretchModes)Check(data.Render(mode,ct).SequenceEqual(expected),"Bright body was stretched or colour balanced: "+target+" / "+mode);Check(data.SkipStretch&&data.DisplayMode.StartsWith("Linear"),"Bright preview did not select linear");}
     data.Target="Unknown";data.ObservationMode="Planetary";Check(data.Render("Strong",ct).SequenceEqual(expected),"Capture mode failed to suppress stretch");data.ObservationMode="LIGHT";data.ApplyContext(null,Path.Combine(root,"Solar","capture.fit"));Check(data.SkipStretch,"Solar folder hint lost behind light header");
     data=new PreviewData{Target="NGC7009"};data.ApplyContext(null,Path.Combine(root,"Solar","Saturn_Nebula.fit"));Check(!data.SkipStretch,"Known planetary nebula treated as a planet");data=new PreviewData();data.ApplyContext(null,Path.Combine(root,"Saturn_Nebula.fit"));Check(!data.SkipStretch,"Nebula filename treated as a planet");Check(!ObservationTargets.Unstretched("Planetary Nebula","Science")&&!ObservationTargets.Unstretched("Sunflower Galaxy",null),"Deep sky label bypassed stretching");
    });
+   Test("Short solar exposures in a wide sample range are scaled to be visible",()=>{
+    // DWARF-style Sun capture: 16-bit range, disc only a few thousand ADU.
+    var data=new PreviewData{Width=4,Height=1,Channels=1,Target="Sun",Minimum=0,Maximum=65535,Pixels=new[]{200.0,3000.0,3200.0,200.0}};var shown=data.Render("Linear",ct);
+    Check(shown[3]>=230&&shown[0]<30&&data.DisplayMode.Contains("scaled"),"Dim solar disc stayed dark: "+shown[3]);
+   });
    Test("Mosaic lunar previews are colour balanced instead of green",()=>{
     var data=new PreviewData{Width=2,Height=1,Channels=3,Mosaic=true,Target="Moon",Minimum=0,Maximum=1000,Pixels=new[]{400.0,800.0,400.0,200.0,400.0,200.0}};var shown=data.Render("Auto",ct);
-    Check(Math.Abs(shown[1]-shown[0])<=1&&Math.Abs(shown[1]-shown[2])<=1,"Green mosaic cast remained on a lunar preview");data.Mosaic=false;shown=data.Render("Auto",ct);Check(shown[1]>shown[0],"Non-mosaic colour was altered");
+    Check(Math.Abs(shown[1]-shown[0])<=1&&Math.Abs(shown[1]-shown[2])<=1,"Green mosaic cast remained on a lunar preview");data.Mosaic=false;shown=data.Render("Auto",ct);Check(shown[4]>shown[3],"Non-mosaic colour was altered");
    });
    Test("FITS preview uses target filter and observation mode metadata",()=>{
     string path=Path.Combine(root,"preview-solar-metadata.fit");Write(path,8,8,(x,y)=>20000+x*100+y,new Dictionary<string,string>{{"OBJECT","'Solar'"},{"FILTER","'IRCUT'"},{"OBSMODE","'SOLAR'"},{"BAYERPAT","'RGGB'"}});string hash=Util.Hash(path,ct);var data=Fits.Preview(path,ct);Check(data.Target=="Solar"&&data.Filter=="IRCUT"&&data.SkipStretch,"FITS subject/filter metadata dropped");Check(data.Render("Auto",ct).SequenceEqual(data.Render("Linear",ct)),"FITS solar image stretched");Check(Util.Hash(path,ct)==hash,"Solar preview changed FITS file");

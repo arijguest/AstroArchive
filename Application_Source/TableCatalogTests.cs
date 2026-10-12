@@ -85,6 +85,13 @@ namespace AstroArchive {
     using(var repo=new Repository(Path.Combine(root,"seestar-counted-repo"))){repo.Import(repo.Scan(source,"Seestar-01","Auto",ct,NoProgress).Frames,ct,NoProgress);var saved=repo.All().Single();Check(saved.StackCount==36&&saved.Exposure==180&&Util.Hash(repo.FilePath(saved),ct)==Util.Hash(file,ct),"Repository metadata or capture bytes changed incorrectly");var project=repo.CreateEditedWorkingCopies(new[]{saved},"Manual editor","Other editor",ct,NoProgress);Check(project.Sources.Single().Metadata.Subs==36&&project.Sources.Single().Metadata.SubExposure==5&&project.Sources.Single().Metadata.TotalExposure==180,"Edited working copy lost Seestar integration");}
     var edited=EditedMetadata.Read("Stacked_36_NGC 7000_5.0s_LP_20260906-214231776.fits.gz",null);Check(edited.Subs==36&&edited.SubExposure==5&&edited.TotalExposure==180,"Compressed filename did not recover exposure");
    });
+   Test("Mode-prefixed Seestar stacks multiply the recorded count by the sub duration",()=>{
+    foreach(bool seestarFolder in new[]{true,false}){
+     string source=Path.Combine(root,seestarFolder?"seestar-dso-prefix":"generic-dso-prefix",seestarFolder?"MyWorks":"Stacks");Directory.CreateDirectory(source);string file=Path.Combine(source,"DSO_Stacked_194_HIP 106890_60.0s_20260912_112545.fit");
+     Write(file,64,48,(x,y)=>1800,new System.Collections.Generic.Dictionary<string,string>{{"EXPTIME","60.0"},{"STACKCNT","194"}});var frame=Classifier.Read(file,source,"Seestar-01","Auto");
+     Check(frame.Kind=="Stack"&&frame.StackCount==194&&frame.Exposure==11640,"DSO_Stacked name did not give 194 × 60 s ("+seestarFolder+"): "+frame.Exposure);
+    }
+   });
    Test("Seestar stack totals respect explicit totals and user metadata without double multiplication",()=>{
     string source=Path.Combine(root,"seestar-stack-precedence");Directory.CreateDirectory(source);string file=Path.Combine(source,"Stacked_36_NGC 7000_5.0s_LP_20260906-214231776.fit");
     Write(file,64,48,(x,y)=>1800,new System.Collections.Generic.Dictionary<string,string>{{"EXPTIME","180"}});var frame=Classifier.Read(file,source,"Seestar-01","Seestar S50");Check(frame.Exposure==180&&frame.StackCount==36,"Integrated EXPTIME was multiplied again");

@@ -35,6 +35,18 @@ namespace AstroArchive {
     var calibration=SkyFrame(10,20,0,0);calibration.Kind="Dark";Check(Stellarium.From(CaptureSky.Resolve(calibration,settings),calibration)==null,"Calibration frame can open Stellarium");
     Check(Stellarium.From(CaptureSky.Resolve(null,settings),null)==null&&Stellarium.From(CaptureSky.Resolve(new Frame{Target="Unknown"},settings),new Frame{Target="Unknown"})==null,"Frame without a position can open Stellarium");
    });
+   Test("Stellarium Web gets the same view when Stellarium is not installed",()=>{
+    var full=new StellariumView{RA=10.68,Dec=41.27,FieldDegrees=3.6,Utc=new DateTime(2026,10,7,23,0,5,DateTimeKind.Utc),Latitude=-33.8688,Longitude=151.2093,Altitude=42.5,Azimuth=310.25,Name="M31"};
+    Check(Stellarium.WebUrl(full)=="https://stellarium-web.org/skysource/M31?fov=3.6&date=2026-10-07T23:00:05Z&lat=-33.8688&lng=151.2093&az=310.25&alt=42.5","Full web URL wrong: "+Stellarium.WebUrl(full));
+    Check(Stellarium.WebUrl(new StellariumView{RA=1,Dec=2,Name="NGC 7000"})=="https://stellarium-web.org/skysource/NGC%207000?fov=5","Name-only web URL wrong");
+    Check(Stellarium.WebUrl(new StellariumView{RA=1,Dec=2})=="https://stellarium-web.org/?fov=5","Unnamed web URL wrong");
+    var old=Thread.CurrentThread.CurrentCulture;
+    try{Thread.CurrentThread.CurrentCulture=new CultureInfo("fr-FR");Check(Stellarium.WebUrl(full).Contains("lat=-33.8688&lng=151.2093"),"Decimal comma leaked into the web URL");}
+    finally{Thread.CurrentThread.CurrentCulture=old;}
+    var settings=new Settings();var frame=SkyFrame(10.68,41.27,51.5,0);frame.Target="M31";var view=Stellarium.From(CaptureSky.Resolve(frame,settings),frame);
+    Check(view!=null&&view.Name=="M31"&&view.Altitude.HasValue&&view.Azimuth.HasValue,"Capture horizon or catalogue name not carried to the web view");
+    Check(Stellarium.From(CaptureSky.Resolve(SkyFrame(10,20,51.5,0),settings),SkyFrame(10,20,51.5,0)).Name==null,"Unknown target given a web name");
+   });
    Test("Stellarium executable is validated, remembered and launched with a start-up script",()=>{
     string root=Path.Combine(Path.GetTempPath(),"aa-stellarium-"+Guid.NewGuid().ToString("N"));Directory.CreateDirectory(root);
     try{

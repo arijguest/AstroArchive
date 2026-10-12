@@ -27,7 +27,7 @@ namespace AstroArchive {
     File.WriteAllText(Path.Combine(output,"target-solving-stage.txt"),"Progress window closure");
     foreach(WindowState ownerState in new[]{WindowState.Normal,WindowState.Maximized}){
      Window.WindowState=ownerState;cancel=new CancellationTokenSource();SetBusy(true);activeMetrics=new PipelineMetrics(null);operationClock=System.Diagnostics.Stopwatch.StartNew();IdentificationStage(new IdentificationProgress{Completed=1,Total=3,Stage="ASTAP solving · 00:04 elapsed · 5 minute limit",Detail="Job 2 of 3 · Second stack.fit\n1 Stack · Scope / Telephoto"});LiveTick();PumpPopupLayout();
-     if(L("OperationHeading").Text!="Identifying targets"||!L("OperationDetail").Text.Contains("Job 2 of 3")||!L("StatusLabel").Text.Contains("ASTAP solving")||L("RateLabel").Text.Contains("filesystem"))throw new Exception("Solver progress hides its current job or reports a filesystem stall");
+     if(L("OperationHeading").Text!="Identifying targets"||!L("OperationDetail").Text.Contains("Job 2 of 3")||!L("StatusLabel").Text.Contains("ASTAP solving")||L("RateLabel").Text.Contains("filesystem")||!L("RateLabel").Text.Contains("ETA ~"))throw new Exception("Solver progress hides its current job or ETA, or reports a filesystem stall");
      if(OperationProgressVisible)throw new Exception("Target solving opened an automatic window.");cancel.Dispose();cancel=null;identificationProgress=null;activeMetrics=null;operationClock.Stop();operationClock=null;SetBusy(false);PumpPopupLayout();if(Window.WindowState!=ownerState)throw new Exception("Completing background solving changed the owner's state.");
     }
     File.WriteAllText(Path.Combine(output,"target-solving-stage.txt"),"Deferred target review");

@@ -66,7 +66,7 @@ namespace AstroArchive {
   public string Night {get;set;} public string Session {get;set;} public string Notes {get;set;} public string Status {get;set;}
   public string SourceMetadataPath {get;set;} public string SidecarRelativePath {get;set;}
   public double? VideoDurationSeconds {get;set;} public string VideoDurationSource {get;set;} public double? Exposure {get;set;} public double? Gain {get;set;} public double? Temperature {get;set;} public double? RA {get;set;} public double? Dec {get;set;}
-  public double? Latitude {get;set;} public double? Longitude {get;set;} public int Width {get;set;} public int Height {get;set;}
+  public double? Latitude {get;set;} public double? Longitude {get;set;} public int? CaptureCityId {get;set;} public string CaptureCity {get;set;} public double? CaptureLatitude {get;set;} public double? CaptureLongitude {get;set;} public int Width {get;set;} public int Height {get;set;}
   public int Channels {get;set;} public int BinX {get;set;} public int BinY {get;set;} public int StackCount {get;set;}
   public FileStamp SourceStamp {get;set;} public FileStamp RepositoryStamp {get;set;} public FileStamp SourceMetadataStamp {get;set;} public string CameraEvidence {get;set;} public long Bytes {get;set;} public bool Rejected {get;set;} public string RotationReport {get;set;}
   public string TelescopeModel{get;set;}public string CameraModel{get;set;}public string CameraId{get;set;}public string AcquisitionSoftware{get;set;}public string DeviceProfile{get;set;}public string AcquisitionProfile{get;set;}public string ClassificationVersion{get;set;}
