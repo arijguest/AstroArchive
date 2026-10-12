@@ -22,7 +22,7 @@ namespace AstroArchive {
    B("CoffeeButton").Click+=(s,e)=>{try{Process.Start(new ProcessStartInfo("https://ko-fi.com/arijguest"){UseShellExecute=true});}catch(Exception error){LocalizedMessage.Show(Window,"Could not open your browser. Visit https://ko-fi.com/arijguest\n\n"+error.Message,"Ko-fi link",MessageBoxButton.OK,MessageBoxImage.Information);}};
    B("ThemeButton").Click+=(s,e)=>{settings.ThemeMode=Theme.IsDark(settings.ThemeMode)?"Light":"Dark";ApplyAppearance();SaveSettings();};
    B("PreviewToggle").Click+=(s,e)=>{settings.ShowPreview=!settings.ShowPreview;SetPreviewVisibility();SaveSettings();if(settings.ShowPreview)PreviewSelected();};
-   B("OpenPreviewButton").Click+=(s,e)=>ShowPreviewFile();UpdatePreviewFileAction();
+   B("OpenPreviewButton").Click+=(s,e)=>ShowPreviewFile();InitializeStellarium();UpdatePreviewFileAction();
    C("StretchMode").SelectionChanged+=(s,e)=>{if(!previewReady||choosingStretch)return;if(previewPath==null||ScientificPreview(previewPath)){settings.PreviewStretch=Convert.ToString(C("StretchMode").SelectedItem);SaveSettings();}if(previewPath!=null)LoadPreview(previewPath,false);};
    SystemEvents.UserPreferenceChanged+=AppearanceChanged;previewReady=true;SetPreviewVisibility();
   }
@@ -36,7 +36,7 @@ namespace AstroArchive {
   }
   // The preview only shows archived captures, so this reveals the repository copy rather than a source file.
   void ShowPreviewFile(){if(repo!=null&&previewFrame!=null)ShowFile(previewFrame);}
-  void UpdatePreviewFileAction(){var button=B("OpenPreviewButton");if(button!=null)button.IsEnabled=repo!=null&&previewFrame!=null;}
+  void UpdatePreviewFileAction(){var button=B("OpenPreviewButton");if(button!=null)button.IsEnabled=repo!=null&&previewFrame!=null;UpdateStellariumAction();}
   void PreviewMessage(string message){L("PreviewMessage").Text=message;L("PreviewMessage").Visibility=Visibility.Visible;}
   async void LoadPreview(string path,bool reload,Frame frame=null,Func<string,CancellationToken,Frame,PreviewData> decode=null){
    if(metadataPreviewSuspended)return;

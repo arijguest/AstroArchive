@@ -1,0 +1,122 @@
+// Offline "Open in Stellarium": builds a small Stellarium script from a capture's sky context and hands it to a running
+// copy (Remote Control on this PC) or to a newly started copy. Nothing is sent beyond 127.0.0.1.
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Globalization;
+using System.IO;
+using System.Linq;
+using System.Net;
+using System.Text;
+using Microsoft.Win32;
+
+namespace AstroArchive {
+ public sealed class StellariumView {
+  public double RA,Dec;public double? FieldDegrees,Latitude,Longitude;public DateTime? Utc;public bool Approximate;
+ }
+ public static class Stellarium {
+  public const string Id="stellarium";
+  public const int RemotePort=8090;
+  const double DefaultFieldDegrees=5,FieldMargin=1.2,MinField=0.05,MaxField=180;
+  static readonly DateTime JulianEpoch=new DateTime(1970,1,1,0,0,0,DateTimeKind.Utc);
+
+  // Null when there is nothing meaningful to show: no frame, a calibration frame, or no known position.
+  public static StellariumView From(CaptureSky sky,Frame frame){
+   if(sky==null||frame==null||CaptureSky.IsCalibration(frame)||!sky.HasPosition||!CaptureSky.Finite(sky.RA)||!CaptureSky.Finite(sky.Dec))return null;
+   var view=new StellariumView{RA=sky.RA,Dec=sky.Dec,Approximate=sky.ApproximatePosition,FieldDegrees=Field(frame)};
+   if(sky.Utc.HasValue)view.Utc=sky.Utc.Value.Kind==DateTimeKind.Utc?sky.Utc.Value:sky.Utc.Value.ToUniversalTime();
+   if(sky.HasHorizon&&ObservingCities.ValidCoordinates(sky.Latitude,sky.Longitude)){view.Latitude=sky.Latitude;view.Longitude=sky.Longitude;}
+   return view;
+  }
+  // The larger side of the solved or WCS footprint, with a little margin; null when the frame has no field of view.
+  public static double? Field(Frame frame){
+   var sky=frame==null?null:frame.Sky;if(sky==null)return null;
+   double side=Math.Max(sky.WidthDegrees,sky.HeightDegrees);if(!CaptureSky.Finite(side)||side<=0)return null;
+   return Math.Max(MinField,Math.Min(MaxField,side*FieldMargin));
+  }
+  public static string Tooltip(StellariumView view){
+   if(view==null)return "Open in Stellarium (needs a light frame with a known position)";
+   var text=new StringBuilder("Open in Stellarium");
+   text.Append(view.Approximate?" at the approximate target centre":" at this capture's position");
+   if(view.Utc.HasValue&&view.Latitude.HasValue)text.Append(", capture time and place");
+   else if(view.Utc.HasValue)text.Append(" and capture time");
+   else text.Append("; capture time unknown, so position only");
+   return text.ToString();
+  }
+  public static double JulianDay(DateTime utc){
+   if(utc.Kind!=DateTimeKind.Utc)utc=utc.ToUniversalTime();
+   return 2440587.5+(utc-JulianEpoch).TotalDays;
+  }
+  // Stellarium's script parser reads angle strings like 5h35m17.30s and -5d23m28.0s.
+  public static string Hours(double degrees){
+   long hundredths=(long)Math.Round(((degrees%360+360)%360)/15*360000)%8640000;
+   long h=hundredths/360000,m=hundredths/6000%60,s=hundredths%6000;
+   return h.ToString(CultureInfo.InvariantCulture)+"h"+m.ToString(CultureInfo.InvariantCulture)+"m"+(s/100.0).ToString("0.00",CultureInfo.InvariantCulture)+"s";
+  }
+  public static string Degrees(double degrees){
+   long tenths=(long)Math.Round(Math.Abs(Math.Max(-90,Math.Min(90,degrees)))*36000);
+   long d=tenths/36000,m=tenths/600%60,s=tenths%600;
+   return (degrees<0?"-":"+")+d.ToString(CultureInfo.InvariantCulture)+"d"+m.ToString(CultureInfo.InvariantCulture)+"m"+(s/10.0).ToString("0.0",CultureInfo.InvariantCulture)+"s";
+  }
+  static string Number(double value){return value.ToString("0.######",CultureInfo.InvariantCulture);}
+  // Only touches location, time and view. Time is frozen so the sky stays as it was at capture.
+  public static string Script(StellariumView view){
+   var text=new StringBuilder();
+   if(view.Latitude.HasValue&&view.Longitude.HasValue)text.Append("core.setObserverLocation(").Append(Number(view.Longitude.Value)).Append(", ").Append(Number(view.Latitude.Value)).Append(", 0, 0, \"\", \"Earth\");\n");
+   if(view.Utc.HasValue)text.Append("core.setTimeRate(0);\ncore.setDate(\"").Append(view.Utc.Value.ToString("yyyy-MM-dd'T'HH:mm:ss",CultureInfo.InvariantCulture)).Append("\", \"utc\");\n");
+   text.Append("core.moveToRaDecJ2000(\"").Append(Hours(view.RA)).Append("\", \"").Append(Degrees(view.Dec)).Append("\", 0);\n");
+   text.Append("StelMovementMgr.zoomTo(").Append(Number(view.FieldDegrees ?? DefaultFieldDegrees)).Append(", 0);\n");
+   return text.ToString();
+  }
+  // Remote Control is off by default, so a refused connection is the normal "not running" answer.
+  public static bool TrySend(string script,int port,int timeoutMs){
+   try{
+    var request=(HttpWebRequest)WebRequest.Create("http://127.0.0.1:"+port.ToString(CultureInfo.InvariantCulture)+"/api/scripts/direct");
+    request.Method="POST";request.ContentType="application/x-www-form-urlencoded";request.Timeout=timeoutMs;request.ReadWriteTimeout=timeoutMs;request.Proxy=null;request.ServicePoint.Expect100Continue=false;
+    byte[] body=Encoding.UTF8.GetBytes("code="+Uri.EscapeDataString(script));request.ContentLength=body.Length;
+    using(var stream=request.GetRequestStream())stream.Write(body,0,body.Length);
+    using(var response=(HttpWebResponse)request.GetResponse())return (int)response.StatusCode>=200&&(int)response.StatusCode<300;
+   }catch(WebException){return false;}catch(IOException){return false;}catch(InvalidOperationException){return false;}
+  }
+  public static string Configured(Settings settings){
+   string path;return settings!=null&&settings.ExternalApplicationPaths!=null&&settings.ExternalApplicationPaths.TryGetValue(Id,out path)?path:null;
+  }
+  public static void Configure(Settings settings,string path){
+   if(settings.ExternalApplicationPaths==null)settings.ExternalApplicationPaths=new Dictionary<string,string>();settings.ExternalApplicationPaths[Id]=path??"";
+  }
+  public static bool IsExecutable(string path){
+   try{return !string.IsNullOrWhiteSpace(path)&&File.Exists(path)&&Path.GetFileName(path).Equals("stellarium.exe",StringComparison.OrdinalIgnoreCase);}catch(ArgumentException){return false;}
+  }
+  public static string Detect(){
+   var candidates=new List<string>();
+   foreach(var hive in new[]{RegistryHive.CurrentUser,RegistryHive.LocalMachine})foreach(var view in new[]{RegistryView.Registry64,RegistryView.Registry32})try{using(var root=RegistryKey.OpenBaseKey(hive,view)){
+    using(var key=root.OpenSubKey(@"Software\Microsoft\Windows\CurrentVersion\App Paths\stellarium.exe")){if(key!=null)candidates.Add(Convert.ToString(key.GetValue(null)).Trim('"'));}
+    using(var uninstall=root.OpenSubKey(@"Software\Microsoft\Windows\CurrentVersion\Uninstall")){if(uninstall!=null)foreach(string name in uninstall.GetSubKeyNames())using(var key=uninstall.OpenSubKey(name)){
+     if(key==null||!Convert.ToString(key.GetValue("DisplayName")).StartsWith("Stellarium",StringComparison.OrdinalIgnoreCase))continue;
+     string location=Convert.ToString(key.GetValue("InstallLocation")).Trim('"');if(location.Length>0)candidates.Add(Path.Combine(location,"stellarium.exe"));
+    }}
+   }}catch(System.Security.SecurityException){}catch(UnauthorizedAccessException){}catch(IOException){}catch(ArgumentException){}
+   foreach(var folder in new[]{Environment.SpecialFolder.ProgramFiles,Environment.SpecialFolder.ProgramFilesX86,Environment.SpecialFolder.LocalApplicationData})try{
+    string root=Environment.GetFolderPath(folder);if(folder==Environment.SpecialFolder.LocalApplicationData)root=Path.Combine(root,"Programs");
+    if(root.Length>0)candidates.Add(Path.Combine(root,"Stellarium","stellarium.exe"));
+   }catch(ArgumentException){}
+   return candidates.FirstOrDefault(IsExecutable);
+  }
+  public static string Resolve(Settings settings){string configured=Configured(settings);return IsExecutable(configured)?Path.GetFullPath(configured):Detect();}
+  public static string ScriptFolder{get{return Path.Combine(Path.GetTempPath(),"AstroArchive","stellarium");}}
+  // Scripts are tiny and only read at start-up; remove day-old ones so the folder does not grow.
+  public static string WriteScript(string script,string folder){
+   Directory.CreateDirectory(folder);
+   try{foreach(string old in Directory.GetFiles(folder,"open-*.ssc"))if(File.GetLastWriteTimeUtc(old)<DateTime.UtcNow.AddDays(-1))File.Delete(old);}catch(IOException){}catch(UnauthorizedAccessException){}
+   string path=Path.Combine(folder,"open-"+Guid.NewGuid().ToString("N").Substring(0,12)+".ssc");
+   File.WriteAllText(path,script,new UTF8Encoding(false));return path;
+  }
+  public static ProcessStartInfo LaunchInfo(string executable,string scriptPath){
+   if(!IsExecutable(executable))throw new IOException("Locate the Stellarium application (stellarium.exe).");
+   return new ProcessStartInfo(Path.GetFullPath(executable),"--startup-script \""+scriptPath+"\""){UseShellExecute=false,WorkingDirectory=Path.GetDirectoryName(Path.GetFullPath(executable))};
+  }
+  public static void Launch(string executable,string script){
+   using(var process=Process.Start(LaunchInfo(executable,WriteScript(script,ScriptFolder))))if(process==null)throw new IOException("Stellarium did not start.");
+  }
+ }
+}
