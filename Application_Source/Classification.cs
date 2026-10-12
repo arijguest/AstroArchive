@@ -31,6 +31,8 @@ namespace AstroArchive {
    AddAlias("Sun","Sun");AddAlias("Solar","Sun");
    AddAlias("Moon","Moon");AddAlias("Lunar","Moon");
    AddAlias("Pleiades","M45");AddAlias("Andromeda","M31");AddAlias("Triangulum","M33");AddAlias("Pacman","NGC281");AddAlias("Pacman Nebula","NGC281");AddAlias("Wizard","NGC7380");AddAlias("Wizard Nebula","NGC7380");AddAlias("Crescent","NGC6888");AddAlias("Crescent Nebula","NGC6888");AddAlias("Hidden Galaxy","IC342");AddAlias("Orion Nebula","M42");
+   // The Deer Lick Group is named after its dominant galaxy, NGC 7331.
+   AddAlias("Deer Lick Group","NGC7331");
    AddAlias("Heart Nebula","IC1805");AddAlias("Soul Nebula","IC1848");AddAlias("Elephant's Trunk Nebula","IC1396");AddAlias("Elephant Trunk Nebula","IC1396");
    foreach(var entry in new[]{new[]{"M45","Pleiades"},new[]{"M31","Andromeda Galaxy"},new[]{"M33","Triangulum Galaxy"},new[]{"NGC281","Pacman Nebula"},new[]{"NGC7380","Wizard Nebula"},new[]{"NGC6888","Crescent Nebula"},new[]{"IC342","Hidden Galaxy"}})if(!commonNames.ContainsKey(entry[0]))commonNames[entry[0]]=entry[1];
    commonNames["IC1805"]="Heart Nebula";commonNames["IC1848"]="Soul Nebula";commonNames["IC1396"]="Elephant’s Trunk Nebula";
