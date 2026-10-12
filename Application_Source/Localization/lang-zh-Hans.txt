@@ -1088,7 +1088,8 @@ Size	大小
 Import from telescope	从望远镜导入
 Import over your network	通过网络导入
 Keep AstroArchive and the telescope on the same Wi-Fi or LAN. Capture continues in the telescope app.	请让 AstroArchive 和望远镜连接到同一 Wi-Fi 或局域网。拍摄将在望远镜应用中继续进行。
-Finding Seestar and DWARF telescopes…	正在查找 Seestar 和 DWARF 望远镜…
+Finding Seestar, DWARF and Celestron Origin telescopes…	正在查找 Seestar、DWARF 和 Celestron Origin 望远镜…
+Turn on Save Raw Images under Menu > Settings > Advanced in the Origin app to keep individual exposures.	要保留单张曝光，请在 Origin 应用的“菜单 > 设置 > 高级”中打开 Save Raw Images。
 Telescopes found on the network	在网络上找到的望远镜
 Address	地址
 Host	主机
@@ -1275,7 +1276,7 @@ Wondering if the smudge is dust or a discovery…	正在琢磨这块污渍是灰
 Negotiating a truce with the background gradient…	正在和背景渐变谈判停火…
 Organising the archive before it becomes a black hole…	正在整理存档，免得它变成黑洞…
 Did you know you can press F1 to open AstroArchive’s offline guide?	你知道吗？按 F1 可以打开 AstroArchive 的离线指南。
-Did you know you can import from Seestar and DWARF over your local network?	你知道吗？你可以通过本地网络从 Seestar 和 DWARF 导入。
+Did you know you can import from Seestar, DWARF and Celestron Origin over your local network?	你知道吗？你可以通过本地网络从 Seestar、DWARF 和 Celestron Origin 导入。
 Did you know you can use live import to bring in completed captures while your telescope keeps shooting?	你知道吗？你可以使用实时导入，在望远镜继续拍摄的同时导入已完成的拍摄文件。
 Did you know you can run independent network imports from more than one telescope?	你知道吗？你可以从多台望远镜分别运行独立的网络导入。
 Did you know you can browse your captures by target and session in Repository?	你知道吗？你可以在“存储库”中按目标和会话浏览拍摄文件。

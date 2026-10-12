@@ -10,6 +10,8 @@ namespace AstroArchive {
    string text=model??"";
    if(Regex.IsMatch(text,@"\bseestar\b|^S(?:30|50)(?:\s*Pro)?$",RegexOptions.IgnoreCase))return "Seestar";
    if(Regex.IsMatch(text,@"\bdwarf(?:lab|[ _-]*(?:III|II|3|2|mini))?\b",RegexOptions.IgnoreCase))return "DWARFLAB";
+   // Only the Origin smart telescope: other Celestron optics are ordinary equipment named in TELESCOP.
+   if(Regex.IsMatch(text,@"\bcelestron[ _-]*origin\b|(?:^|\s)Origin\d*-[0-9a-f]{8,}(?:\s|$)",RegexOptions.IgnoreCase))return CelestronOrigin.Make;
    return text.Length==0||text=="Auto"||text.Contains("unknown")?"Unknown":"Other";
   }
   static string SpecificModel(string text,string make) {
@@ -17,12 +19,13 @@ namespace AstroArchive {
    if(make=="Seestar"&&seestar.Success)return "Seestar S"+seestar.Groups[1].Value+(seestar.Groups[2].Success?" Pro":"");
    var dwarf=Regex.Match(text??"",@"\bDWARF(?:\s*[-_]?\s*)(mini|III|II|3|2)\b",RegexOptions.IgnoreCase);
    if(make=="DWARFLAB"&&dwarf.Success){string n=dwarf.Groups[1].Value.ToUpperInvariant();return n=="MINI"?"Dwarf mini":n=="II"||n=="2"?"Dwarf II":"Dwarf 3";}
+   if(make==CelestronOrigin.Make)return CelestronOrigin.Model;
    return make=="Seestar"?"Seestar (model unknown)":make=="DWARFLAB"?"Dwarf (model unknown)":"Other / unknown";
   }
   public static string LayoutMake(string context,bool shotsMetadata) {
    bool dwarf=shotsMetadata||Regex.IsMatch(context,@"(?:^|/)(?:DWARF_(?:RAW|DARK|CALIBRATION)(?:[_/]|$)|CALI_FRAME(?:/|$)|(?:sdcard[-_ ]?)?DWARF\s*(?:II|III|2|3|mini)?(?:/|$))",RegexOptions.IgnoreCase);
    bool seestar=Regex.IsMatch(context,@"(?:^|/)(?:MyWorks|EMMC Images|Seestar(?:[ _-]+S(?:30|50)(?:[ _-]+Pro)?)?)(?:/|$)",RegexOptions.IgnoreCase);
-   return dwarf&&seestar?"Unknown":dwarf?"DWARFLAB":seestar?"Seestar":"Unknown";
+   return dwarf&&seestar?"Unknown":dwarf?"DWARFLAB":seestar?"Seestar":CelestronOrigin.Layout(context)?CelestronOrigin.Make:"Unknown";
   }
   public static void Apply(Frame frame,FitsHeader header,string root,string requested,string detectionContext=null) {
    if(!string.IsNullOrEmpty(requested)&&requested!="Auto") {
@@ -30,13 +33,14 @@ namespace AstroArchive {
    }
    string metadata=string.Join(" ",new[]{header.Get("TELESCOP"),header.Get("INSTRUME"),header.Get("CAMERA")});
    string make=MakeOf(metadata);
-   if(make=="Seestar"||make=="DWARFLAB") {
+   if(make=="Seestar"||make=="DWARFLAB"||make==CelestronOrigin.Make) {
     frame.Make=make;frame.Model=SpecificModel(metadata,make);frame.MakeEvidence="Explicit FITS instrument metadata";return;
    }
    string relative=frame.SourcePath.Substring(root.TrimEnd('\\','/').Length).TrimStart('\\','/');
    string context=detectionContext??Path.GetFileName(root.TrimEnd('\\','/'))+"/"+relative.Replace('\\','/');
    string layout=LayoutMake(context,!string.IsNullOrEmpty(frame.SourceMetadataPath));bool dwarf=layout=="DWARFLAB",seestar=layout=="Seestar";
-   if(dwarf) {frame.Make="DWARFLAB";frame.Model=SpecificModel(context,"DWARFLAB");frame.MakeEvidence=!string.IsNullOrEmpty(frame.SourceMetadataPath)?"DWARF shotsInfo.json session metadata":"DWARF_RAW / DWARF_DARK / CALI_FRAME folder structure";}
+   if(layout==CelestronOrigin.Make) {frame.Make=CelestronOrigin.Make;frame.Model=CelestronOrigin.Model;frame.MakeEvidence="Celestron Origin session folder and frame names";}
+   else if(dwarf) {frame.Make="DWARFLAB";frame.Model=SpecificModel(context,"DWARFLAB");frame.MakeEvidence=!string.IsNullOrEmpty(frame.SourceMetadataPath)?"DWARF shotsInfo.json session metadata":"DWARF_RAW / DWARF_DARK / CALI_FRAME folder structure";}
    else if(seestar) {frame.Make="Seestar";frame.Model=SpecificModel(context,"Seestar");frame.MakeEvidence="Seestar MyWorks / EMMC Images folder structure";}
    else if(detectionContext==null&&Regex.IsMatch(Path.GetDirectoryName(frame.SourcePath)??"",@"[_-]sub$",RegexOptions.IgnoreCase)&&Regex.IsMatch(frame.OriginalName??"",@"^Light[_-]",RegexOptions.IgnoreCase)) {
     frame.Make="Seestar";frame.Model="Seestar (model unknown)";frame.MakeEvidence="Inferred from a Seestar-style sub folder and Light filename";

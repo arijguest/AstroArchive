@@ -29,7 +29,7 @@ Windows 10 / 11 x64 &nbsp; · &nbsp; .NET Framework 4.8 &nbsp; · &nbsp; Archive
 ## Bring the night straight into your archive
 
 Keep capturing while AstroArchive brings new files into your collection. Import
-from a folder or USB, or connect to **Seestar and DWARF over your local network**.
+from a folder or USB, or connect to **Seestar, DWARF and Celestron Origin over your local network**.
 
 [![Network import showing three real Orion Nebula subframes selected from a Seestar S50 Pro](docs/images/network-import.png)](docs/images/network-import.png)
 
