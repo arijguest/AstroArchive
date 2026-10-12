@@ -11,7 +11,11 @@ using System.Windows.Data;
 using System.Windows.Input;
 namespace AstroArchive {
  public class MetadataCellConverter:IValueConverter {
-  public object Convert(object value,Type target,object parameter,CultureInfo culture){return value==null||value is string?TableText.Display(value as string,new[]{"Target","TargetLabel"}.Contains(System.Convert.ToString(parameter))):value;}
+  public object Convert(object value,Type target,object parameter,CultureInfo culture){
+   string path=System.Convert.ToString(parameter),text=value as string;if(value!=null&&text==null)return value;
+   if(path=="ObjectId"||path=="Metadata.ObjectId")text=Catalog.DisplayId(text);else if(path=="TargetName"||path=="Metadata.TargetName")text=Catalog.DisplayIds(text);
+   return TableText.Display(text,path=="Target"||path=="TargetLabel");
+  }
   public object ConvertBack(object value,Type target,object parameter,CultureInfo culture){throw new NotSupportedException();}
  }
  public sealed class RepositoryPositionComparer:IComparer {
@@ -24,7 +28,7 @@ namespace AstroArchive {
   void InitializeTables(){
    AddCaptureColumns("FramesGrid");AddCaptureColumns("ImportGrid");defaultColumns["EditedGrid"]=G("EditedGrid").Columns.Where(c=>c.Visibility==Visibility.Visible).Select(ColumnId).ToList();originalColumnOrder["EditedGrid"]=G("EditedGrid").Columns.Select(ColumnId).ToList();var converter=new MetadataCellConverter();foreach(string name in new[]{"FramesGrid","ImportGrid","EditedGrid","MetricsGrid"}){var grid=G(name);grid.CanUserSortColumns=true;tableSorts[name]=new List<SortDescription>();
     foreach(var column in grid.Columns.OfType<DataGridBoundColumn>()){var binding=column.Binding as Binding;if(binding==null||binding.Path==null)continue;string path=binding.Path.Path;if(path=="Mount")path="MountText";var header=new Style(typeof(DataGridColumnHeader),Window.TryFindResource(typeof(DataGridColumnHeader)) as Style);header.Setters.Add(new Setter(System.Windows.Automation.AutomationProperties.HelpTextProperty,"Click to sort; Shift-click adds a sort column."));string tip=path=="MountText"?"A ? marks an inference.":path=="SizeText"?"Sorted by pixel count.":path=="QualityText"?"Score from 0 to 100 against similar frames. Click to sort; a flag means a problem was found.":path=="ExposureFitText"?"Planetary, lunar and solar stills only: Under, Good or Over exposed.":null;if(tip!=null)header.Setters.Add(new Setter(FrameworkElement.ToolTipProperty,new ToolTip{Content=new TextBlock{Text=tip,TextWrapping=TextWrapping.Wrap,MaxWidth=360}}));column.HeaderStyle=header;column.SortMemberPath=path=="Metadata.TotalExposureText"?"Metadata.TotalExposure":path=="Metadata.SubExposureText"?"Metadata.SubExposure":path=="Metadata.SubsText"?"Metadata.Subs":path=="ExposureText"?"Exposure":path=="GainText"?"Gain":path=="TemperatureText"?"Temperature":path=="SizeText"?"PixelCount":path=="QualityText"?"QualityOrder":path=="ExposureFitText"?"ExposureOrder":path;
-     if(((name=="FramesGrid"||name=="ImportGrid")&&path!="OriginalName")||(name=="EditedGrid"&&path=="Metadata.TargetName")){column.Binding=new Binding(name=="FramesGrid"&&path=="Kind"?"KindLabel":path){Mode=BindingMode.OneWay,Converter=converter,ConverterParameter=path,StringFormat=binding.StringFormat};}
+     if(((name=="FramesGrid"||name=="ImportGrid")&&path!="OriginalName")||(name=="EditedGrid"&&(path=="Metadata.TargetName"||path=="Metadata.ObjectId"))){column.Binding=new Binding(name=="FramesGrid"&&path=="Kind"?"KindLabel":path){Mode=BindingMode.OneWay,Converter=converter,ConverterParameter=path,StringFormat=binding.StringFormat};}
      if(path=="QualityText"||path=="ExposureFitText"){column.ElementStyle=QualityCellStyle(column.ElementStyle,path=="QualityText"?"QualityBand":"ExposureBand");}
      if(path=="ExposureText"){var cell=new Style(typeof(TextBlock),column.ElementStyle);cell.Setters.Add(new Setter(FrameworkElement.ToolTipProperty,new Binding("ExposureTooltip")));cell.Setters.Add(new Setter(ToolTipService.ShowDurationProperty,30000));column.ElementStyle=cell;}
     }

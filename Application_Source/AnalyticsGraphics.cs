@@ -22,6 +22,7 @@ namespace AstroArchive {
  public static partial class AnalyticsGraphics {
   public const string Ink="#202B43",Muted="#5F6D86",Accent="#5951D6";
   static readonly string[] Colours={"#5951D6","#008477","#CB5078","#B37608","#427AB5","#8756A5","#6B813A","#64748B"};
+  static readonly string[] DarkColours={"#90B8FF","#55DFEA","#C19AFF","#F0C36A","#4F9BFA","#ED9ACB","#9DD7B0","#A6B4CC"};
   static void Box(AnalyticsPage p,double x,double y,double w,double h,string colour){p.Marks.Add(new AnalyticsMark{Kind="rect",X=x,Y=y,Width=w,Height=h,Fill=colour,Role=p.Role});}
   static void Text(AnalyticsPage p,string text,double x,double y,double size,string colour,bool bold=false,string detail=null){p.Marks.Add(new AnalyticsMark{Kind="text",Text=text,X=x,Y=y,Size=size,Fill=colour,Bold=bold,Detail=detail,Role=p.Role});}
   static void CenteredText(AnalyticsPage p,string text,double center,double y,double size,string colour,bool bold=false){p.Marks.Add(new AnalyticsMark{Kind="text",Text=text,X=center,Y=y,Size=size,Fill=colour,Bold=bold,Centered=true,Role=p.Role});}
@@ -59,10 +60,10 @@ namespace AstroArchive {
    if(layout!=AnalyticsLayout.Landscape)return SocialPage(data,index,part,parts,values,dark,layout);
    var report=data.Reports[index];var p=new AnalyticsPage{Title=report.Title,Background=dark?"#0C1220":"#FFFFFF"};
    Box(p,0,0,1200,800,"#FFFFFF");Box(p,0,0,1200,8,Accent);
-   p.Marks.Add(new AnalyticsMark{Kind="logo",X=56,Y=24,Width=70,Height=70});
+   p.Marks.Add(new AnalyticsMark{Kind="logo",X=56,Y=31,Width=56,Height=56});
    Text(p,"AstroArchive",142,46,24,Ink,true);
    Text(p,(index+1).ToString("00",CultureInfo.InvariantCulture)+" / 06"+(parts>1?" · "+(part+1)+"/"+parts:""),parts>1?980:1060,47,17,Accent,true);
-   Text(p,report.Title,60,112,42,Ink,true);Text(p,report.Description+(parts>1?" · Groups "+(part*8+1)+"–"+Math.Min((part+1)*8,report.Values.Count)+" of "+report.Values.Count:""),60,165,17,Muted);
+   Text(p,Fit(report.Title,1080,42),60,112,42,Ink,true,report.Title);Text(p,Fit(report.Description+(parts>1?" · Groups "+(part*8+1)+"–"+Math.Min((part+1)*8,report.Values.Count)+" of "+report.Values.Count:""),1080,17),60,165,17,Muted);
    Box(p,60,210,1080,78,"#F5F7FC");
    string[] metrics={ArchiveAnalytics.Number(data.RepositorySeconds/3600)+" h",data.RepositoryCaptures.ToString("N0",CultureInfo.InvariantCulture),data.RepositoryTargets.ToString("N0",CultureInfo.InvariantCulture)};
    string[] captions={"REPOSITORY INTEGRATION","LIGHT FRAMES IN REPOSITORY","TARGETS IN REPOSITORY"};
@@ -84,8 +85,7 @@ namespace AstroArchive {
   static void ApplyTheme(AnalyticsPage p,bool dark){
    if(dark){
     var colours=new Dictionary<string,string>{{"#FFFFFF",p.Background},{Ink,"#E9EEF8"},{Muted,"#A6B4CC"},{"#F5F7FC","#151E2E"},{"#DCE2EF","#34415A"},{"#E8ECF4","#28354B"}};
-    string[] branded={"#90B8FF","#55DFEA","#C19AFF","#F0C36A","#4F9BFA","#ED9ACB","#9DD7B0","#A6B4CC"};
-    for(int i=0;i<Colours.Length;i++)colours[Colours[i]]=branded[i];
+    for(int i=0;i<Colours.Length;i++)colours[Colours[i]]=DarkColours[i];
     foreach(var mark in p.Marks){string replacement;if(mark.Fill!=null&&colours.TryGetValue(mark.Fill,out replacement))mark.Fill=replacement;}
    }
   }

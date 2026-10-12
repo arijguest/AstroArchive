@@ -71,7 +71,7 @@ namespace AstroArchive {
     }
     if(f==null){
      using(var metadata=metrics.Begin("Metadata",name)){
-      f=FileRetry.Run(()=>{
+      string dataIssue=null;f=FileRetry.Run(()=>{
        AssetInfo asset=fullScan?null:headers.GetAsset(entry.Path,stamp);FitsHeader header=asset==null?null:asset.Header;FileStamp captured=stamp;bool hit=asset!=null;
        if(!hit){using(var availability=(cloudSource||stamp.Cloud)?metrics.Begin("Cloud availability",name):null)using(var read=metrics.Begin("Header open/read",name)){
         using(var locked=new FileStream(entry.Path,FileMode.Open,FileAccess.Read,FileShare.Read)){captured=FileStamp.Read(entry.Path);asset=Assets.Inspect(entry.Path,n=>{ct.ThrowIfCancellationRequested();read.Bytes(n);metadata.Bytes(n);});header=asset.Header;}read.Complete();if(availability!=null)availability.Complete();
@@ -79,8 +79,11 @@ namespace AstroArchive {
        Frame parsed=Classifier.Read(entry.Path,source,telescopeIdentity??telescope,model,stamp.Size,n=>metadata.Bytes(n),shots,header,captured,ct,metrics,asset);
        parsed.Telescope=telescope;
        if(!stamp.ContentSame(parsed.SourceStamp)||(hit&&!stamp.ContentSame(FileStamp.Read(entry.Path))))throw new InvalidDataException("Source changed while reading metadata. Scan again.");
-       if(!hit)headers.PutAsset(entry.Path,parsed.SourceStamp,asset);item.HeaderHit=hit;return parsed;
+       // Damaged pixel data is re-read on the next scan rather than cached.
+       dataIssue=asset.DataIssue;if(!hit&&dataIssue==null)headers.PutAsset(entry.Path,parsed.SourceStamp,asset);item.HeaderHit=hit;return parsed;
       },ct,message=>{metrics.Current=message;metrics.Pulse(true);});stamp=f.SourceStamp;f.Hash="";f.Status="New";metadata.Complete();
+      // Keep readable header metadata, but leave the file flagged and out of stacking.
+      if(dataIssue!=null){item.Error=FileRetry.Detail(entry.Path,new InvalidDataException(dataIssue));f.Status="Unreadable";f.IntegrityIssue=dataIssue;f.Rejected=true;f.RejectionReason="Pixel data unreadable.";f.Notes+=dataIssue+" ";}
      }
      // Fast candidates are provisional; Import checks the copy hash against deletion history before committing.
      if(deferHash&&scopedArchive&&deleted.Count>0)f.SourceDisposition="Deletion exclusions will be checked during verified import. Original retained.";

@@ -8,7 +8,7 @@ using System.Windows.Controls;
 using System.Windows.Data;
 namespace AstroArchive {
  public partial class MainUi {
-  volatile IdentificationProgress identificationProgress;
+  volatile IdentificationProgress identificationProgress;readonly EtaEstimate identificationEta=new EtaEstimate();
   void ShowTargetReviewWhenReady(Action review){if(!closing)QueueActivityReview("Target identification results",review);}
   void IdentificationStage(IdentificationProgress value){identificationProgress=value;var metrics=activeMetrics;if(metrics!=null){metrics.Stage=value.Stage;metrics.UpdateLegacy(value.Completed,value.Total,value.Detail);}}
   SolveResult SolveIdentification(Frame sample,bool imported,CancellationToken ct,Action<string> progress){
@@ -32,7 +32,7 @@ namespace AstroArchive {
    var chosen=jobs.Where(j=>j.Solved&&j.Include).ToList();int updated=0;var errors=new List<string>();
    cancellationMessage="Identification canceled. Metadata already applied is retained.";
    Run(ct=>{int done=0,total=chosen.Sum(j=>j.Frames.Count);foreach(var job in chosen)foreach(var original in job.Frames){ct.ThrowIfCancellationRequested();IdentificationStage(new IdentificationProgress{Completed=done,Total=total,Metadata=true,Stage="Applying target metadata",Detail=original.OriginalName+"\n"+Catalog.Label(job.Target)+" · "+job.Scope});try{if(!PendingImport(original,imported))repo.ValidateCapture(original,ct);else if(original.SourceStamp!=null&&!original.SourceStamp.ContentSame(FileStamp.Read(original.SourcePath)))throw new IOException("Source changed since identification. Scan again.");var frame=TargetSolving.Apply(job,original,job.Target);StoreIdentification(original,frame,imported,ct);updated++;}catch(OperationCanceledException){throw;}catch(Exception error){errors.Add(original.OriginalName+": "+error.Message);}done++;}IdentificationStage(new IdentificationProgress{Completed=done,Total=total,Metadata=true,Stage="Saving archive index",Detail=updated+" captures updated"});if(!imported||chosen.Any(j=>j.Frames.Any(f=>!PendingImport(f,imported))))repo.Checkpoint(ct);return "";},done=>{
-    if(imported)FilterImports();L("StatusLabel").Text=(named+updated)+" captures identified · "+jobs.Count(j=>j.Solved)+" fields solved · "+jobs.Count(j=>!j.Solved)+" failed";
+    RefreshTargetOverlays(true);if(imported)FilterImports();L("StatusLabel").Text=(named+updated)+" captures identified · "+jobs.Count(j=>j.Solved)+" fields solved · "+jobs.Count(j=>!j.Solved)+" failed";
     if(errors.Count>0||jobs.Any(j=>!j.Solved))ShowReport("Target identification report",IdentificationReport(jobs)+(errors.Count==0?"":"\n\nMetadata not applied:\n"+string.Join("\n",errors)));
    });
   }

@@ -11,7 +11,8 @@ and never delete or move a file.
 | --- | --- | --- |
 | Deep-sky light frames (FITS or XISF, linear data) | Yes | Star shape and noise |
 | Planetary, lunar and solar stills | Yes | Disc sharpness (separate method), plus an exposure fit column |
-| Stacks, calibration frames, recordings | No | Shown as `-` with a reason in the tooltip |
+| Stacks (FITS or XISF, linear data) | Yes | Same methods, compared only with other stacks of the same target, telescope, camera and filter |
+| Calibration frames, recordings | No | Shown as `-` with a reason in the tooltip |
 | JPEG, GIF, BMP and other non-linear data, meteor captures, images under 96 px or beyond the decoder limit | No | Same |
 
 Exposure fit (Under, Good, Over) is only computed for planetary, lunar and solar
@@ -37,11 +38,18 @@ measured along the boundary normals, and the ratio of fine to coarse gradient en
 (with background noise energy removed) gives a detail ratio. Saturation or black
 clipping beyond 2 percent of the disc caps the score at 40.
 
+A file that cannot be measured because of its content (an unsupported layout, damaged
+data, or too large for the memory available even when measured on its own) is set aside:
+it is stored with that status and skipped on later runs until Re-measure image quality
+is used. A file that cannot be opened is tried again on the next run. The run report
+lists both, file by file, with the reason.
+
 ## Scoring
 
 Each measurement is compared with the others in its cohort (same group and session by
 default; same target when "Compare deep-sky frames across the whole target" is on;
-disc frames always compare within the session and target). Robust z-scores (median
+disc frames always compare within the session and target; stacks compare only with
+other stacks of the same target, telescope, camera and filter). Robust z-scores (median
 and MAD with floors) pass through a logistic map to 0 to 100 and are combined with a
 weighted geometric mean.
 
@@ -64,7 +72,7 @@ measured directly and still flags Over.
 * QUALITY column (sortable) and an optional EXPOSURE FIT column in the repository table.
 * Filters: Quality rank (Top 10 percent, Top 25 percent, Top half, Bottom half, Weakest 25 percent,
   Has quality flags, Not scored), Exposure fit, and a Quality score range.
-* Tools > Review and analysis > Analyse image quality / Re-measure image quality.
+* Repository > Review and analysis > Analyse image quality / Re-measure image quality.
 * Settings > General > Image quality: measure after each import, and the deep-sky comparison scope.
 
 Saved table layouts gain the QUALITY column once; hide it again from the Columns menu and it

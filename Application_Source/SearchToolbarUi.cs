@@ -15,9 +15,9 @@ namespace AstroArchive {
    int columns=Math.Max(1,Math.Min(count,(int)(width/Math.Max(72*Math.Max(1,font/13),TranslatedWidth(values.Length>2?values[2] as Panel:null)))));
    while(count%columns!=0)columns--;return columns;
   }
-  // Translated labels can be longer than English ones; give each button room for its label.
+  // Give each button room for its label; translated and longer English labels can exceed the minimum.
   static double TranslatedWidth(Panel panel){
-   if(panel==null||Localization.English)return 0;double widest=0;
+   if(panel==null)return 0;double widest=0;
    foreach(var button in panel.Children.OfType<Button>().Where(b=>b.Visibility!=Visibility.Collapsed&&b.Content is string)){
     var text=new FormattedText(Localization.T((string)button.Content),CultureInfo.CurrentUICulture,FlowDirection.LeftToRight,new Typeface(button.FontFamily,button.FontStyle,button.FontWeight,button.FontStretch),button.FontSize,Brushes.Black,VisualTreeHelper.GetDpi(button).PixelsPerDip);
     widest=Math.Max(widest,text.WidthIncludingTrailingWhitespace+button.Padding.Left+button.Padding.Right+button.BorderThickness.Left+button.BorderThickness.Right+button.Margin.Left+button.Margin.Right+6);

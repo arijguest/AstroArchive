@@ -55,7 +55,7 @@ namespace AstroArchive {
     var report=AstroBinCsv.Build(new[]{a,b,c,d},new AstroBinOptions{CountCalibrations=false});Check(report.Sheets.Count==2&&report.Sheets.Select(s=>s.Target).OrderBy(t=>t).SequenceEqual(new[]{"M31","M45"}),"Targets were combined into one AstroBin CSV.");
     var m45=report.Sheets.Single(s=>s.Target=="M45");Check(m45.Rows.Count==2&&m45.Rows[0].Date=="2026-09-19"&&m45.Rows.Select(r=>r.Equipment).Distinct().Count()==2&&m45.Rows.Last().Date=="2026-09-20","Equipment or dates were merged or misordered.");
     Check(m45.Notes.Any(n=>n.Contains("Sensor temperature varies"))&&m45.Rows.Any(r=>r.SensorCooling==-7),"Varying sensor temperature was not averaged and flagged.");
-    Check(report.NotesText().Contains("M31")&&report.NotesText(m45).Contains("2026-09-19"),"Notes omitted targets or rows.");
+    Check(report.NotesText().Contains("M 31")&&report.NotesText(m45).Contains("2026-09-19"),"Notes omitted targets or rows.");
    });
    Test("AstroBin video CSV uses recorded frame counts and leaves local times blank",()=>{
     var video=new Frame{Hash="ser",OriginalName="jupiter.ser",Kind="Video",Target="Jupiter",Telescope="C8",Camera="Planetary",Gain=250,AcquisitionDate="2026-09-19",ObservedUtc="2026-09-19T23:41:00.0000000Z",Images=new List<ImageDescriptor>{new ImageDescriptor{Key="sequence:0",Count=5000,Headers=new Dictionary<string,string>{{"FOCALLEN","2032"}}}}};

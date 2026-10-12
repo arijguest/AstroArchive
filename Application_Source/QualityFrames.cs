@@ -25,7 +25,7 @@ namespace AstroArchive {
   [ScriptIgnore]public string ExposureFitText{get{return ExposureFit.HasValue?Math.Round(ExposureFit.Value).ToString(CultureInfo.InvariantCulture)+" "+ExposureLabel:"-";}}
   [ScriptIgnore]public string QualityTooltip{get{
    if(!string.IsNullOrEmpty(QualityDetail))return QualityDetail;string reason=QualityEligibility.Reason(this);
-   return reason.Length>0?"Not scored: "+reason:"Not measured yet. Use Tools > Review and analysis > Analyse image quality.";}}
+   return reason.Length>0?"Not scored: "+reason:"Not measured yet. Use Repository > Review and analysis > Analyse image quality.";}}
   // Filter label for the quality-rank choice list.
   [ScriptIgnore]public string QualityRank{get{
    if(!QualityScore.HasValue)return "Not scored";double p=QualityPercentile;
@@ -34,9 +34,12 @@ namespace AstroArchive {
 
  public static class QualityOrdering {
   // The library's established order (target, date, session), with each session's captures listed best-scored first.
-  // Captures without a score (stacks, calibration frames, unmeasured subs) keep their time order after the scored ones.
+  // Captures without a score (calibration frames, unmeasured subs) keep their time order after the scored ones.
+  // A session is ranked as one block: one that runs past midnight or mixes target aliases must not restart its ranking part-way down.
   public static List<Frame> Order(IEnumerable<Frame> rows){
-   return rows.Select(f=>new{Frame=f,Date=CaptureSessions.Date(f)}).OrderBy(f=>f.Frame.Target).ThenBy(f=>f.Date==null?DateTime.MaxValue:f.Date.Date).ThenBy(f=>f.Frame.SessionKey).ThenByDescending(f=>f.Frame.QualityOrder).ThenBy(f=>f.Frame.Observed).ThenBy(f=>f.Frame.OriginalName).Select(f=>f.Frame).ToList();
+   var items=rows.Select(f=>new{Frame=f,Date=CaptureSessions.Date(f),Block=Catalog.CanonicalTarget(f.Target)+"\0"+f.SessionKey}).ToList();
+   var blocks=items.GroupBy(i=>i.Block).ToDictionary(g=>g.Key,g=>new{Target=g.Select(i=>i.Frame.Target??"").OrderBy(t=>t).First(),Start=g.Min(i=>i.Date==null?DateTime.MaxValue:i.Date.Date)});
+   return items.OrderBy(i=>blocks[i.Block].Target).ThenBy(i=>blocks[i.Block].Start).ThenBy(i=>i.Block,StringComparer.Ordinal).ThenByDescending(i=>i.Frame.QualityOrder).ThenBy(i=>i.Frame.Observed).ThenBy(i=>i.Frame.OriginalName).Select(i=>i.Frame).ToList();
   }
  }
 
@@ -50,8 +53,8 @@ namespace AstroArchive {
   public static string Reason(Frame f){
    if(f==null)return "No capture";string kind=f.Kind??"";
    if(kind=="Video")return "recordings are not scored";
-   if(kind=="Stack"||CaptureSky.IsCalibration(f))return kind=="Stack"?"stacks are not graded":"calibration frames are not scored";
-   if(kind!="Light")return "only light frames are scored";
+   if(CaptureSky.IsCalibration(f))return "calibration frames are not scored";
+   if(kind!="Light"&&kind!="Stack")return "only light frames and stacks are scored";
    if(Array.IndexOf(new[]{"Deleted","Missing","Unreadable","Failed","Changed"},f.Status)>=0)return "the archived file is not available";
    if(string.IsNullOrEmpty(f.RelativePath))return "not yet in the repository";
    if(f.Target=="Meteor")return "meteor captures are not scored";
@@ -82,12 +85,16 @@ namespace AstroArchive {
     QualityMeasurement m;if(string.IsNullOrEmpty(frame.Hash)||!measurements.TryGetValue(frame.Hash,out m))continue;
     if(m.Version!=QualityMeter.Version||m.Kind!=QualityEligibility.KindOf(frame))continue;
     if(QualityEligibility.Reason(frame).Length>0)continue;
-    string scope=m.Kind==QualityKind.Disc||!compareTarget?frame.SessionKey:frame.Target;
-    items.Add(new QualityItem{M=m,Cohort=(m.Kind==QualityKind.Disc?frame.Target+"|":"")+frame.Group+"|"+scope});owners.Add(frame);
+    // Stacks are compared only with other stacks of the same target and kit, whatever their integration; subs with their session (or target, when chosen).
+    string cohort;
+    if(frame.Kind=="Stack")cohort="stack|"+Catalog.CanonicalTarget(frame.Target)+"|"+string.Join("|",new[]{frame.Telescope,frame.Camera,frame.Filter,frame.Channels.ToString(CultureInfo.InvariantCulture)});
+    else{string scope=m.Kind==QualityKind.Disc||!compareTarget?frame.SessionKey:frame.Target;cohort=(m.Kind==QualityKind.Disc?frame.Target+"|":"")+frame.Group+"|"+scope;}
+    items.Add(new QualityItem{M=m,Cohort=cohort});owners.Add(frame);
    }
    if(items.Count==0)return;
    var outcomes=QualityScorer.Compute(items);
-   for(int i=0;i<owners.Count;i++){var o=outcomes[i];var f=owners[i];f.QualityScore=o.Score;f.QualityPercentile=o.Percentile;f.QualityFlags=o.Flags;f.QualityDetail=o.Detail;f.ExposureFit=o.ExposureFit;f.ExposureLabel=o.ExposureLabel;}
+   for(int i=0;i<owners.Count;i++){var o=outcomes[i];var f=owners[i];f.QualityScore=o.Score;f.QualityPercentile=o.Percentile;f.QualityFlags=o.Flags;f.QualityDetail=o.Detail;f.ExposureFit=o.ExposureFit;f.ExposureLabel=o.ExposureLabel;
+    int status=items[i].M.Status;if(status==QualityStatus.Unsuitable)f.QualityDetail="Not scored: set aside as unsuitable for measuring. Re-measure image quality tries again.";else if(status==QualityStatus.Failed)f.QualityDetail="Not scored: the file could not be read last time. Analyse image quality tries again.";}
   }
  }
 }

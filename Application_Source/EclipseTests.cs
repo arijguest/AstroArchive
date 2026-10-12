@@ -38,6 +38,25 @@ namespace AstroArchive {
     }
     Check(Eclipses.Lunar(Utc(2025,3,1,12,0,0))==null&&Eclipses.Lunar(Utc(2025,3,14,0,0,0))==null,"A lunar eclipse was reported outside an eclipse");
    });
+   Test("Eclipse events find NASA contact times, greatest eclipse and totality",()=>{
+    Func<DateTime?,DateTime,bool> near=(found,expected)=>found.HasValue&&Math.Abs((found.Value-expected).TotalSeconds)<90;
+    // 2025 March 14 total lunar eclipse: P1 03:57:28, U1 05:09:40, U2 06:26:06, greatest 06:58:43, U3 07:31:26, U4 08:47:52, P4 10:00:09.
+    var capture=Utc(2025,3,14,5,40,0);var total=Eclipses.Event(Eclipses.Lunar(capture),capture,0,0);Check(total!=null&&!total.Solar&&total.Kind=="Total","Total lunar eclipse event missing");
+    Check(near(total.Start,Utc(2025,3,14,3,57,28))&&near(total.End,Utc(2025,3,14,10,0,9))&&near(total.Greatest,Utc(2025,3,14,6,58,43)),"Lunar penumbral contacts or greatest eclipse wrong: "+total.Start.ToString("u")+" "+total.Greatest.ToString("u")+" "+total.End.ToString("u"));
+    Check(near(total.PartialStart,Utc(2025,3,14,5,9,40))&&near(total.PartialEnd,Utc(2025,3,14,8,47,52))&&near(total.CentralStart,Utc(2025,3,14,6,26,6))&&near(total.CentralEnd,Utc(2025,3,14,7,31,26)),"Lunar umbral or total contacts wrong: "+total.PartialStart+" "+total.CentralStart+" "+total.CentralEnd+" "+total.PartialEnd);
+    Check(total.Peak.Obscuration>0.999&&total.Curve.Length>10&&total.Curve.Max()>0.999&&total.Curve[0]==0&&total.PenumbralCurve.Max()>0.999&&total.Position(capture)>0.2&&total.Position(capture)<0.35,"Lunar coverage curve or capture position wrong");
+    // The same event is found from any capture inside it.
+    var later=Eclipses.Event(Eclipses.Lunar(Utc(2025,3,14,9,30,0)),Utc(2025,3,14,9,30,0),0,0);Check(later!=null&&Math.Abs((later.Greatest-total.Greatest).TotalSeconds)<5&&Math.Abs((later.Start-total.Start).TotalSeconds)<5,"A penumbral capture found a different event");
+    // 2023 October 28 partial lunar eclipse: U1 19:35:23, U4 20:52:35, no totality.
+    var partial=Eclipses.Event(Eclipses.Lunar(Utc(2023,10,28,20,0,0)),Utc(2023,10,28,20,0,0),0,0);
+    Check(partial!=null&&partial.Kind=="Partial"&&near(partial.PartialStart,Utc(2023,10,28,19,35,23))&&near(partial.PartialEnd,Utc(2023,10,28,20,52,35))&&!partial.CentralStart.HasValue&&partial.Peak.Obscuration>0&&partial.Peak.Obscuration<0.12,"Partial lunar eclipse event wrong");
+    // 2024 April 8 at the point of greatest eclipse: 4 min 28 s of totality inside a partial eclipse of about two and three-quarter hours.
+    var solarCapture=Utc(2024,4,8,17,30,0);var solar=Eclipses.Event(Eclipses.Solar(solarCapture,25.29,-104.14),solarCapture,25.29,-104.14);
+    Check(solar!=null&&solar.Solar&&solar.Kind=="Total"&&solar.CentralStart.HasValue&&!solar.PartialStart.HasValue,"Total solar eclipse event missing its totality");
+    double totality=(solar.CentralEnd.Value-solar.CentralStart.Value).TotalSeconds;Check(Math.Abs(totality-268)<15&&Math.Abs((solar.Greatest-Utc(2024,4,8,18,17,16)).TotalSeconds)<60,"Local totality or greatest eclipse wrong: "+totality+" s at "+solar.Greatest.ToString("u"));
+    Check(solar.Duration.TotalHours>2.4&&solar.Duration.TotalHours<3&&solar.Start<solarCapture&&solar.End>solar.Greatest,"Local solar contacts implausible: "+solar.Start.ToString("u")+" – "+solar.End.ToString("u"));
+    Check(Eclipses.Event(null,solarCapture,0,0)==null,"An event was built without an eclipse");
+   });
    Test("Sun, Moon and eclipse captures resolve their body, map and section",()=>{
     var sun=new Frame{Target="Sun",Kind="Light",Observed="2024-04-08T18:17:16Z",TimeSource="FITS UTC",Latitude=25.29,Longitude=-104.14};
     var sky=CaptureSky.Resolve(sun,null);Check(sky.Body=="Sun"&&sky.Daytime&&sky.Eclipse!=null&&sky.Eclipse.Solar&&sky.Eclipse.Kind=="Total"&&sky.HasPosition,"Total solar eclipse capture lacks its eclipse or daytime context");
@@ -48,6 +67,13 @@ namespace AstroArchive {
     // A Moon computed below the horizon (a wrong clock) keeps its map.
     var wrong=new Frame{Target="Moon",Kind="Light",Observed="2025-03-14T12:58:43Z",TimeSource="FITS UTC",Latitude=51.5,Longitude=0};var hidden=CaptureSky.Resolve(wrong,null);
     Check(hidden.HasHorizon&&hidden.Altitude<0&&hidden.BodyBelowHorizon&&!hidden.BelowHorizon&&hidden.Summary.Contains("timezone"),"A below-horizon Moon hid its map or gave no clock hint");
+    // An unzoned clock or a bare date still places the Moon on the celestial map, within a few degrees.
+    var exact=CaptureSky.Resolve(new Frame{Target="Moon",Kind="Light",Observed="2025-03-14T06:58:43Z",TimeSource="FITS UTC"},null);
+    var unzoned=CaptureSky.Resolve(new Frame{Target="Moon",Kind="Light",Observed="2025-03-14T08:58:43",TimeSource="Capture timestamp",RA=0,Dec=0},null);
+    Check(unzoned.HasPosition&&!unzoned.HasHorizon&&unzoned.Body=="Moon"&&MoonEphemeris.Separation(unzoned.TargetOfDate,exact.TargetOfDate)<1.5,"An unzoned lunar clock lost its Moon position");
+    var dated=CaptureSky.Resolve(new Frame{Target="Moon",Kind="Light",Observed="2025-03-14",TimeSource="FITS date only"},null);
+    Check(dated.HasPosition&&!dated.HasHorizon&&MoonEphemeris.Separation(dated.TargetOfDate,exact.TargetOfDate)<8,"A date-only lunar capture lost its Moon position");
+    Check(!CaptureSky.Resolve(new Frame{Target="Mars",Kind="Light",Observed="2025-03-14T08:58:43"},null).HasPosition,"A planet was placed without a clock");
     var deepSky=new Frame{Target="M31",Kind="Light",Observed="2024-04-08T18:17:16Z",TimeSource="FITS UTC",Latitude=25.29,Longitude=-104.14};Check(CaptureSky.Resolve(deepSky,null).Eclipse==null,"A deep-sky capture was given an eclipse");
     var sections=TargetNavigation.Build(new[]{sun,new Frame{Target="Sun",Kind="Light"}},f=>f==sun?Eclipses.SolarSection:f.Target);
     Check(sections.Any(t=>t.Name==Eclipses.SolarSection&&t.Files==1&&t.Group=="Solar system")&&sections.Any(t=>t.Name=="Sun"&&t.Files==1),"Eclipse captures did not list in their own Solar system section");

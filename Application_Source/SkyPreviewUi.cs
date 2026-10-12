@@ -15,6 +15,9 @@ namespace AstroArchive {
    // The preview collapses and resizes the panel without always resizing the globe (it keeps
    // its last size while hidden), so the panel's own layout changes must reposition reset too.
    var panel=(Grid)Window.FindName(prefix+"PreviewSkyPanel");panel.SizeChanged+=(s,e)=>PositionSkyReset(prefix);panel.IsVisibleChanged+=(s,e)=>{if(panel.IsVisible)Window.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Loaded,new Action(()=>PositionSkyReset(prefix)));};UiHelp.Hint(reset,"Reset sky view.");
+   // Clicking the Moon, Sun or target opens Capture details, where their facts are listed.
+   // Deferred so the click finishes before the light-dismiss popup takes the mouse.
+   globe.DetailsRequested+=(s,e)=>Window.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Input,new Action(()=>{var popup=Window.FindName(prefix+"PreviewDetailsPopup") as System.Windows.Controls.Primitives.Popup;if(popup!=null&&globe.IsVisible)popup.IsOpen=true;}));
    UpdateCaptureSky(prefix,null);
   }
   void UpdateCaptureSky(string prefix,Frame frame){
@@ -45,11 +48,10 @@ namespace AstroArchive {
   string TargetSection(Frame frame,IList<Frame> pool){var e=FrameEclipse(frame,pool);return e==null?frame.Target:e.Solar?Eclipses.SolarSection:Eclipses.LunarSection;}
   EclipseInfo FrameEclipse(Frame frame,IList<Frame> pool){
    if(frame==null||CaptureSky.IsCalibration(frame))return null;string body=ObservationTargets.NamedSolar(frame.Target)??(Catalog.IsAmbiguous(frame.Target)?ObservationTargets.NamedSolar(ObservationTargets.ModeBody(frame.ObservationMode)):null);if(body!="Sun"&&body!="Moon")return null;
-   var current=settings;string key=string.Join("|",new object[]{frame.Target,frame.Kind,frame.Observed,frame.ObservedUtc,frame.TimeZoneId,frame.TimeSource,frame.Latitude,frame.Longitude,frame.Session,current.Latitude,current.Longitude,current.ObservingCity,current.ObservingCityId});
+   var current=settings;string key=string.Join("|",new object[]{frame.Target,frame.Kind,frame.Observed,frame.ObservedUtc,frame.TimeZoneId,frame.TimeSource,frame.Latitude,frame.Longitude,frame.CaptureLatitude,frame.CaptureLongitude,frame.CaptureCityId,frame.Session,current.Latitude,current.Longitude,current.ObservingCity,current.ObservingCityId});
    EclipseSection cached;if(eclipseSections.TryGetValue(frame,out cached)&&cached.Key==key)return cached.Eclipse;
    var timed=StackWithSubframeClock(frame,pool);var utc=CaptureSky.CaptureUtc(timed,current);bool site=false;double latitude=0,longitude=0;
-   if(frame.Latitude.HasValue&&frame.Longitude.HasValue&&ObservingCities.ValidCoordinates(frame.Latitude.Value,frame.Longitude.Value)){latitude=frame.Latitude.Value;longitude=frame.Longitude.Value;site=true;}
-   else if(current.Latitude.HasValue&&current.Longitude.HasValue&&ObservingCities.ValidCoordinates(current.Latitude.Value,current.Longitude.Value)){latitude=current.Latitude.Value;longitude=current.Longitude.Value;site=true;}
+   var captureSite=CaptureSite.For(frame,current);if(captureSite!=null){latitude=captureSite.Latitude;longitude=captureSite.Longitude;site=true;}
    var eclipse=Eclipses.For(body,utc,site,latitude,longitude);eclipseSections.Remove(frame);eclipseSections.Add(frame,new EclipseSection{Key=key,Eclipse=eclipse});return eclipse;
   }
   void RefreshSkyPreviews(){UpdateCaptureSky("",previewSkyFrame);}

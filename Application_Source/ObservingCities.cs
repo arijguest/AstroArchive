@@ -45,4 +45,25 @@ namespace AstroArchive {
   public void Clear(){CityId=null;CityLabel=null;Latitude=null;Longitude=null;}
   public void Save(Settings settings){settings.ObservingCityId=CityId;settings.ObservingCity=CityLabel;settings.Latitude=Latitude;settings.Longitude=Longitude;}
  }
+ // Where a capture was taken: a town/city the user chose for the file, then
+ // coordinates recorded in its metadata, then the observing town in Settings.
+ public sealed class CaptureSite {
+  public double Latitude,Longitude;public int? CityId;public string Label;public bool Chosen,Recorded;
+  static bool Valid(double? latitude,double? longitude){return latitude.HasValue&&longitude.HasValue&&ObservingCities.ValidCoordinates(latitude.Value,longitude.Value);}
+  public static bool HasChoice(Frame frame){return frame!=null&&Valid(frame.CaptureLatitude,frame.CaptureLongitude);}
+  public static CaptureSite For(Frame frame,Settings settings){
+   if(HasChoice(frame))return new CaptureSite{Latitude=frame.CaptureLatitude.Value,Longitude=frame.CaptureLongitude.Value,CityId=frame.CaptureCityId,Label=string.IsNullOrEmpty(frame.CaptureCity)?"Chosen capture town / city":frame.CaptureCity,Chosen=true};
+   if(frame!=null&&Valid(frame.Latitude,frame.Longitude))return new CaptureSite{Latitude=frame.Latitude.Value,Longitude=frame.Longitude.Value,Label="Capture location",Recorded=true};
+   if(settings!=null&&Valid(settings.Latitude,settings.Longitude))return new CaptureSite{Latitude=settings.Latitude.Value,Longitude=settings.Longitude.Value,CityId=settings.ObservingCityId,Label=settings.ObservingCity??"Saved observing location"};
+   return null;
+  }
+  // The town whose timezone rules convert an unzoned capture clock.
+  public static int? ZoneCity(Frame frame,Settings settings){if(HasChoice(frame)&&frame.CaptureCityId.HasValue)return frame.CaptureCityId;return settings==null?null:settings.ObservingCityId;}
+  public static string Describe(Frame frame,Settings settings){var site=For(frame,settings);return site==null?"Not set":site.Chosen?site.Label:site.Recorded?"Recorded in file metadata":site.Label+" · Settings default";}
+  // Null clears the choice so the file falls back to its metadata or Settings.
+  public static void Apply(Frame frame,ObservingCity city){
+   if(city!=null&&!ObservingCities.ValidCoordinates(city.Latitude,city.Longitude))throw new ArgumentException("Choose a valid town or city.");
+   frame.CaptureCityId=city==null?(int?)null:city.Id;frame.CaptureCity=city==null?null:city.Label;frame.CaptureLatitude=city==null?(double?)null:city.Latitude;frame.CaptureLongitude=city==null?(double?)null:city.Longitude;
+  }
+ }
 }

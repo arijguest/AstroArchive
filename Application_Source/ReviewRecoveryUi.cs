@@ -11,16 +11,18 @@ namespace AstroArchive {
   void InitializeReview(){
    ((CheckBox)Window.FindName("SkipFlaggedCheck")).Checked+=(s,e)=>FilterImports();((CheckBox)Window.FindName("SkipFlaggedCheck")).Unchecked+=(s,e)=>FilterImports();
    B("ReviewImportsButton").Click+=(s,e)=>ReviewCaptures(true);B("ReviewLibraryButton").Click+=(s,e)=>ReviewCaptures(false);
-   B("RetryImportsButton").Click+=(s,e)=>Import(true);
+   B("RetryImportsButton").Click+=(s,e)=>Import(true);CaptureScreening.Site=()=>settings;
   }
   void ReviewCaptures(bool imports){
    if(repo==null||RepositoryOperationBlocked)return;var rows=(imports?visibleImports:displayed).Where(CaptureScreening.NeedsReview).ToList();
    var d=new FormWindow(Window,"Review flagged captures",960,680);d.Text(rows.Count+" flagged captures in this view",true);d.Text("Telescope rejection, file integrity and transfer failures are shown separately. Screening checks FITS structure and rejection markers; it does not assess image quality. Unscreened captures remain labelled Not screened.");
+   d.Text("Targets below the horizon at the predicted capture time usually need the capture town / city or timezone set.");
    var grid=new DataGrid{AutoGenerateColumns=false,IsReadOnly=true,SelectionMode=DataGridSelectionMode.Extended,Height=310,ItemsSource=rows,Margin=new Thickness(0,8,0,12)};
    ReviewColumn(grid,"ID","ObjectId",56);ReviewColumn(grid,"OBJECT","TargetName",160);ReviewColumn(grid,"Problem type","ReviewCategory",210);ReviewColumn(grid,"File","OriginalName",280);d.Add(grid);
    var reason=new TextBox{IsReadOnly=true,TextWrapping=TextWrapping.Wrap,VerticalScrollBarVisibility=ScrollBarVisibility.Auto,Height=110};d.Add(reason);
    grid.SelectionChanged+=(s,e)=>{var frame=grid.SelectedItem as Frame;reason.Text=frame==null?"Select a capture to read its full reason.":frame.TargetLabel+"\n"+frame.ReviewReason+"\n"+(imports?frame.SourcePath:frame.RelativePath);};if(rows.Count>0)grid.SelectedIndex=0;
    d.Button("Show flagged captures in the main view",()=>{(imports?importFilters:libraryFilters).Values["Review"]="Needs review";ApplyFilters(imports);d.Window.Close();});
+   d.Button("Set capture town / city for selected…",()=>{var selected=grid.SelectedItems.Cast<Frame>().ToList();if(selected.Count==0)return;d.Window.Close();SetCaptureSite(imports,selected);});
    d.Button("Screen selected captures again",()=>{var selected=grid.SelectedItems.Cast<Frame>().ToList();if(selected.Count==0)return;d.Window.Close();ScreenSelection(selected,imports);});
    d.CloseOnly();d.Show();
   }

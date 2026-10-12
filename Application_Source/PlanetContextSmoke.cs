@@ -40,7 +40,8 @@ namespace AstroArchive {
     for(int longitude=-180;longitude<=180;longitude+=30){moonFrame.Longitude=longitude;moonProbe=CaptureSky.Resolve(moonFrame,null);if(moonProbe.Moon.Altitude<0)break;}
     UpdateMoonDetails(moonProbe,moonFrame);var moonFacts=((Grid)Window.FindName("SkyFacts")).Children;
     if(!moonFacts.OfType<TextBlock>().Any(t=>t.Text=="Not out (below the horizon)")||moonFacts.OfType<DockPanel>().Any())throw new Exception("Below-horizon Moon retained a phase glyph or illumination state");
-    File.WriteAllText(Path.Combine(output,"planetary-sky-smoke.txt"),"PASS timed AVI metadata locates all nine supported bodies; target marker/camera epoch; Moon disc coincidence; cached drawing; observer horizon; absent-clock state; observing-city timezone fallback; light/dark screenshots.");
+    SmokeSkyClicks(popup.Window,view,output);SmokeEclipseDetails(output);
+    File.WriteAllText(Path.Combine(output,"planetary-sky-smoke.txt"),"PASS timed AVI metadata locates all nine supported bodies; target marker/camera epoch; Moon disc coincidence; cached drawing; observer horizon; absent-clock state; observing-city timezone fallback; constellation names and body clicks; eclipse details card; light/dark screenshots.");
    }finally{popup.Window.Close();globe.SetContext(previous);previewSkyFrame=savedFrame;UpdateMoonDetails(previous,savedFrame);Theme.Apply(Window,theme);GoToPage(page);}
   }
  }

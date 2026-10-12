@@ -15,8 +15,18 @@ namespace AstroArchive {
     Check(parsed["X 1"].Overview=="First line. Second line."&&parsed["X 1"].Imaging=="Use Hα."&&parsed["X 1"].Fact=="True."&&parsed["X 1"].HiddenAliases.Length==2&&parsed["X 2"].Overview==null,"Description format was misread");
     Check(TargetInfoPresentation.Tagline(new TargetInfoCard{id="IC 434",name="IC 434",type_label="H II region"},"Orion")=="H II region · Orion","Tagline repeated the ID shown in the heading");
     Check(TargetInfoPresentation.Tagline(new TargetInfoCard{id="NGC 2237",name="NGC 2237 (Rosette A)",type_label="Emission nebula"},null)=="Emission nebula","Tagline repeated an ID contained in the heading");
-    Check(TargetInfoPresentation.Tagline(new TargetInfoCard{id="M31",name="Andromeda Galaxy",type_label="Spiral galaxy"},"Andromeda")=="M31 · Spiral galaxy · Andromeda","Tagline dropped the ID of a named object");
+    Check(TargetInfoPresentation.Tagline(new TargetInfoCard{id="M31",name="Andromeda Galaxy",type_label="Spiral galaxy"},"Andromeda")=="M 31 · Spiral galaxy · Andromeda","Tagline dropped the ID of a named object");
     var sources=TargetInfoPresentation.Sources(new TargetInfoCard{id="M42"},true);Check(sources.Any(x=>x.Url.EndsWith("/messier-42/"))&&sources.Any(x=>x.Url.Contains("simbad")),"Curated overview sources are missing");
+   });
+   Test("Parameters give planets an orbit, size, mass and moons and the Sun only size and mass",()=>{
+    var jupiter=TargetParameters.For("JUPITER");Check(jupiter!=null&&jupiter.HasOrbit&&jupiter.Moons.Contains("Ganymede"),"Jupiter parameters missing");
+    Check(TargetParameters.Orbit(jupiter)=="5.203 AU from the Sun · 11.86 years"&&TargetParameters.Diameter(jupiter)=="142,984 km"&&TargetParameters.Mass(jupiter)=="1.898 × 10²⁷ kg","Jupiter parameters formatted wrongly");
+    Check(TargetParameters.Orbit(TargetParameters.For("mercury"))=="0.387 AU from the Sun · 88 days","Mercury orbit formatted wrongly");
+    var sun=TargetParameters.For("SUN");Check(sun!=null&&!sun.HasOrbit&&sun.Moons.Length==0&&TargetParameters.Mass(sun)=="1.989 × 10³⁰ kg"&&TargetParameters.Diameter(sun)=="1,392,700 km","Sun should show only diameter and mass");
+    Check(TargetParameters.For("M31")==null&&TargetParameters.For(null)==null,"Non-solar targets must have no parameters");
+    var moon=TargetParameters.For("MOON");Check(moon!=null&&moon.HasOrbit&&TargetParameters.Orbit(moon)=="384,400 km from Earth · 27.32 days"&&TargetParameters.DistanceRange(moon)=="363,300 to 405,500 km"&&TargetParameters.Diameter(moon)=="3,475 km"&&TargetParameters.Mass(moon)=="7.346 × 10²² kg"&&TargetParameters.Gravity(moon)=="1.62 m/s²","Moon parameters wrong");
+    Check(TargetParameters.ShowsMoonCount(TargetParameters.For("SATURN"))&&TargetParameters.For("SATURN").MoonCount==274&&!TargetParameters.ShowsMoonCount(TargetParameters.For("EARTH"))&&!TargetParameters.ShowsMoonCount(TargetParameters.For("MERCURY")),"Moon counts wrong");
+    var halleyOrbit=CometInfo.Orbit("1P");Check(CometInfo.SemiMajorAxis(halleyOrbit)=="17.9 AU"&&CometInfo.PerihelionSpeed(halleyOrbit)=="55.1 km/s"&&!CometInfo.ShowsEscapeSpeed(halleyOrbit)&&!CometInfo.HasSemiMajorAxis(CometInfo.Orbit("C/1996 B2"))&&CometInfo.ShowsEscapeSpeed(CometInfo.Orbit("2I"))&&CometInfo.EscapeSpeed(CometInfo.Orbit("2I"))=="32.3 km/s","Comet derived orbit facts wrong");
    });
    var catalog=new TargetInfoCatalog(Path.Combine(AppDomain.CurrentDomain.BaseDirectory,"TargetInfo.zip"));
    Test("Target info resolves complete aliases and preserves disputed identities",()=>{
@@ -57,6 +67,24 @@ namespace AstroArchive {
     Check(TargetInfoCatalog.Normalize("Sh 2-00101")=="SH2:101","Sharpless spelling unresolved");
     Check(TargetInfoCatalog.Normalize("NGC 6992A")!="NGC:6992","Object suffix lost");
     Check(TargetInfoCatalog.Normalize("C/2023 A3")!="NAME:C2023A3","Comet slash lost");
+   });
+   Test("Comets open a page with an overview, orbit and JPL source",()=>{
+    Check(CometTargets.Designation("C/2023 A3 (Tsuchinshan-ATLAS)")=="C/2023 A3"&&CometTargets.Designation("12P/Pons-Brooks")=="12P"&&CometTargets.Designation("2I/Borisov")=="2I"&&CometTargets.Designation("C/2013 US10 (Catalina)")=="C/2013 US10"&&CometTargets.Designation("M31")==null&&CometTargets.Designation("NEOWISE")==null,"Comet designation misread");
+    foreach(var pair in new[]{new[]{"C/2023 A3 (Tsuchinshan-ATLAS)","C/2023 A3"},new[]{"12P/Pons-Brooks","12P"},new[]{"2I/Borisov","2I"},new[]{"C/2019 Q4 (Borisov)","2I"},new[]{"NEOWISE","C/2020 F3"},new[]{"C/1995 O1 (Hale-Bopp)","C/1995 O1"},new[]{"C/2022 E3 (ZTF)","C/2022 E3"},new[]{"3I/ATLAS","3I"},new[]{"C/2099 B12 (Example)","C/2099 B12"}}){
+     var result=catalog.Find(pair[0],CancellationToken.None);Check(result.Status=="matched"&&result.Cards.Single().id==pair[1],"Wrong comet page for "+pair[0]+": "+string.Join(",",result.Cards.Select(c=>c.id)));
+     var card=result.Cards.Single();Check(CometInfo.IsComet(card)&&TargetInfoPresentation.DisplaySummary(card).Length>=80&&TargetInfoPresentation.Imaging(card)!=null,"Comet page is empty for "+pair[0]);
+     var sources=TargetInfoPresentation.Sources(card,TargetDescriptions.For(card.id)!=null);Check(!sources.Any(s=>s.Url.Contains("simbad")),"Comet cites SIMBAD: "+pair[0]);
+     Check((CometInfo.Orbit(card.id)!=null)==sources.Any(s=>s.Url.StartsWith("https://ssd.jpl.nasa.gov/")),"Comet orbit and its JPL source disagree for "+pair[0]);
+    }
+    foreach(string id in new[]{"1P","2P","9P","12P","21P","29P","55P","67P","73P","103P","109P","1I","2I","C/1995 O1","C/2006 P1","C/2014 Q2","C/2017 K2","C/2019 Y4","C/2020 F3","C/2023 A3","C/2025 A6"}){
+     var card=catalog.ById(id,CancellationToken.None).Cards.Single();Check(CometInfo.IsComet(card),id+" is not treated as a comet");
+     Check(TargetDescriptions.For(id)!=null&&TargetDescriptions.For(id).Overview.Length>=100&&CometInfo.Orbit(id)!=null,id+" lacks a written overview or orbit");
+    }
+    Check(TargetInfoPresentation.DisplaySummary(catalog.Find("C/2099 B12",CancellationToken.None).Cards.Single()).Contains("12th comet reported in the second half of January 2099"),"Designation not explained");
+    Check(TargetInfoPresentation.DisplaySummary(CometInfo.Card("Comet ATLAS")).Contains("designation"),"Name-only comet lacks guidance");
+    var halley=CometInfo.Orbit("1P");Check(CometInfo.Period(halley)=="75.9 years per orbit"&&CometInfo.Perihelion(halley)=="0.575 AU from the Sun"&&CometInfo.ClassLabel(halley)=="Halley-type"&&CometInfo.ShowsPerihelionDate(halley)&&CometInfo.PerihelionDate(halley)=="8 Feb 1986"&&CometInfo.ShowsAphelion(halley)&&CometInfo.Aphelion(halley)=="35.3 AU from the Sun"&&CometInfo.Aphelion(CometInfo.Orbit("2P"))=="4.1 AU from the Sun"&&!CometInfo.ShowsAphelion(CometInfo.Orbit("C/1995 O1")),"Halley orbit formatted wrongly");
+    Check(!CometInfo.ShowsPerihelionDate(CometInfo.Orbit("67P"))&&CometInfo.ClassLabel(CometInfo.Orbit("2I"))=="Hyperbolic (interstellar)"&&CometInfo.ClassLabel(CometInfo.Orbit("C/2023 A3"))=="Near-parabolic","Comet orbit classes wrong");
+    Check(!CometInfo.IsComet(catalog.Find("M31",CancellationToken.None).Cards.Single())&&!CometInfo.IsComet(catalog.Find("Jupiter",CancellationToken.None).Cards.Single())&&catalog.Find("Rosette field",CancellationToken.None).Status=="not_found","Non-comets treated as comets");
    });
    Test("Target info cancels obsolete loads and fails safely without a pack",()=>{
     using(var cancellation=new CancellationTokenSource()){cancellation.Cancel();bool canceled=false;try{catalog.Find("M31",cancellation.Token);}catch(OperationCanceledException){canceled=true;}Check(canceled,"Canceled card lookup ran");}

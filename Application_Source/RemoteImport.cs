@@ -73,10 +73,10 @@ namespace AstroArchive {
    ct.ThrowIfCancellationRequested();string relative=RemoteCapturePaths.LocalRelative(c,expected.Path),destination=Path.Combine(root,relative),receiptPath=Path.Combine(receipts,Util.HashText(relative)+".json");
    Paths.CheckLinks(destination,root);Paths.CheckLinks(receiptPath,receipts);Entry before=source.Stat(expected.Path);
    // FTP LIST often omits seconds; use fresh MDTM observations for transfer checks.
-   if(expected.Size!=before.Size||(c.Kind!="DWARF FTP"&&!RemoteCapturePaths.SameVersion(expected,before)))throw new IOException("Still being written; try again when this capture is complete.");
+   if(expected.Size!=before.Size||(!RemoteConnection.Ftp(c.Kind)&&!RemoteCapturePaths.SameVersion(expected,before)))throw new IOException("Still being written; try again when this capture is complete.");
    reused=false;
    if(File.Exists(destination)&&File.Exists(receiptPath))try{var saved=Util.Deserialize<RemoteReceipt>(File.ReadAllText(receiptPath));if(saved.Size==before.Size&&saved.Modified==before.Modified.ToUniversalTime().Ticks&&new FileInfo(destination).Length==before.Size&&Util.Hash(destination,ct)==saved.Hash){reused=true;return destination;}}catch(OperationCanceledException){throw;}catch(Exception){}
-   if(c.Kind=="DWARF FTP"){if(ct.WaitHandle.WaitOne(1000))ct.ThrowIfCancellationRequested();if(!RemoteCapturePaths.SameVersion(before,source.Stat(expected.Path)))throw new IOException("Still being written; try again when this capture is complete.");}
+   // No settle delay before FTP transfers: a capture that changes while downloading fails the size, MDTM and FITS checks below and is retried.
    Directory.CreateDirectory(Path.GetDirectoryName(destination));Paths.CheckLinks(destination,root);string temp=destination+"."+Guid.NewGuid().ToString("N")+".partial";long bytes=0;string hash;
    try{
     using(var input=source.Open(expected.Path))using(var output=new FileStream(temp,FileMode.CreateNew,FileAccess.Write,FileShare.None,1048576))using(var sha=SHA256.Create()){
@@ -102,7 +102,7 @@ namespace AstroArchive {
     }
     // Keep recognised adjacent sidecars and ancestor DWARF session metadata.
     var wanted=new Dictionary<string,HashSet<string>>(StringComparer.OrdinalIgnoreCase);
-    foreach(var file in files){string parent=RemoteCapturePaths.Parent(c,file.Path);HashSet<string> names;if(!wanted.TryGetValue(parent,out names))wanted[parent]=names=new HashSet<string>(StringComparer.OrdinalIgnoreCase);foreach(string name in AssociatedMetadata.Names(file.Name))names.Add(name);
+    foreach(var file in files){string parent=RemoteCapturePaths.Parent(c,file.Path);HashSet<string> names;if(!wanted.TryGetValue(parent,out names))wanted[parent]=names=new HashSet<string>(StringComparer.OrdinalIgnoreCase);foreach(string name in AssociatedMetadata.Names(file.Name))names.Add(name);if(c.Kind=="Origin FTP")names.Add(CelestronOrigin.SessionInfo);
      for(string folder=parent;;folder=RemoteCapturePaths.Parent(c,folder)){if(!wanted.TryGetValue(folder,out names))wanted[folder]=names=new HashSet<string>(StringComparer.OrdinalIgnoreCase);names.Add("shotsInfo.json");if(folder.TrimEnd('\\','/')==c.Folder.TrimEnd('\\','/'))break;}
     }
     long metadataBytes=0;foreach(var folder in wanted){ct.ThrowIfCancellationRequested();List<Entry> listed;

@@ -119,6 +119,8 @@ namespace AstroArchive {
         public FitsHeader Header=new FitsHeader();
         public List<ImageDescriptor> Images=new List<ImageDescriptor>();
         public string Note;
+        // Set when the header is readable but the pixel data is damaged.
+        public string DataIssue;
     }
     public class PixelImage {
         public int Width,Height,Channels;

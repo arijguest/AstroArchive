@@ -13,13 +13,13 @@ namespace AstroArchive {
   void AnalyzeQuality(bool force){
    if(repo==null||RepositoryOperationBlocked)return;
    var rows=Context().Where(f=>f.Status!="Deleted").ToList();
-   if(rows.Count==0){LocalizedMessage.Show(Window,"Choose a target or session with light frames first. Stacks, calibration frames and recordings are not scored.","Nothing to measure");return;}
+   if(rows.Count==0){LocalizedMessage.Show(Window,"Choose a target or session with light frames or stacks first. Calibration frames and recordings are not scored.","Nothing to measure");return;}
    var scorable=rows.Where(f=>QualityEligibility.Reason(f).Length==0).ToList();
    if(scorable.Count==0){L("StatusLabel").Text=QualitySkipSummary(rows);return;}
    QualityRun run=null;
    Run(ct=>{run=repo.AnalyzeQuality(rows,force,ct,Progress);return run.Summary();},message=>{
     L("StatusLabel").Text=message+(run.Measured>0?". Sort by QUALITY or use Filters > Quality rank.":"");
-    if(run.Errors.Count>0)ShowReport("Image quality",string.Join("\n",run.Errors));
+    if(run.NeedsReport)ShowReport("Image quality report",run.Report());
    },"Measuring image quality");
   }
   // Explains why nothing in view can be scored, using the most common reasons.

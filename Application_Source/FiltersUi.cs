@@ -38,7 +38,7 @@ namespace AstroArchive {
    visibleImports=rows;
    var grid=G("ImportGrid");var selection=new HashSet<string>(grid.SelectedItems.Cast<Frame>().Select(f=>f.SourcePath));SetRows("ImportGrid",visibleImports,presorted);foreach(var frame in visibleImports.Where(f=>selection.Contains(f.SourcePath)))if(!grid.SelectedItems.Contains(frame))grid.SelectedItems.Add(frame);
    B("ImportFiltersButton").Content="Filters"+(importFilters.ActiveCount>0?" ("+importFilters.ActiveCount+")":"");
-   int ready=summary.Ready;L("ImportSummaryLabel").Text=summary.Text;
+   int ready=summary.Ready;L("ImportSummaryLabel").Text=summary.Text;L("ImportSummaryLabel").Visibility=summary.Text.Length>0?Visibility.Visible:Visibility.Collapsed;
    B("ImportButton").Content="Import "+ready+" file"+(ready==1?"":"s");UiHelp.Tip(B("ImportButton"),grid.SelectedItems.Count>0?"Row selection does not limit imports. Search and filters choose the ready files.":null);UiHelp.Describe(B("ImportButton"),"Import "+ready+" eligible files in this filtered view. Row selection does not limit imports.");
    B("ImportButton").IsEnabled=!RepositoryOperationBlocked&&repo!=null&&plan!=null&&ready>0;
    B("ScreenImportsButton").IsEnabled=!RepositoryOperationBlocked&&repo!=null&&visibleImports.Any(f=>f.Status!="Deleted");
@@ -55,6 +55,7 @@ namespace AstroArchive {
   ContextMenu BuildImportTools(){
    var menu=ThemedMenu();var selection=G("ImportGrid").SelectedItems.Cast<Frame>().Where(f=>f.Status!="Deleted").ToList();
    menu.Items.Add(FileAction("Edit selected metadata…",()=>Edit(true,selection),selection.Count>0));
+   menu.Items.Add(FileAction("Set capture town / city…",()=>SetCaptureSite(true,Context(true)),plan!=null&&visibleImports.Any(f=>f.Status!="Deleted")));
    menu.Items.Add(FileAction("Identify selected targets…",()=>Identify(true),selection.Count>0));
    menu.Items.Add(FileAction("Set Unknown targets…",AssignUnknownImportTargets,UnknownImportSelection().Count>0));
    menu.Items.Add(new Separator());menu.Items.Add(FileAction("Scan report…",()=>ShowReport("Scan report",plan==null?"Scan a folder first.":plan.Errors.Count==0?"All supported files were read successfully.":string.Join("\r\n\r\n",plan.Errors))));

@@ -11,7 +11,6 @@ Dismiss	閉じる
 Search captures…	キャプチャを検索…
 Filters	フィルター
 Clear	クリア
-Export ▾	エクスポート ▾
 Selected files include other targets. Click to clear the selection.	選択したファイルに他のターゲットが含まれています。クリックすると選択を解除します。
 Your sky, organised.	あなたの星空を、整理して。
 Choose a repository, then import your captures.	リポジトリを選択して、キャプチャをインポートしてください。
@@ -28,7 +27,6 @@ Select a capture	キャプチャを選択
 Select a capture to preview it.	プレビューするキャプチャを選択してください。
 Reset capture sky view	撮影時の空の表示をリセット
 SAVED TELESCOPE	保存済みの望遠鏡
-Reuse a saved telescope.	保存済みの望遠鏡を再利用します。
 Connect over network…	ネットワーク経由で接続…
 Find a telescope on your network, choose captures or import live as it shoots.	ネットワーク上の望遠鏡を検索し、キャプチャを選択するか、撮影しながらライブでインポートします。
 ● Live import underway	● ライブ インポート実行中
@@ -39,7 +37,6 @@ Connect a telescope by USB, or browse its capture folder and save the telescope.
 SOURCE FOLDER	ソース フォルダー
 Browse	参照
 DEVICE ID	デバイス ID
-Unique ID for this physical telescope.	この物理的な望遠鏡の一意の ID です。
 Import preferences…	インポート設定…
 Watch folder…	フォルダーを監視…
 Scan folder	フォルダーをスキャン
@@ -50,7 +47,6 @@ Choose a source folder and scan to begin.	ソース フォルダーを選択し�
 DEVICE / MODEL	デバイス / モデル
 Select a capture to see its review category and reason.	キャプチャを選択すると、確認カテゴリと理由が表示されます。
 Import 0 files	0 個のファイルをインポート
-Imports the ready files shown above.	上に表示されている準備完了のファイルをインポートします。
 Add images…	画像を追加…
 Import folder…	フォルダーをインポート…
 Refresh	最新の情報に更新
@@ -79,7 +75,6 @@ Performance details	パフォーマンスの詳細
 FILES/S	ファイル/s
 MB/S	MB/s
 Ctrl / Shift to select · Right-click for file actions	Ctrl / Shift で選択 · 右クリックでファイル操作
-Switch light/dark theme	ライト/ダーク テーマの切り替え
 Settings	設定
 Guide	ガイド
 Columns ▾	列 ▾
@@ -87,7 +82,6 @@ Preview	プレビュー
 Tools ▾	ツール ▾
 Review flagged	フラグ付きを確認
 Screen for failures	失敗をスクリーニング
-Check selected or visible captures for rejection or damaged FITS data.	選択または表示中のキャプチャに、リジェクトや破損した FITS データがないか確認します。
 Rotation	回転
 Identify target	ターゲットを識別
 Edit metadata	メタデータの編集
@@ -102,13 +96,11 @@ Retry failed imports	失敗したインポートを再試行
 Import tools ▾	インポート ツール ▾
 Report	レポート
 Import options	インポート オプション
-Auto detects the model from each capture.	各キャプチャからモデルを自動検出します。
 TARGET ANALYSIS	ターゲット解析
 ROTATION ANALYSIS	回転解析
 Ignore failed	失敗を無視
 Skip filenames containing “failed”; keep originals.	ファイル名に “failed” を含むものをスキップし、元ファイルは保持します。
 Delete originals after verified import	検証済みのインポート後に元ファイルを削除
-Originals are kept by default. Optional analysis can take longer.	元ファイルは既定で保持されます。オプションの解析には時間がかかる場合があります。
 Choose files, targets or sessions.	ファイル、ターゲット、またはセッションを選択してください。
 Opening AstroArchive	AstroArchive を起動中
 Cancel opening AstroArchive	AstroArchive の起動をキャンセル
@@ -117,7 +109,7 @@ Rosette Nebula · Ari J. Guest	ばら星雲 · Ari J. Guest
 Application startup progress	アプリケーションの起動の進行状況
 Enabled	有効
 Accessibility	アクセシビリティ
-Adjust text and table spacing without scaling images. Settings apply to this Windows user and remain in place after updates.	画像を拡大縮小せずに、テキストと表の間隔を調整します。設定はこの Windows ユーザーに適用され、更新後もそのまま維持されます。
+Adjust text and table spacing without scaling images.	画像を拡大縮小せずに、テキストと表の間隔を調整します。
 Text size	テキストのサイズ
 Comfortable table rows	ゆとりのある表の行
 High contrast surfaces and text	ハイコントラストの背景とテキスト
@@ -136,12 +128,10 @@ Activity and notifications (Ctrl+Shift+N)	アクティビティと通知 (Ctrl+S
 Close	閉じる
 Activity	アクティビティ
 Clear completed	完了した項目をクリア
-Show dismissed	閉じた項目を表示
 View	表示
 Loading image preview	画像のプレビューを読み込み中
 Preparing…	準備中…
 No recent activity. Long-running work and release notifications appear here.	最近のアクティビティはありません。時間のかかる処理やリリースの通知がここに表示されます。
-Dismiss this card; running work continues. Use Show dismissed to restore it.	このカードを閉じます。実行中の処理は続行されます。元に戻すには [閉じた項目を表示] を使用します。
 Details	詳細
 Cloud availability	クラウドの利用可否
 Waiting for cloud provider	クラウド プロバイダーを待機中
@@ -275,7 +265,7 @@ Tags and note…	タグとメモ…
 Tags and notes…	タグとメモ…
 Tags and note	タグとメモ
 Tags and notes	タグとメモ
-Personal labels for finding and remembering these files. They are saved with this repository and never change the files themselves.	これらのファイルを見つけたり覚えたりするための個人用ラベルです。このリポジトリに保存され、ファイル自体が変更されることはありません。
+Saved with this repository; the files themselves never change.	このリポジトリに保存され、ファイル自体は変更されません。
 Tags (separate with commas)	タグ (コンマ区切り)
 Only tags shared by every selected file are shown. Others stay unless you remove them here.	選択したすべてのファイルに共通するタグのみが表示されます。その他のタグは、ここで削除しない限り残ります。
 Add this tag	このタグを追加
@@ -451,7 +441,7 @@ Restore this backup	このバックアップを復元
 Back up archive	アーカイブのバックアップ
 Create a recoverable backup	復元可能なバックアップを作成
 Copies originals, edited files and the current archive database. Choose a folder outside the archive; a separate drive is best.	元ファイル、Edited のファイル、現在のアーカイブ データベースをコピーします。アーカイブ外のフォルダーを選択してください。別のドライブが最適です。
-Large backups can take a long time to create and verify. You can keep using Windows and cancel safely.	大きなバックアップの作成と検証には長い時間がかかることがあります。その間も Windows を使用でき、安全にキャンセルできます。
+Large backups can take a long time to create and verify. You can cancel safely.	大きなバックアップの作成と検証には長い時間がかかることがあります。安全にキャンセルできます。
 Save backup in	バックアップの保存先
 Without compression, the backup is a normal folder. ZIP compression preserves every image byte, including resolution and metadata.	圧縮しない場合、バックアップは通常のフォルダーになります。ZIP 圧縮では、解像度やメタデータを含め、画像のすべてのバイトが保持されます。
 The first backup in a folder is complete. Later backups copy only what changed since the previous backup there, yet each folder backup stays complete on its own.	フォルダー内の最初のバックアップは完全バックアップです。以降のバックアップでは前回のバックアップから変更された部分のみをコピーしますが、各フォルダー バックアップは単独で完全な状態を保ちます。
@@ -594,8 +584,6 @@ Edited metadata saved.	Edited のメタデータを保存しました。
 Export files…	ファイルをエクスポート…
 Delete files…	ファイルを削除…
 Delete selected Edited copies; keep source originals and archived captures.	選択した Edited のコピーを削除します。ソースの元ファイルとアーカイブ済みのキャプチャは保持されます。
-Export Edited files	Edited のファイルをエクスポート
-Copies the selected images in their original format. Existing files are kept; duplicate names receive a numbered suffix.	選択した画像を元の形式でコピーします。既存のファイルは保持され、名前が重複する場合は番号が付加されます。
 Export files	ファイルのエクスポート
 Delete selected Edited files	選択した Edited のファイルを削除
 This permanently removes the selected Edited copies. Source copies, archived originals, other Edited files and project source metadata stay. Cloud-synced deletions propagate to the cloud.	選択した Edited のコピーを完全に削除します。ソースのコピー、アーカイブ済みの元ファイル、その他の Edited のファイル、プロジェクトのソース メタデータは保持されます。クラウド同期されているファイルの削除はクラウドにも反映されます。
@@ -646,12 +634,10 @@ Open GitHub draft	GitHub の下書きを開く
 Open a prefilled GitHub issue draft with the displayed diagnostic report	表示されている診断レポートを入力済みの GitHub Issue の下書きを開きます
 Could not open GitHub. The report has not been sent.\n\n	GitHub を開けませんでした。レポートは送信されていません。\n\n
 Application location	アプリケーションの場所
-Copies and verifies original files before opening your chosen app.	選択したアプリを開く前に、元ファイルをコピーして検証します。
 Opens the selected Edited images in your chosen app. Save results in their image folders.	選択した Edited の画像を選択したアプリで開きます。結果はそれぞれの画像フォルダーに保存してください。
 Creates verified working copies in Edited, then opens them in your chosen app. Save processed results alongside the copies.	Edited に検証済みの作業コピーを作成し、選択したアプリで開きます。処理した結果はコピーと同じ場所に保存してください。
 Choose an application…	アプリケーションを選択…
 Choose a compatible destination. Unavailable destinations below explain their restrictions.	互換性のある出力先を選択してください。利用できない出力先については、その制限が下に説明されています。
-No destination supports this selection. Export files… can copy the originals; convert to a supported format or select fewer images to open them in an app.	この選択に対応する出力先はありません。[ファイルをエクスポート…] で元ファイルをコピーできます。アプリで開くには、サポートされている形式に変換するか、選択する画像を減らしてください。
 Unavailable destinations (	利用できない出力先 (
 Use this as my default for subframe folders	サブフレーム フォルダーの既定として使用する
 Use this as my default for these file types	これらのファイルの種類の既定として使用する
@@ -685,7 +671,6 @@ Find automatically	自動的に検索
 Not found. Browse to the application's GUI executable.	見つかりません。アプリケーションの GUI 実行可能ファイルを参照してください。
 Use automatic detection	自動検出を使用
 Automatic detection will be used when exporting.	エクスポート時に自動検出が使用されます。
-Stacking folder…	スタック用フォルダー…
 Preview…	プレビュー…
 Create Edited copies…	Edited のコピーを作成…
 Open file location	ファイルの場所を開く
@@ -693,7 +678,6 @@ More actions	その他の操作
 Copy file paths	ファイル パスをコピー
 Identify target…	ターゲットを識別…
 Review detected metadata…	検出されたメタデータを確認…
-Export catalogue CSV…	カタログ CSV をエクスポート…
 Choose HDU / page / frame…	HDU / ページ / フレームを選択…
 Exporting catalogue CSV	カタログ CSV をエクスポート中
 This file is missing from the repository.	このファイルはリポジトリにありません。
@@ -707,7 +691,6 @@ None	なし
 Open one exported FITS stack in Siril. Multiple stacks and subs-only exports cannot open a single image.	エクスポートした FITS スタックを 1 つ Siril で開きます。複数のスタックやサブのみのエクスポートは、1 枚の画像として開けません。
 Siril did not start.	Siril を起動できませんでした。
 Siril handoff	Siril への引き渡し
-Original files are copied and verified. Existing files are kept; duplicate names receive a numbered suffix.	元ファイルをコピーして検証します。既存のファイルは保持され、名前が重複する場合は番号が付加されます。
 Export stacking folder	スタック用フォルダーをエクスポート
 Multiple targets	複数のターゲット
 Inputs	入力
@@ -797,7 +780,6 @@ Calibration originals always stay on the source/telescope. Changed or failed fil
 Dump processing also removes verified duplicate science files from Dump.	Dump の処理では、検証済みの重複したサイエンス ファイルも Dump から削除されます。
 Existing duplicates are kept on the source.	既存の重複ファイルはソースに残されます。
 Deletion in a cloud-synced source folder propagates to the cloud and other devices.	クラウド同期されているソース フォルダーでの削除は、クラウドと他のデバイスにも反映されます。
-Cancel to keep all source files and return without starting this import.	すべてのソース ファイルを保持し、このインポートを開始せずに戻るには、[キャンセル] を選択してください。
 Import and delete eligible originals	インポートして対象の元ファイルを削除
 Target for Unknown light/stack captures	不明なライト/スタックのキャプチャのターゲット
 Enter an object ID or name. Blank keeps Unknown.	天体 ID または名前を入力してください。空欄の場合は「不明」のままです。
@@ -851,6 +833,11 @@ Skip “failed” files	“failed” ファイルをスキップ
 Skip PNG/JPG/MP4	PNG/JPG/MP4 をスキップ
 Saved import preference. Also applies to folder, USB, network and Dump imports.	インポート設定として保存されます。フォルダー、USB、ネットワーク、Dump からのインポートにも適用されます。
 Keep AstroArchive open and this PC awake while capturing. Stop watching from Activity at any time; completed imports are kept.	撮影中は AstroArchive を開いたままにし、この PC がスリープしないようにしてください。監視はアクティビティからいつでも停止でき、完了したインポートは保持されます。
+AstroArchive checks this telescope folder and its subfolders, and imports each new capture once the telescope has finished saving it. Capture continues in the telescope app; originals stay on the telescope.	AstroArchive はこの望遠鏡フォルダーとそのサブフォルダーを確認し、望遠鏡が保存を終えた新しいキャプチャを順にインポートします。撮影は望遠鏡アプリで続行され、元のファイルは望遠鏡に残ります。
+Telescope folder	望遠鏡フォルダー
+Check for new captures every	新しいキャプチャを確認する間隔
+Off: only captures saved after live import starts are imported. Select earlier captures and choose Import selected.	オフ: ライブ インポートの開始後に保存されたキャプチャのみがインポートされます。以前のキャプチャは選択して [選択項目をインポート] を選びます。
+Keep AstroArchive open and this PC awake while capturing. Stop live import from Activity at any time; completed imports are kept.	撮影中は AstroArchive を開いたままにし、この PC がスリープしないようにしてください。ライブ インポートはアクティビティからいつでも停止でき、完了したインポートは保持されます。
 Start watching	監視を開始
 Local folder	ローカル フォルダー
 Folder watch could not start	フォルダーの監視を開始できませんでした
@@ -1067,7 +1054,6 @@ Needs attention	対処が必要
 Stopped	停止
 Completed · review results	完了 · 結果を確認
 Completed	完了
-Dismiss from the banner and Activity; running work continues. Use Show dismissed in Activity to restore it.	バナーとアクティビティから閉じます。実行中の処理は続行されます。元に戻すには、アクティビティの [閉じた項目を表示] を使用します。
 No newer release is available.	新しいリリースはありません。
 Release information has not been checked yet.	リリース情報はまだ確認されていません。
 No newer release was found at the last successful check.	前回の確認では、新しいリリースは見つかりませんでした。
@@ -1103,7 +1089,8 @@ Size	サイズ
 Import from telescope	望遠鏡からインポート
 Import over your network	ネットワーク経由でインポート
 Keep AstroArchive and the telescope on the same Wi-Fi or LAN. Capture continues in the telescope app.	AstroArchive と望遠鏡を同じ Wi-Fi または LAN に接続してください。撮影は望遠鏡のアプリで続けられます。
-Finding Seestar and DWARF telescopes…	Seestar と DWARF の望遠鏡を検索しています…
+Finding Seestar, DWARF and Celestron Origin telescopes…	Seestar、DWARF、Celestron Origin の望遠鏡を検索しています…
+Turn on Save Raw Images under Menu > Settings > Advanced in the Origin app to keep individual exposures.	個々の露光を残すには、Origin アプリの [メニュー] > [設定] > [詳細] で Save Raw Images をオンにしてください。
 Telescopes found on the network	ネットワーク上で見つかった望遠鏡
 Address	アドレス
 Host	ホスト
@@ -1134,7 +1121,7 @@ No telescopes replied. Check that both devices share the same network. Search ag
 Finding telescopes on your networks… (about 8 seconds)	ネットワーク上の望遠鏡を検索しています… (約 8 秒)
 Choose files, search all captures, or start live import.	ファイルを選択するか、すべてのキャプチャを検索するか、ライブ インポートを開始してください。
 Live folder: All captures	ライブ フォルダー: すべてのキャプチャ
-Click to select files or folders; Ctrl or Shift adds more. Double-click a folder to open it. Selections are kept as you move between folders.	クリックでファイルまたはフォルダーを選択し、Ctrl または Shift キーで追加します。フォルダーをダブルクリックすると開きます。フォルダー間を移動しても選択は保持されます。
+Selections are kept as you move between folders.	フォルダー間を移動しても選択は保持されます。
 Reading capture folders…	キャプチャ フォルダーを読み取り中…
 No supported captures were found. Open Advanced to check the storage location.	サポートされているキャプチャが見つかりませんでした。[詳細設定] を開いて保存場所を確認してください。
 Searching all capture folders…	すべてのキャプチャ フォルダーを検索中…
@@ -1212,7 +1199,7 @@ Search files and metadata. Combine a target, device and file type, for example M
 Find files	ファイルの検索
 Check your search	検索内容を確認してください
 Search across your files	ファイル全体を検索
-Results update after a short typing pause. Enter searches immediately; Escape clears the search while keeping table filters. Searching runs in the background; file actions wait for the current results. Words combine to narrow results. Catalogue IDs and common names resolve to the same target, including spaced IDs such as NGC 6888. Case, accents and filename separators are handled consistently.	入力を少し止めると結果が更新されます。Enter キーですぐに検索し、Esc キーで表のフィルターを維持したまま検索をクリアします。検索はバックグラウンドで実行され、ファイル操作は現在の結果を待ってから行われます。複数の語句を組み合わせると結果が絞り込まれます。カタログ ID と一般名は、NGC 6888 のようにスペースを含む ID も含めて、同じターゲットとして解決されます。大文字と小文字、アクセント記号、ファイル名の区切り文字は一貫して処理されます。
+Results update after a short typing pause. Enter searches immediately; Escape clears the search while keeping table filters. Words combine to narrow results. Catalogue IDs and common names resolve to the same target, including spaced IDs such as NGC 6888. Case, accents and filename separators are handled consistently.	入力を少し止めると結果が更新されます。Enter キーですぐに検索し、Esc キーで表のフィルターを維持したまま検索をクリアします。複数の語句を組み合わせると結果が絞り込まれます。カタログ ID と一般名は、NGC 6888 のようにスペースを含む ID も含めて、同じターゲットとして解決されます。大文字と小文字、アクセント記号、ファイル名の区切り文字は一貫して処理されます。
 Examples	例
 Search fields	検索フィールド
 Capture time (timezone unknown)	撮影時刻 (タイム ゾーン不明)
@@ -1291,7 +1278,7 @@ Wondering if the smudge is dust or a discovery…	このシミがゴミなのか
 Negotiating a truce with the background gradient…	背景のかぶりと休戦協定を結んでいます…
 Organising the archive before it becomes a black hole…	アーカイブがブラックホールになる前に整理しています…
 Did you know you can press F1 to open AstroArchive’s offline guide?	F1 キーで AstroArchive のオフライン ガイドを開けることをご存じですか?
-Did you know you can import from Seestar and DWARF over your local network?	ローカル ネットワーク経由で Seestar や DWARF からインポートできることをご存じですか?
+Did you know you can import from Seestar, DWARF and Celestron Origin over your local network?	ローカル ネットワーク経由で Seestar、DWARF、Celestron Origin からインポートできることをご存じですか?
 Did you know you can use live import to bring in completed captures while your telescope keeps shooting?	ライブ インポートを使えば、望遠鏡が撮影を続けている間に、完了したキャプチャを取り込めることをご存じですか?
 Did you know you can run independent network imports from more than one telescope?	複数の望遠鏡から、それぞれ独立したネットワーク インポートを実行できることをご存じですか?
 Did you know you can browse your captures by target and session in Repository?	リポジトリでは、ターゲットとセッションごとにキャプチャを参照できることをご存じですか?
@@ -1424,18 +1411,14 @@ Telescope rename	望遠鏡の名前の変更
 Edited scope	Edited の範囲
 Selection	選択範囲
 Recover saved telescopes from archive metadata.	アーカイブのメタデータから保存済みの望遠鏡を復元します。
-Add tags and a note to the selected files.	選択したファイルにタグとメモを追加します。
 Create target card	ターゲット カードを作成
 Make a shareable image of this target with its integration, frames, nights and filters.	このターゲットの総露出時間、フレーム数、夜数、フィルターを載せた共有用の画像を作成します。
-Add tags and a note to this file.	このファイルにタグとメモを追加します。
 Read and hash every source file again.	すべてのソース ファイルを再度読み取ってハッシュを計算します。
 Inspect flagged captures and retry failed transfers.	フラグ付きキャプチャを確認し、失敗した転送を再試行します。
 Review flagged files	フラグ付きファイルの確認
-Inspect captures marked for review.	確認用にマークされたキャプチャを確認します。
 Check rejection labels and file integrity.	リジェクトのラベルとファイルの整合性を確認します。
 Retry failed transfers from unchanged source files.	変更されていないソース ファイルから、失敗した転送を再試行します。
 Edit selected metadata	選択したメタデータの編集
-Change metadata for selected scan results.	選択したスキャン結果のメタデータを変更します。
 Identify selected targets	選択したターゲットを識別
 Solve selected lights and stacks to identify objects.	選択したライトとスタックをプレートソルブして天体を識別します。
 Set Unknown targets	不明なターゲットを設定
@@ -1457,13 +1440,9 @@ Review archive deletions and reimport choices.	アーカイブの削除と再イ
 Delete archive data	アーカイブ データの削除
 Permanently clear indexed archive data; keep source originals.	インデックスされたアーカイブ データを完全に消去します。ソースの元ファイルは保持します。
 View operation timings and import reports.	操作の所要時間とインポート レポートを表示します。
-Show timings and diagnostics for the latest operation.	最新の操作の所要時間と診断情報を表示します。
 Last import report	前回のインポート レポート
-Show the latest import's results and errors.	最新のインポートの結果とエラーを表示します。
 Export capture metadata for spreadsheets.	スプレッドシート用にキャプチャのメタデータをエクスポートします。
 Selected / visible files	選択中 / 表示中のファイル
-Export metadata for selected or visible captures.	選択中または表示中のキャプチャのメタデータをエクスポートします。
-Export metadata for all archived captures.	アーカイブ済みのすべてのキャプチャのメタデータをエクスポートします。
 Choose HDU / page / frame	HDU / ページ / フレームの選択
 Choose the image or frame used for preview and export.	プレビューとエクスポートに使用する画像またはフレームを選択します。
 Re-detect metadata and review	メタデータを再検出して確認
@@ -1517,7 +1496,6 @@ Add compatible darks, flats and biases.	互換性のあるダーク、フラッ�
 Include calibrations for subs with unknown calibration state	キャリブレーション状態が不明なサブにもキャリブレーションを含める
 Review unknown processing states before calibrating.	キャリブレーションの前に、不明な処理状態を確認してください。
 Include files marked rejected/reference	リジェクト/参照用としてマークされたファイルを含める
-Include rejected and reference frames in this export.	このエクスポートに、リジェクトされたフレームと参照用フレームを含めます。
 Renames this device and its archived captures.	このデバイスとアーカイブ済みのキャプチャの名前を変更します。
 Export to	エクスポート先
 Open verified working copies or stacking inputs in a compatible app.	検証済みの作業コピーまたはスタック用の入力を、互換性のあるアプリで開きます。
@@ -1528,12 +1506,10 @@ Export destinations	エクスポート先
 Choose application locations and defaults by file type.	ファイルの種類ごとにアプリケーションの場所と既定値を選択します。
 Ready-to-stack folder	スタック用フォルダー
 Ready-to-stack with calibrations	スタック用 (キャリブレーション付き)
-Include available matching calibration files.	利用可能な一致するキャリブレーション ファイルを含めます。
 Delete selected archive copies; keep source originals.	選択したアーカイブのコピーを削除します。ソースの元ファイルは保持します。
 Solve once per Light session/target group; stacks solve individually.	ライトのセッション/ターゲット グループごとに 1 回プレートソルブします。スタックは個別にプレートソルブします。
 Report missing or changed archive files.	欠落または変更されたアーカイブ ファイルを報告します。
 Index existing images without copying or moving them.	既存の画像をコピーや移動をせずにインデックスします。
-Choose a catalogue target or enter a custom name.	カタログのターゲットを選択するか、カスタム名を入力してください。
 One sampled preview pixel per screen pixel.	画面の 1 ピクセルにつきプレビューの 1 ピクセルを表示します。
 Retry visible failed transfers; rescan changed sources.	表示中の失敗した転送を再試行し、変更されたソースを再スキャンします。
 Exclude rejected or damaged captures.	リジェクトされたキャプチャまたは破損したキャプチャを除外します。
@@ -1548,7 +1524,6 @@ Metadata, target identification and scan report.	メタデータ、ターゲッ�
 Open the guide (F1).	ガイドを開きます (F1)。
 Choose telescope folders or files, then confirm a full scan and import. Keep originals.	望遠鏡のフォルダーまたはファイルを選択し、完全なスキャンとインポートを確定します。元ファイルは保持されます。
 Clear search, filters and target selection.	検索、フィルター、ターゲットの選択をクリアします。
-Export selected files, or all visible files if none selected.	選択したファイルをエクスポートします。選択がない場合は表示中のすべてのファイルをエクスポートします。
 Assess mount mode from rotation in acquisition subs.	撮影したサブの回転から架台の方式を評価します。
 Solve selected Light groups and stacks; review batch target matches.	選択したライトのグループとスタックをプレートソルブし、ターゲットの一致を一括で確認します。
 Edit selected files, or all visible files if none selected.	選択したファイルを編集します。選択がない場合は表示中のすべてのファイルを編集します。
@@ -1568,7 +1543,6 @@ Stop safely; completed imports remain.	安全に停止します。完了した�
 Ctrl/Shift selects files; right-click opens file actions.	Ctrl/Shift キーでファイルを選択し、右クリックでファイル操作を開きます。
 Review scan results. Row selection does not limit imports; search and filters do.	スキャン結果を確認します。行の選択はインポート対象を制限しません。検索とフィルターで絞り込まれます。
 Capture source folder. Scan before importing.	キャプチャのソース フォルダー。インポートする前にスキャンしてください。
-Choose an export action.	エクスポート操作を選択してください。
 Edit metadata for these files.	これらのファイルのメタデータを編集します。
 Check rejection markers and file integrity.	リジェクトのマーカーとファイルの整合性を確認します。
 Back	戻る
@@ -1832,7 +1806,6 @@ Export…	エクスポート…
 Copy and verify grouped inputs into a ready-to-stack folder.	グループ化した入力をスタック用フォルダーにコピーして検証します。
 Build AstroBin's acquisition CSV from archived metadata; no images are copied.	アーカイブ済みのメタデータから AstroBin の撮影データ CSV を作成します。画像はコピーされません。
 Save CSV	CSV を保存
-Choose where to save this CSV.	この CSV の保存先を選択してください。
 Export preferences	エクスポート設定
 Default export folder, Siril and application locations.	既定のエクスポート フォルダー、Siril、アプリケーションの場所。
 Choose an existing folder outside the repository.	リポジトリ外の既存のフォルダーを選択してください。
@@ -1841,7 +1814,6 @@ Open Export for selected files, or all visible files if none selected.	選択し
 Open Export with an option chosen.	オプションを選択した状態でエクスポートを開きます。
 Select captures, then choose **Export**: copy originals, prepare a ready-to-stack folder, open them in an app, or create an AstroBin acquisition CSV.	キャプチャを選択してから **エクスポート** を選択します。元ファイルのコピー、スタック用フォルダーの準備、アプリで開く、AstroBin の撮影データ CSV の作成から選べます。
 No files selected	ファイルが選択されていません
-Catalogue CSV…	カタログ CSV…
 Inputs with different calibration sets use separate folders.	キャリブレーションのセットが異なる入力は、別々のフォルダーに分けられます。
 Export selection: {0}	エクスポート対象: {0}
 {#0} selected files	選択したファイル {0} 個
@@ -1990,9 +1962,160 @@ Compare deep-sky frames across the whole target instead of each session	ディ�
 Nothing to measure	測定するものがありません
 OVERVIEW	概要
 IMAGING NOTES	撮影メモ
-AT A GLANCE	概要データ
+PARAMETERS	パラメータ
+Orbit	軌道
+Diameter	直径
+Mass	質量
+Major moons	主な衛星
+{0} AU from the Sun · {1} days	太陽から{0} au · {1}日
+{0} AU from the Sun · {1} years	太陽から{0} au · {1}年
 SOURCES	出典
 Solar eclipse	日食
 Lunar eclipse	月食
 Solar Eclipse	日食
 Lunar Eclipse	月食
+Orbit type	軌道の種類
+Perihelion	近日点
+Perihelion date	近日点通過日
+Orbital period	公転周期
+Eccentricity	離心率
+{0} AU from the Sun	太陽から{0} au
+{0} years per orbit	{0}年で1周
+Halley-type	ハレー型
+Jupiter-family	木星族
+Encke-type	エンケ型
+Long-period	長周期
+Near-parabolic	ほぼ放物線
+Hyperbolic (interstellar)	双曲線（恒星間）
+Aphelion	遠日点
+Show targets in frame	フレーム内の天体を表示
+Hide targets in frame	フレーム内の天体を非表示
+Field geometry is unusable for marking targets	視野の形状から天体を表示できません
+This capture has no plate solution	このキャプチャにはプレートソルブの結果がありません
+This capture has only approximate pointing	このキャプチャの向きはおおよそしか分かりません
+This image has no plate solution	この画像にはプレートソルブの結果がありません
+This image has no plate solution in its header	この画像のヘッダーにはプレートソルブの結果がありません
+No catalogue objects in this field	この視野にカタログ天体はありません
+Plate solve…	プレートソルブ…
+Reading the image header…	画像ヘッダーを読み込んでいます…
+On	オン
+Telescopes	望遠鏡
+Reports	レポート
+Clean up	クリーンアップ
+Refresh USB devices	USB デバイスを更新
+Live import underway…	ライブ インポート実行中…
+Catalogue CSV…	カタログ CSV…
+Stacking folder…	スタック用フォルダー…
+AstroBin CSV…	AstroBin CSV…
+Save, rename or recover telescope profiles, or look for USB telescopes.	望遠鏡プロファイルを保存、名前変更、復元するか、USB 望遠鏡を探します。
+Look for telescopes connected by USB.	USB で接続された望遠鏡を探します。
+Show the latest scan and import reports.	最新のスキャンとインポートのレポートを表示します。
+Complete metadata, verify checksums, reindex and review deletions.	メタデータの補完、チェックサムの検証、再インデックス、削除履歴の確認を行います。
+Permanently delete failed, non-raw or all archive files.	失敗したファイル、RAW 以外のファイル、またはすべてのアーカイブ ファイルを完全に削除します。
+Show timings and status for the last operation.	最後の操作の所要時間と状態を表示します。
+# Analytics options panel, remembered choices and chart customisation
+Combined document	結合ドキュメント
+All six charts in one document	6 つのチャートすべてを 1 つのドキュメントに
+{#0} of 6 charts in one document	6 つ中 {0} つのチャートを 1 つのドキュメントに
+{#0} of 6 charts	6 つ中 {0} つのチャート
+{#0} of 6 charts · Combined preview	6 つ中 {0} つのチャート · 結合プレビュー
+{#0} of 6 charts · Social pages	6 つ中 {0} つのチャート · ソーシャル ページ
+Combined preview	結合プレビュー
+Social pages	ソーシャル ページ
+Export preview	エクスポート プレビュー
+Customised	カスタマイズ済み
+This chart	このチャート
+Charts in the document	ドキュメントに含めるチャート
+Document	ドキュメント
+Your choices	選択内容
+Order	並び順
+Largest first	大きい順
+Smallest first	小さい順
+A–Z	名前順
+Chart title	チャートのタイトル
+Chart subtitle	チャートのサブタイトル
+Reset this chart	このチャートをリセット
+Colour palette	カラーパレット
+Nebula	星雲
+Aurora	オーロラ
+Colour-blind safe	色覚多様性に配慮
+Hide options	オプションを隠す
+Show options	オプションを表示
+Reset all options…	すべてのオプションをリセット…
+Reset all options	すべてのオプションをリセット
+Keep at least one chart in the combined document.	結合ドキュメントには少なくとも 1 つのチャートを残してください。
+Options reset to their defaults.	オプションを既定値に戻しました。
+Exported all six charts	6 つのチャートすべてをエクスポートしました
+Exported {#0} of 6 charts	6 つ中 {0} つのチャートをエクスポートしました
+Exported chart	チャートをエクスポートしました
+Rank groups by size or alphabetically. Donuts and columns keep the largest groups and gather the rest into Other.	グループをサイズ順または名前順に並べます。ドーナツと縦棒は大きいグループを残し、残りをまとめます。
+Leave blank to use the standard title.	空欄の場合は標準のタイトルを使います。
+Leave blank to use the standard description.	空欄の場合は標準の説明を使います。
+Return this chart's type, order, title and subtitle to their defaults.	このチャートの種類、並び順、タイトル、サブタイトルを既定値に戻します。
+Choose the charts that go into the combined document and Export all. At least one chart stays included.	結合ドキュメントと「すべてエクスポート」に含めるチャートを選びます。少なくとも 1 つは含まれます。
+Shown in each chart's footer and in exported file details. It starts as the repository folder name.	各チャートのフッターとエクスポートしたファイルの詳細に表示されます。最初はリポジトリ フォルダーの名前です。
+Colours for chart series in the preview and every export. Colour-blind safe uses the Okabe–Ito hues. Lettering keeps the document theme's colours.	プレビューとすべてのエクスポートで使う系列の色です。色覚多様性に配慮は Okabe–Ito の色を使います。文字はドキュメントのテーマの色のままです。
+Give the preview the whole width, or bring back the chart, document and export options.	プレビューを全幅で表示するか、チャート、ドキュメント、エクスポートのオプションを再表示します。
+Save the charts chosen for the combined document in one file, using the same telescope and date scope.	結合ドキュメント用に選んだチャートを、同じ望遠鏡と日付の範囲で 1 つのファイルに保存します。
+Return every chart, document and export choice to its default. The telescope and date scope are not changed.	チャート、ドキュメント、エクスポートの選択をすべて既定値に戻します。望遠鏡と日付の範囲は変わりません。
+Return every chart, document and export choice to its default? The telescope and date scope are not changed.	チャート、ドキュメント、エクスポートの選択をすべて既定値に戻しますか? 望遠鏡と日付の範囲は変わりません。
+Chart types, titles, order, palette, document and export choices are remembered for next time. Ctrl+E exports; Ctrl+Shift+E exports the combined document.	チャートの種類、タイトル、並び順、パレット、ドキュメントとエクスポートの選択は次回のために記憶されます。Ctrl+E でエクスポート、Ctrl+Shift+E で結合ドキュメントをエクスポートします。
+Choose targets in the options panel; adjust any card's image above the preview.	カードのターゲットはオプション パネルで選び、各カードの画像はプレビューの上で調整します。
+Export options · Resolution	エクスポート オプション · 解像度
+Export options · Timing and video size	エクスポート オプション · タイミングと動画サイズ
+# Sky map clicks and eclipse details
+Total solar eclipse	皆既日食
+Annular solar eclipse	金環日食
+Partial solar eclipse	部分日食
+Total lunar eclipse	皆既月食
+Partial lunar eclipse	部分月食
+Penumbral lunar eclipse	半影月食
+Sun covered at capture	撮影時の太陽の欠け
+Moon in Earth's shadow at capture	撮影時に地球の本影に入った月
+Moon in Earth's outer shadow at capture	撮影時に地球の半影に入った月
+Maximum	最大
+Began	開始
+Ended	終了
+Duration	継続時間
+Partial phase	部分食
+Totality	皆既
+Annularity	金環
+{#0}% at {1}	{1} に {0}%
+Click a constellation to name it, or the Moon, Sun or target for capture details.	星座をクリックすると名前を表示します。月・太陽・対象をクリックすると撮影の詳細を開きます。
+Coverage from first to last contact.	最初の接触から最後の接触までの食分です。
+The marker shows the capture.	マーカーは撮影時刻を示します。
+Eclipse coverage over time	食の推移
+Eclipse times are for the observing location.	食の時刻は観測地のものです。
+Eclipse times run from the Moon entering Earth's outer shadow to leaving it.	食の時刻は、月が地球の半影に入ってから出るまでです。
+Eclipse coverage comes from the bundled Moon and Sun models at the recorded time; check the capture clock if it looks wrong.	食分は、同梱の月と太陽のモデルで記録時刻から計算しています。おかしい場合は撮影時刻を確認してください。
+# Target card descriptions, drag and zoom, and the preview loading pane
+Preparing preview…	プレビューを準備しています…
+Preparing preview	プレビューを準備しています
+Preparing target cards…	ターゲットカードを準備しています…
+Adjust card…	カードを調整…
+Choose another image of this target, including any Edited image, adjust its zoom and position, and add a short description.	このターゲットの別の画像 (編集済み画像を含む) を選び、ズームと位置を調整して、短い説明を追加します。
+Drag the preview to move the image, and hold Ctrl while scrolling to zoom.	プレビューをドラッグすると画像を移動でき、Ctrl キーを押しながらスクロールするとズームできます。
+Short description (optional)	短い説明 (任意)
+A line or two under the target name, in card images and videos. Leave blank for none.	カードの画像と動画で、ターゲット名の下に 1〜2 行で表示されます。不要なら空欄のままにします。
+↺ Rotate left	↺ 左に回転
+Rotate right ↻	右に回転 ↻
+Rotate left	左に回転
+Rotate right	右に回転
+Turn the image a quarter turn anticlockwise.	画像を反時計回りに 90° 回転します。
+Turn the image a quarter turn clockwise.	画像を時計回りに 90° 回転します。
+Set capture town / city…	撮影地の市区町村を設定…
+Capture town / city	撮影地の市区町村
+Choose where these files were captured. A chosen town or city replaces any capture location recorded in the files. Without a choice, the recorded location is used, then your observing town / city from Settings.	これらのファイルの撮影地を選択します。選択した市区町村は、ファイルに記録された撮影地より優先されます。選択しない場合は記録された撮影地、次に設定の観測地の市区町村が使われます。
+Location used for sky views, Stellarium and eclipse times.	星空表示、Stellarium、食の時刻に使う場所です。
+Use default location	既定の場所を使用
+Default location	既定の場所
+Save location	場所を保存
+Mixed	混在
+Not set	未設定
+Recorded in file metadata	ファイルのメタデータに記録
+Settings default	設定の既定値
+Chosen capture town / city	選択した撮影地の市区町村
+Target below horizon	対象が地平線下
+Set the capture town / city for this file (right-click › Set capture town / city…), or correct the capture timezone in metadata.	このファイルの撮影地の市区町村を設定するか（右クリック › 撮影地の市区町村を設定…）、メタデータで撮影タイムゾーンを修正してください。
+Set capture town / city for selected…	選択項目の撮影地の市区町村を設定…
+Targets below the horizon at the predicted capture time usually need the capture town / city or timezone set.	推定撮影時刻に地平線下にある対象は、通常、撮影地の市区町村またはタイムゾーンの設定が必要です。

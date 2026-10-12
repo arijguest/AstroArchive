@@ -14,10 +14,6 @@ using System.Windows.Media.Imaging;
 namespace AstroArchive {
  // Shareable target cards: the best image of a target with its integration,
  // filters and nights, in the Analytics palette and social sizes.
- public sealed class TargetCardPlacement {
-  public double Zoom=1,PanX,PanY;
-  public TargetCardPlacement Copy(){return (TargetCardPlacement)MemberwiseClone();}
- }
  public static class TargetCardRenderer {
   sealed class Palette {public Color Top,Bottom,Ink,Muted,Accent,Second,Panel,PanelEnd,Border,Matte;}
   static Palette Colours(bool dark){
@@ -46,9 +42,8 @@ namespace AstroArchive {
   static void Image(DrawingContext dc,BitmapSource hero,Rect frame,bool fill,Palette p,double radius,TargetCardPlacement placement){
    dc.PushClip(new RectangleGeometry(frame,radius,radius));dc.DrawRectangle(Solid(p.Matte),null,frame);
    if(hero!=null){
-    double zoom=Math.Max(1,Math.Min(4,placement.Zoom)),panX=Math.Max(-1,Math.Min(1,placement.PanX)),panY=Math.Max(-1,Math.Min(1,placement.PanY));
-    double scale=(fill?Math.Max(frame.Width/hero.PixelWidth,frame.Height/hero.PixelHeight):Math.Min(frame.Width/hero.PixelWidth,frame.Height/hero.PixelHeight))*zoom;
-    double w=hero.PixelWidth*scale,h=hero.PixelHeight*scale,dx=Math.Abs(frame.Width-w)/2,dy=Math.Abs(frame.Height-h)/2;
+    hero=Oriented(hero,placement.Rotation);double panX=Math.Max(-1,Math.Min(1,placement.PanX)),panY=Math.Max(-1,Math.Min(1,placement.PanY));var size=Fitted(hero,frame,fill,placement.Zoom);
+    double w=size.Width,h=size.Height,dx=Math.Abs(frame.Width-w)/2,dy=Math.Abs(frame.Height-h)/2;
     dc.DrawImage(hero,new Rect(frame.X+(frame.Width-w)/2-panX*dx,frame.Y+(frame.Height-h)/2-panY*dy,w,h));
    }else{
     // No image: a quiet field of stars keeps the card on brand.
@@ -56,11 +51,34 @@ namespace AstroArchive {
    }
    dc.Pop();dc.DrawRoundedRectangle(null,new Pen(Solid(p.Border,0.9),2),frame,radius,radius);
   }
+  // The image's drawn size in its frame, before panning.
+  static Size Fitted(BitmapSource hero,Rect frame,bool fill,double zoom){
+   double scale=(fill?Math.Max(frame.Width/hero.PixelWidth,frame.Height/hero.PixelHeight):Math.Min(frame.Width/hero.PixelWidth,frame.Height/hero.PixelHeight))*Math.Max(1,Math.Min(4,zoom));
+   return new Size(hero.PixelWidth*scale,hero.PixelHeight*scale);
+  }
+  // How far, in card pixels, a pan from the centre to either edge moves the image.
+  public static int QuarterTurn(int degrees){return TargetCards.QuarterTurn(degrees);}
+  // The image turned clockwise by whole quarter turns.
+  static BitmapSource Oriented(BitmapSource hero,int rotation){
+   int turn=QuarterTurn(rotation);if(hero==null||turn==0)return hero;var turned=new TransformedBitmap(hero,new RotateTransform(turn));turned.Freeze();return turned;
+  }
+  public static Size PanRange(BitmapSource hero,TargetCardLayout layout,bool fill,TargetCardPlacement placement){
+   if(hero==null)return new Size(0,0);hero=Oriented(hero,placement.Rotation);var frame=HeroFrame(layout);var size=Fitted(hero,frame,fill,placement.Zoom);return new Size(Math.Abs(frame.Width-size.Width)/2,Math.Abs(frame.Height-size.Height)/2);
+  }
+  public static Rect HeroFrame(TargetCardLayout layout){
+   int width,height;TargetCards.Size(layout,out width,out height);bool wide=layout==TargetCardLayout.Widescreen;double scale=wide?1:width/1080.0,margin=64*scale,top=118*scale;
+   if(wide)return new Rect(margin,top,1040,height-top-margin);
+   double share=layout==TargetCardLayout.Vertical?0.56:layout==TargetCardLayout.Portrait?0.48:0.38;return new Rect(margin,top,width-2*margin,height*share);
+  }
+  // The value and its label share a left edge, and the pair is centred in the tile.
   static void Metric(DrawingContext dc,Rect box,string value,string label,Palette p,Color stripe,double scale){
    dc.DrawRoundedRectangle(Vertical(p.Panel,p.PanelEnd),new Pen(Solid(p.Border,0.6),1.5),box,18*scale,18*scale);
    dc.DrawRoundedRectangle(Solid(stripe),null,new Rect(box.X+1,box.Y+16*scale,4*scale,box.Height-32*scale),2,2);
-   var v=Fit(value,46*scale,p.Ink,box.Width-40*scale,true,24);dc.DrawText(v,new Point(box.X+24*scale,box.Y+box.Height/2-v.Height+6*scale));
-   var l=Fit(label,24*scale,p.Muted,box.Width-40*scale);dc.DrawText(l,new Point(box.X+24*scale,box.Y+box.Height/2+8*scale));
+   var v=Fit(value,46*scale,p.Ink,box.Width-44*scale,true,24);var l=Fit(label,24*scale,p.Muted,box.Width-44*scale);
+   double inner=box.X+6*scale,room=box.Width-6*scale,x=inner+Math.Max(16*scale,(room-Math.Max(v.Width,l.Width))/2),gap=10*scale;
+   double vTop=v.Height+v.OverhangAfter-v.Extent,vBottom=v.Height+v.OverhangAfter,lTop=l.Height+l.OverhangAfter-l.Extent,lBottom=l.Height+l.OverhangAfter;
+   double group=vBottom-vTop+gap+lBottom-lTop,y=box.Y+(box.Height-group)/2-vTop;
+   dc.DrawText(v,new Point(x,y));dc.DrawText(l,new Point(x,y+vBottom+gap-lTop));
   }
   static double Filters(DrawingContext dc,TargetCardData data,Rect area,Palette p,bool dark,double scale){
    if(data.Filters.Count==0||data.Seconds<=0)return 0;
@@ -78,7 +96,9 @@ namespace AstroArchive {
   public static readonly string[] ResolutionLabels={"Standard","High · 2×","Sharing · 720 px wide"};
   public static double ResolutionScale(int choice,TargetCardLayout layout){int w,h;TargetCards.Size(layout,out w,out h);return choice==1?2:choice==2?720.0/w:1;}
   public static BitmapSource Render(TargetCardData data,BitmapSource hero,TargetCardLayout layout,bool dark,bool fill,string credit){return Render(data,hero,layout,dark,fill,credit,null,1);}
-  public static BitmapSource Render(TargetCardData data,BitmapSource hero,TargetCardLayout layout,bool dark,bool fill,string credit,TargetCardPlacement placement,double outputScale){
+  public const int DescriptionLength=140;
+  public static BitmapSource Render(TargetCardData data,BitmapSource hero,TargetCardLayout layout,bool dark,bool fill,string credit,TargetCardPlacement placement,double outputScale){return Render(data,hero,layout,dark,fill,credit,placement,outputScale,null);}
+  public static BitmapSource Render(TargetCardData data,BitmapSource hero,TargetCardLayout layout,bool dark,bool fill,string credit,TargetCardPlacement placement,double outputScale,string description){
    if(outputScale<=0||outputScale>2||double.IsNaN(outputScale))throw new ArgumentException("Choose a supported card resolution.");placement=placement??new TargetCardPlacement();
    int width,height;TargetCards.Size(layout,out width,out height);var p=Colours(dark);var visual=new DrawingVisual();
    using(var dc=visual.RenderOpen()){
@@ -92,12 +112,13 @@ namespace AstroArchive {
     var brand=Text("AstroArchive",logoSize,p.Ink,true);brand=Text("AstroArchive",logoSize*logoSize*.75/Math.Max(1,brand.Extent),p.Ink,true);double brandX=margin+logoSize+16*scale;
     dc.DrawText(brand,new Point(brandX,logoCentre-(brand.Height+brand.OverhangAfter-brand.Extent/2)));
     if(!string.IsNullOrEmpty(data.DateRange)){double room=width-margin-(brandX+brand.Width+24*scale);if(room>80*scale){var dates=Fit(data.DateRange,24*scale,p.Muted,room);dc.DrawText(dates,new Point(width-margin-dates.Width,logoCentre-dates.Height/2));}}
-    double top=118*scale;Rect hero1;Rect info;
-    if(wide){hero1=new Rect(margin,top,1040,height-top-margin);info=new Rect(hero1.Right+56,top,width-hero1.Right-56-margin,height-top-margin);}
-    else{double share=layout==TargetCardLayout.Vertical?0.56:layout==TargetCardLayout.Portrait?0.48:0.38;hero1=new Rect(margin,top,width-2*margin,height*share);info=new Rect(margin,hero1.Bottom+36*scale,width-2*margin,height-hero1.Bottom-36*scale-margin);}
+    double top=118*scale;var hero1=HeroFrame(layout);var info=wide?new Rect(hero1.Right+56,top,width-hero1.Right-56-margin,height-top-margin):new Rect(margin,hero1.Bottom+36*scale,width-2*margin,height-hero1.Bottom-36*scale-margin);
     Image(dc,hero,hero1,fill,p,28*scale,placement);
     double y=info.Y;var title=Fit(data.Title,(wide?96:86)*scale,p.Ink,info.Width,true,40);dc.DrawText(title,new Point(info.X,y-10*scale));y+=title.Height-6*scale;
     if(!string.IsNullOrEmpty(data.Subtitle)){var subtitle=Fit(data.Subtitle,38*scale,p.Muted,info.Width);dc.DrawText(subtitle,new Point(info.X,y));y+=subtitle.Height;}
+    if(!string.IsNullOrWhiteSpace(description)){
+     var note=Text(description.Trim(),28*scale,p.Ink);note.MaxTextWidth=Math.Max(1,info.Width);note.MaxLineCount=wide?3:2;note.Trimming=TextTrimming.WordEllipsis;dc.DrawText(note,new Point(info.X,y+10*scale));y+=note.Height+10*scale;
+    }
     y+=26*scale;double gap=16*scale,tileHeight=(layout==TargetCardLayout.Square?112:128)*scale;
     string countLabel=Localization.T(data.Lights>0?"Light frames":"Stacks");int count=data.Lights>0?data.Lights:data.Stacks;
     var tiles=new[]{new{V=TargetCards.Duration(data.Seconds),L=Localization.T("Integration"),C=p.Second},new{V=count.ToString("N0",CultureInfo.CurrentCulture),L=countLabel,C=p.Accent},new{V=data.Nights.ToString("N0",CultureInfo.CurrentCulture),L=Localization.T(data.Nights==1?"Night":"Nights"),C=FilterColour("",2,dark)}};
@@ -157,30 +178,35 @@ namespace AstroArchive {
    var options=new StackPanel();Grid.SetColumn(options,1);layoutGrid.Children.Add(options);d.Add(layoutGrid);
    Func<string,FrameworkElement,FrameworkElement> labelled=(text,control)=>{var panel=new StackPanel{Margin=new Thickness(0,0,0,10)};var caption=new TextBlock{Text=text,Margin=new Thickness(0,0,0,5)};caption.SetResourceReference(TextBlock.FontSizeProperty,"UiFontBody");panel.Children.Add(caption);panel.Children.Add(control);AutomationProperties.SetName(control,text);options.Children.Add(panel);return control;};
    var choices=new List<CardImage>{new CardImage{Label="No image (star field)"}};choices.AddRange(images);
-   var imageBox=(ComboBox)labelled("Image",new ComboBox{ItemsSource=choices,SelectedIndex=images.Count>0?1:0,MaxDropDownHeight=320});
+   // The target's last image, framing and description come back when that image is still available.
+   var memory=CardMemory(target);int remembered=memory==null||memory.Path==null?-1:memory.Path.Length==0?0:choices.FindIndex(c=>c.Path!=null&&string.Equals(c.Path,memory.Path,StringComparison.OrdinalIgnoreCase));
+   var imageBox=(ComboBox)labelled("Image",new ComboBox{ItemsSource=choices,SelectedIndex=remembered>=0?remembered:images.Count>0?1:0,MaxDropDownHeight=320});
    var layoutBox=(ComboBox)labelled("Layout",new ComboBox{ItemsSource=TargetCards.LayoutLabels,SelectedIndex=Math.Max(0,Math.Min(TargetCards.LayoutLabels.Length-1,settings.CardLayout))});
    var themeBox=(ComboBox)labelled("Theme",new ComboBox{ItemsSource=new[]{"Dark","Light"},SelectedItem=settings.CardTheme=="Light"?"Light":"Dark"});LocalizedInterface.SetContext(themeBox,"Theme");
-   var fill=new CheckBox{Content=new TextBlock{Text="Fill the frame (crop edges)",TextWrapping=TextWrapping.Wrap},IsChecked=settings.CardFill,Margin=new Thickness(0,2,0,12)};AutomationProperties.SetName(fill,"Fill the frame");options.Children.Add(fill);
-   var placement=new TargetCardPlacement();Action redraw=null;var adjust=CardPlacementControls(placement,()=>{if(redraw!=null)redraw();});options.Children.Add(adjust);
+   var fill=new CheckBox{Content=new TextBlock{Text="Fill the frame (crop edges)",TextWrapping=TextWrapping.Wrap},IsChecked=remembered>=0?memory.Fill:settings.CardFill,Margin=new Thickness(0,2,0,12)};AutomationProperties.SetName(fill,"Fill the frame");options.Children.Add(fill);
+   var placement=new TargetCardPlacement();TargetCardPlacement pending=remembered>=0?memory.Placement():null;Action redraw=null;var adjust=CardPlacementControls(placement,()=>{if(redraw!=null)redraw();});options.Children.Add(adjust);
+   var note=(TextBox)labelled("Short description (optional)",CardDescription(memory==null?null:memory.Description));
    var credit=(TextBox)labelled("Credit line (optional)",new TextBox{Text=settings.CardCredit??"",MaxLength=80});UiHelp.Hint(credit,"For example, your name or handle. Leave blank for “Made with AstroArchive”.");
    var format=(ComboBox)labelled("Format",new ComboBox{ItemsSource=new[]{"PNG","JPEG"},SelectedItem=settings.CardFormat=="JPEG"?"JPEG":"PNG"});
    var resolution=(ComboBox)labelled("Resolution",new ComboBox{ItemsSource=TargetCardRenderer.ResolutionLabels,SelectedIndex=0});UiHelp.Hint(resolution,"Standard matches the layout's social size. High doubles it for print or large screens. Sharing makes a smaller file for messages.");
    var buttons=new WrapPanel{Margin=new Thickness(0,6,0,0)};options.Children.Add(buttons);
    BitmapSource hero=null,card=null;CancellationTokenSource loading=null;int generation=0;
    Action draw=()=>{
-    try{var layout=(TargetCardLayout)Math.Max(0,layoutBox.SelectedIndex);card=TargetCardRenderer.Render(data,hero,layout,Convert.ToString(themeBox.SelectedItem)!="Light",fill.IsChecked==true,credit.Text,placement,1);preview.Source=card;double factor=TargetCardRenderer.ResolutionScale(Math.Max(0,resolution.SelectedIndex),layout);if(loading==null)status.Text=Math.Round(card.PixelWidth*factor)+" × "+Math.Round(card.PixelHeight*factor)+" pixels";}
+    try{var layout=(TargetCardLayout)Math.Max(0,layoutBox.SelectedIndex);card=TargetCardRenderer.Render(data,hero,layout,Convert.ToString(themeBox.SelectedItem)!="Light",fill.IsChecked==true,credit.Text,placement,1,note.Text);preview.Source=card;double factor=TargetCardRenderer.ResolutionScale(Math.Max(0,resolution.SelectedIndex),layout);if(loading==null)status.Text=Math.Round(card.PixelWidth*factor)+" × "+Math.Round(card.PixelHeight*factor)+" pixels";}
     catch(Exception e){if(!(e is ArgumentException||e is InvalidOperationException||e is OutOfMemoryException))throw;status.Text="The card could not be drawn: "+e.Message;}
    };
    Action loadImage=async()=>{
     if(loading!=null)loading.Cancel();var choice=imageBox.SelectedItem as CardImage;int current=++generation;
-    if(choice==null||choice.Path==null){hero=null;loading=null;draw();return;}
+    Action restore=()=>{if(pending!=null){var saved=pending;pending=null;ApplyCardPlacement(adjust,saved);}};
+    if(choice==null||choice.Path==null){hero=null;loading=null;restore();draw();return;}
     var cancelLoad=loading=new CancellationTokenSource();status.Text="Loading image…";
-    try{var bitmap=await Task.Run(()=>DecodeCardImage(choice,cancelLoad.Token),cancelLoad.Token);if(current!=generation)return;hero=bitmap;loading=null;draw();}
+    try{var bitmap=await Task.Run(()=>DecodeCardImage(choice,cancelLoad.Token),cancelLoad.Token);if(current!=generation)return;hero=bitmap;loading=null;restore();draw();}
     catch(OperationCanceledException){}
     catch(Exception e){if(current!=generation)return;loading=null;hero=null;draw();status.Text="This image could not be read ("+e.Message+"). The card uses a star field instead.";}
    };
-   redraw=draw;Func<BitmapSource> output=()=>{var layout=(TargetCardLayout)Math.Max(0,layoutBox.SelectedIndex);double factor=TargetCardRenderer.ResolutionScale(Math.Max(0,resolution.SelectedIndex),layout);return factor==1?card:TargetCardRenderer.Render(data,hero,layout,Convert.ToString(themeBox.SelectedItem)!="Light",fill.IsChecked==true,credit.Text,placement,factor);};
-   imageBox.SelectionChanged+=(s,e)=>{placement.Zoom=1;placement.PanX=placement.PanY=0;ResetCardPlacement(adjust);loadImage();};foreach(var box in new[]{layoutBox,themeBox,resolution})box.SelectionChanged+=(s,e)=>draw();fill.Checked+=(s,e)=>draw();fill.Unchecked+=(s,e)=>draw();credit.TextChanged+=(s,e)=>draw();
+   redraw=draw;Func<BitmapSource> output=()=>{var layout=(TargetCardLayout)Math.Max(0,layoutBox.SelectedIndex);double factor=TargetCardRenderer.ResolutionScale(Math.Max(0,resolution.SelectedIndex),layout);return factor==1?card:TargetCardRenderer.Render(data,hero,layout,Convert.ToString(themeBox.SelectedItem)!="Light",fill.IsChecked==true,credit.Text,placement,factor,note.Text);};
+   imageBox.SelectionChanged+=(s,e)=>{pending=null;ResetCardPlacement(adjust);loadImage();};foreach(var box in new[]{layoutBox,themeBox,resolution})box.SelectionChanged+=(s,e)=>draw();fill.Checked+=(s,e)=>draw();fill.Unchecked+=(s,e)=>draw();credit.TextChanged+=(s,e)=>draw();note.TextChanged+=(s,e)=>draw();
+   previewStack.Children.Insert(1,CardRotation(adjust));CardGestures(preview,adjust,placement,()=>hero,()=>(TargetCardLayout)Math.Max(0,layoutBox.SelectedIndex),()=>fill.IsChecked==true);
    Action remember=()=>{settings.CardLayout=layoutBox.SelectedIndex;settings.CardTheme=Convert.ToString(themeBox.SelectedItem);settings.CardFill=fill.IsChecked==true;settings.CardCredit=credit.Text.Trim();settings.CardFormat=Convert.ToString(format.SelectedItem);SaveSettings();};
    var save=new Button{Content="Save card…",Margin=new Thickness(0,0,8,8)};Theme.Bind(save,Control.BackgroundProperty,"Accent");Theme.Bind(save,Control.ForegroundProperty,"AccentText");UiHelp.For(save,"Save card");buttons.Children.Add(save);
    save.Click+=(s,e)=>{
@@ -194,7 +220,9 @@ namespace AstroArchive {
    copy.Click+=(s,e)=>{if(card==null)return;try{Clipboard.SetImage(output());remember();status.Text="Copied. Paste it into a post or message.";}catch(Exception error){if(!(error is System.Runtime.InteropServices.ExternalException||error is InvalidOperationException))throw;status.Text="The clipboard is busy. Try again.";}};
    bool more=false;var collection=new Button{Content="More cards & video…",Margin=new Thickness(0,0,8,8)};UiHelp.Hint(collection,"Open Analytics to make cards for several targets or your top targets, or an animated video of them.");buttons.Children.Add(collection);
    collection.Click+=(s,e)=>{remember();more=true;d.Window.Close();};
-   d.CloseOnly();d.Window.Closed+=(s,e)=>{if(loading!=null)loading.Cancel();};
+   d.CloseOnly();d.Window.Closed+=(s,e)=>{if(loading!=null)loading.Cancel();var choice=imageBox.SelectedItem as CardImage;bool untouched=memory==null&&imageBox.SelectedIndex==(images.Count>0?1:0)&&placement.Zoom==1&&placement.PanX==0&&placement.PanY==0&&placement.Rotation==0&&string.IsNullOrWhiteSpace(note.Text)&&fill.IsChecked==settings.CardFill;
+    // Untouched defaults are not pinned, so a newer Edited image can still become the default.
+    if(pending==null&&!untouched)RememberCard(data.Target,choice==null||choice.Path==null?"":choice.Path,new TargetCardComposition{Fill=fill.IsChecked==true,Placement=placement,Description=note.Text});};
    draw();loadImage();d.Show();if(more)ShowAnalytics(AnalyticsWindow.CardsIndex,target);
   }
   static bool CardStill(string name){return !string.IsNullOrEmpty(name)&&Util.IsImageAsset(name)&&!MediaFiles.Motion(name);}

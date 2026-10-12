@@ -42,7 +42,7 @@ namespace AstroArchive {
         }
         AccessibilityChoices AddAccessibilityPreferences(FormWindow dialog) {
             dialog.Text("Accessibility", true);
-            dialog.Text("Adjust text and table spacing without scaling images. Settings apply to this Windows user and remain in place after updates.");
+            dialog.Text("Adjust text and table spacing without scaling images.");
             int percent = settings.TextScalePercent == 0 ? 100 : settings.TextScalePercent;
             var choices = new AccessibilityChoices {
                 Scale = dialog.Select("Text size", new[] { "100%", "115%", "130%", "150%" }, percent + "%"),

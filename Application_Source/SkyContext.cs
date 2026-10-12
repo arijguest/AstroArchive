@@ -104,16 +104,24 @@ namespace AstroArchive {
    }
    // Last resort: a selected observing town supplies historical timezone/DST
    // rules for a real but unzoned capture time. Explicit metadata always wins.
-   if(settings!=null&&settings.ObservingCityId.HasValue&&string.IsNullOrEmpty(frame.TimeZoneId)&&!(frame.TimeSource??"").StartsWith("Capture clock ",StringComparison.OrdinalIgnoreCase)){
+   int? zoneCity=CaptureSite.ZoneCity(frame,settings);
+   if(zoneCity.HasValue&&string.IsNullOrEmpty(frame.TimeZoneId)&&!(frame.TimeSource??"").StartsWith("Capture clock ",StringComparison.OrdinalIgnoreCase)){
     string standard=image==null||image.Headers==null?"":new FitsHeader{Values=image.Headers}.Get("TIMESYS");
     if(standard.Length>0&&!standard.Equals("UTC",StringComparison.OrdinalIgnoreCase))return null;
     string text=frame.Observed;DateTime local;
     if(!string.IsNullOrEmpty(text)&&Regex.IsMatch(text,@"[T ]\d\d:\d\d")&&!Regex.IsMatch(text,@"(?:Z|[+-]\d\d:\d\d)$",RegexOptions.IgnoreCase)&&DateTime.TryParse(text,CultureInfo.InvariantCulture,DateTimeStyles.None,out local)){
-     var zone=CityTimeZones.ForCity(settings.ObservingCityId.Value);local=DateTime.SpecifyKind(local,DateTimeKind.Unspecified);
+     var zone=CityTimeZones.ForCity(zoneCity.Value);local=DateTime.SpecifyKind(local,DateTimeKind.Unspecified);
      if(zone!=null&&!zone.IsInvalidTime(local)&&!zone.IsAmbiguousTime(local))return TimeZoneInfo.ConvertTimeToUtc(local,zone);
     }
    }
    return null;
+  }
+  static bool HasClock(Frame frame){return Regex.IsMatch(frame.Observed??"",@"[T ]\d\d:\d\d");}
+  // UTC is assumed for an unzoned clock; a date alone is taken at noon. Session-folder dates still count as dates.
+  static DateTime? RoughMoonTime(Frame frame){
+   if(frame==null||IsCalibration(frame))return null;DateTime parsed;
+   if(HasClock(frame)&&!(frame.TimeSource??"").StartsWith("Session folder",StringComparison.OrdinalIgnoreCase)&&DateTime.TryParse(frame.Observed,CultureInfo.InvariantCulture,DateTimeStyles.AssumeUniversal|DateTimeStyles.AdjustToUniversal,out parsed))return DateTime.SpecifyKind(parsed,DateTimeKind.Utc);
+   var date=CaptureSessions.Date(frame);return date==null?(DateTime?)null:DateTime.SpecifyKind(date.Date.Date.AddHours(12),DateTimeKind.Utc);
   }
   public static CaptureSky Resolve(Frame frame,Settings settings){
    var sky=new CaptureSky{TargetLabel=frame==null?"Select a capture":Catalog.IsAmbiguous(frame.Target)?"Capture position":frame.TargetLabel,Evidence=""};
@@ -124,8 +132,7 @@ namespace AstroArchive {
    }
    string body=frame==null||IsCalibration(frame)?null:ObservationTargets.NamedSolar(frame.Target)??(Catalog.IsAmbiguous(frame.Target)?ObservationTargets.NamedSolar(ObservationTargets.ModeBody(frame.ObservationMode)):null);sky.Body=body;
    sky.Utc=CaptureUtc(frame,settings);bool site=false;string place="";
-   if(frame!=null&&frame.Latitude.HasValue&&frame.Longitude.HasValue&&ObservingCities.ValidCoordinates(frame.Latitude.Value,frame.Longitude.Value)){sky.Latitude=frame.Latitude.Value;sky.Longitude=frame.Longitude.Value;site=true;place="Capture location";}
-   else if(settings!=null&&settings.Latitude.HasValue&&settings.Longitude.HasValue&&ObservingCities.ValidCoordinates(settings.Latitude.Value,settings.Longitude.Value)){sky.Latitude=settings.Latitude.Value;sky.Longitude=settings.Longitude.Value;site=true;place=settings.ObservingCity??"Saved observing location";}
+   var captureSite=CaptureSite.For(frame,settings);if(captureSite!=null){sky.Latitude=captureSite.Latitude;sky.Longitude=captureSite.Longitude;site=true;place=captureSite.Label;}
    sky.HasHorizon=site&&sky.Utc.HasValue;sky.Orientation=new SkyOrientation(sky.Utc,sky.HasHorizon,sky.Latitude,sky.Longitude);
    if(sky.Utc.HasValue)sky.TimeLabel=sky.Utc.Value.ToString("dd/MM/yy HH:mm:ss 'UTC'",CultureInfo.InvariantCulture);
    else{var date=frame==null?null:CaptureSessions.Date(frame);sky.TimeLabel=date==null?"Capture time unknown":date.Text+" · time / timezone unknown";}
@@ -138,7 +145,15 @@ namespace AstroArchive {
    // That is not a measurement, so the calculated body position replaces it;
    // any other recorded or solved pointing keeps priority.
    bool pointingReplaced=false;
-   if(sky.HasPosition&&sky.Utc.HasValue&&body!=null&&Math.Abs(sky.RA)<1e-6&&Math.Abs(sky.Dec)<1e-6){sky.HasPosition=false;pointingReplaced=true;}
+   DateTime? roughTime=!sky.Utc.HasValue&&body=="Moon"?RoughMoonTime(frame):null;
+   if(sky.HasPosition&&(sky.Utc.HasValue||roughTime.HasValue)&&body!=null&&Math.Abs(sky.RA)<1e-6&&Math.Abs(sky.Dec)<1e-6){sky.HasPosition=false;pointingReplaced=true;}
+   // The Moon moves only about 0.5° an hour against the stars, so an unzoned clock or a bare
+   // date still places it within a few degrees on the celestial map (never on a horizon).
+   if(!sky.HasPosition&&roughTime.HasValue){
+    var rough=MoonEphemeris.At(roughTime.Value,false,0,0).Geocentric;
+    sky.RA=SkyOrientation.Wrap(Math.Atan2(rough.Y,rough.X)*180/Math.PI);sky.Dec=Math.Asin(Math.Max(-1,Math.Min(1,rough.Z)))*180/Math.PI;sky.HasPosition=true;sky.PositionOfDate=true;sky.ApproximatePosition=true;
+    sky.Evidence="Approximate Moon position (geocentric) from the recorded capture "+(HasClock(frame)?"time, timezone unknown":"date")+" - good to a few degrees\nMeeus lunar/solar model"+(pointingReplaced?"\nThe file's recorded pointing was blank (0°, 0°) and is not used.":"");
+   }
    if(!sky.HasPosition&&sky.Utc.HasValue&&body!=null){
     SkyVector direction=new SkyVector();bool found=false;double distance;
     if(body=="Moon"&&sky.Moon!=null){direction=sky.Moon.Topocentric;found=true;}

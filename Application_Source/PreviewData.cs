@@ -18,6 +18,8 @@ namespace AstroArchive {
   internal int StatisticsBuilds{get{lock(statistics.Gate)return statistics.Builds;}}
   public double Minimum=0,Maximum=1;
   public bool FlipY;
+  // Raw colour mosaic binned into red, green and blue; its channels carry sensor response, not scene colour.
+  public bool Mosaic;
   public string Description;
   public string Target,ObservationMode,Filter,DisplayMode;
   public bool SkipStretch {get{return ObservationTargets.Unstretched(Target,ObservationMode);}}
@@ -56,6 +58,17 @@ namespace AstroArchive {
    if(linear){
     DisplayMode="Linear"+(SkipStretch?" · solar / planetary":"");
     for(int c=0;c<Channels;c++){black[c]=Minimum;white[c]=Maximum;mid[c]=0.5;if(!(white[c]>black[c]))white[c]=black[c]+Math.Max(1,Math.Abs(black[c])*0.001);}
+    if(SkipStretch){
+     // Sun, Moon and planet captures often fill a small part of the sample range
+     // (short solar exposures, 12-bit sensors in 16-bit files). Scale linearly to
+     // the brightest samples so the disc is visible; no curve is applied.
+     var highs=GetStatistics(ct).Colours.Select(s=>s.Count>0?s.High-Minimum:0).ToArray();double top=highs.Max(),range=Maximum-Minimum;
+     if(top>0&&top<range){for(int c=0;c<Channels;c++)white[c]=black[c]+top;DisplayMode+=" · scaled to data";}
+     if(Mosaic&&Channels==3&&top>0&&highs.All(h=>h>0)){
+      // Unbalanced Bayer samples look green; match each channel's bright end so a grey Moon stays grey.
+      for(int c=0;c<3;c++)white[c]=black[c]+(white[c]-black[c])*highs[c]/top;DisplayMode+=" · mosaic balanced";
+     }
+    }
     return RenderPixels(black,white,mid,true,ct);
    }
    // Cache sample statistics only; current display context still chooses the stretch.

@@ -23,9 +23,14 @@ namespace AstroArchive {
   internal readonly SkyGlobeCamera Camera=new SkyGlobeCamera();
   internal readonly Dictionary<string,Rect> CardinalLabels=new Dictionary<string,Rect>();
   internal Rect GlobeBounds{get{return new Rect(centre.X-radius,centre.Y-radius,2*radius,2*radius);}}
-  Point dragPoint;bool dragging;
+  Point dragPoint,pressPoint;bool dragging,moved;
+  // A clicked constellation is outlined and named until the next click, Escape or capture.
+  int selectedFigure=-1;internal Rect ConstellationLabelBounds=Rect.Empty,SunBounds=Rect.Empty,TargetBounds=Rect.Empty;
+  internal string SelectedConstellation{get{return selectedFigure<0?null:SkyFigures.Figures[selectedFigure].Name;}}
+  // Raised when the Moon, Sun, target or eclipse close-up is clicked, for Capture details.
+  public event EventHandler DetailsRequested;
   public CaptureSky Context{get{return context;}}
-  const string NavigationHelp="Drag to rotate; scroll or pinch to zoom.";
+  const string NavigationHelp="Drag to rotate; scroll or pinch to zoom.\nClick a constellation to name it, or the Moon, Sun or target for capture details.";
   void ViewChanged(){drawing=null;InvalidateVisual();}
   // Raised after the globe's size changes so overlay controls can follow it.
   public event EventHandler GlobeResized;
@@ -47,10 +52,45 @@ namespace AstroArchive {
   protected override void OnMouseLeftButtonDown(MouseButtonEventArgs e){
    base.OnMouseLeftButtonDown(e);if(e.StylusDevice!=null)return;Focus();
    if(e.ClickCount==2){ResetView();e.Handled=true;return;}
-   dragPoint=e.GetPosition(this);dragging=CaptureMouse();if(dragging)Cursor=Cursors.SizeAll;e.Handled=true;
+   dragPoint=pressPoint=e.GetPosition(this);moved=false;dragging=CaptureMouse();if(dragging)Cursor=Cursors.SizeAll;e.Handled=true;
   }
-  protected override void OnMouseMove(MouseEventArgs e){base.OnMouseMove(e);if(!dragging)return;if(e.LeftButton!=MouseButtonState.Pressed){ReleaseMouseCapture();return;}var point=e.GetPosition(this);RotateView(point.X-dragPoint.X,point.Y-dragPoint.Y);dragPoint=point;e.Handled=true;}
-  protected override void OnMouseLeftButtonUp(MouseButtonEventArgs e){base.OnMouseLeftButtonUp(e);if(!dragging)return;ReleaseMouseCapture();e.Handled=true;}
+  protected override void OnMouseMove(MouseEventArgs e){base.OnMouseMove(e);if(!dragging)return;if(e.LeftButton!=MouseButtonState.Pressed){ReleaseMouseCapture();return;}var point=e.GetPosition(this);if((point-pressPoint).Length>4)moved=true;RotateView(point.X-dragPoint.X,point.Y-dragPoint.Y);dragPoint=point;e.Handled=true;}
+  protected override void OnMouseLeftButtonUp(MouseButtonEventArgs e){base.OnMouseLeftButtonUp(e);if(!dragging)return;bool click=!moved;ReleaseMouseCapture();if(click)Tap(e.GetPosition(this));e.Handled=true;}
+  // A press that did not rotate the globe: open details for a body, else name a constellation.
+  internal void Tap(Point point){
+   if(context.BelowHorizon)return;
+   if(OnBody(point)){RequestDetails();return;}
+   int figure=ConstellationLabelBounds.Contains(point)?-1:FigureAt(point);
+   if(figure==selectedFigure)figure=-1;SelectConstellation(figure);
+  }
+  internal void SelectConstellation(int figure){if(figure==selectedFigure)return;selectedFigure=figure;AutomationProperties.SetItemStatus(this,figure<0?"":Localization.T(SkyFigures.Figures[figure].Name));ViewChanged();}
+  void RequestDetails(){var handler=DetailsRequested;if(handler!=null)handler(this,EventArgs.Empty);}
+  internal bool OnBody(Point point){
+   Func<Rect,bool> hit=r=>{if(r.IsEmpty)return false;r.Inflate(4,4);return r.Contains(point);};
+   return TargetMarkerDrawn&&hit(TargetBounds)||MoonDrawn&&!MoonBehindGlobe&&hit(MoonBounds)||SunDrawn&&hit(SunBounds)||EclipseDrawn&&EclipseBounds.Contains(point);
+  }
+  // Nearest near-side figure line within reach of the pointer, or -1.
+  internal int FigureAt(Point point){
+   if(stars==null||radius<=0)return -1;int best=-1;double nearest=10;
+   for(int f=0;f<SkyFigures.Figures.Length;f++)foreach(var path in SkyFigures.Figures[f].Paths)for(int i=1;i<path.Length;i++){
+    var a=stars[path[i-1]];var b=stars[path[i]];if(a.Dot(front)<0||b.Dot(front)<0)continue;
+    double d=SegmentDistance(point,Project(a),Project(b));if(d<nearest){nearest=d;best=f;}
+   }
+   return best;
+  }
+  // The middle of a near-side line of a constellation, clear of the bodies, for checks; NaN when none is.
+  internal Point FigureProbe(int figure){
+   foreach(var path in SkyFigures.Figures[figure].Paths)for(int i=1;i<path.Length;i++){var a=stars[path[i-1]];var b=stars[path[i]];if(a.Dot(front)>0.2&&b.Dot(front)>0.2){var p=Project(a);var q=Project(b);var middle=new Point((p.X+q.X)/2,(p.Y+q.Y)/2);if(!OnBody(middle)&&(TargetBounds.IsEmpty||(middle-new Point(TargetBounds.X+TargetBounds.Width/2,TargetBounds.Y+TargetBounds.Height/2)).Length>30))return middle;}}
+   return new Point(double.NaN,double.NaN);
+  }
+  static double SegmentDistance(Point p,Point a,Point b){
+   var ab=b-a;double length=ab.LengthSquared,t=length<1e-9?0:Math.Max(0,Math.Min(1,((p-a).X*ab.X+(p-a).Y*ab.Y)/length));
+   return (p-(a+ab*t)).Length;
+  }
+  protected override void OnManipulationCompleted(ManipulationCompletedEventArgs e){
+   base.OnManipulationCompleted(e);var total=e.TotalManipulation;
+   if(total!=null&&total.Translation.Length<6&&Math.Abs(total.Scale.X*total.Scale.Y-1)<0.05)Tap(e.ManipulationOrigin);
+  }
   protected override void OnLostMouseCapture(MouseEventArgs e){base.OnLostMouseCapture(e);dragging=false;Cursor=Cursors.Hand;}
   protected override void OnMouseWheel(MouseWheelEventArgs e){base.OnMouseWheel(e);ZoomView(Math.Pow(1.2,e.Delta/120.0));e.Handled=true;}
   protected override void OnManipulationStarting(ManipulationStartingEventArgs e){base.OnManipulationStarting(e);e.ManipulationContainer=this;e.Mode=ManipulationModes.Translate|ManipulationModes.Scale;e.Handled=true;}
@@ -63,17 +103,19 @@ namespace AstroArchive {
     case Key.Left:Camera.Orbit(10,0);break;case Key.Right:Camera.Orbit(-10,0);break;
     case Key.Up:Camera.Orbit(0,-10);break;case Key.Down:Camera.Orbit(0,10);break;
     case Key.Add:case Key.OemPlus:Camera.Magnify(1.2);break;case Key.Subtract:case Key.OemMinus:Camera.Magnify(1/1.2);break;
-    case Key.Home:case Key.D0:case Key.NumPad0:case Key.F:Camera.Reset();break;default:return;
+    case Key.Home:case Key.D0:case Key.NumPad0:case Key.F:Camera.Reset();break;
+    case Key.Escape:if(selectedFigure<0)return;SelectConstellation(-1);e.Handled=true;return;
+    case Key.Enter:case Key.Space:RequestDetails();e.Handled=true;return;default:return;
    }ViewChanged();e.Handled=true;
   }
   public SkyGlobeView(){
    SetResourceReference(LineBrushProperty,"Muted");SetResourceReference(TextBrushProperty,"Text");SetResourceReference(AccentBrushProperty,"Accent");SetResourceReference(SurfaceBrushProperty,"SurfaceAlt");
-   Focusable=true;IsManipulationEnabled=true;Cursor=Cursors.Hand;ClipToBounds=true;IsVisibleChanged+=(s,e)=>{if(!IsVisible&&IsMouseCaptured)ReleaseMouseCapture();};Unloaded+=(s,e)=>{if(IsMouseCaptured)ReleaseMouseCapture();};AutomationProperties.SetHelpText(this,NavigationHelp);SetContext(CaptureSky.Resolve(null,null));
+   Focusable=true;IsManipulationEnabled=true;Cursor=Cursors.Hand;ClipToBounds=true;IsVisibleChanged+=(s,e)=>{if(!IsVisible&&IsMouseCaptured)ReleaseMouseCapture();};Unloaded+=(s,e)=>{if(IsMouseCaptured)ReleaseMouseCapture();};AutomationProperties.SetHelpText(this,NavigationHelp.Replace("\n"," "));SetContext(CaptureSky.Resolve(null,null));
   }
   public void SetContext(CaptureSky value){
    value=value??CaptureSky.Resolve(null,null);bool changed=context==null||context.Key!=value.Key;if(changed)context=value;
    string lunar=value.Moon==null?"":"Moon: "+value.Moon.PhaseName+" · "+value.Moon.IlluminationText+" illuminated"+(value.Moon.HasHorizon?" · "+(value.Moon.Altitude<0?"below horizon":"Alt "+value.Moon.Altitude.ToString("0",CultureInfo.InvariantCulture)+"°"):"");
-   ToolTip=value.TargetLabel+"\n"+value.TimeLabel+" · "+value.Summary+(value.ApproximatePosition?" · approximate":"")+(lunar.Length>0?"\n"+lunar:"")+"\n"+NavigationHelp;AutomationProperties.SetName(this,"Capture sky. "+value.TargetLabel+". "+value.TimeLabel+". "+value.Summary+(lunar.Length>0?". "+lunar:""));
+   if(changed)SelectConstellation(-1);ToolTip=value.TargetLabel+"\n"+value.TimeLabel+" · "+value.Summary+(value.ApproximatePosition?" · approximate":"")+(lunar.Length>0?"\n"+lunar:"")+"\n"+NavigationHelp;AutomationProperties.SetName(this,"Capture sky. "+value.TargetLabel+". "+value.TimeLabel+". "+value.Summary+(lunar.Length>0?". "+lunar:""));
    if(!changed)return;
    if(value.Moon!=null){moon=value.Orientation.MapOfDate(value.Moon.Topocentric);sun=value.Orientation.MapOfDate(value.Moon.Sun);}
    var target=value.TargetOnGlobe;Camera.SetHome(value.HasPosition?Math.Atan2(target.X,target.Y)*180/Math.PI:180,value.HasHorizon&&value.Altitude<0?-25:25);
@@ -139,7 +181,7 @@ namespace AstroArchive {
   void DrawSun(DrawingContext dc,double opacity){
    var point=Project(sun);double size=Math.Max(6,Math.Min(12,radius*0.07));if(opacity<1)dc.PushOpacity(opacity);
    var glow=new RadialGradientBrush(Color.FromArgb(110,255,214,110),Color.FromArgb(0,255,214,110));glow.Freeze();dc.DrawEllipse(glow,null,point,size*2.2,size*2.2);
-   var disc=new SolidColorBrush(SunLight);disc.Freeze();dc.DrawEllipse(disc,null,point,size,size);if(opacity<1)dc.Pop();SunDrawn=true;
+   var disc=new SolidColorBrush(SunLight);disc.Freeze();dc.DrawEllipse(disc,null,point,size,size);if(opacity<1)dc.Pop();SunDrawn=true;SunBounds=new Rect(point.X-size,point.Y-size,2*size,2*size);
   }
   // Companion close-up for an eclipse: the discs at their true relative size and
   // separation, oriented as on the globe, with the covered fraction.
@@ -167,6 +209,20 @@ namespace AstroArchive {
    var label=new FormattedText(caption,CultureInfo.CurrentUICulture,FlowDirection.LeftToRight,new Typeface(new FontFamily("Segoe UI"),FontStyles.Normal,FontWeights.SemiBold,FontStretches.Normal),11,Brushes.White,VisualTreeHelper.GetDpi(this).PixelsPerDip);
    label.MaxTextWidth=side-8;label.Trimming=TextTrimming.CharacterEllipsis;label.MaxLineCount=1;dc.DrawText(label,new Point(EclipseBounds.X+(side-Math.Min(label.Width,side-8))/2,EclipseBounds.Bottom-label.Height-4));EclipseDrawn=true;
   }
+  // The name sits over the constellation's label point, or the middle of its visible
+  // lines when that point has turned to the far side; it never leaves the view.
+  void DrawConstellationName(DrawingContext dc,Brush text,Brush accent,Brush surface,Point[] points){
+   var figure=SkyFigures.Figures[selectedFigure];var label=context.Orientation.Map(figure.Label);Point anchor;
+   if(label.Dot(front)>=0)anchor=Project(label);
+   else{var visible=figure.Paths.SelectMany(p=>p).Distinct().Where(i=>stars[i].Dot(front)>=0).Select(i=>points[i]).ToList();if(visible.Count==0){return;}anchor=new Point(visible.Average(p=>p.X),visible.Average(p=>p.Y));}
+   var name=new FormattedText(Localization.T(figure.Name),CultureInfo.CurrentUICulture,FlowDirection.LeftToRight,new Typeface(new FontFamily("Segoe UI"),FontStyles.Normal,FontWeights.SemiBold,FontStretches.Normal),12,text,VisualTreeHelper.GetDpi(this).PixelsPerDip);
+   name.MaxTextWidth=Math.Max(40,ActualWidth-24);name.MaxLineCount=1;name.Trimming=TextTrimming.CharacterEllipsis;
+   double width=Math.Min(name.Width,name.MaxTextWidth)+16,height=name.Height+6;
+   var bounds=new Rect(anchor.X-width/2,anchor.Y-height-8,width,height);
+   bounds.X=Math.Max(2,Math.Min(ActualWidth-width-2,bounds.X));bounds.Y=Math.Max(2,Math.Min(ActualHeight-height-2,bounds.Y));
+   dc.DrawRoundedRectangle(Tint(surface,0.94),Stroke(accent,0.9,1),bounds,height/2,height/2);dc.DrawText(name,new Point(bounds.X+8,bounds.Y+3));
+   ConstellationLabelBounds=bounds;
+  }
   DrawingGroup Build(Brush line,Brush text,Brush accent,Brush surface){
    EclipseDrawn=false;
    var group=new DrawingGroup();centre=new Point(ActualWidth/2,ActualHeight/2);radius=Math.Max(5,Math.Min(ActualWidth/2-14,ActualHeight/2-14))*Camera.Zoom;
@@ -187,18 +243,20 @@ namespace AstroArchive {
      Pen pen=depth<0?rear:context.HasHorizon&&(a.Z+b.Z)/2<0?below:context.HasPosition&&(a.Dot(target)+b.Dot(target))/2>0.82?near:figures;
      dc.DrawLine(pen,points[path[i-1]],points[path[i]]);
     }
+    if(selectedFigure>=0){var outline=Stroke(accent,0.95,1.8);foreach(var path in SkyFigures.Figures[selectedFigure].Paths)for(int i=1;i<path.Length;i++)if(stars[path[i-1]].Dot(front)>=0&&stars[path[i]].Dot(front)>=0)dc.DrawLine(outline,points[path[i-1]],points[path[i]]);}
     Brush starBrush=Tint(text,context.Daytime?0.25:0.65),faintStar=Tint(line,context.Daytime?0.12:0.25);for(int i=0;i<stars.Length;i++)if(stars[i].Dot(front)>0)dc.DrawEllipse(context.HasHorizon&&stars[i].Z<0?faintStar:starBrush,null,points[i],1.05,1.05);
     // The Sun sits beneath a near-side Moon, so an eclipse reads correctly on the globe.
-    SunDrawn=false;if(context.Moon!=null&&(context.Daytime||context.Body=="Sun")&&sun.Dot(front)>=0)DrawSun(dc,context.HasHorizon&&sun.Z<0?0.45:1);
+    SunDrawn=false;SunBounds=Rect.Empty;if(context.Moon!=null&&(context.Daytime||context.Body=="Sun")&&sun.Dot(front)>=0)DrawSun(dc,context.HasHorizon&&sun.Z<0?0.45:1);
     // A near-side Moon covers stars and figure lines but never the target marker.
     if(context.Moon!=null&&moon.Dot(front)>=0)DrawMoon(dc,line,text,context.HasHorizon&&moon.Z<0?0.45:1);
-    TargetMarkerDrawn=false;
+    TargetMarkerDrawn=false;TargetBounds=Rect.Empty;
     if(context.HasPosition&&target.Dot(front)>=0){
      TargetMarkerDrawn=true;
-     var point=Project(target);dc.DrawEllipse(Tint(accent,0.12),Stroke(accent,1,1.5),point,6,6);dc.DrawEllipse(accent,null,point,2,2);
+     var point=Project(target);TargetBounds=new Rect(point.X-10,point.Y-6,20,12);dc.DrawEllipse(Tint(accent,0.12),Stroke(accent,1,1.5),point,6,6);dc.DrawEllipse(accent,null,point,2,2);
      dc.DrawLine(Stroke(accent,0.8,1),new Point(point.X-10,point.Y),new Point(point.X-7,point.Y));dc.DrawLine(Stroke(accent,0.8,1),new Point(point.X+7,point.Y),new Point(point.X+10,point.Y));
     }
     DrawCardinals(dc,text);
+    ConstellationLabelBounds=Rect.Empty;if(selectedFigure>=0)DrawConstellationName(dc,text,accent,surface,points);
     if(context.Eclipse!=null)DrawEclipse(dc,line,text);
    }group.Freeze();return group;
   }

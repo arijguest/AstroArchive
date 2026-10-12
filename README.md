@@ -29,7 +29,7 @@ Windows 10 / 11 x64 &nbsp; · &nbsp; .NET Framework 4.8 &nbsp; · &nbsp; Archive
 ## Bring the night straight into your archive
 
 Keep capturing while AstroArchive brings new files into your collection. Import
-from a folder or USB, or connect to **Seestar and DWARF over your local network**.
+from a folder or USB, or connect to **Seestar, DWARF and Celestron Origin over your local network**.
 
 [![Network import showing three real Orion Nebula subframes selected from a Seestar S50 Pro](docs/images/network-import.png)](docs/images/network-import.png)
 
@@ -84,6 +84,11 @@ Filter by acquisition dates or telescope, add a document label, and choose a
 one document, with 150 or 300 DPI for raster images. Choose Landscape or a social
 layout: **9:16**, **4:5**, **1:1**, **16:9** or **2:3**, with matching pixel presets.
 
+Make each chart your own: show it as a donut, bars or columns, reorder rankings,
+give it your own title and subtitle, and pick a colour palette, including a
+colour-blind safe one. Choose which charts go into the combined document.
+Analytics remembers these choices for next time.
+
 Choose **MP4** or **GIF** to share an animated chart or an **Export all** story.
 Preview the chart reveals and Glide, Zoom or Dissolve transitions; set 4, 6 or 8
 seconds per page and choose original or smaller dimensions. MP4 uses Windows’
@@ -111,13 +116,13 @@ use a grid for square and wide pages.
 
 ## Find your sharpest subs
 
-**Tools → Review and analysis → Analyse image quality** scores each light frame from 0 to 100 against
+**Repository → Review and analysis → Analyse image quality** scores each light frame from 0 to 100 against
 similar frames in its session: star size, roundness, star count and noise for deep-sky subs, and
 edge sharpness and detail for planetary, lunar and solar stills. Sort by **QUALITY**, or use
 **Filters → Quality rank** to keep the top or weakest frames, flagged frames or unscored ones.
 Subs inside each session list best first. Flags such as Soft, Clouded or Trailed explain themselves
-in a tooltip, and scores only suggest: nothing is rejected for you. Stacks, calibration frames,
-recordings and non-linear images are never graded. [How scoring works](docs/IMAGE_QUALITY.md)
+in a tooltip, and scores only suggest: nothing is rejected for you. Linear stacks are scored against
+other stacks of the same target. Calibration frames, recordings and non-linear images are never graded. [How scoring works](docs/IMAGE_QUALITY.md)
 
 ## Built around the captures you want to keep
 
@@ -161,6 +166,10 @@ It follows your Windows language, or choose one in **Settings → General → La
 **Need a hand?** Press **F1** in the app, follow the [offline guide](Application_Source/Quick_Start.txt), or [report an issue](https://github.com/arijguest/AstroArchive/issues).
 
 ### Fresh from the latest releases
+
+**[3.2.5 prerelease](https://github.com/arijguest/AstroArchive/releases/tag/v3.2.5.1)** adds Celestron Origin network import, an ETA on every running process, steadier quality ranking with scored stacks, a clearer target overlay with spaced catalogue IDs, per-file capture towns and below-horizon flags, Stellarium Web when Stellarium is not installed, and sturdier FITS/XISF parsing.
+
+**[3.2.4 prerelease](https://github.com/arijguest/AstroArchive/releases/tag/v3.2.4.1)** overhauls Analytics, adds Open in Stellarium and a target overlay to the preview, eclipse timing in Capture details, reorganised menus, a PARAMETERS section with orbits, sizes, masses and moons for solar-system bodies, comet information pages, a backup-in-progress indicator, and fixes for green lunar stacks and Moon sky maps.
 
 **[3.2.3 prerelease](https://github.com/arijguest/AstroArchive/releases/tag/v3.2.3.1)** detects solar and lunar eclipses in your Sun and Moon captures, adds daytime sky maps, in-depth overviews for 170 popular targets and image-quality scoring.
 
