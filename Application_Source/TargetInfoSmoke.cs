@@ -19,7 +19,7 @@ namespace AstroArchive {
    try{
     openingRepositorySelection=openingEditedSelection=false;
     repo=new Repository(Path.Combine(output,"info-repository"));C("LibraryViewBox").SelectedItem="Show all files";
-    all=new System.Collections.Generic.List<Frame>{new Frame{Hash="info-one",Target="M31",Kind="Light",OriginalName="info.png",RelativePath="info.png"},new Frame{Hash="info-two",Target="M45",Kind="Light",OriginalName="other.png",RelativePath="info.png"}};
+    all=new System.Collections.Generic.List<Frame>{new Frame{Hash="info-one",Target="M31",Kind="Light",Session="info-session",OriginalName="info.png",RelativePath="info.png"},new Frame{Hash="info-two",Target="M45",Kind="Light",OriginalName="other.png",RelativePath="info.png"},new Frame{Hash="info-three",Target="M31",Kind="Light",Session="info-session",OriginalName="third.png",RelativePath="info.png"}};
     var project=new EditedProject{Id=Guid.NewGuid().ToString("N"),Name="Info fixture"};editedImages=new System.Collections.Generic.List<EditedImage>{new EditedImage{Project=project,Filename="info.png",RelativePath="info.png",Metadata=new EditedMetadata{Object="M31",ImageClass="Edited image"}}};
     var pixels=Enumerable.Repeat((byte)110,64*48*3).ToArray();var encoder=new PngBitmapEncoder();encoder.Frames.Add(BitmapFrame.Create(BitmapSource.Create(64,48,96,96,PixelFormats.Rgb24,null,pixels,64*3)));using(var stream=File.Create(repo.FilePath(all[0])))encoder.Save(stream);
     Directory.CreateDirectory(repo.EditedProjectFolder(project));File.Copy(repo.FilePath(all[0]),repo.EditedPath(project,"info.png"),true);
