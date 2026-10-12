@@ -58,7 +58,11 @@ namespace AstroArchive {
    });
    Test("Incremental ZIP chains restart with a full backup at the chain limit and ignore other archives",()=>{
     using(var repo=SafetyFixture("incremental-chain"))using(var other=SafetyFixture("incremental-other")){
-     string destination=Path.Combine(root,"incremental-chain-backups");BackupResult last=null;for(int i=0;i<Repository.MaxBackupChain;i++)last=repo.CreateBackup(destination,true,ct,NoProgress,true);
+     string destination=Path.Combine(root,"incremental-chain-backups");BackupResult last=null;DateTime created=DateTime.MinValue;
+     for(int i=0;i<Repository.MaxBackupChain;i++){
+      last=repo.CreateBackup(destination,true,ct,NoProgress,true);var step=BackupSets.ReadManifest(last.Path);var time=DateTime.Parse(step.CreatedUtc,System.Globalization.CultureInfo.InvariantCulture,System.Globalization.DateTimeStyles.RoundtripKind);
+      Check(time>created&&step.Chain.Count==i+1,"Successive backups were not ordered by creation: "+i);created=time;
+     }
      Check(BackupSets.ReadManifest(last.Path).Chain.Count==Repository.MaxBackupChain,"Chain did not grow to its limit");
      var restart=repo.CreateBackup(destination,true,ct,NoProgress,true);Check(!restart.Incremental&&BackupSets.ReadManifest(restart.Path).Chain.Count==1,"Chain did not restart with a full backup");
      var foreign=other.CreateBackup(destination,true,ct,NoProgress,true);Check(!foreign.Incremental&&BackupSets.List(destination,repo.RepositoryId(),ct).Count==Repository.MaxBackupChain+1,"Another archive's backups were treated as this archive's");

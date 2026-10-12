@@ -61,7 +61,12 @@ namespace AstroArchive {
     ct.ThrowIfCancellationRequested();pulse(true);db.BackupTo(snapshot,ct);File.WriteAllText(identity,Guid.NewGuid().ToString("N"),new UTF8Encoding(false));var sources=BackupSources(ct);sources.Add(new BackupSource{Source=snapshot,Relative=".astroarchive/index.sqlite",Stamp=FileStamp.Read(snapshot)});sources.Add(new BackupSource{Source=identity,Relative=".astroarchive/"+BackupIdentityName,Stamp=FileStamp.Read(identity)});
     if(previous!=null)foreach(var file in sources){if(file.Source==snapshot||file.Source==identity)continue;BackupFile prior;if(previous.Files.TryGetValue("Repository/"+file.Relative,out prior)&&BackupSets.Unchanged(prior,file.Stamp))file.Prior=prior;}
     count=sources.Count;total=sources.Where(f=>f.Prior==null).Sum(f=>f.Stamp.Size)*2;
-    var manifest=new BackupManifest{Version=2,CreatedUtc=DateTime.UtcNow.ToString("o"),Archive=Path.GetFileName(Root.TrimEnd('\\','/')),RepositoryId=repositoryId,Kind=previous==null?"Full":"Incremental",Base=previous==null?null:previous.Name};
+    // Windows clocks can return the same instant for successive small backups.
+    // Keep their manifest times increasing so discovery and retention do not
+    // choose an older snapshot by its random filename suffix.
+    DateTime createdUtc=DateTime.UtcNow;var newest=BackupSets.List(destination,repositoryId,ct).LastOrDefault();
+    if(newest!=null&&createdUtc<=newest.CreatedUtc)createdUtc=newest.CreatedUtc.AddTicks(1);
+    var manifest=new BackupManifest{Version=2,CreatedUtc=createdUtc.ToString("o"),Archive=Path.GetFileName(Root.TrimEnd('\\','/')),RepositoryId=repositoryId,Kind=previous==null?"Full":"Incremental",Base=previous==null?null:previous.Name};
     if(compressed)manifest.Chain=(previous==null?new List<string>():previous.Chain.ToList()).Concat(new[]{name+".zip"}).ToList();
     stage="Creating backup";bool linksAvailable=true;var linked=new HashSet<string>(StringComparer.OrdinalIgnoreCase);
     Func<BackupSource,BackupFile> entry=file=>new BackupFile{Path="Repository/"+file.Relative,Bytes=file.Stamp.Size,ModifiedUtcTicks=file.Stamp.Modified,CreatedUtcTicks=file.Stamp.Created,ChangedUtcTicks=file.Stamp.Reliable?file.Stamp.Changed:0};
