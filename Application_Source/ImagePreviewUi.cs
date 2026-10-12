@@ -9,7 +9,7 @@ namespace AstroArchive {
  public partial class MainUi {
   void PreviewImage(Frame frame){
    if(repo==null||RepositoryOperationBlocked||frame==null)return;var capture=frame.Clone();string mediaPath=repo.FilePath(capture);if(MediaFiles.Motion(mediaPath)){Run(ct=>{repo.ValidateCapture(capture,ct);return mediaPath;},path=>new ImagePreviewWindow(Window,capture.OriginalName,path).ShowDialog());return;}PreviewData pixels=null;byte[] rendered=null;
-   Run(ct=>{Progress(new ProgressInfo{Stage="Loading image preview",Text=capture.OriginalName});repo.ValidateCapture(capture,ct);string path=repo.FilePath(capture);pixels=DecodeFullPreview(path,ct,capture);pixels.ApplyContext(capture,path);ct.ThrowIfCancellationRequested();rendered=pixels.Render(ScientificPreview(path)?settings.PreviewStretch??"Auto per channel":"Linear",ct);ct.ThrowIfCancellationRequested();return "";},r=>new ImagePreviewWindow(Window,capture.OriginalName,pixels.Width,pixels.Height,rendered).ShowDialog());
+   Run(ct=>{Progress(new ProgressInfo{Stage="Loading image preview",Text=capture.OriginalName});repo.ValidateCapture(capture,ct);string path=repo.FilePath(capture);pixels=DecodeFullPreview(path,ct,capture);pixels.ApplyContext(capture,path);ct.ThrowIfCancellationRequested();rendered=pixels.Render(ScientificPreview(path)?settings.PreviewStretch??"Auto per channel":"Linear",ct);ct.ThrowIfCancellationRequested();return "";},r=>{var window=new ImagePreviewWindow(Window,capture.OriginalName,pixels.Width,pixels.Height,rendered);bool flip=TargetOverlay.DisplayFlip(pixels.FlipY,capture.Sky,capture.Format);AttachTargets(window,()=>TargetOverlay.For(capture,flip));window.ShowDialog();});
   }
  }
  public class ImagePreviewWindow:Window {
@@ -27,6 +27,11 @@ namespace AstroArchive {
    var bitmap=BitmapSource.Create(width,height,96,96,PixelFormats.Rgb24,null,pixels,width*3);bitmap.Freeze();preview.SetImage(bitmap,true);
    Loaded+=(s,e)=>preview.Resize();PreviewKeyDown+=(s,e)=>{if(e.Key==Key.Escape){Close();e.Handled=true;}else if(e.Key==Key.F){preview.Fit();e.Handled=true;}};
   }
+  Func<TargetOverlayResult> targetOverlay;Func<bool> targetsOn;
+  // The overlay is computed by the owner, which also owns the shared on/off setting.
+  public void EnableTargets(Func<TargetOverlayResult> overlay,Func<bool> on,Action toggle){targetOverlay=overlay;targetsOn=on;preview.ShowTargetToggle(()=>{toggle();RefreshTargets();});RefreshTargets();}
+  public void RefreshTargets(){if(targetOverlay==null)return;bool on=targetsOn();preview.SetTargetToggle(on);var result=on?targetOverlay():null;if(result==null)preview.SetTargets(null,null);else preview.SetTargets(result.Marks,result.Note);}
+  public PreviewViewport Viewport{get{return preview;}}
   public void SmokeGestures(){preview.SmokeGestures();preview.SmokeRotation();}
  }
 }

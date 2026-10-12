@@ -1988,11 +1988,14 @@ Hyperbolic (interstellar)	双曲线（星际）
 Aphelion	远日点
 Show targets in frame	显示画面中的目标
 Hide targets in frame	隐藏画面中的目标
-Show targets in frame (plate-solved captures)	显示画面中的目标（已解析的图像）
-Plate solve this capture to mark targets in the frame	请先解析此图像，以便在画面中标出目标
-Pointing is approximate, so targets are not marked	指向仅为近似值，因此不标出目标
 Field geometry is unusable for marking targets	视场几何无法用于标出目标
-No catalogue targets in this field	此视场中没有目录目标
+This capture has no plate solution	此拍摄没有天文定位解算结果
+This capture has only approximate pointing	此拍摄只有大致指向
+This image has no plate solution	此图像没有天文定位解算结果
+This image has no plate solution in its header	此图像的文件头中没有天文定位解算结果
+No catalogue objects in this field	此视场中没有星表天体
+Plate solve…	天文定位解算…
+Reading the image header…	正在读取图像文件头…
 On	开
 Telescopes	望远镜
 Reports	报告

@@ -1956,11 +1956,14 @@ Hyperbolic (interstellar)	Hyperbolisch (interstellar)
 Aphelion	Aphel
 Show targets in frame	Ziele im Bild anzeigen
 Hide targets in frame	Ziele im Bild ausblenden
-Show targets in frame (plate-solved captures)	Ziele im Bild anzeigen (Aufnahmen mit Plate Solving)
-Plate solve this capture to mark targets in the frame	Für diese Aufnahme ein Plate Solving durchführen, um Ziele im Bild zu markieren
-Pointing is approximate, so targets are not marked	Die Ausrichtung ist nur ungefähr bekannt, daher werden keine Ziele markiert
 Field geometry is unusable for marking targets	Die Feldgeometrie eignet sich nicht zum Markieren von Zielen
-No catalogue targets in this field	Keine Katalogziele in diesem Feld
+This capture has no plate solution	Diese Aufnahme hat keine Plate-Solving-Lösung
+This capture has only approximate pointing	Für diese Aufnahme ist die Ausrichtung nur ungefähr bekannt
+This image has no plate solution	Dieses Bild hat keine Plate-Solving-Lösung
+This image has no plate solution in its header	Der Header dieses Bildes enthält keine Plate-Solving-Lösung
+No catalogue objects in this field	Keine Katalogobjekte in diesem Feld
+Plate solve…	Plate Solving…
+Reading the image header…	Bild-Header wird gelesen…
 On	Ein
 Telescopes	Teleskope
 Reports	Berichte

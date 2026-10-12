@@ -1982,11 +1982,14 @@ Hyperbolic (interstellar)	Hiperbólica (interestelar)
 Aphelion	Afelio
 Show targets in frame	Mostrar objetivos en el encuadre
 Hide targets in frame	Ocultar objetivos en el encuadre
-Show targets in frame (plate-solved captures)	Mostrar objetivos en el encuadre (capturas con resolución astrométrica)
-Plate solve this capture to mark targets in the frame	Resuelve astrométricamente esta captura para marcar objetivos en el encuadre
-Pointing is approximate, so targets are not marked	El apuntado es aproximado, así que no se marcan objetivos
 Field geometry is unusable for marking targets	La geometría del campo no permite marcar objetivos
-No catalogue targets in this field	No hay objetivos del catálogo en este campo
+This capture has no plate solution	Esta captura no tiene resolución astrométrica
+This capture has only approximate pointing	Esta captura solo tiene un apuntado aproximado
+This image has no plate solution	Esta imagen no tiene resolución astrométrica
+This image has no plate solution in its header	El encabezado de esta imagen no contiene resolución astrométrica
+No catalogue objects in this field	No hay objetos del catálogo en este campo
+Plate solve…	Resolver astrometría…
+Reading the image header…	Leyendo el encabezado de la imagen…
 On	Activado
 Telescopes	Telescopios
 Reports	Informes
