@@ -88,7 +88,8 @@ namespace AstroArchive {
    optionsToggle=new Button{Margin=new Thickness(12,0,0,0)};AccessibleName(optionsToggle,"Show or hide options");UiHelp.Hint(optionsToggle,"Give the preview the whole width, or bring back the chart, document and export options.");DockPanel.SetDock(optionsToggle,Dock.Right);previewHeader.Children.Add(optionsToggle);
    previewPage=new ComboBox{Width=150,Margin=new Thickness(12,0,0,0),Visibility=Visibility.Collapsed};AccessibleName(previewPage,"Preview page");UiHelp.Hint(previewPage,"Inspect an individual page or card, or the combined sheet. Exports include every page in the chosen chart.");DockPanel.SetDock(previewPage,Dock.Right);previewHeader.Children.Add(previewPage);
    InitializeCardHeader(previewHeader);
-   previewTitle=Label("Preview",16,true);previewTitle.VerticalAlignment=VerticalAlignment.Center;previewHeader.Children.Add(previewTitle);
+   // The title gives way to the page picker and options button on one line, so it never wraps into a tall column.
+   previewTitle=Label("Preview",16,true);previewTitle.VerticalAlignment=VerticalAlignment.Center;previewTitle.TextWrapping=TextWrapping.NoWrap;previewTitle.TextTrimming=TextTrimming.CharacterEllipsis;previewHeader.Children.Add(previewTitle);
    preview=new Image{Stretch=Stretch.Uniform,Margin=new Thickness(12),HorizontalAlignment=HorizontalAlignment.Stretch,VerticalAlignment=VerticalAlignment.Center};AccessibleName(preview,"Branded analytics export preview");RenderOptions.SetBitmapScalingMode(preview,BitmapScalingMode.HighQuality);
    paper=new Border{Background=Brushes.White,BorderThickness=new Thickness(1),Child=preview};Theme.Bind(paper,Border.BorderBrushProperty,"Border");Grid.SetRow(paper,1);pane.Children.Add(paper);
    optionsPanel=new Border{BorderThickness=new Thickness(1),CornerRadius=new CornerRadius(8),Margin=new Thickness(18,0,0,0)};Theme.Bind(optionsPanel,Border.BackgroundProperty,"Surface");Theme.Bind(optionsPanel,Border.BorderBrushProperty,"Border");Grid.SetColumn(optionsPanel,2);body.Children.Add(optionsPanel);
@@ -139,7 +140,7 @@ namespace AstroArchive {
    var footer=new Grid{Margin=new Thickness(0,14,0,0)};footer.ColumnDefinitions.Add(new ColumnDefinition());footer.ColumnDefinitions.Add(new ColumnDefinition{Width=GridLength.Auto});Grid.SetRow(footer,3);root.Children.Add(footer);
    var outcome=new StackPanel{Margin=new Thickness(0,0,16,0),VerticalAlignment=VerticalAlignment.Center};footer.Children.Add(outcome);
    progress=new ProgressBar{Minimum=0,Maximum=100,Height=4,Margin=new Thickness(0,0,0,8),Visibility=Visibility.Collapsed};AccessibleName(progress,"Video export progress");outcome.Children.Add(progress);
-   status=Label("Integration includes standalone stacks; stacks with matching subframes, videos and calibrations are excluded.",12);Theme.Bind(status,TextBlock.ForegroundProperty,"Muted");AccessibleName(status,"Analytics status");AutomationProperties.SetLiveSetting(status,AutomationLiveSetting.Polite);outcome.Children.Add(status);
+   status=Label("Integration includes standalone stacks; stacks with matching subframes, videos and calibrations are excluded.",12);Theme.Bind(status,TextBlock.ForegroundProperty,"Muted");AccessibleName(status,"Analytics status");AutomationProperties.SetLiveSetting(status,AutomationLiveSetting.Polite);var statusScroll=new ScrollViewer{Content=status,VerticalScrollBarVisibility=ScrollBarVisibility.Auto,HorizontalScrollBarVisibility=ScrollBarVisibility.Disabled};outcome.Children.Add(statusScroll);
    var open=new Button{Content="Open export folder",HorizontalAlignment=HorizontalAlignment.Left,Visibility=Visibility.Collapsed,Margin=new Thickness(0,8,0,0)};outcome.Children.Add(open);
    open.Click+=(s,e)=>{try{System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(Path.GetDirectoryName(lastOutput)){UseShellExecute=true});}catch(Exception error){status.Text=error.Message;}};
    export=new Button{Content="Export chart…"};Theme.Bind(export,Control.BackgroundProperty,"Accent");Theme.Bind(export,Control.BorderBrushProperty,"Accent");Theme.Bind(export,Control.ForegroundProperty,"AccentText");
@@ -147,8 +148,9 @@ namespace AstroArchive {
    play=new Button{Content="▶ Play preview",Visibility=Visibility.Collapsed};AccessibleName(play,"Play animation preview");
    var exportActions=new StackPanel{Orientation=Orientation.Horizontal,VerticalAlignment=VerticalAlignment.Bottom};foreach(var button in new[]{play,export,exportAll,close}){button.Margin=new Thickness(8,0,0,0);exportActions.Children.Add(button);}Grid.SetColumn(exportActions,1);footer.Children.Add(exportActions);
    UiHelp.Hint(export,"Save the preview in the chosen format. Long rankings include continuation pages.");UiHelp.Hint(exportAll,"Save the charts chosen for the combined document in one file, using the same telescope and date scope.");
-   // Short windows keep the preview usable: the scope gives way first.
-   Action arrange=()=>{scopeScroll.MaxHeight=ActualHeight<740?80:190;};SizeChanged+=(s,e)=>arrange();
+   // Short windows keep the preview usable: the scope and a long status scroll
+   // within a few lines rather than pushing the preview out of the window.
+   Action arrange=()=>{bool compact=ActualHeight<740;scopeScroll.MaxHeight=compact?80:190;statusScroll.MaxHeight=compact?72:double.PositiveInfinity;};SizeChanged+=(s,e)=>arrange();
    debounce=new DispatcherTimer{Interval=TimeSpan.FromMilliseconds(250)};debounce.Tick+=(s,e)=>{debounce.Stop();RefreshData();};
    designDebounce=new DispatcherTimer{Interval=TimeSpan.FromMilliseconds(350)};designDebounce.Tick+=(s,e)=>{designDebounce.Stop();Redraw();};
    playback=new DispatcherTimer{Interval=TimeSpan.FromMilliseconds(1000.0/24)};playback.Tick+=(s,e)=>{if(animation==null||playbackClock==null)return;double seconds=playbackClock.Elapsed.TotalSeconds%animation.Duration;preview.Source=animation.Preview(seconds);};
