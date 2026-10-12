@@ -1057,7 +1057,8 @@ Size	Taille
 Import from telescope	Importer depuis le télescope
 Import over your network	Importer via votre réseau
 Keep AstroArchive and the telescope on the same Wi-Fi or LAN. Capture continues in the telescope app.	Laissez AstroArchive et le télescope sur le même réseau Wi-Fi ou local. La capture se poursuit dans l'application du télescope.
-Finding Seestar and DWARF telescopes…	Recherche des télescopes Seestar et DWARF…
+Finding Seestar, DWARF and Celestron Origin telescopes…	Recherche des télescopes Seestar, DWARF et Celestron Origin…
+Turn on Save Raw Images under Menu > Settings > Advanced in the Origin app to keep individual exposures.	Activez Save Raw Images dans Menu > Réglages > Avancé de l'application Origin pour conserver les poses individuelles.
 Telescopes found on the network	Télescopes trouvés sur le réseau
 Address	Adresse
 Host	Hôte
@@ -1245,7 +1246,7 @@ Wondering if the smudge is dust or a discovery…	On se demande si cette tache e
 Negotiating a truce with the background gradient…	Négociation d'une trêve avec le gradient de fond de ciel…
 Organising the archive before it becomes a black hole…	On range l'archive avant qu'elle ne devienne un trou noir…
 Did you know you can press F1 to open AstroArchive’s offline guide?	Saviez-vous que vous pouvez appuyer sur F1 pour ouvrir le guide hors connexion d'AstroArchive ?
-Did you know you can import from Seestar and DWARF over your local network?	Saviez-vous que vous pouvez importer depuis Seestar et DWARF via votre réseau local ?
+Did you know you can import from Seestar, DWARF and Celestron Origin over your local network?	Saviez-vous que vous pouvez importer depuis Seestar, DWARF et Celestron Origin via votre réseau local ?
 Did you know you can use live import to bring in completed captures while your telescope keeps shooting?	Saviez-vous que l'importation en direct permet de récupérer les captures terminées pendant que votre télescope continue de photographier ?
 Did you know you can run independent network imports from more than one telescope?	Saviez-vous que vous pouvez lancer des importations réseau indépendantes depuis plusieurs télescopes ?
 Did you know you can browse your captures by target and session in Repository?	Saviez-vous que vous pouvez parcourir vos captures par cible et par session dans Dépôt ?

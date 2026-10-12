@@ -13,7 +13,7 @@ namespace AstroArchive {
   public string Summary{get{return WholeSource?"the entire telescope drive":Folders.Count+" folder"+(Folders.Count==1?"":"s")+" and "+Files.Count+" file"+(Files.Count==1?"":"s");}}
   public IEnumerable<string> Paths{get{return Folders.Concat(Files);}}
   static bool SamePath(string a,string b){return a.TrimEnd('\\','/').Equals(b.TrimEnd('\\','/'),StringComparison.OrdinalIgnoreCase);}
-  public static string TelescopeBrand(string make){return make=="DWARFLAB"?"Dwarflab":make=="Seestar"?"Seestar":"connected telescope";}
+  public static string TelescopeBrand(string make){return make=="DWARFLAB"?"Dwarflab":make=="Seestar"?"Seestar":make==CelestronOrigin.Make?"Celestron Origin":"connected telescope";}
   public static ImportSelection Create(string root,IEnumerable<string> paths){
    if(string.IsNullOrWhiteSpace(root)||!Directory.Exists(root))throw new IOException("The telescope drive is unavailable. Reconnect it and try again.");
    string source=Path.GetFullPath(root);var folders=new List<string>();var files=new List<string>();var checkedFolders=new HashSet<string>(StringComparer.OrdinalIgnoreCase);

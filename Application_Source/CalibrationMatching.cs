@@ -37,7 +37,7 @@ namespace AstroArchive {
             return Missing(f.Camera)?null:f.Camera.Trim();
         }
         static bool FixedOptics(Frame f) {
-            return f.MakeText=="Seestar"||f.MakeText=="DWARFLAB";
+            return f.MakeText=="Seestar"||f.MakeText=="DWARFLAB"||f.MakeText==CelestronOrigin.Make;
         }
         public static int? NightDays(string a,string b) {
             DateTime x,y;

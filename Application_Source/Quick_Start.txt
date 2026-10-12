@@ -19,17 +19,20 @@ IMPORT OVER WI-FI / LAN
 
 ## Connect and choose files
 Choose a repository in Settings > General first. On Import, click Connect over
-network beside Saved telescope. Connect this PC and Seestar/DWARF to the same
-LAN (or join the telescope hotspot). Discovery starts
+network beside Saved telescope. Connect this PC and Seestar, DWARF or Celestron
+Origin to the same LAN (or join the telescope hotspot). Discovery starts
 automatically. Select the telescope and Connect; no IP entry is needed.
+Celestron Origin connects over FTP like DWARF and opens its RawData session
+folders. It keeps individual exposures only when Save Raw Images is on in the
+Origin app (Menu > Settings > Advanced); FinalStackedMaster.tiff is its own stack.
 
 Choose a saved physical telescope for the import or keep the suggested new name.
 Browse files opens capture folders. Click to select files or folders (a folder
 includes its subfolders); Ctrl or Shift adds more, Esc clears. Double-click a folder
 to open it; selections are kept across folders. Search all selects every supported
 capture. Review the total files and size, then import. Network imports first remind
-you that transfers take longer than USB. Originals stay on the telescope. Adjacent sidecars and DWARF session
-metadata are downloaded with captures; normal archive checks and duplicates apply.
+you that transfers take longer than USB. Originals stay on the telescope. Adjacent sidecars, DWARF session
+metadata and Origin info.json are downloaded with captures; normal archive checks and duplicates apply.
 
 ## Import as the telescope shoots
 Start live import watches the displayed folder and its subfolders. To limit it to

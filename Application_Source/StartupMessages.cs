@@ -65,7 +65,7 @@ namespace AstroArchive {
   };
   public static readonly string[] Hints={
    "Did you know you can press F1 to open AstroArchive’s offline guide?",
-   "Did you know you can import from Seestar and DWARF over your local network?",
+   "Did you know you can import from Seestar, DWARF and Celestron Origin over your local network?",
    "Did you know you can use live import to bring in completed captures while your telescope keeps shooting?",
    "Did you know you can run independent network imports from more than one telescope?",
    "Did you know you can browse your captures by target and session in Repository?",
