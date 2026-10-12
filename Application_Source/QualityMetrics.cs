@@ -7,7 +7,8 @@ using System.Globalization;
 using System.Text;
 
 namespace AstroArchive {
- public static class QualityStatus {public const int Ok=0,TooFewStars=1,NoObject=2,Failed=3;}
+ // Failed: the file could not be read (tried again next run). Unsuitable: set aside, skipped until a fresh measurement is requested.
+ public static class QualityStatus {public const int Ok=0,TooFewStars=1,NoObject=2,Failed=3,Unsuitable=4;}
  public static class QualityKind {public const int Stars=0,Disc=1;}
  public sealed class QualityMeasurement {
   public string Hash;public int Version,Kind,Status;
