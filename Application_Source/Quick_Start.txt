@@ -302,7 +302,7 @@ your PC. If Stellarium is already open with its Remote Control plugin switched o
 window is reused; otherwise a new Stellarium window opens. Calibration frames and
 captures without a position leave the button off.
 The target button, after Stellarium, draws a white circle around every catalogue
-object in the preview, sized to cover the whole object, with its ID (M42, NGC 1977)
+object in the preview, sized to cover the whole object, with its ID (M 42, NGC 1977)
 set in a break in the ring. Circles that run past the edge stay partly drawn, with
 the ID in a visible part of the ring. The same button sits on the Edited preview and
 in enlarged previews; it is off until you switch it on, and switching it off in any

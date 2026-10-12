@@ -19,7 +19,8 @@ namespace AstroArchive {
   static readonly CatalogObject[] Features={new CatalogObject{Name="IC1396A",Type="HII",RA=324.2083,Dec=57.5000,Diameter=20/60.0}};
   // A small margin keeps each circle just outside its object's catalogued edge.
   const double Margin=1.1;
-  public static string ShortId(string name){return Regex.Replace(name??"",@"^(NGC|IC|PGC|UGC|ESO|Mel|Cr|HCG|MWSC)(?=\d)","$1 ");}
+  // Same spaced IDs as the rest of the app (M 42, Sh2-155); catalogues it does not cover still get a space after their prefix.
+  public static string ShortId(string name){string id=Catalog.DisplayId(name??"");return id!=(name??"")?id:Regex.Replace(id,@"^(ESO|Mel|Cr|HCG|MWSC)(?=\d)","$1 ");}
   public static IEnumerable<CatalogObject> Catalogue{get{return Catalog.Objects.Concat(Features);}}
   // The overlay draws in display rows. FITS previews draw the last stored row at the top; solved geometry counts rows from the first stored row,
   // except a WCS read from XISF keywords, which follows the FITS bottom-up convention while XISF pixels run top-down.

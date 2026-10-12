@@ -32,7 +32,7 @@ namespace AstroArchive {
     var header=OverlayWcs(0,false);var frame=new Frame{Target="M42",Kind="Light",Width=2000,Height=1500,Sky=SkyWcs.FromHeader(header,2000,1500)};
     var result=TargetOverlay.For(frame,true);Check(result.Marks.Count>0&&result.Marks[0].Name=="M42"&&result.Marks[0].Primary&&result.Marks.Count(m=>m.Primary)==1,"Capture target not first: "+string.Join(",",result.Marks.Select(m=>m.Name)));
     Check(result.Marks.Any(m=>m.Name=="M43")&&result.Marks.Any(m=>m.Name=="NGC1977")&&result.Note=="","Orion field incomplete: "+string.Join(",",result.Marks.Select(m=>m.Label)));
-    Check(result.Marks[0].Label=="M42"&&result.Marks.First(m=>m.Name=="NGC1977").Label=="NGC 1977"&&TargetOverlay.ShortId("IC1396A")=="IC 1396A","Labels are not short object IDs");
+    Check(result.Marks[0].Label=="M 42"&&result.Marks.First(m=>m.Name=="NGC1977").Label=="NGC 1977"&&TargetOverlay.ShortId("IC1396A")=="IC 1396A"&&TargetOverlay.ShortId("Mel22")=="Mel 22","Labels are not short object IDs");
     var centre=OverlayPixel(header,1000.5,750.5);var crowded=Enumerable.Range(0,40).Select(i=>new CatalogObject{Name="G"+i,Type=i%5==0?"*":"G",RA=centre.RA+i*0.01,Dec=centre.Dec,Magnitude=20-i*0.1}).ToList();
     crowded.Add(new CatalogObject{Name="G1",Type="G",RA=centre.RA,Dec=centre.Dec+0.1});crowded.Add(new CatalogObject{Name="Twin",Type="Dup",RA=centre.RA,Dec=centre.Dec});crowded.Add(new CatalogObject{Name="Ghost",Type="NonEx",RA=centre.RA,Dec=centre.Dec});
     var edge=OverlayPixel(header,-100,750.5);crowded.Add(new CatalogObject{Name="Edge",Type="Neb",RA=edge.RA,Dec=edge.Dec,Diameter=0.4});var far=OverlayPixel(header,-600,750.5);crowded.Add(new CatalogObject{Name="Far",Type="Neb",RA=far.RA,Dec=far.Dec,Diameter=0.2});
