@@ -2092,3 +2092,9 @@ Choose another image of this target, including any Edited image, adjust its zoom
 Drag the preview to move the image, and hold Ctrl while scrolling to zoom.	拖动预览可移动图像，按住 Ctrl 滚动可缩放。
 Short description (optional)	简短说明 (可选)
 A line or two under the target name, in card images and videos. Leave blank for none.	在卡片图像和视频中显示于目标名称下方的一两行文字。留空则不显示。
+↺ Rotate left	↺ 向左旋转
+Rotate right ↻	向右旋转 ↻
+Rotate left	向左旋转
+Rotate right	向右旋转
+Turn the image a quarter turn anticlockwise.	将图像逆时针旋转 90°。
+Turn the image a quarter turn clockwise.	将图像顺时针旋转 90°。

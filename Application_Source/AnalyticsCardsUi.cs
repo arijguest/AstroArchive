@@ -183,12 +183,29 @@ namespace AstroArchive {
    var result=BitmapSource.Create(converted.PixelWidth,converted.PixelHeight,96,96,PixelFormats.Bgr24,null,pixels,stride);result.Freeze();return result;
   }
   // The first readable image in card order: linked or starred Edited images, then stacks.
+  // The target's remembered image and framing when it can still be read,
+  // otherwise its first readable image.
   async Task<TargetCardComposition> DefaultCardImage(string target,CancellationToken ct){
-   foreach(var choice in CardImages(target).Where(c=>c.Path!=null).Take(3).ToList()){
-    try{var image=await Task.Run(()=>CompactCardImage(DecodeCardImage(choice,ct)),ct);return new TargetCardComposition{Path=choice.Path,Label=choice.Label,Image=image,Fill=settings.CardFill};}
+   var memory=CardMemory(target);var images=CardImages(target);
+   Func<TargetCardComposition,TargetCardComposition> restore=c=>{if(memory!=null){c.Description=memory.Description;if(memory.Path!=null&&(memory.Path.Length==0||string.Equals(memory.Path,c.Path,StringComparison.OrdinalIgnoreCase))){c.Fill=memory.Fill;c.Placement=memory.Placement();}}return c;};
+   if(memory!=null&&memory.Path!=null){
+    if(memory.Path.Length==0)return restore(new TargetCardComposition{Fill=settings.CardFill});
+    var saved=images.FirstOrDefault(c=>c.Path!=null&&string.Equals(c.Path,memory.Path,StringComparison.OrdinalIgnoreCase));
+    if(saved!=null){try{var image=await Task.Run(()=>CompactCardImage(DecodeCardImage(saved,ct)),ct);return restore(new TargetCardComposition{Path=saved.Path,Label=saved.Label,Image=image,Fill=settings.CardFill});}catch(OperationCanceledException){throw;}catch(Exception){ct.ThrowIfCancellationRequested();}}
+   }
+   foreach(var choice in images.Where(c=>c.Path!=null).Take(3).ToList()){
+    try{var image=await Task.Run(()=>CompactCardImage(DecodeCardImage(choice,ct)),ct);return restore(new TargetCardComposition{Path=choice.Path,Label=choice.Label,Image=image,Fill=settings.CardFill});}
     catch(OperationCanceledException){throw;}catch(Exception){ct.ThrowIfCancellationRequested();}
    }
-   return new TargetCardComposition{Fill=settings.CardFill};
+   return restore(new TargetCardComposition{Fill=settings.CardFill});
+  }
+  TargetCardMemory CardMemory(string target){
+   TargetCardMemory memory;return settings.CardChoices!=null&&settings.CardChoices.TryGetValue(Catalog.CanonicalTarget(target),out memory)?memory:null;
+  }
+  // Path is the chosen image, "" for the star field, or null while nothing was chosen.
+  void RememberCard(string target,string path,TargetCardComposition card){
+   if(settings.CardChoices==null)settings.CardChoices=new Dictionary<string,TargetCardMemory>(StringComparer.Ordinal);var p=card.Placement??new TargetCardPlacement();
+   settings.CardChoices[Catalog.CanonicalTarget(target)]=new TargetCardMemory{Path=path,Fill=card.Fill,Zoom=p.Zoom,PanX=p.PanX,PanY=p.PanY,Rotation=TargetCardRenderer.QuarterTurn(p.Rotation),Description=string.IsNullOrWhiteSpace(card.Description)?null:card.Description.Trim()};SaveSettings();
   }
   static Expander CardPlacementControls(TargetCardPlacement placement,Action changed){
    var panel=new StackPanel{Margin=new Thickness(0,6,0,0)};var expander=new Expander{Header="Adjust image position",Content=panel,Margin=new Thickness(0,0,0,12)};AutomationProperties.SetName(expander,"Adjust image position");
@@ -198,19 +215,38 @@ namespace AstroArchive {
     control.ValueChanged+=(s,e)=>{apply(control.Value);changed();};return control;
    };
    var sliders=new[]{slider("Zoom",1,4,placement.Zoom,v=>placement.Zoom=v),slider("Horizontal position",-1,1,placement.PanX,v=>placement.PanX=v),slider("Vertical position",-1,1,placement.PanY,v=>placement.PanY=v)};
-   var reset=new Button{Content="Reset position",HorizontalAlignment=HorizontalAlignment.Left,Margin=new Thickness(0,2,0,0)};UiHelp.For(reset,"Reset position");reset.Click+=(s,e)=>ResetCardPlacement(expander);panel.Children.Add(reset);
-   UiHelp.Hint(sliders[0],"Enlarge the image within its frame, then move it into place.");expander.Tag=sliders;return expander;
+   var reset=new Button{Content="Reset position",HorizontalAlignment=HorizontalAlignment.Left,Margin=new Thickness(0,2,0,0)};UiHelp.For(reset,"Reset position");reset.Click+=(s,e)=>ResetCardPlacement(expander,false);panel.Children.Add(reset);
+   UiHelp.Hint(sliders[0],"Enlarge the image within its frame, then move it into place.");expander.Tag=new CardPlacementUi{Sliders=sliders,Placement=placement,Changed=changed};return expander;
   }
-  static void ResetCardPlacement(Expander controls){var sliders=controls.Tag as Slider[];if(sliders==null)return;sliders[0].Value=1;sliders[1].Value=0;sliders[2].Value=0;}
+  sealed class CardPlacementUi {public Slider[] Sliders;public TargetCardPlacement Placement;public Action Changed;}
+  static Slider[] CardSliders(Expander controls){var ui=controls.Tag as CardPlacementUi;return ui==null?null:ui.Sliders;}
+  // A new image starts upright and centred; Reset position keeps the rotation.
+  static void ResetCardPlacement(Expander controls,bool rotation=true){
+   var ui=controls.Tag as CardPlacementUi;if(ui==null)return;bool turned=rotation&&ui.Placement.Rotation!=0;if(rotation)ui.Placement.Rotation=0;
+   ui.Sliders[0].Value=1;ui.Sliders[1].Value=0;ui.Sliders[2].Value=0;if(turned)ui.Changed();
+  }
+  static void ApplyCardPlacement(Expander controls,TargetCardPlacement saved){
+   var ui=controls.Tag as CardPlacementUi;if(ui==null||saved==null)return;ui.Placement.Rotation=saved.Rotation;ui.Sliders[0].Value=saved.Zoom;ui.Sliders[1].Value=saved.PanX;ui.Sliders[2].Value=saved.PanY;ui.Changed();
+  }
+  // Quarter turns sit under the preview, where the image is, rather than in a menu.
+  static Panel CardRotation(Expander controls){
+   var bar=new StackPanel{Orientation=Orientation.Horizontal,HorizontalAlignment=HorizontalAlignment.Center,Margin=new Thickness(0,8,0,0)};
+   foreach(var turn in new[]{-90,90}){
+    int delta=turn;var button=new Button{Content=delta<0?"↺ Rotate left":"Rotate right ↻",Margin=new Thickness(4,0,4,0),Padding=new Thickness(10,3,10,3)};UiHelp.For(button,delta<0?"Rotate left":"Rotate right");
+    UiHelp.Hint(button,delta<0?"Turn the image a quarter turn anticlockwise.":"Turn the image a quarter turn clockwise.");
+    button.Click+=(s,e)=>{var ui=controls.Tag as CardPlacementUi;if(ui==null)return;ui.Placement.Rotation=TargetCardRenderer.QuarterTurn(ui.Placement.Rotation+delta);ui.Sliders[1].Value=0;ui.Sliders[2].Value=0;ui.Changed();};bar.Children.Add(button);
+   }
+   return bar;
+  }
   // Dragging the preview moves the image and Ctrl+scroll zooms it. Both go
   // through the sliders, so keyboard users keep the same control.
   static void CardGestures(Image preview,Expander controls,TargetCardPlacement placement,Func<BitmapSource> hero,Func<TargetCardLayout> layout,Func<bool> fill){
-   var sliders=controls.Tag as Slider[];if(sliders==null)return;Point? last=null;
+   var sliders=CardSliders(controls);if(sliders==null)return;Point? last=null;
    Action cursor=()=>preview.Cursor=hero()==null?null:last!=null?Cursors.SizeAll:Cursors.Hand;preview.MouseEnter+=(s,e)=>cursor();
    preview.MouseLeftButtonDown+=(s,e)=>{if(hero()==null)return;last=e.GetPosition(preview);preview.CaptureMouse();cursor();e.Handled=true;};
    preview.MouseMove+=(s,e)=>{
     var image=hero();if(last==null||image==null||preview.ActualWidth<=0)return;var now=e.GetPosition(preview);int width,height;TargetCards.Size(layout(),out width,out height);
-    double toCard=width/preview.ActualWidth;var range=TargetCardRenderer.PanRange(image,layout(),fill(),placement.Zoom);
+    double toCard=width/preview.ActualWidth;var range=TargetCardRenderer.PanRange(image,layout(),fill(),placement);
     if(range.Width>.5)sliders[1].Value=placement.PanX-(now.X-last.Value.X)*toCard/range.Width;if(range.Height>.5)sliders[2].Value=placement.PanY-(now.Y-last.Value.Y)*toCard/range.Height;last=now;
    };
    preview.MouseLeftButtonUp+=(s,e)=>{if(last!=null)preview.ReleaseMouseCapture();};preview.LostMouseCapture+=(s,e)=>{last=null;cursor();};
@@ -244,7 +280,7 @@ namespace AstroArchive {
    bool loading=false;int generation=0;var cancel=new CancellationTokenSource();
    Action draw=()=>{try{preview.Source=TargetCardRenderer.Render(edit.Data,work.Image,edit.Layout,edit.Dark,work.Fill,edit.Credit,work.Placement,.6,work.Description);}catch(Exception e){if(!(e is ArgumentException||e is InvalidOperationException||e is OutOfMemoryException))throw;status.Text="The card could not be drawn: "+e.Message;}};
    var placement=CardPlacementControls(work.Placement,draw);options.Children.Add(placement);
-   CardGestures(preview,placement,work.Placement,()=>work.Image,()=>edit.Layout,()=>work.Fill);
+   CardGestures(preview,placement,work.Placement,()=>work.Image,()=>edit.Layout,()=>work.Fill);previewStack.Children.Insert(1,CardRotation(placement));
    note.TextChanged+=(s,e)=>{work.Description=string.IsNullOrWhiteSpace(note.Text)?null:note.Text.Trim();draw();};
    fill.Checked+=(s,e)=>{work.Fill=true;draw();};fill.Unchecked+=(s,e)=>{work.Fill=false;draw();};
    imageBox.SelectionChanged+=async(s,e)=>{
@@ -257,7 +293,7 @@ namespace AstroArchive {
     catch(Exception error){if(current!=generation)return;loading=false;status.Text="This image could not be read ("+error.Message+"). Choose another image.";}
    };
    d.Accept("Use this image",()=>{if(loading)status.Text="Wait for the image to finish loading.";return !loading;});d.Window.Closed+=(s,e)=>cancel.Cancel();
-   draw();return d.Show()?work:null;
+   draw();if(!d.Show())return null;RememberCard(edit.Data.Target,work.Image==null?"":work.Path,work);return work;
   }
  }
 }

@@ -115,6 +115,12 @@ namespace AstroArchive {
      int w=plain.PixelWidth,h=plain.PixelHeight;var a=new byte[w*h*4];var b=new byte[w*h*4];plain.CopyPixels(a,w*4,0);described.CopyPixels(b,w*4,0);
      if(a.SequenceEqual(b)||described.PixelWidth!=w||described.PixelHeight!=h)throw new Exception("Target card description was not drawn: "+layout);
     }
+    // Rotation turns the card image, and each target's choices survive a settings round trip.
+    var stripes=new byte[40*20*3];for(int i=0;i<stripes.Length;i+=3)stripes[i]=(byte)((i/3)%40<20?255:0);var hero=BitmapSource.Create(40,20,96,96,System.Windows.Media.PixelFormats.Rgb24,null,stripes,120);hero.Freeze();
+    var upright=TargetCardRenderer.Render(cardData,hero,TargetCardLayout.Square,true,false,"",new TargetCardPlacement(),1,null);var turned=TargetCardRenderer.Render(cardData,hero,TargetCardLayout.Square,true,false,"",new TargetCardPlacement{Rotation=90},1,null);
+    var uprightPixels=new byte[1080*1080*4];var turnedPixels=new byte[uprightPixels.Length];upright.CopyPixels(uprightPixels,1080*4,0);turned.CopyPixels(turnedPixels,1080*4,0);if(uprightPixels.SequenceEqual(turnedPixels))throw new Exception("Rotating the card image did not change the card.");
+    var cardSettings=Util.Deserialize<Settings>(Util.Serialize(new Settings{CardChoices=new Dictionary<string,TargetCardMemory>{{"M31",new TargetCardMemory{Path="",Zoom=9,PanX=.5,Rotation=-90,Description="First light"}}}}));
+    var cardPlacement=cardSettings.CardChoices["M31"].Placement();if(cardPlacement.Zoom!=4||cardPlacement.PanX!=.5||cardPlacement.Rotation!=270||cardSettings.CardChoices["M31"].Path!=""||cardSettings.CardChoices["M31"].Description!="First light")throw new Exception("Target card choices were not remembered intact.");
     File.WriteAllText(Path.Combine(output,"analytics-smoke.txt"),"PASS: Repository menu, six reports, combined preview, landscape default and five social layout selectors, exact social pixel sizes, dark/light document and application themes, single/combined PNG/JPEG/PDF/SVG exports, telescope/date scoping, stale-export prevention, decoding and atomic overwrite checks.");
    }finally{repo=savedRepo;Theme.Apply(Window,theme);}
   }

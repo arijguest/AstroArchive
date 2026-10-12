@@ -2061,3 +2061,9 @@ Choose another image of this target, including any Edited image, adjust its zoom
 Drag the preview to move the image, and hold Ctrl while scrolling to zoom.	Ziehen Sie die Vorschau, um das Bild zu verschieben, und scrollen Sie mit gedrückter Strg-Taste, um zu zoomen.
 Short description (optional)	Kurzbeschreibung (optional)
 A line or two under the target name, in card images and videos. Leave blank for none.	Ein bis zwei Zeilen unter dem Zielnamen, in Kartenbildern und Videos. Leer lassen, um keine anzuzeigen.
+↺ Rotate left	↺ Nach links drehen
+Rotate right ↻	Nach rechts drehen ↻
+Rotate left	Nach links drehen
+Rotate right	Nach rechts drehen
+Turn the image a quarter turn anticlockwise.	Dreht das Bild um eine Vierteldrehung gegen den Uhrzeigersinn.
+Turn the image a quarter turn clockwise.	Dreht das Bild um eine Vierteldrehung im Uhrzeigersinn.

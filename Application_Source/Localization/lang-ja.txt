@@ -2093,3 +2093,9 @@ Choose another image of this target, including any Edited image, adjust its zoom
 Drag the preview to move the image, and hold Ctrl while scrolling to zoom.	プレビューをドラッグすると画像を移動でき、Ctrl キーを押しながらスクロールするとズームできます。
 Short description (optional)	短い説明 (任意)
 A line or two under the target name, in card images and videos. Leave blank for none.	カードの画像と動画で、ターゲット名の下に 1〜2 行で表示されます。不要なら空欄のままにします。
+↺ Rotate left	↺ 左に回転
+Rotate right ↻	右に回転 ↻
+Rotate left	左に回転
+Rotate right	右に回転
+Turn the image a quarter turn anticlockwise.	画像を反時計回りに 90° 回転します。
+Turn the image a quarter turn clockwise.	画像を時計回りに 90° 回転します。

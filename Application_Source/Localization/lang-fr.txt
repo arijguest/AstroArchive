@@ -2058,3 +2058,9 @@ Choose another image of this target, including any Edited image, adjust its zoom
 Drag the preview to move the image, and hold Ctrl while scrolling to zoom.	Faites glisser l’aperçu pour déplacer l’image, et maintenez Ctrl en faisant défiler pour zoomer.
 Short description (optional)	Courte description (facultatif)
 A line or two under the target name, in card images and videos. Leave blank for none.	Une ou deux lignes sous le nom de la cible, dans les images et vidéos des cartes. Laissez vide pour n’en afficher aucune.
+↺ Rotate left	↺ Pivoter à gauche
+Rotate right ↻	Pivoter à droite ↻
+Rotate left	Pivoter à gauche
+Rotate right	Pivoter à droite
+Turn the image a quarter turn anticlockwise.	Fait pivoter l’image d’un quart de tour dans le sens antihoraire.
+Turn the image a quarter turn clockwise.	Fait pivoter l’image d’un quart de tour dans le sens horaire.
