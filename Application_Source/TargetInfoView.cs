@@ -19,7 +19,8 @@ namespace AstroArchive {
   public Action<string> ChooseObject;
   public string CurrentId{get;private set;}
   public TargetInfoView(){
-   scroll=new ScrollViewer{Content=content,VerticalScrollBarVisibility=ScrollBarVisibility.Auto,HorizontalScrollBarVisibility=ScrollBarVisibility.Disabled,Padding=new Thickness(4,2,4,8)};
+   // Always reserve the scrollbar gutter: with Auto, text rewrapping at the narrower width toggled the bar on and off.
+   scroll=new ScrollViewer{Content=content,VerticalScrollBarVisibility=ScrollBarVisibility.Visible,HorizontalScrollBarVisibility=ScrollBarVisibility.Disabled,Padding=new Thickness(4,2,4,8)};
    Content=scroll;AutomationProperties.SetName(this,"Target information");SizeChanged+=(s,e)=>ArrangeBody();scroll.SizeChanged+=(s,e)=>ArrangeBody();scroll.ScrollChanged+=(s,e)=>{if(Math.Abs(e.ViewportHeightChange)>0.1)ArrangeBody();};
   }
   static TextBlock Text(string value,string colour="Text",string size="UiFontControl"){
