@@ -23,6 +23,8 @@ Network live import: Start live import now opens a setup dialog like Watch a cap
 
 Import page: the search bar has proper spacing below the source card, and the totals line only appears when the import table has files, listing only categories that have any.
 
+Edited page: Add images, Import folder, Refresh and Export to sit in one toolbar beside search, and the preview column follows the shape of the image being shown while keeping the table at least 440 px wide.
+
 Backups and notifications: a small indicator beside the repository path shows when a backup is running, even after its notice is dismissed. The notifications menu always lists every notification, including dismissed ones, and its bell shows when a process is active.
 
 Includes everything in 3.2.3: eclipse detection, daytime and lunar sky maps, in-depth target overviews and image-quality scoring.
