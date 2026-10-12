@@ -121,8 +121,8 @@ similar frames in its session: star size, roundness, star count and noise for de
 edge sharpness and detail for planetary, lunar and solar stills. Sort by **QUALITY**, or use
 **Filters → Quality rank** to keep the top or weakest frames, flagged frames or unscored ones.
 Subs inside each session list best first. Flags such as Soft, Clouded or Trailed explain themselves
-in a tooltip, and scores only suggest: nothing is rejected for you. Stacks, calibration frames,
-recordings and non-linear images are never graded. [How scoring works](docs/IMAGE_QUALITY.md)
+in a tooltip, and scores only suggest: nothing is rejected for you. Linear stacks are scored against
+other stacks of the same target. Calibration frames, recordings and non-linear images are never graded. [How scoring works](docs/IMAGE_QUALITY.md)
 
 ## Built around the captures you want to keep
 

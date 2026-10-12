@@ -17,7 +17,7 @@ namespace AstroArchive {
   static void QualityLibraryTests(){
    Test("Quality: only linear light subs are eligible and every skip gives a reason",()=>{
     Check(QualityReason(f=>{})=="","A plain FITS light sub was refused");
-    Check(QualityReason(f=>f.Kind="Stack").Contains("stacks"),"A stack was graded");
+    Check(QualityReason(f=>f.Kind="Stack")=="","A linear stack was refused");
     Check(QualityReason(f=>f.Kind="Video").Contains("recordings"),"A video was graded");
     foreach(string kind in new[]{"Dark","Flat","Bias","Master dark"})Check(QualityReason(f=>f.Kind=kind).Contains("calibration"),kind+" frames were graded");
     Check(QualityReason(f=>{f.Kind="Light";f.Target="Calibration";}).Contains("calibration"),"A calibration target was graded");
@@ -53,7 +53,7 @@ namespace AstroArchive {
     var unmeasured=QualitySub("none","one","2026-10-05T22:55:00Z");frames.Add(unmeasured);
     QualityAnnotator.Apply(frames,measurements,false);
     Check(frames.Take(20).All(f=>f.QualityScore.HasValue&&f.QualityPercentile>=0&&f.QualityPercentile<=1),"Eligible subs were not scored");
-    Check(!stack.QualityScore.HasValue&&stack.QualityText=="-"&&stack.QualityTooltip.Contains("stacks"),"A stack was graded or lacks its reason");
+    Check(stack.QualityScore.HasValue&&frames[0].QualityPercentile==1,"A stack was not scored or was ranked among the subs");
     Check(!stale.QualityScore.HasValue&&!wrong.QualityScore.HasValue&&!unmeasured.QualityScore.HasValue,"Stale, mismatched or missing measurements were scored");
     Check(unmeasured.QualityTooltip.Contains("Analyse image quality"),"An unmeasured sub does not say how to get a score");
     for(int i=1;i<10;i++)Check(frames[i].QualityScore.Value<frames[i-1].QualityScore.Value,"Scores did not fall with wider stars within a session");
@@ -84,6 +84,12 @@ namespace AstroArchive {
     int lastScored=ordered.FindLastIndex(f=>f.QualityScore.HasValue&&f.Session=="one"),firstUnscored=ordered.FindIndex(f=>!f.QualityScore.HasValue&&f.Session=="one");Check(firstUnscored>lastScored,"Unscored captures were listed among the scored ones");
     Check(ordered.IndexOf(other)>ordered.IndexOf(first[0]),"A later session moved ahead of an earlier one");
     var plain=frames.Select(f=>QualitySub(f.Hash,f.Session,f.Observed)).ToList();var byTime=QualityOrdering.Order(plain.AsEnumerable().Reverse());for(int i=1;i<byTime.Count;i++)Check(string.CompareOrdinal(byTime[i-1].Session,byTime[i].Session)<=0,"Unscored libraries changed order");
+   });
+   Test("Quality: a session past midnight or under two target names is ranked as one block",()=>{
+    var frames=new List<Frame>();var measurements=new Dictionary<string,QualityMeasurement>();double[] widths={3.4,2.1,2.8,2.0,3.9,2.5,3.1,2.2,3.6,2.9};
+    for(int i=0;i<10;i++){var f=QualitySub("n"+i,"night","2026-10-05T"+((20+i)%24).ToString("00")+":30:00Z");f.Observed=(i<4?"2026-10-05T":"2026-10-06T")+((20+i)%24).ToString("00")+":30:00Z";if(i%3==0)f.Target="NGC 5194";frames.Add(f);measurements[f.Hash]=QualityShot(f.Hash,widths[i]);}
+    QualityAnnotator.Apply(frames,measurements,false);
+    var ordered=QualityOrdering.Order(frames);for(int i=1;i<ordered.Count;i++)Check(ordered[i-1].QualityOrder>=ordered[i].QualityOrder,"Scores restart part-way through a session: "+string.Join(",",ordered.Select(f=>f.Hash)));
    });
    Test("Quality: filter by rank, flags, exposure and score range",()=>{
     var frames=new List<Frame>();var measurements=new Dictionary<string,QualityMeasurement>();
@@ -120,8 +126,11 @@ namespace AstroArchive {
     Write(Path.Combine(source,"Light_M51_a.fit"),w,h,(x,y)=>plane[y*w+x],LightHeaders(new DateTime(2026,10,5,21,0,0),"M51"));
     using(var repo=new Repository(Path.Combine(root,"quality-broken-repo"))){
      repo.Import(repo.Scan(source,"Unit-01","Auto",ct,NoProgress).Frames,ct,NoProgress);var frame=repo.All().Single();File.WriteAllBytes(repo.FilePath(frame),new byte[2880]);
-     var run=repo.AnalyzeQuality(new[]{frame},true,ct,NoProgress);Check(run.Failed==1&&run.Errors.Count==1&&run.Summary().Contains("unreadable"),"A damaged file was not reported: "+run.Summary());
-     Check(!repo.All().Single().QualityScore.HasValue,"A damaged file received a score");
+     var run=repo.AnalyzeQuality(new[]{frame},true,ct,NoProgress);Check(run.Unsuitable==1&&run.Errors.Count==1&&run.Errors[0].StartsWith("Light_M51_a.fit: set aside")&&run.Summary().Contains("1 set aside")&&run.Report().Contains("Light_M51_a.fit"),"A damaged file was not reported by name: "+run.Report());
+     Check(!repo.All().Single().QualityScore.HasValue&&repo.All().Single().QualityTooltip.Contains("set aside"),"A damaged file received a score or lacks its reason");
+     var again=repo.AnalyzeQuality(repo.All(),false,ct,NoProgress);Check(again.SetAside==1&&again.Measured==0&&again.Unsuitable==0,"A set-aside file was measured again: "+again.Summary());
+     Check(repo.UnmeasuredQuality(repo.All()).Count==0,"A set-aside file is still reported as unmeasured");
+     File.Delete(repo.FilePath(frame));var missing=repo.AnalyzeQuality(repo.All(),true,ct,NoProgress);Check(missing.Failed==1&&missing.Errors[0].Contains("could not be read")&&repo.UnmeasuredQuality(repo.All()).Count==1,"A missing file was set aside instead of being tried again: "+missing.Report());
     }
    });
    Test("Quality: saved repository layouts gain the QUALITY heading once",()=>{
@@ -134,7 +143,10 @@ namespace AstroArchive {
    });
    Test("Quality: the run summary says what happened in plain words",()=>{
     Check(new QualityRun().Summary().Contains("No light frames"),"Empty run summary wrong");
-    var run=new QualityRun{Eligible=10,Measured=6,Reused=3,TooFewStars=1,Failed=1,Skipped=2};string text=run.Summary();Check(text.Contains("6 measured")&&text.Contains("3 already measured")&&text.Contains("1 with too few stars")&&text.Contains("1 unreadable")&&text.Contains("2 not scorable"),"Run summary wrong: "+text);
+    var run=new QualityRun{Eligible=10,Measured=6,Reused=3,TooFewStars=1,Failed=1,Unsuitable=1,SetAside=1,Skipped=2};string text=run.Summary();Check(text.Contains("6 measured")&&text.Contains("3 already measured")&&text.Contains("1 with too few stars")&&text.Contains("1 unreadable")&&text.Contains("2 set aside")&&text.Contains("2 not scorable"),"Run summary wrong: "+text);
+    Check(QualityFailure.Unsuitable(new InvalidDataException())&&QualityFailure.Unsuitable(new NotSupportedException())&&QualityFailure.Unsuitable(new OutOfMemoryException())&&QualityFailure.Unsuitable(new EndOfStreamException()),"Content problems were not set aside");
+    Check(!QualityFailure.Unsuitable(new IOException("busy"))&&!QualityFailure.Unsuitable(new FileNotFoundException())&&!QualityFailure.Unsuitable(new UnauthorizedAccessException()),"Read problems were set aside instead of retried");
+    Check(QualityFailure.Describe(new OutOfMemoryException()).Contains("too large")&&QualityFailure.Describe(new FileNotFoundException()).Contains("missing"),"Failure reasons are not plain");
    });
   }
  }

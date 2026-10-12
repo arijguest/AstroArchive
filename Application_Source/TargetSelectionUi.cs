@@ -34,7 +34,7 @@ namespace AstroArchive {
   void SelectOnlyTargetRow(string name,object item){
    bool previous=restoringTargetSelection;restoringTargetSelection=true;
    try{
-    if(name=="FramesGrid"){librarySelection.Clear();ClearSessionSelection();}else editedSelection.Clear();
+    if(name=="FramesGrid"){librarySelection.Clear();ClearSessionSelection();rowSelectionAnchor=item as Frame;sessionSelectionAnchor=null;}else editedSelection.Clear();
     var grid=G(name);grid.SelectedItems.Clear();grid.SelectedItem=item;
    }finally{restoringTargetSelection=previous;}
    CaptureTargetSelection(name);if(name=="FramesGrid")Details();else{UpdateEditedActions();LoadEditedPreview();}

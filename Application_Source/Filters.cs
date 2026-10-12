@@ -30,7 +30,7 @@ namespace AstroArchive {
     case "Bottom half":return "Frames scoring below the middle of their comparison group.";
     case "Weakest 25%":return "The weakest quarter of comparable frames, often the first to leave out of a stack.";
     case "Has quality flags":return "Frames marked Soft, Clouded, Trailed, Bright sky, Clipped or similar.";
-    case "Not scored":return "Stacks, calibration frames, recordings, non-linear images, and frames not measured yet.";
+    case "Not scored":return "Calibration frames, recordings, non-linear images, files set aside as unsuitable, and frames not measured yet.";
     default:return choice;
    }
   }

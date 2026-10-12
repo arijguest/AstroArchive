@@ -24,7 +24,7 @@ namespace AstroArchive {
   public static QualityOutcome[] Compute(IList<QualityItem> items){
    var outcomes=new QualityOutcome[items.Count];for(int i=0;i<outcomes.Length;i++)outcomes[i]=new QualityOutcome();
    var groups=new Dictionary<string,Group>();
-   for(int i=0;i<items.Count;i++){var m=items[i].M;if(m==null||m.Status==QualityStatus.Failed||m.Status==QualityStatus.NoObject)continue;string key=m.Kind+"|"+items[i].Cohort;Group g;if(!groups.TryGetValue(key,out g)){g=new Group();groups[key]=g;}g.Index.Add(i);}
+   for(int i=0;i<items.Count;i++){var m=items[i].M;if(m==null||m.Status==QualityStatus.Failed||m.Status==QualityStatus.Unsuitable||m.Status==QualityStatus.NoObject)continue;string key=m.Kind+"|"+items[i].Cohort;Group g;if(!groups.TryGetValue(key,out g)){g=new Group();groups[key]=g;}g.Index.Add(i);}
    foreach(var g in groups.Values){if(items[g.Index[0]].M.Kind==QualityKind.Disc)ScoreDiscs(items,g.Index,outcomes);else ScoreStars(items,g.Index,outcomes);Rank(g.Index,outcomes);}
    return outcomes;
   }
