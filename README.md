@@ -111,7 +111,7 @@ use a grid for square and wide pages.
 
 ## Find your sharpest subs
 
-**Tools → Review and analysis → Analyse image quality** scores each light frame from 0 to 100 against
+**Repository → Review and analysis → Analyse image quality** scores each light frame from 0 to 100 against
 similar frames in its session: star size, roundness, star count and noise for deep-sky subs, and
 edge sharpness and detail for planetary, lunar and solar stills. Sort by **QUALITY**, or use
 **Filters → Quality rank** to keep the top or weakest frames, flagged frames or unscored ones.

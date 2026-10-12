@@ -64,7 +64,7 @@ measured directly and still flags Over.
 * QUALITY column (sortable) and an optional EXPOSURE FIT column in the repository table.
 * Filters: Quality rank (Top 10 percent, Top 25 percent, Top half, Bottom half, Weakest 25 percent,
   Has quality flags, Not scored), Exposure fit, and a Quality score range.
-* Tools > Review and analysis > Analyse image quality / Re-measure image quality.
+* Repository > Review and analysis > Analyse image quality / Re-measure image quality.
 * Settings > General > Image quality: measure after each import, and the deep-sky comparison scope.
 
 Saved table layouts gain the QUALITY column once; hide it again from the Columns menu and it

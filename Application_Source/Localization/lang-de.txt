@@ -1962,3 +1962,17 @@ Pointing is approximate, so targets are not marked	Die Ausrichtung ist nur ungef
 Field geometry is unusable for marking targets	Die Feldgeometrie eignet sich nicht zum Markieren von Zielen
 No catalogue targets in this field	Keine Katalogziele in diesem Feld
 On	Ein
+Telescopes	Teleskope
+Reports	Berichte
+Clean up	Bereinigen
+Refresh USB devices	USB-Geräte aktualisieren
+Live import underway…	Live-Import läuft…
+Catalogue CSV…	Katalog-CSV…
+Stacking folder…	Stacking-Ordner…
+AstroBin CSV…	AstroBin-CSV…
+Save, rename or recover telescope profiles, or look for USB telescopes.	Teleskopprofile speichern, umbenennen oder wiederherstellen oder nach USB-Teleskopen suchen.
+Look for telescopes connected by USB.	Nach per USB verbundenen Teleskopen suchen.
+Show the latest scan and import reports.	Die neuesten Scan- und Importberichte anzeigen.
+Complete metadata, verify checksums, reindex and review deletions.	Metadaten ergänzen, Prüfsummen verifizieren, neu indizieren und Löschungen prüfen.
+Permanently delete failed, non-raw or all archive files.	Fehlgeschlagene, Nicht-RAW- oder alle Archivdateien endgültig löschen.
+Show timings and status for the last operation.	Dauer und Status des letzten Vorgangs anzeigen.

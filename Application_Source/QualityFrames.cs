@@ -25,7 +25,7 @@ namespace AstroArchive {
   [ScriptIgnore]public string ExposureFitText{get{return ExposureFit.HasValue?Math.Round(ExposureFit.Value).ToString(CultureInfo.InvariantCulture)+" "+ExposureLabel:"-";}}
   [ScriptIgnore]public string QualityTooltip{get{
    if(!string.IsNullOrEmpty(QualityDetail))return QualityDetail;string reason=QualityEligibility.Reason(this);
-   return reason.Length>0?"Not scored: "+reason:"Not measured yet. Use Tools > Review and analysis > Analyse image quality.";}}
+   return reason.Length>0?"Not scored: "+reason:"Not measured yet. Use Repository > Review and analysis > Analyse image quality.";}}
   // Filter label for the quality-rank choice list.
   [ScriptIgnore]public string QualityRank{get{
    if(!QualityScore.HasValue)return "Not scored";double p=QualityPercentile;

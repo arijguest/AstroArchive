@@ -108,7 +108,7 @@ manual address/path to connect and check access.
   Failed/raster exclusions still apply. Live mode excludes existing files by default.
 - **Repeated retry or incomplete imports:** keep the connection and PC awake,
   allow captures to finish writing, and check free space for staging and repository
-  copies. Read **Repository → Diagnostics** for the latest report. Completed
+  copies. Read **Import → Reports → Last import report…** for the latest report. Completed
   imports remain available when stopping or retrying.
 
 For a support report, include app/package version, telescope model/firmware, the

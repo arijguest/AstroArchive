@@ -1988,3 +1988,17 @@ Pointing is approximate, so targets are not marked	El apuntado es aproximado, as
 Field geometry is unusable for marking targets	La geometría del campo no permite marcar objetivos
 No catalogue targets in this field	No hay objetivos del catálogo en este campo
 On	Activado
+Telescopes	Telescopios
+Reports	Informes
+Clean up	Limpieza
+Refresh USB devices	Actualizar dispositivos USB
+Live import underway…	Importación en directo en curso…
+Catalogue CSV…	Catálogo CSV…
+Stacking folder…	Carpeta de apilado…
+AstroBin CSV…	CSV de AstroBin…
+Save, rename or recover telescope profiles, or look for USB telescopes.	Guarda, renombra o recupera perfiles de telescopio, o busca telescopios USB.
+Look for telescopes connected by USB.	Busca telescopios conectados por USB.
+Show the latest scan and import reports.	Muestra los últimos informes de escaneo e importación.
+Complete metadata, verify checksums, reindex and review deletions.	Completa metadatos, verifica sumas de comprobación, reindexa y revisa eliminaciones.
+Permanently delete failed, non-raw or all archive files.	Elimina definitivamente archivos fallidos, no RAW o todos los del archivo.
+Show timings and status for the last operation.	Muestra la duración y el estado de la última operación.
