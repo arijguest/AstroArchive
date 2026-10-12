@@ -1946,3 +1946,17 @@ Long-period	Longue période
 Near-parabolic	Quasi parabolique
 Hyperbolic (interstellar)	Hyperbolique (interstellaire)
 Aphelion	Aphélie
+Telescopes	Télescopes
+Reports	Rapports
+Clean up	Nettoyage
+Refresh USB devices	Actualiser les périphériques USB
+Live import underway…	Importation en direct en cours…
+Catalogue CSV…	Catalogue CSV…
+Stacking folder…	Dossier d'empilement…
+AstroBin CSV…	CSV AstroBin…
+Save, rename or recover telescope profiles, or look for USB telescopes.	Enregistrer, renommer ou récupérer des profils de télescope, ou rechercher des télescopes USB.
+Look for telescopes connected by USB.	Rechercher les télescopes connectés en USB.
+Show the latest scan and import reports.	Afficher les derniers rapports d'analyse et d'importation.
+Complete metadata, verify checksums, reindex and review deletions.	Compléter les métadonnées, vérifier les sommes de contrôle, réindexer et consulter les suppressions.
+Permanently delete failed, non-raw or all archive files.	Supprimer définitivement les fichiers en échec, non bruts ou tous les fichiers de l'archive.
+Show timings and status for the last operation.	Afficher la durée et l'état de la dernière opération.

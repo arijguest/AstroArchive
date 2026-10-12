@@ -76,8 +76,8 @@ Retry checks their saved hashes and reuses complete copies. Space is needed for 
 these local downloads and the final archive. Stop imports and close AstroArchive
 before removing caches. Removing them does not remove completed repository imports.
 If captures are absent, check Save Each Frame and Import preferences; ignored
-failed/raster captures are filtered before transfer. Read Repository > Diagnostics
-for import errors and warnings.
+failed/raster captures are filtered before transfer. Read Import > Reports > Last
+import report… for import errors and warnings.
 
 GUIDE AND TOOLTIPS
 
@@ -98,7 +98,7 @@ Scan folder reviews files; Import copies eligible captures in the filtered view.
 ## Repeat imports
 Default filename matching skips known captures and completed dated DWARF sessions.
 Robust file matching revisits same-name edits, sidecars and missing archive copies.
-Import > Review and repair > Full rescan reads and hashes every source file.
+Import > Full rescan reads and hashes every source file.
 Cancel keeps completed imports. Changed sources need a new scan.
 
 ## Watch a capture folder
@@ -233,7 +233,8 @@ Connected imports keep originals and leave analysis off. Cancel retains complete
 copies; reconnect and select the captures again to resume or repair missing copies.
 
 ## Manage profiles
-Import > Saved telescopes saves, renames or recovers profiles from archive data.
+Import > Telescopes saves, renames or recovers profiles from archive data,
+and Refresh USB devices looks for telescopes connected by USB.
 Recovered profiles need a source association before USB import.
 A physical telescope ID identifies one device; its model can be shared.
 
@@ -453,7 +454,7 @@ data. Stacks and registered images are unsuitable. Mount labels ending in ? are
 suggestions; confirm them through Edit metadata.
 
 ## Image quality
-Tools > Review and analysis > Analyse image quality measures the light frames in
+Repository > Review and analysis > Analyse image quality measures the light frames in
 view (or selected) and fills the QUALITY column with a score from 0 to 100. Each
 sub is compared with similar frames from the same session, so a score says how it
 ranks among its neighbours, not how good the night was. Deep-sky frames use star
@@ -489,12 +490,15 @@ REVIEW, EXCLUSIONS AND DELETION
 
 ## Review and retry
 Import > Review and repair separates rejection, integrity and transfer issues.
+Import > Reports shows the latest scan report and import report.
 Flagged captures are skipped by default. Retry failed imports uses the filtered scan;
 changed sources need a fresh scan. Completed imports survive cancellation.
 
 ## Exclusions and deletion
 Settings > Import can ignore failed filenames and PNG/JPG/JPEG/MP4 inputs; rescan after
-changes. Repository > Maintenance offers Delete failed and Purge non-raw files.
+changes. Repository > Clean up offers Delete failed and Purge non-raw files, and
+keeps Delete archive data apart at the bottom. Repository > Maintenance offers
+Fill missing metadata, checksum verification, reindexing and deletion history.
 Fill missing metadata previews additions from original headers, recognised
 filenames and preserved session metadata. Existing values and user edits stay
 in place; conflicting or unsupported fields remain unknown. DSO and solar-system
@@ -582,7 +586,8 @@ restart; this guide stays in English.
 The Activity bell beside Buy Me a Coffee (Ctrl+Shift+N) shows progress, ETA, Cancel,
 reports and review actions. Closing it leaves work running; cancellation waits for
 a safe stopping point. ETA covers the current stage. Conflicting changes wait.
-Repository > Diagnostics shows timings and the latest import report.
+Repository > Last operation… shows timings; Import > Reports shows the latest
+import report.
 
 KEYBOARD SHORTCUTS
 

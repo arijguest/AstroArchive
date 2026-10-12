@@ -1981,3 +1981,17 @@ Long-period	长周期
 Near-parabolic	近抛物线
 Hyperbolic (interstellar)	双曲线（星际）
 Aphelion	远日点
+Telescopes	望远镜
+Reports	报告
+Clean up	清理
+Refresh USB devices	刷新 USB 设备
+Live import underway…	正在实时导入…
+Catalogue CSV…	目录 CSV…
+Stacking folder…	叠加文件夹…
+AstroBin CSV…	AstroBin CSV…
+Save, rename or recover telescope profiles, or look for USB telescopes.	保存、重命名或恢复望远镜配置文件，或查找 USB 望远镜。
+Look for telescopes connected by USB.	查找通过 USB 连接的望远镜。
+Show the latest scan and import reports.	显示最新的扫描和导入报告。
+Complete metadata, verify checksums, reindex and review deletions.	补全元数据、验证校验和、重新索引并查看删除记录。
+Permanently delete failed, non-raw or all archive files.	永久删除失败文件、非原始格式文件或全部存档文件。
+Show timings and status for the last operation.	显示上一次操作的耗时和状态。

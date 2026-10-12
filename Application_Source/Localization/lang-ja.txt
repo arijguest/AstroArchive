@@ -1982,3 +1982,17 @@ Long-period	長周期
 Near-parabolic	ほぼ放物線
 Hyperbolic (interstellar)	双曲線（恒星間）
 Aphelion	遠日点
+Telescopes	望遠鏡
+Reports	レポート
+Clean up	クリーンアップ
+Refresh USB devices	USB デバイスを更新
+Live import underway…	ライブ インポート実行中…
+Catalogue CSV…	カタログ CSV…
+Stacking folder…	スタック用フォルダー…
+AstroBin CSV…	AstroBin CSV…
+Save, rename or recover telescope profiles, or look for USB telescopes.	望遠鏡プロファイルを保存、名前変更、復元するか、USB 望遠鏡を探します。
+Look for telescopes connected by USB.	USB で接続された望遠鏡を探します。
+Show the latest scan and import reports.	最新のスキャンとインポートのレポートを表示します。
+Complete metadata, verify checksums, reindex and review deletions.	メタデータの補完、チェックサムの検証、再インデックス、削除履歴の確認を行います。
+Permanently delete failed, non-raw or all archive files.	失敗したファイル、RAW 以外のファイル、またはすべてのアーカイブ ファイルを完全に削除します。
+Show timings and status for the last operation.	最後の操作の所要時間と状態を表示します。
