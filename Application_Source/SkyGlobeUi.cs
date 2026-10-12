@@ -27,6 +27,20 @@ namespace AstroArchive {
   public CaptureSky Context{get{return context;}}
   const string NavigationHelp="Drag to rotate; scroll or pinch to zoom.";
   void ViewChanged(){drawing=null;InvalidateVisual();}
+  // Raised after the globe's size changes so overlay controls can follow it.
+  public event EventHandler GlobeResized;
+  protected override void OnRenderSizeChanged(SizeChangedInfo info){base.OnRenderSizeChanged(info);var handler=GlobeResized;if(handler!=null)handler(this,EventArgs.Empty);}
+  // Unzoomed globe radius: zooming changes the drawing, not the reset control.
+  internal double HomeRadius{get{return Math.Max(5,Math.Min(ActualWidth/2-14,ActualHeight/2-14));}}
+  // Keeps a reset button at the globe's lower-left, sized in proportion to the globe.
+  internal static void PlaceReset(System.Windows.Controls.Button button,SkyGlobeView globe,UIElement container){
+   if(button==null||globe==null||container==null||!globe.IsVisible||globe.ActualWidth<=0||globe.ActualHeight<=0)return;
+   double r=globe.HomeRadius,size=Math.Round(Math.Max(22,Math.Min(40,r*0.17)));
+   Point corner;try{corner=globe.TranslatePoint(new Point(globe.ActualWidth/2-r,globe.ActualHeight/2+r),container);}catch(InvalidOperationException){return;}
+   button.Width=button.Height=size;var icon=button.Content as FrameworkElement;if(icon!=null)icon.Width=icon.Height=size*0.7;
+   var move=button.RenderTransform as TranslateTransform;if(move==null||move.IsFrozen){move=new TranslateTransform();button.RenderTransform=move;}
+   move.X=Math.Max(2,corner.X);move.Y=Math.Max(2,corner.Y-size);
+  }
   public void ResetView(){Camera.Reset();ViewChanged();}
   internal void RotateView(double dx,double dy){double scale=180/(Math.PI*Math.Max(25,radius));Camera.Orbit(-dx*scale,dy*scale);ViewChanged();}
   internal void ZoomView(double factor){Camera.Magnify(factor);ViewChanged();}
@@ -120,13 +134,49 @@ namespace AstroArchive {
    DrawMoonDisc(dc,point,size,context.Moon.Illumination,angle,Tint(line,0.55),Stroke(text,0.55,0.8),opacity);
    MoonDrawn=true;MoonBehindGlobe=moon.Dot(front)<0;MoonBounds=new Rect(point.X-size,point.Y-size,2*size,2*size);
   }
+  internal bool SunDrawn,EclipseDrawn;internal Rect EclipseBounds;
+  static readonly Color SunLight=Color.FromRgb(255,206,84);
+  void DrawSun(DrawingContext dc,double opacity){
+   var point=Project(sun);double size=Math.Max(6,Math.Min(12,radius*0.07));if(opacity<1)dc.PushOpacity(opacity);
+   var glow=new RadialGradientBrush(Color.FromArgb(110,255,214,110),Color.FromArgb(0,255,214,110));glow.Freeze();dc.DrawEllipse(glow,null,point,size*2.2,size*2.2);
+   var disc=new SolidColorBrush(SunLight);disc.Freeze();dc.DrawEllipse(disc,null,point,size,size);if(opacity<1)dc.Pop();SunDrawn=true;
+  }
+  // Companion close-up for an eclipse: the discs at their true relative size and
+  // separation, oriented as on the globe, with the covered fraction.
+  void DrawEclipse(DrawingContext dc,Brush line,Brush text){
+   var e=context.Eclipse;double side=Math.Max(64,Math.Min(120,radius*0.62)),margin=6;EclipseBounds=new Rect(ActualWidth-side-margin,margin,side,side);
+   var frame=new SolidColorBrush(e.Solar?Color.FromArgb(235,96,150,215):Color.FromArgb(235,12,16,28));frame.Freeze();dc.DrawRoundedRectangle(frame,Stroke(line,0.5,0.8),EclipseBounds,8,8);
+   var middle=new Point(EclipseBounds.X+side/2,EclipseBounds.Y+side*0.44);
+   var from=e.Solar?Project(sun):Project(new SkyVector(-sun.X,-sun.Y,-sun.Z));var to=Project(moon);double dx=to.X-from.X,dy=to.Y-from.Y,length=Math.Sqrt(dx*dx+dy*dy);if(length<1e-9){dx=1;dy=0;length=1;}
+   double reference=e.Solar?e.SunRadiusArcmin:e.PenumbraRadiusArcmin,scale=side*(e.Solar?0.26:0.34)/reference,offset=Math.Min(side*0.4,e.SeparationArcmin*scale);
+   var moonPoint=new Point(middle.X+dx/length*offset,middle.Y+dy/length*offset);double moonSize=e.MoonRadiusArcmin*scale;
+   dc.PushClip(new RectangleGeometry(EclipseBounds,8,8));
+   if(e.Solar){
+    var corona=new RadialGradientBrush(Color.FromArgb(120,255,236,180),Color.FromArgb(0,255,236,180));corona.Freeze();dc.DrawEllipse(corona,null,middle,e.SunRadiusArcmin*scale*1.6,e.SunRadiusArcmin*scale*1.6);
+    var disc=new SolidColorBrush(SunLight);disc.Freeze();dc.DrawEllipse(disc,null,middle,e.SunRadiusArcmin*scale,e.SunRadiusArcmin*scale);
+    var shadow=new SolidColorBrush(Color.FromRgb(22,26,38));shadow.Freeze();dc.DrawEllipse(shadow,null,moonPoint,moonSize,moonSize);
+   }else{
+    var penumbra=new SolidColorBrush(Color.FromArgb(70,150,150,170));penumbra.Freeze();dc.DrawEllipse(penumbra,null,middle,e.PenumbraRadiusArcmin*scale,e.PenumbraRadiusArcmin*scale);
+    var umbra=new SolidColorBrush(Color.FromArgb(150,120,30,24));umbra.Freeze();
+    var disc=new SolidColorBrush(MoonLight);disc.Freeze();dc.DrawEllipse(disc,null,moonPoint,moonSize,moonSize);
+    dc.PushClip(new EllipseGeometry(moonPoint,moonSize,moonSize));dc.DrawEllipse(umbra,null,middle,e.ShadowRadiusArcmin*scale,e.ShadowRadiusArcmin*scale);dc.Pop();
+    dc.DrawEllipse(null,Stroke(line,0.6,0.8),middle,e.ShadowRadiusArcmin*scale,e.ShadowRadiusArcmin*scale);
+   }
+   dc.Pop();
+   string caption=e.Solar||e.Kind!="Penumbral"?(e.Obscuration*100).ToString(e.Obscuration>=0.995?"0.#":"0",CultureInfo.InvariantCulture)+"% · "+e.Kind:"Penumbral";
+   var label=new FormattedText(caption,CultureInfo.CurrentUICulture,FlowDirection.LeftToRight,new Typeface(new FontFamily("Segoe UI"),FontStyles.Normal,FontWeights.SemiBold,FontStretches.Normal),11,Brushes.White,VisualTreeHelper.GetDpi(this).PixelsPerDip);
+   label.MaxTextWidth=side-8;label.Trimming=TextTrimming.CharacterEllipsis;label.MaxLineCount=1;dc.DrawText(label,new Point(EclipseBounds.X+(side-Math.Min(label.Width,side-8))/2,EclipseBounds.Bottom-label.Height-4));EclipseDrawn=true;
+  }
   DrawingGroup Build(Brush line,Brush text,Brush accent,Brush surface){
+   EclipseDrawn=false;
    var group=new DrawingGroup();centre=new Point(ActualWidth/2,ActualHeight/2);radius=Math.Max(5,Math.Min(ActualWidth/2-14,ActualHeight/2-14))*Camera.Zoom;
    var target=context.TargetOnGlobe;double yaw=Camera.Yaw*Math.PI/180,tilt=Camera.Tilt*Math.PI/180;
    right=new SkyVector(Math.Cos(yaw),-Math.Sin(yaw),0);up=new SkyVector(-Math.Sin(yaw)*Math.Sin(tilt),-Math.Cos(yaw)*Math.Sin(tilt),Math.Cos(tilt));front=new SkyVector(Math.Sin(yaw)*Math.Cos(tilt),Math.Cos(yaw)*Math.Cos(tilt),Math.Sin(tilt));
    Pen horizon=Stroke(line,0.85,1),grid=Stroke(line,0.22,0.7),rear=Stroke(line,0.10,0.7),below=Stroke(line,0.13,0.7),figures=Stroke(line,0.60,0.8),near=Stroke(line,0.9,1);
    using(var dc=group.Open()){
-    dc.DrawEllipse(surface,Stroke(line,0.25,0.8),centre,radius,radius);
+    Brush sky=surface;
+    if(context.Daytime){var day=new RadialGradientBrush(Color.FromArgb(150,120,176,232),Color.FromArgb(90,70,130,205)){GradientOrigin=new Point(0.4,0.3)};day.Freeze();sky=day;}
+    dc.DrawEllipse(surface,null,centre,radius,radius);dc.DrawEllipse(sky,Stroke(line,0.25,0.8),centre,radius,radius);
     // A Moon on the far hemisphere sits beneath every near-side line and marker.
     MoonDrawn=false;MoonBehindGlobe=false;MoonBounds=Rect.Empty;if(context.Moon!=null&&moon.Dot(front)<0)DrawMoon(dc,line,text,0.2);
     Ring(dc,0,horizon,rear);Ring(dc,45,grid,rear);Ring(dc,-45,grid,rear);
@@ -137,7 +187,9 @@ namespace AstroArchive {
      Pen pen=depth<0?rear:context.HasHorizon&&(a.Z+b.Z)/2<0?below:context.HasPosition&&(a.Dot(target)+b.Dot(target))/2>0.82?near:figures;
      dc.DrawLine(pen,points[path[i-1]],points[path[i]]);
     }
-    Brush starBrush=Tint(text,0.65),faintStar=Tint(line,0.25);for(int i=0;i<stars.Length;i++)if(stars[i].Dot(front)>0)dc.DrawEllipse(context.HasHorizon&&stars[i].Z<0?faintStar:starBrush,null,points[i],1.05,1.05);
+    Brush starBrush=Tint(text,context.Daytime?0.25:0.65),faintStar=Tint(line,context.Daytime?0.12:0.25);for(int i=0;i<stars.Length;i++)if(stars[i].Dot(front)>0)dc.DrawEllipse(context.HasHorizon&&stars[i].Z<0?faintStar:starBrush,null,points[i],1.05,1.05);
+    // The Sun sits beneath a near-side Moon, so an eclipse reads correctly on the globe.
+    SunDrawn=false;if(context.Moon!=null&&(context.Daytime||context.Body=="Sun")&&sun.Dot(front)>=0)DrawSun(dc,context.HasHorizon&&sun.Z<0?0.45:1);
     // A near-side Moon covers stars and figure lines but never the target marker.
     if(context.Moon!=null&&moon.Dot(front)>=0)DrawMoon(dc,line,text,context.HasHorizon&&moon.Z<0?0.45:1);
     TargetMarkerDrawn=false;
@@ -147,6 +199,7 @@ namespace AstroArchive {
      dc.DrawLine(Stroke(accent,0.8,1),new Point(point.X-10,point.Y),new Point(point.X-7,point.Y));dc.DrawLine(Stroke(accent,0.8,1),new Point(point.X+7,point.Y),new Point(point.X+10,point.Y));
     }
     DrawCardinals(dc,text);
+    if(context.Eclipse!=null)DrawEclipse(dc,line,text);
    }group.Freeze();return group;
   }
  }

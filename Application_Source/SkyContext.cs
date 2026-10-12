@@ -52,7 +52,13 @@ namespace AstroArchive {
   public MoonSnapshot Moon;
   public SkyVector TargetOfDate{get{var vector=SkyVector.Equatorial(RA,Dec);return PositionOfDate?vector:Orientation.Precess(vector);}}
   public SkyVector TargetOnGlobe{get{return Orientation.MapOfDate(TargetOfDate);}}
-  public bool BelowHorizon{get{return HasPosition&&HasHorizon&&Altitude<0;}}
+  // A body the user photographed was above the horizon; a calculated position below
+  // it means the recorded clock or timezone is off, so the map stays visible.
+  public bool BelowHorizon{get{return HasPosition&&HasHorizon&&Altitude<0&&Body==null;}}
+  // Sun, Moon or planet named by the target or by a solar/lunar observation mode.
+  public string Body;public bool BodyBelowHorizon,Daytime;public double SunAltitude=double.NaN;
+  // Set when the Moon covers part of the Sun from the site, or the Moon is in Earth's shadow.
+  public EclipseInfo Eclipse;
   public static bool IsCalibration(Frame frame){return frame!=null&&(frame.Target=="Calibration"||Regex.IsMatch(frame.Kind??"",@"^(?:Master[ _-]*)?(?:Dark(?:[ _-]*flat)?|Flat|Bias|Offset)$",RegexOptions.IgnoreCase));}
   public static string Compass(double azimuth){string[] compass={"N","NE","E","SE","S","SW","W","NW"};return compass[(int)Math.Round(SkyOrientation.Wrap(azimuth)/45)%8];}
   public static string Elevation(double altitude,double azimuth){return altitude.ToString("0",CultureInfo.InvariantCulture)+"° · "+Compass(azimuth)+" "+azimuth.ToString("0",CultureInfo.InvariantCulture)+"°"+(altitude<0?" · below horizon":"");}
@@ -116,6 +122,7 @@ namespace AstroArchive {
     else if(frame.RA.HasValue&&frame.Dec.HasValue&&Position(frame.RA.Value,frame.Dec.Value)){sky.RA=frame.RA.Value;sky.Dec=frame.Dec.Value;sky.HasPosition=true;sky.Evidence="Frame pointing";}
     else{CatalogObject target;if(positions.Value.TryGetValue(Catalog.CanonicalTarget(frame.Target),out target)){sky.RA=target.RA;sky.Dec=target.Dec;sky.HasPosition=true;sky.ApproximatePosition=true;sky.Evidence="Approximate target centre from the catalogue";}}
    }
+   string body=frame==null||IsCalibration(frame)?null:ObservationTargets.NamedSolar(frame.Target)??(Catalog.IsAmbiguous(frame.Target)?ObservationTargets.NamedSolar(ObservationTargets.ModeBody(frame.ObservationMode)):null);sky.Body=body;
    sky.Utc=CaptureUtc(frame,settings);bool site=false;string place="";
    if(frame!=null&&frame.Latitude.HasValue&&frame.Longitude.HasValue&&ObservingCities.ValidCoordinates(frame.Latitude.Value,frame.Longitude.Value)){sky.Latitude=frame.Latitude.Value;sky.Longitude=frame.Longitude.Value;site=true;place="Capture location";}
    else if(settings!=null&&settings.Latitude.HasValue&&settings.Longitude.HasValue&&ObservingCities.ValidCoordinates(settings.Latitude.Value,settings.Longitude.Value)){sky.Latitude=settings.Latitude.Value;sky.Longitude=settings.Longitude.Value;site=true;place=settings.ObservingCity??"Saved observing location";}
@@ -127,22 +134,35 @@ namespace AstroArchive {
     if(sky.HasHorizon){var local=sky.Orientation.MapOfDate(moon.Topocentric);moon.Altitude=Math.Asin(Math.Max(-1,Math.Min(1,local.Z)))*180/Math.PI;moon.Azimuth=SkyOrientation.Wrap(Math.Atan2(local.X,local.Y)*180/Math.PI);}
     sky.Moon=moon;
    }
-   string body=frame==null||IsCalibration(frame)?null:ObservationTargets.NamedSolar(frame.Target);
+   // Mount pointing in solar-system stacks is often blank (0°, 0°) or stale, so a
+   // calculated body position replaces pointing that is far from it.
+   bool pointingReplaced=false;
+   if(sky.HasPosition&&sky.Utc.HasValue&&body!=null&&sky.Moon!=null){
+    SkyVector expected=new SkyVector();double ignored;bool known=body=="Moon"||body=="Sun"||PlanetEphemeris.TryAt(body,sky.Utc.Value,out expected,out ignored);
+    if(known){expected=body=="Moon"?sky.Moon.Geocentric:body=="Sun"?sky.Moon.Sun:sky.Orientation.Precess(expected);
+     bool blank=Math.Abs(sky.RA)<1e-6&&Math.Abs(sky.Dec)<1e-6;if(blank||MoonEphemeris.Separation(expected,sky.TargetOfDate)>5){sky.HasPosition=false;pointingReplaced=true;}}
+   }
    if(!sky.HasPosition&&sky.Utc.HasValue&&body!=null){
     SkyVector direction=new SkyVector();bool found=false;double distance;
     if(body=="Moon"&&sky.Moon!=null){direction=sky.Moon.Topocentric;found=true;}
     else if(body=="Sun"&&sky.Moon!=null){direction=sky.Moon.Sun;double sunLongitude,sunDistance;MoonEphemeris.Sun(sky.Utc.Value,out sunLongitude,out sunDistance);if(site)direction=PlanetEphemeris.Topocentric(direction,sunDistance/149597870.7,sky.Utc.Value,sky.Latitude,sky.Longitude);found=true;}
     else if(PlanetEphemeris.TryAt(body,sky.Utc.Value,out direction,out distance)){direction=sky.Orientation.Precess(direction);if(site)direction=PlanetEphemeris.Topocentric(direction,distance,sky.Utc.Value,sky.Latitude,sky.Longitude);found=true;}
-    if(found){sky.RA=SkyOrientation.Wrap(Math.Atan2(direction.Y,direction.X)*180/Math.PI);sky.Dec=Math.Asin(Math.Max(-1,Math.Min(1,direction.Z)))*180/Math.PI;sky.HasPosition=true;sky.PositionOfDate=true;sky.ApproximatePosition=true;sky.Evidence="Approximate "+body+" position calculated at the recorded capture time"+(site?" (observer location)":" (geocentric)")+"\n"+(body=="Moon"||body=="Sun"?"Meeus lunar/solar model":"JPL approximate Keplerian model · 1800–2050");}
+    if(found){sky.RA=SkyOrientation.Wrap(Math.Atan2(direction.Y,direction.X)*180/Math.PI);sky.Dec=Math.Asin(Math.Max(-1,Math.Min(1,direction.Z)))*180/Math.PI;sky.HasPosition=true;sky.PositionOfDate=true;sky.ApproximatePosition=true;sky.Evidence="Approximate "+body+" position calculated at the recorded capture time"+(site?" (observer location)":" (geocentric)")+"\n"+(body=="Moon"||body=="Sun"?"Meeus lunar/solar model":"JPL approximate Keplerian model · 1800–2050")+(pointingReplaced?"\nThe file's recorded pointing was blank or far from the "+body+" and is not used.":"");}
    }
+   if(sky.Utc.HasValue&&body!=null)sky.Eclipse=Eclipses.For(body,sky.Utc,site,sky.Latitude,sky.Longitude);
+   if(sky.Moon!=null&&sky.HasHorizon){var sunLocal=sky.Orientation.MapOfDate(sky.Moon.Sun);sky.SunAltitude=Math.Asin(Math.Max(-1,Math.Min(1,sunLocal.Z)))*180/Math.PI;}
+   sky.Daytime=body=="Sun"||sky.Eclipse!=null&&sky.Eclipse.Solar||sky.SunAltitude>-0.833;
    if(sky.Moon!=null&&sky.HasPosition){sky.Moon.HasTarget=true;sky.Moon.TargetSeparation=MoonEphemeris.Separation(sky.TargetOfDate,sky.Moon.Topocentric);}
    string hemisphere=sky.Dec>0?"Northern celestial sky":sky.Dec<0?"Southern celestial sky":"Celestial equator";
    if(sky.HasPosition&&sky.HasHorizon){
     var target=sky.TargetOnGlobe;sky.Altitude=Math.Asin(Math.Max(-1,Math.Min(1,target.Z)))*180/Math.PI;sky.Azimuth=SkyOrientation.Wrap(Math.Atan2(target.X,target.Y)*180/Math.PI);
     sky.Summary=(sky.ApproximatePosition?"≈ ":"")+"Alt "+sky.Altitude.ToString("0",CultureInfo.InvariantCulture)+"° · "+Compass(sky.Azimuth)+" "+sky.Azimuth.ToString("0",CultureInfo.InvariantCulture)+"°"+(sky.Altitude<0?" · below horizon":"");
+    if(body!=null&&sky.Altitude<0){sky.BodyBelowHorizon=true;sky.Summary+=" · check the capture timezone";}
    }else sky.Summary=!sky.HasPosition?(body!=null&&!sky.Utc.HasValue?"Capture time / timezone required":"Pointing unavailable"):!site?"Celestial view · set an observing location":"Celestial view · capture time unknown";
    sky.Evidence+=(sky.Evidence.Length>0?"\n":"")+sky.TimeLabel+"\n"+(site?place+" · "+sky.Latitude.ToString("0.###",CultureInfo.InvariantCulture)+"°, "+sky.Longitude.ToString("0.###",CultureInfo.InvariantCulture)+"°":"Choose your observing town / city in Settings for the local horizon.");
    if(!sky.HasPosition&&body!=null)sky.Evidence+="\n"+(!sky.Utc.HasValue?"A moving target needs a capture time with a known timezone. Set the capture timezone in metadata if needed.":"No offline ephemeris is available for this body/date.");
+   if(sky.BodyBelowHorizon)sky.Evidence+="\nThe "+body+" was below the horizon at this recorded time, so the capture clock or timezone is probably wrong. Set the capture timezone in metadata.";
+   if(sky.Eclipse!=null)sky.Evidence+="\n"+sky.Eclipse.Title+": "+sky.Eclipse.Summary+(sky.Eclipse.Solar?" (from the observing location)":"")+".";
    if(sky.HasPosition)sky.Evidence+="\n"+hemisphere+" · RA "+sky.RA.ToString("0.###",CultureInfo.InvariantCulture)+"°, Dec "+sky.Dec.ToString("0.###",CultureInfo.InvariantCulture)+"° · "+(sky.PositionOfDate?"equatorial coordinates of capture date":"J2000 equatorial coordinates")+".";
    sky.Evidence+="\n"+(sky.HasHorizon?"Sky at the recorded capture time. Solid horizon; faint figures lie below it. Geometric altitude excludes atmospheric refraction.":"Celestial coordinates only. No compass horizon is inferred without a known capture time and observing location.");
    sky.Key=string.Join("|",new[]{sky.HasPosition.ToString(),sky.HasHorizon.ToString(),sky.PositionOfDate.ToString(),sky.RA.ToString("R",CultureInfo.InvariantCulture),sky.Dec.ToString("R",CultureInfo.InvariantCulture),sky.Latitude.ToString("R",CultureInfo.InvariantCulture),sky.Longitude.ToString("R",CultureInfo.InvariantCulture),sky.Utc.HasValue?sky.Utc.Value.Ticks.ToString(CultureInfo.InvariantCulture):""});return sky;

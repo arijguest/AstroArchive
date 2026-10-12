@@ -43,8 +43,9 @@ namespace AstroArchive {
    facts.Children.Clear();facts.RowDefinitions.Clear();note.Text="";
    bool relevant=frame!=null&&sky!=null&&!CaptureSky.IsCalibration(frame);var moon=relevant?sky.Moon:null;
    // Shown only when there is something to say: a timed capture or a horizon position.
-   panel.Visibility=relevant&&(moon!=null||sky.HasPosition&&sky.HasHorizon)?Visibility.Visible:Visibility.Collapsed;
+   panel.Visibility=relevant&&(moon!=null||sky.Eclipse!=null||sky.HasPosition&&sky.HasHorizon)?Visibility.Visible:Visibility.Collapsed;
    if(!relevant)return;
+   if(sky.Eclipse!=null)SkyFact(facts,sky.Eclipse.Title,sky.Eclipse.Summary);
    if(sky.HasPosition&&sky.HasHorizon)SkyFact(facts,"Target elevation",(sky.ApproximatePosition?"≈ ":"")+CaptureSky.Elevation(sky.Altitude,sky.Azimuth));
    if(moon!=null&&moon.HasHorizon&&moon.Altitude<0){SkyFact(facts,"Moon","Not out (below the horizon)");}
    else if(moon!=null){
@@ -53,7 +54,8 @@ namespace AstroArchive {
     if(moon.HasHorizon)SkyFact(facts,"Moon elevation",CaptureSky.Elevation(moon.Altitude,moon.Azimuth));
     if(moon.HasTarget)SkyFact(facts,"Moon to target",(sky.ApproximatePosition?"≈ ":"")+Degrees(moon.TargetSeparation)+" apart");
    }
-   note.Text=moon==null?"":!moon.HasHorizon?"Choose an observing town / city in Settings > Sky & solving for elevations.":"Geometric elevations at the capture time; refraction excluded.";
+   note.Text=moon==null?"":!moon.HasHorizon?(sky.Body=="Sun"&&!moon.HasTopocentric?"Choose an observing town / city in Settings > Sky & solving for elevations and solar eclipse detection.":"Choose an observing town / city in Settings > Sky & solving for elevations."):"Geometric elevations at the capture time; refraction excluded.";
+   if(sky.Eclipse!=null)note.Text+=" Eclipse coverage comes from the bundled Moon and Sun models at the recorded time; check the capture clock if it looks wrong.";
   }
  }
 }

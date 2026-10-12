@@ -12,6 +12,8 @@ namespace AstroArchive {
   }
   void SizeEditedPreview(){
    var body=(Grid)Window.FindName("EditedBody");var host=(Grid)Window.FindName("EditedPreviewHost");if(editedPreviewDragging||body.ActualWidth<=0||host.ActualHeight<=0)return;
+   // Target information sizes this column while it is shown; two owners made it jump.
+   if(((FrameworkElement)Window.FindName("EditedTargetInfoPane")).Visibility==Visibility.Visible)return;
    var pane=(Border)Window.FindName("EditedPreviewPane");double chrome=pane.Padding.Left+pane.Padding.Right+pane.BorderThickness.Left+pane.BorderThickness.Right;
    // Allocate enough width for a full-height 3:4 portrait, leaving the table
    // the space it can actually use. File selection never changes the column.

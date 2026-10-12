@@ -7,6 +7,8 @@ namespace AstroArchive {
   static readonly string[] Bodies={"Sun","Solar","Moon","Lunar","Mercury","Venus","Mars","Jupiter","Saturn","Uranus","Neptune","Pluto","Planetary"};
   static readonly Regex solarWords=new Regex(@"(?<!\p{L})(?:"+string.Join("|",Bodies.Where(b=>b!="Planetary"))+@")(?!\p{L})",RegexOptions.IgnoreCase|RegexOptions.CultureInvariant|RegexOptions.Compiled);
   public static string NamedSolar(string target){string body=Bodies.FirstOrDefault(b=>b!="Planetary"&&b.Equals((target??"").Trim(),StringComparison.OrdinalIgnoreCase));return body=="Solar"?"Sun":body=="Lunar"?"Moon":body;}
+  // "Lunar mode", "Solar" and similar capture modes name a body when the target is unknown.
+  public static string ModeBody(string observationMode){var match=Regex.Match(observationMode??"",@"^\s*(solar|sun|lunar|moon)(?:[ _-]+(?:mode|capture|imaging|light))?\s*$",RegexOptions.IgnoreCase);return match.Success?match.Groups[1].Value:null;}
   public static string CanonicalSolar(string target){return NamedSolar(target)??target;}
   public static string SolarFromFilename(string filename){
    string name=Path.GetFileName(filename??"");if(Regex.IsMatch(name,@"(?<![a-z])(nebula|galaxy|cluster)(?![a-z])",RegexOptions.IgnoreCase))return null;

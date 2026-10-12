@@ -95,7 +95,7 @@ namespace AstroArchive {
      var index=state.Captures??(state.Captures=new SearchIndex<Frame>(SearchDocument.FromFrame));
      work=token=>{var query=FileSearch.Parse(text);var rows=index.Find(source,query,criteria.Matches,token);token.ThrowIfCancellationRequested();
       if(imports){var summary=ImportWorkflow.Summarize(source,rows,skip);int retry=ImportWorkflow.Select(rows,skip,true).Count;return new SearchResult{Query=query,Source=source.ToList(),Frames=SearchOrdering.Order(rows,sorts,culture,token),ImportSummary=summary,Retry=retry};}
-      var targets=TargetNavigation.Build(rows,token);string active=targets.Any(t=>t.Name==target)?target:"All targets";if(active!="All targets")rows=rows.Where(f=>f.Target==active).ToList();
+      Func<Frame,string> section=f=>TargetSection(f,source);var targets=TargetNavigation.Build(rows,section,token);string active=targets.Any(t=>t.Name==target)?target:"All targets";if(active!="All targets")rows=rows.Where(f=>section(f)==active).ToList();
       // Preserve the established target/session order as a stable tie-breaker; inside a session the best-scored captures come first.
       rows=QualityOrdering.Order(rows);
       List<SubframeSession> sessions;rows=RepositoryOrdering.Order(rows,sorts,culture,active=="All targets",mode=="Session summaries",token,out sessions);token.ThrowIfCancellationRequested();

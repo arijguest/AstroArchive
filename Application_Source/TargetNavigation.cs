@@ -13,6 +13,7 @@ namespace AstroArchive {
    if(target.Equals("Unknown",StringComparison.OrdinalIgnoreCase))return "Unidentified";
    if(target.Equals("Meteor",StringComparison.OrdinalIgnoreCase))return "Meteors";
    if(target=="Calibration")return "Calibration";
+   if(Eclipses.IsSection(name))return "Solar system";
    if(Regex.IsMatch(target,@"^(Sun|Solar|Moon|Lunar|Mercury|Venus|Mars|Jupiter|Saturn|Uranus|Neptune|Pluto|Planetary)$",RegexOptions.IgnoreCase))return "Solar system";
    if(types.Value.TryGetValue(target,out type)){
     switch(type){
@@ -29,9 +30,11 @@ namespace AstroArchive {
    if(Regex.IsMatch(label,@"\b(cluster|clusters)\b",RegexOptions.IgnoreCase))hints.Add("Star clusters");
    return hints.Count==1?hints.First():"Other targets";
   }
-  public static List<TargetSummary> Build(IEnumerable<Frame> frames,CancellationToken token=default(CancellationToken)){
+  public static List<TargetSummary> Build(IEnumerable<Frame> frames,CancellationToken token=default(CancellationToken)){return Build(frames,null,token);}
+  // The section key lets derived groups (eclipses) list captures apart from their stored target.
+  public static List<TargetSummary> Build(IEnumerable<Frame> frames,Func<Frame,string> section,CancellationToken token=default(CancellationToken)){
    var rows=frames.ToList();var result=new List<TargetSummary>{Summarize("All targets",rows,token)};
-   result.AddRange(rows.GroupBy(f=>f.Target).Select(g=>Summarize(g.Key,g,token)).OrderBy(t=>Array.IndexOf(Groups,t.Group)).ThenBy(t=>CometTargets.IsComet(t.Name)?1:0).ThenBy(t=>t.DisplayName,StringComparer.OrdinalIgnoreCase).ThenBy(t=>t.Name,StringComparer.OrdinalIgnoreCase));token.ThrowIfCancellationRequested();return result;
+   result.AddRange(rows.GroupBy(section??(f=>f.Target)).Select(g=>Summarize(g.Key,g,token)).OrderBy(t=>Array.IndexOf(Groups,t.Group)).ThenBy(t=>CometTargets.IsComet(t.Name)?1:0).ThenBy(t=>t.DisplayName,StringComparer.OrdinalIgnoreCase).ThenBy(t=>t.Name,StringComparer.OrdinalIgnoreCase));token.ThrowIfCancellationRequested();return result;
   }
   static Match CometName(string name){return Regex.Match(name??"",@"^([CPDXAI]\s*/?\s*\d{4}\s*[A-Z]{1,2}\d{1,3}\b|\d{1,4}\s*[PDI]\b)\s*[/ -]?\s*(.*)$",RegexOptions.IgnoreCase|RegexOptions.CultureInvariant);}
   public static string ShortName(string name){

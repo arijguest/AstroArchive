@@ -20,7 +20,7 @@ namespace AstroArchive {
   bool PopulateTargetMenu(ListBox list){
    var target=list.SelectedItem as TargetSummary;if(target==null||target.Name=="All targets")return false;
    var menu=list.ContextMenu;menu.Items.Clear();menu.Items.Add(FileAction("Show target info",()=>OpenTargetInformation(list),true));
-   if(!Catalog.IsAmbiguous(target.Name)){menu.Items.Add(new Separator());menu.Items.Add(TargetNamesAction(target.Name));menu.Items.Add(FileAction("Create target card…",()=>ShowTargetCard(target.Name),repo!=null&&!RepositoryOperationBlocked&&IntegrationTarget(target.Name)));}return true;
+   if(!Catalog.IsAmbiguous(target.Name)&&!Eclipses.IsSection(target.Name)){menu.Items.Add(new Separator());menu.Items.Add(TargetNamesAction(target.Name));menu.Items.Add(FileAction("Create target card…",()=>ShowTargetCard(target.Name),repo!=null&&!RepositoryOperationBlocked&&IntegrationTarget(target.Name)));}return true;
   }
   MenuItem TargetNamesAction(string target){return FileAction("Edit name and aliases…",()=>EditTargetNames(target),!RepositoryOperationBlocked&&!ActiveSearchBlocked);}
   FormWindow TargetNameDialog(string target,out TargetNameFields fields){

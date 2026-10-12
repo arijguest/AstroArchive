@@ -20,7 +20,7 @@ namespace AstroArchive {
   public string CurrentId{get;private set;}
   public TargetInfoView(){
    scroll=new ScrollViewer{Content=content,VerticalScrollBarVisibility=ScrollBarVisibility.Auto,HorizontalScrollBarVisibility=ScrollBarVisibility.Disabled,Padding=new Thickness(4,2,4,8)};
-   Content=scroll;AutomationProperties.SetName(this,"Target information");SizeChanged+=(s,e)=>ArrangeBody();scroll.SizeChanged+=(s,e)=>ArrangeBody();scroll.ScrollChanged+=(s,e)=>{if(Math.Abs(e.ViewportWidthChange)>0.1||Math.Abs(e.ViewportHeightChange)>0.1)ArrangeBody();};
+   Content=scroll;AutomationProperties.SetName(this,"Target information");SizeChanged+=(s,e)=>ArrangeBody();scroll.SizeChanged+=(s,e)=>ArrangeBody();scroll.ScrollChanged+=(s,e)=>{if(Math.Abs(e.ViewportHeightChange)>0.1)ArrangeBody();};
   }
   static TextBlock Text(string value,string colour="Text",string size="UiFontControl"){
    var text=new TextBlock{Text=value??"",TextWrapping=TextWrapping.Wrap,Margin=new Thickness(0,0,0,8)};text.SetResourceReference(TextBlock.ForegroundProperty,colour);text.SetResourceReference(TextBlock.FontSizeProperty,size);return text;
@@ -71,7 +71,7 @@ namespace AstroArchive {
      mapHost=new Grid{Height=230,MinHeight=160};mapPanel.Children.Add(mapHost);
      globe=new SkyGlobeView{Margin=new Thickness(4)};globe.SetContext(sky);globe.Camera.SetHome(90-ra.value,dec.value);globe.ResetView();AutomationProperties.SetName(globe,"Sky location of "+card.name);mapHost.Children.Add(globe);
      reset=new Button{Width=26,Height=26,MinHeight=0,Padding=new Thickness(0),Margin=new Thickness(0),BorderThickness=new Thickness(0),Background=Brushes.Transparent,HorizontalAlignment=HorizontalAlignment.Left,VerticalAlignment=VerticalAlignment.Top};
-     var icon=new System.Windows.Shapes.Path{Data=Geometry.Parse("M 5,7 A 7,7 0 1 1 5,15 M 5,3 L 5,7 L 9,7"),Width=18,Height=18,Stretch=Stretch.Uniform,StrokeThickness=1.6,StrokeStartLineCap=PenLineCap.Round,StrokeEndLineCap=PenLineCap.Round};icon.SetBinding(System.Windows.Shapes.Shape.StrokeProperty,new Binding("Foreground"){Source=reset});reset.Content=icon;AutomationProperties.SetName(reset,"Reset sky view");UiHelp.Hint(reset,"Reset sky view.");reset.Click+=(s,e)=>globe.ResetView();mapHost.Children.Add(reset);mapHost.LayoutUpdated+=(s,e)=>PositionReset();
+     var icon=new System.Windows.Shapes.Path{Data=Geometry.Parse("M 5,7 A 7,7 0 1 1 5,15 M 5,3 L 5,7 L 9,7"),Width=18,Height=18,Stretch=Stretch.Uniform,StrokeThickness=1.6,StrokeStartLineCap=PenLineCap.Round,StrokeEndLineCap=PenLineCap.Round};icon.SetBinding(System.Windows.Shapes.Shape.StrokeProperty,new Binding("Foreground"){Source=reset});reset.Content=icon;AutomationProperties.SetName(reset,"Reset sky view");UiHelp.Hint(reset,"Reset sky view.");reset.Click+=(s,e)=>globe.ResetView();mapHost.Children.Add(reset);globe.GlobeResized+=(s,e)=>PositionReset();mapHost.SizeChanged+=(s,e)=>PositionReset();
      mapPanel.Children.Add(Text("Catalogue position · drag to rotate. Scroll or pinch over the map to zoom.","Muted","UiFontCaption"));
     }else mapPanel.Children.Add(Text("Catalogue coordinates are not available for this target.","Muted"));
    }
@@ -104,11 +104,9 @@ namespace AstroArchive {
    var link=new Hyperlink(new Run(label)){NavigateUri=uri,ToolTip=url};link.SetResourceReference(Hyperlink.ForegroundProperty,"Accent");link.RequestNavigate+=(s,e)=>{try{Process.Start(new ProcessStartInfo(uri.AbsoluteUri){UseShellExecute=true});}catch(System.ComponentModel.Win32Exception){}e.Handled=true;};return link;
   }
   static TextBlock Link(string label,string url){var text=Text("","Muted","UiFontCaption");text.Inlines.Add(Linked(label,url));return text;}
-  void PositionReset(){
-   if(reset==null||globe==null||mapHost.ActualWidth<=0||mapHost.ActualHeight<=0)return;double diameter=Math.Max(0,Math.Min(globe.ActualWidth,globe.ActualHeight)-28);var position=reset.RenderTransform as TranslateTransform;if(position==null){position=new TranslateTransform();reset.RenderTransform=position;}position.X=Math.Max(4,(mapHost.ActualWidth-diameter)/2);position.Y=Math.Max(4,(mapHost.ActualHeight+diameter)/2-reset.Height);
-  }
+  void PositionReset(){SkyGlobeView.PlaceReset(reset,globe,mapHost);}
   void ArrangeBody(){
-   if(photo!=null){var bitmap=photo.Source as BitmapSource;double ratio=bitmap.PixelWidth/(double)bitmap.PixelHeight,width=Math.Max(1,(scroll.ViewportWidth>0?scroll.ViewportWidth:ActualWidth)-8),cap=Math.Min(340,Math.Max(160,scroll.ActualHeight*0.48));double height=Math.Min(cap,width/ratio);photo.Height=height;photo.Width=height*ratio;}
+   if(photo!=null){var bitmap=photo.Source as BitmapSource;double ratio=bitmap.PixelWidth/(double)bitmap.PixelHeight,width=Math.Max(1,ActualWidth-scroll.Padding.Left-scroll.Padding.Right-SystemParameters.VerticalScrollBarWidth-8),cap=Math.Min(340,Math.Max(160,scroll.ActualHeight*0.48));double height=Math.Min(cap,width/ratio);photo.Height=height;photo.Width=height*ratio;}
    if(body==null)return;bool wide=ActualWidth>=540&&mapPanel!=null;body.ColumnDefinitions[0].Width=new GridLength(1,GridUnitType.Star);body.ColumnDefinitions[1].Width=wide?new GridLength(230):new GridLength(0);
    if(mapPanel!=null){Grid.SetColumn(mapPanel,wide?1:0);Grid.SetRow(mapPanel,wide?0:1);mapPanel.Margin=new Thickness(wide?16:0,4,0,10);if(mapHost!=null)mapHost.Height=wide?230:Math.Min(280,Math.Max(160,ActualWidth-40));}
   }
