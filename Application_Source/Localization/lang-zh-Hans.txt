@@ -2001,3 +2001,11 @@ Solar eclipse	日食
 Lunar eclipse	月食
 Solar Eclipse	日食
 Lunar Eclipse	月食
+Show targets in frame	显示画面中的目标
+Hide targets in frame	隐藏画面中的目标
+Show targets in frame (plate-solved captures)	显示画面中的目标（已解析的图像）
+Plate solve this capture to mark targets in the frame	请先解析此图像，以便在画面中标出目标
+Pointing is approximate, so targets are not marked	指向仅为近似值，因此不标出目标
+Field geometry is unusable for marking targets	视场几何无法用于标出目标
+No catalogue targets in this field	此视场中没有目录目标
+On	开

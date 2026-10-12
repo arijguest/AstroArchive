@@ -22,7 +22,7 @@ namespace AstroArchive {
    B("CoffeeButton").Click+=(s,e)=>{try{Process.Start(new ProcessStartInfo("https://ko-fi.com/arijguest"){UseShellExecute=true});}catch(Exception error){LocalizedMessage.Show(Window,"Could not open your browser. Visit https://ko-fi.com/arijguest\n\n"+error.Message,"Ko-fi link",MessageBoxButton.OK,MessageBoxImage.Information);}};
    B("ThemeButton").Click+=(s,e)=>{settings.ThemeMode=Theme.IsDark(settings.ThemeMode)?"Light":"Dark";ApplyAppearance();SaveSettings();};
    B("PreviewToggle").Click+=(s,e)=>{settings.ShowPreview=!settings.ShowPreview;SetPreviewVisibility();SaveSettings();if(settings.ShowPreview)PreviewSelected();};
-   B("OpenPreviewButton").Click+=(s,e)=>ShowPreviewFile();InitializeStellarium();UpdatePreviewFileAction();
+   B("OpenPreviewButton").Click+=(s,e)=>ShowPreviewFile();InitializeStellarium();InitializeTargetOverlay();UpdatePreviewFileAction();
    C("StretchMode").SelectionChanged+=(s,e)=>{if(!previewReady||choosingStretch)return;if(previewPath==null||ScientificPreview(previewPath)){settings.PreviewStretch=Convert.ToString(C("StretchMode").SelectedItem);SaveSettings();}if(previewPath!=null)LoadPreview(previewPath,false);};
    SystemEvents.UserPreferenceChanged+=AppearanceChanged;previewReady=true;SetPreviewVisibility();
   }
@@ -53,7 +53,7 @@ namespace AstroArchive {
     if(!current()||token.IsCancellationRequested)return;data.ApplyContext(context,path);previewData=data;bool firstPaint=true;
     await RenderProgressivePreview(data,mode,previous==null,token,current,(bitmap,provisional)=>{
      C("StretchMode").IsEnabled=!data.SkipStretch;if(data.SkipStretch){choosingStretch=true;C("StretchMode").SelectedItem="Linear";choosingStretch=false;}
-     previewViewport.SetImage(bitmap,reload&&firstPaint);firstPaint=false;L("PreviewMessage").Visibility=Visibility.Collapsed;L("PreviewInfo").Text=data.SourceWidth+" × "+data.SourceHeight+" pixels";L("PreviewInfo").ToolTip=data.Description+" · "+data.DisplayMode+(provisional?" · applying selected stretch":"")+(data.SourceWidth>data.Width?" · sampled preview":"");PreviewSize();
+     previewViewport.SetImage(bitmap,reload&&firstPaint);firstPaint=false;UpdateTargetOverlay();L("PreviewMessage").Visibility=Visibility.Collapsed;L("PreviewInfo").Text=data.SourceWidth+" × "+data.SourceHeight+" pixels";L("PreviewInfo").ToolTip=data.Description+" · "+data.DisplayMode+(provisional?" · applying selected stretch":"")+(data.SourceWidth>data.Width?" · sampled preview":"");PreviewSize();
     });
    }catch(OperationCanceledException){}catch(Exception error){if(!Window.Dispatcher.HasShutdownStarted)Window.Dispatcher.Invoke(new Action(()=>{if(generation!=previewGeneration)return;if(((Image)Window.FindName("PreviewImage")).Source==null)previewViewport.BeginLoading();PreviewMessage("Preview unavailable\n\n"+error.Message);L("PreviewInfo").Text=ScientificPreview(path)?"FITS / XISF preview":"RAW formats require a compatible Windows image codec.";}));}
   }

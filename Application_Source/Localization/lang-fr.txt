@@ -1966,3 +1966,11 @@ Solar eclipse	Éclipse solaire
 Lunar eclipse	Éclipse lunaire
 Solar Eclipse	Éclipse solaire
 Lunar Eclipse	Éclipse lunaire
+Show targets in frame	Afficher les cibles dans l’image
+Hide targets in frame	Masquer les cibles dans l’image
+Show targets in frame (plate-solved captures)	Afficher les cibles dans l’image (captures résolues astrométriquement)
+Plate solve this capture to mark targets in the frame	Résolvez astrométriquement cette capture pour marquer les cibles dans l’image
+Pointing is approximate, so targets are not marked	Le pointage est approximatif, les cibles ne sont donc pas marquées
+Field geometry is unusable for marking targets	La géométrie du champ ne permet pas de marquer les cibles
+No catalogue targets in this field	Aucune cible du catalogue dans ce champ
+On	Activé

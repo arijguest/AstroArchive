@@ -1970,3 +1970,11 @@ Solar eclipse	Sonnenfinsternis
 Lunar eclipse	Mondfinsternis
 Solar Eclipse	Sonnenfinsternis
 Lunar Eclipse	Mondfinsternis
+Show targets in frame	Ziele im Bild anzeigen
+Hide targets in frame	Ziele im Bild ausblenden
+Show targets in frame (plate-solved captures)	Ziele im Bild anzeigen (Aufnahmen mit Plate Solving)
+Plate solve this capture to mark targets in the frame	Für diese Aufnahme ein Plate Solving durchführen, um Ziele im Bild zu markieren
+Pointing is approximate, so targets are not marked	Die Ausrichtung ist nur ungefähr bekannt, daher werden keine Ziele markiert
+Field geometry is unusable for marking targets	Die Feldgeometrie eignet sich nicht zum Markieren von Zielen
+No catalogue targets in this field	Keine Katalogziele in diesem Feld
+On	Ein

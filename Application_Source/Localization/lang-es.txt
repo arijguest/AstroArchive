@@ -1996,3 +1996,11 @@ Solar eclipse	Eclipse solar
 Lunar eclipse	Eclipse lunar
 Solar Eclipse	Eclipse solar
 Lunar Eclipse	Eclipse lunar
+Show targets in frame	Mostrar objetivos en el encuadre
+Hide targets in frame	Ocultar objetivos en el encuadre
+Show targets in frame (plate-solved captures)	Mostrar objetivos en el encuadre (capturas con resolución astrométrica)
+Plate solve this capture to mark targets in the frame	Resuelve astrométricamente esta captura para marcar objetivos en el encuadre
+Pointing is approximate, so targets are not marked	El apuntado es aproximado, así que no se marcan objetivos
+Field geometry is unusable for marking targets	La geometría del campo no permite marcar objetivos
+No catalogue targets in this field	No hay objetivos del catálogo en este campo
+On	Activado
