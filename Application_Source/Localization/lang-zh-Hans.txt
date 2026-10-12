@@ -2001,3 +2001,53 @@ Solar eclipse	日食
 Lunar eclipse	月食
 Solar Eclipse	日食
 Lunar Eclipse	月食
+# Analytics options panel, remembered choices and chart customisation
+Combined document	合并文档
+All six charts in one document	全部六张图表合为一个文档
+{#0} of 6 charts in one document	六张中的 {0} 张图表合为一个文档
+{#0} of 6 charts	六张中的 {0} 张图表
+{#0} of 6 charts · Combined preview	六张中的 {0} 张图表 · 合并预览
+{#0} of 6 charts · Social pages	六张中的 {0} 张图表 · 社交媒体页面
+Combined preview	合并预览
+Social pages	社交媒体页面
+Export preview	导出预览
+Customised	已自定义
+This chart	此图表
+Charts in the document	文档中的图表
+Document	文档
+Your choices	你的选择
+Order	排序
+Largest first	从大到小
+Smallest first	从小到大
+A–Z	按名称
+Chart title	图表标题
+Chart subtitle	图表副标题
+Reset this chart	重置此图表
+Colour palette	配色方案
+Nebula	星云
+Aurora	极光
+Colour-blind safe	色盲友好
+Hide options	隐藏选项
+Show options	显示选项
+Reset all options…	重置所有选项…
+Reset all options	重置所有选项
+Keep at least one chart in the combined document.	合并文档中至少要保留一张图表。
+Options reset to their defaults.	选项已恢复为默认值。
+Exported all six charts	已导出全部六张图表
+Exported {#0} of 6 charts	已导出六张中的 {0} 张图表
+Exported chart	已导出图表
+Rank groups by size or alphabetically. Donuts and columns keep the largest groups and gather the rest into Other.	按大小或字母顺序排列分组。环形图和柱形图保留最大的分组，其余合并显示。
+Leave blank to use the standard title.	留空则使用标准标题。
+Leave blank to use the standard description.	留空则使用标准说明。
+Return this chart's type, order, title and subtitle to their defaults.	将此图表的类型、排序、标题和副标题恢复为默认值。
+Choose the charts that go into the combined document and Export all. At least one chart stays included.	选择要放入合并文档和“全部导出”的图表。至少保留一张图表。
+Shown in each chart's footer and in exported file details. It starts as the repository folder name.	显示在每张图表的页脚和导出文件的详细信息中。初始为存储库文件夹名称。
+Colours for chart series in the preview and every export. Colour-blind safe uses the Okabe–Ito hues. Lettering keeps the document theme's colours.	预览和每次导出中数据系列的颜色。色盲友好使用 Okabe–Ito 配色。文字保留文档主题的颜色。
+Give the preview the whole width, or bring back the chart, document and export options.	让预览占满整个宽度，或重新显示图表、文档和导出选项。
+Save the charts chosen for the combined document in one file, using the same telescope and date scope.	将为合并文档选择的图表保存到一个文件中，使用相同的望远镜和日期范围。
+Return every chart, document and export choice to its default. The telescope and date scope are not changed.	将所有图表、文档和导出选择恢复为默认值。望远镜和日期范围不变。
+Return every chart, document and export choice to its default? The telescope and date scope are not changed.	将所有图表、文档和导出选择恢复为默认值吗？望远镜和日期范围不变。
+Chart types, titles, order, palette, document and export choices are remembered for next time. Ctrl+E exports; Ctrl+Shift+E exports the combined document.	图表类型、标题、排序、配色、文档和导出选择会保存到下次使用。Ctrl+E 导出；Ctrl+Shift+E 导出合并文档。
+Choose targets in the options panel; adjust any card's image above the preview.	在选项面板中选择目标；在预览上方调整任意卡片的图像。
+Export options · Resolution	导出选项 · 分辨率
+Export options · Timing and video size	导出选项 · 时长和视频大小

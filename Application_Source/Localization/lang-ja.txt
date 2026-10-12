@@ -2002,3 +2002,53 @@ Solar eclipse	日食
 Lunar eclipse	月食
 Solar Eclipse	日食
 Lunar Eclipse	月食
+# Analytics options panel, remembered choices and chart customisation
+Combined document	結合ドキュメント
+All six charts in one document	6 つのチャートすべてを 1 つのドキュメントに
+{#0} of 6 charts in one document	6 つ中 {0} つのチャートを 1 つのドキュメントに
+{#0} of 6 charts	6 つ中 {0} つのチャート
+{#0} of 6 charts · Combined preview	6 つ中 {0} つのチャート · 結合プレビュー
+{#0} of 6 charts · Social pages	6 つ中 {0} つのチャート · ソーシャル ページ
+Combined preview	結合プレビュー
+Social pages	ソーシャル ページ
+Export preview	エクスポート プレビュー
+Customised	カスタマイズ済み
+This chart	このチャート
+Charts in the document	ドキュメントに含めるチャート
+Document	ドキュメント
+Your choices	選択内容
+Order	並び順
+Largest first	大きい順
+Smallest first	小さい順
+A–Z	名前順
+Chart title	チャートのタイトル
+Chart subtitle	チャートのサブタイトル
+Reset this chart	このチャートをリセット
+Colour palette	カラーパレット
+Nebula	星雲
+Aurora	オーロラ
+Colour-blind safe	色覚多様性に配慮
+Hide options	オプションを隠す
+Show options	オプションを表示
+Reset all options…	すべてのオプションをリセット…
+Reset all options	すべてのオプションをリセット
+Keep at least one chart in the combined document.	結合ドキュメントには少なくとも 1 つのチャートを残してください。
+Options reset to their defaults.	オプションを既定値に戻しました。
+Exported all six charts	6 つのチャートすべてをエクスポートしました
+Exported {#0} of 6 charts	6 つ中 {0} つのチャートをエクスポートしました
+Exported chart	チャートをエクスポートしました
+Rank groups by size or alphabetically. Donuts and columns keep the largest groups and gather the rest into Other.	グループをサイズ順または名前順に並べます。ドーナツと縦棒は大きいグループを残し、残りをまとめます。
+Leave blank to use the standard title.	空欄の場合は標準のタイトルを使います。
+Leave blank to use the standard description.	空欄の場合は標準の説明を使います。
+Return this chart's type, order, title and subtitle to their defaults.	このチャートの種類、並び順、タイトル、サブタイトルを既定値に戻します。
+Choose the charts that go into the combined document and Export all. At least one chart stays included.	結合ドキュメントと「すべてエクスポート」に含めるチャートを選びます。少なくとも 1 つは含まれます。
+Shown in each chart's footer and in exported file details. It starts as the repository folder name.	各チャートのフッターとエクスポートしたファイルの詳細に表示されます。最初はリポジトリ フォルダーの名前です。
+Colours for chart series in the preview and every export. Colour-blind safe uses the Okabe–Ito hues. Lettering keeps the document theme's colours.	プレビューとすべてのエクスポートで使う系列の色です。色覚多様性に配慮は Okabe–Ito の色を使います。文字はドキュメントのテーマの色のままです。
+Give the preview the whole width, or bring back the chart, document and export options.	プレビューを全幅で表示するか、チャート、ドキュメント、エクスポートのオプションを再表示します。
+Save the charts chosen for the combined document in one file, using the same telescope and date scope.	結合ドキュメント用に選んだチャートを、同じ望遠鏡と日付の範囲で 1 つのファイルに保存します。
+Return every chart, document and export choice to its default. The telescope and date scope are not changed.	チャート、ドキュメント、エクスポートの選択をすべて既定値に戻します。望遠鏡と日付の範囲は変わりません。
+Return every chart, document and export choice to its default? The telescope and date scope are not changed.	チャート、ドキュメント、エクスポートの選択をすべて既定値に戻しますか? 望遠鏡と日付の範囲は変わりません。
+Chart types, titles, order, palette, document and export choices are remembered for next time. Ctrl+E exports; Ctrl+Shift+E exports the combined document.	チャートの種類、タイトル、並び順、パレット、ドキュメントとエクスポートの選択は次回のために記憶されます。Ctrl+E でエクスポート、Ctrl+Shift+E で結合ドキュメントをエクスポートします。
+Choose targets in the options panel; adjust any card's image above the preview.	カードのターゲットはオプション パネルで選び、各カードの画像はプレビューの上で調整します。
+Export options · Resolution	エクスポート オプション · 解像度
+Export options · Timing and video size	エクスポート オプション · タイミングと動画サイズ

@@ -1966,3 +1966,53 @@ Solar eclipse	Éclipse solaire
 Lunar eclipse	Éclipse lunaire
 Solar Eclipse	Éclipse solaire
 Lunar Eclipse	Éclipse lunaire
+# Analytics options panel, remembered choices and chart customisation
+Combined document	Document combiné
+All six charts in one document	Les six graphiques dans un document
+{#0} of 6 charts in one document	{0} graphiques sur 6 dans un document
+{#0} of 6 charts	{0} graphiques sur 6
+{#0} of 6 charts · Combined preview	{0} graphiques sur 6 · Aperçu combiné
+{#0} of 6 charts · Social pages	{0} graphiques sur 6 · Pages sociales
+Combined preview	Aperçu combiné
+Social pages	Pages sociales
+Export preview	Aperçu de l'exportation
+Customised	Personnalisé
+This chart	Ce graphique
+Charts in the document	Graphiques du document
+Document	Document
+Your choices	Vos choix
+Order	Ordre
+Largest first	Les plus grands d'abord
+Smallest first	Les plus petits d'abord
+A–Z	A–Z
+Chart title	Titre du graphique
+Chart subtitle	Sous-titre du graphique
+Reset this chart	Réinitialiser ce graphique
+Colour palette	Palette de couleurs
+Nebula	Nébuleuse
+Aurora	Aurore
+Colour-blind safe	Adaptée au daltonisme
+Hide options	Masquer les options
+Show options	Afficher les options
+Reset all options…	Réinitialiser toutes les options…
+Reset all options	Réinitialiser toutes les options
+Keep at least one chart in the combined document.	Gardez au moins un graphique dans le document combiné.
+Options reset to their defaults.	Options réinitialisées à leurs valeurs par défaut.
+Exported all six charts	Les six graphiques ont été exportés
+Exported {#0} of 6 charts	{0} graphiques sur 6 exportés
+Exported chart	Graphique exporté
+Rank groups by size or alphabetically. Donuts and columns keep the largest groups and gather the rest into Other.	Classe les groupes par taille ou par ordre alphabétique. Les anneaux et les colonnes gardent les plus grands groupes et regroupent le reste.
+Leave blank to use the standard title.	Laissez vide pour utiliser le titre standard.
+Leave blank to use the standard description.	Laissez vide pour utiliser la description standard.
+Return this chart's type, order, title and subtitle to their defaults.	Rétablit par défaut le type, l'ordre, le titre et le sous-titre de ce graphique.
+Choose the charts that go into the combined document and Export all. At least one chart stays included.	Choisissez les graphiques du document combiné et de Tout exporter. Au moins un graphique reste inclus.
+Shown in each chart's footer and in exported file details. It starts as the repository folder name.	Affiché dans le pied de chaque graphique et dans les détails des fichiers exportés. Il reprend d'abord le nom du dossier du dépôt.
+Colours for chart series in the preview and every export. Colour-blind safe uses the Okabe–Ito hues. Lettering keeps the document theme's colours.	Couleurs des séries dans l'aperçu et dans chaque exportation. Adaptée au daltonisme utilise les teintes d'Okabe–Ito. Le texte garde les couleurs du thème du document.
+Give the preview the whole width, or bring back the chart, document and export options.	Donne toute la largeur à l'aperçu, ou réaffiche les options de graphique, de document et d'exportation.
+Save the charts chosen for the combined document in one file, using the same telescope and date scope.	Enregistre dans un fichier les graphiques choisis pour le document combiné, avec le même télescope et la même plage de dates.
+Return every chart, document and export choice to its default. The telescope and date scope are not changed.	Rétablit par défaut tous les choix de graphique, de document et d'exportation. Le télescope et la plage de dates ne changent pas.
+Return every chart, document and export choice to its default? The telescope and date scope are not changed.	Rétablir par défaut tous les choix de graphique, de document et d'exportation ? Le télescope et la plage de dates ne changent pas.
+Chart types, titles, order, palette, document and export choices are remembered for next time. Ctrl+E exports; Ctrl+Shift+E exports the combined document.	Les types de graphiques, titres, ordre, palette et choix de document et d'exportation sont mémorisés pour la prochaine fois. Ctrl+E exporte ; Ctrl+Shift+E exporte le document combiné.
+Choose targets in the options panel; adjust any card's image above the preview.	Choisissez les cibles dans le panneau d'options ; ajustez l'image d'une carte au-dessus de l'aperçu.
+Export options · Resolution	Options d'exportation · Résolution
+Export options · Timing and video size	Options d'exportation · Durée et taille de la vidéo

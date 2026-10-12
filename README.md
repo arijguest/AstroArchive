@@ -84,6 +84,11 @@ Filter by acquisition dates or telescope, add a document label, and choose a
 one document, with 150 or 300 DPI for raster images. Choose Landscape or a social
 layout: **9:16**, **4:5**, **1:1**, **16:9** or **2:3**, with matching pixel presets.
 
+Make each chart your own: show it as a donut, bars or columns, reorder rankings,
+give it your own title and subtitle, and pick a colour palette, including a
+colour-blind safe one. Choose which charts go into the combined document.
+Analytics remembers these choices for next time.
+
 Choose **MP4** or **GIF** to share an animated chart or an **Export all** story.
 Preview the chart reveals and Glide, Zoom or Dissolve transitions; set 4, 6 or 8
 seconds per page and choose original or smaller dimensions. MP4 uses Windows’
