@@ -24,7 +24,7 @@ namespace AstroArchive {
     var pixels=Enumerable.Repeat((byte)110,64*48*3).ToArray();var encoder=new PngBitmapEncoder();encoder.Frames.Add(BitmapFrame.Create(BitmapSource.Create(64,48,96,96,PixelFormats.Rgb24,null,pixels,64*3)));using(var stream=File.Create(repo.FilePath(all[0])))encoder.Save(stream);
     var project=repo.AddEditedImages(new[]{repo.FilePath(all[0])},null,"Info fixture",CancellationToken.None,null);
     repo.SaveEditedMetadata(project,repo.EditedImages(project),new EditedMetadata{Object="M31"},CancellationToken.None);
-    System.Collections.Generic.List<string> projectErrors;project=repo.EditedProjects(out projectErrors).Single();editedImages=repo.EditedImages(project);
+    editedImages=EditedGallery.Read(repo,new[]{"M31"},CancellationToken.None).Images;
     Filter(true);FilterEditedImages();WaitForSearches();
     foreach(int tab in new[]{0,2}){
      stage="select target on page "+tab;GoToPage(tab);WaitForSearches();var list=tab==0?Targets:EditedTargets;list.SelectedItem=list.Items.OfType<TargetSummary>().Single(t=>t.Name=="M31");WaitForSearches();
