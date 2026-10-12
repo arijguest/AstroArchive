@@ -814,7 +814,7 @@
        <Button x:Name="LibraryFiltersButton" Content="Filters" Margin="0,0,6,0" Padding="6"/>
        <Button x:Name="ClearButton" Content="Clear" Margin="0,0,6,0" Padding="6"/>
        <Button x:Name="RepositoryImportButton" Content="Import" Margin="0,0,6,0" Padding="6"/>
-       <Button x:Name="ExportButton" Content="Export ▾" Padding="6" Background="{DynamicResource Accent}" BorderBrush="{DynamicResource Accent}" Foreground="White"/>
+       <Button x:Name="ExportButton" Content="Export…" Padding="6" Background="{DynamicResource Accent}" BorderBrush="{DynamicResource Accent}" Foreground="White"/>
       </UniformGrid>
       <Border Grid.Row="2" Background="{DynamicResource Surface}" CornerRadius="8" BorderBrush="{DynamicResource Border}" BorderThickness="1" Margin="0,0,10,0">
        <DockPanel>
@@ -1010,7 +1010,7 @@
       <TextBlock x:Name="ImportDetailsLabel" local:UiHelp.OnlyWhenTruncated="True" ToolTip="{Binding Text, RelativeSource={RelativeSource Self}}" Text="Select a capture to see its review category and reason." TextTrimming="CharacterEllipsis" Foreground="{DynamicResource Muted}" FontSize="{DynamicResource UiFontSmall}" Margin="2,0,0,9" />
       <DockPanel Grid.Row="1">
        <Button DockPanel.Dock="Left" x:Name="ImportButton" Content="Import 0 files" Background="{DynamicResource Accent}" Foreground="White" BorderBrush="{DynamicResource Accent}" />
-       <Button Content="Export ▾" Margin="8,0,12,0" x:Name="ImportExportButton" DockPanel.Dock="Left" />
+       <Button Content="Export…" Margin="8,0,12,0" x:Name="ImportExportButton" DockPanel.Dock="Left" />
        <TextBlock Text="Imports the ready files shown above." VerticalAlignment="Center" Foreground="{DynamicResource Muted}" FontSize="{DynamicResource UiFontSmall}" Margin="8,0" />
       </DockPanel>
      </Grid>

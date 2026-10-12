@@ -47,16 +47,8 @@ namespace AstroArchive {
    grid.PreviewKeyDown+=(sender,args)=>{if(args.Key==Key.Delete&&repo!=null&&!RepositoryOperationBlocked&&!SearchBlocked("EditedSearchBox")&&SelectedEditedImages().Count>0){args.Handled=true;DeleteEditedFiles(SelectedEditedImages());}};
   }
   void BuildEditedFileMenu(ContextMenu menu,List<EditedImage> selected){
-   menu.Items.Clear();menu.Items.Add(new MenuItem{Header=selected.Count+" selected file"+(selected.Count==1?"":"s"),IsEnabled=false});menu.Items.Add(StarAction(selected.Cast<IAnnotated>().ToList()));menu.Items.Add(NotesAction(selected.Cast<IAnnotated>().ToList()));menu.Items.Add(FileAction("Export files…",ExportEditedFiles,selected.Count>0));menu.Items.Add(FileAction("Export to…",ExportEditedTo,selected.Count>0));menu.Items.Add(FileAction("Edit metadata…",()=>EditEditedMetadata(selected),selected.Count>0));menu.Items.Add(FileAction("Preview image…",PreviewEditedImage,selected.Count==1));menu.Items.Add(FileAction("Image details…",ShowEditedDetails,selected.Count==1));menu.Items.Add(FileAction("Open image folder",OpenEditedFolder,selected.Count==1));
+   menu.Items.Clear();menu.Items.Add(new MenuItem{Header=selected.Count+" selected file"+(selected.Count==1?"":"s"),IsEnabled=false});menu.Items.Add(StarAction(selected.Cast<IAnnotated>().ToList()));menu.Items.Add(NotesAction(selected.Cast<IAnnotated>().ToList()));var export=new MenuItem{Header="Export",IsEnabled=selected.Count>0};UiHelp.Tip(export,"Open Export with an option chosen.");export.Items.Add(FileAction("Files…",ExportEditedFiles,selected.Count>0));export.Items.Add(FileAction("Open in app…",ExportEditedTo,selected.Count>0));menu.Items.Add(export);menu.Items.Add(FileAction("Edit metadata…",()=>EditEditedMetadata(selected),selected.Count>0));menu.Items.Add(FileAction("Preview image…",PreviewEditedImage,selected.Count==1));menu.Items.Add(FileAction("Image details…",ShowEditedDetails,selected.Count==1));menu.Items.Add(FileAction("Open image folder",OpenEditedFolder,selected.Count==1));
    menu.Items.Add(new Separator());var delete=FileAction("Delete files…",()=>DeleteEditedFiles(selected),selected.Count>0);delete.Foreground=new SolidColorBrush(Color.FromRgb(183,40,51));UiHelp.Tip(delete,"Delete selected Edited copies; keep source originals and archived captures.");menu.Items.Add(delete);
-  }
-  void ExportEditedFiles(){
-   if(repo==null||RepositoryOperationBlocked||SearchBlocked("EditedSearchBox"))return;var selected=SelectedEditedImages();if(selected.Count==0)return;
-   var dialog=new FormWindow(Window,"Export Edited files",610,480);dialog.Text(selected.Count+" selected file"+(selected.Count==1?"":"s"),true);
-   dialog.Text("Copies the selected images in their original format. Existing files are kept; duplicate names receive a numbered suffix.");
-   var destination=ExportDestination(dialog,"AstroArchive_Edited_"+DateTime.Now.ToString("yyyyMMdd_HHmmss"));
-   dialog.Accept("Export files",()=>ValidExportDestination(dialog,destination));if(!dialog.Show())return;var options=destination.Options();
-   Run(ct=>Exporter.CreateEdited(repo,selected,options,ct,Progress),path=>ExportComplete(path,false));
   }
   FormWindow EditedDeletionDialog(List<EditedImage> selected){
    var dialog=new FormWindow(Window,"Delete selected Edited files",640,520);dialog.Text("Delete "+selected.Count+" selected file"+(selected.Count==1?"":"s")+"?",true);dialog.Text(repo.Root);
