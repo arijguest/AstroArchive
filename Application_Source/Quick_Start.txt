@@ -272,6 +272,11 @@ Select a file for the sidebar; open Preview image for a larger window.
 The i button above the preview opens Capture details. With a known capture time
 and observing town/city, it lists the target and Moon elevations, the Moon's
 phase and illumination, and how far the Moon was from the target.
+The Stellarium button next to it opens Stellarium on the selected capture: its position
+and field of view, plus the capture time and place when they are known. Nothing leaves
+your PC. If Stellarium is already open with its Remote Control plugin switched on, that
+window is reused; otherwise a new Stellarium window opens. Calibration frames and
+captures without a position leave the button off.
 When no files are selected, the sidebar shows information for the selected target:
 its catalogue overview, available thumbnail and sources. Deep-sky objects also
 have an interactive map of their catalogue position. Right-click a target and
