@@ -59,7 +59,7 @@ namespace AstroArchive {
    article.Children.Add(Section("OVERVIEW",true));article.Children.Add(string.IsNullOrWhiteSpace(summary)?Text("No information is available for this target.","Muted"):Data(summary));
    if(!string.IsNullOrWhiteSpace(factText))article.Children.Add(Callout(Data(factText)));
    if(curated!=null&&!string.IsNullOrWhiteSpace(curated.Imaging)){article.Children.Add(Section("IMAGING NOTES"));article.Children.Add(Callout(Data(curated.Imaging)));}
-   article.Children.Add(Section("AT A GLANCE"));var facts=Facts();article.Children.Add(facts);
+   article.Children.Add(Section("PARAMETERS"));var facts=Facts();article.Children.Add(facts);
    if(!string.IsNullOrEmpty(card.parent_body))AddFact(facts,"Parent",card.parent_body,null);
    var measurements=card.measurements??new TargetInfoMeasurement[0];
    var ra=measurements.FirstOrDefault(m=>m.field=="RA");var dec=measurements.FirstOrDefault(m=>m.field=="Dec");
@@ -69,6 +69,7 @@ namespace AstroArchive {
    if(major!=null)AddFact(facts,"Apparent size",major.value.ToString("0.##",CultureInfo.InvariantCulture)+(minor==null?"":" × "+minor.value.ToString("0.##",CultureInfo.InvariantCulture))+" arcmin",Evidence(card,major));
    var magnitude=measurements.FirstOrDefault(m=>m.field=="V-Mag")??measurements.FirstOrDefault(m=>m.field=="B-Mag");
    if(magnitude!=null)AddFact(facts,Localization.F("Magnitude ({0})",magnitude.field.Substring(0,1)),magnitude.value.ToString("0.##",CultureInfo.InvariantCulture),Evidence(card,magnitude));
+   AddParameters(facts,card);
    if(card.domain=="deep_sky"){
     mapPanel=new StackPanel{Margin=new Thickness(0,4,0,10)};body.Children.Add(mapPanel);mapPanel.Children.Add(Section("LOCATION IN THE SKY"));
     if(ra!=null&&dec!=null){
@@ -90,6 +91,14 @@ namespace AstroArchive {
    foreach(var source in TargetInfoPresentation.Sources(card,curated!=null&&!string.IsNullOrWhiteSpace(curated.Overview)))sources.Children.Add(Link(source.Title,source.Url));
    if(sources.Children.Count>0){content.Children.Add(Section("SOURCES"));content.Children.Add(Disclosure("Sources and catalogue details",sources));}
    content.Children.Add(Text("Select a file to return to its image preview.","Muted","UiFontCaption"));ArrangeBody();
+  }
+  // Planets, the largest dwarf planets and the Sun carry fixed physical parameters; the Sun shows only size and mass.
+  static void AddParameters(Grid facts,TargetInfoCard card){
+   var set=card.domain=="solar_system"?TargetParameters.For(card.id):null;if(set==null)return;
+   if(set.HasOrbit)AddFact(facts,"Orbit",TargetParameters.Orbit(set),"NASA Planetary Fact Sheet");
+   AddFact(facts,"Diameter",TargetParameters.Diameter(set),set.HasOrbit?"Mean or equatorial diameter. NASA Planetary Fact Sheet":"Nominal solar diameter. IAU 2015 Resolution B3");
+   AddFact(facts,"Mass",TargetParameters.Mass(set),set.HasOrbit?"NASA Planetary Fact Sheet":"Nominal solar mass. IAU 2015 Resolution B3");
+   if(set.Moons.Length>0)AddFact(facts,"Major moons",TargetParameters.Moons(set),null);
   }
   void AddImageCredit(TargetInfoImage image){
    string credit=TargetInfoPresentation.Credit(image);bool longCredit=credit.Length>120||credit.Contains("://");

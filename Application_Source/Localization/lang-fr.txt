@@ -1954,7 +1954,13 @@ Compare deep-sky frames across the whole target instead of each session	Comparer
 Nothing to measure	Rien à mesurer
 OVERVIEW	APERÇU
 IMAGING NOTES	CONSEILS D’IMAGERIE
-AT A GLANCE	EN BREF
+PARAMETERS	PARAMÈTRES
+Orbit	Orbite
+Diameter	Diamètre
+Mass	Masse
+Major moons	Lunes principales
+{0} AU from the Sun · {1} days	{0} UA du Soleil · {1} jours
+{0} AU from the Sun · {1} years	{0} UA du Soleil · {1} ans
 SOURCES	SOURCES
 Solar eclipse	Éclipse solaire
 Lunar eclipse	Éclipse lunaire

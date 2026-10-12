@@ -1984,7 +1984,13 @@ Compare deep-sky frames across the whole target instead of each session	Comparar
 Nothing to measure	Nada que medir
 OVERVIEW	RESUMEN
 IMAGING NOTES	NOTAS DE CAPTURA
-AT A GLANCE	DE UN VISTAZO
+PARAMETERS	PARÁMETROS
+Orbit	Órbita
+Diameter	Diámetro
+Mass	Masa
+Major moons	Lunas principales
+{0} AU from the Sun · {1} days	{0} UA del Sol · {1} días
+{0} AU from the Sun · {1} years	{0} UA del Sol · {1} años
 SOURCES	FUENTES
 Solar eclipse	Eclipse solar
 Lunar eclipse	Eclipse lunar
