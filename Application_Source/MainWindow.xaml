@@ -854,8 +854,11 @@
          <TextBlock Text="Choose a repository, then import your captures." TextWrapping="Wrap" TextAlignment="Center" Foreground="{DynamicResource Muted}" Margin="0,8,0,0" />
         </StackPanel>
      <Border Grid.Row="1" x:Name="RepositoryPathStrip" Background="{DynamicResource SurfaceAlt}" Margin="0" CornerRadius="4">
-   <Button x:Name="OpenRepositoryFolderButton" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" Padding="10,4" Margin="0" Background="Transparent" BorderThickness="0" ToolTip="Open repository folder.">
-    <TextBlock x:Name="RepositoryLabel" Text="Choose a repository from the Repository menu" TextTrimming="CharacterEllipsis" Foreground="{DynamicResource Muted}" FontSize="{DynamicResource UiFontSmall}" />
+   <Button x:Name="OpenRepositoryFolderButton" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" Padding="10,4" Margin="0" Background="Transparent" BorderThickness="0" ToolTip="Open repository folder.">
+    <DockPanel>
+     <TextBlock x:Name="RepositorySizeLabel" DockPanel.Dock="Right" Margin="12,0,0,0" Foreground="{DynamicResource Muted}" FontSize="{DynamicResource UiFontSmall}" Visibility="Collapsed" AutomationProperties.Name="Repository size" />
+     <TextBlock x:Name="RepositoryLabel" Text="Choose a repository from the Repository menu" TextTrimming="CharacterEllipsis" Foreground="{DynamicResource Muted}" FontSize="{DynamicResource UiFontSmall}" />
+    </DockPanel>
    </Button>
      </Border>
        </Grid>

@@ -92,7 +92,7 @@ namespace AstroArchive {
   FormWindow BackupDialog(out TextBox destination,out CheckBox compress,out CheckBox incremental){
    destination=null;compress=null;incremental=null;if(repo==null||RepositoryOperationBlocked)return null;var dialog=new FormWindow(Window,"Back up archive",600,570);
    dialog.Text("Create a recoverable backup",true);dialog.Text("Copies originals, edited files and the current archive database. Choose a folder outside the archive; a separate drive is best.");
-   dialog.Text("Large backups can take a long time to create and verify. You can keep using Windows and cancel safely.");
+   dialog.Text((repositorySize==null?"":"This archive uses "+repositorySize.Summary+". ")+"Large backups can take a long time to create and verify. You can keep using Windows and cancel safely.");
    var folderInput=dialog.Input("Save backup in",settings.BackupDestination??"");destination=folderInput;folderInput.IsReadOnly=true;
    dialog.Button("Choose backup folder…",()=>{string path=Folder("Choose a backup destination outside the archive",folderInput.Text,dialog.Window);if(path!=null)folderInput.Text=path;});
    compress=dialog.Check("Compress as ZIP (lossless)",settings.CompressBackup);dialog.Text("Without compression, the backup is a normal folder. ZIP compression preserves every image byte, including resolution and metadata.");

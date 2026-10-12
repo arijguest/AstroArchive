@@ -11,6 +11,15 @@ namespace AstroArchive {
    using(var restored=new Repository(repository))Check(restored.All().Count==1,"Restored archive does not open");
   }
   static void BackupSetsTests(){
+   Test("Repository size counts captures, Edited, Dump and archive data separately",()=>{
+    using(var repo=SafetyFixture("repository-size")){
+     string edited=Path.Combine(repo.EditedFolder,"p","final.tif");Directory.CreateDirectory(Path.GetDirectoryName(edited));File.WriteAllBytes(edited,new byte[3000]);
+     repo.EnsureDumpFolder();File.WriteAllBytes(Path.Combine(repo.DumpFolder,"waiting.fit"),new byte[2880]);
+     var size=RepositorySize.Measure(repo.Root,repo.Meta,repo.EditedFolder,repo.DumpFolder,ct);long all=Directory.EnumerateFiles(repo.Root,"*",SearchOption.AllDirectories).Sum(p=>new FileInfo(p).Length);
+     Check(size.Total==all&&size.Edited==3000&&size.Dump==2880&&size.Captures==new FileInfo(repo.FilePath(repo.All().Single())).Length&&size.ArchiveData>0&&size.Total==size.Captures+size.Edited+size.Dump+size.ArchiveData&&!size.Partial,"Repository size categories wrong: "+size.Breakdown);
+     Check(RepositorySize.Format(512)=="512 bytes"&&RepositorySize.Format(1536).StartsWith("1")&&RepositorySize.Format(5L*1024*1024*1024*1024).EndsWith("TB")&&size.Breakdown.Contains("Edited"),"Size formatting wrong");
+    }
+   });
    Test("Backup schedules are due by frequency, with slack, and never when off",()=>{
     var now=new DateTime(2026,10,12,20,0,0,DateTimeKind.Utc);Func<double,string> ago=hours=>now.AddHours(-hours).ToString("o");
     Check(!BackupSchedule.Due("Off",null,now)&&!BackupSchedule.Due("Hourly",null,now)&&BackupSchedule.Due("Daily",null,now),"Off, unknown or never-backed-up schedules wrong");
