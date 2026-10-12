@@ -26,7 +26,8 @@ namespace AstroArchive {
     preview.SmokeZoom(6);PumpPopupLayout();if(preview.TargetCircles==0)throw new Exception("Zoomed overlay lost circles that cross the frame edge");CheckTargetLabels(preview,stage,"zoomed "+label);
     if(label=="Dark100")CaptureSidebar(host,Path.Combine(output,"AstroArchive_Target_Overlay_Zoomed.png"));preview.Fit();PumpPopupLayout();
     if(label=="Dark100"){
-     header.Values["CRVAL1"]="324.2083";header.Values["CRVAL2"]="57.5";previewFrame=new Frame{Target="Elephant's Trunk Nebula",Kind="Light",Width=720,Height=1280,Sky=SkyWcs.FromHeader(header,720,1280)};UpdateTargetOverlay();PumpPopupLayout();
+     // A wide field (about 3° × 5°), so IC 1396's ring crosses the view rather than enclosing it.
+     header.Values["CRVAL1"]="324.2083";header.Values["CRVAL2"]="57.5";header.Values["CDELT1"]="-0.004";header.Values["CDELT2"]="0.004";previewFrame=new Frame{Target="Elephant's Trunk Nebula",Kind="Light",Width=720,Height=1280,Sky=SkyWcs.FromHeader(header,720,1280)};UpdateTargetOverlay();PumpPopupLayout();
      if(preview.TargetCircles<2)throw new Exception("Elephant's Trunk field lacks IC 1396 and its trunk");CheckTargetLabels(preview,stage,"Elephant's Trunk");CaptureSidebar(host,Path.Combine(output,"AstroArchive_Target_Overlay_Elephants_Trunk.png"));
     }
     if(label=="Dark100"){settings.HighContrast=true;ApplyAppearance();PumpPopupLayout();if(preview.TargetCircles==0)throw new Exception("High contrast hid the target overlay");CaptureSidebar(host,Path.Combine(output,"AstroArchive_Target_Overlay_HighContrast.png"));settings.HighContrast=contrast;ApplyAppearance();PumpPopupLayout();}
