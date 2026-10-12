@@ -8,17 +8,35 @@ namespace AstroArchive {
  public sealed class ScreeningResult {public int Checked;public int Problems;public List<string> Errors=new List<string>();}
  public static class CaptureScreening {
   public static bool Importable(Frame frame){return frame.Status=="New"||frame.Status=="Restore"||frame.Status=="Failed";}
-  public static bool NeedsReview(Frame frame){return frame.Rejected||FileProblem(frame)||!string.IsNullOrEmpty(frame.ScreeningIssue)||new[]{"Failed","Unreadable","Missing","Changed"}.Contains(frame.Status);}
+  public static bool NeedsReview(Frame frame){return frame.Rejected||FileProblem(frame)||HorizonIssue(frame)!=null||!string.IsNullOrEmpty(frame.ScreeningIssue)||new[]{"Failed","Unreadable","Missing","Changed"}.Contains(frame.Status);}
   public static bool FileProblem(Frame frame){return !string.IsNullOrEmpty(frame.IntegrityIssue)||new[]{"Unreadable","Missing","Changed"}.Contains(frame.Status)||(!frame.Rejected&&!string.IsNullOrEmpty(frame.ScreeningIssue)&&frame.Status!="Failed");}
   public static string Category(Frame frame){
-   var types=new List<string>();if(frame.Rejected)types.Add("Telescope rejected / reference");if(FileProblem(frame))types.Add("File integrity problem");if(frame.Status=="Failed")types.Add("Transfer failure");
+   var types=new List<string>();if(frame.Rejected)types.Add("Telescope rejected / reference");if(FileProblem(frame))types.Add("File integrity problem");if(frame.Status=="Failed")types.Add("Transfer failure");if(HorizonIssue(frame)!=null)types.Add("Target below horizon");
    return types.Count>0?string.Join("; ",types):frame.Screened?"Screened, no issues":"Not screened";
   }
   public static string Reason(Frame frame){
    var reasons=new List<string>();if(frame.Rejected)reasons.Add(FirstReason(frame.RejectionReason,FileProblem(frame)?null:frame.ScreeningIssue,"Capture is marked rejected/reference."));
    if(FileProblem(frame))reasons.Add(FirstReason(frame.IntegrityIssue,frame.ScreeningIssue,"Archive status: "+frame.Status));
    if(frame.Status=="Failed")reasons.Add(FirstReason(frame.TransferIssue,frame.Notes,"Previous transfer failed. Retry after resolving the source problem."));
+   reasons.Add(HorizonIssue(frame));
    return string.Join("\n",reasons.Where(s=>!string.IsNullOrWhiteSpace(s)).Distinct());
+  }
+  // Archived lights whose target would be below the horizon at the predicted
+  // capture time and place: the clock, timezone or location is probably wrong.
+  // Pending imports are not checked, so Skip flagged never drops them.
+  public static Func<Settings> Site;
+  sealed class HorizonResult {public string Key,Issue;}
+  static readonly System.Runtime.CompilerServices.ConditionalWeakTable<Frame,HorizonResult> horizon=new System.Runtime.CompilerServices.ConditionalWeakTable<Frame,HorizonResult>();
+  public static string HorizonIssue(Frame frame){
+   var site=Site;var settings=site==null?null:site();
+   if(settings==null||frame==null||string.IsNullOrEmpty(frame.Target)||!(frame.Kind=="Light"||frame.Kind=="Stack"||frame.Kind=="Video")||Importable(frame)||frame.Status=="Duplicate in source"||frame.Status=="Deleted")return null;
+   string key=string.Join("|",new object[]{frame.Target,frame.Kind,frame.ObservationMode,frame.Observed,frame.ObservedUtc,frame.TimeZoneId,frame.TimeSource,frame.RA,frame.Dec,frame.Sky==null?null:(object)(frame.Sky.RA+","+frame.Sky.Dec),frame.Latitude,frame.Longitude,frame.CaptureLatitude,frame.CaptureLongitude,frame.CaptureCityId,settings.Latitude,settings.Longitude,settings.ObservingCityId});
+   HorizonResult cached;if(horizon.TryGetValue(frame,out cached)&&cached.Key==key)return cached.Issue;
+   string issue=null;
+   try{var sky=CaptureSky.Resolve(frame,settings);
+    if(sky.HasPosition&&sky.HasHorizon&&sky.Altitude<-2)issue=(sky.Body??sky.TargetLabel)+" was below the horizon at the predicted capture time ("+sky.TimeLabel+") from "+CaptureSite.Describe(frame,settings)+". Set the capture town / city for this file (right-click › Set capture town / city…), or correct the capture timezone in metadata.";
+   }catch(Exception error){if(error is OutOfMemoryException)throw;}
+   horizon.Remove(frame);horizon.Add(frame,new HorizonResult{Key=key,Issue=issue});return issue;
   }
   static string FirstReason(params string[] reasons){return reasons.FirstOrDefault(s=>!string.IsNullOrWhiteSpace(s))??"";}
   public static string Rejection(FitsHeader header,string path){

@@ -2067,3 +2067,19 @@ Eclipse coverage over time	Copertura dell’eclissi nel tempo
 Eclipse times are for the observing location.	Gli orari dell’eclissi si riferiscono al luogo di osservazione.
 Eclipse times run from the Moon entering Earth's outer shadow to leaving it.	Gli orari dell’eclissi vanno dall’ingresso della Luna nella penombra della Terra alla sua uscita.
 Eclipse coverage comes from the bundled Moon and Sun models at the recorded time; check the capture clock if it looks wrong.	La copertura deriva dai modelli lunare e solare inclusi all’ora registrata; controlla l’orologio della ripresa se sembra errata.
+Set capture town / city…	Imposta località di ripresa…
+Capture town / city	Località di ripresa
+Choose where these files were captured. A chosen town or city replaces any capture location recorded in the files. Without a choice, the recorded location is used, then your observing town / city from Settings.	Scegli dove sono stati ripresi questi file. Una località scelta sostituisce qualsiasi posizione di ripresa registrata nei file. Senza scelta si usa la posizione registrata, poi la località di osservazione delle Impostazioni.
+Location used for sky views, Stellarium and eclipse times.	Posizione usata per viste del cielo, Stellarium e orari delle eclissi.
+Use default location	Usa posizione predefinita
+Default location	Posizione predefinita
+Save location	Salva posizione
+Mixed	Misto
+Not set	Non impostata
+Recorded in file metadata	Registrata nei metadati del file
+Settings default	Predefinita dalle Impostazioni
+Chosen capture town / city	Località di ripresa scelta
+Target below horizon	Obiettivo sotto l'orizzonte
+Set the capture town / city for this file (right-click › Set capture town / city…), or correct the capture timezone in metadata.	Imposta la località di ripresa per questo file (clic destro › Imposta località di ripresa…) o correggi il fuso orario di ripresa nei metadati.
+Set capture town / city for selected…	Imposta località di ripresa per la selezione…
+Targets below the horizon at the predicted capture time usually need the capture town / city or timezone set.	Gli obiettivi sotto l'orizzonte all'ora di ripresa stimata di solito richiedono la località o il fuso orario di ripresa.
