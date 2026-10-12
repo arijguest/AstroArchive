@@ -48,6 +48,13 @@ namespace AstroArchive {
     // A Moon computed below the horizon (a wrong clock) keeps its map.
     var wrong=new Frame{Target="Moon",Kind="Light",Observed="2025-03-14T12:58:43Z",TimeSource="FITS UTC",Latitude=51.5,Longitude=0};var hidden=CaptureSky.Resolve(wrong,null);
     Check(hidden.HasHorizon&&hidden.Altitude<0&&hidden.BodyBelowHorizon&&!hidden.BelowHorizon&&hidden.Summary.Contains("timezone"),"A below-horizon Moon hid its map or gave no clock hint");
+    // An unzoned clock or a bare date still places the Moon on the celestial map, within a few degrees.
+    var exact=CaptureSky.Resolve(new Frame{Target="Moon",Kind="Light",Observed="2025-03-14T06:58:43Z",TimeSource="FITS UTC"},null);
+    var unzoned=CaptureSky.Resolve(new Frame{Target="Moon",Kind="Light",Observed="2025-03-14T08:58:43",TimeSource="Capture timestamp",RA=0,Dec=0},null);
+    Check(unzoned.HasPosition&&!unzoned.HasHorizon&&unzoned.Body=="Moon"&&MoonEphemeris.Separation(unzoned.TargetOfDate,exact.TargetOfDate)<1.5,"An unzoned lunar clock lost its Moon position");
+    var dated=CaptureSky.Resolve(new Frame{Target="Moon",Kind="Light",Observed="2025-03-14",TimeSource="FITS date only"},null);
+    Check(dated.HasPosition&&!dated.HasHorizon&&MoonEphemeris.Separation(dated.TargetOfDate,exact.TargetOfDate)<8,"A date-only lunar capture lost its Moon position");
+    Check(!CaptureSky.Resolve(new Frame{Target="Mars",Kind="Light",Observed="2025-03-14T08:58:43"},null).HasPosition,"A planet was placed without a clock");
     var deepSky=new Frame{Target="M31",Kind="Light",Observed="2024-04-08T18:17:16Z",TimeSource="FITS UTC",Latitude=25.29,Longitude=-104.14};Check(CaptureSky.Resolve(deepSky,null).Eclipse==null,"A deep-sky capture was given an eclipse");
     var sections=TargetNavigation.Build(new[]{sun,new Frame{Target="Sun",Kind="Light"}},f=>f==sun?Eclipses.SolarSection:f.Target);
     Check(sections.Any(t=>t.Name==Eclipses.SolarSection&&t.Files==1&&t.Group=="Solar system")&&sections.Any(t=>t.Name=="Sun"&&t.Files==1),"Eclipse captures did not list in their own Solar system section");
