@@ -130,8 +130,14 @@ They are saved with the repository and never change the files themselves.
 ## Target cards
 Right-click a target > Create target card… makes a shareable image with your best
 image of the target, its integration, light frames, nights and filters.
-Choose the image (starred Edited images are offered first), a layout for posts,
-stories or video, Dark or Light, and an optional credit line. Save PNG/JPEG or Copy.
+Choose any image of the target: Edited images linked to its captures come first,
+then starred and newer Edited images (no link is needed), then stacks and lights.
+Adjust image position sets zoom and placement. Pick a layout for posts, stories or
+video, Dark or Light, a resolution (Standard, High 2x or Sharing), and an optional
+credit line. Cards show the AstroArchive logo and website. Save PNG/JPEG or Copy.
+More cards & video… opens Analytics > Target cards: cards for your top 3-25
+targets (by integration or light frames) or targets you choose, saved as one
+image, a ZIP of images, or an MP4/GIF slideshow.
 
 ## Condensed subs
 Repeated Lights share a collapsed session row with dates, count, per-sub exposure,
@@ -183,6 +189,10 @@ saved in the same session or on the same date, so it never doubles those subs;
 the same rule applies to target and session totals. Missing exposures and dates
 remain unknown and are reported with the chart.
 Target/filter shares show the largest seven categories plus Other when needed.
+Chart type, below the chart list, shows a chart as a donut, bars or columns; every
+group is still included and the timeline stays in date order. Export as offers
+Images & documents or Video & GIF. Resolution, video timing and size, and card
+credit are under Export options. The AstroArchive wordmark matches the logo.
 Time rankings continue onto additional pages so every target and telescope is
 included. Timeline gaps remain zero; longer timelines use years or grouped periods.
 Choose PNG or JPEG at 300 dpi for print or 150 dpi for screen. PDF keeps charts and

@@ -11,6 +11,38 @@ namespace AstroArchive {
    return new Frame{Target=target,Kind="Light",Exposure=seconds,AcquisitionDate=date,Telescope=telescope,Filter="L",Session=session};
   }
   static void AnalyticsTests(){
+   Test("Chart types restyle a copy and keep every group and headline",()=>{
+    var source=Enumerable.Range(0,20).Select(i=>AnalyticsLight("Target "+i,60*(i+1),"2026-10-"+(i%9+1).ToString("00"),"Scope "+(i%3))).ToList();var data=ArchiveAnalytics.Build(source,new AnalyticsOptions());
+    for(int index=0;index<6;index++){
+     Check(AnalyticsGraphics.NaturalStyles[index]==data.Reports[index].Style,"Natural chart style differs from the report: "+index);
+     var styles=AnalyticsGraphics.StylesFor(index);Check(styles[0]==data.Reports[index].Style&&styles.Distinct().Count()==styles.Length&&(index==1?styles.Length==1:styles.Length==3),"Chart type choices are wrong: "+index);
+     foreach(string style in styles)foreach(AnalyticsLayout layout in Enum.GetValues(typeof(AnalyticsLayout))){
+      var pages=AnalyticsGraphics.Pages(data,index,true,layout,style);Check(pages.Count>0&&pages.All(p=>p.Marks.Any(m=>m.Role=="header"&&m.Text==ArchiveAnalytics.Number(data.RepositorySeconds/3600)+" h")),"Chart type lost the repository headline: "+index+" "+style);
+      Check(pages.All(p=>p.Marks.Any(m=>m.Role=="chart")),"Chart type drew no chart: "+index+" "+style+" "+layout);
+      if(style=="bars"&&index!=1)foreach(var value in data.Reports[index].Values)Check(pages.SelectMany(p=>p.Marks).Any(m=>m.Detail==value.Label||m.Text==value.Label),"Bars lost a group: "+index+" "+value.Label);
+      if(style=="bars"&&data.Reports[index].Unit=="frames")Check(pages.SelectMany(p=>p.Marks).Any(m=>m.Text=="Light frames")&&!pages.SelectMany(p=>p.Marks).Any(m=>m.Text=="Integration (hours)"),"Frame bars are labelled as hours: "+index);
+     }
+    }
+    Check(data.Reports[0].Style=="donut"&&data.Reports[2].Style=="bars"&&data.Reports[0].Values.Count==20,"Restyling changed the source report");
+    var natural=AnalyticsGraphics.Pages(data,2,true,AnalyticsLayout.Landscape,null);Check(natural.Count==AnalyticsGraphics.Pages(data,2).Count,"Default chart type changed the pages");
+    var invalid=AnalyticsGraphics.Pages(data,1,true,AnalyticsLayout.Landscape,"donut");Check(invalid.Count==AnalyticsGraphics.Pages(data,1).Count&&!invalid.SelectMany(p=>p.Marks).Any(m=>m.Kind=="polygon"&&m.Role=="chart"),"The timeline accepted an unordered chart type");
+   });
+   Test("The AstroArchive wordmark matches the logo height and centre in every layout",()=>{
+    var data=ArchiveAnalytics.Build(new[]{AnalyticsLight("M31",600)},new AnalyticsOptions());
+    foreach(AnalyticsLayout layout in Enum.GetValues(typeof(AnalyticsLayout)))foreach(int index in Enumerable.Range(0,6))foreach(var page in AnalyticsGraphics.Pages(data,index,index%2==0,layout)){
+     var logo=page.Marks.Single(m=>m.Kind=="logo");var brand=page.Marks.Single(m=>m.Text=="AstroArchive");double capitals=brand.Size*AnalyticsGraphics.BrandCapHeight;
+     Check(capitals<=logo.Height+.01&&capitals>=logo.Height*.7,"Wordmark is not similar in height to the logo: "+layout+" "+capitals+" / "+logo.Height);
+     Check(Math.Abs(brand.Y+brand.Size*AnalyticsGraphics.BrandCapCentre-(logo.Y+logo.Height/2))<.01,"Wordmark is not centred on the logo: "+layout);
+     Check(brand.X>logo.X+logo.Width&&page.Marks.Where(m=>m.Kind=="text"&&m!=brand&&m.Role=="header"&&m.Y<logo.Y+logo.Height&&m.Y+m.Size>logo.Y).All(m=>m.X>brand.X+brand.Size*6.4||m.Centered),"Wordmark overlaps header text: "+layout);
+    }
+   });
+   Test("Top target cards rank by integration or light frames without double counting stacks",()=>{
+    var rows=new List<Frame>{AnalyticsLight("M31",60,"2026-10-01","Scope","night"),new Frame{Target="M31",Kind="Stack",Exposure=99999,Session="night",Telescope="Scope",AcquisitionDate="2026-10-01"},AnalyticsLight("M45",300),AnalyticsLight("M45",300),AnalyticsLight("M42",30),AnalyticsLight("M42",30),AnalyticsLight("M42",30),new Frame{Target="Calibration",Kind="Light",Exposure=99999},new Frame{Target="Unknown",Kind="Light",Exposure=99999}};
+    var rejected=AnalyticsLight("M42",9000);rejected.Rejected=true;rows.Add(rejected);
+    var byTime=TargetCards.Rank(rows);var byFrames=TargetCards.Rank(rows,true);var withRejected=TargetCards.Rank(rows,false,true);
+    Check(byTime.Count==3&&byTime[0].Target=="M45"&&byTime[0].Seconds==600&&byFrames[0].Target=="M42"&&byFrames[0].Lights==3,"Top target ranking is wrong: "+string.Join(", ",byTime.Select(c=>c.Target+" "+c.Seconds)));
+    Check(byTime.Single(c=>c.Target=="M31").Seconds==60&&withRejected[0].Target=="M42","Matching stacks were double counted or rejected frames ignored");
+   });
    Test("Repository headline totals survive every chart scope and missing date",()=>{
     var rejected=AnalyticsLight("M45",3600,"2025-01-01","Scope B");rejected.Rejected=true;
     var deleted=AnalyticsLight("M51",7200);deleted.Status="Deleted";

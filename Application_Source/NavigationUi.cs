@@ -100,6 +100,8 @@ namespace AstroArchive {
             TopMenu("CoffeeMenu").Click += (s,e) => OpenWebsite("https://ko-fi.com/arijguest");
             UiHelp.Hint(TopMenu("CoffeeMenu"), "Support AstroArchive on Ko-fi.");
             B("OpenRepositoryFolderButton").Click += (s,e) => OpenRepositoryFolder();
+            B("OpenImportSourceButton").Click += (s,e) => { string source = T("SourceBox").Text.Trim(); if (Directory.Exists(source)) OpenFolder(source); };
+            B("OpenEditedRootButton").Click += (s,e) => { if (repo != null) { Directory.CreateDirectory(repo.EditedFolder); OpenFolder(repo.EditedFolder); } };
             B("RepositoryImportButton").Click += (s,e) => GoToPage(1);
             B("ImportExportButton").Click += (s,e) => OpenExport();
             B("ImportOptionsButton").Click += (s,e) => ImportPreferences();
@@ -136,6 +138,7 @@ namespace AstroArchive {
             TopMenu("SettingsMenu").IsEnabled = !NetworkImportBlocked;
             B("ImportExportButton").IsEnabled = TopMenu("ExportMenu").IsEnabled;
             B("OpenRepositoryFolderButton").IsEnabled = repo != null;
+            UpdatePathStrips();
             if (repo != null) {
                 B("OpenRepositoryFolderButton").ToolTip = "Open repository folder\n" + repo.Root;
                 AutomationProperties.SetName(B("OpenRepositoryFolderButton"), "Open active repository: " + repo.Root);
@@ -195,6 +198,20 @@ menu.Items.Add(MenuAction("Watch a capture folder…",()=>{GoToPage(1);OpenLocal
         }
         void BuildGuideNavigation(MenuItem menu) {
             menu.Items.Add(MenuAction("Help…",()=>OpenGuide(CurrentHelpTopic()),true,false));menu.Items.Add(MenuAction("Interactive walkthrough…",StartWalkthrough,!RepositoryOperationBlocked));menu.Items.Add(new Separator());menu.Items.Add(MenuAction("About AstroArchive…",About,true,false));
+        }
+        // Each table shows the folder behind it in a centred bar; clicking opens that folder.
+        void UpdatePathStrips() {
+            string source = T("SourceBox").Text.Trim();
+            bool sourceExists = source.Length > 0 && Directory.Exists(source);
+            L("ImportPathLabel").Text = source.Length == 0 ? "Choose a source folder to scan" : source;
+            B("OpenImportSourceButton").IsEnabled = sourceExists;
+            B("OpenImportSourceButton").ToolTip = sourceExists ? "Open source folder\n" + source : source.Length == 0 ? "Choose a source folder to scan." : "This source folder is not currently available.";
+            AutomationProperties.SetName(B("OpenImportSourceButton"), sourceExists ? "Open source folder: " + source : "Source folder unavailable");
+            string edited = repo == null ? null : repo.EditedFolder;
+            L("EditedPathLabel").Text = edited ?? "Choose a repository to keep edited images";
+            B("OpenEditedRootButton").IsEnabled = edited != null;
+            B("OpenEditedRootButton").ToolTip = edited == null ? "Choose a repository first." : "Open Edited folder\n" + edited;
+            AutomationProperties.SetName(B("OpenEditedRootButton"), edited == null ? "Edited folder unavailable" : "Open Edited folder: " + edited);
         }
         void OpenRepositoryFolder() { if (repo != null) OpenFolder(repo.Root); }
         void OpenFolder(string path) {

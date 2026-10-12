@@ -1930,3 +1930,39 @@ Images & documents	画像とドキュメント
 Video & GIF	動画とGIF
 Not out (below the horizon)	地平線の下にあります
 Output	出力
+Export as	エクスポート形式
+Chart type	グラフの種類
+Donut	ドーナツ
+Bars	横棒
+Columns	縦棒
+Recommended	推奨
+Target cards	ターゲットカード
+Share your imaged targets	撮影したターゲットを共有
+Card layout	カードのレイアウト
+Card resolution	カードの解像度
+Card credit (optional)	カードのクレジット (任意)
+Resolution	解像度
+Standard	標準
+Adjust image…	画像を調整…
+Adjust image position	画像の位置を調整
+Adjust target card	ターゲットカードを調整
+Horizontal position	水平位置
+Vertical position	垂直位置
+Reset position	位置をリセット
+Use this image	この画像を使用
+More cards & video…	カードと動画をさらに作成…
+Choose target cards	ターゲットカードを選択
+Make cards for	カードを作成する対象
+My top targets	上位のターゲット
+Targets I choose	自分で選ぶターゲット
+How many	件数
+Rank by	並べ替え基準
+Integration time	積算時間
+Find a target	ターゲットを検索
+Use these targets	これらのターゲットを使用
+Time per scene	シーンあたりの時間
+Export cards…	カードをエクスポート…
+Export card video…	カード動画をエクスポート…
+All cards	すべてのカード
+ASTAP is much quicker and highly recommended. Astrometry.net solves can wait minutes in a shared online queue.	ASTAP のほうがはるかに高速なため、強くおすすめします。Astrometry.net の解析は共有オンラインキューで数分待つことがあります。
+Choose card targets	カードのターゲットを選択

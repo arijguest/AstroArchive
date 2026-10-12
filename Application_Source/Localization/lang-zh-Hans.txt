@@ -1929,3 +1929,39 @@ Images & documents	图像和文档
 Video & GIF	视频和 GIF
 Not out (below the horizon)	未升起（在地平线下方）
 Output	输出
+Export as	导出为
+Chart type	图表类型
+Donut	环形
+Bars	条形
+Columns	柱形
+Recommended	推荐
+Target cards	目标卡片
+Share your imaged targets	分享你拍摄的目标
+Card layout	卡片布局
+Card resolution	卡片分辨率
+Card credit (optional)	卡片署名 (可选)
+Resolution	分辨率
+Standard	标准
+Adjust image…	调整图像…
+Adjust image position	调整图像位置
+Adjust target card	调整目标卡片
+Horizontal position	水平位置
+Vertical position	垂直位置
+Reset position	重置位置
+Use this image	使用此图像
+More cards & video…	更多卡片和视频…
+Choose target cards	选择目标卡片
+Make cards for	为以下目标制作卡片
+My top targets	我的热门目标
+Targets I choose	我选择的目标
+How many	数量
+Rank by	排序依据
+Integration time	累计曝光时间
+Find a target	查找目标
+Use these targets	使用这些目标
+Time per scene	每个场景的时长
+Export cards…	导出卡片…
+Export card video…	导出卡片视频…
+All cards	所有卡片
+ASTAP is much quicker and highly recommended. Astrometry.net solves can wait minutes in a shared online queue.	ASTAP 速度快得多，强烈推荐。Astrometry.net 解析可能需要在共享在线队列中等待数分钟。
+Choose card targets	选择卡片目标

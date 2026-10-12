@@ -1893,3 +1893,40 @@ Images & documents	Images et documents
 Video & GIF	Vidéo et GIF
 Not out (below the horizon)	Non visible (sous l’horizon)
 Output	Sortie
+Export as	Exporter en
+Chart type	Type de graphique
+Donut	Anneau
+Bars	Barres
+Columns	Colonnes
+Recommended	Recommandé
+Target cards	Cartes de cibles
+Share your imaged targets	Partagez vos cibles photographiées
+Card layout	Mise en page de la carte
+Card resolution	Résolution de la carte
+Card credit (optional)	Crédit de la carte (facultatif)
+Resolution	Résolution
+Standard	Standard
+Adjust image…	Ajuster l’image…
+Adjust image position	Ajuster la position de l’image
+Adjust target card	Ajuster la carte de la cible
+Zoom	Zoom
+Horizontal position	Position horizontale
+Vertical position	Position verticale
+Reset position	Réinitialiser la position
+Use this image	Utiliser cette image
+More cards & video…	Plus de cartes et vidéo…
+Choose target cards	Choisir les cartes de cibles
+Make cards for	Créer des cartes pour
+My top targets	Mes cibles principales
+Targets I choose	Cibles de mon choix
+How many	Combien
+Rank by	Classer par
+Integration time	Temps d’intégration
+Find a target	Rechercher une cible
+Use these targets	Utiliser ces cibles
+Time per scene	Durée par scène
+Export cards…	Exporter les cartes…
+Export card video…	Exporter la vidéo des cartes…
+All cards	Toutes les cartes
+ASTAP is much quicker and highly recommended. Astrometry.net solves can wait minutes in a shared online queue.	ASTAP est bien plus rapide et vivement recommandé. Les résolutions Astrometry.net peuvent attendre plusieurs minutes dans une file d’attente en ligne partagée.
+Choose card targets	Choisir les cibles des cartes

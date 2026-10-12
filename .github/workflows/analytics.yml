@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - 'Application_Source/Analytics*.cs'
+      - 'Application_Source/TargetCard*.cs'
       - 'Application_Source/NavigationUi.cs'
       - 'Application_Source/test.ps1'
       - '.github/workflows/analytics.yml'

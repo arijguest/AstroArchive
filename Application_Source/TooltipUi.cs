@@ -73,7 +73,7 @@ namespace AstroArchive {
    {"Binning x × y (optional, e.g. 1x1)","Horizontal × vertical binning. Blank keeps existing values."},
    {"ASTAP executable","Local solving also requires an ASTAP star database."},
    {"ASTAP image height in degrees (blank: automatic; useful for wide cameras)","Greater than 0° and at most 180°; blank is automatic."},
-   {"Use Astrometry.net instead of ASTAP","Requires internet and your Astrometry.net API key."},
+   {"Use Astrometry.net instead of ASTAP","Requires internet and your Astrometry.net API key. ASTAP is much quicker and is recommended."},
    {"Delete all archive data","Permanently delete indexed archive data; keep sources and unindexed files."},
    {"Destination folder","Use a location outside the repository."},
    {"New folder name","Existing folders are not overwritten."},

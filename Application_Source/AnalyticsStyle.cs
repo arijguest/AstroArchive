@@ -15,7 +15,16 @@ namespace AstroArchive {
    x=Enumerable.Range(0,mark.Points.Length/2).Min(i=>mark.Points[i*2]);y=Enumerable.Range(0,mark.Points.Length/2).Min(i=>mark.Points[i*2+1]);
    width=Enumerable.Range(0,mark.Points.Length/2).Max(i=>mark.Points[i*2])-x;height=Enumerable.Range(0,mark.Points.Length/2).Max(i=>mark.Points[i*2+1])-y;
   }
+  // The wordmark's capitals are about three quarters of the logo's height and
+  // share its vertical centre. Arial's capitals span 0.19–0.905 em below the
+  // text origin, so their centre sits 0.547 em down.
+  public const double BrandCapHeight=.716,BrandCapCentre=.547;
+  static void Brand(AnalyticsPage page){
+   var logo=page.Marks.FirstOrDefault(m=>m.Kind=="logo");var brand=page.Marks.FirstOrDefault(m=>m.Kind=="text"&&m.Text=="AstroArchive"&&m.Role=="header");if(logo==null||brand==null)return;
+   brand.Size=logo.Height*.75/BrandCapHeight;brand.Y=logo.Y+logo.Height/2-brand.Size*BrandCapCentre;brand.X=logo.X+logo.Width+logo.Width*.22;
+  }
   static void Polish(AnalyticsPage page,bool dark,int index){
+   Brand(page);
    string panel=dark?"#151E2E":"#F5F7FC",ink=dark?"#E9EEF8":Ink,accent=dark?"#90B8FF":Accent;
    var decorations=new List<AnalyticsMark>();
    // A restrained constellation gives the document a recognisable night-sky

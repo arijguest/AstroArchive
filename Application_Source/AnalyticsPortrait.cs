@@ -98,7 +98,7 @@ namespace AstroArchive {
     Text(p,Fit(ArchiveAnalytics.Number(value.Value)+" "+unit,240,compact?18:21),760,y+offset-2,compact?18:21,Ink,true);
    }
    for(int i=0;i<=4;i++)Text(p,ArchiveAnalytics.Number(max*i/4),start+width*i/4,compact?p.CanvasHeight-210:1480,16,Muted);
-   Text(p,"Integration (hours)",80,compact?p.CanvasHeight-185:1510,16,Muted);
+   Text(p,unit=="h"?"Integration (hours)":"Light frames",80,compact?p.CanvasHeight-185:1510,16,Muted);
   }
   static void PortraitColumns(AnalyticsPage p,List<AnalyticsValue> source,string unit,bool compact=false){
    var values=source.ToList();

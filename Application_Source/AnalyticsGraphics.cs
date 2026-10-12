@@ -9,6 +9,8 @@ namespace AstroArchive {
  public sealed class AnalyticsMark {
   public string Kind,Fill,FillEnd,Text,Detail,Role,Animation;public double X,Y,Width,Height,Size,Radius;public bool Bold,VerticalGradient,Centered;
   public double[] Points;
+  // A frozen WPF ImageSource for Kind "image" (target cards); raster and video outputs only.
+  public object Image;
  }
  public sealed class AnalyticsPage {
   public const double Width=1200,Height=800;
@@ -31,6 +33,23 @@ namespace AstroArchive {
   }
   public static AnalyticsPage Page(AnalyticsSnapshot data,int index,bool dark=true,AnalyticsLayout layout=AnalyticsLayout.Landscape){
    return Page(data,index,0,1,data.Reports[index].Style=="bars"?data.Reports[index].Values.Take(8).ToList():ArchiveAnalytics.Compact(data.Reports[index].Values,8),dark,layout);
+  }
+  // Presentation choices restyle a copy, so the source report and every group are preserved.
+  public static readonly string[] ChartStyles={"donut","bars","columns"};
+  public static string StyleLabel(string style){return style=="donut"?"Donut":style=="bars"?"Bars":"Columns";}
+  // Matches the styles ArchiveAnalytics.Build assigns. The timeline stays in date order as columns.
+  public static readonly string[] NaturalStyles={"donut","columns","bars","bars","donut","columns"};
+  public static string[] StylesFor(int index){
+   string natural=NaturalStyles[index];if(index==1)return new[]{natural};
+   return new[]{natural}.Concat(ChartStyles.Where(s=>s!=natural)).ToArray();
+  }
+  public static List<AnalyticsPage> Pages(AnalyticsSnapshot data,int index,bool dark,AnalyticsLayout layout,string style){
+   var report=data.Reports[index];if(string.IsNullOrEmpty(style)||style==report.Style||!StylesFor(index).Contains(style))return Pages(data,index,dark,layout);
+   var copy=data.Copy();var restyled=copy.Reports[index];
+   // Donuts and columns read best by size; ordered lengths keep their order as bars.
+   if(style!="bars"&&report.Style=="columns")restyled.Values=restyled.Values.OrderByDescending(v=>v.Value).ThenBy(v=>v.Label,StringComparer.OrdinalIgnoreCase).ToList();
+   if(style=="columns")restyled.Values=ArchiveAnalytics.Compact(restyled.Values.OrderByDescending(v=>v.Value),12);
+   restyled.Style=style;return Pages(copy,index,dark,layout);
   }
   public static List<AnalyticsPage> Pages(AnalyticsSnapshot data,int index,bool dark=true,AnalyticsLayout layout=AnalyticsLayout.Landscape){
    var report=data.Reports[index];int count=report.Style=="bars"?Math.Max(1,(int)Math.Ceiling(report.Values.Count/8.0)):1;
@@ -97,7 +116,7 @@ namespace AstroArchive {
     p.Marks.Last().Animation="bar";
     Text(p,ArchiveAnalytics.Number(value.Value)+" "+unit,1050,y+barHeight/2-8,15,Ink,true);
    }
-   Text(p,"Integration (hours)",60,658,12,Muted);
+   Text(p,unit=="h"?"Integration (hours)":"Light frames",60,658,12,Muted);
   }
   static void Columns(AnalyticsPage p,List<AnalyticsValue> source,string unit){
    var values=source.ToList();if(values.Count>18){int chunk=(int)Math.Ceiling(values.Count/18.0);values=Enumerable.Range(0,(int)Math.Ceiling(values.Count/(double)chunk)).Select(i=>{var bucket=source.Skip(i*chunk).Take(chunk).ToList();return new AnalyticsValue(bucket[0].Label+"–"+bucket.Last().Label,bucket.Sum(v=>v.Value));}).ToList();}

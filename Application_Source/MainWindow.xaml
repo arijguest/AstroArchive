@@ -854,11 +854,13 @@
          <TextBlock Text="Choose a repository, then import your captures." TextWrapping="Wrap" TextAlignment="Center" Foreground="{DynamicResource Muted}" Margin="0,8,0,0" />
         </StackPanel>
      <Border Grid.Row="1" x:Name="RepositoryPathStrip" Background="{DynamicResource SurfaceAlt}" Margin="0" CornerRadius="4">
-   <Button x:Name="OpenRepositoryFolderButton" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" Padding="10,4" Margin="0" Background="Transparent" BorderThickness="0" ToolTip="Open repository folder.">
-    <DockPanel>
-     <TextBlock x:Name="RepositorySizeLabel" DockPanel.Dock="Right" Margin="12,0,0,0" Foreground="{DynamicResource Muted}" FontSize="{DynamicResource UiFontSmall}" Visibility="Collapsed" AutomationProperties.Name="Repository size" />
-     <TextBlock x:Name="RepositoryLabel" Text="Choose a repository from the Repository menu" TextTrimming="CharacterEllipsis" Foreground="{DynamicResource Muted}" FontSize="{DynamicResource UiFontSmall}" />
-    </DockPanel>
+   <Button x:Name="OpenRepositoryFolderButton" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Center" MinHeight="28" Padding="10,4" Margin="0" Background="Transparent" BorderThickness="0" ToolTip="Open repository folder.">
+    <Grid VerticalAlignment="Center">
+     <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+     <Border Width="{Binding ActualWidth, ElementName=RepositoryLabelSide}" IsHitTestVisible="False"/>
+     <TextBlock Grid.Column="1" x:Name="RepositoryLabel" Text="Choose a repository from the Repository menu" TextTrimming="CharacterEllipsis" TextAlignment="Center" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="{DynamicResource Muted}" FontSize="{DynamicResource UiFontSmall}" />
+     <Border Grid.Column="2" x:Name="RepositoryLabelSide" VerticalAlignment="Center"><TextBlock x:Name="RepositorySizeLabel" Margin="12,0,0,0" Foreground="{DynamicResource Muted}" FontSize="{DynamicResource UiFontSmall}" Visibility="Collapsed" AutomationProperties.Name="Repository size" /></Border>
+    </Grid>
    </Button>
      </Border>
        </Grid>
@@ -988,6 +990,8 @@
       </StackPanel>
      </Grid>
      <Border Grid.Row="3" Background="{DynamicResource Surface}" CornerRadius="10" BorderBrush="{DynamicResource Border}" BorderThickness="1" ClipToBounds="True">
+      <Grid>
+      <Grid.RowDefinitions><RowDefinition Height="*"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
       <DataGrid x:Name="ImportGrid">
        <DataGrid.Columns>
         <DataGridTextColumn Header="STATUS" Binding="{Binding Status}" Width="110" />
@@ -1002,6 +1006,17 @@
         <DataGridTextColumn Header="FILE" Binding="{Binding OriginalName}" Width="*" MinWidth="180" />
        </DataGrid.Columns>
       </DataGrid>
+      <Border Grid.Row="1" x:Name="ImportPathStrip" Background="{DynamicResource SurfaceAlt}" Margin="0" CornerRadius="4">
+   <Button x:Name="OpenImportSourceButton" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Center" MinHeight="28" Padding="10,4" Margin="0" Background="Transparent" BorderThickness="0" ToolTip="Open source folder.">
+    <Grid VerticalAlignment="Center">
+     <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+     <Border Width="{Binding ActualWidth, ElementName=ImportPathLabelSide}" IsHitTestVisible="False"/>
+     <TextBlock Grid.Column="1" x:Name="ImportPathLabel" Text="Choose a source folder to scan" TextTrimming="CharacterEllipsis" TextAlignment="Center" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="{DynamicResource Muted}" FontSize="{DynamicResource UiFontSmall}" />
+     <Border Grid.Column="2" x:Name="ImportPathLabelSide" VerticalAlignment="Center"></Border>
+    </Grid>
+   </Button>
+     </Border>
+      </Grid>
      </Border>
      <Grid Grid.Row="4" Margin="0,12,0,0">
       <Grid.RowDefinitions>
@@ -1060,7 +1075,7 @@
       </ListBox></DockPanel></Border>
       <Grid Grid.Row="1" Grid.Column="1"><Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="*"/></Grid.RowDefinitions>
        <StackPanel Margin="0,0,0,8"><WrapPanel Margin="0,6,0,0"><Button x:Name="EditedEditButton" Visibility="Collapsed" Content="Edit metadata…" Margin="0,0,8,0"/><Button x:Name="EditedDetailsButton" Visibility="Collapsed" Content="Image details…" Margin="0,0,8,0"/><Button x:Name="EditedPreviewButton" Visibility="Collapsed" Content="Preview image…"/><Button x:Name="EditedEditorButton" Content="Export to…" Margin="8,0,0,0"/><Button x:Name="EditedFolderButton" Visibility="Collapsed" Content="Open image folder" Margin="8,0,0,0"/></WrapPanel></StackPanel>
-       <Border Grid.Row="1" Background="{DynamicResource Surface}" BorderBrush="{DynamicResource Border}" BorderThickness="1" CornerRadius="8" ClipToBounds="True"><Grid><DataGrid x:Name="EditedGrid" CanUserSortColumns="True"><DataGrid.Columns>
+       <Border Grid.Row="1" Background="{DynamicResource Surface}" BorderBrush="{DynamicResource Border}" BorderThickness="1" CornerRadius="8" ClipToBounds="True"><Grid><Grid.RowDefinitions><RowDefinition Height="*"/><RowDefinition Height="Auto"/></Grid.RowDefinitions><DataGrid x:Name="EditedGrid" CanUserSortColumns="True"><DataGrid.Columns>
          <DataGridTextColumn Header="FILE" Binding="{Binding Filename}" Width="*" MinWidth="200"/>
          <DataGridTextColumn Header="FILE TYPE" Binding="{Binding FileType}" Width="85"/>
          <DataGridTextColumn Header="ID" Binding="{Binding Metadata.ObjectId}" Width="88"/>
@@ -1076,7 +1091,17 @@
          <DataGridTextColumn Header="STARRED" Binding="{Binding StarText}" Width="80" Visibility="Collapsed"/>
          <DataGridTextColumn Header="TAGS" Binding="{Binding TagsText}" Width="160" Visibility="Collapsed"/>
          <DataGridTextColumn Header="NOTE" Binding="{Binding UserNote}" Width="220" Visibility="Collapsed"/>
-        </DataGrid.Columns></DataGrid><TextBlock x:Name="EditedEmptyState" Text="Add edited images, or send a repository stack to an editor to create a working copy." Foreground="{DynamicResource Muted}" HorizontalAlignment="Center" VerticalAlignment="Center" TextWrapping="Wrap" TextAlignment="Center" MaxWidth="420" Margin="24" IsHitTestVisible="False"/></Grid></Border>
+        </DataGrid.Columns></DataGrid><TextBlock x:Name="EditedEmptyState" Text="Add edited images, or send a repository stack to an editor to create a working copy." Foreground="{DynamicResource Muted}" HorizontalAlignment="Center" VerticalAlignment="Center" TextWrapping="Wrap" TextAlignment="Center" MaxWidth="420" Margin="24" IsHitTestVisible="False"/>
+        <Border Grid.Row="1" x:Name="EditedPathStrip" Background="{DynamicResource SurfaceAlt}" Margin="0" CornerRadius="4">
+   <Button x:Name="OpenEditedRootButton" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Center" MinHeight="28" Padding="10,4" Margin="0" Background="Transparent" BorderThickness="0" ToolTip="Open Edited folder.">
+    <Grid VerticalAlignment="Center">
+     <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+     <Border Width="{Binding ActualWidth, ElementName=EditedPathLabelSide}" IsHitTestVisible="False"/>
+     <TextBlock Grid.Column="1" x:Name="EditedPathLabel" Text="Choose a repository to keep edited images" TextTrimming="CharacterEllipsis" TextAlignment="Center" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="{DynamicResource Muted}" FontSize="{DynamicResource UiFontSmall}" />
+     <Border Grid.Column="2" x:Name="EditedPathLabelSide" VerticalAlignment="Center"></Border>
+    </Grid>
+   </Button>
+     </Border></Grid></Border>
       </Grid>
       <GridSplitter Grid.Row="1" Grid.Column="2" x:Name="EditedPreviewDivider" Width="4" HorizontalAlignment="Center" Background="{DynamicResource Border}" ResizeBehavior="PreviousAndNext"/>
       <Border Grid.Row="1" Grid.Column="3" x:Name="EditedPreviewPane" Background="{DynamicResource Surface}" CornerRadius="8" BorderBrush="{DynamicResource Border}" BorderThickness="1" Padding="8">

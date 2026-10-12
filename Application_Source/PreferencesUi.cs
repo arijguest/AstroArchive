@@ -51,7 +51,7 @@ namespace AstroArchive {
    d.Tab(1);f.Import=AddImportPreferences(d,editedImport);
    d.Tab(2);d.Text("Export",true);f.Directory=d.Input("Default export folder",settings.ExportWorkingDirectory??"");d.Button("Choose export folder…",()=>{string path=Folder("Choose the default export folder",f.Directory.Text,d.Window);if(path!=null)f.Directory.Text=path;});
    d.Text("Choose Siril in the export popup to open one exported stack. Application locations and defaults are optional.");f.Exports=AddExportPreferences(d);
-   d.Tab(3);d.Text("Sky & solving",true);f.Site=AddObservingSite(d);f.Online=d.Check("Use Astrometry.net instead of ASTAP",settings.UseOnline);
+   d.Tab(3);d.Text("Sky & solving",true);f.Site=AddObservingSite(d);f.Online=d.Check("Use Astrometry.net instead of ASTAP",settings.UseOnline);AddAstapRecommendation(d);
    f.Solver=d.Advanced("Plate solver setup",()=>{
     f.Astap=d.Input("ASTAP executable",settings.Astap??"");d.Button("Choose ASTAP…",()=>{var picker=new OpenFileDialog{Title="Locate ASTAP",Filter="Windows executable|*.exe"};if(picker.ShowDialog(d.Window)==true)f.Astap.Text=picker.FileName;});f.Database=d.Input("ASTAP star database folder",settings.StarDatabase??"");d.Button("Choose star database…",()=>{string path=Folder("Choose the ASTAP star database",f.Database.Text,d.Window);if(path!=null)f.Database.Text=path;});
     f.Fov=d.Input("Image height in degrees (blank: automatic)",settings.FieldHeight.HasValue?Util.Num(settings.FieldHeight):"");d.Text("Astrometry.net API key");f.Key=new PasswordBox{Password=PlateSolve.Unprotect(settings.ApiKeyProtected),Padding=new Thickness(10,8,10,8)};UiHelp.Hint(f.Key,"Saved with Windows user encryption. Online solving sends star coordinates, never the full image.");System.Windows.Automation.AutomationProperties.SetName(f.Key,"Astrometry.net API key");d.Add(f.Key);d.Text("ASTAP needs a local star database. Online solving needs your API key and internet access. Analysis stays off until selected for an import.");
@@ -60,6 +60,13 @@ namespace AstroArchive {
    d.Tab(5);f.AutomaticReleases=d.Check("Check for releases automatically while AstroArchive is open",!settings.DisableAutomaticReleaseChecks);d.Text("Checks after startup and every six hours. Downloads and installation begin only when you request them.");AddReleaseSettings(d,()=>SavePreferences(d,f));
    d.Tab(6);f.Backups=AddArchiveSafetySettings(d);
    d.SelectTab(section);if(section==1)f.Import.Current.IsExpanded=true;if(section==3)f.Solver.IsExpanded=true;d.Accept("Save preferences",()=>SavePreferences(d,f));return d;
+  }
+  // Online solving queues on a shared service; local ASTAP usually finishes in seconds.
+  static void AddAstapRecommendation(FormWindow d){
+   var panel=new StackPanel{Margin=new Thickness(28,2,0,12)};var warning=new DockPanel();var sign=new TextBlock{Text="⚠",Margin=new Thickness(0,0,6,0),FontWeight=FontWeights.SemiBold};Theme.Bind(sign,TextBlock.ForegroundProperty,"Accent");DockPanel.SetDock(sign,Dock.Left);warning.Children.Add(sign);
+   var text=new TextBlock{Text="ASTAP is much quicker and highly recommended. Astrometry.net solves can wait minutes in a shared online queue.",TextWrapping=TextWrapping.Wrap,FontWeight=FontWeights.SemiBold};text.SetResourceReference(TextBlock.FontSizeProperty,"UiFontBody");warning.Children.Add(text);panel.Children.Add(warning);
+   var link=new TextBlock{TextWrapping=TextWrapping.Wrap,Margin=new Thickness(0,4,0,0)};link.SetResourceReference(TextBlock.FontSizeProperty,"UiFontBody");link.Inlines.Add(TargetInfoView.Linked("Set up ASTAP: download it and a star database (hnsky.org)","https://www.hnsky.org/astap.htm"));panel.Children.Add(link);
+   System.Windows.Automation.AutomationProperties.SetName(panel,"ASTAP is much quicker and highly recommended");d.Add(panel);
   }
   static string OptionalPath(string value){return string.IsNullOrWhiteSpace(value)?null:Path.GetFullPath(value.Trim());}
   bool SavePreferences(FormWindow d,PreferenceFields f){

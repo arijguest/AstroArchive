@@ -10,6 +10,7 @@ namespace AstroArchive {
   public string Target,Title,Subtitle,DateRange,Equipment;public double Seconds;public int Lights,Stacks,Nights,UnknownExposure;
   public List<AnalyticsValue> Filters=new List<AnalyticsValue>();
  }
+ public sealed class TargetCardChoice {public string Target,Label;public double Seconds;public int Lights;public override string ToString(){return Label;}}
  public enum TargetCardLayout {Portrait,Vertical,Square,Widescreen}
  public static class TargetCards {
   public static readonly string[] LayoutLabels={"Portrait · 4:5","Vertical · 9:16","Square · 1:1","Widescreen · 16:9"};
@@ -24,9 +25,16 @@ namespace AstroArchive {
    var culture=Localization.English||Localization.Pseudo?CultureInfo.InvariantCulture:CultureInfo.GetCultureInfo(code);
    return date.ToString(code=="de"?(year?"d. MMM yyyy":"d. MMM"):(year?"d MMM yyyy":"d MMM"),culture);
   }
-  public static TargetCardData Build(IEnumerable<Frame> frames,string target){
+  public static bool Eligible(string target){return !string.IsNullOrWhiteSpace(target)&&target!="All targets"&&target!="Calibration"&&!Catalog.IsAmbiguous(target);}
+  // Imaged targets, most integration (or most light frames) first. Target keeps
+  // the stored name so it matches the archive and the target list.
+  public static List<TargetCardChoice> Rank(IEnumerable<Frame> frames,bool byFrames=false,bool includeRejected=false){
+   return frames.Where(f=>f!=null&&f.Status!="Deleted"&&(f.Kind=="Light"||f.Kind=="Stack")&&Eligible(f.Target)).GroupBy(f=>f.Target,StringComparer.Ordinal).Select(g=>{var data=Build(g,g.Key,includeRejected);return new TargetCardChoice{Target=g.Key,Label=Catalog.Label(data.Target),Seconds=data.Seconds,Lights=data.Lights};})
+    .Where(c=>c.Seconds>0||c.Lights>0).OrderByDescending(c=>byFrames?c.Lights:c.Seconds).ThenByDescending(c=>byFrames?c.Seconds:c.Lights).ThenBy(c=>c.Label,StringComparer.OrdinalIgnoreCase).ToList();
+  }
+  public static TargetCardData Build(IEnumerable<Frame> frames,string target,bool includeRejected=false){
    string key=Catalog.CanonicalTarget(target);
-   var rows=frames.Where(f=>f!=null&&f.Target==key&&f.Status!="Deleted"&&!f.Rejected&&(f.Kind=="Light"||f.Kind=="Stack")).ToList();
+   var rows=frames.Where(f=>f!=null&&(f.Target==key||f.Target==target)&&f.Status!="Deleted"&&(includeRejected||!f.Rejected)&&(f.Kind=="Light"||f.Kind=="Stack")).ToList();
    var integration=CaptureGroups.ExposureFrames(rows).ToList();var timed=integration.Where(ArchiveAnalytics.KnownExposure).ToList();
    string id=Catalog.ObjectId(key),common=Catalog.CommonName(key);
    var data=new TargetCardData{Target=key,Title=id.Length>0?id:Catalog.Label(key),Subtitle=id.Length>0?common:"",Seconds=timed.Sum(f=>f.Exposure.Value),Lights=rows.Count(f=>f.Kind=="Light"),Stacks=rows.Count(f=>f.Kind=="Stack"),UnknownExposure=integration.Count-timed.Count};
