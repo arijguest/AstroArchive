@@ -15,7 +15,6 @@ namespace AstroArchive {
    dialog.Text("Calibration originals always stay on the source/telescope. Changed or failed files also stay.");
    dialog.Text(dump?"Dump processing also removes verified duplicate science files from Dump.":"Existing duplicates are kept on the source.");
    dialog.Text("Deletion in a cloud-synced source folder propagates to the cloud and other devices.");
-   dialog.Text("Cancel to keep all source files and return without starting this import.");
    dialog.Accept("Import and delete eligible originals",()=>true,true);return dialog;
   }
  }

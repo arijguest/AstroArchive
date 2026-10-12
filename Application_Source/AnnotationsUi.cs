@@ -71,7 +71,7 @@ namespace AstroArchive {
    var common=CaptureAnnotations.CommonTags(items);var notes=items.Select(i=>i.UserNote??"").Distinct().ToList();bool mixedNotes=notes.Count>1;
    var d=new FormWindow(Window,items.Count==1?"Tags and note":"Tags and notes",620,620);
    d.Text(items.Count==1?"Tags and note":items.Count.ToString("N0")+" selected files",true);
-   d.Text("Personal labels for finding and remembering these files. They are saved with this repository and never change the files themselves.");
+   d.Text("Saved with this repository; the files themselves never change.");
    int starred=items.Count(i=>i.IsStarred);
    var star=new CheckBox{Content=new TextBlock{Text="Starred",TextWrapping=TextWrapping.Wrap},IsThreeState=starred>0&&starred<items.Count,IsChecked=starred==items.Count?true:starred==0?(bool?)false:null,Margin=new Thickness(0,4,0,3)};AutomationProperties.SetName(star,"Starred");
    if(star.IsThreeState)star.Checked+=(s,e)=>star.IsThreeState=false;d.Add(star);
