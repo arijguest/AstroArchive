@@ -48,6 +48,8 @@ namespace AstroArchive {
    double? reported=ExposureSeconds(header,"EXPTIME","EXPOSURE","EXP_TIME");
    if(!PositiveExposure(sub)&&perFrame)sub=reported;
    double? filenameSub,gain;if(!PositiveExposure(sub)&&FilenameExposureGain(frame.OriginalName,out filenameSub,out gain))sub=filenameSub;
+   // A Seestar-style name gives seconds per sub; use it when its count matches the recorded one.
+   int namedCount;double namedSeconds;if(!PositiveExposure(sub)&&SeestarStackFilename(frame.OriginalName,out namedCount,out namedSeconds)&&namedCount==frame.StackCount)sub=namedSeconds;
    if(!explicitTotal&&Regex.IsMatch(comment??"",@"total|integrat",RegexOptions.IgnoreCase)){total=reported;explicitTotal=PositiveExposure(total);}
    // A duration explicitly identified as per-frame, or matching a separately
    // recorded sub duration, can be multiplied by a real combined-frame count.

@@ -104,12 +104,13 @@ namespace AstroArchive {
    }
    // Last resort: a selected observing town supplies historical timezone/DST
    // rules for a real but unzoned capture time. Explicit metadata always wins.
-   if(settings!=null&&settings.ObservingCityId.HasValue&&string.IsNullOrEmpty(frame.TimeZoneId)&&!(frame.TimeSource??"").StartsWith("Capture clock ",StringComparison.OrdinalIgnoreCase)){
+   int? zoneCity=CaptureSite.ZoneCity(frame,settings);
+   if(zoneCity.HasValue&&string.IsNullOrEmpty(frame.TimeZoneId)&&!(frame.TimeSource??"").StartsWith("Capture clock ",StringComparison.OrdinalIgnoreCase)){
     string standard=image==null||image.Headers==null?"":new FitsHeader{Values=image.Headers}.Get("TIMESYS");
     if(standard.Length>0&&!standard.Equals("UTC",StringComparison.OrdinalIgnoreCase))return null;
     string text=frame.Observed;DateTime local;
     if(!string.IsNullOrEmpty(text)&&Regex.IsMatch(text,@"[T ]\d\d:\d\d")&&!Regex.IsMatch(text,@"(?:Z|[+-]\d\d:\d\d)$",RegexOptions.IgnoreCase)&&DateTime.TryParse(text,CultureInfo.InvariantCulture,DateTimeStyles.None,out local)){
-     var zone=CityTimeZones.ForCity(settings.ObservingCityId.Value);local=DateTime.SpecifyKind(local,DateTimeKind.Unspecified);
+     var zone=CityTimeZones.ForCity(zoneCity.Value);local=DateTime.SpecifyKind(local,DateTimeKind.Unspecified);
      if(zone!=null&&!zone.IsInvalidTime(local)&&!zone.IsAmbiguousTime(local))return TimeZoneInfo.ConvertTimeToUtc(local,zone);
     }
    }
@@ -131,8 +132,7 @@ namespace AstroArchive {
    }
    string body=frame==null||IsCalibration(frame)?null:ObservationTargets.NamedSolar(frame.Target)??(Catalog.IsAmbiguous(frame.Target)?ObservationTargets.NamedSolar(ObservationTargets.ModeBody(frame.ObservationMode)):null);sky.Body=body;
    sky.Utc=CaptureUtc(frame,settings);bool site=false;string place="";
-   if(frame!=null&&frame.Latitude.HasValue&&frame.Longitude.HasValue&&ObservingCities.ValidCoordinates(frame.Latitude.Value,frame.Longitude.Value)){sky.Latitude=frame.Latitude.Value;sky.Longitude=frame.Longitude.Value;site=true;place="Capture location";}
-   else if(settings!=null&&settings.Latitude.HasValue&&settings.Longitude.HasValue&&ObservingCities.ValidCoordinates(settings.Latitude.Value,settings.Longitude.Value)){sky.Latitude=settings.Latitude.Value;sky.Longitude=settings.Longitude.Value;site=true;place=settings.ObservingCity??"Saved observing location";}
+   var captureSite=CaptureSite.For(frame,settings);if(captureSite!=null){sky.Latitude=captureSite.Latitude;sky.Longitude=captureSite.Longitude;site=true;place=captureSite.Label;}
    sky.HasHorizon=site&&sky.Utc.HasValue;sky.Orientation=new SkyOrientation(sky.Utc,sky.HasHorizon,sky.Latitude,sky.Longitude);
    if(sky.Utc.HasValue)sky.TimeLabel=sky.Utc.Value.ToString("dd/MM/yy HH:mm:ss 'UTC'",CultureInfo.InvariantCulture);
    else{var date=frame==null?null:CaptureSessions.Date(frame);sky.TimeLabel=date==null?"Capture time unknown":date.Text+" · time / timezone unknown";}

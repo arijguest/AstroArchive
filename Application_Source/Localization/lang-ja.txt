@@ -2087,3 +2087,19 @@ Eclipse coverage over time	食の推移
 Eclipse times are for the observing location.	食の時刻は観測地のものです。
 Eclipse times run from the Moon entering Earth's outer shadow to leaving it.	食の時刻は、月が地球の半影に入ってから出るまでです。
 Eclipse coverage comes from the bundled Moon and Sun models at the recorded time; check the capture clock if it looks wrong.	食分は、同梱の月と太陽のモデルで記録時刻から計算しています。おかしい場合は撮影時刻を確認してください。
+Set capture town / city…	撮影地の市区町村を設定…
+Capture town / city	撮影地の市区町村
+Choose where these files were captured. A chosen town or city replaces any capture location recorded in the files. Without a choice, the recorded location is used, then your observing town / city from Settings.	これらのファイルの撮影地を選択します。選択した市区町村は、ファイルに記録された撮影地より優先されます。選択しない場合は記録された撮影地、次に設定の観測地の市区町村が使われます。
+Location used for sky views, Stellarium and eclipse times.	星空表示、Stellarium、食の時刻に使う場所です。
+Use default location	既定の場所を使用
+Default location	既定の場所
+Save location	場所を保存
+Mixed	混在
+Not set	未設定
+Recorded in file metadata	ファイルのメタデータに記録
+Settings default	設定の既定値
+Chosen capture town / city	選択した撮影地の市区町村
+Target below horizon	対象が地平線下
+Set the capture town / city for this file (right-click › Set capture town / city…), or correct the capture timezone in metadata.	このファイルの撮影地の市区町村を設定するか（右クリック › 撮影地の市区町村を設定…）、メタデータで撮影タイムゾーンを修正してください。
+Set capture town / city for selected…	選択項目の撮影地の市区町村を設定…
+Targets below the horizon at the predicted capture time usually need the capture town / city or timezone set.	推定撮影時刻に地平線下にある対象は、通常、撮影地の市区町村またはタイムゾーンの設定が必要です。

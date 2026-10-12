@@ -24,6 +24,9 @@ namespace AstroArchive {
     Check(TargetParameters.Orbit(TargetParameters.For("mercury"))=="0.387 AU from the Sun · 88 days","Mercury orbit formatted wrongly");
     var sun=TargetParameters.For("SUN");Check(sun!=null&&!sun.HasOrbit&&sun.Moons.Length==0&&TargetParameters.Mass(sun)=="1.989 × 10³⁰ kg"&&TargetParameters.Diameter(sun)=="1,392,700 km","Sun should show only diameter and mass");
     Check(TargetParameters.For("M31")==null&&TargetParameters.For(null)==null,"Non-solar targets must have no parameters");
+    var moon=TargetParameters.For("MOON");Check(moon!=null&&moon.HasOrbit&&TargetParameters.Orbit(moon)=="384,400 km from Earth · 27.32 days"&&TargetParameters.DistanceRange(moon)=="363,300 to 405,500 km"&&TargetParameters.Diameter(moon)=="3,475 km"&&TargetParameters.Mass(moon)=="7.346 × 10²² kg"&&TargetParameters.Gravity(moon)=="1.62 m/s²","Moon parameters wrong");
+    Check(TargetParameters.ShowsMoonCount(TargetParameters.For("SATURN"))&&TargetParameters.For("SATURN").MoonCount==274&&!TargetParameters.ShowsMoonCount(TargetParameters.For("EARTH"))&&!TargetParameters.ShowsMoonCount(TargetParameters.For("MERCURY")),"Moon counts wrong");
+    var halleyOrbit=CometInfo.Orbit("1P");Check(CometInfo.SemiMajorAxis(halleyOrbit)=="17.9 AU"&&CometInfo.PerihelionSpeed(halleyOrbit)=="55.1 km/s"&&!CometInfo.ShowsEscapeSpeed(halleyOrbit)&&!CometInfo.HasSemiMajorAxis(CometInfo.Orbit("C/1996 B2"))&&CometInfo.ShowsEscapeSpeed(CometInfo.Orbit("2I"))&&CometInfo.EscapeSpeed(CometInfo.Orbit("2I"))=="32.3 km/s","Comet derived orbit facts wrong");
    });
    var catalog=new TargetInfoCatalog(Path.Combine(AppDomain.CurrentDomain.BaseDirectory,"TargetInfo.zip"));
    Test("Target info resolves complete aliases and preserves disputed identities",()=>{

@@ -16,6 +16,31 @@ namespace AstroArchive {
    dialog.Button("Choose town / city…",()=>{var picker=new CityPicker(dialog.Window,choice.CityLabel);try{if(picker.Show()){choice.Select(picker.SelectedCity);label.Text=choice.Label;}}finally{picker.Dispose();}});
    dialog.Button("Clear observing location",()=>{choice.Clear();label.Text=choice.Label;});return choice;
   }
+  // A chosen town/city replaces recorded capture coordinates; clearing it returns
+  // each file to its metadata location, then the observing town in Settings.
+  sealed class CaptureSiteEdit {public ObservingCity City;public bool UseDefault;}
+  CaptureSiteEdit ChooseCaptureSite(List<Frame> selected){
+   var dialog=new FormWindow(Window,"Capture town / city",650,480);var edit=new CaptureSiteEdit();
+   dialog.Text(selected.Count==1?selected[0].OriginalName:selected.Count+" selected files",true);
+   dialog.Text("Choose where these files were captured. A chosen town or city replaces any capture location recorded in the files. Without a choice, the recorded location is used, then your observing town / city from Settings.");
+   var current=selected.Select(f=>CaptureSite.Describe(f,settings)).Distinct().ToList();
+   var label=dialog.Input("Town / city",current.Count==1?current[0]:"Mixed");label.IsReadOnly=true;UiHelp.Hint(label,"Location used for sky views, Stellarium and eclipse times.");
+   dialog.Button("Choose town / city…",()=>{var picker=new CityPicker(dialog.Window,edit.City==null?selected.Select(f=>f.CaptureCity).FirstOrDefault(c=>!string.IsNullOrEmpty(c)):edit.City.Label);try{if(picker.Show()){edit.City=picker.SelectedCity;edit.UseDefault=false;label.Text=edit.City.Label;}}finally{picker.Dispose();}});
+   var reset=dialog.Button("Use default location",()=>{edit.City=null;edit.UseDefault=true;label.Text="Default location";});reset.IsEnabled=selected.Any(CaptureSite.HasChoice);
+   dialog.Accept("Save location",()=>true);
+   return dialog.Show()&&(edit.City!=null||edit.UseDefault)?edit:null;
+  }
+  async void SetCaptureSite(bool imported,List<Frame> selected){
+   if(repo==null||RepositoryOperationBlocked||metadataPreviewSuspended||SearchBlocked(imported?"ImportSearchBox":"SearchBox"))return;selected=selected.Where(f=>f.Status!="Deleted").ToList();if(selected.Count==0)return;var repository=repo;
+   try{
+    await SuspendMetadataPreviews();if(closing||repo!=repository||RepositoryOperationBlocked)return;
+    var edit=ChooseCaptureSite(selected);if(edit==null)return;
+    await RunOperation(ct=>{
+     foreach(var original in selected){ct.ThrowIfCancellationRequested();var updated=original.Clone();CaptureSite.Apply(updated,edit.City);if(!PendingImport(original,imported))repo.Refile(updated,ct);if(imported){int row=plan.Frames.IndexOf(original);if(row>=0)plan.Frames[row]=updated;}}
+     return selected.Count+" captures updated · "+(edit.City==null?"default location":edit.City.Name)+".";
+    },message=>{if(imported)FilterImports();RefreshSkyPreviews();L("StatusLabel").Text=message;});
+   }finally{ResumeMetadataPreviews();}
+  }
  }
  public sealed class CityPicker:IDisposable {
   readonly FormWindow dialog;readonly DispatcherTimer debounce;int generation;bool closed;

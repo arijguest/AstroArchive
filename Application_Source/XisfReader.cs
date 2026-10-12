@@ -141,8 +141,10 @@ namespace AstroArchive {
                     bool attached=false;
                     string[] attachment=location.Split(':');
                     if(attachment.Length==3&&attachment[0]=="attachment"&&long.TryParse(attachment[1],out offset)&&long.TryParse(attachment[2],out bytes)) {
-                        if(offset<16+length||bytes<0||offset>stream.Length||bytes>stream.Length-offset)throw new InvalidDataException("XISF attachment escapes the file.");
-                        attached=true;
+                        if(offset<16+length||bytes<0)throw new InvalidDataException("Invalid XISF attachment.");
+                        // A short file keeps its XML metadata; the image is never decoded.
+                        if(offset>stream.Length||bytes>stream.Length-offset)result.DataIssue="XISF image data is truncated ("+A(image,"id","Image "+n)+").";
+                        else attached=true;
                     }
                     bool inline=location=="inline:base64"||(location=="embedded"&&image.Elements().Any(e=>e.Name.LocalName=="Data"&&A(e,"encoding")=="base64"));
                     string codec=compression.Split(':')[0].Replace("+sh","");
@@ -152,7 +154,7 @@ namespace AstroArchive {
                     };
                     result.Images.Add(descriptor);
                     if(n==1)result.Header=header;
-                    if(!descriptor.Numeric)result.Note="An XISF image uses an unsupported attachment, sample format, subblock layout or optional compression codec. Its original file can be archived.";
+                    if(!descriptor.Numeric)result.Note=result.DataIssue??"An XISF image uses an unsupported attachment, sample format, subblock layout or optional compression codec. Its original file can be archived.";
                 }
                 if(result.Images.Count==0)throw new InvalidDataException("XISF contains no image.");
                 return result;

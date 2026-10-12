@@ -89,6 +89,12 @@ namespace AstroArchive {
   // orbits it depends too strongly on the rounded eccentricity.
   public static bool ShowsAphelion(CometOrbit orbit){return orbit.PeriodYears>0&&orbit.PeriodYears<=200;}
   public static string Aphelion(CometOrbit orbit){double q=orbit.Q*(1+orbit.E)/(1-orbit.E);return Localization.F("{0} AU from the Sun",q.ToString(q<10?"0.0#":"0.#",CultureInfo.InvariantCulture));}
+  // Derived from perihelion distance and eccentricity (vis-viva, Sun's GM; 29.785 km/s at 1 AU).
+  public static bool HasSemiMajorAxis(CometOrbit orbit){return orbit.E<0.9995;}
+  public static string SemiMajorAxis(CometOrbit orbit){double a=orbit.Q/(1-orbit.E);return Localization.F("{0} AU",a.ToString(a<10?"0.0#":a<1000?"0.#":"#,##0",CultureInfo.InvariantCulture));}
+  public static string PerihelionSpeed(CometOrbit orbit){return Localization.F("{0} km/s",(29.785*Math.Sqrt((1+orbit.E)/orbit.Q)).ToString("0.#",CultureInfo.InvariantCulture));}
+  public static bool ShowsEscapeSpeed(CometOrbit orbit){return orbit.E>1.002;}
+  public static string EscapeSpeed(CometOrbit orbit){return Localization.F("{0} km/s",(29.785*Math.Sqrt((orbit.E-1)/orbit.Q)).ToString("0.#",CultureInfo.InvariantCulture));}
   public static string Eccentricity(CometOrbit orbit){return orbit.E.ToString("0.0###",CultureInfo.InvariantCulture);}
   // Short-period orbits are solved near an older perihelion, so only one-off and
   // long-period passages show a date.
