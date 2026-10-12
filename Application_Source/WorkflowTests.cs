@@ -9,7 +9,7 @@ namespace AstroArchive {
    Test("Canonical target IDs unify old labels, catalogue aliases and combined names",()=>{
     var rows=new[]{"Heart Nebula","IC 1805","IC1805 · Heart Nebula"}.Select(s=>Util.Deserialize<Frame>("{\"Target\":\""+s+"\"}")).ToList();
     Check(rows.Select(f=>f.Target).Distinct().Single()=="IC1805"&&rows.All(f=>f.CommonName=="Heart Nebula"&&f.ObjectId=="IC1805"),"Heart categories did not merge");
-    foreach(string name in new[]{"M 051","NGC5194","Whirlpool Galaxy","M51 (Whirlpool Galaxy)"})Check(new Frame{Target=name}.TargetLabel=="M51 · Whirlpool Galaxy","Whirlpool ID/name mismatch: "+name);
+    foreach(string name in new[]{"M 051","NGC5194","Whirlpool Galaxy","M51 (Whirlpool Galaxy)"})Check(new Frame{Target=name}.TargetLabel=="M 51 · Whirlpool Galaxy","Whirlpool ID/name mismatch: "+name);
     Check(new Frame{Target="My custom field"}.Target=="My custom field"&&new Frame{Target="Calibration"}.Target=="Calibration","Custom or calibration label changed");
     Check(new Frame{Target="M31 and M33"}.Target=="M31 and M33","Conflicting targets were merged");
    });

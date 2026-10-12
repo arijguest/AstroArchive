@@ -26,8 +26,8 @@ namespace AstroArchive {
    });
    Test("Concise target rows keep identity counts and honest exposure totals in tooltips",()=>{
     var rows=new[]{new Frame{Target="M42",Kind="Light",Exposure=3600},new Frame{Target="M42",Kind="Light",Exposure=60},new Frame{Target="M42",Kind="Light"},new Frame{Target="M42",Kind="Stack",Exposure=7200},new Frame{Target="M42",Kind="Dark",Exposure=900}};
-    var target=TargetNavigation.Build(rows).Single(s=>s.Name=="M42");Check(target.DisplayName=="M42 - Orion Nebula"&&target.FileCount=="5"&&target.Subline==TargetNavigation.Identifier("M42")+" · 3h 1m","Short row lost identity or failed to include standalone stack exposure");
-    Check(target.Tooltip=="M42\n3 subs · 1 stack"&&!target.Tooltip.Contains("files")&&!target.Tooltip.Contains("Nebula")&&!target.Tooltip.Contains("sessions"),"Concise tooltip lost counts or retained exposure, names, types or file counts");
+    var target=TargetNavigation.Build(rows).Single(s=>s.Name=="M42");Check(target.DisplayName=="M 42 - Orion Nebula"&&target.FileCount=="5"&&target.Subline==TargetNavigation.Identifier("M42")+" · 3h 1m","Short row lost identity or failed to include standalone stack exposure");
+    Check(target.Tooltip=="M 42\n3 subs · 1 stack"&&!target.Tooltip.Contains("files")&&!target.Tooltip.Contains("Nebula")&&!target.Tooltip.Contains("sessions"),"Concise tooltip lost counts or retained exposure, names, types or file counts");
     var stack=TargetNavigation.Build(new[]{new Frame{Target="C/2023 A3",Kind="Stack",Exposure=7200}})[1];Check(stack.Subline=="2h"&&stack.Tooltip=="C/2023 A3\n0 subs · 1 stack","Standalone stack total was omitted or tooltip showed exposure");
     Check(TargetNavigation.Exposure(20)=="20s"&&TargetNavigation.Exposure(90)=="1m 30s"&&TargetNavigation.Exposure(3600)=="1h","Compact exposure labels misleading");
     var comet=TargetNavigation.Build(new[]{new Frame{Target="C/2023 A3 (Tsuchinshan-ATLAS)",Kind="Light",Exposure=30}})[1];Check(comet.DisplayName=="C/2023 A3 (Tsuchinshan-ATLAS)"&&comet.Subline=="30s"&&comet.Tooltip.StartsWith("C/2023 A3\n")&&!comet.Tooltip.Contains("Tsuchinshan"),"Short comet tooltip lost its ID or retained the full name");
@@ -72,8 +72,8 @@ namespace AstroArchive {
    });
    Test("Target rows omit repeated catalogue IDs without merging shared names",()=>{
     var targets=TargetNavigation.Build(new[]{new Frame{Target="IC434"},new Frame{Target="NGC2024"}});
-    Check(targets.Single(t=>t.Name=="IC434").DisplayName=="IC434 - Flame Nebula","IC434 repeats its ID after the common name");
-    Check(targets.Single(t=>t.Name=="NGC2024").DisplayName=="NGC2024 - Flame Nebula"&&targets.Count==3,"Shared display names merged catalogue identities");
+    Check(targets.Single(t=>t.Name=="IC434").DisplayName=="IC 434 - Flame Nebula","IC434 repeats its ID after the common name");
+    Check(targets.Single(t=>t.Name=="NGC2024").DisplayName=="NGC 2024 - Flame Nebula"&&targets.Count==3,"Shared display names merged catalogue identities");
     Check(Catalog.KnownName(Catalog.CommonName("IC434"))=="IC434"&&Catalog.KnownName("Flame Nebula")=="NGC2024","Display formatting changed name resolution");
    });
   }

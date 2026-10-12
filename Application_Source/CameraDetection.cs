@@ -13,7 +13,7 @@ namespace AstroArchive {public static class CameraDetection {
   if(Regex.IsMatch(frame.CameraEvidence??"",@"conflict|^User|^Saved",RegexOptions.IgnoreCase)||(frame.MetadataConflicts??new List<string>()).Any(c=>c.StartsWith("Camera:",StringComparison.OrdinalIgnoreCase)))return false;
   // Any identified object is shot with the telephoto camera; the Milky Way (and meteors) are wide-field subjects.
   string group=TargetNavigation.Group(frame.Target);if(Catalog.IsAmbiguous(frame.Target)||Regex.IsMatch(frame.Target??"",@"^\s*unidentified\b",RegexOptions.IgnoreCase)||new[]{"","Calibration","Unidentified","Meteors"}.Contains(group)||WideField(frame.Target))return false;
-  frame.Camera="Telephoto";frame.CameraEvidence="Target-based default: "+TargetNavigation.TargetId(frame.Target)+" (not a detected camera marker)";
+  frame.Camera="Telephoto";frame.CameraEvidence="Target-based default: "+TargetNavigation.RecordedId(frame.Target)+" (not a detected camera marker)";
   if(frame.Facts==null)frame.Facts=new Dictionary<string,MetadataFact>();frame.Facts["Camera"]=new MetadataFact{Value=frame.Camera,Raw=frame.Target,Source=frame.CameraEvidence};
   return true;
  }

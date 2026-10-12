@@ -32,7 +32,7 @@ namespace AstroArchive {
    var scores=new Dictionary<string,double>(StringComparer.OrdinalIgnoreCase);
    foreach(var name in names)foreach(string probe in probes){int length=Math.Max(probe.Length,name.Key.Length),limit=Math.Min(3,(int)Math.Floor(length*0.16));if(Math.Abs(probe.Length-name.Key.Length)>limit)continue;int edits=Distance(probe,name.Key);if(edits>limit)continue;double score=1.0-(double)edits/length,previous;if(!scores.TryGetValue(name.Value,out previous)||score>previous)scores[name.Value]=score;}
    var ranked=scores.OrderByDescending(p=>p.Value).ThenBy(p=>p.Key,StringComparer.OrdinalIgnoreCase).ToList();if(ranked.Count==0)return null;if(ranked.Count>1&&ranked[0].Value-ranked[1].Value<0.06){evidence="Target name resembles multiple objects; identity left unresolved";return null;}
-   evidence="Object from "+(ranked[0].Value==1?"name matching":"fuzzy name matching")+": "+Catalog.Label(ranked[0].Key)+" ("+(ranked[0].Value*100).ToString("0",CultureInfo.InvariantCulture)+"% name similarity)";return ranked[0].Key;
+   evidence="Object from "+(ranked[0].Value==1?"name matching":"fuzzy name matching")+": "+Catalog.RecordLabel(ranked[0].Key)+" ("+(ranked[0].Value*100).ToString("0",CultureInfo.InvariantCulture)+"% name similarity)";return ranked[0].Key;
   }
  }
 }
