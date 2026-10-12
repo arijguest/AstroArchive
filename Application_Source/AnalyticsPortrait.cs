@@ -24,7 +24,7 @@ namespace AstroArchive {
   }
   static AnalyticsPage CompactSocialPage(AnalyticsSnapshot data,int index,int part,int parts,List<AnalyticsValue> values,bool dark,double height){
    var report=data.Reports[index];var p=new AnalyticsPage{Title=report.Title,CanvasWidth=1080,CanvasHeight=height,Background=dark?"#0C1220":"#FFFFFF"};
-   Box(p,0,0,1080,height,"#FFFFFF");Box(p,0,0,1080,6,Accent);p.Marks.Add(new AnalyticsMark{Kind="logo",X=60,Y=28,Width=64,Height=64});
+   Box(p,0,0,1080,height,"#FFFFFF");Box(p,0,0,1080,6,Accent);p.Marks.Add(new AnalyticsMark{Kind="logo",X=60,Y=34.4,Width=51.2,Height=51.2});
    Text(p,"AstroArchive",140,44,26,Ink,true);Text(p,(index+1).ToString("00")+" / 06"+(parts>1?" · "+(part+1)+"/"+parts:""),parts>1?850:932,50,16,Accent,true);
    Text(p,Fit(report.Title,960,44),60,120,44,Ink,true,report.Title);Lines(p,report.Description+(parts>1?" · Groups "+(part*8+1)+"–"+Math.Min((part+1)*8,report.Values.Count)+" of "+report.Values.Count:""),60,180,120,18,Muted,2,960);
    Box(p,60,244,960,86,"#F5F7FC");string[] metrics={ArchiveAnalytics.Number(data.RepositorySeconds/3600)+" h",data.RepositoryCaptures.ToString("N0",CultureInfo.InvariantCulture),data.RepositoryTargets.ToString("N0",CultureInfo.InvariantCulture)},captions={"REPOSITORY INTEGRATION","LIGHT FRAMES","REPOSITORY TARGETS"};
@@ -45,7 +45,7 @@ namespace AstroArchive {
    var report=data.Reports[index];
    var p=new AnalyticsPage{Title=report.Title,CanvasWidth=1080,CanvasHeight=1920,Background=dark?"#0C1220":"#FFFFFF"};
    Box(p,0,0,p.CanvasWidth,p.CanvasHeight,"#FFFFFF");Box(p,0,0,p.CanvasWidth,8,Accent);
-   p.Marks.Add(new AnalyticsMark{Kind="logo",X=80,Y=112,Width=88,Height=88});
+   p.Marks.Add(new AnalyticsMark{Kind="logo",X=80,Y=120.8,Width=70.4,Height=70.4});
    Text(p,"AstroArchive",186,139,34,Ink,true);
    Text(p,(index+1).ToString("00",CultureInfo.InvariantCulture)+" / 06"+(parts>1?" · "+(part+1)+"/"+parts:""),parts>1?800:866,150,18,Accent,true);
    Lines(p,report.Title,80,238,60,52,Ink,2,920,true);
