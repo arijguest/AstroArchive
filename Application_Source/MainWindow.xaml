@@ -968,7 +968,7 @@
        <TextBlock Text="Originals kept · Analysis off" TextWrapping="Wrap" Margin="0,8,0,0" Foreground="{DynamicResource Muted}" x:Name="ImportPolicyLabel" />
       </StackPanel>
      </Border>
-     <Grid Grid.Row="2" Margin="0,0,0,10">
+     <Grid Grid.Row="2" Margin="0,10,0,10">
       <Grid.RowDefinitions>
        <RowDefinition Height="Auto" />
        <RowDefinition Height="Auto" />
@@ -990,7 +990,7 @@
        <Button Grid.Column="3" x:Name="AssignUnknownTargetButton" Content="Set Unknown targets…" Margin="8,0,0,0"/>
       </Grid>
       <StackPanel Grid.Row="1" Margin="2,8,0,0">
-       <TextBlock x:Name="ImportSummaryLabel" TextWrapping="Wrap" />
+       <TextBlock x:Name="ImportSummaryLabel" Visibility="Collapsed" Foreground="{DynamicResource Muted}" FontSize="{DynamicResource UiFontSmall}" TextWrapping="Wrap" />
        <TextBlock x:Name="ScanLabel" Text="Choose a source folder and scan to begin." FontSize="{DynamicResource UiFontSmall}" Foreground="{DynamicResource Muted}" TextWrapping="Wrap" Margin="0,6,0,0" />
       </StackPanel>
      </Grid>
