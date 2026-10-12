@@ -65,6 +65,24 @@ namespace AstroArchive {
     Check(TargetInfoCatalog.Normalize("NGC 6992A")!="NGC:6992","Object suffix lost");
     Check(TargetInfoCatalog.Normalize("C/2023 A3")!="NAME:C2023A3","Comet slash lost");
    });
+   Test("Comets open a page with an overview, orbit and JPL source",()=>{
+    Check(CometTargets.Designation("C/2023 A3 (Tsuchinshan-ATLAS)")=="C/2023 A3"&&CometTargets.Designation("12P/Pons-Brooks")=="12P"&&CometTargets.Designation("2I/Borisov")=="2I"&&CometTargets.Designation("C/2013 US10 (Catalina)")=="C/2013 US10"&&CometTargets.Designation("M31")==null&&CometTargets.Designation("NEOWISE")==null,"Comet designation misread");
+    foreach(var pair in new[]{new[]{"C/2023 A3 (Tsuchinshan-ATLAS)","C/2023 A3"},new[]{"12P/Pons-Brooks","12P"},new[]{"2I/Borisov","2I"},new[]{"C/2019 Q4 (Borisov)","2I"},new[]{"NEOWISE","C/2020 F3"},new[]{"C/1995 O1 (Hale-Bopp)","C/1995 O1"},new[]{"C/2022 E3 (ZTF)","C/2022 E3"},new[]{"3I/ATLAS","3I"},new[]{"C/2099 B12 (Example)","C/2099 B12"}}){
+     var result=catalog.Find(pair[0],CancellationToken.None);Check(result.Status=="matched"&&result.Cards.Single().id==pair[1],"Wrong comet page for "+pair[0]+": "+string.Join(",",result.Cards.Select(c=>c.id)));
+     var card=result.Cards.Single();Check(CometInfo.IsComet(card)&&TargetInfoPresentation.DisplaySummary(card).Length>=80&&TargetInfoPresentation.Imaging(card)!=null,"Comet page is empty for "+pair[0]);
+     var sources=TargetInfoPresentation.Sources(card,TargetDescriptions.For(card.id)!=null);Check(!sources.Any(s=>s.Url.Contains("simbad")),"Comet cites SIMBAD: "+pair[0]);
+     Check((CometInfo.Orbit(card.id)!=null)==sources.Any(s=>s.Url.StartsWith("https://ssd.jpl.nasa.gov/")),"Comet orbit and its JPL source disagree for "+pair[0]);
+    }
+    foreach(string id in new[]{"1P","2P","9P","12P","21P","29P","55P","67P","73P","103P","109P","1I","2I","C/1995 O1","C/2006 P1","C/2014 Q2","C/2017 K2","C/2019 Y4","C/2020 F3","C/2023 A3","C/2025 A6"}){
+     var card=catalog.ById(id,CancellationToken.None).Cards.Single();Check(CometInfo.IsComet(card),id+" is not treated as a comet");
+     Check(TargetDescriptions.For(id)!=null&&TargetDescriptions.For(id).Overview.Length>=100&&CometInfo.Orbit(id)!=null,id+" lacks a written overview or orbit");
+    }
+    Check(TargetInfoPresentation.DisplaySummary(catalog.Find("C/2099 B12",CancellationToken.None).Cards.Single()).Contains("12th comet reported in the second half of January 2099"),"Designation not explained");
+    Check(TargetInfoPresentation.DisplaySummary(CometInfo.Card("Comet ATLAS")).Contains("designation"),"Name-only comet lacks guidance");
+    var halley=CometInfo.Orbit("1P");Check(CometInfo.Period(halley)=="75.9 years per orbit"&&CometInfo.Perihelion(halley)=="0.575 AU from the Sun"&&CometInfo.ClassLabel(halley)=="Halley-type"&&CometInfo.ShowsPerihelionDate(halley)&&CometInfo.PerihelionDate(halley)=="8 Feb 1986","Halley orbit formatted wrongly");
+    Check(!CometInfo.ShowsPerihelionDate(CometInfo.Orbit("67P"))&&CometInfo.ClassLabel(CometInfo.Orbit("2I"))=="Hyperbolic (interstellar)"&&CometInfo.ClassLabel(CometInfo.Orbit("C/2023 A3"))=="Near-parabolic","Comet orbit classes wrong");
+    Check(!CometInfo.IsComet(catalog.Find("M31",CancellationToken.None).Cards.Single())&&!CometInfo.IsComet(catalog.Find("Jupiter",CancellationToken.None).Cards.Single())&&catalog.Find("Rosette field",CancellationToken.None).Status=="not_found","Non-comets treated as comets");
+   });
    Test("Target info cancels obsolete loads and fails safely without a pack",()=>{
     using(var cancellation=new CancellationTokenSource()){cancellation.Cancel();bool canceled=false;try{catalog.Find("M31",cancellation.Token);}catch(OperationCanceledException){canceled=true;}Check(canceled,"Canceled card lookup ran");}
     bool missing=false;try{new TargetInfoCatalog(Path.Combine(root,"missing-info.zip")).Find("M31",CancellationToken.None);}catch(IOException){missing=true;}Check(missing,"Missing pack silently matched");

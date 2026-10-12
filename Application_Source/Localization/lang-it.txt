@@ -1986,3 +1986,16 @@ Solar eclipse	Eclissi solare
 Lunar eclipse	Eclissi lunare
 Solar Eclipse	Eclissi solare
 Lunar Eclipse	Eclissi lunare
+Orbit type	Tipo di orbita
+Perihelion	Perielio
+Perihelion date	Data del perielio
+Orbital period	Periodo orbitale
+Eccentricity	Eccentricità
+{0} AU from the Sun	{0} UA dal Sole
+{0} years per orbit	{0} anni per orbita
+Halley-type	Tipo Halley
+Jupiter-family	Famiglia di Giove
+Encke-type	Tipo Encke
+Long-period	Lungo periodo
+Near-parabolic	Quasi parabolica
+Hyperbolic (interstellar)	Iperbolica (interstellare)

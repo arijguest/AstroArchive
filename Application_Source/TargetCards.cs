@@ -20,7 +20,7 @@ namespace AstroArchive {
    double minutes=Math.Round(seconds/60);int hours=(int)(minutes/60),rest=(int)(minutes%60);return hours==0?rest+" m":rest==0?hours+" h":hours+" h "+rest+" m";
   }
   // Month names follow the interface language; English keeps the invariant "1 Oct 2026".
-  static string Day(DateTime date,bool year){
+  internal static string Day(DateTime date,bool year){
    string code=Localization.Current;if(code=="ja"||code=="zh-Hans")return date.ToString(year?"yyyy年M月d日":"M月d日",CultureInfo.InvariantCulture);
    var culture=Localization.English||Localization.Pseudo?CultureInfo.InvariantCulture:CultureInfo.GetCultureInfo(code);
    return date.ToString(code=="de"?(year?"d. MMM yyyy":"d. MMM"):(year?"d MMM yyyy":"d MMM"),culture);
