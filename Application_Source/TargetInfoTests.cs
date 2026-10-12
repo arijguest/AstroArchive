@@ -18,6 +18,13 @@ namespace AstroArchive {
     Check(TargetInfoPresentation.Tagline(new TargetInfoCard{id="M31",name="Andromeda Galaxy",type_label="Spiral galaxy"},"Andromeda")=="M31 · Spiral galaxy · Andromeda","Tagline dropped the ID of a named object");
     var sources=TargetInfoPresentation.Sources(new TargetInfoCard{id="M42"},true);Check(sources.Any(x=>x.Url.EndsWith("/messier-42/"))&&sources.Any(x=>x.Url.Contains("simbad")),"Curated overview sources are missing");
    });
+   Test("Parameters give planets an orbit, size, mass and moons and the Sun only size and mass",()=>{
+    var jupiter=TargetParameters.For("JUPITER");Check(jupiter!=null&&jupiter.HasOrbit&&jupiter.Moons.Contains("Ganymede"),"Jupiter parameters missing");
+    Check(TargetParameters.Orbit(jupiter)=="5.203 AU from the Sun · 11.86 years"&&TargetParameters.Diameter(jupiter)=="142,984 km"&&TargetParameters.Mass(jupiter)=="1.898 × 10²⁷ kg","Jupiter parameters formatted wrongly");
+    Check(TargetParameters.Orbit(TargetParameters.For("mercury"))=="0.387 AU from the Sun · 88 days","Mercury orbit formatted wrongly");
+    var sun=TargetParameters.For("SUN");Check(sun!=null&&!sun.HasOrbit&&sun.Moons.Length==0&&TargetParameters.Mass(sun)=="1.989 × 10³⁰ kg"&&TargetParameters.Diameter(sun)=="1,392,700 km","Sun should show only diameter and mass");
+    Check(TargetParameters.For("M31")==null&&TargetParameters.For(null)==null,"Non-solar targets must have no parameters");
+   });
    var catalog=new TargetInfoCatalog(Path.Combine(AppDomain.CurrentDomain.BaseDirectory,"TargetInfo.zip"));
    Test("Target info resolves complete aliases and preserves disputed identities",()=>{
     foreach(string label in new[]{"M31","Messier 031","NGC 0224","Andromeda Galaxy"}){var result=catalog.Find(label,CancellationToken.None);Check(result.Status=="matched"&&result.Cards.Single().id=="M31","Wrong identity for "+label);}

@@ -1990,7 +1990,13 @@ Compare deep-sky frames across the whole target instead of each session	ディ�
 Nothing to measure	測定するものがありません
 OVERVIEW	概要
 IMAGING NOTES	撮影メモ
-AT A GLANCE	概要データ
+PARAMETERS	パラメータ
+Orbit	軌道
+Diameter	直径
+Mass	質量
+Major moons	主な衛星
+{0} AU from the Sun · {1} days	太陽から{0} au · {1}日
+{0} AU from the Sun · {1} years	太陽から{0} au · {1}年
 SOURCES	出典
 Solar eclipse	日食
 Lunar eclipse	月食

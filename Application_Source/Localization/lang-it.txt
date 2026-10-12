@@ -1974,7 +1974,13 @@ Compare deep-sky frames across the whole target instead of each session	Confront
 Nothing to measure	Niente da misurare
 OVERVIEW	PANORAMICA
 IMAGING NOTES	NOTE DI RIPRESA
-AT A GLANCE	IN SINTESI
+PARAMETERS	PARAMETRI
+Orbit	Orbita
+Diameter	Diametro
+Mass	Massa
+Major moons	Lune principali
+{0} AU from the Sun · {1} days	{0} UA dal Sole · {1} giorni
+{0} AU from the Sun · {1} years	{0} UA dal Sole · {1} anni
 SOURCES	FONTI
 Solar eclipse	Eclissi solare
 Lunar eclipse	Eclissi lunare

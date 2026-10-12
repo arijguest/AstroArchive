@@ -1989,7 +1989,13 @@ Compare deep-sky frames across the whole target instead of each session	按整�
 Nothing to measure	没有可测量的内容
 OVERVIEW	概述
 IMAGING NOTES	拍摄提示
-AT A GLANCE	速览
+PARAMETERS	参数
+Orbit	轨道
+Diameter	直径
+Mass	质量
+Major moons	主要卫星
+{0} AU from the Sun · {1} days	距太阳 {0} AU · {1} 天
+{0} AU from the Sun · {1} years	距太阳 {0} AU · {1} 年
 SOURCES	来源
 Solar eclipse	日食
 Lunar eclipse	月食
