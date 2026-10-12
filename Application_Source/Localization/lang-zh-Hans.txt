@@ -2058,3 +2058,28 @@ Chart types, titles, order, palette, document and export choices are remembered 
 Choose targets in the options panel; adjust any card's image above the preview.	在选项面板中选择目标；在预览上方调整任意卡片的图像。
 Export options · Resolution	导出选项 · 分辨率
 Export options · Timing and video size	导出选项 · 时长和视频大小
+# Sky map clicks and eclipse details
+Total solar eclipse	日全食
+Annular solar eclipse	日环食
+Partial solar eclipse	日偏食
+Total lunar eclipse	月全食
+Partial lunar eclipse	月偏食
+Penumbral lunar eclipse	半影月食
+Sun covered at capture	拍摄时太阳被遮挡
+Moon in Earth's shadow at capture	拍摄时月球位于地球本影中
+Moon in Earth's outer shadow at capture	拍摄时月球位于地球半影中
+Maximum	最大
+Began	开始
+Ended	结束
+Duration	持续时间
+Partial phase	偏食阶段
+Totality	全食
+Annularity	环食
+{#0}% at {1}	{1} 时 {0}%
+Click a constellation to name it, or the Moon, Sun or target for capture details.	点击星座可显示其名称；点击月球、太阳或目标可打开拍摄详情。
+Coverage from first to last contact.	从初亏到复圆的遮挡程度。
+The marker shows the capture.	标记表示拍摄时刻。
+Eclipse coverage over time	食分随时间变化
+Eclipse times are for the observing location.	食的时间以观测地点为准。
+Eclipse times run from the Moon entering Earth's outer shadow to leaving it.	食的时间从月球进入地球半影开始，到离开半影为止。
+Eclipse coverage comes from the bundled Moon and Sun models at the recorded time; check the capture clock if it looks wrong.	遮挡程度由内置的月球和太阳模型按记录时间计算；如看起来不对，请检查拍摄时间。

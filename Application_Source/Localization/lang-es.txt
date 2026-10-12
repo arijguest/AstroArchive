@@ -2052,3 +2052,28 @@ Chart types, titles, order, palette, document and export choices are remembered 
 Choose targets in the options panel; adjust any card's image above the preview.	Elige los objetos en el panel de opciones; ajusta la imagen de cualquier tarjeta encima de la vista previa.
 Export options · Resolution	Opciones de exportación · Resolución
 Export options · Timing and video size	Opciones de exportación · Tiempos y tamaño del vídeo
+# Sky map clicks and eclipse details
+Total solar eclipse	Eclipse solar total
+Annular solar eclipse	Eclipse solar anular
+Partial solar eclipse	Eclipse solar parcial
+Total lunar eclipse	Eclipse lunar total
+Partial lunar eclipse	Eclipse lunar parcial
+Penumbral lunar eclipse	Eclipse lunar penumbral
+Sun covered at capture	Sol cubierto en la captura
+Moon in Earth's shadow at capture	Luna en la sombra de la Tierra en la captura
+Moon in Earth's outer shadow at capture	Luna en la penumbra de la Tierra en la captura
+Maximum	Máximo
+Began	Inicio
+Ended	Fin
+Duration	Duración
+Partial phase	Fase parcial
+Totality	Totalidad
+Annularity	Fase anular
+{#0}% at {1}	{0} % a las {1}
+Click a constellation to name it, or the Moon, Sun or target for capture details.	Haz clic en una constelación para ver su nombre, o en la Luna, el Sol o el objeto para ver los detalles de la captura.
+Coverage from first to last contact.	Cobertura desde el primer hasta el último contacto.
+The marker shows the capture.	El marcador indica la captura.
+Eclipse coverage over time	Cobertura del eclipse a lo largo del tiempo
+Eclipse times are for the observing location.	Las horas del eclipse son para el lugar de observación.
+Eclipse times run from the Moon entering Earth's outer shadow to leaving it.	Las horas del eclipse van desde que la Luna entra en la penumbra de la Tierra hasta que sale de ella.
+Eclipse coverage comes from the bundled Moon and Sun models at the recorded time; check the capture clock if it looks wrong.	La cobertura del eclipse procede de los modelos de la Luna y el Sol incluidos, a la hora registrada; comprueba el reloj de la captura si parece incorrecta.

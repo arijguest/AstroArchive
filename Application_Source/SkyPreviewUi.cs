@@ -15,6 +15,9 @@ namespace AstroArchive {
    // The preview collapses and resizes the panel without always resizing the globe (it keeps
    // its last size while hidden), so the panel's own layout changes must reposition reset too.
    var panel=(Grid)Window.FindName(prefix+"PreviewSkyPanel");panel.SizeChanged+=(s,e)=>PositionSkyReset(prefix);panel.IsVisibleChanged+=(s,e)=>{if(panel.IsVisible)Window.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Loaded,new Action(()=>PositionSkyReset(prefix)));};UiHelp.Hint(reset,"Reset sky view.");
+   // Clicking the Moon, Sun or target opens Capture details, where their facts are listed.
+   // Deferred so the click finishes before the light-dismiss popup takes the mouse.
+   globe.DetailsRequested+=(s,e)=>Window.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Input,new Action(()=>{var popup=Window.FindName(prefix+"PreviewDetailsPopup") as System.Windows.Controls.Primitives.Popup;if(popup!=null&&globe.IsVisible)popup.IsOpen=true;}));
    UpdateCaptureSky(prefix,null);
   }
   void UpdateCaptureSky(string prefix,Frame frame){

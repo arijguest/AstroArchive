@@ -131,8 +131,29 @@ half a degree per hour.
 
 Sun and Moon captures taken during an eclipse list under **Solar Eclipse** or
 **Lunar Eclipse** in the target list. This is a display grouping only; the stored
-target, folders and file names are unchanged. Capture details show the kind,
-coverage and magnitude, and the sky map adds a close-up of both discs to scale.
+target, folders and file names are unchanged. The sky map adds a close-up of
+both discs to scale; clicking it, the Moon, the Sun or the target opens Capture
+details.
+
+Capture details open with an eclipse card: a cartoon of the discs at the capture
+time (true sizes and separation, fixed direction), the coverage at capture, and a
+curve of coverage across the whole event with the capture marked. Below it are the
+maximum and its time, when the eclipse began and ended, its duration, and the
+partial phase and totality (or annularity) where they occur. `Eclipses.Event`
+finds these from the same models: it steps out from the capture time to the outer
+contacts, bisects them to a tenth of a second, finds greatest eclipse by golden-
+section search on the disc separation and bisects inner contacts from it. Solar
+contacts are local to the site (first to last contact); lunar contacts are the
+penumbral ones, with umbral and total phases listed separately. Times use the
+capture's timezone, then the observing town's, then UTC. Against NASA's 2025 March
+14 and 2023 October 28 lunar contacts the results agree within 90 seconds (the
+models run on UT without a ΔT correction, so lunar times are about a minute late);
+2024 April 8 totality at greatest eclipse comes out at 4 min 30 s against 4 min 28 s.
+
+Clicking a constellation's lines names it with a pill over its label point. The
+name stays while the map is rotated and is dismissed by clicking the
+constellation, the name or empty sky, pressing Escape, or selecting another
+capture. Constellation names are the IAU Latin names; tables may add translations.
 
 ## Daytime maps and Moon stacks
 

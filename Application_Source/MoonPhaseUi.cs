@@ -45,7 +45,7 @@ namespace AstroArchive {
    // Shown only when there is something to say: a timed capture or a horizon position.
    panel.Visibility=relevant&&(moon!=null||sky.Eclipse!=null||sky.HasPosition&&sky.HasHorizon)?Visibility.Visible:Visibility.Collapsed;
    if(!relevant)return;
-   if(sky.Eclipse!=null)SkyFact(facts,sky.Eclipse.Title,sky.Eclipse.Summary);
+   if(sky.Eclipse!=null)EclipseDetails(facts,sky,frame);
    if(sky.HasPosition&&sky.HasHorizon)SkyFact(facts,"Target elevation",(sky.ApproximatePosition?"≈ ":"")+CaptureSky.Elevation(sky.Altitude,sky.Azimuth));
    if(moon!=null&&moon.HasHorizon&&moon.Altitude<0){SkyFact(facts,"Moon","Not out (below the horizon)");}
    else if(moon!=null){
@@ -55,7 +55,7 @@ namespace AstroArchive {
     if(moon.HasTarget)SkyFact(facts,"Moon to target",(sky.ApproximatePosition?"≈ ":"")+Degrees(moon.TargetSeparation)+" apart");
    }
    note.Text=moon==null?"":!moon.HasHorizon?(sky.Body=="Sun"&&!moon.HasTopocentric?"Choose an observing town / city in Settings > Sky & solving for elevations and solar eclipse detection.":"Choose an observing town / city in Settings > Sky & solving for elevations."):"Geometric elevations at the capture time; refraction excluded.";
-   if(sky.Eclipse!=null)note.Text+=" Eclipse coverage comes from the bundled Moon and Sun models at the recorded time; check the capture clock if it looks wrong.";
+   if(sky.Eclipse!=null)note.Text+=(sky.Eclipse.Solar?" Eclipse times are for the observing location.":" Eclipse times run from the Moon entering Earth's outer shadow to leaving it.")+" Eclipse coverage comes from the bundled Moon and Sun models at the recorded time; check the capture clock if it looks wrong.";
   }
  }
 }

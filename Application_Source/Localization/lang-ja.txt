@@ -2059,3 +2059,28 @@ Chart types, titles, order, palette, document and export choices are remembered 
 Choose targets in the options panel; adjust any card's image above the preview.	カードのターゲットはオプション パネルで選び、各カードの画像はプレビューの上で調整します。
 Export options · Resolution	エクスポート オプション · 解像度
 Export options · Timing and video size	エクスポート オプション · タイミングと動画サイズ
+# Sky map clicks and eclipse details
+Total solar eclipse	皆既日食
+Annular solar eclipse	金環日食
+Partial solar eclipse	部分日食
+Total lunar eclipse	皆既月食
+Partial lunar eclipse	部分月食
+Penumbral lunar eclipse	半影月食
+Sun covered at capture	撮影時の太陽の欠け
+Moon in Earth's shadow at capture	撮影時に地球の本影に入った月
+Moon in Earth's outer shadow at capture	撮影時に地球の半影に入った月
+Maximum	最大
+Began	開始
+Ended	終了
+Duration	継続時間
+Partial phase	部分食
+Totality	皆既
+Annularity	金環
+{#0}% at {1}	{1} に {0}%
+Click a constellation to name it, or the Moon, Sun or target for capture details.	星座をクリックすると名前を表示します。月・太陽・対象をクリックすると撮影の詳細を開きます。
+Coverage from first to last contact.	最初の接触から最後の接触までの食分です。
+The marker shows the capture.	マーカーは撮影時刻を示します。
+Eclipse coverage over time	食の推移
+Eclipse times are for the observing location.	食の時刻は観測地のものです。
+Eclipse times run from the Moon entering Earth's outer shadow to leaving it.	食の時刻は、月が地球の半影に入ってから出るまでです。
+Eclipse coverage comes from the bundled Moon and Sun models at the recorded time; check the capture clock if it looks wrong.	食分は、同梱の月と太陽のモデルで記録時刻から計算しています。おかしい場合は撮影時刻を確認してください。

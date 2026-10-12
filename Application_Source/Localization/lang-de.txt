@@ -2027,3 +2027,28 @@ Chart types, titles, order, palette, document and export choices are remembered 
 Choose targets in the options panel; adjust any card's image above the preview.	Wählen Sie die Ziele im Optionsbereich; passen Sie das Bild einer Karte über der Vorschau an.
 Export options · Resolution	Exportoptionen · Auflösung
 Export options · Timing and video size	Exportoptionen · Zeitablauf und Videogröße
+# Sky map clicks and eclipse details
+Total solar eclipse	Totale Sonnenfinsternis
+Annular solar eclipse	Ringförmige Sonnenfinsternis
+Partial solar eclipse	Partielle Sonnenfinsternis
+Total lunar eclipse	Totale Mondfinsternis
+Partial lunar eclipse	Partielle Mondfinsternis
+Penumbral lunar eclipse	Halbschatten-Mondfinsternis
+Sun covered at capture	Sonne bei Aufnahme bedeckt
+Moon in Earth's shadow at capture	Mond bei Aufnahme im Erdschatten
+Moon in Earth's outer shadow at capture	Mond bei Aufnahme im Halbschatten der Erde
+Maximum	Maximum
+Began	Beginn
+Ended	Ende
+Duration	Dauer
+Partial phase	Partielle Phase
+Totality	Totalität
+Annularity	Ringförmige Phase
+{#0}% at {1}	{0} % um {1}
+Click a constellation to name it, or the Moon, Sun or target for capture details.	Klicken Sie auf ein Sternbild, um seinen Namen zu sehen, oder auf Mond, Sonne oder Ziel für die Aufnahmedetails.
+Coverage from first to last contact.	Bedeckung vom ersten bis zum letzten Kontakt.
+The marker shows the capture.	Die Markierung zeigt die Aufnahme.
+Eclipse coverage over time	Bedeckung der Finsternis im Zeitverlauf
+Eclipse times are for the observing location.	Die Finsterniszeiten gelten für den Beobachtungsort.
+Eclipse times run from the Moon entering Earth's outer shadow to leaving it.	Die Finsterniszeiten reichen vom Eintritt des Mondes in den Halbschatten der Erde bis zu seinem Austritt.
+Eclipse coverage comes from the bundled Moon and Sun models at the recorded time; check the capture clock if it looks wrong.	Die Bedeckung stammt aus den mitgelieferten Mond- und Sonnenmodellen zum aufgezeichneten Zeitpunkt; prüfen Sie die Aufnahmeuhr, falls sie falsch wirkt.
