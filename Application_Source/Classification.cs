@@ -105,16 +105,32 @@ namespace AstroArchive {
   static bool KindHeader(string key){return Regex.IsMatch(key??"",@".*(?:IMAGE|IMAG|FRAME|OBSTYPE|CALTYPE|PROCTYPE|PROCESS|FILETYPE).*",RegexOptions.IgnoreCase|RegexOptions.CultureInvariant);}
   static string CalibrationType(string value){
    string text=Regex.Replace((value??"").ToLowerInvariant(),@"[^a-z0-9]+"," ").Trim();
-   bool darkFlat=Regex.IsMatch(text,@"\b(?:dark\s*flat|flat\s*dark|darkflat|flatdark)\b");
+   bool darkFlat=Regex.IsMatch(text,@"\b(?:dark\s*flats?|flat\s*darks?|darkflats?|flatdarks?)\b");
    if(darkFlat)return "Dark flat";
    if(Regex.IsMatch(text,@"\b(?:dark|darks|dark\s*frame|dark\s*frames|masterdark|darkframe|darkframes)\b"))return "Dark";
    if(Regex.IsMatch(text,@"\b(?:bias|biases|offset|zero|pedestal|biasframe|biasframes|masterbias)\b"))return "Bias";
    if(Regex.IsMatch(text,@"\b(?:(?:dome|sky|twilight)\s*)?flat(?:s|field|fields|frame|frames)?\b"))return "Flat";
    return null;
   }
-  static string CalibrationTypeFromName(string name){
-   string text=Regex.Replace(Regex.Replace(name??"",@"\.(fit|fits|fts)(\.gz)?$","",RegexOptions.IgnoreCase).ToLowerInvariant(),@"[^a-z0-9]+"," ").Trim();
-   return CalibrationType(text);
+  // Folder names count only when every word is calibration vocabulary, so "Dark Nebulae" or "Dark Sky Trip" never mark lights as darks.
+  static readonly HashSet<string> CalibrationFolderWords=new HashSet<string>(new[]{"dark","darks","flat","flats","flatfield","flatfields","skyflat","skyflats","domeflat","domeflats","twilight","sky","dome","bias","biases","offset","offsets","zero","zeros","darkflat","darkflats","flatdark","flatdarks","masterdark","masterdarks","masterbias","darkframe","darkframes","biasframe","biasframes","master","masters","cali","calib","calibration","calibrations","frame","frames","dwarf"},StringComparer.Ordinal);
+  static readonly HashSet<string> ScienceFolderWords=new HashSet<string>(new[]{"light","lights","sub","subs","science","object","objects"},StringComparer.Ordinal);
+  static string[] Words(string value){return Regex.Split((value??"").ToLowerInvariant(),@"[^a-z0-9]+").Where(word=>word.Length>0).ToArray();}
+  static string CalibrationTypeFromStem(string stem){
+   string text=string.Join(" ",Words(stem)),kind=CalibrationType(text);
+   // Offset, zero and pedestal are common words; in a filename they mean bias only as its first word.
+   if(kind=="Bias"&&!Regex.IsMatch(text,@"\b(?:bias|biases|biasframe|biasframes|masterbias)\b")&&!Regex.IsMatch(text,@"^(?:offset|zero|pedestal)s?\b"))kind=CalibrationType(Regex.Replace(text,@"\b(?:offset|zero|pedestal)s?\b"," "));
+   return kind;
+  }
+  internal static string CalibrationTypeFromPath(string path,string stem){
+   string kind=CalibrationTypeFromStem(stem);if(kind!=null)return kind;
+   string[] folders=(path??"").Replace('\\','/').Split('/');
+   for(int i=folders.Length-2;i>=0;i--){
+    string[] words=Words(folders[i]);if(words.Length==0)continue;
+    if(words.All(ScienceFolderWords.Contains))return null;
+    if(words.All(CalibrationFolderWords.Contains)){kind=CalibrationType(string.Join(" ",words));if(kind!=null)return kind;}
+   }
+   return null;
   }
   static double? MatchNumber(string text,string pattern){var m=Regex.Match(text,pattern,RegexOptions.IgnoreCase);double d;return m.Success&&double.TryParse(m.Groups[1].Value,NumberStyles.Float,CultureInfo.InvariantCulture,out d)?(double?)d:null;}
   public static bool FilenameExposureGain(string filename,out double? exposure,out double? gain){
@@ -200,8 +216,7 @@ namespace AstroArchive {
    string declaredKind=declaredKinds.FirstOrDefault();
    bool explicitScience=Regex.IsMatch(type,@"\b(?:light|science|object|object\s*frame|science\s*frame)\b",RegexOptions.IgnoreCase);
    bool master=Regex.IsMatch(name,@"(?:^|[_-])(master|stacked|stack|staced)(?:[_-]|$)")||Regex.IsMatch(name,@"(?:^|[_-])stack[_-]?\d+")||Regex.IsMatch(name+" "+type,@"\bmaster\b|master(?:dark|flat|bias)|stacked",RegexOptions.IgnoreCase);
-   string kindPath=low.Substring(0,low.LastIndexOf('/')+1)+name;
-   string inferredKind=CalibrationTypeFromName(kindPath);
+   string inferredKind=CalibrationTypeFromPath(text,stem);
    string calibrationKind=declaredKind??(explicitScience?null:inferredKind);
    if(calibrationKind=="Dark flat")f.Kind=master?"Master dark flat":"Dark flat";else if(calibrationKind=="Dark")f.Kind=master?"Master dark":"Dark";else if(calibrationKind=="Bias")f.Kind=master?"Master bias":"Bias";else if(calibrationKind=="Flat")f.Kind=master?"Master flat":"Flat";
    else if(master||type.Contains("stack")||low.Contains("restacked/")||Regex.IsMatch(name,@"\d+x\d+(?:\.\d+)?(?:s|sec)"))f.Kind="Stack";
