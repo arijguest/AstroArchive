@@ -30,6 +30,13 @@ namespace AstroArchive {
    tabs.SelectedIndex=2;PumpPopupLayout();EditedTargets.SelectedIndex=0;PumpPopupLayout();var edited=G("EditedGrid").Items.OfType<EditedImage>().First();SmokeTableClick("EditedGrid",edited);
    TargetWorkflowCheck(PressStar(G("EditedGrid"))&&edited.IsStarred&&Annotations.ContainsKey(edited.AnnotationKey),"S did not star an Edited image.");
    menu=ThemedMenu();BuildEditedFileMenu(menu,SelectedEditedImages());TargetWorkflowCheck(menu.Items.OfType<MenuItem>().Any(m=>Convert.ToString(m.Header)=="Unstar")&&menu.Items.OfType<MenuItem>().Any(m=>Convert.ToString(m.Header).StartsWith("Tags and note")),"Edited menu lacks stars or notes.");
+   // Target cards: every layout and theme renders at its social size with real content.
+   var cardData=TargetCards.Build(all,frame.Target);
+   foreach(TargetCardLayout layout in Enum.GetValues(typeof(TargetCardLayout)))foreach(bool dark in new[]{true,false}){
+    int w,h;TargetCards.Size(layout,out w,out h);var card=TargetCardRenderer.Render(cardData,null,layout,dark,true,"");
+    var pixels=new byte[w*h*4];card.CopyPixels(pixels,w*4,0);TargetWorkflowCheck(card.PixelWidth==w&&card.PixelHeight==h&&pixels.Where((b,i)=>i%4==0).Distinct().Count()>20,"Target card "+layout+" did not render its content.");
+    string path=Path.Combine(output,"AstroArchive_Target_Card_"+layout+"_"+(dark?"Dark":"Light")+".png");TargetCardRenderer.Save(card,path,false);TargetWorkflowCheck(File.Exists(path)&&new FileInfo(path).Length>1000,"Target card was not saved.");
+   }
    var clear=new AnnotationEdit{Starred=false,Note=""};clear.RemoveTags.Add("Reprocess");SaveAnnotations(new IAnnotated[]{frame,edited},clear,out changed);
    TargetWorkflowCheck(!frame.IsStarred&&!edited.IsStarred&&Annotations.Count==0,"Clearing stars, tags and notes left annotations behind.");tabs.SelectedIndex=0;PumpPopupLayout();
   }

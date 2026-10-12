@@ -5,6 +5,16 @@ using System.Linq;
 namespace AstroArchive {
  public partial class Tests {
   static void CaptureAnnotationsTests(){
+   Test("Target cards summarise integration, filters, nights and equipment like Analytics",()=>{
+    Func<string,string,double?,string,Frame> light=(kind,filter,exposure,date)=>new Frame{Target="M31",Kind=kind,Filter=filter,Exposure=exposure,AcquisitionDate=date,Night=date,Session="S"+date,TelescopeModel="Seestar S50",CameraModel="IMX462",Telescope="Rig"};
+    var frames=new List<Frame>{light("Light","Ha",600,"2026-10-01"),light("Light","Ha",600,"2026-10-01"),light("Light","OIII",300,"2026-10-03"),light("Light","",120,"2026-10-03"),light("Light","Ha",null,"2026-10-03"),light("Stack","Ha",1200,"2026-10-01"),light("Light","Ha",900,"2026-10-04")};frames[6].Rejected=true;
+    frames.Add(new Frame{Target="M33",Kind="Light",Exposure=60});
+    var card=TargetCards.Build(frames,"Andromeda Galaxy");
+    Check(card.Title=="M31"&&card.Subtitle.Contains("Andromeda")&&card.Seconds==1620&&card.Lights==5&&card.Stacks==1&&card.Nights==2&&card.UnknownExposure==1,"Card counts wrong: "+card.Seconds+" "+card.Lights+" "+card.Nights);
+    Check(card.Filters.First().Label=="Ha"&&card.Filters.First().Value==1200&&card.Filters.Any(f=>f.Label=="No filter recorded"&&f.Value==120)&&card.DateRange=="1 Oct – 3 Oct 2026"&&card.Equipment=="Seestar S50 · IMX462","Card filters, dates or equipment wrong: "+card.DateRange+" / "+card.Equipment);
+    Check(TargetCards.Duration(45)=="45 s"&&TargetCards.Duration(1620)=="27 m"&&TargetCards.Duration(9000)=="2 h 30 m"&&TargetCards.Duration(7200)=="2 h","Card durations wrong");
+    int width,height;TargetCards.Size(TargetCardLayout.Vertical,out width,out height);Check(width==1080&&height==1920,"Card sizes wrong");
+   });
    Test("Tags are trimmed, de-duplicated without case and bounded",()=>{
     var tags=CaptureAnnotations.Tags(" #Widefield, widefield;Reprocess\n  needs   flats ,,");Check(tags.SequenceEqual(new[]{"Widefield","Reprocess","needs flats"}),"Tags not normalised: "+string.Join("|",tags));
     Check(CaptureAnnotations.Tags(string.Join(",",Enumerable.Range(0,50).Select(i=>"t"+i))).Count==CaptureAnnotations.MaxTags&&CaptureAnnotations.Tags(new string('x',80))[0].Length==CaptureAnnotations.MaxTagLength,"Tag limits not applied");

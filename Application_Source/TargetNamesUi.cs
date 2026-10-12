@@ -16,7 +16,7 @@ namespace AstroArchive {
     targetList.PreviewMouseRightButtonDown+=(s,e)=>{var item=ItemsControl.ContainerFromElement(targetList,e.OriginalSource as DependencyObject) as ListBoxItem;if(item!=null)targetList.SelectedItem=item.DataContext;};
     targetList.ContextMenuOpening+=(s,e)=>{
      var target=targetList.SelectedItem as TargetSummary;if(target==null||target.Name=="All targets"||Catalog.IsAmbiguous(target.Name)){e.Handled=true;return;}
-     var menu=targetList.ContextMenu;menu.Items.Clear();menu.Items.Add(TargetNamesAction(target.Name));
+     var menu=targetList.ContextMenu;menu.Items.Clear();menu.Items.Add(TargetNamesAction(target.Name));string name=target.Name;menu.Items.Add(FileAction("Create target card…",()=>ShowTargetCard(name),repo!=null&&!RepositoryOperationBlocked&&IntegrationTarget(name)));
     };
    }
   }

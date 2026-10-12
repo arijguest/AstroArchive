@@ -22,6 +22,7 @@ namespace AstroArchive {
    {"Watch a capture folder","Import new captures as your capture software saves them."},
    {"Start watching","Import each new capture once it stops changing; originals stay in place."},
    {"Tags and notes","Add tags and a note to the selected files."},
+   {"Create target card","Make a shareable image of this target with its integration, frames, nights and filters."},
    {"Tags and note","Add tags and a note to this file."},
    {"Full rescan","Read and hash every source file again."},
    {"Review and repair","Inspect flagged captures and retry failed transfers."},
