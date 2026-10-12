@@ -21,6 +21,11 @@ namespace AstroArchive {
   bool remainderEnabled=true;
   List<TargetMark> targetMarks;string targetNote;
   public void SetRemainderEnabled(bool enabled){remainderEnabled=enabled;Resize();}
+  // Width/height of the frame as shown (after any quarter turn); null before any image.
+  public double? FrameAspect{get{return geometry==null||geometry.Height<=0?(double?)null:geometry.Width/geometry.Height;}}
+  // Raised when a new image, video or rotation changes the frame's shape, so hosts can size around it.
+  public event Action FrameChanged;double? notifiedAspect;
+  void NotifyFrame(){var aspect=FrameAspect;if(aspect.HasValue==notifiedAspect.HasValue&&(!aspect.HasValue||Math.Abs(aspect.Value-notifiedAspect.Value)<0.005))return;notifiedAspect=aspect;if(FrameChanged!=null)FrameChanged();}
   PreviewGeometry geometry;bool fitting=true,dragging,loading;Point previous;readonly bool portrait;int quarterTurns;readonly Button rotateLeftButton,rotateRightButton;
   public PreviewViewport(Grid host,Grid viewport,Image image,FrameworkElement remainder=null,bool portrait=true,bool allowRotation=false){
    this.host=host;this.viewport=viewport;this.image=image;this.remainder=remainder;this.portrait=portrait;
@@ -63,11 +68,11 @@ namespace AstroArchive {
    if(source==null){SetPlayback(null,false);targetMarks=null;targetNote=null;DrawTargets();}
    if(viewport.IsMouseCaptured)viewport.ReleaseMouseCapture();
    image.Source=source;controls.IsEnabled=source!=null;toolbarHost.Visibility=source==null?Visibility.Collapsed:Visibility.Visible;
-   viewport.Background=source==null?Brushes.Transparent:Brushes.Black;if(source==null){geometry=null;Resize();return;}
+   viewport.Background=source==null?Brushes.Transparent:Brushes.Black;if(source==null){geometry=null;Resize();NotifyFrame();return;}
    bool changed=geometry==null||image.Width!=source.PixelWidth||image.Height!=source.PixelHeight;
    if(reset||geometry==null||changed&&portrait)quarterTurns=portrait&&source.PixelWidth>source.PixelHeight?1:0;
    image.Width=source.PixelWidth;image.Height=source.PixelHeight;geometry=new PreviewGeometry(source.PixelWidth,source.PixelHeight,quarterTurns);
-   if(reset||changed)fitting=true;Resize();
+   if(reset||changed)fitting=true;Resize();NotifyFrame();
   }
   public void BeginLoading(int width=0,int height=0){
    if(media!=null){imageLayer.Children.Remove(media);media=null;}SetPlayback(null,false);
@@ -76,13 +81,13 @@ namespace AstroArchive {
    // Keep the last frame until the new pixels arrive. On a first load, indexed
    // dimensions can establish its frame without opening/decoding the file.
    if(geometry==null&&width>0&&height>0){quarterTurns=portrait&&width>height?1:0;geometry=new PreviewGeometry(width,height,quarterTurns);image.Width=width;image.Height=height;fitting=true;}
-   toolbarHost.Visibility=geometry==null?Visibility.Collapsed:Visibility.Visible;viewport.Background=Brushes.Black;Resize();
+   toolbarHost.Visibility=geometry==null?Visibility.Collapsed:Visibility.Visible;viewport.Background=Brushes.Black;Resize();NotifyFrame();
   }
   public void SetMedia(MediaElement element,int width,int height){
    loading=false;
    if(media!=null&&media!=element)imageLayer.Children.Remove(media);media=element;if(!imageLayer.Children.Contains(element))imageLayer.Children.Add(element);
    targetMarks=null;targetNote=null;DrawTargets();image.Visibility=Visibility.Collapsed;image.Width=width;image.Height=height;element.Width=width;element.Height=height;element.Stretch=Stretch.Fill;element.RenderTransform=transform;
-   if(geometry==null||portrait)quarterTurns=portrait&&width>height?1:0;geometry=new PreviewGeometry(width,height,quarterTurns);controls.IsEnabled=true;toolbarHost.Visibility=Visibility.Visible;viewport.Background=Brushes.Black;fitting=true;Resize();
+   if(geometry==null||portrait)quarterTurns=portrait&&width>height?1:0;geometry=new PreviewGeometry(width,height,quarterTurns);controls.IsEnabled=true;toolbarHost.Visibility=Visibility.Visible;viewport.Background=Brushes.Black;fitting=true;Resize();NotifyFrame();
   }
   public void SetPlayback(Action toggle,bool playing){togglePlayback=toggle;playbackButton.Visibility=toggle==null?Visibility.Collapsed:Visibility.Visible;playbackButton.Content=playing?"Ⅱ":"▶";AutomationProperties.SetName(playbackButton,playing?"Pause playback":"Play playback");UiHelp.Hint(playbackButton,playing?"Pause playback":"Play playback");}
   public bool HasPlaybackControl{get{return playbackButton.Visibility==Visibility.Visible;}}
@@ -103,7 +108,7 @@ namespace AstroArchive {
   Point Center{get{return new Point(viewport.Width/2,viewport.Height/2);}}
   public int RotationQuarterTurns{get{return quarterTurns;}}
   public bool HasRotationControls{get{return rotateLeftButton!=null&&rotateRightButton!=null;}}
-  public void Rotate(int direction){if(geometry==null)return;quarterTurns=((quarterTurns+direction)%4+4)%4;geometry=new PreviewGeometry(image.Width,image.Height,quarterTurns);fitting=true;Resize();}
+  public void Rotate(int direction){if(geometry==null)return;quarterTurns=((quarterTurns+direction)%4+4)%4;geometry=new PreviewGeometry(image.Width,image.Height,quarterTurns);fitting=true;Resize();NotifyFrame();}
   public void Fit(){if(geometry==null)return;fitting=true;zoom.Fit(viewport.Width,viewport.Height,geometry.Width,geometry.Height);Apply();}
   void ZoomAt(double factor,Point origin){if(geometry==null)return;fitting=false;zoom.Zoom(factor,origin.X,origin.Y);Apply();}
   void Pan(double x,double y){if(geometry==null)return;fitting=false;zoom.Pan(x,y);Apply();}
