@@ -86,7 +86,7 @@ namespace AstroArchive {
    content.Children.Add(Text("Select a file to return to its image preview.","Muted","UiFontCaption"));ArrangeBody();
   }
   void AddImageCredit(TargetInfoImage image){
-   string credit=TargetInfoPresentation.Credit(image);bool longCredit=credit.Length>180;
+   string credit=TargetInfoPresentation.Credit(image);bool longCredit=credit.Length>120||credit.Contains("://");
    var line=Text("","Muted","UiFontCaption");line.ToolTip=Data(image.attribution+"\n"+image.modifications,"Text","UiFontSmall");line.Inlines.Add(Linked(longCredit&&!string.IsNullOrWhiteSpace(image.creator)?image.creator:credit,image.file_page_url));line.Inlines.Add(new Run(" · "));line.Inlines.Add(Linked(image.licence,image.licence_url));content.Children.Add(line);
    if(longCredit){var full=new StackPanel();full.Children.Add(Data(image.attribution,"Muted","UiFontCaption"));content.Children.Add(Disclosure("Full image credit",full));}
    string caption=TargetInfoPresentation.Caption(image.representation);if(caption.Length>0)content.Children.Add(Data(caption,"Muted","UiFontCaption"));
