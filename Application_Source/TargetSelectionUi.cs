@@ -28,7 +28,7 @@ namespace AstroArchive {
    foreach(string name in new[]{"LibrarySelectionCounter","EditedSelectionCounter"}){var button=Window.FindName(name) as Button;if(button==null)continue;int count=name=="LibrarySelectionCounter"?librarySelection.Count:editedSelection.Count;button.Content=count.ToString("N0")+" selected";button.Visibility=count>1?Visibility.Visible:Visibility.Collapsed;}
   }
   void ClearTargetSelection(string name){
-   restoringTargetSelection=true;try{if(name=="FramesGrid"){librarySelection.Clear();ClearSessionSelection();}else editedSelection.Clear();G(name).SelectedItems.Clear();}finally{restoringTargetSelection=false;}
+   restoringTargetSelection=true;try{if(name=="FramesGrid"){librarySelection.Clear();ClearSessionSelection();rowSelectionAnchor=null;sessionSelectionAnchor=null;}else editedSelection.Clear();G(name).SelectedItems.Clear();}finally{restoringTargetSelection=false;}
    UpdateSelectionCounters();if(name=="FramesGrid")Details();else{UpdateEditedActions();LoadEditedPreview();}
   }
   void SelectOnlyTargetRow(string name,object item){
