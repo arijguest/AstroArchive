@@ -44,7 +44,7 @@ namespace AstroArchive {
    var brand=new Image{Source=((Image)owner.FindName("BrandLogo")).Source,Width=48,Height=48,Margin=new Thickness(0,0,14,0)};DockPanel.SetDock(brand,Dock.Left);header.Children.Add(brand);
    var heading=new StackPanel();heading.Children.Add(Label("Archive analytics",25,true));summary=Label("Preparing your observatory notes…");Theme.Bind(summary,TextBlock.ForegroundProperty,"Muted");heading.Children.Add(summary);header.Children.Add(heading);
    scope=new Expander{Header="Scope · Entire repository",Margin=new Thickness(0,0,0,14)};Grid.SetRow(scope,1);root.Children.Add(scope);
-   var filters=new WrapPanel{Margin=new Thickness(0,12,0,6)};scope.Content=filters;
+   var filters=new WrapPanel{Margin=new Thickness(0,12,0,6)};var scopeScroll=new ScrollViewer{Content=filters,VerticalScrollBarVisibility=ScrollBarVisibility.Auto,HorizontalScrollBarVisibility=ScrollBarVisibility.Disabled,MaxHeight=190};scope.Content=scopeScroll;
    telescope=new ComboBox{MinWidth=180,MaxWidth=260};telescope.Items.Add("All telescopes");foreach(string value in frames.Select(f=>string.IsNullOrWhiteSpace(f.Telescope)?"":f.Telescope).Distinct(StringComparer.OrdinalIgnoreCase).OrderBy(t=>t)){telescope.Items.Add(new ComboBoxItem{Content=string.IsNullOrWhiteSpace(value)?"Unknown telescope":value,Tag=value});}telescope.SelectedIndex=0;
    from=new DatePicker{Width=145};to=new DatePicker{Width=145};caption=new TextBox{Text=repositoryName,Width=220,MaxLength=160};
    AddField(filters,"Telescope",telescope);AddField(filters,"From (inclusive)",from);AddField(filters,"To (inclusive)",to);AddField(filters,"Document label",caption);
@@ -73,9 +73,10 @@ namespace AstroArchive {
    var outputLabel=Label("Output",12,true);outputLabel.Margin=new Thickness(0,3,16,0);outputChoices.Children.Add(outputLabel);
    imagesOutput=new RadioButton{Content="Images & documents",GroupName="AnalyticsOutput",IsChecked=true,Margin=new Thickness(0,0,18,0),VerticalAlignment=VerticalAlignment.Center};
    videoOutput=new RadioButton{Content="Video & GIF",GroupName="AnalyticsOutput",VerticalAlignment=VerticalAlignment.Center};
-   foreach(var choice in new[]{imagesOutput,videoOutput}){Theme.Bind(choice,Control.ForegroundProperty,"Text");AccessibleName(choice,Convert.ToString(choice.Content));outputChoices.Children.Add(choice);}
+   foreach(var choice in new[]{imagesOutput,videoOutput}){Theme.Bind(choice,Control.ForegroundProperty,"Text");choice.SetResourceReference(Control.FontSizeProperty,"UiFontControl");AccessibleName(choice,Convert.ToString(choice.Content));outputChoices.Children.Add(choice);}
    var footer=new StackPanel();var optionsScroll=new ScrollViewer{Content=footer,VerticalScrollBarVisibility=ScrollBarVisibility.Auto,HorizontalScrollBarVisibility=ScrollBarVisibility.Disabled,MaxHeight=190};Grid.SetRow(optionsScroll,1);footerFrame.Children.Add(optionsScroll);
-   SizeChanged+=(s,e)=>optionsScroll.MaxHeight=Math.Max(120,Math.Min(190,ActualHeight*0.27));
+   Action arrangeOptions=()=>{bool compact=ActualHeight<740;optionsScroll.MaxHeight=compact?(scope.IsExpanded?80:120):190;scopeScroll.MaxHeight=compact?80:190;exportHint.Visibility=compact?Visibility.Collapsed:Visibility.Visible;};
+   SizeChanged+=(s,e)=>arrangeOptions();scope.Expanded+=(s,e)=>arrangeOptions();scope.Collapsed+=(s,e)=>arrangeOptions();
    var actions=new WrapPanel{VerticalAlignment=VerticalAlignment.Center};footer.Children.Add(actions);
    format=new ComboBox{ItemsSource=new[]{"PNG","JPEG","PDF","SVG"},SelectedIndex=2,Width=105};resolution=new ComboBox{ItemsSource=new[]{"300 dpi · Print","150 dpi · Screen"},SelectedIndex=0,Width=190};
    documentTheme=new ComboBox{ItemsSource=new[]{"Dark","Light"},SelectedIndex=0,Width=100};LocalizedInterface.SetContext(documentTheme,"Theme");
