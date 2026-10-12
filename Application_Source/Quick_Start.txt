@@ -308,11 +308,15 @@ already open with its Remote Control plugin switched on, that window is reused; 
 a new Stellarium window opens. If Stellarium is not installed, the same view opens in
 Stellarium Web in your browser, which receives the target, time and place. Calibration frames and
 captures without a position leave the button off.
-The target button, after Stellarium, circles catalogue targets in the preview, labelled
-with their names. It is off until you switch it on, and it stays as you leave it.
-Circles come from the capture's plate solution or WCS header and the built-in
-catalogue, so nothing leaves your PC. The capture's own target is drawn solid and
-others dashed. Captures without a full solution show a short note instead.
+The target button, after Stellarium, draws a white circle around every catalogue
+object in the preview, sized to cover the whole object, with its ID (M 42, NGC 1977)
+set in a break in the ring. Circles that run past the edge stay partly drawn, with
+the ID in a visible part of the ring. The same button sits on the Edited preview and
+in enlarged previews; it is off until you switch it on, and switching it off in any
+preview switches it off everywhere. Circles come from the capture's plate solution
+or the image's WCS header and the built-in catalogue, so nothing leaves your PC.
+Captures without a full solution show a note with Plate solve…, which runs Identify
+target on that capture and then marks the field.
 When no files are selected, the sidebar shows information for the selected target:
 its catalogue overview, available thumbnail and sources. Deep-sky objects also
 have an interactive map of their catalogue position. Right-click a target and

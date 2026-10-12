@@ -12,14 +12,13 @@ using System.Windows.Shapes;
 
 namespace AstroArchive {
  // Shared fitting, display rotation and input handling for sidebars and large previews.
- public class PreviewViewport {
+ public partial class PreviewViewport {
   public const double ToolbarSpace=46;
   readonly Grid host,viewport;readonly Image image;readonly Canvas imageLayer,overlayLayer;readonly StackPanel controls;readonly Viewbox toolbarHost;readonly FrameworkElement remainder;readonly TranslateTransform remainderOffset=new TranslateTransform();MediaElement media;
   readonly Button playbackButton;Action togglePlayback;
   readonly Button zoomOutButton,zoomInButton,fitButton;readonly List<Button> panButtons=new List<Button>();
   readonly PreviewZoom zoom=new PreviewZoom();readonly MatrixTransform transform=new MatrixTransform();
   bool remainderEnabled=true;
-  List<TargetMark> targetMarks;string targetNote;
   public void SetRemainderEnabled(bool enabled){remainderEnabled=enabled;Resize();}
   // Width/height of the frame as shown (after any quarter turn); null before any image.
   public double? FrameAspect{get{return geometry==null||geometry.Height<=0?(double?)null:geometry.Width/geometry.Height;}}
@@ -36,7 +35,7 @@ namespace AstroArchive {
    // Canvas measures the full bitmap, so only the final viewport clips zoom/pan.
    viewport.Children.Remove(image);imageLayer=new Canvas{IsHitTestVisible=false};imageLayer.Children.Add(image);viewport.Children.Insert(0,imageLayer);
    // Marks are drawn in viewport space so circles stay round and labels upright through zoom and rotation.
-   overlayLayer=new Canvas{IsHitTestVisible=false,Visibility=Visibility.Collapsed};viewport.Children.Insert(1,overlayLayer);
+   overlayLayer=new Canvas{Visibility=Visibility.Collapsed};viewport.Children.Insert(1,overlayLayer);
    image.Stretch=Stretch.Fill;image.HorizontalAlignment=HorizontalAlignment.Left;image.VerticalAlignment=VerticalAlignment.Top;image.IsHitTestVisible=false;image.RenderTransform=transform;
    RenderOptions.SetBitmapScalingMode(image,BitmapScalingMode.HighQuality);
    controls=new StackPanel{Orientation=Orientation.Horizontal,IsEnabled=false};var toolbar=new Border{Child=controls,Padding=new Thickness(4),CornerRadius=new CornerRadius(7),Background=new SolidColorBrush(Color.FromArgb(230,20,29,46)),BorderBrush=new SolidColorBrush(Color.FromArgb(150,148,165,192)),BorderThickness=new Thickness(1)};
@@ -118,42 +117,7 @@ namespace AstroArchive {
    double fitted=Math.Min(viewport.Width/geometry.Width,viewport.Height/geometry.Height);bool enlarged=scale>fitted+0.000001;zoomOutButton.IsEnabled=enlarged;zoomInButton.IsEnabled=scale<32;foreach(var button in panButtons)button.IsEnabled=enlarged;
    DrawTargets();
   }
-  // Null marks hide the overlay. A note without marks explains why nothing is circled.
-  public void SetTargets(IList<TargetMark> marks,string note){targetMarks=marks==null?null:new List<TargetMark>(marks);targetNote=marks==null?null:note;DrawTargets();}
-  public int TargetCircles{get{return overlayLayer.Children.OfType<Ellipse>().Count(e=>e.Tag!=null);}}
-  public IEnumerable<Rect> TargetLabelBounds{get{return overlayLayer.Children.OfType<Border>().Where(b=>b.Tag is TargetMark).Select(b=>new Rect(Canvas.GetLeft(b),Canvas.GetTop(b),b.ActualWidth>0?b.ActualWidth:b.DesiredSize.Width,b.ActualHeight>0?b.ActualHeight:b.DesiredSize.Height));}}
-  public string TargetNoteText{get{var note=overlayLayer.Children.OfType<Border>().FirstOrDefault(b=>b.Tag==null);return note==null?null:((TextBlock)note.Child).Text;}}
-  void DrawTargets(){
-   overlayLayer.Children.Clear();
-   bool show=targetMarks!=null&&geometry!=null&&media==null&&image.Source!=null&&image.Width>0&&image.Height>0;overlayLayer.Visibility=show?Visibility.Visible:Visibility.Collapsed;if(!show)return;
-   overlayLayer.Width=viewport.Width;overlayLayer.Height=viewport.Height;var placed=new List<Rect>();var bounds=new Rect(0,0,viewport.Width,viewport.Height);double scale=zoom.Scale;
-   if(!string.IsNullOrEmpty(targetNote)){var note=Chip(Localization.T(targetNote),null);((TextBlock)note.Child).MaxWidth=Math.Max(60,viewport.Width-28);overlayLayer.Children.Add(note);note.Measure(new Size(Math.Max(0,viewport.Width-16),double.PositiveInfinity));Canvas.SetLeft(note,8);Canvas.SetTop(note,8);placed.Add(new Rect(8,8,note.DesiredSize.Width,note.DesiredSize.Height));}
-   // Draw the least important first so the capture's own target sits on top.
-   foreach(var mark in Enumerable.Reverse(targetMarks)){
-    Point centre=transform.Matrix.Transform(new Point(mark.X*image.Width,mark.Y*image.Height));
-    double radius=Math.Max(9,(mark.RadiusX*image.Width+mark.RadiusY*image.Height)/2*scale);
-    if(centre.X+radius<0||centre.Y+radius<0||centre.X-radius>viewport.Width||centre.Y-radius>viewport.Height)continue;
-    var halo=new Ellipse{Width=radius*2,Height=radius*2,StrokeThickness=mark.Primary?4.5:3.5,Stroke=new SolidColorBrush(Color.FromArgb(150,0,0,0))};
-    var ring=new Ellipse{Width=radius*2,Height=radius*2,StrokeThickness=mark.Primary?2:1.4,Tag=mark};ring.SetResourceReference(Shape.StrokeProperty,"TargetMark");if(!mark.Primary)ring.StrokeDashArray=new DoubleCollection{4,3};
-    foreach(var circle in new[]{halo,ring}){Canvas.SetLeft(circle,centre.X-radius);Canvas.SetTop(circle,centre.Y-radius);overlayLayer.Children.Add(circle);}
-   }
-   // Labels: try each side of the circle and skip one that would cover another label, so small panes stay readable.
-   foreach(var mark in targetMarks){
-    Point centre=transform.Matrix.Transform(new Point(mark.X*image.Width,mark.Y*image.Height));double radius=Math.Max(9,(mark.RadiusX*image.Width+mark.RadiusY*image.Height)/2*scale);
-    if(!bounds.Contains(centre))continue;
-    var chip=Chip(mark.Label,mark);overlayLayer.Children.Add(chip);chip.Measure(new Size(Math.Max(0,viewport.Width-8),double.PositiveInfinity));Size size=chip.DesiredSize;double offset=Math.Min(radius,Math.Max(viewport.Width,viewport.Height))*0.71+3;
-    Rect? spot=null;foreach(var candidate in new[]{new Point(centre.X+offset,centre.Y-offset-size.Height),new Point(centre.X+offset,centre.Y+offset),new Point(centre.X-offset-size.Width,centre.Y-offset-size.Height),new Point(centre.X-offset-size.Width,centre.Y+offset)}){
-     var rect=new Rect(Math.Max(4,Math.Min(viewport.Width-size.Width-4,candidate.X)),Math.Max(4,Math.Min(viewport.Height-size.Height-4,candidate.Y)),size.Width,size.Height);
-     if(!placed.Any(r=>r.IntersectsWith(rect))){spot=rect;break;}
-    }
-    // Chips join the tree before measuring so their themed text size applies.
-    if(spot==null){overlayLayer.Children.Remove(chip);continue;}placed.Add(spot.Value);Canvas.SetLeft(chip,spot.Value.X);Canvas.SetTop(chip,spot.Value.Y);
-   }
-  }
-  static Border Chip(string text,TargetMark mark){
-   var label=new TextBlock{Text=text,TextTrimming=TextTrimming.CharacterEllipsis,MaxWidth=180};label.SetResourceReference(TextBlock.ForegroundProperty,"Text");label.SetResourceReference(TextBlock.FontSizeProperty,"UiFontSmall");if(mark!=null&&mark.Primary)label.FontWeight=FontWeights.SemiBold;if(mark==null){label.TextWrapping=TextWrapping.Wrap;label.MaxWidth=260;}
-   var chip=new Border{Child=label,Padding=new Thickness(5,1,5,2),CornerRadius=new CornerRadius(4),BorderThickness=new Thickness(1),Tag=mark};chip.SetResourceReference(Border.BackgroundProperty,"Surface");chip.SetResourceReference(Border.BorderBrushProperty,mark==null?"Border":"TargetMark");return chip;
-  }
+  public void SmokeZoom(double factor){ZoomAt(factor,Center);}
   public void SmokeRotation(){
    if(!HasRotationControls||geometry==null||portrait||quarterTurns!=0)throw new InvalidOperationException("Large preview did not start in source orientation with rotation controls.");
    for(int turn=1;turn<=4;turn++){rotateRightButton.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));if(quarterTurns!=turn%4)throw new InvalidOperationException("Clockwise preview rotation did not advance.");var corners=new[]{new Point(0,0),new Point(image.Width,0),new Point(0,image.Height),new Point(image.Width,image.Height)};foreach(var corner in corners){Point displayed=transform.Transform(corner);if(displayed.X< -0.001||displayed.Y< -0.001||displayed.X>viewport.Width+0.001||displayed.Y>viewport.Height+0.001)throw new InvalidOperationException("Rotation clipped a source corner.");}}

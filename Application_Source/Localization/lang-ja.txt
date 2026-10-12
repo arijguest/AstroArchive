@@ -1990,11 +1990,14 @@ Hyperbolic (interstellar)	双曲線（恒星間）
 Aphelion	遠日点
 Show targets in frame	フレーム内の天体を表示
 Hide targets in frame	フレーム内の天体を非表示
-Show targets in frame (plate-solved captures)	フレーム内の天体を表示（プレートソルブ済みの画像）
-Plate solve this capture to mark targets in the frame	フレーム内の天体を示すには、この画像をプレートソルブしてください
-Pointing is approximate, so targets are not marked	導入位置がおおよそのため、天体は表示されません
 Field geometry is unusable for marking targets	視野の形状から天体を表示できません
-No catalogue targets in this field	この視野にはカタログ天体がありません
+This capture has no plate solution	このキャプチャにはプレートソルブの結果がありません
+This capture has only approximate pointing	このキャプチャの向きはおおよそしか分かりません
+This image has no plate solution	この画像にはプレートソルブの結果がありません
+This image has no plate solution in its header	この画像のヘッダーにはプレートソルブの結果がありません
+No catalogue objects in this field	この視野にカタログ天体はありません
+Plate solve…	プレートソルブ…
+Reading the image header…	画像ヘッダーを読み込んでいます…
 On	オン
 Telescopes	望遠鏡
 Reports	レポート
