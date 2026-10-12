@@ -14,7 +14,7 @@ namespace AstroArchive {
   }
   void UpdateCaptureSky(string prefix,Frame frame){
    if(prefix.Length==0)previewSkyFrame=frame;
-   var globe=Window.FindName(prefix+"PreviewSky") as SkyGlobeView;if(globe==null)return;var sky=CaptureSky.Resolve(frame,settings);globe.SetContext(sky);
+   var globe=Window.FindName(prefix+"PreviewSky") as SkyGlobeView;if(globe==null)return;var sky=CaptureSky.Resolve(frame,settings);globe.SetContext(sky);if(prefix.Length==0)UpdateMoonDetails(sky,frame);
    var viewport=prefix.Length==0?previewViewport:editedPreviewViewport;if(viewport!=null)viewport.SetRemainderEnabled(!CaptureSky.IsCalibration(frame)&&!sky.BelowHorizon);PositionSkyReset(prefix);
   }
   void RefreshSkyPreviews(){UpdateCaptureSky("",previewSkyFrame);}

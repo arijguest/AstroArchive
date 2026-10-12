@@ -48,8 +48,12 @@ namespace AstroArchive {
   public bool HasPosition,HasHorizon,ApproximatePosition;public double RA,Dec,Latitude,Longitude,Altitude,Azimuth;
   public DateTime? Utc;public string TargetLabel,TimeLabel,Summary,Evidence,Key;
   public SkyOrientation Orientation;
+  // Null when the capture clock is unknown; the Moon needs a real time.
+  public MoonSnapshot Moon;
   public bool BelowHorizon{get{return HasPosition&&HasHorizon&&Altitude<0;}}
   public static bool IsCalibration(Frame frame){return frame!=null&&(frame.Target=="Calibration"||Regex.IsMatch(frame.Kind??"",@"^(?:Master[ _-]*)?(?:Dark(?:[ _-]*flat)?|Flat|Bias|Offset)$",RegexOptions.IgnoreCase));}
+  public static string Compass(double azimuth){string[] compass={"N","NE","E","SE","S","SW","W","NW"};return compass[(int)Math.Round(SkyOrientation.Wrap(azimuth)/45)%8];}
+  public static string Elevation(double altitude,double azimuth){return altitude.ToString("0",CultureInfo.InvariantCulture)+"° · "+Compass(azimuth)+" "+azimuth.ToString("0",CultureInfo.InvariantCulture)+"°"+(altitude<0?" · below horizon":"");}
   public static bool Finite(double number){return !double.IsNaN(number)&&!double.IsInfinity(number);}
   static bool Position(double ra,double dec){return Finite(ra)&&Finite(dec)&&ra>=0&&ra<=360&&Math.Abs(dec)<=90;}
   public static Frame FromHeader(FitsHeader header,string format,string filename,string fallbackTarget=null){
@@ -97,9 +101,14 @@ namespace AstroArchive {
    string hemisphere=sky.Dec>0?"Northern celestial sky":sky.Dec<0?"Southern celestial sky":"Celestial equator";
    if(sky.HasPosition&&sky.HasHorizon){
     var target=sky.Orientation.Map(SkyVector.Equatorial(sky.RA,sky.Dec));sky.Altitude=Math.Asin(Math.Max(-1,Math.Min(1,target.Z)))*180/Math.PI;sky.Azimuth=SkyOrientation.Wrap(Math.Atan2(target.X,target.Y)*180/Math.PI);
-    string[] compass={"N","NE","E","SE","S","SW","W","NW"};
-    sky.Summary=(sky.ApproximatePosition?"≈ ":"")+"Alt "+sky.Altitude.ToString("0",CultureInfo.InvariantCulture)+"° · "+compass[(int)Math.Round(sky.Azimuth/45)%8]+" "+sky.Azimuth.ToString("0",CultureInfo.InvariantCulture)+"°"+(sky.Altitude<0?" · below horizon":"");
+    sky.Summary=(sky.ApproximatePosition?"≈ ":"")+"Alt "+sky.Altitude.ToString("0",CultureInfo.InvariantCulture)+"° · "+Compass(sky.Azimuth)+" "+sky.Azimuth.ToString("0",CultureInfo.InvariantCulture)+"°"+(sky.Altitude<0?" · below horizon":"");
    }else sky.Summary=!sky.HasPosition?"Pointing unavailable":!site?"Celestial view · set an observing location":"Celestial view · capture time unknown";
+   if(sky.Utc.HasValue){
+    var moon=MoonEphemeris.At(sky.Utc.Value,site,sky.Latitude,sky.Longitude);moon.HasHorizon=sky.HasHorizon;
+    if(sky.HasHorizon){var local=sky.Orientation.MapOfDate(moon.Topocentric);moon.Altitude=Math.Asin(Math.Max(-1,Math.Min(1,local.Z)))*180/Math.PI;moon.Azimuth=SkyOrientation.Wrap(Math.Atan2(local.X,local.Y)*180/Math.PI);}
+    if(sky.HasPosition){moon.HasTarget=true;moon.TargetSeparation=MoonEphemeris.Separation(sky.Orientation.Precess(SkyVector.Equatorial(sky.RA,sky.Dec)),moon.Topocentric);}
+    sky.Moon=moon;
+   }
    sky.Evidence+=(sky.Evidence.Length>0?"\n":"")+sky.TimeLabel+"\n"+(site?place+" · "+sky.Latitude.ToString("0.###",CultureInfo.InvariantCulture)+"°, "+sky.Longitude.ToString("0.###",CultureInfo.InvariantCulture)+"°":"Choose your observing town / city in Settings for the local horizon.");
    if(sky.HasPosition)sky.Evidence+="\n"+hemisphere+" · RA "+sky.RA.ToString("0.###",CultureInfo.InvariantCulture)+"°, Dec "+sky.Dec.ToString("0.###",CultureInfo.InvariantCulture)+"°.";
    sky.Evidence+="\n"+(sky.HasHorizon?"Sky at the recorded capture time. Solid horizon; faint figures lie below it. Geometric altitude excludes atmospheric refraction.":"Celestial coordinates only. No compass horizon is inferred without a known capture time and observing location.");
@@ -117,9 +126,14 @@ namespace AstroArchive {
    cq=Math.Cos(zeta);sq=Math.Sin(zeta);cz=Math.Cos(z);sz=Math.Sin(z);ct=Math.Cos(theta);st=Math.Sin(theta);
    double lst=utc.HasValue?Sidereal(utc.Value,longitude)*Math.PI/180:0,p=latitude*Math.PI/180;cl=Math.Cos(lst);sl=Math.Sin(lst);cp=Math.Cos(p);sp=Math.Sin(p);
   }
-  public SkyVector Map(SkyVector vector){
+  public SkyVector Map(SkyVector vector){return MapOfDate(Precess(vector));}
+  // J2000 catalogue direction to the equator and equinox of the capture date.
+  public SkyVector Precess(SkyVector vector){
    double a=cq*vector.X-sq*vector.Y,b=sq*vector.X+cq*vector.Y,c=ct*a-st*vector.Z;
-   var v=new SkyVector(cz*c-sz*b,sz*c+cz*b,st*a+ct*vector.Z);
+   return new SkyVector(cz*c-sz*b,sz*c+cz*b,st*a+ct*vector.Z);
+  }
+  // Directions already of date (Moon and Sun) skip precession.
+  public SkyVector MapOfDate(SkyVector v){
    if(!horizon)return v;double meridian=cl*v.X+sl*v.Y;
    return new SkyVector(-sl*v.X+cl*v.Y,-sp*meridian+cp*v.Z,cp*meridian+sp*v.Z);
   }

@@ -869,6 +869,12 @@
              <TextBlock x:Name="PreviewInfo" Style="{StaticResource DetailsLine}" Foreground="{DynamicResource Muted}" FontSize="{DynamicResource UiFontSmall}" Margin="0,2,0,0"/>
              <Grid x:Name="DetailsFacts" Margin="0,10,0,0"><Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions></Grid>
              <TextBlock x:Name="DetailsLabel" Text="Select a capture to view its details." Style="{StaticResource DetailsLine}" Foreground="{DynamicResource Text}" FontSize="{DynamicResource UiFontSmall}" Margin="0,6,0,0"/>
+             <StackPanel x:Name="SkyFactsPanel" Visibility="Collapsed">
+              <Border Height="1" Background="{DynamicResource Border}" Margin="0,10,0,8"/>
+              <TextBlock Text="SKY AT CAPTURE" FontSize="{DynamicResource UiFontCaption}" FontWeight="SemiBold" Foreground="{DynamicResource Muted}"/>
+              <Grid x:Name="SkyFacts" Margin="0,6,0,0"><Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions></Grid>
+              <TextBlock x:Name="SkyFactsNote" Style="{StaticResource DetailsLine}" Foreground="{DynamicResource Muted}" FontSize="{DynamicResource UiFontCaption}" Margin="0,2,0,0"/>
+             </StackPanel>
              <Border Height="1" Background="{DynamicResource Border}" Margin="0,10,0,8"/>
              <TextBlock x:Name="LibrarySummaryLabel" Style="{StaticResource DetailsLine}" Foreground="{DynamicResource Muted}" FontSize="{DynamicResource UiFontCaption}"/>
             </StackPanel>
