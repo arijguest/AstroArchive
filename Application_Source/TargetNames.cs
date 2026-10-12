@@ -48,6 +48,16 @@ namespace AstroArchive {
    catalogueIds=aliases.Where(p=>CatalogueId.IsMatch(p.Key)).GroupBy(p=>p.Value).ToDictionary(g=>g.Key,g=>g.Select(p=>p.Key).Distinct().OrderBy(IdRank).ThenBy(id=>id,StringComparer.OrdinalIgnoreCase).ToArray());
   }
   static int IdRank(string id){return id.StartsWith("M",StringComparison.Ordinal)?0:id.StartsWith("C",StringComparison.Ordinal)?1:id.StartsWith("NGC",StringComparison.Ordinal)?2:id.StartsWith("IC",StringComparison.Ordinal)?3:id.StartsWith("UGC",StringComparison.Ordinal)?6:id.StartsWith("PGC",StringComparison.Ordinal)?7:4;}
+  // IDs are stored compact (M45, NGC7000, SH2155) for matching; people read them spaced (M 45, NGC 7000, Sh2-155).
+  static readonly Regex DisplayIdPattern=new Regex(@"^(M|NGC|IC|UGC|PGC|C|B|SH\s*2)[\s-]*0*(\d+)([A-Z]?)$",RegexOptions.IgnoreCase|RegexOptions.CultureInvariant);
+  static readonly Regex CompactIdInText=new Regex(@"(?<![A-Za-z0-9-])(M|NGC|IC|UGC|PGC|SH2-?|C|B)(\d+[A-Z]?)(?![A-Za-z0-9-])",RegexOptions.CultureInvariant);
+  public static string DisplayId(string id){
+   var m=DisplayIdPattern.Match((id??"").Trim());if(!m.Success)return id;
+   string prefix=m.Groups[1].Value.ToUpperInvariant().Replace(" ",""),number=m.Groups[2].Value+m.Groups[3].Value.ToUpperInvariant();
+   return prefix=="SH2"?"Sh2-"+number:prefix+" "+number;
+  }
+  // Spaces compact IDs inside a catalogue label, such as "Rosette Nebula (NGC2237)".
+  public static string DisplayIds(string text){return string.IsNullOrEmpty(text)?text:CompactIdInText.Replace(text,m=>DisplayId(m.Value));}
   public static string[] CatalogueIds(string target){string id=ObjectId(target);string[] others;if(!catalogueIds.TryGetValue(id,out others))return id.Length==0?new string[0]:new[]{id};return new[]{id}.Concat(others.Where(alias=>alias!=id)).ToArray();}
  }
 }

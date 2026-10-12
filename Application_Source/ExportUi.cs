@@ -195,7 +195,7 @@ namespace AstroArchive {
   void RunExportTo(List<Frame> selected,ExternalSelection selection,ExportApplication app,string executable,ExportOptions options,bool cals,bool unknown){
    if(!selection.Folder){
     EditedProject project=null;string launchError=null;var paths=new List<string>();
-    Run(ct=>{project=repo.CreateEditedWorkingCopies(selected,selected[0].TargetLabel+" · "+app.Name+" · "+ExportStamp(),app.Name,ct,Progress);paths=project.Sources.Select(f=>repo.EditedPath(project,f.RelativePath)).ToList();ct.ThrowIfCancellationRequested();try{ExternalApps.Launch(app,executable,paths,null,ct);}catch(OperationCanceledException){throw;}catch(Exception error){launchError=error.Message;}return "";},done=>{RefreshEdited();ExportLaunchResult(app,Path.GetDirectoryName(paths[0]),launchError,false);});return;
+    Run(ct=>{project=repo.CreateEditedWorkingCopies(selected,Catalog.RecordLabel(selected[0].Target)+" · "+app.Name+" · "+ExportStamp(),app.Name,ct,Progress);paths=project.Sources.Select(f=>repo.EditedPath(project,f.RelativePath)).ToList();ct.ThrowIfCancellationRequested();try{ExternalApps.Launch(app,executable,paths,null,ct);}catch(OperationCanceledException){throw;}catch(Exception error){launchError=error.Message;}return "";},done=>{RefreshEdited();ExportLaunchResult(app,Path.GetDirectoryName(paths[0]),launchError,false);});return;
    }
    options.Mode="Files";options.IncludeCalibration=false;options.IncludeRejected=false;List<DssJob> jobs=null;string launchFailure=null;
    Run(ct=>{

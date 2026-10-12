@@ -10,7 +10,7 @@ namespace AstroArchive {
     var frames=new List<Frame>{light("Light","Ha",600,"2026-10-01"),light("Light","Ha",600,"2026-10-01"),light("Light","OIII",300,"2026-10-03"),light("Light","",120,"2026-10-03"),light("Light","Ha",null,"2026-10-03"),light("Stack","Ha",1200,"2026-10-01"),light("Light","Ha",900,"2026-10-04")};frames[6].Rejected=true;
     frames.Add(new Frame{Target="M33",Kind="Light",Exposure=60});
     var card=TargetCards.Build(frames,"Andromeda Galaxy");
-    Check(card.Title=="M31"&&card.Subtitle.Contains("Andromeda")&&card.Seconds==1620&&card.Lights==5&&card.Stacks==1&&card.Nights==2&&card.UnknownExposure==1,"Card counts wrong: "+card.Seconds+" "+card.Lights+" "+card.Nights);
+    Check(card.Title=="M 31"&&card.Subtitle.Contains("Andromeda")&&card.Seconds==1620&&card.Lights==5&&card.Stacks==1&&card.Nights==2&&card.UnknownExposure==1,"Card counts wrong: "+card.Seconds+" "+card.Lights+" "+card.Nights);
     Check(card.Filters.First().Label=="Ha"&&card.Filters.First().Value==1200&&card.Filters.Any(f=>f.Label=="No filter recorded"&&f.Value==120)&&card.DateRange=="1 Oct – 3 Oct 2026"&&card.Equipment=="Seestar S50 · IMX462","Card filters, dates or equipment wrong: "+card.DateRange+" / "+card.Equipment);
     Check(TargetCards.Duration(45)=="45 s"&&TargetCards.Duration(1620)=="27 m"&&TargetCards.Duration(9000)=="2 h 30 m"&&TargetCards.Duration(7200)=="2 h","Card durations wrong");
     int width,height;TargetCards.Size(TargetCardLayout.Vertical,out width,out height);Check(width==1080&&height==1920,"Card sizes wrong");
