@@ -31,6 +31,9 @@ namespace AstroArchive {
      var dated=new List<Frame>{new Frame{Target="M31",Kind="Light",Exposure=60,AcquisitionDate="2026-10-01",Night="2026-10-01"},new Frame{Target="M31",Kind="Light",Exposure=60,AcquisitionDate="2026-10-03",Night="2026-10-03"}};
      Localization.UseTable("ja","");Check(TargetCards.Build(dated,"M31").DateRange=="10月1日 – 2026年10月3日","Japanese card dates wrong: "+TargetCards.Build(dated,"M31").DateRange);
      Localization.UseTable("de","");Check(TargetCards.Build(dated,"M31").DateRange.StartsWith("1. Okt"),"German card dates wrong: "+TargetCards.Build(dated,"M31").DateRange);
+     Localization.UseTable("de","Import\tImportieren\nGuide\tHilfe\nSettings\tEinstellungen\nSave as\tSpeichern_unter");
+     Check(Localization.AccessText("_Import")=="_Importieren"&&Localization.AccessText("_Settings")=="Ein_stellungen"&&Localization.AccessText("_Guide")=="_Hilfe"&&Localization.AccessText("_Unknown")=="_Unknown"&&Localization.AccessText("Save _as")=="_Speichern__unter","Access keys not kept: "+Localization.AccessText("_Settings"));
+     Localization.UseTable("ja","Import\tインポート");Check(Localization.AccessText("_Import")=="インポート(_I)","Japanese access key wrong");
      Localization.UseTable("qps","");Check(Localization.T("Save")=="［Save］"&&Localization.T("42")=="42","Pseudo-localisation wrong");
      Localization.Use("en");Check(Localization.English&&Localization.T("Cancel")=="Cancel"&&Localization.Count==0,"English not restored");
     });

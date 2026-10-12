@@ -10,7 +10,7 @@ START HERE
 3. For a local folder, Scan folder and review before importing. For a network
    telescope, connect and select files, Search all or Start live import.
 4. Browse Repository by target, search or Filters; expand sessions to see subs.
-5. Select files and use Export for copies, stacking inputs or external processing.
+5. Select files and use Export for copies, stacking inputs, apps or AstroBin.
 
 Imports verify copies and skip duplicates. Source originals are kept by default.
 Stacking and image processing run in your external software.
@@ -302,10 +302,10 @@ counter shows the whole batch; export includes files selected under other target
 Click the counter or press Escape to clear the selection.
 
 ## Export and delete
-Export to… opens supported working images in your editor. Save outputs alongside
-the working copy; Refresh finds them. Settings > Export stores app defaults.
-Right-click Export files… copies individual or multiple selected images, verifies
-their bytes and adds suffixes for filename collisions.
+Export > Open in app… opens supported working images in your editor. Save outputs
+alongside the working copy; Refresh finds them. Settings > Export stores app defaults.
+Export > Files… copies individual or multiple selected images, verifies their bytes
+and adds suffixes for filename collisions.
 Delete files… or Delete confirms removal of Edited copies. Source originals and
 archived captures remain. Right-click also offers preview, details and file location.
 
@@ -354,8 +354,12 @@ Names cannot claim another object's identity. Use built-in names resets that obj
 STACKING PROJECTS AND SESSIONS
 
 ## Choose an export
-Export files… copies originals; Stacking folder… offers Subs, Stacks or Both.
-Export to… verifies copies before opening supported inputs in external software.
+Export opens one window. Its header counts the files and names their targets; the
+left list chooses Files, Stacking folder, Open in app, AstroBin CSV or Catalogue CSV.
+Right-click Export items open the same window with that option chosen, and the
+window reopens on the option you used last. Folder exports share one destination.
+Files copies originals; Stacking folder offers Subs, Stacks or Both.
+Open in app verifies copies before opening supported inputs in external software.
 DSS loads file lists. Siril opens the exported folder; other stackers may require
 choosing the inputs. No app starts stacking automatically.
 Choose subframes separately from finished stacks.
@@ -373,8 +377,22 @@ Open with… after export can open one eligible FITS stack in Siril after verifi
 Configure its location and export folder under Settings > Export.
 Cancelled/failed exports do not launch it; launch failures keep completed copies.
 
-Catalogue CSV exports metadata. Formula-like text is prefixed with a tab to avoid
-spreadsheet execution; numeric columns retain their values.
+Catalogue CSV exports metadata for the selection or the whole repository.
+Formula-like text is prefixed with a tab to avoid spreadsheet execution; numeric
+columns retain their values.
+
+## AstroBin acquisition CSV
+AstroBin CSV previews, copies or saves AstroBin's acquisition table without
+exporting images. Stacking folders add astrobin_acquisition.csv and notes by
+default; clear Add AstroBin acquisition CSV to skip them.
+Values come from the archived originals. Matching subs are combined by date,
+equipment, filter, exposure, binning, gain and ISO. Calibration frames, duplicate
+exposures and rejected files are not counted as integration. Stacks are skipped
+when their subs are included, and overlapping snapshots count once. Each target
+gets its own CSV; recordings use AstroBin's video columns.
+Unknown values stay blank and are listed under Check before uploading. AstroBin
+needs a numeric filter ID: paste each filter's AstroBin page address or number in
+AstroBin filter IDs. Local start times, Bortle, SQM and seeing are not invented.
 
 CALIBRATION AND FITS CONVERSION
 

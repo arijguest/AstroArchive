@@ -18,7 +18,7 @@ namespace AstroArchive {
   void Build(){
    string text=DataContext as string;if(text==null){Child=null;return;}
    var presenter=TemplatedParent as ContentPresenter;string context=LocalizedInterface.GetContext(this),shown=context!=null&&Localization.Has(context+"|"+text)?Localization.T(context+"|"+text):Localization.T(text);
-   if(presenter!=null&&presenter.RecognizesAccessKey){var access=Child as AccessText??new AccessText();access.Text=shown;if(Child!=access)Child=access;}
+   if(presenter!=null&&presenter.RecognizesAccessKey){var access=Child as AccessText??new AccessText();access.Text=context==null&&shown==text?Localization.AccessText(text):shown;if(Child!=access)Child=access;}
    else{var plain=Child as TextBlock??new TextBlock();plain.Text=shown;if(Child!=plain)Child=plain;}
   }
  }
