@@ -115,6 +115,13 @@ namespace AstroArchive {
    }
    return null;
   }
+  static bool HasClock(Frame frame){return Regex.IsMatch(frame.Observed??"",@"[T ]\d\d:\d\d");}
+  // UTC is assumed for an unzoned clock; a date alone is taken at noon. Session-folder dates still count as dates.
+  static DateTime? RoughMoonTime(Frame frame){
+   if(frame==null||IsCalibration(frame))return null;DateTime parsed;
+   if(HasClock(frame)&&!(frame.TimeSource??"").StartsWith("Session folder",StringComparison.OrdinalIgnoreCase)&&DateTime.TryParse(frame.Observed,CultureInfo.InvariantCulture,DateTimeStyles.AssumeUniversal|DateTimeStyles.AdjustToUniversal,out parsed))return DateTime.SpecifyKind(parsed,DateTimeKind.Utc);
+   var date=CaptureSessions.Date(frame);return date==null?(DateTime?)null:DateTime.SpecifyKind(date.Date.Date.AddHours(12),DateTimeKind.Utc);
+  }
   public static CaptureSky Resolve(Frame frame,Settings settings){
    var sky=new CaptureSky{TargetLabel=frame==null?"Select a capture":Catalog.IsAmbiguous(frame.Target)?"Capture position":frame.TargetLabel,Evidence=""};
    if(frame!=null){
@@ -138,7 +145,15 @@ namespace AstroArchive {
    // That is not a measurement, so the calculated body position replaces it;
    // any other recorded or solved pointing keeps priority.
    bool pointingReplaced=false;
-   if(sky.HasPosition&&sky.Utc.HasValue&&body!=null&&Math.Abs(sky.RA)<1e-6&&Math.Abs(sky.Dec)<1e-6){sky.HasPosition=false;pointingReplaced=true;}
+   DateTime? roughTime=!sky.Utc.HasValue&&body=="Moon"?RoughMoonTime(frame):null;
+   if(sky.HasPosition&&(sky.Utc.HasValue||roughTime.HasValue)&&body!=null&&Math.Abs(sky.RA)<1e-6&&Math.Abs(sky.Dec)<1e-6){sky.HasPosition=false;pointingReplaced=true;}
+   // The Moon moves only about 0.5° an hour against the stars, so an unzoned clock or a bare
+   // date still places it within a few degrees on the celestial map (never on a horizon).
+   if(!sky.HasPosition&&roughTime.HasValue){
+    var rough=MoonEphemeris.At(roughTime.Value,false,0,0).Geocentric;
+    sky.RA=SkyOrientation.Wrap(Math.Atan2(rough.Y,rough.X)*180/Math.PI);sky.Dec=Math.Asin(Math.Max(-1,Math.Min(1,rough.Z)))*180/Math.PI;sky.HasPosition=true;sky.PositionOfDate=true;sky.ApproximatePosition=true;
+    sky.Evidence="Approximate Moon position (geocentric) from the recorded capture "+(HasClock(frame)?"time, timezone unknown":"date")+" - good to a few degrees\nMeeus lunar/solar model"+(pointingReplaced?"\nThe file's recorded pointing was blank (0°, 0°) and is not used.":"");
+   }
    if(!sky.HasPosition&&sky.Utc.HasValue&&body!=null){
     SkyVector direction=new SkyVector();bool found=false;double distance;
     if(body=="Moon"&&sky.Moon!=null){direction=sky.Moon.Topocentric;found=true;}
