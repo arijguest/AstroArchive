@@ -1,12 +1,12 @@
-AstroArchive 3.2.1 — prerelease
-Package 3.2.1.1
+AstroArchive 3.2.2 — prerelease
+Package 3.2.2.1
 
-Offline target information in Library and Edited previews when no files are selected, with thumbnails for 325 target entries and a DSO sky map. Right-click a target and choose Show target info to open it. The pane adapts to narrow windows and larger text; image credits and sources remain accessible.
+Analytics: choose each chart's type (donut, bars or columns; the timeline stays in date order) below the chart list. Export as now shows Images & documents and Video & GIF with their formats; resolution, video timing and size sit under Export options. The AstroArchive wordmark on chart outputs is larger and centred on the logo.
 
-Interface language options: English, German, Spanish, French, Italian, Japanese and Simplified Chinese. Info-pane controls use the selected language; catalogue descriptions, scientific names and source credits remain in their original language.
+Target cards in Analytics: make cards for your top 3-25 targets (by integration or light frames) or targets you choose, within the current telescope and date scope. Save one image, a ZIP of images, or an MP4/GIF slideshow at Standard, High 2x or Sharing size. Cards show a larger logo and the AstroArchive website. Choose any image of a target, including Edited images without an archive link (linked images come first), and adjust its zoom and position.
 
-Correct planetary sky locations from capture dates and times for the Moon, Sun and seven planets, including AVI and other supported recordings. When capture metadata has no timezone, the saved observing town/city supplies it using the capture date's daylight-saving rules.
+Repository, Import and Edited tables each end with a centred path bar; click it to open that folder. Settings now notes beside the Astrometry.net option that ASTAP is much quicker and recommended, with a link to set it up.
 
-Includes temp2 at d499896: translation tables, export options and AstroBin CSV handoffs, plus sky-preview layout fixes.
+Also includes target information and analytics refinements since 3.2.1: lengthy image credits fold into a disclosure, split Serpens constellations resolve correctly, analytics previews stay visible in short windows with larger text, and saved stacks with an existing frame count recover their total exposure.
 
 This is a prerelease for testing. Stable releases remain available separately.
