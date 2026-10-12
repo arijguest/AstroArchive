@@ -6,7 +6,14 @@ namespace AstroArchive {
  public sealed class ColumnLayout {
   public List<string> Order{get;set;}public List<string> Visible{get;set;}
   public bool RepositoryGainShown{get;set;}
+  public bool RepositoryQualityShown{get;set;}
+  // Saved repository layouts gain the QUALITY heading once; after that the user's choice stands.
   public static ColumnLayout UpgradeRepository(ColumnLayout saved){
+   saved=ShowGain(saved);if(saved==null||saved.RepositoryQualityShown)return saved;
+   var visible=saved.Visible==null?null:saved.Visible.ToList();if(visible!=null&&!visible.Contains("QualityText"))visible.Add("QualityText");
+   return new ColumnLayout{Order=saved.Order,Visible=visible,RepositoryGainShown=saved.RepositoryGainShown,RepositoryQualityShown=true};
+  }
+  static ColumnLayout ShowGain(ColumnLayout saved){
    if(saved==null||saved.RepositoryGainShown)return saved;
    var order=saved.Order==null?null:saved.Order.ToList();
    if(order!=null&&!saved.VisibleContains("GainText")){order.Remove("GainText");order.Insert(order.Contains("ExposureText")?order.IndexOf("ExposureText")+1:order.Count,"GainText");}

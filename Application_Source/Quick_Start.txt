@@ -440,6 +440,24 @@ Requires timestamped acquisition subs with enough time coverage and site/pointin
 data. Stacks and registered images are unsuitable. Mount labels ending in ? are
 suggestions; confirm them through Edit metadata.
 
+## Image quality
+Tools > Review and analysis > Analyse image quality measures the light frames in
+view (or selected) and fills the QUALITY column with a score from 0 to 100. Each
+sub is compared with similar frames from the same session, so a score says how it
+ranks among its neighbours, not how good the night was. Deep-sky frames use star
+size, star count, roundness and noise. Planetary, lunar and solar stills use edge
+sharpness, fine detail and noise, and also get an EXPOSURE FIT column (Under,
+Good or Over) from the Columns menu. A flag beside a score (for example Clouded,
+Trailed or Clipped) is explained in its tooltip. Hover any score for the reasons.
+Filters > Quality rank keeps the top or weakest frames, frames with flags, or
+frames without a score. Subs inside each session are listed best first when scores
+exist. Stacks, calibration frames, recordings, JPEG and other non-linear or
+oversized images are not scored; their cell shows - and the tooltip gives the
+reason. Scores only suggest; nothing is rejected or deleted for you. Measuring is
+on demand; Settings > General can also measure after each import. Results are
+remembered per file content, so renamed or moved files are not measured twice.
+Re-measure image quality repeats the measurement.
+
 OBSERVING TOWN / CITY
 
 Settings > Sky & solving offers an offline town/city search or manual coordinates.

@@ -1950,3 +1950,25 @@ Export card video…	Esporta video delle schede…
 All cards	Tutte le schede
 ASTAP is much quicker and highly recommended. Astrometry.net solves can wait minutes in a shared online queue.	ASTAP è molto più veloce ed è vivamente consigliato. Le risoluzioni di Astrometry.net possono attendere minuti in una coda online condivisa.
 Choose card targets	Scegli gli oggetti delle schede
+QUALITY	QUALITÀ
+EXPOSURE FIT	ADEGUATEZZA ESPOSIZIONE
+Analyse image quality…	Analizza la qualità dell'immagine…
+Re-measure image quality…	Misura di nuovo la qualità dell'immagine…
+Analyse image quality	Analizza la qualità dell'immagine
+Quality rank	Posizione di qualità
+Exposure fit	Adeguatezza esposizione
+Quality score (0 to 100)	Punteggio di qualità (da 0 a 100)
+Top 10%	Migliori 10%
+Top 25%	Migliori 25%
+Top half	Metà superiore
+Bottom half	Metà inferiore
+Weakest 25%	25% più deboli
+Has quality flags	Con segnalazioni di qualità
+Not scored	Non valutato
+Under	Sottoesposta
+Good	Buona
+Over	Sovraesposta
+Image quality	Qualità dell'immagine
+Measure image quality after each import	Misura la qualità dell'immagine dopo ogni importazione
+Compare deep-sky frames across the whole target instead of each session	Confronta i fotogrammi deep-sky sull'intero oggetto invece che per sessione
+Nothing to measure	Niente da misurare

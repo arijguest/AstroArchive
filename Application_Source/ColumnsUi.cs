@@ -19,7 +19,7 @@ namespace AstroArchive {
     grid.Columns.Add(new DataGridTextColumn{Header=parts[1],Binding=new Binding(parts[0]),Width=int.Parse(parts[2]),Visibility=Visibility.Collapsed});
    }
    // Personal labels: optional columns, hidden until chosen.
-   if(name=="FramesGrid")foreach(string field in new[]{"StarText|STARRED|80","TagsText|TAGS|160","UserNote|NOTE|220"}){var parts=field.Split('|');if(!grid.Columns.Any(c=>ColumnId(c)==parts[0]))grid.Columns.Add(new DataGridTextColumn{Header=parts[1],Binding=new Binding(parts[0]),Width=int.Parse(parts[2]),Visibility=Visibility.Collapsed});}
+   if(name=="FramesGrid")foreach(string field in new[]{"ExposureFitText|EXPOSURE FIT|110","StarText|STARRED|80","TagsText|TAGS|160","UserNote|NOTE|220"}){var parts=field.Split('|');if(!grid.Columns.Any(c=>ColumnId(c)==parts[0]))grid.Columns.Add(new DataGridTextColumn{Header=parts[1],Binding=new Binding(parts[0]),Width=int.Parse(parts[2]),Visibility=Visibility.Collapsed});}
    originalColumnOrder[name]=grid.Columns.Select(ColumnId).ToList();grid.CanUserReorderColumns=true;
   }
   void InitializeColumnLayouts(){
@@ -50,7 +50,7 @@ namespace AstroArchive {
    TableColumnResizing.Refresh(grid);
    tableSorts[name].RemoveAll(s=>!grid.Columns.Any(c=>c.Visibility==Visibility.Visible&&c.SortMemberPath==s.PropertyName));RestoreTableSort(name);
   }
-  ColumnLayout CurrentColumnLayout(string name){var columns=G(name).Columns.OrderBy(c=>c.DisplayIndex).ToList();return new ColumnLayout{Order=columns.Select(ColumnId).ToList(),Visible=columns.Where(c=>c.Visibility==Visibility.Visible).Select(ColumnId).ToList(),RepositoryGainShown=name=="FramesGrid"};}
+  ColumnLayout CurrentColumnLayout(string name){var columns=G(name).Columns.OrderBy(c=>c.DisplayIndex).ToList();return new ColumnLayout{Order=columns.Select(ColumnId).ToList(),Visible=columns.Where(c=>c.Visibility==Visibility.Visible).Select(ColumnId).ToList(),RepositoryGainShown=name=="FramesGrid",RepositoryQualityShown=name=="FramesGrid"};}
   void PersistColumnLayout(string name){
    if(settings.TableLayouts==null)settings.TableLayouts=new Dictionary<string,ColumnLayout>();settings.TableLayouts[name]=CurrentColumnLayout(name);
    if(!testingColumnLayouts)SaveSettings();
