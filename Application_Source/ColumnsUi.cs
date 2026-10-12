@@ -18,6 +18,8 @@ namespace AstroArchive {
    foreach(string field in fields){var parts=field.Split('|');if(grid.Columns.Any(c=>ColumnId(c)==parts[0]))continue;
     grid.Columns.Add(new DataGridTextColumn{Header=parts[1],Binding=new Binding(parts[0]),Width=int.Parse(parts[2]),Visibility=Visibility.Collapsed});
    }
+   // Personal labels: optional columns, hidden until chosen.
+   if(name=="FramesGrid")foreach(string field in new[]{"StarText|STARRED|80","TagsText|TAGS|160","UserNote|NOTE|220"}){var parts=field.Split('|');if(!grid.Columns.Any(c=>ColumnId(c)==parts[0]))grid.Columns.Add(new DataGridTextColumn{Header=parts[1],Binding=new Binding(parts[0]),Width=int.Parse(parts[2]),Visibility=Visibility.Collapsed});}
    originalColumnOrder[name]=grid.Columns.Select(ColumnId).ToList();grid.CanUserReorderColumns=true;
   }
   void InitializeColumnLayouts(){

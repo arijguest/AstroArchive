@@ -11,6 +11,9 @@ namespace AstroArchive {
   void Changed(string name){if(PropertyChanged!=null)PropertyChanged(this,new PropertyChangedEventArgs(name));}
   public bool IsSelected{get{return selected;}set{if(selected==value)return;selected=value;Changed("IsSelected");}}
   public bool Expanded{get{return expanded;}set{if(expanded==value)return;expanded=value;Changed("Expanded");}}
+  // A session reads as starred only when every capture in it is starred.
+  public bool Starred{get{return Frames!=null&&Frames.Count>0&&Frames.All(f=>f.IsStarred);}}
+  public void StarsChanged(){Changed("Starred");}
  }
  public static class SubframeSessions {
   internal sealed class Membership {

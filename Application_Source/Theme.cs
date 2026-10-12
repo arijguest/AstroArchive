@@ -21,6 +21,9 @@ namespace AstroArchive {
    string[] controlKeys={"ControlBorder","DisabledSurface","DisabledText","DisabledBorder","SelectionIndicator"};
    string[] controlColours=contrast?(dark?new[]{"#FFFFFF","#151515","#FFFFFF","#FFFFFF","#FFFFFF"}:new[]{"#000000","#F3F3F3","#000000","#000000","#000000"}):(dark?new[]{"#94A5C0","#202C40","#A8B5CA","#71829D","#B7B4FF"}:new[]{"#64748B","#E3E8F0","#536077","#64748B","#5951D6"});
    for(int i=0;i<controlKeys.Length;i++){var brush=new SolidColorBrush((Color)ColorConverter.ConvertFromString(controlColours[i]));brush.Freeze();window.Resources[controlKeys[i]]=brush;}
+   // Starred rows: a faint warm tint that stays behind selection, plus an amber star.
+   string[] starKeys={"Starred","StarAccent"};string[] starColours=contrast?(dark?new[]{"#3A3000","#FFD54A"}:new[]{"#FFF0B3","#000000"}):(dark?new[]{"#2D2A26","#FBBF24"}:new[]{"#FFF8E5","#B27800"});
+   for(int i=0;i<starKeys.Length;i++){var brush=new SolidColorBrush((Color)ColorConverter.ConvertFromString(starColours[i]));brush.Freeze();window.Resources[starKeys[i]]=brush;}
    var support=new SolidColorBrush((Color)ColorConverter.ConvertFromString(contrast?(dark?"#183E69":"#DDEBFF"):(dark?"#29314B":"#E7E9F8")));support.Freeze();window.Resources["SupportSurface"]=support;
    // Tooltips and popup windows have separate visual trees. Share the palette and
    // implicit control styles at application scope so they resolve the same colours.

@@ -59,7 +59,8 @@ namespace AstroArchive {
    SmokeSelectionEscape(T("EditedSearchBox"));TargetWorkflowCheck(SelectedEditedImages().Count==0&&G("EditedGrid").SelectedItems.Count==0&&B("EditedSelectionCounter").Visibility==Visibility.Collapsed,"Escape from search left a hidden Edited selection.");
    tabs.SelectedIndex=1;SetRows("ImportGrid",all.Take(2).ToList());WaitForSearches();foreach(var frame in G("ImportGrid").Items.OfType<Frame>())G("ImportGrid").SelectedItems.Add(frame);
    SmokeSelectionEscape(T("ImportSearchBox"));TargetWorkflowCheck(G("ImportGrid").SelectedItems.Count==0,"Escape from search retained Import selections.");
-   File.WriteAllText(Path.Combine(output,"target-workflow-smoke.txt"),"PASS: Repository and Edited retain additive batches across targets, searches, sorting and refresh; plain clicks replace visible and hidden selections; right-click preserves selected batches; counters and Escape clear all files; comet grouping, device search, menu and verified export work together.");
+   SmokeAnnotations(output);
+   File.WriteAllText(Path.Combine(output,"target-workflow-smoke.txt"),"PASS: Stars, tags and notes on Repository and Edited files; Repository and Edited retain additive batches across targets, searches, sorting and refresh; plain clicks replace visible and hidden selections; right-click preserves selected batches; counters and Escape clear all files; comet grouping, device search, menu and verified export work together.");
   }
  }
 }

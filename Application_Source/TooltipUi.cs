@@ -19,6 +19,10 @@ namespace AstroArchive {
   public static void For(FrameworkElement control,string label){string text;if(DialogTips.TryGetValue(label.TrimEnd('…','.'),out text)){Tip(control,text);Describe(control,text);}}
   static readonly Dictionary<string,string> DialogTips=new Dictionary<string,string>{
    {"Recover profiles","Recover saved telescopes from archive metadata."},
+   {"Watch a capture folder","Import new captures as your capture software saves them."},
+   {"Start watching","Import each new capture once it stops changing; originals stay in place."},
+   {"Tags and notes","Add tags and a note to the selected files."},
+   {"Tags and note","Add tags and a note to this file."},
    {"Full rescan","Read and hash every source file again."},
    {"Review and repair","Inspect flagged captures and retry failed transfers."},
    {"Review flagged files","Inspect captures marked for review."},

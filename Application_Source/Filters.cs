@@ -18,8 +18,8 @@ namespace AstroArchive {
  public sealed class CaptureFilters {
   public readonly Dictionary<string,string> Values=new Dictionary<string,string>();
   public readonly Dictionary<string,CaptureRange> Ranges=new Dictionary<string,CaptureRange>();
-  public static readonly string[] Fields={"Target","Session","Device","Frame type","Optical filter","Review","Camera","Mount","Calibration","Dimensions","Status","Format","Capabilities"};
-  public static readonly string[] Primary={"Target","Session","Device","Frame type","Optical filter","Review"};
+  public static readonly string[] Fields={"Target","Session","Device","Frame type","Optical filter","Review","Starred","Tag","Camera","Mount","Calibration","Dimensions","Status","Format","Capabilities"};
+  public static readonly string[] Primary={"Target","Session","Device","Frame type","Optical filter","Review","Starred","Tag"};
   public static readonly string[] Advanced={"Camera","Mount","Calibration","Dimensions","Status","Format","Capabilities"};
   public static readonly string[] ReviewChoices={"Needs review","No issues flagged","Passed","Not screened","Telescope rejected / reference","File integrity problem","Transfer failure"};
   public int ActiveCount {get{return Values.Count+Ranges.Count(p=>p.Value.Active);}}
@@ -46,6 +46,8 @@ namespace AstroArchive {
     case "Dimensions":value=frame.Width>0&&frame.Height>0?frame.SizeText:"Unknown";break;
     case "Status":value=frame.Status;break;
     case "Review":return frame.ReviewText;
+    case "Starred":return frame.IsStarred?"Starred":"Not starred";
+    case "Tag":return frame.Tags==null||frame.Tags.Count==0?"No tags":frame.TagsText;
     case "Review type":return frame.ReviewCategory;
     default:throw new ArgumentException("Unknown capture filter: "+field);
    }
@@ -55,13 +57,18 @@ namespace AstroArchive {
    if(active||field=="Target"||field=="Session"||field=="Review"||field=="Frame type")return true;
    return field=="Exposure"||field=="Gain"?frames.Select(f=>Number(f,field)).Distinct().Take(2).Count()>1:Options(frames,field).Take(2).Count()>1;
   }
-  public static IEnumerable<string> Options(IEnumerable<Frame> frames,string field){return frames.Select(f=>Value(f,field)).Distinct().OrderBy(v=>v); }
+  public static IEnumerable<string> Options(IEnumerable<Frame> frames,string field){
+   // A capture can carry several tags; each tag is its own choice.
+   if(field=="Tag")return frames.SelectMany(f=>f.Tags==null||f.Tags.Count==0?new[]{"No tags"}:(IEnumerable<string>)f.Tags).GroupBy(t=>t,StringComparer.OrdinalIgnoreCase).Select(g=>g.First()).OrderBy(v=>v=="No tags"?1:0).ThenBy(v=>v,StringComparer.OrdinalIgnoreCase);
+   return frames.Select(f=>Value(f,field)).Distinct().OrderBy(v=>v);
+  }
   public List<Frame> Apply(IEnumerable<Frame> frames,string search){
    var query=FileSearch.Parse(search);
    return frames.Where(f=>Matches(f)&&query.Matches(f)).ToList();
   }
   static bool Matches(Frame frame,string field,string value){
    if(field=="Target")return frame.Target==Catalog.CanonicalTarget(value);
+   if(field=="Tag")return value=="No tags"?frame.Tags==null||frame.Tags.Count==0:frame.Tags!=null&&frame.Tags.Any(t=>string.Equals(t,value,StringComparison.OrdinalIgnoreCase));
    if(field=="Review"||field=="Review type"){
     if(value=="No issues flagged")return !CaptureScreening.NeedsReview(frame);
     if(value=="Needs review")return CaptureScreening.NeedsReview(frame);

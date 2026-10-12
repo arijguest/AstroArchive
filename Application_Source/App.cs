@@ -63,7 +63,7 @@ namespace AstroArchive {
    C("CameraBox").ItemsSource=new[]{"Auto","Telephoto","Wide"};C("CameraBox").SelectedIndex=0;C("ImportSolveMode").ItemsSource=new[]{"Off","Ambiguous only","All light/stack files"};C("ImportSolveMode").SelectedIndex=0;C("ImportRotationMode").ItemsSource=new[]{"Off","Ambiguous mounts","All light sessions"};C("ImportRotationMode").SelectedIndex=0;
    opening(40,"Preparing browsing and capture tools…");InitializeBrowsing();InitializeReview();InitializeFilters();InitializeFailedImports();T("SearchBox").TextChanged+=(s,e)=>{Watermark();ScheduleSearch("SearchBox");};Watermark();
    Targets.SelectionChanged+=(s,e)=>{if(!updating)Filter(false);};G("FramesGrid").SelectionChanged+=(s,e)=>SessionFileSelectionChanged(e);G("FramesGrid").MouseDoubleClick+=(s,e)=>PreviewSelected();
-   InitializeTables();InitializeFileTools();InitializeHelp();InitializeEdited();InitializeTargetNames();
+   InitializeTables();InitializeFileTools();InitializeHelp();InitializeEdited();InitializeTargetNames();InitializeAnnotations();
    T("SourceBox").TextChanged+=(s,e)=>{if(cancel!=null)return;if(pendingUsb!=null&&!string.Equals(T("SourceBox").Text,pendingUsb.Source,StringComparison.OrdinalIgnoreCase))pendingUsb=null;plan=null;importFilters.Reset();T("ImportSearchBox").Text="";FilterImports();((CheckBox)Window.FindName("DeleteOriginalsCheck")).IsChecked=false;SetBusy(false);};
    B("SourceButton").Click+=(s,e)=>{string p=Folder("Choose a mirrored telescope folder",T("SourceBox").Text);if(p!=null){T("SourceBox").Text=p;((CheckBox)Window.FindName("DeleteOriginalsCheck")).IsChecked=false;}};
    B("ClearButton").Click+=(s,e)=>{updating=true;T("SearchBox").Text="";libraryFilters.Reset();Targets.SelectedIndex=0;updating=false;Filter(true);};
@@ -84,7 +84,7 @@ namespace AstroArchive {
   void SaveSettings(){Directory.CreateDirectory(Path.GetDirectoryName(config));settings.LastSource=T("SourceBox").Text;settings.Telescope=T("TelescopeBox").Text;settings.Model=Convert.ToString(C("ModelBox").SelectedItem);Util.AtomicText(config,Util.Serialize(settings));}
   void OpenRepository(string path,bool save=true){if(repo!=null&&repo.Root.Equals(Path.GetFullPath(path),StringComparison.OrdinalIgnoreCase))return;if(RepositoryOperationBlocked)throw new InvalidOperationException("Wait for the current operation before switching repositories.");
    CancelAutomaticEditedRefresh();CancelPreview();CancelEditedPreview();Repository candidate=new Repository(path);List<Frame> frames;try{candidate.EnsureDumpFolder();frames=candidate.All();}catch{candidate.Dispose();throw;}if(repo!=null)repo.Dispose();repo=candidate;all=frames;librarySelection.Clear();editedSelection.Clear();ResetOpeningSelection();UpdateSelectionCounters();if(candidate.RecoveredTelescopeSettings!=null){settings=Util.Deserialize<Settings>(candidate.RecoveredTelescopeSettings);TelescopeProfiles.Initialize(settings);ApplyColumnLayout("FramesGrid",SavedColumnLayout("FramesGrid"));ApplyColumnLayout("ImportGrid",SavedColumnLayout("ImportGrid"));((CheckBox)Window.FindName("IgnoreFailedCheck")).IsChecked=settings.IgnoreFailed;ReloadScopes(settings.SelectedTelescope,true);}settings.Repository=repo.Root;L("RepositoryLabel").Text=CompactPath(repo.Root);L("RepositoryLabel").ToolTip=repo.Root;if(save)SaveSettings();plan=null;FilterImports();Refresh();if(navigationReady)BeginOpeningSelection(((TabControl)Window.FindName("MainTabs")).SelectedIndex);RebuildScopes(false);if(Window.IsLoaded){var opened=repo;Window.Dispatcher.BeginInvoke(new Action(()=>{if(repo==opened)ProcessDumpUi();}));}}
-  void Refresh(){if(repo!=null)all=repo.All();repositoryRows.Clear();for(int i=0;i<all.Count;i++)if(!string.IsNullOrEmpty(all[i].Hash))repositoryRows[all[i].Hash]=i;Filter(true);RefreshEdited();SetBusy(cancel!=null);}
+  void Refresh(){if(repo!=null){all=repo.All();ApplyAnnotations(all);}repositoryRows.Clear();for(int i=0;i<all.Count;i++)if(!string.IsNullOrEmpty(all[i].Hash))repositoryRows[all[i].Hash]=i;Filter(true);RefreshEdited();SetBusy(cancel!=null);}
   void Filter(bool rebuild){if(updating)return;if(Window.IsLoaded&&all.Count>2000){ScheduleSearch("SearchBox",true,true);return;}CancelSearch("SearchBox");ShowSearchError("SearchBox",FileSearch.Parse(T("SearchBox").Text));var rows=libraryFilters.Apply(all,T("SearchBox").Text);B("LibraryFiltersButton").Content="Filters"+(libraryFilters.ActiveCount>0?" ("+libraryFilters.ActiveCount+")":"");
    if(rebuild){string previous=Targets.SelectedItem is TargetSummary?((TargetSummary)Targets.SelectedItem).Name:"All targets";var summaries=TargetNavigation.Build(rows);var targetView=new ListCollectionView(summaries);targetView.GroupDescriptions.Add(new PropertyGroupDescription("Group"));updating=true;Targets.ItemsSource=targetView;Targets.SelectedItem=summaries.FirstOrDefault(t=>t.Name==previous)??summaries.First();updating=false;}
    var active=Targets.SelectedItem as TargetSummary;if(active!=null&&active.Name!="All targets")rows=rows.Where(f=>f.Target==active.Name).ToList();displayed=rows.OrderBy(f=>f.Target).ThenBy(f=>CaptureSessions.Date(f)==null?DateTime.MaxValue:CaptureSessions.Date(f).Date).ThenBy(f=>f.SessionKey).ThenBy(f=>f.Observed).ThenBy(f=>f.OriginalName).ToList();DisplayLibrary();((FrameworkElement)Window.FindName("EmptyState")).Visibility=displayed.Count==0?Visibility.Visible:Visibility.Collapsed;if(cancel==null)L("StatusLabel").Text=repo==null?"Choose a repository folder in Settings to begin.":displayed.Count+" visible files  ·  "+all.Count+" in repository";
@@ -98,6 +98,7 @@ namespace AstroArchive {
     DetailFact(facts,"Total exposure",summary.ExposureSeconds>0?TargetNavigation.Exposure(summary.ExposureSeconds):"");
     DetailFact(facts,"Filters",string.Join(", ",frames.Select(x=>x.Filter).Where(Known).Distinct(StringComparer.OrdinalIgnoreCase)));
     DetailFact(facts,"Telescope",string.Join(", ",frames.Select(x=>x.Telescope).Where(Known).Distinct(StringComparer.OrdinalIgnoreCase)));
+    AnnotationFacts(frames.Cast<IAnnotated>().ToList(),(label,value)=>DetailFact(facts,label,value));
     L("DetailsLabel").Text=summary.Flagged>0?summary.Flagged+" flagged for review":"";L("DetailsLabel").FontWeight=FontWeights.SemiBold;return;
    }
    if(f==null){L("DetailsTitle").Text="No capture selected";L("DetailsLabel").Text="Select a capture to view its details.";L("DetailsLabel").FontWeight=FontWeights.Normal;return;}
@@ -108,6 +109,7 @@ namespace AstroArchive {
    string instrument=Known(f.InstrumentText)&&!string.Equals(f.InstrumentText,f.Telescope,StringComparison.OrdinalIgnoreCase)?f.InstrumentText:"";
    DetailFact(facts,"Telescope",Known(f.Telescope)?f.Telescope+(instrument.Length>0?" · "+instrument:""):instrument);
    DetailFact(facts,"Camera",f.Camera=="Auto"?"":f.Camera);DetailFact(facts,"Mount",f.MountText);DetailFact(facts,"Calibration",f.Calibration);
+   AnnotationFacts(new IAnnotated[]{f},(label,value)=>DetailFact(facts,label,value));
    string issue=f.ReviewReason;L("DetailsLabel").Text=string.IsNullOrWhiteSpace(issue)?"":"Needs review: "+issue;L("DetailsLabel").FontWeight=FontWeights.SemiBold;
   }
   static bool Known(string value){return !string.IsNullOrWhiteSpace(value)&&value.Trim()!="-"&&!value.Trim().StartsWith("Unknown",StringComparison.OrdinalIgnoreCase);}
@@ -144,7 +146,7 @@ namespace AstroArchive {
    if(!flushAll&&(DateTime.UtcNow-lastLive).TotalMilliseconds<750)return;if(incoming.IsEmpty)return;lastLive=DateTime.UtcNow;bool repositoryChanged=false;
    foreach(string path in incoming.Keys.Take(flushAll?int.MaxValue:400)){
     Frame frame;if(!incoming.TryRemove(path,out frame))continue;int row;if(importMap.TryGetValue(frame.SourcePath,out row))importRows[row]=frame;else{importMap[frame.SourcePath]=importRows.Count;importRows.Add(frame);}
-    if(frame.Status=="Imported"){if(repositoryRows.TryGetValue(frame.Hash,out row))all[row]=frame;else{repositoryRows[frame.Hash]=all.Count;all.Add(frame);}repositoryChanged=true;}
+    if(frame.Status=="Imported"){CaptureAnnotations.Apply(frame,Annotations);if(repositoryRows.TryGetValue(frame.Hash,out row))all[row]=frame;else{repositoryRows[frame.Hash]=all.Count;all.Add(frame);}repositoryChanged=true;}
    }
    if(repositoryChanged)Filter(true);if(importLive)FilterImports();
   }

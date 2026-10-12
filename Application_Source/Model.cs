@@ -46,7 +46,7 @@ namespace AstroArchive {
   }
   public static string[] Tokens(string s) { return (s??"").Split(new[]{' ','\t'},StringSplitOptions.RemoveEmptyEntries); }
  }
- public class Frame {
+ public class Frame:System.ComponentModel.INotifyPropertyChanged,IAnnotated {
   public string Hash {get;set;} public string RelativePath {get;set;} public string SourcePath {get;set;} public string SourceRoot {get;set;} public string OriginalName {get;set;}
   public string Telescope {get;set;} public string TelescopeIdentity {get;set;} public string Model {get;set;} public string Camera {get;set;} string target="Unknown";
   public string Target {get{return Util.MeteorFilename(OriginalName)?"Meteor":target;}set{target=Catalog.CanonicalTarget(value);}}
@@ -86,9 +86,19 @@ namespace AstroArchive {
   public string GainText {get{return Gain.HasValue?Util.Num(Gain):"-";}} public string TemperatureText {get{return Temperature.HasValue?Util.Num(Temperature)+" °C":"-";}}
   [ScriptIgnore]public long? PixelCount {get{return Width>0&&Height>0?(long?)((long)Width*Height*Math.Max(1,Channels)):null;}}
   public string SizeText {get{return Width<=0||Height<=0?"-":Width+" × "+Height+(Channels>1?" × "+Channels:"");}}
-  public string SearchText {get{return string.Join(" ",new[]{Target,ObjectId,CommonName,Catalog.Aliases(Target),Telescope,TelescopeModel,CameraModel,CameraId,AcquisitionSoftware,ReadoutMode,Roi,OpticalConfiguration,Format,CapabilityText,MakeText,Model,MakeEvidence,TargetEvidence,SourceDisposition,Camera,Kind,Calibration,Filter,Mount,MountText,Night,AcquisitionDate,AcquisitionDateLabel,Observed,OriginalName,Notes,Status,ReviewText,ScreeningIssue,Util.Num(Exposure),Util.Num(Gain),Util.Num(Temperature),SizeText,"bin"+BinX+"x"+BinY});}}
+  public string SearchText {get{return string.Join(" ",new[]{starred?"starred":"",TagsText,UserNote,Target,ObjectId,CommonName,Catalog.Aliases(Target),Telescope,TelescopeModel,CameraModel,CameraId,AcquisitionSoftware,ReadoutMode,Roi,OpticalConfiguration,Format,CapabilityText,MakeText,Model,MakeEvidence,TargetEvidence,SourceDisposition,Camera,Kind,Calibration,Filter,Mount,MountText,Night,AcquisitionDate,AcquisitionDateLabel,Observed,OriginalName,Notes,Status,ReviewText,ScreeningIssue,Util.Num(Exposure),Util.Num(Gain),Util.Num(Temperature),SizeText,"bin"+BinX+"x"+BinY});}}
   public string Group {get{return string.Join("|",new[]{Telescope,MakeText,Camera,Filter,Width.ToString(),Height.ToString(),Channels.ToString(),BinX.ToString(),BinY.ToString(),Bayer,Calibration,Util.Num(Exposure),Util.Num(Gain),Assets.CompatibilityKey(this)});}}
-  public Frame Clone() { var copy=(Frame)MemberwiseClone();copy.Facts=Facts==null?null:Facts.ToDictionary(p=>p.Key,p=>new MetadataFact{Value=p.Value.Value,Raw=p.Value.Raw,Source=p.Value.Source,Unit=p.Value.Unit});copy.MetadataConflicts=MetadataConflicts==null?null:new List<string>(MetadataConflicts);copy.AssociatedFiles=AssociatedFiles==null?null:AssociatedFiles.Select(a=>new AssociatedFile{SourcePath=a.SourcePath,RelativePath=a.RelativePath,Hash=a.Hash,Role=a.Role,Stamp=a.Stamp==null?null:a.Stamp.Clone()}).ToList();copy.SourceStamp=SourceStamp==null?null:SourceStamp.Clone();copy.RepositoryStamp=RepositoryStamp==null?null:RepositoryStamp.Clone();copy.SourceMetadataStamp=SourceMetadataStamp==null?null:SourceMetadataStamp.Clone();copy.Sky=Sky==null?null:Sky.Clone();return copy; }
+  // Personal stars, tags and notes live in the repository annotation store, not the index.
+  bool starred;List<string> tags;string userNote;
+  [ScriptIgnore]public string AnnotationKey{get{return Hash;}}
+  [ScriptIgnore]public bool IsStarred{get{return starred;}set{if(starred==value)return;starred=value;Changed("IsStarred");Changed("StarText");}}
+  [ScriptIgnore]public List<string> Tags{get{return tags;}set{if(tags==value||tags!=null&&value!=null&&tags.SequenceEqual(value))return;tags=value;Changed("Tags");Changed("TagsText");}}
+  [ScriptIgnore]public string UserNote{get{return userNote;}set{if(userNote==value)return;userNote=value;Changed("UserNote");}}
+  [ScriptIgnore]public string StarText{get{return starred?"★":"";}}
+  [ScriptIgnore]public string TagsText{get{return tags==null?"":string.Join(", ",tags);}}
+  public event System.ComponentModel.PropertyChangedEventHandler PropertyChanged;
+  void Changed(string name){var handler=PropertyChanged;if(handler!=null)handler(this,new System.ComponentModel.PropertyChangedEventArgs(name));}
+  public Frame Clone() { var copy=(Frame)MemberwiseClone();copy.PropertyChanged=null;copy.tags=tags==null?null:new List<string>(tags);copy.Facts=Facts==null?null:Facts.ToDictionary(p=>p.Key,p=>new MetadataFact{Value=p.Value.Value,Raw=p.Value.Raw,Source=p.Value.Source,Unit=p.Value.Unit});copy.MetadataConflicts=MetadataConflicts==null?null:new List<string>(MetadataConflicts);copy.AssociatedFiles=AssociatedFiles==null?null:AssociatedFiles.Select(a=>new AssociatedFile{SourcePath=a.SourcePath,RelativePath=a.RelativePath,Hash=a.Hash,Role=a.Role,Stamp=a.Stamp==null?null:a.Stamp.Clone()}).ToList();copy.SourceStamp=SourceStamp==null?null:SourceStamp.Clone();copy.RepositoryStamp=RepositoryStamp==null?null:RepositoryStamp.Clone();copy.SourceMetadataStamp=SourceMetadataStamp==null?null:SourceMetadataStamp.Clone();copy.Sky=Sky==null?null:Sky.Clone();return copy; }
  }
  public class TargetSummary {
   public string Name{get;set;}public int Files{get;set;}public int Subs{get;set;}public int Videos{get;set;}public int Stacks{get;set;}public int Sessions{get;set;}public double ExposureSeconds{get;set;}public int UnknownExposure{get;set;}

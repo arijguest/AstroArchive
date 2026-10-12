@@ -19,8 +19,8 @@ namespace AstroArchive {
    dialog.Text("Quoted phrases stay together. Prefix a term with - to exclude it. OR or | separates alternative groups. * matches any characters and ? matches one. Existing table filters apply to every search group. An incomplete quote or comparison shows no results, preventing a broad accidental import.");dialog.CloseOnly();dialog.Show();
   }
   static SearchDocument EditedSearchDocument(EditedImage image){
-   var d=new SearchDocument{Target=image.Metadata.Object,Text=image.Filename+" "+image.RelativePath+" "+image.FileType+" "+image.Kind+" "+image.Source+" "+image.Metadata.ImageClass+" "+image.Metadata.ObjectLabel+" "+Catalog.Aliases(image.Metadata.Object)+" "+image.Metadata.Filters};
-   d.Fields["target"]=image.Metadata.ObjectLabel+" "+Catalog.Aliases(image.Metadata.Object);d.Fields["file"]=image.Filename;d.Fields["path"]=image.RelativePath;d.Fields["format"]=image.FileType;d.Fields["type"]=image.Metadata.ImageClass+" "+image.Kind;d.Fields["filter"]=image.Metadata.Filters;d.Fields["source"]=image.Source;d.Fields["device"]=image.Filename+" "+image.RelativePath+" "+image.Source;
+   var d=new SearchDocument{Target=image.Metadata.Object,Text=(image.IsStarred?"starred ":"")+image.TagsText+" "+image.UserNote+" "+image.Filename+" "+image.RelativePath+" "+image.FileType+" "+image.Kind+" "+image.Source+" "+image.Metadata.ImageClass+" "+image.Metadata.ObjectLabel+" "+Catalog.Aliases(image.Metadata.Object)+" "+image.Metadata.Filters};
+   d.Fields["target"]=image.Metadata.ObjectLabel+" "+Catalog.Aliases(image.Metadata.Object);d.Fields["file"]=image.Filename;d.Fields["path"]=image.RelativePath;d.Fields["format"]=image.FileType;d.Fields["type"]=image.Metadata.ImageClass+" "+image.Kind;d.Fields["filter"]=image.Metadata.Filters;d.Fields["source"]=image.Source;d.Fields["device"]=image.Filename+" "+image.RelativePath+" "+image.Source;d.Fields["tag"]=image.TagsText;d.Fields["note"]=image.UserNote;
    d.Numbers["exposure"]=image.Metadata.SubExposure;return d;
   }
  }

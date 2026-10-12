@@ -13,8 +13,17 @@ namespace AstroArchive {
   public Dictionary<string,EditedMetadata> MetadataEdits{get;set;}
   public List<EditedSource> Sources{get;set;} public override string ToString(){return Name;}
  }
- public sealed class EditedImage {
+ public sealed class EditedImage:System.ComponentModel.INotifyPropertyChanged,IAnnotated {
   [System.Web.Script.Serialization.ScriptIgnore]public EditedProject Project{get;set;}
+  bool starred;List<string> tags;string userNote;
+  [System.Web.Script.Serialization.ScriptIgnore]public string AnnotationKey{get{return Project==null||string.IsNullOrEmpty(RelativePath)?null:CaptureAnnotations.EditedKey(Project.Id,RelativePath);}}
+  [System.Web.Script.Serialization.ScriptIgnore]public bool IsStarred{get{return starred;}set{if(starred==value)return;starred=value;Changed("IsStarred");Changed("StarText");}}
+  [System.Web.Script.Serialization.ScriptIgnore]public List<string> Tags{get{return tags;}set{if(tags==value||tags!=null&&value!=null&&tags.SequenceEqual(value))return;tags=value;Changed("Tags");Changed("TagsText");}}
+  [System.Web.Script.Serialization.ScriptIgnore]public string UserNote{get{return userNote;}set{if(userNote==value)return;userNote=value;Changed("UserNote");}}
+  [System.Web.Script.Serialization.ScriptIgnore]public string StarText{get{return starred?"★":"";}}
+  [System.Web.Script.Serialization.ScriptIgnore]public string TagsText{get{return tags==null?"":string.Join(", ",tags);}}
+  public event System.ComponentModel.PropertyChangedEventHandler PropertyChanged;
+  void Changed(string name){var handler=PropertyChanged;if(handler!=null)handler(this,new System.ComponentModel.PropertyChangedEventArgs(name));}
   public string RelatedImage{get;set;} public string Filename{get;set;} public string RelativePath{get;set;} public string Kind{get;set;} public long Bytes{get;set;} public DateTime Modified{get;set;} public string Source{get;set;} public EditedMetadata Metadata{get;set;} public string MetadataProblem{get;set;}
   public string FileType{get{return MediaFiles.FileType(Filename??RelativePath);}}
  }

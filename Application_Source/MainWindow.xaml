@@ -441,6 +441,9 @@
   <Style TargetType="DataGridRow">
    <Setter Property="Foreground" Value="{DynamicResource Text}" />
    <Style.Triggers>
+    <DataTrigger Binding="{Binding IsStarred, FallbackValue=False}" Value="True">
+     <Setter Property="Background" Value="{DynamicResource Starred}" />
+    </DataTrigger>
     <Trigger Property="IsSelected" Value="True">
      <Setter Property="Background" Value="{DynamicResource Selection}" />
     </Trigger>
@@ -454,8 +457,15 @@
     <Setter.Value>
      <ControlTemplate TargetType="DataGridCell">
       <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" Padding="{TemplateBinding Padding}">
-       <ContentPresenter VerticalAlignment="Center" />
+       <DockPanel>
+        <TextBlock x:Name="StarGlyph" DockPanel.Dock="Left" Text="★" Foreground="{DynamicResource StarAccent}" Margin="0,0,6,0" VerticalAlignment="Center" Visibility="Collapsed" AutomationProperties.Name="Starred"/>
+        <ContentPresenter VerticalAlignment="Center" />
+       </DockPanel>
       </Border>
+      <ControlTemplate.Triggers>
+       <!-- The first visible column of a starred row carries the star, so it never relies on colour alone. -->
+       <MultiDataTrigger><MultiDataTrigger.Conditions><Condition Binding="{Binding IsStarred, FallbackValue=False}" Value="True"/><Condition Binding="{Binding Column.DisplayIndex, RelativeSource={RelativeSource Self}}" Value="0"/></MultiDataTrigger.Conditions><Setter TargetName="StarGlyph" Property="Visibility" Value="Visible"/></MultiDataTrigger>
+      </ControlTemplate.Triggers>
      </ControlTemplate>
     </Setter.Value>
    </Setter>
@@ -708,7 +718,10 @@
            </ControlTemplate></ToggleButton.Template>
           </ToggleButton>
           <Button Grid.Column="1" x:Name="SessionSelector" Tag="SelectSession" Padding="6,7" Margin="0" Background="Transparent" BorderThickness="0" FontWeight="Normal" HorizontalContentAlignment="Stretch" ToolTip="{Binding Converter={StaticResource CaptureGroupLabel}}" AutomationProperties.Name="{Binding Converter={StaticResource CaptureGroupLabel}}">
-           <TextBlock Text="{Binding Converter={StaticResource CaptureGroupLabel}}" FontSize="{DynamicResource UiFontControl}" FontWeight="Normal" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" TextTrimming="CharacterEllipsis" VerticalAlignment="Center"/>
+           <DockPanel>
+            <TextBlock x:Name="SessionStar" DockPanel.Dock="Left" Text="★" Foreground="{DynamicResource StarAccent}" Margin="0,0,6,0" VerticalAlignment="Center" Visibility="Collapsed" AutomationProperties.Name="Starred session"/>
+            <TextBlock Text="{Binding Converter={StaticResource CaptureGroupLabel}}" FontSize="{DynamicResource UiFontControl}" FontWeight="Normal" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" TextTrimming="CharacterEllipsis" VerticalAlignment="Center"/>
+           </DockPanel>
           </Button>
          </Grid>
         </Border>
@@ -716,6 +729,7 @@
        </StackPanel>
        <ControlTemplate.Triggers>
         <Trigger Property="IsExpanded" Value="True"><Setter TargetName="SessionContent" Property="Visibility" Value="Visible"/></Trigger>
+        <DataTrigger Binding="{Binding Name.Starred, FallbackValue=False}" Value="True"><Setter TargetName="SessionSurface" Property="Background" Value="{DynamicResource Starred}"/><Setter TargetName="SessionStar" Property="Visibility" Value="Visible"/></DataTrigger>
         <DataTrigger Binding="{Binding Name.IsSelected}" Value="True"><Setter TargetName="SessionSurface" Property="Background" Value="{DynamicResource Selection}"/></DataTrigger>
        </ControlTemplate.Triggers>
       </ControlTemplate></Setter.Value></Setter>
@@ -1055,6 +1069,9 @@
          <DataGridTextColumn Header="BYTES" Binding="{Binding Bytes}" Width="100" Visibility="Collapsed"/>
          <DataGridTextColumn Header="ORIGINAL" Binding="{Binding Source}" Width="180" Visibility="Collapsed"/>
          <DataGridTextColumn Header="FILE PATH" Binding="{Binding RelativePath}" Width="240" Visibility="Collapsed"/>
+         <DataGridTextColumn Header="STARRED" Binding="{Binding StarText}" Width="80" Visibility="Collapsed"/>
+         <DataGridTextColumn Header="TAGS" Binding="{Binding TagsText}" Width="160" Visibility="Collapsed"/>
+         <DataGridTextColumn Header="NOTE" Binding="{Binding UserNote}" Width="220" Visibility="Collapsed"/>
         </DataGrid.Columns></DataGrid><TextBlock x:Name="EditedEmptyState" Text="Add edited images, or send a repository stack to an editor to create a working copy." Foreground="{DynamicResource Muted}" HorizontalAlignment="Center" VerticalAlignment="Center" TextWrapping="Wrap" TextAlignment="Center" MaxWidth="420" Margin="24" IsHitTestVisible="False"/></Grid></Border>
       </Grid>
       <GridSplitter Grid.Row="1" Grid.Column="2" x:Name="EditedPreviewDivider" Width="4" HorizontalAlignment="Center" Background="{DynamicResource Border}" ResizeBehavior="PreviousAndNext"/>

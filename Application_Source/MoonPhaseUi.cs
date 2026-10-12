@@ -42,7 +42,8 @@ namespace AstroArchive {
    var panel=(FrameworkElement)Window.FindName("SkyFactsPanel");var facts=(Grid)Window.FindName("SkyFacts");var note=L("SkyFactsNote");
    facts.Children.Clear();facts.RowDefinitions.Clear();note.Text="";
    bool relevant=frame!=null&&sky!=null&&!CaptureSky.IsCalibration(frame);var moon=relevant?sky.Moon:null;
-   panel.Visibility=relevant&&(sky.HasPosition||moon!=null)?Visibility.Visible:Visibility.Collapsed;
+   // Shown only when there is something to say: a timed capture or a horizon position.
+   panel.Visibility=relevant&&(moon!=null||sky.HasPosition&&sky.HasHorizon)?Visibility.Visible:Visibility.Collapsed;
    if(!relevant)return;
    if(sky.HasPosition&&sky.HasHorizon)SkyFact(facts,"Target elevation",(sky.ApproximatePosition?"≈ ":"")+CaptureSky.Elevation(sky.Altitude,sky.Azimuth));
    if(moon!=null){
@@ -51,7 +52,7 @@ namespace AstroArchive {
     if(moon.HasHorizon)SkyFact(facts,"Moon elevation",CaptureSky.Elevation(moon.Altitude,moon.Azimuth));
     if(moon.HasTarget)SkyFact(facts,"Moon to target",(sky.ApproximatePosition?"≈ ":"")+Degrees(moon.TargetSeparation)+" apart");
    }
-   note.Text=moon==null?"Moon details need a recorded capture time.":!moon.HasHorizon?"Choose an observing town / city in Settings > Sky & solving for elevations.":"Geometric elevations at the capture time; refraction excluded.";
+   note.Text=moon==null?"":!moon.HasHorizon?"Choose an observing town / city in Settings > Sky & solving for elevations.":"Geometric elevations at the capture time; refraction excluded.";
   }
  }
 }
