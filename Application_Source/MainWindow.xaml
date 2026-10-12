@@ -12,6 +12,8 @@
   <Geometry x:Key="PreviewStellariumIcon">M13,2 A8,8 0 1 0 18,13 A6.5,6.5 0 0 1 13,2 Z M4,2 L4,6 M2,4 L6,4</Geometry>
   <Geometry x:Key="PreviewDetailsIcon">M10,1 A9,9 0 1 1 9.99,1 Z M10,9 L10,15 M10,5 L10,6</Geometry>
   <SolidColorBrush Color="#FBBF24" x:Key="Focus" />
+  <SolidColorBrush Color="#A9A6FF" x:Key="TargetMark" />
+  <Geometry x:Key="PreviewTargetsIcon">M10,3 A7,7 0 1 1 9.99,3 Z M10,0.5 L10,4.5 M10,15.5 L10,19.5 M0.5,10 L4.5,10 M15.5,10 L19.5,10 M10,8.6 L10,11.4 M8.6,10 L11.4,10</Geometry>
   <sys:Double x:Key="CaptureRowHeight">32</sys:Double>
   <sys:Double x:Key="UiFontBrand">20</sys:Double>
   <sys:Double x:Key="UiFontHeaderBrand">26</sys:Double>
@@ -873,9 +875,9 @@
         <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="*"/></Grid.RowDefinitions>
         <Border Grid.RowSpan="3" x:Name="TargetInfoPane" Visibility="Collapsed"/>
         <Grid x:Name="PreviewHeader">
-         <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/><ColumnDefinition Width="Auto"/><ColumnDefinition Width="Auto"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+         <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/><ColumnDefinition Width="Auto"/><ColumnDefinition Width="Auto"/><ColumnDefinition Width="Auto"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
          <TextBlock Text="PREVIEW" FontSize="{DynamicResource UiFontCaption}" FontWeight="SemiBold" Foreground="{DynamicResource Muted}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
-         <ComboBox Grid.Column="1" x:Name="StretchMode" Width="108" FontSize="{DynamicResource UiFontSmall}" ItemTemplate="{StaticResource PreviewStretchItem}" MinHeight="0" Margin="4,0,0,0" AutomationProperties.Name="Preview stretch" ToolTip="{Binding SelectedItem, RelativeSource={RelativeSource Self}}"/>
+         <ComboBox Grid.Column="1" x:Name="StretchMode" Width="100" FontSize="{DynamicResource UiFontSmall}" ItemTemplate="{StaticResource PreviewStretchItem}" MinHeight="0" Margin="4,0,0,0" AutomationProperties.Name="Preview stretch" ToolTip="{Binding SelectedItem, RelativeSource={RelativeSource Self}}"/>
          <Button Grid.Column="2" x:Name="PreviewDetailsButton" Width="28" Height="28" Padding="6" Margin="4,0,0,0" ToolTip="Capture details" AutomationProperties.Name="Capture details">
           <Viewbox><Path Data="{StaticResource PreviewDetailsIcon}" Stroke="{DynamicResource Text}" StrokeThickness="1.6" StrokeStartLineCap="Round" StrokeEndLineCap="Round"/></Viewbox>
          </Button>
@@ -884,6 +886,9 @@
          </Button>
          <Button Grid.Column="4" x:Name="StellariumButton" Width="28" Height="28" Padding="6" Margin="4,0,0,0" ToolTip="Open in Stellarium" AutomationProperties.Name="Open in Stellarium">
           <Viewbox><Path Data="{StaticResource PreviewStellariumIcon}" Stroke="{DynamicResource Text}" StrokeThickness="1.6" StrokeLineJoin="Round" StrokeStartLineCap="Round" StrokeEndLineCap="Round"/></Viewbox>
+         </Button>
+         <Button Grid.Column="5" x:Name="TargetOverlayButton" Width="28" Height="28" Padding="6" Margin="4,0,0,0" ToolTip="Show targets in frame" AutomationProperties.Name="Show targets in frame">
+          <Viewbox><Path x:Name="TargetOverlayIcon" Data="{StaticResource PreviewTargetsIcon}" Stroke="{DynamicResource Text}" StrokeThickness="1.6" StrokeStartLineCap="Round" StrokeEndLineCap="Round"/></Viewbox>
          </Button>
          <Popup x:Name="PreviewDetailsPopup" Placement="Bottom" PlacementTarget="{Binding ElementName=PreviewDetailsButton}" AllowsTransparency="True" StaysOpen="False" PopupAnimation="None">
           <Border Width="340" Padding="12" CornerRadius="6" Background="{DynamicResource Surface}" BorderBrush="{DynamicResource Border}" BorderThickness="1" Focusable="True" KeyboardNavigation.TabNavigation="Cycle">
