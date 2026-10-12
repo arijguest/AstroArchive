@@ -1,6 +1,12 @@
 AstroArchive 3.2.4 — prerelease
 Package 3.2.4.1
 
+Analytics: the window now has three columns: the chart list, the preview and a grouped options panel. Each chart can have its own type, order, title and subtitle. Documents get colour palettes and can leave charts out, every choice is remembered, and Hide options gives the preview the full width. All existing charts, layouts and export formats still work.
+
+Sky maps and eclipses: click a constellation to outline it and show its name, then click again, click empty sky or press Escape to hide it. Clicking the Moon, Sun or target opens Capture details. Eclipse captures show an illustrated card with the coverage at capture time, a coverage curve for the whole eclipse, and the maximum, start, end and duration, all worked out offline.
+
+Menus: the Import, Export and Repository menus are reorganised. Each USB telescope appears once, reports and telescope tools have their own submenus, Catalogue CSV is a single item, and Delete archive data sits under Clean up, away from routine maintenance.
+
 Open in Stellarium: a new button in the preview header shows the selected capture in Stellarium, with its position and field of view plus the capture time and place when known. Nothing leaves your PC. A running Stellarium with Remote Control switched on is reused; otherwise a new Stellarium window opens.
 
 Target overlay: a new button beside Open in Stellarium circles catalogued targets in the previewed frame using its plate solution. It is off by default and remembers your choice; unsolved frames show a short note instead.
