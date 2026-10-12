@@ -16,7 +16,8 @@ namespace AstroArchive.Remote {
   public string SmbMode="Direct";public int SmbPort=445;
   public int Port=21,PollSeconds=5;public double LimitMB=2;public bool IncludeExisting=true;
   public void Validate(bool downloading){
-   if(Kind!="DWARF FTP"&&Kind!="Seestar SMB"&&Kind!="Local simulator")throw new ArgumentException("Choose a connection type.");
+   if(Kind!="DWARF FTP"&&Kind!="Seestar SMB"&&Kind!="Local simulator"&&Kind!="Local folder")throw new ArgumentException("Choose a connection type.");
+   if(Kind=="Local folder"&&(string.IsNullOrWhiteSpace(Folder)||!Path.IsPathRooted(Folder)||!Directory.Exists(Folder)))throw new ArgumentException("Choose an existing capture folder on this PC or your network.");
    if(Kind=="DWARF FTP"){IPAddress address;if(!IPAddress.TryParse(Host,out address)||address.AddressFamily!=System.Net.Sockets.AddressFamily.InterNetwork)throw new ArgumentException("Enter the telescope IPv4 address, such as 192.168.88.1. Do not enter your PC address or an ftp:// URL.");if(Port<1||Port>65535)throw new ArgumentException("FTP port must be between 1 and 65535.");if(!Folder.StartsWith("/")||Folder.Contains("\\")||Folder.Split('/').Any(p=>p==".."||p=="."))throw new ArgumentException("Use an absolute FTP folder such as /Astronomy.");}
    else if(Kind=="Seestar SMB"){var path=SmbPath.Parse(Folder);if(path.Host!=Host)throw new ArgumentException("The capture folder and telescope address must match.");if(SmbMode!="Direct"&&SmbMode!="Windows")throw new ArgumentException("Choose Direct or Windows file access.");if(SmbPort<1||SmbPort>65535)throw new ArgumentException("Invalid SMB port.");}else if(!Path.IsPathRooted(Folder))throw new ArgumentException("Choose an absolute source folder.");
    if(PollSeconds<2||PollSeconds>120||LimitMB<0||LimitMB>1000)throw new ArgumentException("Use a poll interval of 2–120 seconds and a non-negative bandwidth limit.");

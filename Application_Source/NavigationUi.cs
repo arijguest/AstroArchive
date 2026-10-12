@@ -159,6 +159,7 @@ namespace AstroArchive {
         }
         void BuildImportNavigation(MenuItem menu) {
             menu.Items.Add(MenuAction("Connect telescope over network…",()=>{GoToPage(1);OpenRemoteImport();},repo!=null&&!NetworkImportBlocked,false));
+menu.Items.Add(MenuAction("Watch a capture folder…",()=>{GoToPage(1);OpenLocalWatch();},repo!=null&&!NetworkImportBlocked,false));
             menu.Items.Add(MenuAction("Telescope import progress…",OpenActivity,remoteSessions.Count>0,false));
             menu.Items.Add(new Separator());
             foreach(var telescope in usbTelescopes){var device=telescope;menu.Items.Add(MenuAction(UsbImportLabel(device),()=>{GoToPage(1);UploadUsb(device);},repo!=null&&!RepositoryOperationBlocked&&!usbImportPicking));}

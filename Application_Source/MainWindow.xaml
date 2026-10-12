@@ -938,7 +938,7 @@
          <TextBlock Text="DEVICE ID" FontSize="{DynamicResource UiFontCaption}" Foreground="{DynamicResource Muted}" FontWeight="SemiBold" />
          <TextBox x:Name="TelescopeBox" Margin="0,6,0,0" Text="Telescope-01" ToolTip="Unique ID for this physical telescope." />
         </StackPanel>
-        <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Bottom"><Button x:Name="ImportOptionsButton" Content="Import preferences…" Margin="0,0,8,0"/><Button x:Name="ScanButton" Content="Scan folder" Margin="0" /></StackPanel>
+        <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Bottom"><Button x:Name="ImportOptionsButton" Content="Import preferences…" Margin="0,0,8,0"/><Button x:Name="WatchFolderButton" Content="Watch folder…" Margin="0,0,8,0" ToolTip="Import new captures from this folder as your capture software saves them." AutomationProperties.Name="Watch folder for new captures"/><Button x:Name="ScanButton" Content="Scan folder" Margin="0" /></StackPanel>
        </Grid>
        <TextBlock Text="Originals kept · Analysis off" TextWrapping="Wrap" Margin="0,8,0,0" Foreground="{DynamicResource Muted}" x:Name="ImportPolicyLabel" />
       </StackPanel>

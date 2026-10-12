@@ -87,6 +87,23 @@ namespace AstroArchive {
    var secret=new ImportResumeRecord{Kind="RemoteFiles",Repository=Path.Combine(root,"secret-archive"),Connection=Util.Deserialize<RemoteConnection>(Util.Serialize(connection))};secret.Connection.Password="plaintext-never-write";Reject(()=>store.Save(secret),"recovery refuses plaintext telescope passwords");secret.ProtectedPassword=PlateSolve.Protect(secret.Connection.Password);secret.Connection.Password="";store.Save(secret);Check(!File.ReadAllText(Path.Combine(jobs,secret.Id+".json")).Contains("plaintext-never-write")&&PlateSolve.Unprotect(store.Load().Single().ProtectedPassword)=="plaintext-never-write","telescope credentials are recoverable only through protected storage");store.Remove(secret);
    string broken=Path.Combine(jobs,Guid.NewGuid().ToString("N")+".json");File.WriteAllText(broken,"{broken");Check(store.Load().Count==0&&store.Warnings.Count==1&&File.Exists(broken),"corrupt recovery records are reported and retained instead of silently discarded");
   }
+  // Capture software saving to this PC: live import archives in place, without staging copies.
+  static void WatchedFolderChecks(string root){
+   string watched=Path.Combine(root,"watched"),baseline=Path.Combine(watched,"Night 1","Light_M31_baseline.fit"),cache=Path.Combine(root,"watched-cache");Fits(baseline,1400);
+   var c=new RemoteConnection{Kind="Local folder",Host="",Folder=watched,LimitMB=0,IncludeExisting=false,PollSeconds=2};c.Validate(false);
+   Check(RemoteCapturePaths.Relative(c,Path.Combine(watched,"Night 1","x.fit"))==Path.Combine("Night 1","x.fit")&&RemoteCapturePaths.LocalRelative(c,Path.Combine(watched,"Night 1","x.fit"))==Path.Combine("Night 1","x.fit"),"watched folder paths stay relative and archive in place");
+   Reject(()=>RemoteCapturePaths.Relative(c,Path.Combine(root,"elsewhere.fit")),"watched folder rejects captures outside it");
+   Reject(()=>RemoteCapturePaths.CheckWatchedFolder(c,Path.Combine(watched,"Archive")),"watching a folder containing the repository is refused");
+   Reject(()=>RemoteCapturePaths.CheckWatchedFolder(c,root),"watching a folder inside the repository is refused");
+   try{new RemoteConnection{Kind="Local folder",Folder=Path.Combine(root,"missing-folder")}.Validate(false);throw new Exception("Missing watched folder accepted");}catch(ArgumentException){Check(true,"missing watched folders are refused");}
+   using(var repo=new Repository(Path.Combine(root,"watched-archive")))using(var stopped=new CancellationTokenSource())using(var baselineSeen=new ManualResetEvent(false))using(var imported=new ManualResetEvent(false)){
+    int waiting=0;var task=Task.Run(()=>RemoteLiveImport.Run(repo,new TelescopeProfile{Id="Rig 1",Model="Auto",Camera="Auto"},c,cache,1,stopped.Token,p=>{if(p.Stage=="Live import"&&p.Text.StartsWith("Watching"))baselineSeen.Set();if(p.Text!=null&&p.Text.StartsWith("Waiting for 1 capture to finish writing"))Interlocked.Increment(ref waiting);},f=>{if(f.Status=="Imported")imported.Set();},p=>{},false,false));
+    string next=Path.Combine(watched,"Night 1","Light_M31_live.fit");
+    try{Check(baselineSeen.WaitOne(10000),"folder watcher establishes its baseline");Fits(next,1500);byte[] complete=File.ReadAllBytes(next);File.WriteAllBytes(next,complete.Take(2880).ToArray());Check(!imported.WaitOne(6500),"folder watcher does not archive a capture still being written");File.WriteAllBytes(next,complete);Check(imported.WaitOne(20000),"folder watcher archives the completed capture");}finally{stopped.Cancel();try{task.GetAwaiter().GetResult();}catch(OperationCanceledException){}}
+    var frame=repo.All().Single();Check(waiting>0&&frame.Telescope=="Rig 1"&&frame.Hash==Util.Hash(next,CancellationToken.None)&&File.Exists(next)&&File.Exists(baseline),"watched capture is archived once with verified bytes; originals stay in place");
+    Check(!Directory.Exists(cache)&&!Directory.EnumerateFiles(root,"*.partial",SearchOption.AllDirectories).Any(),"watched folders are archived without staging copies");
+   }
+  }
   public static void Run(string root){
    string previousIndex=Repository.LocalIndexBase;try{checks=0;root=Path.Combine(root,"remote-integration");Directory.CreateDirectory(root);Repository.LocalIndexBase=Path.Combine(root,"indexes");var c=new RemoteConnection{Kind="Seestar SMB",Host="127.0.0.1",Folder=@"\\127.0.0.1\EMMC Images",LimitMB=0,IncludeExisting=false,PollSeconds=2};string storage=Path.Combine(root,"storage"),cache=Path.Combine(root,"cache"),one=Path.Combine(storage,"MyWorks","M31_sub","Light_M31_0001.fit");Fits(one,1000);File.WriteAllText(Path.Combine(Path.GetDirectoryName(one),"session.json"),"{\"target\":\"M31\"}");File.WriteAllText(Path.Combine(storage,"shotsInfo.json"),"{\"targetName\":\"M31\"}");Directory.CreateDirectory(Path.Combine(storage,".astroarchive"));Fits(Path.Combine(storage,".astroarchive","ignored.fit"),2000);
    Check(RemoteCapturePaths.Relative(c,c.Folder+@"\MyWorks\M31_sub\Light_M31_0001.fit")==Path.Combine("MyWorks","M31_sub","Light_M31_0001.fit"),"capture layout stays relative to telescope storage");Reject(()=>RemoteCapturePaths.Relative(c,@"\\127.0.0.2\EMMC Images\escape.fit"),"another telescope cannot escape selected storage");Reject(()=>RemoteCapturePaths.Relative(c,c.Folder+@"\..\escape.fit"),"remote traversal is rejected before any local write");
@@ -106,7 +123,7 @@ namespace AstroArchive {
     try{Check(baselineSeen.WaitOne(10000),"live importer establishes its baseline");string next=Path.Combine(liveRoot,"MyWorks","Light_M31_live.fit");Fits(next,1300);byte[] complete=File.ReadAllBytes(next);File.WriteAllBytes(next,complete.Take(2880).ToArray());Check(!imported.WaitOne(6500),"live import does not archive an exposure while it is incomplete");File.WriteAllBytes(next,complete);Check(imported.WaitOne(20000),"live importer recovers from disconnect and archives a new capture");}finally{stopped.Cancel();try{task.GetAwaiter().GetResult();}catch(OperationCanceledException){}}
     Check(retries>0&&repo.All().Count==1&&File.Exists(baseline),"live reconnect and stop retain exactly the new archive capture and originals");
    }
-   ConcurrentImports(root,c);RecoveryChecks(root,c);
+   ConcurrentImports(root,c);RecoveryChecks(root,c);WatchedFolderChecks(root);
    Console.WriteLine(checks+" remote integration checks passed.");}finally{Repository.LocalIndexBase=previousIndex;}
   }
  }

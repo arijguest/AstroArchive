@@ -154,10 +154,11 @@ namespace AstroArchive {
  public partial class MainUi {
   readonly List<RemoteImportSession> remoteSessions=new List<RemoteImportSession>();
   bool NetworkImportBlocked {get{return closing||cancel!=null||dumpChecking||releaseInstalling||usbImportPicking||sourceRemovalConfirming;}}
-  static string RemoteEndpoint(RemoteConnection c){return c.Kind+"|"+c.Host.ToLowerInvariant()+"|"+(c.Kind=="Seestar SMB"?c.SmbPort:c.Port);}
+  static string RemoteEndpoint(RemoteConnection c){return RemoteCapturePaths.LocalFolder(c)?c.Kind+"|"+Path.GetFullPath(c.Folder).TrimEnd('\\','/').ToLowerInvariant():c.Kind+"|"+c.Host.ToLowerInvariant()+"|"+(c.Kind=="Seestar SMB"?c.SmbPort:c.Port);}
   bool HasLiveImport(RemoteConnection c){return remoteSessions.Any(s=>s.Request.Live&&RemoteEndpoint(s.Request.Connection)==RemoteEndpoint(c));}
   string ValidateRemoteRequest(RemoteImportRequest request){
-   if(request.Live&&HasLiveImport(request.Connection))return "Live import is already underway for this telescope. Select files to import alongside it, or stop its watcher in Activity first.";
+   if(request.Live&&HasLiveImport(request.Connection))return RemoteCapturePaths.LocalFolder(request.Connection)?"This folder is already being watched. Stop its watcher in Activity first.":"Live import is already underway for this telescope. Select files to import alongside it, or stop its watcher in Activity first.";
+   if(RemoteCapturePaths.LocalFolder(request.Connection)&&remoteSessions.Any(s=>RemoteCapturePaths.LocalFolder(s.Request.Connection)&&(Util.Within(s.Request.Connection.Folder,request.Connection.Folder)||Util.Within(request.Connection.Folder,s.Request.Connection.Folder))))return "Another watcher already covers part of this folder. Stop it in Activity, or choose a separate folder.";
    var endpoint=RemoteEndpoint(request.Connection);
    if(remoteSessions.Any(s=>s.Request.Profile.Id.Equals(request.Profile.Id,StringComparison.OrdinalIgnoreCase)&&RemoteEndpoint(s.Request.Connection)!=endpoint))return "This saved telescope is importing from another device. Choose a different saved telescope or give this device its own name.";
    if(remoteSessions.Any(s=>RemoteEndpoint(s.Request.Connection)==endpoint&&!s.Request.Profile.Id.Equals(request.Profile.Id,StringComparison.OrdinalIgnoreCase)))return "This device is already importing as another saved telescope. Use the same saved telescope shown in Activity.";
@@ -168,7 +169,7 @@ namespace AstroArchive {
    // Matches Import preferences saved from this dialog: a folder scan built with the old filters is discarded.
    if(remoteSessions.Count==0&&plan!=null){plan=null;FilterImports();L("StatusLabel").Text="Import option saved. Scan the source folder again to apply it.";}
   }
-  void InitializeRemoteImport(){B("RemoteTelescopeButton").Click+=(s,e)=>OpenRemoteImport();B("RemoteLiveStatusButton").Click+=(s,e)=>OpenActivity();}
+  void InitializeRemoteImport(){B("RemoteTelescopeButton").Click+=(s,e)=>OpenRemoteImport();B("RemoteLiveStatusButton").Click+=(s,e)=>OpenActivity();B("WatchFolderButton").Click+=(s,e)=>OpenLocalWatch();}
   async void OpenRemoteImport(){
    if(NetworkImportBlocked||repo==null)return;RemoteImportRequest request=null;usbImportPicking=true;SetBusy(true);
    try{var dialog=new RemoteImportDialog(Window,settings.Telescopes,SelectedScope,new RemoteImportFilters{IgnoreFailed=settings.IgnoreFailed,IgnoreRaster=settings.IgnoreRasterImports,Changed=SaveRemoteImportFilters},isLiveActive:HasLiveImport,validate:ValidateRemoteRequest);if(dialog.Show())request=dialog.Request;}
@@ -179,10 +180,11 @@ namespace AstroArchive {
    if(NetworkImportBlocked||repo==null)throw new InvalidOperationException("Wait for the current operation before starting a telescope import.");string issue=ValidateRemoteRequest(request);if(issue!=null)throw new IOException(issue);
    var previous=TelescopeProfiles.Find(settings,request.Profile.Id);if(previous!=null)settings.Telescopes.Remove(previous);settings.Telescopes.Add(request.Profile);settings.SelectedTelescope=request.Profile.Id;ReloadScopes(request.Profile.Id,true);
    ((CheckBox)Window.FindName("DeleteOriginalsCheck")).IsChecked=false;C("ImportSolveMode").SelectedItem="Off";C("ImportRotationMode").SelectedItem="Off";((TabControl)Window.FindName("MainTabs")).SelectedIndex=1;
-   string cache=Path.Combine(Path.GetDirectoryName(config),"RemoteDownloads");if(remoteSessions.Count==0){T("SourceBox").Text=cache;plan=null;BeginLive(true);}SaveSettings();
+   bool local=RemoteCapturePaths.LocalFolder(request.Connection);if(local)RemoteCapturePaths.CheckWatchedFolder(request.Connection,repo.Root);
+   string cache=Path.Combine(Path.GetDirectoryName(config),"RemoteDownloads");if(remoteSessions.Count==0){T("SourceBox").Text=local?request.Connection.Folder:cache;plan=null;BeginLive(true);}SaveSettings();
    var record=recovery??RemoteImportRecord(request);record.State="Running";ResumeStore.Save(record);
    var session=new RemoteImportSession{Request=request,Record=record,Activity=AddActivity(record.Title,true)};
-   session.Activity.LiveImport=request.Live;session.Activity.ProcessContext=request.Profile.Id+" · "+request.Connection.Host;session.Activity.NetworkImport=true;session.Activity.RepositoryRoot=repo.Root;session.Activity.CancelLabel=request.Live?"Stop live import":"Cancel download";
+   session.Activity.LiveImport=request.Live;session.Activity.ProcessContext=request.Profile.Id+" · "+RemoteCapturePaths.SourceLabel(request.Connection);session.Activity.NetworkImport=true;session.Activity.RepositoryRoot=repo.Root;session.Activity.CancelLabel=local?"Stop watching":request.Live?"Stop live import":"Cancel download";
    session.Activity.Pause=()=>PauseRemoteImport(session);session.Activity.Cancel=()=>{session.Record.State="Canceled";session.Cancellation.Cancel();session.Activity.Canceled=true;session.Activity.Status="Stopping this telescope import; completed copies are retained…";};remoteSessions.Add(session);SetBusy(true);
    session.Work=RunRemoteSession(session,repo,cache,record.Workers,record.IgnoreFailed,record.IgnoreRaster,factory);return session.Work;
   }
@@ -191,22 +193,22 @@ namespace AstroArchive {
    Action<ProgressInfo> progress=p=>session.Latest=p;
    Action<RemoteArchiveResult> completed=result=>{session.Imported+=result.Archive.Import.Imported;session.Duplicates+=result.Archive.Import.Duplicates;if(result.Archive.Import.Failed+result.Downloads.Errors.Count>0)session.Record.State="Interrupted";if(result.Archive.Import.Errors.Count+result.Archive.Import.Warnings.Count>0){session.NeedsReview=true;session.Report=(session.Report??"")+result.Report+Environment.NewLine;}};
    try{status=await Task.Run(()=>{
-    if(request.Live){RemoteLiveImport.Run(repository,request.Profile,request.Connection,cache,workers,token,progress,LiveFrame,null,ignoreFailed,ignoreRaster,factory,completed,session.Record.LiveState,state=>{session.Record.LiveState=state;ResumeStore.Save(session.Record);});return "Live import stopped.";}
+    if(request.Live){RemoteLiveImport.Run(repository,request.Profile,request.Connection,cache,workers,token,progress,LiveFrame,null,ignoreFailed,ignoreRaster,factory,completed,session.Record.LiveState,state=>{session.Record.LiveState=state;ResumeStore.Save(session.Record);});return RemoteCapturePaths.LocalFolder(request.Connection)?"Stopped watching the folder.":"Live import stopped.";}
     var result=RemoteArchiveImport.Run(repository,request.Profile,request.Connection,request.Files,cache,workers,token,progress,LiveFrame,null,ignoreFailed,ignoreRaster,factory);completed(result);return result.Summary;
    });}
-   catch(OperationCanceledException){canceled=true;status="Stopped. "+session.Imported+" imported; "+session.Duplicates+" already present. Completed copies retained; telescope originals unchanged.";}
+   catch(OperationCanceledException){canceled=true;status="Stopped. "+session.Imported+" imported; "+session.Duplicates+" already present. Completed copies retained; "+(RemoteCapturePaths.LocalFolder(request.Connection)?"originals in the watched folder":"telescope originals")+" unchanged.";}
    catch(Exception error){session.Activity.Failed=true;session.NeedsReview=true;session.Report=(session.Report??"")+error.Message;status="Import could not finish: "+error.Message;}
    finally{
-    LiveTick(true);session.Clock.Stop();var entry=session.Activity;entry.Running=false;entry.Cancel=null;entry.Pause=null;entry.Canceled=canceled;entry.Status=status;entry.DurationSeconds=session.Clock.Elapsed.TotalSeconds;entry.ProcessOutcome=session.Imported+" imported · "+session.Duplicates+" duplicates";if(entry.Progress!=null){entry.Progress.Finished=true;entry.Progress.ElapsedSeconds=entry.DurationSeconds.Value;entry.Progress.RemainingSeconds=null;}entry.NeedsReview=session.NeedsReview;entry.Report=session.Report;entry.ReportTitle="Telescope import report · "+request.Profile.Id;
-    remoteSessions.Remove(session);session.Cancellation.Dispose();if(remoteSessions.Count==0){plan=new ImportPlan{Source=cache,Frames=importRows.ToList()};importLive=false;latestProgress=null;((ProgressBar)Window.FindName("ProgressBar")).IsIndeterminate=false;}
+    LiveTick(true);session.Clock.Stop();var entry=session.Activity;entry.Running=false;entry.Cancel=null;entry.Pause=null;entry.Canceled=canceled;entry.Status=status;entry.DurationSeconds=session.Clock.Elapsed.TotalSeconds;entry.ProcessOutcome=session.Imported+" imported · "+session.Duplicates+" duplicates";if(entry.Progress!=null){entry.Progress.Finished=true;entry.Progress.ElapsedSeconds=entry.DurationSeconds.Value;entry.Progress.RemainingSeconds=null;}entry.NeedsReview=session.NeedsReview;entry.Report=session.Report;entry.ReportTitle=(RemoteCapturePaths.LocalFolder(request.Connection)?"Folder watch report · ":"Telescope import report · ")+request.Profile.Id;
+    remoteSessions.Remove(session);session.Cancellation.Dispose();if(remoteSessions.Count==0){plan=new ImportPlan{Source=RemoteCapturePaths.LocalFolder(request.Connection)?request.Connection.Folder:cache,Frames=importRows.ToList()};importLive=false;latestProgress=null;((ProgressBar)Window.FindName("ProgressBar")).IsIndeterminate=false;}
     FinishImportRecord(session.Record,entry,!entry.Failed&&!canceled,canceled);SetBusy(false);Refresh();L("StatusLabel").Text=remoteSessions.Count==0?entry.Status:remoteSessions.Count+" telescope imports underway. See Activity for each telescope.";NotifyActivity(entry);if(closing&&remoteSessions.Count==0)Window.Close();
    }
   }
   void StopRemoteImports(){foreach(var session in remoteSessions.ToList()){session.Activity.Canceled=true;session.Activity.Cancel();}RenderActivity();}
   void UpdateRemoteImportStatus(){
    var live=remoteSessions.Where(s=>s.Request.Live).ToList();var indicator=B("RemoteLiveStatusButton");indicator.Visibility=live.Count==0?Visibility.Collapsed:Visibility.Visible;
-   indicator.Content=live.Count==1?"● Live import underway":"● "+live.Count+" live imports underway";indicator.ToolTip=string.Join("\n",live.Select(s=>s.Request.Profile.Id+" · "+s.Request.Connection.Host+" · "+s.Request.Connection.Folder))+"\nView Activity to stop individual imports.";
-   B("RemoteTelescopeButton").IsEnabled=repo!=null&&!NetworkImportBlocked&&(!operationBusy||remoteSessions.Count>0);B("CancelButton").Content=remoteSessions.Count>0?"Stop all telescope imports":"Cancel";
+   indicator.Content=live.Count==1?"● Live import underway":"● "+live.Count+" live imports underway";indicator.ToolTip=string.Join("\n",live.Select(s=>s.Request.Profile.Id+" · "+(RemoteCapturePaths.LocalFolder(s.Request.Connection)?"Watching "+s.Request.Connection.Folder:s.Request.Connection.Host+" · "+s.Request.Connection.Folder)))+"\nView Activity to stop individual imports.";
+   B("RemoteTelescopeButton").IsEnabled=repo!=null&&!NetworkImportBlocked&&(!operationBusy||remoteSessions.Count>0);B("WatchFolderButton").IsEnabled=B("RemoteTelescopeButton").IsEnabled;B("CancelButton").Content=remoteSessions.Count>0?"Stop all telescope imports":"Cancel";
    B("PauseImportButton").Visibility=remoteSessions.Count>0||foregroundImportRecord!=null?Visibility.Visible:Visibility.Collapsed;B("PauseImportButton").Content=remoteSessions.Count>1?"Pause all imports":"Pause import";
   }
   void TickRemoteImports(){
@@ -219,6 +221,6 @@ namespace AstroArchive {
    }
    if(remoteSessions.Count>0){L("StatusLabel").Text=remoteSessions.Count+" telescope import"+(remoteSessions.Count==1?"":"s")+" underway. Connect to select more files or add another telescope; view Activity for progress.";L("RateLabel").Text=estimates.Count==0?"Preparing telescope imports…":string.Join(" · ",estimates);var bar=(ProgressBar)Window.FindName("ProgressBar");bar.IsIndeterminate=!settings.ReducedMotion&&transfers.Any(p=>!p.TotalKnown);bar.Maximum=1;bar.Value=transfers.Count==0?0:transfers.Average(p=>p.ProgressFraction);}
   }
-  static string RemoteEstimateLabel(ProgressInfo p){return p.Stage=="Live import"?"Watching for captures":p.RemainingSeconds.HasValue?"ETA ~"+EtaEstimate.Format(p.RemainingSeconds.Value):p.Stage=="Downloading from telescope"?"Starting transfer":p.Stage??"Preparing";}
+  static string RemoteEstimateLabel(ProgressInfo p){return p.Stage=="Live import"?"Watching for captures":p.Stage=="Scanning folder"?"Checking folder":p.RemainingSeconds.HasValue?"ETA ~"+EtaEstimate.Format(p.RemainingSeconds.Value):p.Stage=="Downloading from telescope"?"Starting transfer":p.Stage??"Preparing";}
  }
 }
