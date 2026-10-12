@@ -23,14 +23,16 @@ namespace AstroArchive {
     string folder=Path.Combine(root,"stack-saved-session"),meta=Path.Combine(folder,".astroarchive");Directory.CreateDirectory(Path.Combine(meta,"session-metadata"));
     string sidecar=Path.Combine(meta,"session-metadata","saved.json");File.WriteAllText(sidecar,"{\"exposureSeconds\":10}");string before=File.ReadAllText(sidecar);string savedName=Util.Hash(sidecar,ct)+".json";File.Move(sidecar,Path.Combine(Path.GetDirectoryName(sidecar),savedName));sidecar=Path.Combine(Path.GetDirectoryName(sidecar),savedName);
     var frame=new Frame{Hash="saved-stack",Kind="Stack",Make="DWARFLAB",OriginalName="stacked-16_HD 237015_Astro_20260910-214058719.fits",Exposure=2360,RelativePath="missing.fits",SidecarRelativePath=Path.Combine(".astroarchive","session-metadata",savedName),Images=new System.Collections.Generic.List<ImageDescriptor>{new ImageDescriptor{Headers=new System.Collections.Generic.Dictionary<string,string>{{"EXPTIME","2360"}}}}};
-    using(var repo=new Repository(folder))repo.Save(frame);
-    using(var repo=new Repository(folder)){var repaired=repo.Find(frame.Hash);Check(repaired.StackCount==236&&repaired.Exposure==2360&&!File.Exists(repo.FilePath(repaired)),"Archived acquisition data was not recovered without the original FITS");}
+    var counted=frame.Clone();counted.Hash="recorded-count";counted.StackCount=236;counted.Exposure=10;counted.Images[0].Headers["EXPTIME"]="10";
+    using(var repo=new Repository(folder)){repo.Save(frame);repo.Save(counted);}
+    using(var repo=new Repository(folder)){var repaired=repo.Find(frame.Hash);Check(repaired.StackCount==236&&repaired.Exposure==2360&&!File.Exists(repo.FilePath(repaired)),"Archived acquisition data was not recovered without the original FITS");Check(repo.Find(counted.Hash).Exposure==2360,"Known-count stack retained per-frame exposure despite its saved session duration");}
     Check(File.ReadAllText(sidecar)==before,"Stack recovery modified the archived sidecar");
     File.WriteAllText(sidecar,"{\"exposureSeconds\":20}");frame.StackCount=0;frame.Facts=null;using(var repo=new Repository(folder))repo.Save(frame);
     using(var repo=new Repository(folder))Check(repo.Find(frame.Hash).StackCount==0,"Altered archived metadata was trusted for stack recovery");
    });
    Test("Stack durations respect milliseconds and conflicting session values",()=>{
     var frame=new Frame{Kind="Stack",Exposure=0.1,Images=new System.Collections.Generic.List<ImageDescriptor>{new ImageDescriptor{Headers=new System.Collections.Generic.Dictionary<string,string>{{"EXPTIME","100"},{"NCOMBINE","20"}},Comments=new System.Collections.Generic.Dictionary<string,string>{{"EXPTIME","Per frame exposure [ms]"}}}}};
+    Check(!Classifier.ApplyStackSessionMetadata(frame,new System.Collections.Generic.Dictionary<string,string>{{"exposureSeconds","10"}}),"Session duration displaced an explicitly labelled header duration");
     Classifier.ApplyStackMetadata(frame);Check(frame.Exposure==2&&frame.StackCount==20,"Per-frame milliseconds were multiplied as seconds");
     var unknown=new Frame{Kind="Stack",Exposure=2360};Check(!Classifier.ApplyStackSessionMetadata(unknown,new System.Collections.Generic.Dictionary<string,string>{{"exposure_s","10"},{"exposureSeconds","20"}})&&unknown.StackCount==0,"Conflicting session durations supplied a fabricated count");
    });

@@ -16,6 +16,7 @@ namespace AstroArchive {
   }
   static double? StackSubExposure(Frame frame,FitsHeader header){
    var value=ExposureSeconds(header,StackSubKeys);if(PositiveExposure(value))return value;
+   string comment;header.Comments.TryGetValue("EXPTIME",out comment);if(Regex.IsMatch(comment??"",@"per[ _-]?(sub|frame)|individual|single",RegexOptions.IgnoreCase)){value=ExposureSeconds(header,"EXPTIME");if(PositiveExposure(value))return value;}
    MetadataFact fact;double seconds;
    if(frame.Facts!=null&&frame.Facts.TryGetValue("SubExposure",out fact)&&fact!=null&&fact.Unit=="s"&&double.TryParse(fact.Value,NumberStyles.Float,CultureInfo.InvariantCulture,out seconds)&&PositiveExposure(seconds))return seconds;
    return null;
@@ -24,7 +25,8 @@ namespace AstroArchive {
   // newer DWARF filenames. Never interpret the 16/32 bit-depth prefix as a count.
   public static bool ApplyStackSessionMetadata(Frame frame,Dictionary<string,string> values){
    if(frame.Kind!="Stack"||values==null)return false;var header=StackHeader(frame);
-   if(PositiveExposure(ExposureSeconds(header,StackSubKeys))||UserMetadata(frame,"SubExposure"))return false;
+   string comment;header.Comments.TryGetValue("EXPTIME",out comment);
+   if(PositiveExposure(ExposureSeconds(header,StackSubKeys))||Regex.IsMatch(comment??"",@"per[ _-]?(sub|frame)|individual|single",RegexOptions.IgnoreCase)&&PositiveExposure(ExposureSeconds(header,"EXPTIME"))||UserMetadata(frame,"SubExposure"))return false;
    double? duration=null;string source=null,sourceRaw=null;
    foreach(string key in new[]{"exposure_s","exposureSeconds","exposureTimeSec"}){
     string raw;double seconds;if(!values.TryGetValue(key,out raw)||string.IsNullOrWhiteSpace(raw))continue;
@@ -57,7 +59,7 @@ namespace AstroArchive {
  }
  public sealed partial class Repository {
   bool RecoverStackSession(Frame frame,Dictionary<string,Dictionary<string,string>> cache){
-   if(frame.Kind!="Stack"||frame.StackCount>0||string.IsNullOrEmpty(frame.SidecarRelativePath))return false;
+   if(frame.Kind!="Stack"||string.IsNullOrEmpty(frame.SidecarRelativePath))return false;
    string relative=frame.SidecarRelativePath;Dictionary<string,string> values;
    if(!cache.TryGetValue(relative,out values)){
     values=null;try{values=PreservedShots(frame,System.Threading.CancellationToken.None);}
