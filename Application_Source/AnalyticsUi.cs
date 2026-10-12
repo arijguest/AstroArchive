@@ -39,7 +39,8 @@ namespace AstroArchive {
   static TextBlock Label(string text,double size=13,bool bold=false){var label=new TextBlock{Text=text,FontSize=size,FontWeight=bold?FontWeights.SemiBold:FontWeights.Normal,TextWrapping=TextWrapping.Wrap};label.SetResourceReference(TextBlock.FontSizeProperty,size>=16?"UiFontTitle":size<=12?"UiFontSmall":"UiFontControl");return label;}
   static void AccessibleName(DependencyObject control,string name){AutomationProperties.SetName(control,name);}
   // An output choice reads as its purpose first, then the formats it offers.
-  static StackPanel OutputLabel(string title,string formats){var panel=new StackPanel{Orientation=Orientation.Horizontal};panel.Children.Add(new TextBlock{Text=title});var detail=new TextBlock{Text=formats,Margin=new Thickness(8,0,0,0),FontWeight=FontWeights.Normal};Theme.Bind(detail,TextBlock.ForegroundProperty,"Muted");panel.Children.Add(detail);return panel;}
+  readonly List<TextBlock> outputDetails=new List<TextBlock>();
+  StackPanel OutputLabel(string title,string formats){var panel=new StackPanel{Orientation=Orientation.Horizontal};panel.Children.Add(new TextBlock{Text=title});var detail=new TextBlock{Text=formats,Margin=new Thickness(8,0,0,0),FontWeight=FontWeights.Normal};Theme.Bind(detail,TextBlock.ForegroundProperty,"Muted");panel.Children.Add(detail);outputDetails.Add(detail);return panel;}
   public AnalyticsWindow(Window owner,List<Frame> source,string repositoryName,int initial):this(owner,source,repositoryName,initial,null){}
   public AnalyticsWindow(Window owner,List<Frame> source,string repositoryName,int initial,AnalyticsCardSource cardSource){
    frames=source;cards=cardSource;Owner=owner;Icon=ApplicationIcon.Image;Title="Analytics · AstroArchive";WindowStartupLocation=WindowStartupLocation.CenterOwner;
@@ -112,7 +113,9 @@ namespace AstroArchive {
    status=Label("Integration includes standalone stacks; stacks with matching subframes, videos and calibrations are excluded.",12);status.Margin=new Thickness(0,10,0,0);Theme.Bind(status,TextBlock.ForegroundProperty,"Muted");AccessibleName(status,"Analytics status");AutomationProperties.SetLiveSetting(status,AutomationLiveSetting.Polite);footer.Children.Add(status);
    var open=new Button{Content="Open export folder",HorizontalAlignment=HorizontalAlignment.Left,Visibility=Visibility.Collapsed,Margin=new Thickness(0,8,0,0)};footer.Children.Add(open);
    open.Click+=(s,e)=>{try{System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(Path.GetDirectoryName(lastOutput)){UseShellExecute=true});}catch(Exception error){status.Text=error.Message;}};
-   Action arrangeOptions=()=>{bool compact=ActualHeight<740;optionsScroll.MaxHeight=compact?(scope.IsExpanded?80:120):230;scopeScroll.MaxHeight=compact?80:190;exportHint.Visibility=compact?Visibility.Collapsed:Visibility.Visible;};
+   // Short or narrow windows keep the preview usable: the format hints beside the
+   // output choices give way first so those choices stay on one line.
+   Action arrangeOptions=()=>{bool compact=ActualHeight<740;foreach(var detail in outputDetails)detail.Visibility=compact||ActualWidth<1100?Visibility.Collapsed:Visibility.Visible;optionsScroll.MaxHeight=compact?(scope.IsExpanded?72:104):230;scopeScroll.MaxHeight=compact?80:190;exportHint.Visibility=compact?Visibility.Collapsed:Visibility.Visible;};
    SizeChanged+=(s,e)=>arrangeOptions();scope.Expanded+=(s,e)=>arrangeOptions();scope.Collapsed+=(s,e)=>arrangeOptions();
    export=new Button{Content="Export chart…",VerticalAlignment=VerticalAlignment.Bottom};Theme.Bind(export,Control.BackgroundProperty,"Accent");Theme.Bind(export,Control.BorderBrushProperty,"Accent");Theme.Bind(export,Control.ForegroundProperty,"AccentText");
    exportAll=new Button{Content="Export all…",VerticalAlignment=VerticalAlignment.Bottom};close=new Button{Content="Close",IsCancel=true,VerticalAlignment=VerticalAlignment.Bottom};
