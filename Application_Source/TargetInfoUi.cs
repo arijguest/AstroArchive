@@ -14,12 +14,17 @@ namespace AstroArchive {
    var state=prefix.Length==0?libraryInfo:editedInfo;state.View=new TargetInfoView{Focusable=true};((Border)Window.FindName(prefix+"TargetInfoPane")).Child=state.View;
    state.View.ChooseObject=id=>LoadTargetInformation(prefix,state.Target,id);
    var body=(Grid)Window.FindName(prefix.Length==0?"LibraryBody":"EditedBody");body.SizeChanged+=(s,e)=>ConstrainTargetInformationWidth(prefix);
+   // A Grid may retain its minimum desired size while an ancestor clips it.
+   // Recheck its allotted slot after layout, including preview divider changes.
+   body.LayoutUpdated+=(s,e)=>ConstrainTargetInformationWidth(prefix);
    var divider=(GridSplitter)Window.FindName(prefix+"PreviewDivider");divider.DragCompleted+=(s,e)=>{state.PreferredWidth=body.ColumnDefinitions[3].ActualWidth;ConstrainTargetInformationWidth(prefix);};
   }
   void ConstrainTargetInformationWidth(string prefix){
    var pane=(FrameworkElement)Window.FindName(prefix+"TargetInfoPane");if(pane.Visibility!=Visibility.Visible)return;
    var state=prefix.Length==0?libraryInfo:editedInfo;var body=(Grid)Window.FindName(prefix.Length==0?"LibraryBody":"EditedBody");if(body.ActualWidth<=0)return;
-   var column=body.ColumnDefinitions[3];double available=Math.Max(220,body.ActualWidth-body.ColumnDefinitions[0].ActualWidth-body.ColumnDefinitions[1].MinWidth-body.ColumnDefinitions[2].ActualWidth);
+   double allotted=System.Windows.Controls.Primitives.LayoutInformation.GetLayoutSlot(body).Width;
+   double bodyWidth=allotted>0?Math.Min(body.ActualWidth,allotted):body.ActualWidth;
+   var column=body.ColumnDefinitions[3];double available=Math.Max(220,bodyWidth-body.ColumnDefinitions[0].ActualWidth-body.ColumnDefinitions[1].MinWidth-body.ColumnDefinitions[2].ActualWidth);
    double width=Math.Min(available,state.PreferredWidth??column.Width.Value);if(!column.Width.IsAbsolute||Math.Abs(column.Width.Value-width)>0.5)column.Width=new GridLength(width);
   }
   void SetTargetInformationVisible(string prefix,bool visible){
