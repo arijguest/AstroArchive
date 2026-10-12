@@ -162,7 +162,7 @@ It follows your Windows language, or choose one in **Settings → General → La
 
 ### Fresh from the latest releases
 
-**[3.2.4 prerelease](https://github.com/arijguest/AstroArchive/releases/tag/v3.2.4.1)** adds Open in Stellarium from the preview, a PARAMETERS section with orbits, sizes, masses and moons for solar-system bodies, a backup-in-progress indicator, and fixes for green lunar stacks and Moon sky maps.
+**[3.2.4 prerelease](https://github.com/arijguest/AstroArchive/releases/tag/v3.2.4.1)** adds Open in Stellarium from the preview, a PARAMETERS section with orbits, sizes, masses and moons for solar-system bodies, comet information pages, a backup-in-progress indicator, and fixes for green lunar stacks and Moon sky maps.
 
 **[3.2.3 prerelease](https://github.com/arijguest/AstroArchive/releases/tag/v3.2.3.1)** detects solar and lunar eclipses in your Sun and Moon captures, adds daytime sky maps, in-depth overviews for 170 popular targets and image-quality scoring.
 

@@ -5,6 +5,10 @@ Open in Stellarium: a new button in the preview header shows the selected captur
 
 Target information: AT A GLANCE is now PARAMETERS. Planets and the largest dwarf planets list their nominal orbit, diameter, mass and major moons; the Sun shows its diameter and mass. The Moon's information pane no longer flickers as its scrollbar appears and disappears.
 
+Comets: every comet target now opens an information page with an overview, imaging notes and PARAMETERS (orbit type, perihelion, period and eccentricity), with written overviews for 33 well-known comets and links to NASA/JPL.
+
+Cleaner text: tooltips that only repeated their label are gone, dialog introductions are shorter, and stale guide and translation text has been removed.
+
 Moon and lunar stacks: lunar and solar stacks from colour cameras no longer preview green, and Seestar stacks with millisecond timestamps in their names show their Stack() count again. Moon captures whose clock has no timezone, or only a date, now show the Moon on the sky map at an approximate position.
 
 Backups and notifications: a small indicator beside the repository path shows when a backup is running, even after its notice is dismissed. The notifications menu always lists every notification, including dismissed ones, and its bell shows when a process is active.
