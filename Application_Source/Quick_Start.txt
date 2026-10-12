@@ -155,8 +155,10 @@ Expand Scope to choose a physical telescope, inclusive acquisition dates, a
 document label, or whether to include rejected light frames. Reset scope restores
 the entire repository. Undated frames are excluded only when a date range is set.
 Time is recorded individual light-frame integration, not elapsed observing time.
-Stacks, videos and calibrations are excluded to avoid double counting. Missing
-exposures and dates remain unknown and are reported with the chart.
+Calibrations are excluded. A stack counts only when no sub of its target was
+saved in the same session or on the same date, so it never doubles those subs;
+the same rule applies to target and session totals. Missing exposures and dates
+remain unknown and are reported with the chart.
 Target/filter shares show the largest seven categories plus Other when needed.
 Time rankings continue onto additional pages so every target and telescope is
 included. Timeline gaps remain zero; longer timelines use years or grouped periods.

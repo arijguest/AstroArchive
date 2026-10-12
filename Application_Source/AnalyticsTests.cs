@@ -55,13 +55,15 @@ namespace AstroArchive {
      Check(svg.Descendants(ns+"text").Single(e=>e.Value=="REPOSITORY INTEGRATION").Attribute("text-anchor").Value=="middle","SVG text is not centered for "+layout);
     }
    });
-   Test("Standalone stack integration is counted unless two light subframes share its session and target",()=>{
+   Test("Stack integration is counted only when no sub of its target shares its session or date",()=>{
     var rows=new List<Frame>{AnalyticsLight("M31",600,"2026-10-01","Scope A","shared"),AnalyticsLight("M31",900,"2026-10-01","Scope A","shared"),new Frame{Target="M31",Kind="Stack",Exposure=1500,Session="shared"},AnalyticsLight("M42",120,"2026-10-02","Scope A","single"),new Frame{Target="M42",Kind="Stack",Exposure=1200,Session="single",AcquisitionDate="2026-10-02"},new Frame{Target="M42",Kind="Stack",Exposure=1800,Session="other",AcquisitionDate="2026-10-02"},new Frame{Target="M31",Kind="Stack",Exposure=2400,AcquisitionDate="2026-10-02"}};
-    var data=ArchiveAnalytics.Build(rows,new AnalyticsOptions());Check(data.RepositorySeconds==7020&&data.Seconds==7020,"Matched stack was double-counted or standalone stack exposure was omitted");
+    var data=ArchiveAnalytics.Build(rows,new AnalyticsOptions());Check(data.RepositorySeconds==4020&&data.Seconds==4020,"Stack with same-session or same-date subs was double-counted, or a standalone stack was omitted");
     foreach(int index in new[]{1,2,3,4})Check(Math.Abs(data.Reports[index].Values.Sum(v=>v.Value)-data.Seconds/3600)<1e-10,"An integration chart disagrees with the total at index "+index);
     Check(data.Reports[5].Values.Sum(v=>v.Value)==3,"Stack images were counted as individual light frames in the exposure-length histogram");
     var oneSub=new[]{AnalyticsLight("M31",600,"2026-10-01","Scope A","one"),new Frame{Target="M31",Kind="Stack",Exposure=900,Session="one"}};
-    Check(CaptureGroups.ExposureFrames(oneSub).Count==2,"One light frame incorrectly suppressed its stack");
+    Check(CaptureGroups.ExposureFrames(oneSub).Count==1,"A single saved sub did not suppress its session's stack");
+    var otherDate=new[]{AnalyticsLight("M31",600,"2026-10-01","Scope A","a"),new Frame{Target="Andromeda Galaxy",Kind="Stack",Exposure=900,Session="b",AcquisitionDate="2026-10-01"},new Frame{Target="M31",Kind="Stack",Exposure=900,Session="c",AcquisitionDate="2026-10-03"}};
+    var kept=CaptureGroups.ExposureFrames(otherDate);Check(kept.Count==2&&kept.Any(f=>f.Kind=="Stack"&&f.AcquisitionDate=="2026-10-03"),"Same-date stack (alias target) was counted or another date's stack was dropped");
     var differentTarget=new[]{AnalyticsLight("M31",600,"2026-10-01","Scope A","same"),AnalyticsLight("M31",900,"2026-10-01","Scope A","same"),new Frame{Target="M42",Kind="Stack",Exposure=1800,Session="same"}};
     Check(CaptureGroups.ExposureFrames(differentTarget).Count==3,"Subframes for a different target incorrectly suppressed a stack");
    });

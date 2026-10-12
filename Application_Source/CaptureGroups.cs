@@ -9,15 +9,20 @@ namespace AstroArchive {
   public string Detail {get{return Captures+" captures · "+Subs+" subs"+(Videos>0?" · "+Videos+" video"+(Videos==1?"":"s"):"")+" · "+Stacks+" stacks · "+Sessions+" sessions · "+CaptureGroups.ExposureLabel(ExposureSeconds,UnknownExposure)+(Flagged>0?" · "+Flagged+" flagged":"");}}
  }
  public static class CaptureGroups {
-  static string ExposureGroupKey(Frame frame){return (frame.Session??"").Trim().ToUpperInvariant()+"\0"+Catalog.CanonicalTarget(frame.Target).ToUpperInvariant();}
+  static string TargetKey(Frame frame){return Catalog.CanonicalTarget(frame.Target).ToUpperInvariant();}
+  static string DateKey(Frame frame){var date=CaptureSessions.Date(frame);return date==null?null:date.Date.ToString("yyyy-MM-dd",System.Globalization.CultureInfo.InvariantCulture);}
+  // A stack is counted only when no light sub of its target was saved in the same session or on the same date;
+  // otherwise its integration would duplicate those subs.
   public static List<Frame> ExposureFrames(IEnumerable<Frame> frames,CancellationToken token=default(CancellationToken)){
    var rows=new List<Frame>();foreach(var frame in frames){token.ThrowIfCancellationRequested();if(frame!=null)rows.Add(frame);}
-   var subframes=new Dictionary<string,int>();foreach(var frame in rows){token.ThrowIfCancellationRequested();if(frame.Kind=="Light"&&!string.IsNullOrWhiteSpace(frame.Session)){string key=ExposureGroupKey(frame);int count;subframes.TryGetValue(key,out count);subframes[key]=count+1;}}
+   var sessions=new HashSet<string>(StringComparer.Ordinal);var dates=new HashSet<string>(StringComparer.Ordinal);
+   foreach(var frame in rows){token.ThrowIfCancellationRequested();if(frame.Kind!="Light")continue;string target=TargetKey(frame);if(!string.IsNullOrWhiteSpace(frame.Session))sessions.Add(frame.Session.Trim().ToUpperInvariant()+"\0"+target);string date=DateKey(frame);if(date!=null)dates.Add(date+"\0"+target);}
    return rows.Where(f=>{
     if(f.Kind=="Light"||f.Kind=="Video")return true;
     if(f.Kind!="Stack")return false;
-    if(string.IsNullOrWhiteSpace(f.Session))return true;
-    int count;return !subframes.TryGetValue(ExposureGroupKey(f),out count)||count<2;
+    string target=TargetKey(f);
+    if(!string.IsNullOrWhiteSpace(f.Session)&&sessions.Contains(f.Session.Trim().ToUpperInvariant()+"\0"+target))return false;
+    string date=DateKey(f);return date==null||!dates.Contains(date+"\0"+target);
    }).ToList();
   }
   public static CaptureGroupSummary Summarize(IEnumerable<Frame> frames,CancellationToken token=default(CancellationToken)){
