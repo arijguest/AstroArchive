@@ -3,6 +3,8 @@ Package 3.2.4.1
 
 Open in Stellarium: a new button in the preview header shows the selected capture in Stellarium, with its position and field of view plus the capture time and place when known. Nothing leaves your PC. A running Stellarium with Remote Control switched on is reused; otherwise a new Stellarium window opens.
 
+Target overlay: a new button beside Open in Stellarium circles catalogued targets in the previewed frame using its plate solution. It is off by default and remembers your choice; unsolved frames show a short note instead.
+
 Target information: AT A GLANCE is now PARAMETERS. Planets and the largest dwarf planets list their nominal orbit, diameter, mass and major moons; the Sun shows its diameter and mass. The Moon's information pane no longer flickers as its scrollbar appears and disappears.
 
 Comets: every comet target now opens an information page with an overview, imaging notes and PARAMETERS (orbit type, perihelion, period and eccentricity), with written overviews for 33 well-known comets and links to NASA/JPL.
@@ -12,6 +14,8 @@ Cleaner text: tooltips that only repeated their label are gone, dialog introduct
 Moon and lunar stacks: lunar and solar stacks from colour cameras no longer preview green, and Seestar stacks with millisecond timestamps in their names show their Stack() count again. Moon captures whose clock has no timezone, or only a date, now show the Moon on the sky map at an approximate position.
 
 Network live import: Start live import now opens a setup dialog like Watch a capture folder, with the check interval, transfer limit and the option to also import captures already in the telescope folder.
+
+Import page: the search bar has proper spacing below the source card, and the totals line only appears when the import table has files, listing only categories that have any.
 
 Backups and notifications: a small indicator beside the repository path shows when a backup is running, even after its notice is dismissed. The notifications menu always lists every notification, including dismissed ones, and its bell shows when a process is active.
 
