@@ -850,6 +850,11 @@ Skip “failed” files	跳过“failed”文件
 Skip PNG/JPG/MP4	跳过 PNG/JPG/MP4
 Saved import preference. Also applies to folder, USB, network and Dump imports.	已保存的导入首选项。也适用于文件夹、USB、网络和 Dump 导入。
 Keep AstroArchive open and this PC awake while capturing. Stop watching from Activity at any time; completed imports are kept.	拍摄期间，请保持 AstroArchive 打开并使此电脑保持唤醒状态。可随时在“活动”中停止监视；已完成的导入将保留。
+AstroArchive checks this telescope folder and its subfolders, and imports each new capture once the telescope has finished saving it. Capture continues in the telescope app; originals stay on the telescope.	AstroArchive 会检查此望远镜文件夹及其子文件夹，并在望远镜保存完每个新拍摄文件后将其导入。拍摄在望远镜应用中继续进行；原始文件保留在望远镜上。
+Telescope folder	望远镜文件夹
+Check for new captures every	检查新拍摄文件的间隔
+Off: only captures saved after live import starts are imported. Select earlier captures and choose Import selected.	关闭：仅导入开始实时导入后保存的拍摄文件。如需较早的拍摄文件，请选中它们并选择“导入所选项”。
+Keep AstroArchive open and this PC awake while capturing. Stop live import from Activity at any time; completed imports are kept.	拍摄期间，请保持 AstroArchive 打开并使此电脑保持唤醒状态。可随时在“活动”中停止实时导入；已完成的导入将保留。
 Start watching	开始监视
 Local folder	本地文件夹
 Folder watch could not start	无法开始监视文件夹

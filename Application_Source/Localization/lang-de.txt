@@ -823,6 +823,11 @@ Skip “failed” files	„failed“-Dateien überspringen
 Skip PNG/JPG/MP4	PNG/JPG/MP4 überspringen
 Saved import preference. Also applies to folder, USB, network and Dump imports.	Gespeicherte Importeinstellung. Gilt auch für Ordner-, USB-, Netzwerk- und Dump-Importe.
 Keep AstroArchive open and this PC awake while capturing. Stop watching from Activity at any time; completed imports are kept.	Lassen Sie AstroArchive während der Aufnahme geöffnet und diesen PC aktiv. Sie können die Überwachung jederzeit unter „Aktivität“ beenden; abgeschlossene Importe bleiben erhalten.
+AstroArchive checks this telescope folder and its subfolders, and imports each new capture once the telescope has finished saving it. Capture continues in the telescope app; originals stay on the telescope.	AstroArchive überwacht diesen Teleskopordner und seine Unterordner und importiert jede neue Aufnahme, sobald das Teleskop sie vollständig gespeichert hat. Die Aufnahme läuft in der Teleskop-App weiter; die Originale bleiben auf dem Teleskop.
+Telescope folder	Teleskopordner
+Check for new captures every	Nach neuen Aufnahmen suchen alle
+Off: only captures saved after live import starts are imported. Select earlier captures and choose Import selected.	Aus: Nur Aufnahmen, die nach Beginn des Live-Imports gespeichert werden, werden importiert. Wählen Sie frühere Aufnahmen aus und klicken Sie auf „Ausgewählte importieren“.
+Keep AstroArchive open and this PC awake while capturing. Stop live import from Activity at any time; completed imports are kept.	Lassen Sie AstroArchive während der Aufnahme geöffnet und diesen PC aktiv. Sie können den Live-Import jederzeit unter „Aktivität“ beenden; abgeschlossene Importe bleiben erhalten.
 Start watching	Überwachung starten
 Local folder	Lokaler Ordner
 Folder watch could not start	Ordnerüberwachung konnte nicht gestartet werden
