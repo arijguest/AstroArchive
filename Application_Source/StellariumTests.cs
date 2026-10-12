@@ -58,7 +58,8 @@ namespace AstroArchive {
      request=text.ToString();var reply=Encoding.ASCII.GetBytes("HTTP/1.1 200 OK\r\nContent-Length: 2\r\nConnection: close\r\n\r\nok");stream.Write(reply,0,reply.Length);}}catch(Exception){}});
     worker.Start();
     try{Check(Stellarium.TrySend("core.setTimeRate(0);\n",port,2000),"Answering Stellarium was not used");}finally{worker.Join(3000);server.Stop();}
-    Check(request!=null&&request.StartsWith("POST /api/scripts/direct ")&&request.Contains("code=core.setTimeRate%280%29%3B%0A"),"Remote Control request wrong: "+request);
+    int bodyStart=request==null?-1:request.IndexOf("\r\n\r\n",StringComparison.Ordinal);
+    Check(bodyStart>=0&&request.StartsWith("POST /api/scripts/direct ")&&Uri.UnescapeDataString(request.Substring(bodyStart+4))=="code=core.setTimeRate(0);\n","Remote Control request wrong: "+request);
    });
   }
  }
