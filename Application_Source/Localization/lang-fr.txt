@@ -1893,3 +1893,25 @@ Images & documents	Images et documents
 Video & GIF	Vidéo et GIF
 Not out (below the horizon)	Non visible (sous l’horizon)
 Output	Sortie
+QUALITY	QUALITÉ
+EXPOSURE FIT	ADÉQUATION D'EXPOSITION
+Analyse image quality…	Analyser la qualité d'image…
+Re-measure image quality…	Mesurer à nouveau la qualité d'image…
+Analyse image quality	Analyser la qualité d'image
+Quality rank	Rang de qualité
+Exposure fit	Adéquation d'exposition
+Quality score (0 to 100)	Note de qualité (0 à 100)
+Top 10%	Meilleurs 10 %
+Top 25%	Meilleurs 25 %
+Top half	Moitié supérieure
+Bottom half	Moitié inférieure
+Weakest 25%	25 % les plus faibles
+Has quality flags	Avec alertes de qualité
+Not scored	Non noté
+Under	Sous-exposé
+Good	Bon
+Over	Surexposé
+Image quality	Qualité d'image
+Measure image quality after each import	Mesurer la qualité d'image après chaque import
+Compare deep-sky frames across the whole target instead of each session	Comparer les images du ciel profond sur toute la cible plutôt que par session
+Nothing to measure	Rien à mesurer

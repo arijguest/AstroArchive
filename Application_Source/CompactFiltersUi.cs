@@ -35,7 +35,7 @@ namespace AstroArchive {
    var primary=FilterGrid();body.Children.Add(primary);int cell=0;
    foreach(string field in CaptureFilters.Primary)if(CaptureFilters.Useful(rows,field,criteria.Values.ContainsKey(field)))AddFilterCell(primary,FilterSelector(field,rows,criteria,apply),cell++);
    var ranges=FilterGrid();body.Children.Add(ranges);cell=0;
-   foreach(string field in new[]{"Exposure","Gain"})if(CaptureFilters.Useful(rows,field,criteria.Ranges.ContainsKey(field)))AddFilterCell(ranges,RangeSelector(field,rows,criteria,apply),cell++);
+   foreach(string field in new[]{"Exposure","Gain","Quality"})if(CaptureFilters.Useful(rows,field,criteria.Ranges.ContainsKey(field)))AddFilterCell(ranges,RangeSelector(field,rows,criteria,apply),cell++);
    var advancedFields=CaptureFilters.Advanced.Where(field=>CaptureFilters.Useful(rows,field,criteria.Values.ContainsKey(field))).ToList();
    if(advancedFields.Count>0){var advanced=FilterGrid();cell=0;foreach(string field in advancedFields)AddFilterCell(advanced,FilterSelector(field,rows,criteria,apply),cell++);body.Children.Add(new Expander{Header="Advanced capture settings",Content=advanced,Margin=new Thickness(0,6,0,0),IsExpanded=advancedFields.Any(criteria.Values.ContainsKey)});}
    int unknown=rows.Count(f=>f.Status!="Deleted"&&CaptureSessions.Date(f)==null);
@@ -63,6 +63,7 @@ namespace AstroArchive {
    var panel=new StackPanel{Margin=new Thickness(0,0,12,12)};panel.Children.Add(new TextBlock{Text=field=="Dimensions"?"Image size":field,Foreground=Brushes.SlateGray,Margin=new Thickness(0,0,0,5)});
    var options=new List<FilterChoice>{new FilterChoice{Label="All",Description=null}};
    if(field=="Session")options.AddRange(CaptureSessions.Choices(rows).Select(c=>new FilterChoice{Value=c.Key,Label=c.Label,Description=c.Description}));
+   else if(field=="Quality rank")options.AddRange(CaptureFilters.QualityRankChoices.Select(v=>new FilterChoice{Value=v,Label=v,Description=CaptureFilters.QualityRankHelp(v)}));
    else if(field=="Review")options.AddRange(CaptureFilters.ReviewChoices.Select(v=>new FilterChoice{Value=v,Label=v,Description=v=="No issues flagged"?"May include unscreened captures.":v}));
    else options.AddRange(CaptureFilters.Options(rows,field).Select(v=>new FilterChoice{Value=v,Label=field=="Target"?Catalog.Label(v):v,Description=field=="Target"?Catalog.Label(v):v}));
    string selected;criteria.Values.TryGetValue(field,out selected);if(selected!=null&&!options.Any(o=>o.Value==selected))options.Add(new FilterChoice{Value=selected,Label=field=="Session"?"Selected session unavailable":selected,Description="No matching captures. Clear this filter to show others."});
@@ -73,7 +74,7 @@ namespace AstroArchive {
   FrameworkElement RangeSelector(string field,List<Frame> rows,CaptureFilters criteria,Action apply){
    CaptureRange range;if(!criteria.Ranges.TryGetValue(field,out range))range=new CaptureRange();
    var values=rows.Select(f=>CaptureFilters.Number(f,field)).Where(v=>v.HasValue).Select(v=>v.Value).ToList();if(range.Minimum.HasValue)values.Add(range.Minimum.Value);if(range.Maximum.HasValue)values.Add(range.Maximum.Value);values=values.Where(v=>!double.IsNaN(v)&&!double.IsInfinity(v)).Distinct().OrderBy(v=>v).ToList();
-   var panel=new StackPanel{Margin=new Thickness(0,4,12,12)};panel.Children.Add(new TextBlock{Text=field=="Exposure"?"Exposure (seconds)":"Gain",Foreground=Brushes.SlateGray,Margin=new Thickness(0,0,0,5)});
+   var panel=new StackPanel{Margin=new Thickness(0,4,12,12)};panel.Children.Add(new TextBlock{Text=field=="Exposure"?"Exposure (seconds)":field=="Quality"?"Quality score (0 to 100)":"Gain",Foreground=Brushes.SlateGray,Margin=new Thickness(0,0,0,5)});
    var modes=new[]{"Any value","Known values only","Between limits","Unknown only"};var mode=new ComboBox{ItemsSource=modes,SelectedIndex=(int)range.Mode,MinHeight=34};panel.Children.Add(mode);
    Func<int,double?> number=index=>values.Count==0?(double?)null:values[Math.Max(0,Math.Min(values.Count-1,index))];
    int lower=range.Minimum.HasValue?values.FindIndex(v=>v>=range.Minimum.Value):0;if(lower<0)lower=Math.Max(0,values.Count-1);int upper=range.Maximum.HasValue?values.FindLastIndex(v=>v<=range.Maximum.Value):values.Count-1;upper=Math.Max(lower,upper);

@@ -1929,3 +1929,25 @@ Images & documents	图像和文档
 Video & GIF	视频和 GIF
 Not out (below the horizon)	未升起（在地平线下方）
 Output	输出
+QUALITY	质量
+EXPOSURE FIT	曝光适度
+Analyse image quality…	分析图像质量…
+Re-measure image quality…	重新测量图像质量…
+Analyse image quality	分析图像质量
+Quality rank	质量排名
+Exposure fit	曝光适度
+Quality score (0 to 100)	质量分数（0 至 100）
+Top 10%	前 10%
+Top 25%	前 25%
+Top half	前一半
+Bottom half	后一半
+Weakest 25%	最弱 25%
+Has quality flags	带质量警示
+Not scored	未评分
+Under	曝光不足
+Good	适度
+Over	曝光过度
+Image quality	图像质量
+Measure image quality after each import	每次导入后测量图像质量
+Compare deep-sky frames across the whole target instead of each session	按整个目标而非每个会话比较深空帧
+Nothing to measure	没有可测量的内容
