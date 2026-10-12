@@ -63,6 +63,12 @@ namespace AstroArchive {
     Check(sheet.Csv.Length==0&&lines[0]=="date,frames,focalLength,gain"&&lines[1]=="2026-09-19,5000,2032,250","Video acquisition columns are wrong: "+sheet.VideoCsv);
     Check(sheet.Videos.Single().UtcStart=="23:41 UTC"&&sheet.Notes.Any(n=>n.Contains("local start time")),"UTC start time was written as local time or not reported.");
    });
+   Test("Export window summaries count files and shorten long target lists",()=>{
+    var frames=new List<Frame>{AstroBinLight("a","2026-09-19"),AstroBinLight("b","2026-09-19"),AstroBinLight("c","2026-09-19",60,"M31")};var dark=CalibrationFixture("Dark",60);dark.Target="Unknown";frames.Add(dark);
+    var summary=ExportSummaries.Describe(frames,true);Check(summary.Title=="4 selected files"&&summary.Targets==frames[0].TargetLabel+", "+frames[2].TargetLabel&&summary.Detail=="3 subs · 1 calibration frame","Selection summary is wrong: "+summary.Title+" | "+summary.Targets+" | "+summary.Detail);
+    Check(ExportSummaries.Describe(frames.Take(1).ToList(),false).Title=="1 file in view"&&ExportSummaries.Describe(new List<Frame>(),true).Title=="No files selected","Visible or empty summaries are wrong.");
+    var many=new ExportSummary();ExportSummaries.Targets(new[]{"M45","M31","M31","NGC 7000","IC 1396","Unknown",""},many);Check(many.Targets=="M31, IC 1396 and 2 more targets"&&many.TargetList.Split('\n').Length==4,"Long target lists were not shortened: "+many.Targets);
+   });
    Test("Stacking exports write the AstroBin CSV only when requested",()=>{
     using(var repo=new Repository(Path.Combine(root,"astrobin-export-repo"))){
      var frames=ExportFixture(repo,"astrobin-export-source",true);string folder=ExportDestinationFolder("astrobin-export-off");Exporter.Create(repo,frames,new ExportOptions{Parent=folder,Mode="Subs"},ct,NoProgress);Check(!Directory.EnumerateFiles(folder,"astrobin*",SearchOption.AllDirectories).Any(),"Default exports changed: an AstroBin CSV was written without the option.");

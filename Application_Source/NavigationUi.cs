@@ -101,7 +101,7 @@ namespace AstroArchive {
             UiHelp.Hint(TopMenu("CoffeeMenu"), "Support AstroArchive on Ko-fi.");
             B("OpenRepositoryFolderButton").Click += (s,e) => OpenRepositoryFolder();
             B("RepositoryImportButton").Click += (s,e) => GoToPage(1);
-            B("ImportExportButton").Click += (s,e) => OpenTopMenu("ExportMenu");
+            B("ImportExportButton").Click += (s,e) => OpenExport();
             B("ImportOptionsButton").Click += (s,e) => ImportPreferences();
             B("AssignUnknownTargetButton").Click += (s,e) => AssignUnknownImportTargets();
             UiHelp.Hint(B("OpenRepositoryFolderButton"), "Open repository folder.");
@@ -125,7 +125,7 @@ namespace AstroArchive {
                 var search = T(((TabControl)Window.FindName("MainTabs")).SelectedIndex == 2 ? "EditedSearchBox" : ((TabControl)Window.FindName("MainTabs")).SelectedIndex == 1 ? "ImportSearchBox" : "SearchBox");
                 search.Focus(); search.SelectAll(); e.Handled = true;
             } else if (e.Key == Key.I) { GoToPage(1); e.Handled = true; }
-            else if (e.Key == Key.E && !RepositoryOperationBlocked && repo != null) { OpenTopMenu("ExportMenu"); e.Handled = true; }
+            else if (e.Key == Key.E && !RepositoryOperationBlocked && repo != null) { if (((TabControl)Window.FindName("MainTabs")).SelectedIndex == 2) ExportEditedFiles(); else OpenExport(); e.Handled = true; }
         }
         void UpdateNavigationState() {
             if (!navigationReady) return;
@@ -175,10 +175,13 @@ namespace AstroArchive {
             menu.Items.Add(new Separator());menu.Items.Add(MenuAction("Import preferences…",ImportPreferences,!NetworkImportBlocked,false));
         }
         void BuildExportNavigation(MenuItem menu) {
-            if(((TabControl)Window.FindName("MainTabs")).SelectedIndex==2){menu.Items.Add(MenuAction("Export to…",ExportEditedTo,SelectedEditedImages().Count>0));return;}
-            var selected=Context();menu.Items.Add(new MenuItem{Header=selected.Count+" files"+(SelectedFiles().Count==0?" in view":" selected"),IsEnabled=false});
-            menu.Items.Add(MenuAction("Export files…",()=>ExportFiles(selected),selected.Count>0));menu.Items.Add(MenuAction("Export to…",()=>ExportTo(selected),selected.Count>0));menu.Items.Add(MenuAction("Stacking folder…",()=>ExportProject(selected,false),selected.Any(f=>f.Kind=="Light"||f.Kind=="Stack")));
-            menu.Items.Add(new Separator());menu.Items.Add(Branch("Catalogue CSV",MenuAction("Selected / visible files…",()=>ExportSelectionCsv(selected),selected.Count>0),MenuAction("Entire repository…",ExportCatalogue,repo!=null)));
+            if(((TabControl)Window.FindName("MainTabs")).SelectedIndex==2){
+                var images=SelectedEditedImages();menu.Items.Add(new MenuItem{Header=EditedExportSummary(images).Title,IsEnabled=false});
+                menu.Items.Add(MenuAction("Files…",ExportEditedFiles,images.Count>0));menu.Items.Add(MenuAction("Open in app…",ExportEditedTo,images.Count>0));return;
+            }
+            var selected=Context();var summary=ExportSummaries.Describe(selected,SelectedFiles().Count>0);var header=new MenuItem{Header=summary.Title+(summary.Targets.Length>0?" · "+summary.Targets:""),IsEnabled=false};if(summary.TargetList.Contains("\n"))UiHelp.Tip(header,summary.TargetList);menu.Items.Add(header);
+            foreach(var category in new[]{ExportCategory.Files,ExportCategory.Stacking,ExportCategory.Application,ExportCategory.AstroBin}){var chosen=category;menu.Items.Add(MenuAction(ExportCategoryName(chosen)+"…",()=>OpenExport(chosen,selected),ExportCategoryAvailable(chosen,selected)));}
+            menu.Items.Add(new Separator());menu.Items.Add(Branch("Catalogue CSV",MenuAction("Selected / visible files…",()=>OpenExport(ExportCategory.Catalogue,selected),selected.Count>0),MenuAction("Entire repository…",ExportCatalogue,repo!=null)));
         }
         void BuildRepositoryNavigation(MenuItem menu) {
             var grouped=MenuAction("Group subs by session",()=>{GoToPage(0);C("LibraryViewBox").SelectedItem=Convert.ToString(C("LibraryViewBox").SelectedItem)=="Session summaries"?"Show all files":"Session summaries";},repo!=null,false);grouped.IsCheckable=true;grouped.IsChecked=Convert.ToString(C("LibraryViewBox").SelectedItem)=="Session summaries";menu.Items.Add(grouped);
@@ -200,10 +203,6 @@ namespace AstroArchive {
         void OpenWebsite(string url) {
             try { Process.Start(new ProcessStartInfo(url) { UseShellExecute = true }); }
             catch (Exception ex) { MessageBox.Show(Window, "Visit " + url + "\n\n" + ex.Message, "Browser could not be opened", MessageBoxButton.OK, MessageBoxImage.Information); }
-        }
-        void ExportCatalogue() {
-            var dialog = new Microsoft.Win32.SaveFileDialog { FileName = "AstroArchive_catalog.csv", Filter = "CSV catalogue|*.csv" };
-            if (dialog.ShowDialog(Window) == true) { string destination=dialog.FileName;Run(ct=>{ct.ThrowIfCancellationRequested();repo.ExportIndex(destination);return "Catalogue CSV exported.";},message=>{L("StatusLabel").Text=message;if(completionActivity!=null)completionActivity.OutputPath=Path.GetDirectoryName(destination);},"Exporting catalogue CSV"); }
         }
         void ImportPreferences() { Configure(1); }
     }

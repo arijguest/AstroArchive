@@ -52,7 +52,7 @@ your captures, then prepare files for the processing software you already use.
 
 | Find the right captures | Prepare the handoff | Keep the results together |
 | :--- | :--- | :--- |
-| Search targets and devices, expand grouped subs, and compare stills or recordings. | Export verified originals or compatible stacking folders with optional calibrations. | Keep working copies and returned outputs in **Edited**, alongside your archive. |
+| Search targets and devices, expand grouped subs, and compare stills or recordings. | Export verified originals or compatible stacking folders with optional calibrations and an AstroBin acquisition CSV. | Keep working copies and returned outputs in **Edited**, alongside your archive. |
 
 **Works with your workflow:** PixInsight · Siril · DeepSkyStacker · GIMP · Photoshop · AS!4 · AstroWizard · Stacking Wizard
 

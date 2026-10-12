@@ -10,7 +10,6 @@ using Microsoft.Win32;
 
 namespace AstroArchive {
  public partial class MainUi {
-  sealed class ExportToFields {public ComboBox Application;public CheckBox Remember,Calibration,Unknown;public ExportDestinationFields Destination;public string Executable;}
   ExportApplication SelectedApplication(ComboBox combo){var item=combo.SelectedItem as ComboBoxItem;return item==null?null:item.Tag as ExportApplication;}
   string LocateExportApplication(ExportApplication app,Window owner){
    string path=ExternalApps.Resolve(settings,app);if(path!=null)return path;
@@ -19,51 +18,9 @@ namespace AstroArchive {
    if(picker.ShowDialog(owner)!=true)return null;
    try{ExternalApps.ValidateExecutable(app,picker.FileName);ExternalApps.Configure(settings,app,picker.FileName);SaveSettings();return picker.FileName;}catch(Exception error){MessageBox.Show(owner,error.Message,"Application location");return null;}
   }
-  FormWindow ExportToDialog(ExternalSelection selection,out ExportToFields fields,bool fromEdited=false){
-   var d=new FormWindow(Window,"Export to…",650,selection.Folder?730:470);fields=new ExportToFields();var controls=fields;
-   d.Text(selection.Paths.Count+" selected "+(selection.Folder?"stacking input":"image")+(selection.Paths.Count==1?"":"s"),true);
-   d.Text(selection.Folder?"Copies and verifies original files before opening your chosen app.":fromEdited?"Opens the selected Edited images in your chosen app. Save results in their image folders.":"Creates verified working copies in Edited, then opens them in your chosen app. Save processed results alongside the copies.");
-   var combo=new ComboBox();fields.Application=combo;combo.Items.Add(new ComboBoxItem{Content="Choose an application…"});
-   string preferred=ExternalApps.Default(settings,selection);foreach(var app in ExternalApps.All){string problem=ExternalApps.Problem(app,selection);var item=new ComboBoxItem{Content=app.Name,Tag=app,IsEnabled=problem==null,ToolTip=problem};ToolTipService.SetShowOnDisabled(item,true);combo.Items.Add(item);if(preferred==app.Id)combo.SelectedItem=item;}
-   if(combo.SelectedItem==null)combo.SelectedIndex=0;d.Add(combo);
-   var help=new TextBlock{TextWrapping=TextWrapping.Wrap,Margin=new Thickness(0,14,0,12)};Theme.Bind(help,TextBlock.ForegroundProperty,"Muted");d.Add(help);
-   Action summary=()=>{var app=SelectedApplication(combo);help.Text=app==null?(ExternalApps.All.Any(a=>ExternalApps.Problem(a,selection)==null)?"Choose a compatible destination. Unavailable destinations below explain their restrictions.":"No destination supports this selection. Export files… can copy the originals; convert to a supported format or select fewer images to open them in an app."):app.Help;};combo.SelectionChanged+=(s,e)=>summary();summary();
-   var unavailable=ExternalApps.All.Where(a=>ExternalApps.Problem(a,selection)!=null).ToList();if(unavailable.Count>0)d.Options("Unavailable destinations ("+unavailable.Count+")",()=>{foreach(var app in unavailable){d.Text(app.Name,true);d.Text(ExternalApps.Problem(app,selection));}});
-   fields.Remember=d.Check(selection.Subframes?"Use this as my default for subframe folders":"Use this as my default for these file types",false);
-   if(selection.Folder){
-    fields.Destination=ExportDestination(d,"AstroArchive_inputs_"+DateTime.Now.ToString("yyyyMMdd_HHmmss"));
-    fields.Calibration=d.Check("Include matching calibration files",false);fields.Calibration.IsEnabled=selection.Paths.All(p=>ExternalApps.FileType(p)!="SER"&&ExternalApps.FileType(p)!="AVI");
-    d.Advanced("More options",()=>{d.Add(controls.Destination.Metadata);controls.Unknown=d.Check("Include calibrations when the subframe calibration state is unknown",false);});
-    controls.Unknown.IsEnabled=false;controls.Calibration.Checked+=(s,e)=>controls.Unknown.IsEnabled=true;controls.Calibration.Unchecked+=(s,e)=>controls.Unknown.IsEnabled=false;
-   }
-   d.Button("Export preferences…",()=>{ExportDestinationSettings(owner:d.Window);string updated=ExternalApps.Default(settings,selection);if(updated!=null)combo.SelectedItem=combo.Items.OfType<ComboBoxItem>().FirstOrDefault(i=>i.Tag is ExportApplication&&((ExportApplication)i.Tag).Id==updated);summary();});
-   d.Accept("Export",()=>{var app=SelectedApplication(combo);if(app==null){MessageBox.Show(d.Window,"Choose an application.");return false;}string problem=ExternalApps.Problem(app,selection);if(problem!=null){MessageBox.Show(d.Window,problem);return false;}if(controls.Destination!=null&&!ValidExportDestination(d,controls.Destination))return false;controls.Executable=LocateExportApplication(app,d.Window);return controls.Executable!=null;});return d;
-  }
   void RememberExport(ExternalSelection selection,ExportApplication app,bool remember){
    if(!remember)return;if(settings.ExportDefaults==null)settings.ExportDefaults=new Dictionary<string,string>();
    foreach(string key in selection.Subframes?new[]{"Subframe folders"}:selection.Paths.Select(ExternalApps.FileType).Distinct())settings.ExportDefaults[key]=app.Id;SaveSettings();
-  }
-  void ExportTo(List<Frame> selected){
-   ExternalSelection selection;try{selection=ExternalApps.Selection(selected);}catch(Exception error){MessageBox.Show(Window,error.Message,"Export to…");return;}
-   ExportToFields fields;var dialog=ExportToDialog(selection,out fields);if(!dialog.Show())return;var app=SelectedApplication(fields.Application);RememberExport(selection,app,fields.Remember.IsChecked==true);
-   if(!selection.Folder){
-    EditedProject project=null;string launchError=null;var paths=new List<string>();
-    Run(ct=>{project=repo.CreateEditedWorkingCopies(selected,selected[0].TargetLabel+" · "+app.Name+" · "+DateTime.Now.ToString("yyyyMMdd_HHmmss"),app.Name,ct,Progress);paths=project.Sources.Select(f=>repo.EditedPath(project,f.RelativePath)).ToList();ct.ThrowIfCancellationRequested();try{ExternalApps.Launch(app,fields.Executable,paths,null,ct);}catch(OperationCanceledException){throw;}catch(Exception error){launchError=error.Message;}return "";},done=>{RefreshEdited();ExportLaunchResult(app,Path.GetDirectoryName(paths[0]),launchError,false);});return;
-   }
-   bool cals=fields.Calibration.IsChecked==true,unknown=fields.Unknown.IsChecked==true&&cals;var options=fields.Destination.Options();options.Mode="Files";options.IncludeCalibration=false;options.IncludeRejected=false;List<DssJob> jobs=null;string launchFailure=null;
-   Run(ct=>{
-    var inputs=ExternalApps.FolderInputs(repo,selected,cals,unknown);
-    // Every calibration must be readable by the receiver too, before copying.
-    string problem=ExternalApps.Problem(app,new ExternalSelection{Folder=true,Paths=inputs.Select(f=>f.OriginalName??f.RelativePath).ToList()});if(problem!=null)throw new IOException(problem);
-    string folder=Exporter.Create(repo,inputs,options,ct,Progress);if(app.Id=="dss")jobs=ExternalApps.WriteDssJobs(folder,selected,options.ExportedFiles,cals,unknown,ct);
-    ct.ThrowIfCancellationRequested();if(jobs==null||jobs.Count==1)try{ExternalApps.Launch(app,fields.Executable,jobs==null?new string[0]:new[]{jobs[0].Path},folder,ct);}catch(OperationCanceledException){throw;}catch(Exception error){launchFailure=error.Message;}return folder;
-   },folder=>{if(jobs!=null&&jobs.Count>1){QueueActivityReview("DSS capture groups are ready",()=>ChooseDssJob(folder,jobs,app,fields.Executable));if(completionActivity!=null)completionActivity.OutputPath=folder;return;}ExportLaunchResult(app,folder,launchFailure,app.Id!="dss"&&app.Id!="siril");});
-  }
-  void ExportEditedTo(){
-   if(repo==null||RepositoryOperationBlocked||SearchBlocked("EditedSearchBox"))return;var images=SelectedEditedImages();if(images.Count==0)return;
-   var selection=new ExternalSelection{Paths=images.Select(i=>repo.EditedPath(i.Project,i.RelativePath)).ToList()};ExportToFields fields;var dialog=ExportToDialog(selection,out fields,true);if(!dialog.Show())return;
-   var app=SelectedApplication(fields.Application);RememberExport(selection,app,fields.Remember.IsChecked==true);string error=null;
-   Run(ct=>{try{ExternalApps.Launch(app,fields.Executable,selection.Paths,null,ct);}catch(OperationCanceledException){throw;}catch(Exception e){error=e.Message;}return "";},done=>ExportLaunchResult(app,Path.GetDirectoryName(selection.Paths[0]),error,false));
   }
   void ExportLaunchResult(ExportApplication app,string folder,string error,bool assisted){
    L("StatusLabel").Text=error!=null?"Files ready; "+app.Name+" could not open.":app.Name+" opened · "+folder;
