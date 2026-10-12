@@ -24,7 +24,7 @@ namespace AstroArchive {
     Check(Catalog.CanonicalTarget("M45_NEAT_stack")=="M45"&&TargetNavigation.Group("M45_NEAT_stack")=="Star clusters","Comet survey word overrode a known target");
     Check(!CometTargets.IsComet("Atlas wide field")&&!CometTargets.IsComet("A/2017 U1")&&!CometTargets.IsComet("1I/Oumuamua"),"Ambiguous label was confidently classified as a comet");
     var targets=TargetNavigation.Build(new[]{"Moon","NEAT","Jupiter","NEOWISE","M31"}.Select(t=>new Frame{Target=t}));Check(targets.Skip(1).Take(4).All(t=>t.Group=="Solar system")&&targets.Skip(3).Take(2).All(t=>CometTargets.IsComet(t.Name)),"Comets were interleaved with planets");
-    Check(TargetNavigation.ShortName("M31")=="M31 - Andromeda Galaxy"&&!TargetNavigation.Identifier("M31").Split('·').Select(s=>s.Trim()).Contains("M31"),"Preferred ID was missing or duplicated");
+    Check(TargetNavigation.ShortName("M31")=="M 31 - Andromeda Galaxy"&&!TargetNavigation.Identifier("M31").Split('·').Select(s=>s.Trim()).Contains("M 31"),"Preferred ID was missing or duplicated");
    });
    Test("Natural searches combine object device and stack while respecting exact identities",()=>{
     var dwarf=new Frame{Target="M45",Make="DWARFLAB",Model="Dwarf 3",Kind="Light",OriginalName="one.fit"};

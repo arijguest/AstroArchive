@@ -40,7 +40,7 @@ namespace AstroArchive {
    // "IC 434" or "NGC 2237 (Rosette A)" already show the ID in the heading.
    string id=(card.id??"").Trim();bool inHeading=id.Length>0&&Regex.IsMatch(card.name??"",@"(?<![A-Za-z0-9])"+string.Join(@"[\s-]*",Regex.Split(id,@"[\s-]+").Select(Regex.Escape))+@"(?![0-9])",RegexOptions.IgnoreCase|RegexOptions.CultureInvariant);
    bool named=!string.IsNullOrWhiteSpace(card.name)&&!inHeading;
-   var parts=new List<string>();if(named)parts.Add(card.id);if(!string.IsNullOrWhiteSpace(card.type_label))parts.Add(card.type_label);if(constellation!=null)parts.Add(constellation);
+   var parts=new List<string>();if(named)parts.Add(Catalog.DisplayId(card.id));if(!string.IsNullOrWhiteSpace(card.type_label))parts.Add(card.type_label);if(constellation!=null)parts.Add(constellation);
    return string.Join(" · ",parts);
   }
   public static List<TargetInfoSource> Sources(TargetInfoCard card){return Sources(card,false);}
@@ -58,7 +58,7 @@ namespace AstroArchive {
    if(CometInfo.IsComet(card)){if(CometInfo.Orbit(card.id)!=null||curated)add(CometInfo.SourceTitle+" · "+card.id,CometInfo.LookupUrl(card.id));}
    else if(curated){
     var messier=Regex.Match(card.id??"",@"^M(\d{1,3})$");if(messier.Success)add("NASA Hubble Messier Catalog · Messier "+messier.Groups[1].Value,"https://science.nasa.gov/mission/hubble/science/explore-the-night-sky/hubble-messier-catalog/messier-"+messier.Groups[1].Value+"/");
-    add("SIMBAD · "+card.id,"https://simbad.cds.unistra.fr/simbad/sim-id?Ident="+Uri.EscapeDataString(Regex.Replace(card.id,@"^SH2-","SH 2-",RegexOptions.IgnoreCase)));
+    add("SIMBAD · "+Catalog.DisplayId(card.id),"https://simbad.cds.unistra.fr/simbad/sim-id?Ident="+Uri.EscapeDataString(Regex.Replace(card.id,@"^SH2-","SH 2-",RegexOptions.IgnoreCase)));
    }
    return sources;
   }

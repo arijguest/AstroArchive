@@ -12,7 +12,7 @@ namespace AstroArchive {
   public string Name; public string Common; public string Aliases; public string Type; public double RA; public double Dec; public double Diameter; public double? Magnitude;
   public string Label {get{return Name+(string.IsNullOrEmpty(Common)?"":"  ·  "+Common);}}
  }
- public class Candidate {public string Name{get;set;} public string Common{get;set;} public double Separation{get;set;} public string Label{get{return Name+(string.IsNullOrWhiteSpace(Common)?"":" · "+Common);}} public string DistanceText{get{return Separation.ToString("0.000",CultureInfo.InvariantCulture)+"° from centre";}} }
+ public class Candidate {public string Name{get;set;} public string Common{get;set;} public double Separation{get;set;} public string Label{get{return DisplayName+(string.IsNullOrWhiteSpace(Common)?"":" · "+Catalog.DisplayIds(Common));}} public string DisplayName{get{return Catalog.DisplayId(Name);}} public string DistanceText{get{return Separation.ToString("0.000",CultureInfo.InvariantCulture)+"° from centre";}} }
  public static partial class Catalog {
   public static List<CatalogObject> Objects=new List<CatalogObject>(); static Dictionary<string,string> aliases=new Dictionary<string,string>(StringComparer.OrdinalIgnoreCase);static Dictionary<string,string> descriptions=new Dictionary<string,string>(StringComparer.OrdinalIgnoreCase);static HashSet<string> ambiguous=new HashSet<string>(StringComparer.OrdinalIgnoreCase);
   static Dictionary<string,string> commonNames=new Dictionary<string,string>(StringComparer.OrdinalIgnoreCase);
@@ -77,7 +77,9 @@ namespace AstroArchive {
   }
   public static string ObjectId(string target){string id=CanonicalTarget(target);return !IsAmbiguous(id)&&(KnownName(id)!=null||Regex.IsMatch(id,@"^(M|NGC|IC|C|B|SH2|UGC|PGC)\d+[A-Z]?$",RegexOptions.IgnoreCase))?id:"";}
   public static string CommonName(string target){string name;string id=CanonicalTarget(target);return savedNames.Common.TryGetValue(id,out name)||commonNames.TryGetValue(id,out name)?name:"";}
-  public static string Label(string target){string id=CanonicalTarget(target),common=CommonName(id);return id+(common.Length>0?" · "+common:"");}
+  public static string Label(string target){string id=CanonicalTarget(target),common=CommonName(id);return DisplayId(id)+(common.Length>0?" · "+DisplayIds(common):"");}
+  // Compact form for names that are saved or written to disk, which must not change with display styling.
+  public static string RecordLabel(string target){string id=CanonicalTarget(target),common=CommonName(id);return id+(common.Length>0?" · "+common:"");}
   static string Key(string s){return NameKey(s);}
   public static string CompactId(string s){var m=Regex.Match(FileSearch.Fold(s),@"^(NGC|IC|MESSIER|M|CALDWELL|C|BARNARD|B|UGC|PGC|SHARPLESS|SH\s*2)\s*(?:(?:NO|NUMBER)\s*)?0*(\d+)(.*)$",RegexOptions.IgnoreCase|RegexOptions.CultureInvariant);return m.Success?CataloguePrefix(m.Groups[1].Value)+m.Groups[2].Value+m.Groups[3].Value:s;}
   static string CataloguePrefix(string prefix){prefix=prefix.ToUpperInvariant().Replace(" ","");return prefix=="MESSIER"?"M":prefix=="CALDWELL"?"C":prefix=="BARNARD"?"B":prefix=="SHARPLESS"?"SH2":prefix;}
