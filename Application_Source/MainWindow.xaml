@@ -943,7 +943,7 @@
       <StackPanel>
        <WrapPanel Margin="0,0,0,8">
         <TextBlock Text="SAVED TELESCOPE" FontSize="{DynamicResource UiFontCaption}" Foreground="{DynamicResource Muted}" FontWeight="SemiBold" VerticalAlignment="Center" Margin="0,0,10,0" />
-        <ComboBox x:Name="SavedTelescopeBox" Width="220" Margin="0,0,10,0" ToolTip="Reuse a saved telescope." />
+        <ComboBox x:Name="SavedTelescopeBox" Width="220" Margin="0,0,10,0" />
         <Button x:Name="RemoteTelescopeButton" Height="{Binding ActualHeight, ElementName=SavedTelescopeBox}" VerticalAlignment="Center" Padding="12,5" Content="Connect over network…" Margin="0" ToolTip="Find a telescope on your network, choose captures or import live as it shoots." />
         <Button x:Name="RemoteLiveStatusButton" Content="● Live import underway" Visibility="Collapsed" Margin="10,0,0,0" Padding="10,5" Background="{DynamicResource SurfaceAlt}" Foreground="{DynamicResource Accent}" FontSize="{DynamicResource UiFontSmall}" AutomationProperties.Name="Live telescope imports; view Activity" ToolTip="View live telescope imports in Activity." />
        </WrapPanel>
@@ -966,7 +966,7 @@
         </StackPanel>
         <StackPanel Grid.Column="1" Margin="0,0,16,0">
          <TextBlock Text="DEVICE ID" FontSize="{DynamicResource UiFontCaption}" Foreground="{DynamicResource Muted}" FontWeight="SemiBold" />
-         <TextBox x:Name="TelescopeBox" Margin="0,6,0,0" Text="Telescope-01" ToolTip="Unique ID for this physical telescope." />
+         <TextBox x:Name="TelescopeBox" Margin="0,6,0,0" Text="Telescope-01" />
         </StackPanel>
         <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Bottom"><Button x:Name="ImportOptionsButton" Content="Import preferences…" Margin="0,0,8,0"/><Button x:Name="WatchFolderButton" Content="Watch folder…" Margin="0,0,8,0" ToolTip="Import new captures from this folder as your capture software saves them." AutomationProperties.Name="Watch folder for new captures"/><Button x:Name="ScanButton" Content="Scan folder" Margin="0" /></StackPanel>
        </Grid>
@@ -1034,10 +1034,9 @@
        <RowDefinition Height="Auto" />
       </Grid.RowDefinitions>
       <TextBlock x:Name="ImportDetailsLabel" local:UiHelp.OnlyWhenTruncated="True" ToolTip="{Binding Text, RelativeSource={RelativeSource Self}}" Text="Select a capture to see its review category and reason." TextTrimming="CharacterEllipsis" Foreground="{DynamicResource Muted}" FontSize="{DynamicResource UiFontSmall}" Margin="2,0,0,9" />
-      <DockPanel Grid.Row="1">
+      <DockPanel Grid.Row="1" LastChildFill="False">
        <Button DockPanel.Dock="Left" x:Name="ImportButton" Content="Import 0 files" Background="{DynamicResource Accent}" Foreground="White" BorderBrush="{DynamicResource Accent}" />
        <Button Content="Export…" Margin="8,0,12,0" x:Name="ImportExportButton" DockPanel.Dock="Left" />
-       <TextBlock Text="Imports the ready files shown above." VerticalAlignment="Center" Foreground="{DynamicResource Muted}" FontSize="{DynamicResource UiFontSmall}" Margin="8,0" />
       </DockPanel>
      </Grid>
     </Grid>
@@ -1176,23 +1175,23 @@
       <TextBlock x:Name="SelectionLabel" Text="Ctrl / Shift to select · Right-click for file actions" Foreground="{DynamicResource Muted}" FontSize="{DynamicResource UiFontSmall}" VerticalAlignment="Center" />
 
    <Button x:Name="CoffeeButton" Content="☕ Buy me a coffee" Background="{DynamicResource Selection}" Foreground="{DynamicResource Text}" BorderBrush="{DynamicResource Accent}" BorderThickness="1.5" FontSize="{DynamicResource UiFontControl}" Padding="14,7" Margin="0,0,10,0" />
-   <Button x:Name="ThemeButton" Content="◐" ToolTip="Switch light/dark theme" Padding="10,6" />
+   <Button x:Name="ThemeButton" Content="◐" Padding="10,6" />
    <Button x:Name="SettingsButton" Content="Settings" />
    <Button x:Name="HelpButton" Content="Guide" Margin="0" />
    <Button x:Name="LibraryColumnsButton" Content="Columns ▾" />
    <Button x:Name="PreviewToggle" Content="Preview" />
    <Button x:Name="MoreButton" Content="Tools ▾" Margin="0" />
    <Button x:Name="ReviewLibraryButton" Content="Review flagged" />
-   <Button x:Name="ScreenLibraryButton" Content="Screen for failures" ToolTip="Check selected or visible captures for rejection or damaged FITS data." />
+   <Button x:Name="ScreenLibraryButton" Content="Screen for failures" />
    <Button x:Name="RotationButton" Content="Rotation" Padding="10,5" />
-   <Button x:Name="AnalyzeQualityButton" Content="Analyse image quality" ToolTip="Measure star sharpness or disc detail in the captures in view and score them against similar frames." />
+   <Button x:Name="AnalyzeQualityButton" Content="Analyse image quality" />
    <Button x:Name="SolveButton" Content="Identify target" Padding="10,5" />
    <Button x:Name="EditButton" Content="Edit metadata" Padding="10,5" Margin="0" />
    <Button x:Name="SaveTelescopeButton" Content="Save telescope" Padding="10,6" />
    <Button x:Name="RenameTelescopeButton" Content="Rename" Padding="10,6" />
    <Button x:Name="RebuildTelescopesButton" Content="Recover profiles" Padding="10,6" />
    <Button x:Name="RefreshUsbButton" Content="Refresh USB" Padding="10,6" Margin="0" />
-   <Button Grid.Column="3" x:Name="ScreenImportsButton" Content="Screen for failures" Margin="8,0,0,0" ToolTip="Check visible captures for rejection or damaged FITS data." />
+   <Button Grid.Column="3" x:Name="ScreenImportsButton" Content="Screen for failures" Margin="8,0,0,0" />
    <CheckBox x:Name="SkipFlaggedCheck" Content="Skip flagged captures" IsChecked="True" VerticalAlignment="Center" Margin="0,0,16,8" />
    <Button x:Name="ReviewImportsButton" Content="Review flagged captures" Padding="12,6" Margin="0,0,8,8" />
    <Button x:Name="RetryImportsButton" Content="Retry failed imports" Padding="12,6" Margin="0,0,0,8" />
@@ -1211,7 +1210,7 @@
        </Grid.ColumnDefinitions>
        <StackPanel Margin="0,0,12,0">
         <TextBlock Text="MODEL" FontSize="{DynamicResource UiFontCaption}" />
-        <ComboBox x:Name="ModelBox" Margin="0,5,0,0" ToolTip="Auto detects the model from each capture." />
+        <ComboBox x:Name="ModelBox" Margin="0,5,0,0" />
        </StackPanel>
        <StackPanel Grid.Column="1" Margin="0,0,12,0">
         <TextBlock Text="CAMERA" FontSize="{DynamicResource UiFontCaption}" />
@@ -1226,9 +1225,8 @@
         <ComboBox x:Name="ImportRotationMode" Margin="0,5,0,0" />
        </StackPanel>
       </Grid>
-      <CheckBox x:Name="IgnoreFailedCheck" IsChecked="False" Content="Ignore failed" Margin="0,12,0,0" ToolTip="Skip filenames containing “failed”; keep originals." />
-      <CheckBox x:Name="DeleteOriginalsCheck" IsChecked="False" Content="Delete originals after verified import" Margin="0,10,0,0" ToolTip="Delete verified new/restored source images; keep calibration originals. Cloud deletions sync." />
-      <TextBlock Text="Originals are kept by default. Optional analysis can take longer." FontSize="{DynamicResource UiFontSmall}" Foreground="{DynamicResource Muted}" Margin="0,8,0,0" />
+      <CheckBox x:Name="IgnoreFailedCheck" IsChecked="False" Content="Ignore failed" Margin="0,12,0,0" />
+      <CheckBox x:Name="DeleteOriginalsCheck" IsChecked="False" Content="Delete originals after verified import" Margin="0,10,0,0" />
      </StackPanel>
     </Border>
    </Expander>

@@ -19,7 +19,12 @@ namespace AstroArchive {
    return Regex.Replace(summary,@"\b([A-Za-z][A-Za-z0-9]{2}) \(IAU constellation code\)",m=>Constellation(m.Groups[1].Value)??m.Groups[1].Value);
   }
   // A curated overview, when one exists, replaces the pack's summary.
-  public static string DisplaySummary(TargetInfoCard card){var curated=TargetDescriptions.For(card.id);return curated!=null&&!string.IsNullOrWhiteSpace(curated.Overview)?curated.Overview:Summary(card);}
+  // Comets without either explain their designation instead of showing nothing.
+  public static string DisplaySummary(TargetInfoCard card){
+   var curated=TargetDescriptions.For(card.id);if(curated!=null&&!string.IsNullOrWhiteSpace(curated.Overview))return curated.Overview;
+   string summary=Summary(card);return string.IsNullOrWhiteSpace(summary)&&CometInfo.IsComet(card)?CometInfo.Overview(card):summary;
+  }
+  public static string Imaging(TargetInfoCard card){var curated=TargetDescriptions.For(card.id);return curated!=null&&!string.IsNullOrWhiteSpace(curated.Imaging)?curated.Imaging:CometInfo.IsComet(card)?CometInfo.Imaging:null;}
   public static string Caption(string value){
    string text=value??"";
    text=text.Replace("Astronomical observation; filter bands and colour processing unspecified.","").Replace("Optical astrophotography; processing/filter details not stated.","");
@@ -40,6 +45,7 @@ namespace AstroArchive {
   }
   public static List<TargetInfoSource> Sources(TargetInfoCard card){return Sources(card,false);}
   // Curated overviews cite SIMBAD for the object, and NASA's Messier pages where relevant.
+  // Comets cite JPL's Small-Body Database, the source of their orbits, instead.
   public static List<TargetInfoSource> Sources(TargetInfoCard card,bool curated){
    var sources=new List<TargetInfoSource>();var seen=new HashSet<string>(StringComparer.OrdinalIgnoreCase);
    Action<string,string> add=(title,url)=>{
@@ -49,7 +55,8 @@ namespace AstroArchive {
    };
    foreach(var citation in card.citations??new TargetInfoCitation[0])if(citation.review_status!="draft")add(citation.source_title,citation.source_url);
    foreach(string url in card.source_urls??new string[0])add(null,url);
-   if(curated){
+   if(CometInfo.IsComet(card)){if(CometInfo.Orbit(card.id)!=null||curated)add(CometInfo.SourceTitle+" · "+card.id,CometInfo.LookupUrl(card.id));}
+   else if(curated){
     var messier=Regex.Match(card.id??"",@"^M(\d{1,3})$");if(messier.Success)add("NASA Hubble Messier Catalog · Messier "+messier.Groups[1].Value,"https://science.nasa.gov/mission/hubble/science/explore-the-night-sky/hubble-messier-catalog/messier-"+messier.Groups[1].Value+"/");
     add("SIMBAD · "+card.id,"https://simbad.cds.unistra.fr/simbad/sim-id?Ident="+Uri.EscapeDataString(Regex.Replace(card.id,@"^SH2-","SH 2-",RegexOptions.IgnoreCase)));
    }

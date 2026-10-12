@@ -11,7 +11,6 @@ Dismiss	Descartar
 Search captures…	Buscar capturas…
 Filters	Filtros
 Clear	Borrar
-Export ▾	Exportar ▾
 Selected files include other targets. Click to clear the selection.	Los archivos seleccionados incluyen otros objetos. Haz clic para borrar la selección.
 Your sky, organised.	Tu cielo, organizado.
 Choose a repository, then import your captures.	Elige un repositorio y luego importa tus capturas.
@@ -28,7 +27,6 @@ Select a capture	Selecciona una captura
 Select a capture to preview it.	Selecciona una captura para obtener una vista previa.
 Reset capture sky view	Restablecer la vista del cielo de la captura
 SAVED TELESCOPE	TELESCOPIO GUARDADO
-Reuse a saved telescope.	Reutiliza un telescopio guardado.
 Connect over network…	Conectar por red…
 Find a telescope on your network, choose captures or import live as it shoots.	Busca un telescopio en tu red, elige capturas o importa en directo mientras captura.
 ● Live import underway	● Importación en directo en curso
@@ -39,7 +37,6 @@ Connect a telescope by USB, or browse its capture folder and save the telescope.
 SOURCE FOLDER	CARPETA DE ORIGEN
 Browse	Examinar
 DEVICE ID	ID DE DISPOSITIVO
-Unique ID for this physical telescope.	ID único de este telescopio físico.
 Import preferences…	Preferencias de importación…
 Watch folder…	Supervisar carpeta…
 Scan folder	Escanear carpeta
@@ -50,7 +47,6 @@ Choose a source folder and scan to begin.	Elige una carpeta de origen y escanéa
 DEVICE / MODEL	DISPOSITIVO / MODELO
 Select a capture to see its review category and reason.	Selecciona una captura para ver su categoría de revisión y el motivo.
 Import 0 files	Importar 0 archivos
-Imports the ready files shown above.	Importa los archivos listos que se muestran arriba.
 Add images…	Agregar imágenes…
 Import folder…	Importar carpeta…
 Refresh	Actualizar
@@ -78,7 +74,6 @@ Cancel	Cancelar
 Performance details	Detalles de rendimiento
 FILES/S	ARCHIVOS/S
 Ctrl / Shift to select · Right-click for file actions	Ctrl / Shift para seleccionar · Clic derecho para acciones de archivo
-Switch light/dark theme	Cambiar tema claro/oscuro
 Settings	Configuración
 Guide	Guía
 Columns ▾	Columnas ▾
@@ -86,7 +81,6 @@ Preview	Vista previa
 Tools ▾	Herramientas ▾
 Review flagged	Revisar marcadas
 Screen for failures	Detectar fallos
-Check selected or visible captures for rejection or damaged FITS data.	Comprueba si las capturas seleccionadas o visibles están rechazadas o tienen datos FITS dañados.
 Rotation	Rotación
 Identify target	Identificar objeto
 Edit metadata	Editar metadatos
@@ -101,13 +95,11 @@ Retry failed imports	Reintentar importaciones fallidas
 Import tools ▾	Herramientas de importación ▾
 Report	Informe
 Import options	Opciones de importación
-Auto detects the model from each capture.	Detecta automáticamente el modelo de cada captura.
 TARGET ANALYSIS	ANÁLISIS DE OBJETOS
 ROTATION ANALYSIS	ANÁLISIS DE ROTACIÓN
 Ignore failed	Omitir fallidos
 Skip filenames containing “failed”; keep originals.	Omite los nombres de archivo que contienen “failed”; conserva los originales.
 Delete originals after verified import	Eliminar los originales tras la importación verificada
-Originals are kept by default. Optional analysis can take longer.	Los originales se conservan de forma predeterminada. El análisis opcional puede tardar más.
 Choose files, targets or sessions.	Elige archivos, objetos o sesiones.
 Opening AstroArchive	Abriendo AstroArchive
 Cancel opening AstroArchive	Cancelar la apertura de AstroArchive
@@ -116,7 +108,7 @@ Rosette Nebula · Ari J. Guest	Nebulosa Roseta · Ari J. Guest
 Application startup progress	Progreso del inicio de la aplicación
 Enabled	Activado
 Accessibility	Accesibilidad
-Adjust text and table spacing without scaling images. Settings apply to this Windows user and remain in place after updates.	Ajusta el tamaño del texto y el espaciado de las tablas sin escalar las imágenes. La configuración se aplica a este usuario de Windows y se mantiene tras las actualizaciones.
+Adjust text and table spacing without scaling images.	Ajusta el tamaño del texto y el espaciado de las tablas sin escalar las imágenes.
 Text size	Tamaño del texto
 Comfortable table rows	Filas de tabla más amplias
 High contrast surfaces and text	Superficies y texto de alto contraste
@@ -135,12 +127,10 @@ Activity and notifications (Ctrl+Shift+N)	Actividad y notificaciones (Ctrl+Shift
 Close	Cerrar
 Activity	Actividad
 Clear completed	Borrar completadas
-Show dismissed	Mostrar descartadas
 View	Ver
 Loading image preview	Cargando la vista previa de la imagen
 Preparing…	Preparando…
 No recent activity. Long-running work and release notifications appear here.	No hay actividad reciente. Aquí aparecen las tareas de larga duración y las notificaciones de versiones.
-Dismiss this card; running work continues. Use Show dismissed to restore it.	Descarta esta tarjeta; el trabajo en curso continúa. Usa Mostrar descartadas para restaurarla.
 Details	Detalles
 Cloud availability	Disponibilidad en la nube
 Waiting for cloud provider	Esperando al proveedor de nube
@@ -272,7 +262,7 @@ Tags and note…	Etiquetas y nota…
 Tags and notes…	Etiquetas y notas…
 Tags and note	Etiquetas y nota
 Tags and notes	Etiquetas y notas
-Personal labels for finding and remembering these files. They are saved with this repository and never change the files themselves.	Etiquetas personales para encontrar y recordar estos archivos. Se guardan con este repositorio y nunca modifican los propios archivos.
+Saved with this repository; the files themselves never change.	Se guarda con este repositorio; los propios archivos nunca se modifican.
 Tags (separate with commas)	Etiquetas (separadas por comas)
 Only tags shared by every selected file are shown. Others stay unless you remove them here.	Solo se muestran las etiquetas que comparten todos los archivos seleccionados. Las demás se mantienen a menos que las quites aquí.
 Add this tag	Agregar esta etiqueta
@@ -448,7 +438,7 @@ Restore this backup	Restaurar esta copia de seguridad
 Back up archive	Hacer copia de seguridad del archivo
 Create a recoverable backup	Crear una copia de seguridad recuperable
 Copies originals, edited files and the current archive database. Choose a folder outside the archive; a separate drive is best.	Copia los originales, los archivos editados y la base de datos actual del archivo. Elige una carpeta fuera del archivo; lo ideal es una unidad independiente.
-Large backups can take a long time to create and verify. You can keep using Windows and cancel safely.	Las copias de seguridad grandes pueden tardar mucho en crearse y verificarse. Puedes seguir usando Windows y cancelar de forma segura.
+Large backups can take a long time to create and verify. You can cancel safely.	Las copias de seguridad grandes pueden tardar mucho en crearse y verificarse. Puedes cancelar de forma segura.
 Save backup in	Guardar la copia de seguridad en
 Without compression, the backup is a normal folder. ZIP compression preserves every image byte, including resolution and metadata.	Sin compresión, la copia de seguridad es una carpeta normal. La compresión ZIP conserva cada byte de las imágenes, incluidos la resolución y los metadatos.
 The first backup in a folder is complete. Later backups copy only what changed since the previous backup there, yet each folder backup stays complete on its own.	La primera copia de seguridad en una carpeta es completa. Las copias posteriores solo copian lo que ha cambiado desde la copia anterior en esa carpeta, pero cada copia en carpeta sigue siendo completa por sí misma.
@@ -588,8 +578,6 @@ Edited metadata saved.	Metadatos de la imagen editada guardados.
 Export files…	Exportar archivos…
 Delete files…	Eliminar archivos…
 Delete selected Edited copies; keep source originals and archived captures.	Elimina las copias de Edited seleccionadas; conserva los originales de origen y las capturas archivadas.
-Export Edited files	Exportar archivos de Edited
-Copies the selected images in their original format. Existing files are kept; duplicate names receive a numbered suffix.	Copia las imágenes seleccionadas en su formato original. Se conservan los archivos existentes; los nombres duplicados reciben un sufijo numérico.
 Export files	Exportar archivos
 Delete selected Edited files	Eliminar los archivos de Edited seleccionados
 This permanently removes the selected Edited copies. Source copies, archived originals, other Edited files and project source metadata stay. Cloud-synced deletions propagate to the cloud.	Esta acción quita permanentemente las copias de Edited seleccionadas. Se mantienen las copias de origen, los originales archivados, los demás archivos de Edited y los metadatos de origen del proyecto. Las eliminaciones sincronizadas con la nube se propagan a la nube.
@@ -640,12 +628,10 @@ Open GitHub draft	Abrir borrador en GitHub
 Open a prefilled GitHub issue draft with the displayed diagnostic report	Abrir un borrador de incidencia de GitHub rellenado con el informe de diagnóstico mostrado
 Could not open GitHub. The report has not been sent.\n\n	No se pudo abrir GitHub. El informe no se ha enviado.\n\n
 Application location	Ubicación de la aplicación
-Copies and verifies original files before opening your chosen app.	Copia y verifica los archivos originales antes de abrir la aplicación elegida.
 Opens the selected Edited images in your chosen app. Save results in their image folders.	Abre las imágenes de Edited seleccionadas en la aplicación elegida. Guarda los resultados en sus carpetas de imagen.
 Creates verified working copies in Edited, then opens them in your chosen app. Save processed results alongside the copies.	Crea copias de trabajo verificadas en Edited y luego las abre en la aplicación elegida. Guarda los resultados procesados junto a las copias.
 Choose an application…	Elegir una aplicación…
 Choose a compatible destination. Unavailable destinations below explain their restrictions.	Elige un destino compatible. Los destinos no disponibles que aparecen abajo explican sus restricciones.
-No destination supports this selection. Export files… can copy the originals; convert to a supported format or select fewer images to open them in an app.	Ningún destino admite esta selección. Exportar archivos… puede copiar los originales; convierte a un formato compatible o selecciona menos imágenes para abrirlas en una aplicación.
 Unavailable destinations (	Destinos no disponibles (
 Use this as my default for subframe folders	Usar como predeterminado para carpetas de subexposiciones
 Use this as my default for these file types	Usar como predeterminado para estos tipos de archivo
@@ -679,7 +665,6 @@ Find automatically	Buscar automáticamente
 Not found. Browse to the application's GUI executable.	No se encontró. Busca el ejecutable con interfaz gráfica de la aplicación.
 Use automatic detection	Usar la detección automática
 Automatic detection will be used when exporting.	Se usará la detección automática al exportar.
-Stacking folder…	Carpeta de apilado…
 Preview…	Vista previa…
 Create Edited copies…	Crear copias en Edited…
 Open file location	Abrir la ubicación del archivo
@@ -687,7 +672,6 @@ More actions	Más acciones
 Copy file paths	Copiar rutas de archivo
 Identify target…	Identificar objeto…
 Review detected metadata…	Revisar los metadatos detectados…
-Export catalogue CSV…	Exportar catálogo CSV…
 Choose HDU / page / frame…	Elegir HDU / página / fotograma…
 Exporting catalogue CSV	Exportando catálogo CSV
 This file is missing from the repository.	Este archivo falta en el repositorio.
@@ -701,7 +685,6 @@ None	Ninguno
 Open one exported FITS stack in Siril. Multiple stacks and subs-only exports cannot open a single image.	Abre un apilado FITS exportado en Siril. Las exportaciones con varios apilados o solo con subexposiciones no pueden abrir una única imagen.
 Siril did not start.	Siril no se inició.
 Siril handoff	Envío a Siril
-Original files are copied and verified. Existing files are kept; duplicate names receive a numbered suffix.	Los archivos originales se copian y se verifican. Se conservan los archivos existentes; los nombres duplicados reciben un sufijo numérico.
 Export stacking folder	Exportar carpeta de apilado
 Multiple targets	Varios objetos
 Inputs	Entradas
@@ -791,7 +774,6 @@ Calibration originals always stay on the source/telescope. Changed or failed fil
 Dump processing also removes verified duplicate science files from Dump.	El procesamiento de Dump también quita de Dump los archivos científicos duplicados verificados.
 Existing duplicates are kept on the source.	Los duplicados existentes se conservan en el origen.
 Deletion in a cloud-synced source folder propagates to the cloud and other devices.	La eliminación en una carpeta de origen sincronizada con la nube se propaga a la nube y a otros dispositivos.
-Cancel to keep all source files and return without starting this import.	Cancela para conservar todos los archivos de origen y volver sin iniciar esta importación.
 Import and delete eligible originals	Importar y eliminar los originales aptos
 Target for Unknown light/stack captures	Objeto para las capturas de luz/apilado desconocidas
 Enter an object ID or name. Blank keeps Unknown.	Escribe un ID o nombre de objeto. Si se deja en blanco, se mantiene Desconocido.
@@ -1060,7 +1042,6 @@ Needs attention	Requiere atención
 Stopped	Detenido
 Completed · review results	Completado · revisar resultados
 Completed	Completado
-Dismiss from the banner and Activity; running work continues. Use Show dismissed in Activity to restore it.	Descarta del banner y de Actividad; el trabajo en curso continúa. Usa Mostrar descartadas en Actividad para restaurarlo.
 No newer release is available.	No hay ninguna versión más reciente disponible.
 Release information has not been checked yet.	Aún no se ha comprobado la información de versiones.
 No newer release was found at the last successful check.	No se encontró ninguna versión más reciente en la última comprobación correcta.
@@ -1126,7 +1107,7 @@ No telescopes replied. Check that both devices share the same network. Search ag
 Finding telescopes on your networks… (about 8 seconds)	Buscando telescopios en tus redes… (unos 8 segundos)
 Choose files, search all captures, or start live import.	Elige archivos, busca en todas las capturas o inicia la importación en directo.
 Live folder: All captures	Carpeta en directo: Todas las capturas
-Click to select files or folders; Ctrl or Shift adds more. Double-click a folder to open it. Selections are kept as you move between folders.	Haz clic para seleccionar archivos o carpetas; Ctrl o Shift agrega más. Haz doble clic en una carpeta para abrirla. Las selecciones se mantienen al moverte entre carpetas.
+Selections are kept as you move between folders.	Las selecciones se mantienen al moverte entre carpetas.
 Reading capture folders…	Leyendo las carpetas de capturas…
 No supported captures were found. Open Advanced to check the storage location.	No se encontraron capturas compatibles. Abre Avanzado para comprobar la ubicación de almacenamiento.
 Searching all capture folders…	Buscando en todas las carpetas de capturas…
@@ -1204,7 +1185,7 @@ Search files and metadata. Combine a target, device and file type, for example M
 Find files	Buscar archivos
 Check your search	Revisa tu búsqueda
 Search across your files	Buscar en todos tus archivos
-Results update after a short typing pause. Enter searches immediately; Escape clears the search while keeping table filters. Searching runs in the background; file actions wait for the current results. Words combine to narrow results. Catalogue IDs and common names resolve to the same target, including spaced IDs such as NGC 6888. Case, accents and filename separators are handled consistently.	Los resultados se actualizan tras una breve pausa al escribir. Enter busca de inmediato; Escape borra la búsqueda pero mantiene los filtros de la tabla. La búsqueda se ejecuta en segundo plano; las acciones de archivo esperan a los resultados actuales. Las palabras se combinan para acotar los resultados. Los ID de catálogo y los nombres comunes se resuelven al mismo objeto, incluidos los ID con espacios como NGC 6888. Las mayúsculas, los acentos y los separadores de nombres de archivo se tratan de forma coherente.
+Results update after a short typing pause. Enter searches immediately; Escape clears the search while keeping table filters. Words combine to narrow results. Catalogue IDs and common names resolve to the same target, including spaced IDs such as NGC 6888. Case, accents and filename separators are handled consistently.	Los resultados se actualizan tras una breve pausa al escribir. Enter busca de inmediato; Escape borra la búsqueda pero mantiene los filtros de la tabla. Las palabras se combinan para acotar los resultados. Los ID de catálogo y los nombres comunes se resuelven al mismo objeto, incluidos los ID con espacios como NGC 6888. Las mayúsculas, los acentos y los separadores de nombres de archivo se tratan de forma coherente.
 Examples	Ejemplos
 Crescent Nebula filter:dual\ntarget:M45 -type:Stack\nfile:*.fits OR file:*.fit\n"wide field" -failed\nexposure:>=20 gain:80\ndate:2026-10 device:Seestar\ntype:Starless source:*.fits (Edited)	Crescent Nebula filter:dual\ntarget:M45 -type:Stack\nfile:*.fits OR file:*.fit\n"campo amplio" -failed\nexposure:>=20 gain:80\ndate:2026-10 device:Seestar\ntype:Starless source:*.fits (Edited)
 Search fields	Campos de búsqueda
@@ -1418,18 +1399,14 @@ Telescope rename	Cambio de nombre del telescopio
 Edited scope	Ámbito de Edited
 Selection	Selección
 Recover saved telescopes from archive metadata.	Recupera los telescopios guardados a partir de los metadatos del archivo.
-Add tags and a note to the selected files.	Agrega etiquetas y una nota a los archivos seleccionados.
 Create target card	Crear tarjeta del objeto
 Make a shareable image of this target with its integration, frames, nights and filters.	Crea una imagen para compartir de este objeto con su integración, tomas, noches y filtros.
-Add tags and a note to this file.	Agrega etiquetas y una nota a este archivo.
 Read and hash every source file again.	Vuelve a leer todos los archivos de origen y a calcular su hash.
 Inspect flagged captures and retry failed transfers.	Inspecciona las capturas marcadas y reintenta las transferencias fallidas.
 Review flagged files	Revisar archivos marcados
-Inspect captures marked for review.	Inspecciona las capturas marcadas para revisión.
 Check rejection labels and file integrity.	Comprueba las etiquetas de rechazo y la integridad de los archivos.
 Retry failed transfers from unchanged source files.	Reintenta las transferencias fallidas desde archivos de origen sin cambios.
 Edit selected metadata	Editar metadatos seleccionados
-Change metadata for selected scan results.	Cambia los metadatos de los resultados de escaneo seleccionados.
 Identify selected targets	Identificar objetos seleccionados
 Solve selected lights and stacks to identify objects.	Resuelve las tomas de luz y los apilados seleccionados para identificar objetos.
 Set Unknown targets	Asignar objetos desconocidos
@@ -1451,13 +1428,9 @@ Review archive deletions and reimport choices.	Revisa las eliminaciones del arch
 Delete archive data	Eliminar datos del archivo
 Permanently clear indexed archive data; keep source originals.	Borra permanentemente los datos indexados del archivo; conserva los originales de origen.
 View operation timings and import reports.	Consulta los tiempos de las operaciones y los informes de importación.
-Show timings and diagnostics for the latest operation.	Muestra los tiempos y el diagnóstico de la última operación.
 Last import report	Último informe de importación
-Show the latest import's results and errors.	Muestra los resultados y errores de la última importación.
 Export capture metadata for spreadsheets.	Exporta los metadatos de las capturas para hojas de cálculo.
 Selected / visible files	Archivos seleccionados / visibles
-Export metadata for selected or visible captures.	Exporta los metadatos de las capturas seleccionadas o visibles.
-Export metadata for all archived captures.	Exporta los metadatos de todas las capturas archivadas.
 Choose HDU / page / frame	Elegir HDU / página / fotograma
 Choose the image or frame used for preview and export.	Elige la imagen o el fotograma que se usa para la vista previa y la exportación.
 Re-detect metadata and review	Volver a detectar metadatos y revisar
@@ -1511,7 +1484,6 @@ Add compatible darks, flats and biases.	Agrega darks, flats y bias compatibles.
 Include calibrations for subs with unknown calibration state	Incluir calibraciones para subexposiciones con estado de calibración desconocido
 Review unknown processing states before calibrating.	Revisa los estados de procesamiento desconocidos antes de calibrar.
 Include files marked rejected/reference	Incluir archivos marcados como rechazados/de referencia
-Include rejected and reference frames in this export.	Incluye las tomas rechazadas y de referencia en esta exportación.
 Renames this device and its archived captures.	Cambia el nombre de este dispositivo y de sus capturas archivadas.
 Export to	Exportar a
 Open verified working copies or stacking inputs in a compatible app.	Abre copias de trabajo verificadas o entradas de apilado en una aplicación compatible.
@@ -1522,12 +1494,10 @@ Export destinations	Destinos de exportación
 Choose application locations and defaults by file type.	Elige las ubicaciones de las aplicaciones y los valores predeterminados por tipo de archivo.
 Ready-to-stack folder	Carpeta lista para apilar
 Ready-to-stack with calibrations	Lista para apilar con calibraciones
-Include available matching calibration files.	Incluye los archivos de calibración coincidentes disponibles.
 Delete selected archive copies; keep source originals.	Elimina las copias archivadas seleccionadas; conserva los originales de origen.
 Solve once per Light session/target group; stacks solve individually.	Resuelve una vez por grupo de sesión de luz/objeto; los apilados se resuelven por separado.
 Report missing or changed archive files.	Informa de los archivos archivados que faltan o han cambiado.
 Index existing images without copying or moving them.	Indexa las imágenes existentes sin copiarlas ni moverlas.
-Choose a catalogue target or enter a custom name.	Elige un objeto del catálogo o escribe un nombre personalizado.
 One sampled preview pixel per screen pixel.	Un píxel muestreado de la vista previa por cada píxel de la pantalla.
 Retry visible failed transfers; rescan changed sources.	Reintenta las transferencias fallidas visibles; vuelve a escanear los orígenes modificados.
 Exclude rejected or damaged captures.	Excluye las capturas rechazadas o dañadas.
@@ -1542,7 +1512,6 @@ Metadata, target identification and scan report.	Metadatos, identificación de o
 Open the guide (F1).	Abre la guía (F1).
 Choose telescope folders or files, then confirm a full scan and import. Keep originals.	Elige carpetas o archivos del telescopio y confirma un escaneo completo y la importación. Conserva los originales.
 Clear search, filters and target selection.	Borra la búsqueda, los filtros y la selección de objeto.
-Export selected files, or all visible files if none selected.	Exporta los archivos seleccionados o, si no hay ninguno, todos los visibles.
 Assess mount mode from rotation in acquisition subs.	Evalúa el modo de montura a partir de la rotación de las subexposiciones de adquisición.
 Solve selected Light groups and stacks; review batch target matches.	Resuelve los grupos de luz y apilados seleccionados; revisa las coincidencias de objetos del lote.
 Edit selected files, or all visible files if none selected.	Edita los archivos seleccionados o, si no hay ninguno, todos los visibles.
@@ -1562,7 +1531,6 @@ Stop safely; completed imports remain.	Detén de forma segura; las importaciones
 Ctrl/Shift selects files; right-click opens file actions.	Ctrl/Shift selecciona archivos; el clic derecho abre las acciones de archivo.
 Review scan results. Row selection does not limit imports; search and filters do.	Revisa los resultados del escaneo. La selección de filas no limita las importaciones; la búsqueda y los filtros, sí.
 Capture source folder. Scan before importing.	Carpeta de origen de las capturas. Escanéala antes de importar.
-Choose an export action.	Elige una acción de exportación.
 Edit metadata for these files.	Edita los metadatos de estos archivos.
 Check rejection markers and file integrity.	Comprueba las marcas de rechazo y la integridad de los archivos.
 Back	Atrás
@@ -1826,7 +1794,6 @@ Export…	Exportar…
 Copy and verify grouped inputs into a ready-to-stack folder.	Copia y verifica las entradas agrupadas en una carpeta lista para apilar.
 Build AstroBin's acquisition CSV from archived metadata; no images are copied.	Crea el CSV de adquisición de AstroBin a partir de los metadatos archivados; no se copia ninguna imagen.
 Save CSV	Guardar CSV
-Choose where to save this CSV.	Elige dónde guardar este CSV.
 Export preferences	Preferencias de exportación
 Default export folder, Siril and application locations.	Carpeta de exportación predeterminada, Siril y ubicaciones de las aplicaciones.
 Choose an existing folder outside the repository.	Elige una carpeta existente fuera del repositorio.
@@ -1835,8 +1802,6 @@ Open Export for selected files, or all visible files if none selected.	Abre Expo
 Open Export with an option chosen.	Abre Exportar con una opción ya elegida.
 Select captures, then choose **Export**: copy originals, prepare a ready-to-stack folder, open them in an app, or create an AstroBin acquisition CSV.	Selecciona capturas y elige **Exportar**: copia los originales, prepara una carpeta lista para apilar, ábrelas en una aplicación o crea un CSV de adquisición de AstroBin.
 No files selected	No hay archivos seleccionados
-AstroBin CSV…	CSV de AstroBin…
-Catalogue CSV…	Catálogo CSV…
 Inputs with different calibration sets use separate folders.	Las entradas con distintos conjuntos de calibración usan carpetas separadas.
 Export selection: {0}	Selección para exportar: {0}
 {#0} selected files	{0} archivos seleccionados
@@ -1996,6 +1961,20 @@ Solar eclipse	Eclipse solar
 Lunar eclipse	Eclipse lunar
 Solar Eclipse	Eclipse solar
 Lunar Eclipse	Eclipse lunar
+Orbit type	Tipo de órbita
+Perihelion	Perihelio
+Perihelion date	Fecha del perihelio
+Orbital period	Período orbital
+Eccentricity	Excentricidad
+{0} AU from the Sun	{0} UA del Sol
+{0} years per orbit	{0} años por órbita
+Halley-type	Tipo Halley
+Jupiter-family	Familia de Júpiter
+Encke-type	Tipo Encke
+Long-period	Largo período
+Near-parabolic	Casi parabólica
+Hyperbolic (interstellar)	Hiperbólica (interestelar)
+Aphelion	Afelio
 Show targets in frame	Mostrar objetivos en el encuadre
 Hide targets in frame	Ocultar objetivos en el encuadre
 Show targets in frame (plate-solved captures)	Mostrar objetivos en el encuadre (capturas con resolución astrométrica)

@@ -82,11 +82,15 @@ namespace AstroArchive {
      var result=new TargetInfoResult();string term=Normalize(query);string[] ids;
      if(byId)ids=index.entries.ContainsKey(query)?new[]{query}:new string[0];
      else if(!index.aliases.TryGetValue(term,out ids))ids=new string[0];
+     // Comet targets carry the discoverer ("C/2023 A3 (Tsuchinshan-ATLAS)"); the pack files them by designation.
+     string comet=!byId&&ids.Length==0&&CometTargets.IsComet(query)?CometInfo.Canonical(CometTargets.Designation(query)):null;
+     if(comet!=null&&!index.aliases.TryGetValue(Normalize(comet),out ids))ids=index.entries.ContainsKey(comet)?new[]{comet}:new string[0];
      bool uncertain=!byId&&(index.uncertain??new string[0]).Contains(term);
      result.Status=ids.Length==1&&!uncertain?"matched":ids.Length>0?"ambiguous":"not_found";
      result.Message=result.Status=="ambiguous"?"This name has more than one possible identity. Choose an object to read about; your files will not be renamed.":!byId&&(index.nonexistent??new string[0]).Contains(term)?"This catalogue designation is listed as nonexistent.":"No verified overview is available for this target yet.";
      // Ambiguous matches are displayed as explicit choices, never picked by order.
      foreach(string id in ids.Take(30)){token.ThrowIfCancellationRequested();result.Cards.Add(Card(zip,id,token));}
+     if(result.Status=="not_found"&&!byId&&CometTargets.IsComet(query)){result.Status="matched";result.Cards.Add(CometInfo.Card(query));}
      token.ThrowIfCancellationRequested();return result;
     }
    }

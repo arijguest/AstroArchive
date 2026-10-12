@@ -685,3 +685,106 @@ Imaging: A southern target for wide fields.
 ## SMC
 The Small Magellanic Cloud is a satellite galaxy of the Milky Way about 200,000 light-years away, visible to the unaided eye from the southern hemisphere. It appears beside the globular cluster 47 Tucanae.
 Imaging: A southern target for wide fields.
+
+# Comets, keyed by designation. Comets the information pack lacks get a page from
+# CometInfo.cs, and these overviews apply to them too.
+
+## 1P
+Halley's Comet is the best-known periodic comet, returning about every 76 years. Edmond Halley realised that comets seen in 1531, 1607 and 1682 were one object and predicted its return in 1758, the first comet shown to come back. In 1986 the Giotto spacecraft photographed its dark nucleus, about 15 km long. Dust it has shed produces the Eta Aquariid and Orionid meteor showers.
+Imaging: Its next perihelion is in 2061. Until then it is far too faint for amateur cameras.
+
+## 2P
+Encke's Comet has the shortest period of any well-known comet, about 3.3 years, and never travels as far out as Jupiter. Johann Franz Encke computed its orbit in 1819, making it the second comet after Halley's found to return. It is the parent of the Taurid meteor showers.
+
+## 9P
+Tempel 1 is a Jupiter-family comet discovered by Wilhelm Tempel in 1867, orbiting the Sun about every 5.6 years. In 2005 NASA's Deep Impact mission struck its nucleus with an impactor to expose material from beneath the surface, and the Stardust spacecraft revisited it in 2011.
+
+## 12P
+Pons-Brooks is a Halley-type comet with a period of about 71 years, discovered by Jean-Louis Pons in 1812 and recovered by William Brooks in 1883. Before its April 2024 perihelion it had repeated outbursts that gave its coma a horned shape, earning it the nickname "Devil Comet". Its next return is in the 2090s.
+
+## 13P
+Olbers' Comet was discovered by Heinrich Olbers in 1815 and returns about every 69 years. It reached perihelion in June 2024 as a binocular comet, its first return since 1956.
+
+## 17P
+Holmes is a Jupiter-family comet found by Edwin Holmes during an outburst in 1892. In October 2007 it brightened about a millionfold in under two days, becoming visible to the unaided eye, and its expanding coma briefly grew larger than the Sun.
+
+## 21P
+Giacobini-Zinner is a Jupiter-family comet with a period of about 6.5 years, discovered by Michel Giacobini in 1900. It is the parent of the Draconid meteor shower. In 1985 the International Cometary Explorer flew through its tail, the first spacecraft to visit a comet.
+
+## 29P
+Schwassmann-Wachmann 1 follows an almost circular orbit between Jupiter and Saturn, so it never comes close to the Sun. It was discovered in 1927 and is famous for frequent outbursts that can brighten it many times over within hours.
+
+## 46P
+Wirtanen is a small Jupiter-family comet discovered by Carl Wirtanen in 1948. It was the original target of the Rosetta mission. In December 2018 it passed about 11.5 million km from Earth and was faintly visible to the unaided eye under dark skies.
+
+## 55P
+Tempel-Tuttle returns about every 33 years and is the parent of the Leonid meteor shower, which produced great meteor storms in 1833, 1966 and 1999. Wilhelm Tempel and Horace Tuttle discovered it independently in December 1865 and January 1866.
+
+## 67P
+Churyumov-Gerasimenko is a Jupiter-family comet discovered in 1969 by Klim Churyumov and Svetlana Gerasimenko. The European Space Agency's Rosetta spacecraft orbited it from 2014 to 2016 and set the Philae lander on its two-lobed nucleus, about 4 km across, in November 2014.
+
+## 73P
+Schwassmann-Wachmann 3 began breaking apart in 1995, and by its 2006 return it had split into dozens of fragments strung along its orbit. Its debris produced the Tau Herculid meteor shower of 2022.
+
+## 103P
+Hartley 2 is a small Jupiter-family comet discovered by Malcolm Hartley in 1986. Its peanut-shaped nucleus is only about 2 km long, yet very active. NASA's EPOXI mission flew past it in November 2010, shortly after it passed close to Earth.
+
+## 109P
+Swift-Tuttle is the parent of the Perseid meteor shower. Its nucleus is about 26 km across, large for a comet, and it orbits the Sun about every 133 years. Lewis Swift and Horace Tuttle discovered it in 1862. Its last perihelion was in December 1992 and the next is due in 2126.
+
+## 1I
+ʻOumuamua, found by the Pan-STARRS survey in October 2017, was the first object known to have come from outside the Solar System. It was small and very elongated and showed no visible coma, although its path was nudged slightly as it left, as a comet's would be.
+
+## 2I
+Borisov was the second known interstellar object and the first clearly a comet, with a coma and tail much like the Solar System's own comets. The amateur astronomer Gennadiy Borisov discovered it from Crimea in August 2019. It reached perihelion in December 2019 and is now leaving the Solar System.
+
+## 3I
+3I/ATLAS is the third known interstellar object, discovered by the ATLAS survey on 1 July 2025 and also designated C/2025 N1. It travels faster than either earlier visitor and is an active comet. It passed perihelion in late October 2025, just inside the orbit of Mars.
+
+## C/1995 O1
+Hale-Bopp, discovered independently by Alan Hale and Thomas Bopp in July 1995, was one of the most widely seen comets of the 20th century. It stayed visible to the unaided eye for about 18 months, a record. Its large nucleus, about 60 km across, produced a bright white dust tail and a distinct blue ion tail. It reached perihelion in spring 1997 and will not return for more than 2,000 years.
+
+## C/1996 B2
+Hyakutake was discovered by the amateur astronomer Yuji Hyakutake in January 1996. In March 1996 it passed about 15 million km from Earth, one of the closest comet approaches in centuries, and its tail stretched across a large part of the sky. It was the first comet found to emit X-rays.
+
+## C/2006 P1
+McNaught, discovered by Robert McNaught in August 2006, became the Great Comet of 2007 and the brightest comet in more than 40 years. Around perihelion in January 2007 it was visible in daylight, and southern observers then saw a broad curved tail with long striations.
+
+## C/2011 L4
+Comet PANSTARRS was found by the Pan-STARRS survey in June 2011. It became visible to the unaided eye in March 2013, low in the evening twilight after perihelion, with a short, fan-shaped dust tail.
+
+## C/2013 US10
+Comet Catalina was discovered by the Catalina Sky Survey in October 2013. Around the turn of 2016 it was a binocular comet in the morning sky, showing separate dust and ion tails.
+
+## C/2014 Q2
+Comet Lovejoy, discovered by the Australian amateur Terry Lovejoy in August 2014, reached about magnitude 4 in January 2015. Its green coma and long blue ion tail passed close to the Pleiades, a favourite pairing for astrophotographers.
+
+## C/2017 K2
+Comet PANSTARRS (C/2017 K2) was found in May 2017 while still beyond the orbit of Saturn, one of the most distant active comets ever seen on its way in. It reached perihelion in December 2022 at 1.8 AU from the Sun.
+
+## C/2019 Y4
+Comet ATLAS (C/2019 Y4) brightened quickly after its discovery in December 2019 and raised hopes of a bright spring comet. Instead its nucleus broke apart in March and April 2020, before perihelion, and the Hubble Space Telescope followed the fragments.
+
+## C/2020 F3
+NEOWISE was discovered by the NEOWISE space telescope in March 2020 and became the brightest comet seen from the northern hemisphere since Hale-Bopp. In July 2020 it was easy to see without optical aid, with a curved dust tail and a fainter blue ion tail.
+
+## C/2021 A1
+Comet Leonard was discovered by Greg Leonard at the Mount Lemmon Observatory in January 2021. It was best seen in December 2021, close to Earth and Venus, with a long ion tail. It disintegrated soon after perihelion in January 2022.
+
+## C/2022 E3
+Comet ZTF was found by the Zwicky Transient Facility in March 2022. In late January and early February 2023 it passed about 42 million km from Earth, showing a green coma and both dust and ion tails, and was faintly visible to the unaided eye from dark sites.
+
+## C/2023 A3
+Tsuchinshan-ATLAS was discovered in January 2023 at the Purple Mountain Observatory (Tsuchinshan) and independently by the ATLAS survey. After perihelion in late September 2024 it became a bright evening comet in October, with a long dust tail and a striking anti-tail pointing towards the Sun.
+
+## C/2023 P1
+Nishimura was discovered by the Japanese amateur Hideo Nishimura in August 2023, only weeks before perihelion. It was seen low in the twilight in September 2023 with a long, rippling ion tail.
+
+## C/2024 G3
+Comet ATLAS (C/2024 G3) passed less than 0.1 AU from the Sun in January 2025 and briefly became a bright comet in southern evening skies, with a long curved tail. Its nucleus disintegrated after perihelion.
+
+## C/2025 A6
+Comet Lemmon was discovered at the Mount Lemmon Observatory in January 2025. In October 2025 it was a bright evening comet for northern observers, with a long, finely structured ion tail.
+
+## C/2025 R2
+Comet SWAN was spotted in September 2025 in images from the SWAN instrument on the SOHO spacecraft, around the time of its perihelion. It reached binocular visibility that month.
