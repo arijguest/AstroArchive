@@ -105,3 +105,41 @@ explicit-timezone priority and absent/invalid clocks. The application compiled
 against .NET Framework 4.8 references. The city timezone index covers all 236,003
 existing city choices and rebuilds byte-for-byte. Windows visual checks are
 provided in the workflow and remain pending in this Linux workspace.
+
+## Eclipses
+
+`Eclipses.cs` derives eclipse geometry from the same bundled Meeus Moon and Sun
+models; nothing is downloaded and no eclipse table is shipped.
+
+- **Solar:** the Moon and Sun are placed as seen from the capture or saved observing
+  location (lunar parallax reaches about a degree, so a site is required). Apparent
+  radii come from the topocentric distances. Obscuration is the overlapping area of
+  the two discs as a fraction of the Sun's disc; magnitude is the fraction of the
+  Sun's diameter covered, or the ratio of diameters once the eclipse is total or
+  annular, matching NASA's convention.
+- **Lunar:** the Moon's geocentric distance from the antisolar point is compared with
+  Earth's umbral and penumbral radii using Danjon's enlargement
+  (1.01 × lunar parallax ± solar semi-diameter + solar parallax). Coverage is the
+  fraction of the Moon's disc inside the umbra; umbral and penumbral magnitudes are
+  reported. No site is needed.
+
+Checks against NASA's Five Millennium Canon greatest-eclipse values (2017, 2022,
+2023 annular and 2024 total solar; 2022, 2023 partial/penumbral and 2025 lunar)
+agree within 0.005 magnitude for solar and 0.01 for lunar eclipses. A capture's
+eclipse is only as good as its clock: a timezone error moves the Moon by about
+half a degree per hour.
+
+Sun and Moon captures taken during an eclipse list under **Solar Eclipse** or
+**Lunar Eclipse** in the target list. This is a display grouping only; the stored
+target, folders and file names are unchanged. Capture details show the kind,
+coverage and magnitude, and the sky map adds a close-up of both discs to scale.
+
+## Daytime maps and Moon stacks
+
+Captures of the Sun, or taken while the Sun was up, use a daytime map with the Sun
+drawn beneath the Moon. Lunar, solar and planetary stacks often record a blank
+(0°, 0°) mount pointing; that is ignored in favour of the calculated position.
+A solar or lunar capture mode names the body when the target is unknown. Stacks
+without a usable clock use the median capture time of their subs in the same
+session or night. A body calculated below the horizon keeps its map and points to
+the capture timezone instead of disappearing.

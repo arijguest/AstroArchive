@@ -1,0 +1,687 @@
+# Curated overviews for targets astrophotographers commonly image.
+# "## ID" starts an entry and must match the information pack's object ID.
+# Plain lines form the overview; "Imaging:" and "Fact:" lines add those notes.
+# Distances are rounded published values and are given as approximations.
+# An entry without overview lines keeps the pack's reviewed overview.
+# "Not:" lists catalogue names the pack wrongly attaches to the object (comma separated).
+
+## M1
+Imaging: A small (about 7 × 5 arcmin) but bright target well placed on winter evenings. Hα reveals the red filament web and OIII the outer shell; a focal length above 800 mm shows the structure best.
+
+## M2
+One of the larger and richer globular clusters, M2 lies roughly 37,500 light-years away in Aquarius and holds around 150,000 stars. It is among the older globulars in the Milky Way, at roughly 13 billion years. Its bright, compact core and evenly falling halo make it a good test of focus and seeing.
+Imaging: An autumn target. Short sub-exposures keep the core from saturating; combine them with longer subs for the faint halo.
+
+## M3
+M3 is a large, bright globular cluster about 34,000 light-years away in Canes Venatici. It contains around half a million stars and is famous for its unusually high number of variable stars, more than 200 of them RR Lyrae pulsators. It sits high in the sky in spring for northern observers.
+Imaging: Resolves well with 400 mm or more. Keep sub-exposures short enough that the core is not clipped.
+
+## M4
+M4 is one of the nearest globular clusters to Earth, roughly 7,200 light-years away beside Antares in Scorpius. It is loosely concentrated, and a distinctive bar of stars crosses its centre. Its nearness made it the site of the first white dwarfs observed in a globular cluster.
+Imaging: Low for northern observers in summer, so image near the meridian. A wide field can include Antares and the colourful Rho Ophiuchi clouds.
+
+## M5
+M5 is a bright globular cluster about 24,500 light-years away in Serpens, roughly 13 billion years old. Its dense, slightly elliptical core and broad halo hold more than 100,000 stars, including over 100 known variables.
+Imaging: A late spring and summer target that rewards focal lengths above 500 mm. Moderate sub-exposures preserve star colour in the core.
+
+## M6
+The Butterfly Cluster is an open cluster about 1,600 light-years away in Scorpius. Its brightest members form a shape suggesting a butterfly's open wings, and the orange giant BM Scorpii stands out among its blue stars. It is around 100 million years old.
+Imaging: Very low for northern observers; a wide field with M7 nearby makes a rich summer Milky Way frame.
+
+## M7
+Ptolemy's Cluster, described by Ptolemy around 130 AD, is a large, bright open cluster about 1,000 light-years away in the tail of Scorpius. It spans more than a degree against the dense star fields toward the galactic centre and is about 200 million years old.
+Imaging: Best with short focal lengths. Its large size and the rich background suit a wide-field camera lens or small refractor.
+
+## M8
+The Lagoon Nebula is a giant star-forming cloud about 4,100 light-years away in Sagittarius, spanning roughly 100 light-years. A dark lane divides its glowing hydrogen, and the young cluster NGC 6530 lies within it. Near its centre, the bright Hourglass region is lit by the hot star Herschel 36.
+Imaging: Bright enough for a one-shot-colour camera, and it responds strongly to Hα. A wide field can pair it with the Trifid Nebula (M20) just to the north.
+
+## M9
+M9 is a globular cluster about 25,800 light-years away in Ophiuchus, one of the closest globulars to the centre of the Milky Way. Dust between us and the cluster dims and reddens one side of it.
+Imaging: Small; use at least 600 mm. The nearby dark nebula Barnard 64 adds interest in a wider field.
+
+## M10
+M10 is a bright globular cluster about 14,300 light-years away in Ophiuchus. It is fairly loosely concentrated, so its stars resolve readily, and it lies only a few degrees from its near twin, M12.
+Imaging: A summer target. 400–800 mm shows its structure; a wider field can capture M10 and M12 together.
+
+## M11
+The Wild Duck Cluster is one of the richest and most compact open clusters known, with nearly 3,000 stars about 6,200 light-years away in Scutum. Its brightest stars form a V-shape likened to a flight of ducks. It is roughly 250 million years old.
+Imaging: Sits in the bright Scutum Star Cloud, so a moderate focal length frames the cluster against a dense Milky Way background.
+
+## M12
+M12 is a loosely concentrated globular cluster about 16,000 light-years away in Ophiuchus. Studies suggest it has lost many of its low-mass stars to the gravity of the Milky Way.
+Imaging: A summer target close to M10; its open structure resolves well at moderate focal lengths.
+
+## M13
+The Great Hercules Cluster is the finest globular cluster of northern skies, about 22,000 to 25,000 light-years away with several hundred thousand stars. In 1974 the Arecibo radio telescope beamed a message toward it. The small galaxy NGC 6207 lies about half a degree away.
+Imaging: High in summer for northern observers. Use short to moderate subs to keep the core unsaturated; 600 mm or more resolves deep into the core.
+
+## M14
+M14 is a globular cluster about 30,000 light-years away in Ophiuchus. It has fewer bright stars than its neighbours and appears evenly bright, but it holds many variables, and a nova appeared in it in 1938.
+Imaging: Small and fairly faint; use a longer focal length and good seeing.
+
+## M15
+M15 is one of the densest globular clusters in the Milky Way, about 33,600 light-years away in Pegasus. Its core has undergone core collapse, and it contains the planetary nebula Pease 1, one of very few known inside a globular cluster.
+Imaging: An autumn target. Its intensely bright core needs short subs; longer subs bring out the outer halo.
+
+## M16
+The Eagle Nebula is a star-forming region about 6,000 to 7,000 light-years away in Serpens. Its young cluster, NGC 6611, illuminates the gas, and columns of dense gas and dust at its centre became famous as Hubble's 1995 "Pillars of Creation".
+Imaging: Excellent in narrowband: Hα, OIII and SII bring out the pillars. At 600 mm or more the pillars become a distinct subject.
+
+## M17
+The Omega (Swan) Nebula is one of the brightest star-forming regions in the Milky Way, about 5,500 light-years away in Sagittarius. Its bright bar of glowing gas, sculpted by hot young stars, has been compared to a swan or the Greek letter omega.
+Imaging: Bright and rewarding in Hα; OIII adds blue-green tones. A summer target that suits moderate focal lengths.
+
+## M18
+M18 is a small, sparse open cluster about 4,900 light-years away in Sagittarius, lying between the Omega Nebula (M17) and the Small Sagittarius Star Cloud (M24). It is young, roughly 30 million years old, and contains a few dozen bright blue stars set against a dense Milky Way background.
+Imaging: Best included in a wider field with M17 and M24 rather than imaged alone.
+
+## M19
+M19 is one of the most oblate globular clusters known, about 28,000 light-years away near the centre of the Milky Way in Ophiuchus. Its flattened appearance is partly caused by dust lanes dimming one side.
+Imaging: Low for northern observers; image near the meridian with moderate focal length.
+
+## M20
+The Trifid Nebula, about 4,100 to 5,200 light-years away in Sagittarius, combines three kinds of nebula: a red emission region, a blue reflection nebula to its north and dark lanes that divide the emission into three lobes.
+Imaging: Combine broadband for the blue reflection nebula with Hα for the emission. It frames well with the Lagoon Nebula.
+
+## M21
+M21 is a young open cluster about 4,250 light-years away in Sagittarius, just north-east of the Trifid Nebula. It is only about 5 million years old, and its brightest members are hot blue stars. Many of its stars are still young enough to be surrounded by traces of the gas from which they formed.
+Imaging: Easily framed with the Trifid Nebula (M20) at moderate focal lengths.
+
+## M22
+M22 is one of the brightest globular clusters, about 10,600 light-years away in Sagittarius. It was among the first globular clusters discovered and contains a small planetary nebula and two stellar-mass black hole candidates.
+Imaging: Its loose core resolves easily. Low for northern observers, so catch it near the meridian in summer.
+
+## M23
+M23 is a rich open cluster of around 150 stars about 2,150 light-years away in Sagittarius, roughly 300 million years old. Its stars are spread over an area about the size of the full Moon, with several orange giants among the blue-white members.
+Imaging: A wide summer field target against rich Milky Way star fields.
+
+## M24
+The Small Sagittarius Star Cloud is not a true cluster but a window through the Milky Way's dust, showing stars in a spiral arm about 10,000 light-years away. It contains the open cluster NGC 6603 and several dark nebulae.
+Imaging: Spans about 1.5 degrees; use short focal lengths. The dark nebulae Barnard 92 and 93 sit on its edge.
+
+## M25
+M25 (IC 4725) is a bright open cluster about 2,000 light-years away in Sagittarius, roughly 90 million years old. It contains the Cepheid variable star U Sagittarii, whose regular pulsation has been used to check the cluster's distance. Charles Messier added it to his list in 1764.
+Imaging: A wide summer target; short subs keep its bright stars tight.
+
+## M26
+M26 is a compact open cluster about 5,000 light-years away in Scutum, roughly 90 million years old. A curious gap in the number of stars near its centre may be caused by a dark cloud of interstellar dust lying in front of it.
+Imaging: Pairs well with the Scutum Star Cloud and M11 in a wide field.
+
+## M27
+The Dumbbell Nebula, about 1,360 light-years away in Vulpecula, was the first planetary nebula discovered, by Charles Messier in 1764. It is the expanding outer layers shed by a dying Sun-like star, and its central white dwarf is one of the largest known.
+Imaging: Bright and large for a planetary nebula. Hα and OIII bring out the faint outer halo beyond the familiar "apple core" shape.
+
+## M28
+M28 is a globular cluster about 18,000 light-years away in Sagittarius, near the lid of the Teapot. In 1987 it became the first globular cluster in which a millisecond pulsar was found, and it is now known to host more than a dozen pulsars.
+Imaging: A summer target near the Teapot's lid; a wider field can include M22.
+
+## M29
+M29 is a small open cluster about 4,000 light-years away in Cygnus, set in the dense Milky Way near Gamma Cygni (Sadr). Interstellar dust dims it considerably; without that dust it would appear several times brighter. It is roughly 10 million years old.
+Imaging: A wide field around Sadr captures M29 with the Butterfly Nebula (IC 1318) emission in Hα.
+
+## M30
+M30 is a globular cluster about 27,000 light-years away in Capricornus. Its core has undergone core collapse, packing stars extremely densely at the centre. It orbits the Milky Way in the opposite direction to most globular clusters and may have come from a captured dwarf galaxy.
+Imaging: Low in late summer and autumn for northern observers; short subs help with the bright core.
+
+## M31
+The Andromeda Galaxy is the nearest large spiral galaxy, about 2.5 million light-years away, and the most distant object easily seen with the unaided eye. It is larger than the Milky Way and is expected to merge with it in several billion years. Its companions M32 and M110 are visible beside it.
+Imaging: Spans about 3 degrees, so 300–500 mm frames the whole galaxy. Hα adds its pink star-forming regions; longer integrations reveal the faint outer disc.
+Fact: Edwin Hubble's 1920s observations of variable stars in Andromeda proved it lies far beyond the Milky Way.
+
+## M32
+M32 is a compact dwarf elliptical galaxy orbiting the Andromeda Galaxy, about 2.5 million light-years away. It is unusually dense, probably because tidal interactions with Andromeda stripped its outer stars.
+Imaging: Appears beside M31 in most framings; it can saturate in long exposures of the larger galaxy.
+
+## M33
+Imaging: Large (about 70 × 40 arcmin) but low in surface brightness, so it needs dark skies and long integrations. Hα brings out its many pink star-forming regions, including NGC 604.
+
+## M34
+M34 is an open cluster of around 400 stars about 1,500 light-years away in Perseus, roughly 200 to 250 million years old. It contains several white dwarfs, whose cooling ages help astronomers measure the age of the cluster independently.
+Imaging: An autumn target for wide fields; short subs keep its stars sharp.
+
+## M35
+M35 is a large, bright open cluster about 2,800 light-years away in Gemini. The more distant and much older cluster NGC 2158 appears beside it, making a striking contrast of colour and density.
+Imaging: Frame M35 and NGC 2158 together at moderate focal lengths in winter.
+
+## M36
+M36 is a young open cluster about 4,100 light-years away in Auriga, roughly 25 million years old. Many of its bright members are rapidly rotating blue stars, and it is similar in age and appearance to the Pleiades would be at that distance.
+Imaging: One of three Messier clusters in Auriga; a wide field captures M36, M37 and M38 together.
+
+## M37
+M37 is the richest of the three Auriga open clusters, about 4,500 light-years away, with several hundred stars spread over the size of the full Moon. It is about 350 to 500 million years old, old enough that its brightest stars include a number of orange and red giants.
+Imaging: Resolves into a dense field of stars at moderate focal lengths.
+
+## M38
+M38 is an open cluster about 4,200 light-years away in Auriga, roughly 220 million years old. Its brightest stars form a cross or the Greek letter pi. The smaller and more distant cluster NGC 1907 lies about half a degree away.
+Imaging: A wide winter field can include the Flaming Star Nebula (IC 405) and IC 410 with the Auriga clusters.
+
+## M39
+M39 is a large, loose open cluster only about 1,000 light-years away in Cygnus, roughly 300 million years old. Its few dozen bright stars spread over an area larger than the full Moon, set against the rich Milky Way near the North America Nebula.
+Imaging: Best with short focal lengths against the Cygnus Milky Way.
+
+## M40
+M40 is not a deep-sky object but a double star, Winnecke 4, in Ursa Major. Messier catalogued it while looking for a nebula reported in the area. The two stars are not physically related.
+Imaging: The galaxy NGC 4290 is nearby; a moderate focal length makes a field of both.
+
+## M41
+M41 is a bright open cluster about 2,300 light-years away in Canis Major, a few degrees south of Sirius. It contains around 100 stars, including several orange giants.
+Imaging: A winter target; a wide field can include Sirius.
+
+## M42
+The Orion Nebula is the nearest region of massive star formation, about 1,350 light-years away. Its gas is lit by the young Trapezium stars at its heart, and it is part of a much larger molecular cloud spanning the Orion constellation.
+Imaging: Its very bright core needs short exposures blended with long ones (an HDR combination) to keep the Trapezium visible. Hα reveals the faint outer loops; M43 lies just to the north.
+Fact: The Orion Nebula is visible to the unaided eye as the middle "star" of Orion's sword.
+
+## M43
+De Mairan's Nebula (M43) is a separate part of the Orion Nebula complex, about 1,350 light-years away, divided from M42 by a dark lane of dust. It is lit mainly by the young, massive star NU Orionis and has its own small region of ionised hydrogen, giving it a comma shape.
+Imaging: Normally captured in the same frame as M42.
+
+## M44
+The Beehive Cluster (Praesepe) is one of the nearest open clusters, about 600 light-years away in Cancer. Its 1,000 or so stars are about 600 million years old, and planets have been found orbiting some of them.
+Imaging: Spans more than a degree; use short focal lengths and short subs.
+
+## M45
+The Pleiades are a young open cluster about 440 light-years away in Taurus, roughly 100 million years old. Their blue reflection nebulosity is not left over from their formation; the cluster is passing through an unrelated cloud of interstellar dust.
+Imaging: The faint dust needs dark skies and long integration in broadband. Bright stars create diffraction spikes or halos, so watch for reflections from filters.
+
+## M46
+M46 is a rich open cluster about 5,000 light-years away in Puppis. The planetary nebula NGC 2438 appears within it but lies at a different distance and is not a member.
+Imaging: A moderate focal length captures the cluster and the small ring of NGC 2438.
+
+## M47
+M47 is a bright, loose open cluster about 1,600 light-years away in Puppis, roughly 80 million years old. It appears close to the richer M46, though the two are at very different distances. Messier recorded its position incorrectly, and it was identified as NGC 2422 only in 1959.
+Imaging: A wide field shows M46 and M47 together in late winter.
+
+## M48
+M48 is a large open cluster about 1,500 light-years away in Hydra, roughly 300 million years old, with around 80 stars brighter than 13th magnitude. Messier recorded its position incorrectly, so for many years it was considered a "missing" Messier object until it was identified as NGC 2548.
+Imaging: A large, loose cluster for short focal lengths.
+
+## M49
+M49 is a giant elliptical galaxy about 56 million light-years away and the brightest member of the Virgo Cluster. It was the first member of that cluster to be discovered, in 1771, and is surrounded by thousands of globular clusters. Its gravity is pulling in the small irregular galaxy UGC 7636.
+Imaging: A spring target that shows a bright, smooth glow; longer integrations reveal faint neighbouring galaxies.
+
+## M50
+M50 is an open cluster about 3,000 light-years away in Monoceros, roughly 130 million years old. Its brightest stars form a heart-shaped outline, and a conspicuous red giant lies near its centre.
+Imaging: A winter target in a rich Milky Way field.
+
+## M51
+The Whirlpool Galaxy is a grand-design spiral about 23 to 31 million light-years away in Canes Venatici. It is interacting with its smaller companion, NGC 5195, whose gravity has enhanced the Whirlpool's prominent spiral arms and star formation.
+Imaging: Best at 800 mm or longer. Long integrations reveal the faint tidal debris around NGC 5195; Hα highlights star-forming knots in the arms.
+
+## M52
+M52 is a rich open cluster about 5,000 light-years away in Cassiopeia, roughly 35 to 60 million years old. It sits in a dense Milky Way field less than a degree from the Bubble Nebula (NGC 7635), and a bright yellow giant stands out on its south-western edge.
+Imaging: A moderate field captures M52 and the Bubble Nebula together, especially in Hα.
+
+## M53
+M53 is one of the more distant Messier globular clusters, about 58,000 light-years away in Coma Berenices. The diffuse globular NGC 5053 lies about a degree away.
+Imaging: A spring target that pairs with NGC 5053 in a wider field.
+
+## M54
+M54 is a dense globular cluster about 87,000 light-years away. It belongs to the Sagittarius Dwarf Spheroidal Galaxy, which the Milky Way is absorbing, making it the first globular cluster recognised as extragalactic.
+Imaging: Small and concentrated; needs a long focal length and low altitude conditions to resolve.
+
+## M55
+M55 is a large, loosely concentrated globular cluster about 17,600 light-years away in Sagittarius, about 100 light-years across. Its sparse core lets it resolve readily into individual stars, and it contains many "blue stragglers", stars rejuvenated by mergers or mass transfer.
+Imaging: Low for northern observers; its open structure resolves well at moderate focal lengths.
+
+## M56
+M56 is a globular cluster about 33,000 light-years away in Lyra, set in a rich Milky Way field between Albireo and Sulafat. It is relatively loose and faint, and is thought to have been captured from a dwarf galaxy that merged with the Milky Way.
+Imaging: A summer target; the surrounding star field rewards a moderate focal length.
+
+## M57
+The Ring Nebula is a planetary nebula about 2,300 light-years away in Lyra: the glowing outer layers of a dying star, seen nearly end-on as a ring. Deep images show faint outer loops beyond the bright ring.
+Imaging: Small (about 1.5 arcmin), so a long focal length and good seeing help. Hα and OIII bring out the faint halo.
+
+## M58
+M58 is a barred spiral galaxy about 62 million light-years away and one of the brightest galaxies in the Virgo Cluster. It has a prominent bar and a faint inner ring, and two supernovae have been observed in it.
+Imaging: Frame it with nearby M59 and M60 in a spring Virgo field.
+
+## M59
+M59 is an elliptical galaxy about 60 million light-years away in the Virgo Cluster. It rotates unusually fast for an elliptical and hosts a supermassive black hole estimated at hundreds of millions of solar masses.
+Imaging: Pairs with M60 in the same field.
+
+## M60
+M60 is a giant elliptical galaxy about 55 million light-years away and one of the largest in the Virgo Cluster. It forms an apparent pair, Arp 116, with the spiral galaxy NGC 4647, though the two may not yet be interacting strongly. Its central black hole is among the most massive known nearby.
+Imaging: A moderate focal length shows M60 with NGC 4647 and M59.
+
+## M61
+M61 is one of the largest spiral galaxies in the Virgo Cluster, about 52 million light-years away. It is a starburst galaxy with prominent, knotted spiral arms, and at least eight supernovae have been observed in it, among the most in any galaxy.
+Imaging: Face-on with prominent arms; 800 mm or more shows its structure.
+
+## M62
+M62 is a globular cluster about 22,000 light-years away in Ophiuchus, close to the centre of the Milky Way. Tidal forces from the galactic centre have distorted it into an irregular shape, and it contains an unusually large number of variable stars and X-ray binaries.
+Imaging: Low for northern observers; a summer target near the meridian.
+
+## M63
+The Sunflower Galaxy is a flocculent spiral about 29 million light-years away in Canes Venatici. Its short, patchy spiral segments resemble a sunflower, and deep images show a faint stellar stream around it.
+Imaging: Long integrations reveal its faint outer halo and the stellar stream.
+
+## M64
+The Black Eye Galaxy is a spiral about 17 million light-years away in Coma Berenices. A dark band of dust in front of its bright nucleus gives it its name, and its outer gas rotates opposite to its inner disc, a sign of a past merger.
+Imaging: Bright and compact; 800 mm or more shows the dust lane clearly.
+
+## M65
+M65 is a spiral galaxy about 35 million light-years away and part of the Leo Triplet with M66 and NGC 3628. Its tightly wound arms contain mostly older stars, with little ongoing star formation, though dust lanes are prominent on one side.
+Imaging: A field of about 1 degree frames the whole Leo Triplet in spring.
+
+## M66
+M66 is a spiral galaxy in the Leo Triplet, about 35 million light-years away. Gravitational interaction with its neighbours has distorted its spiral arms and displaced its core. It is the brightest member of the triplet and has hosted several supernovae.
+Imaging: Bright and detailed; included with M65 and NGC 3628 in a triplet framing.
+
+## M67
+M67 is one of the oldest known open clusters, about 4 billion years old, about 2,800 light-years away in Cancer. Its stars resemble the Sun in age and composition, making it a key reference for stellar evolution.
+Imaging: A rich, colourful cluster for moderate focal lengths.
+
+## M68
+M68 is a globular cluster about 33,000 light-years away in Hydra. It is metal-poor and very old, and appears to orbit the Milky Way in a direction opposite to most clusters, suggesting it may have come from a dwarf galaxy absorbed long ago.
+Imaging: Low for northern observers in spring.
+
+## M69
+M69 is a globular cluster about 29,700 light-years away in Sagittarius, close to the Teapot asterism and near the centre of the Milky Way. It is unusually rich in heavier elements for a globular cluster.
+Imaging: Small and low for northern observers; a wider field can include M70.
+
+## M70
+M70 is a compact globular cluster about 29,300 light-years away in Sagittarius, near the centre of the Milky Way. Its core has undergone core collapse. Comet Hale-Bopp was discovered in 1995 while passing close to it in the sky.
+Imaging: Frame it with M69 in a summer field.
+
+## M71
+M71 is a loosely concentrated globular cluster about 13,000 light-years away in Sagitta. It was long thought to be a dense open cluster because it lacks a strongly concentrated core, but its age of about 10 billion years and its composition mark it as a globular.
+Imaging: A summer target in a rich Milky Way field.
+
+## M72
+M72 is one of the more distant Messier globular clusters, about 55,000 light-years away in Aquarius, on the far side of the Milky Way's centre. It is fairly loose and contains a number of RR Lyrae variable stars.
+Imaging: Small and faint; needs a long focal length.
+
+## M73
+M73 is an asterism of four stars in Aquarius rather than a true cluster. Measurements of the stars' distances and motions in the 2000s showed they lie at different distances and are unrelated, appearing grouped only by chance alignment.
+Imaging: Usually included in a wider field with M72.
+
+## M74
+The Phantom Galaxy is a grand-design spiral about 32 million light-years away in Pisces, seen face-on. Its low surface brightness makes it one of the more challenging Messier objects to see visually.
+Imaging: Needs dark skies and long integrations; Hα highlights star-forming regions along its arms.
+
+## M75
+M75 is one of the most concentrated globular clusters, about 67,500 light-years away in Sagittarius, on the far side of the galactic centre. Most of its several hundred thousand stars are packed into a tiny, bright core.
+Imaging: Small and dense; best with a long focal length.
+
+## M76
+The Little Dumbbell Nebula is a planetary nebula about 2,500 to 3,400 light-years away in Perseus and among the faintest Messier objects. A bright central bar is the dying star's ejected ring seen edge-on, with fainter lobes extending to either side.
+Imaging: Hα and OIII bring out the faint outer loops beyond its bright central bar.
+
+## M77
+M77 is a barred spiral galaxy about 47 million light-years away in Cetus. Its very bright, active nucleus made it one of the first Seyfert galaxies identified, powered by gas falling onto a supermassive black hole. It is one of the largest galaxies in the Messier catalogue.
+Imaging: An autumn target; long integrations reveal its faint outer ring.
+
+## M78
+M78 is the brightest reflection nebula in the sky, about 1,350 light-years away in Orion. Dust scatters blue light from nearby young stars, and the region is part of the Orion B molecular cloud.
+Imaging: Broadband suits its blue reflection; long integrations reveal surrounding dark dust and Barnard's Loop nearby.
+
+## M79
+M79 is a globular cluster about 41,000 light-years away in Lepus, unusual for being on the opposite side of the sky from the galactic centre. It may have originated in the Canis Major dwarf galaxy, which is being absorbed by the Milky Way.
+Imaging: A winter target, low for northern observers.
+
+## M80
+M80 is one of the densest globular clusters, about 32,600 light-years away in Scorpius, between Antares and Graffias. In 1860 a nova, T Scorpii, briefly outshone the whole cluster, and the cluster is rich in blue stragglers.
+Imaging: Small and dense; a long focal length helps resolve it.
+
+## M81
+Bode's Galaxy is a grand-design spiral about 12 million light-years away in Ursa Major, one of the brightest galaxies in the sky. Gravitational interaction with M82 and NGC 3077 has created streams of hydrogen around the group.
+Imaging: Frames with M82 at 400–600 mm. Very long integrations reveal the faint Integrated Flux Nebula in the foreground.
+
+## M82
+The Cigar Galaxy is a starburst galaxy about 12 million light-years away in Ursa Major. Interaction with M81 triggered intense star formation, driving a superwind of hydrogen out of its core.
+Imaging: Hα reveals the red filaments of its galactic wind. Frames well with M81.
+
+## M83
+The Southern Pinwheel is a barred spiral galaxy about 15 million light-years away in Hydra, one of the nearest and brightest barred spirals. It is a starburst galaxy with prominent dust lanes, and six supernovae have been recorded in it.
+Imaging: Low for northern observers; a spring target with bright, well-defined arms.
+
+## M84
+M84 is a lenticular galaxy about 60 million light-years away at the western end of Markarian's Chain in the Virgo Cluster. Its active core launches two radio jets, and dust lanes cross its centre.
+Imaging: A field of about 1.5 degrees captures Markarian's Chain with M84 and M86.
+
+## M85
+M85 is a lenticular galaxy about 60 million light-years away in Coma Berenices, on the northern edge of the Virgo Cluster. Faint shells and ripples around it show it absorbed a smaller galaxy a few billion years ago.
+Imaging: Smooth and bright; the spiral NGC 4394 lies nearby.
+
+## M86
+M86 is a lenticular or elliptical galaxy about 52 million light-years away in Markarian's Chain. It is moving toward us at about 240 km/s, one of the few galaxies with a blueshift, and ram pressure from cluster gas is stripping a long tail of hot gas from it.
+Imaging: Captured with M84 in a Markarian's Chain framing.
+
+## M87
+M87 (Virgo A) is a giant elliptical galaxy about 54 million light-years away at the centre of the Virgo Cluster. A jet of particles extends from its core, and its supermassive black hole was the first ever imaged, by the Event Horizon Telescope in 2019.
+Imaging: The jet can be captured at long focal lengths in good seeing; many globular clusters surround it.
+
+## M88
+M88 is a multi-arm spiral galaxy about 47 million light-years away in Coma Berenices, one of the brightest spirals in the Virgo Cluster. It is moving away from us quickly and is thought to be falling through the cluster for the first time.
+Imaging: Inclined with well-defined arms; a spring target.
+
+## M89
+M89 is an elliptical galaxy about 50 million light-years away in the Virgo Cluster. It is almost perfectly round in images, and deep exposures reveal faint shells and plumes from past mergers.
+Imaging: Deep images show faint shells around it.
+
+## M90
+M90 is a large spiral galaxy in the Virgo Cluster. It is approaching us, and ram pressure from the cluster's hot gas has stripped much of the gas from its disc, leaving its arms smooth and with little ongoing star formation.
+Imaging: Inclined and elongated; a spring target.
+
+## M91
+M91 is a barred spiral galaxy about 63 million light-years away in Coma Berenices. Messier misrecorded its position, and it was identified as NGC 4548 only in 1969.
+Imaging: Small; needs a long focal length.
+
+## M92
+M92 is a bright globular cluster about 26,700 light-years away in Hercules and one of the oldest known, at roughly 13 billion years. It contains very few heavy elements, making it a reference for the earliest generations of stars.
+Imaging: Often overlooked beside M13, but a fine summer target.
+
+## M93
+M93 is an open cluster about 3,600 light-years away in Puppis, roughly 100 million years old. Its brightest stars are blue giants, and its overall shape is often compared to a wedge or arrowhead.
+Imaging: A winter target, low for northern observers.
+
+## M94
+M94 is a spiral galaxy about 16 million light-years away in Canes Venatici, with a bright inner ring of intense star formation and a faint outer ring. Studies suggest it contains surprisingly little dark matter compared with most spirals.
+Imaging: Long integrations reveal the faint outer ring.
+
+## M95
+M95 is a barred spiral galaxy about 33 million light-years away in Leo, part of the Leo I group. A bright ring of star formation surrounds its core, and the supernova SN 2012aw appeared in it.
+Imaging: Frames with M96 and M105 in a spring field.
+
+## M96
+M96 is a spiral galaxy about 35 million light-years away and the brightest member of the Leo I group. Its asymmetric arms and offset core suggest interaction with its neighbours.
+Imaging: Pairs with M95 and M105.
+
+## M97
+The Owl Nebula is a planetary nebula about 2,000 light-years away in Ursa Major, roughly 8,000 years old. Two darker patches give it the appearance of an owl's eyes; they are a cylindrical cavity in the shell seen at an angle.
+Imaging: Hα and OIII show its structure. A moderate field includes the galaxy M108 nearby.
+
+## M98
+M98 is a spiral galaxy in Coma Berenices seen nearly edge-on. It is one of the few galaxies in the Virgo Cluster region approaching us, so its distance is uncertain, but it is thought to be about 45 to 60 million light-years away.
+Imaging: Elongated and fairly faint; a long focal length helps.
+
+## M99
+M99 is a spiral galaxy about 50 million light-years away in Coma Berenices. One of its arms is noticeably extended, probably because of a close encounter with another galaxy, and it has a high rate of star formation.
+Imaging: Face-on; good for detailed structure at long focal lengths.
+
+## M100
+M100 is a grand-design spiral galaxy about 55 million light-years away in Coma Berenices and one of the brightest in the Virgo Cluster. Hubble images of its Cepheid variables helped refine the cosmic distance scale in the 1990s.
+Imaging: Face-on and detailed; Hα highlights its star-forming regions.
+
+## M101
+The Pinwheel Galaxy is a large face-on spiral about 21 million light-years away in Ursa Major, nearly twice the diameter of the Milky Way. It hosted the nearby supernovae SN 2011fe and SN 2023ixf.
+Imaging: Large but faint; long integrations reveal its outer arms. Hα highlights its many pink HII regions.
+
+## M102
+The identity of M102 is disputed; it is most often taken to be the Spindle Galaxy, NGC 5866, a lenticular galaxy about 50 million light-years away seen edge-on, with a crisp dust lane.
+Imaging: Small; a long focal length shows the dust lane.
+
+## M103
+M103 is a young open cluster about 10,000 light-years away in Cassiopeia, roughly 25 million years old. It contains a prominent red giant among its bright blue stars.
+Imaging: A wide field can include several other Cassiopeia clusters.
+
+## M104
+The Sombrero Galaxy is a spiral about 31 million light-years away in Virgo, seen nearly edge-on. A prominent dust lane and a large bright bulge give it the look of a hat.
+Imaging: Bright; a long focal length shows the dust lane.
+
+## M105
+M105 is an elliptical galaxy about 32 million light-years away in Leo, part of the Leo I group. It hosts a supermassive black hole of about 200 million solar masses and lies inside a huge ring of hydrogen gas, the Leo Ring.
+Imaging: Frames with M95 and M96, and the nearby NGC 3384 and NGC 3389.
+
+## M106
+M106 is a spiral galaxy about 24 million light-years away in Canes Venatici. Its active nucleus produces extra "anomalous arms" visible in Hα and X-rays, and water masers near its centre have provided one of the most precise geometric distances to a galaxy.
+Imaging: Hα reveals the anomalous arms; long integrations reveal the faint outer disc.
+
+## M107
+M107 is a loosely concentrated globular cluster about 21,000 light-years away in Ophiuchus. Dark dust lanes cross its outer regions, and it was the last globular cluster added to the Messier list.
+Imaging: A summer target near the meridian.
+
+## M108
+The Surfboard Galaxy is a barred spiral seen nearly edge-on, about 46 million light-years away in Ursa Major. Its mottled disc shows many dust lanes and star-forming regions, but no distinct bulge.
+Imaging: Frames with the Owl Nebula (M97) in the same field.
+
+## M109
+M109 is a barred spiral galaxy about 60 million light-years away in Ursa Major, close to the star Phecda. Its prominent bar and ring-shaped arms make it the brightest member of a small group of galaxies.
+Imaging: Keep Phecda just outside the frame to avoid reflections.
+
+## M110
+M110 is a dwarf elliptical galaxy and a satellite of the Andromeda Galaxy, about 2.5 million light-years away. Unlike most dwarf ellipticals it contains some dust and young stars.
+Imaging: Appears in most framings of M31.
+
+## NGC 7000
+The North America Nebula is a large emission nebula about 1,600 to 2,600 light-years away in Cygnus, whose outline resembles the North American continent. A dark cloud of dust (LDN 935) separates it from the Pelican Nebula, IC 5070.
+Imaging: Spans about 2 degrees; ideal for short focal lengths with Hα or a dual-band filter. Pairs naturally with the Pelican Nebula.
+
+## IC 5070
+The Pelican Nebula is an emission nebula in Cygnus beside the North America Nebula, part of the same cloud of ionised hydrogen. Its bright ionisation front is sculpted into pillars and ridges.
+Imaging: Narrowband shows the ionisation fronts. Frame with NGC 7000 at short focal lengths, or alone at 500 mm or more.
+
+## IC 1805
+The Heart Nebula is an emission nebula about 7,500 light-years away in Cassiopeia, part of a large star-forming complex with the Soul Nebula. Its central cluster, Melotte 15, contains a few very massive stars whose radiation and winds have carved out its heart-shaped cavity.
+Imaging: Large and responsive to Hα and OIII. Pair it with the Soul Nebula (IC 1848) for a "Heart and Soul" mosaic.
+
+## IC 1848
+The Soul Nebula is an emission nebula about 7,500 light-years away in Cassiopeia, beside the Heart Nebula. Young clusters inside it have sculpted pillars and globules where new stars are forming.
+Imaging: Narrowband reveals its bright pillars; frame with the Heart Nebula in a wide field.
+
+## NGC 6888
+The Crescent Nebula is a shell of gas about 5,000 light-years away in Cygnus, blown off by the massive Wolf-Rayet star WR 136 at its centre. The star's strong wind is sweeping up material it shed earlier as a red supergiant, forming a bright inner shell and a fainter outer OIII bubble.
+Imaging: Hα shows the bright crescent; OIII reveals a faint blue-green outer shell that needs long integration.
+
+## NGC 6960
+The Western Veil Nebula is part of the Cygnus Loop, a supernova remnant about 2,400 light-years away from an explosion roughly 10,000 to 20,000 years ago. It passes behind the bright star 52 Cygni, which is not related to it.
+Imaging: Hα and OIII bring out its fine filaments. A wide field can capture the whole Cygnus Loop.
+
+## NGC 6992
+The Eastern Veil Nebula is the brightest part of the Cygnus Loop, a supernova remnant about 2,400 light-years away from an explosion roughly 10,000 to 20,000 years ago.
+Imaging: Dual-band filters capture its red and blue-green filaments.
+
+## NGC 2237
+NGC 2237 is part of the Rosette Nebula, an emission nebula about 5,000 light-years away in Monoceros. The young cluster NGC 2244 at its centre has blown a cavity in the gas.
+Imaging: Large (over a degree) and bright in Hα; narrowband shows its dark globules.
+
+## NGC 2244
+NGC 2244 is the young open cluster at the centre of the Rosette Nebula in Monoceros, about 5,000 light-years away and only a few million years old. Its hot stars create the central cavity and illuminate the surrounding nebula.
+Imaging: Capture with the Rosette Nebula (NGC 2237) in Hα or a dual-band filter.
+
+## IC 434
+Not: Flame Nebula
+IC 434 is an emission nebula about 1,400 light-years away in Orion, the glowing background against which the dark Horsehead Nebula (Barnard 33) is seen. It is lit by the nearby multiple star Sigma Orionis and fades toward the east, where it meets the dark cloud.
+Imaging: Hα shows IC 434 and the Horsehead; the Flame Nebula (NGC 2024) lies nearby.
+
+## B 33
+The Horsehead Nebula is a cloud of dark dust about 1,400 light-years away in Orion, silhouetted against the glowing hydrogen of IC 434. Its distinctive shape, about 3.5 light-years tall, is part of the larger Orion B molecular cloud and is slowly being eroded by radiation from Sigma Orionis.
+Imaging: Hα gives the best contrast; the nearby Flame Nebula (NGC 2024) and Alnitak frame well together.
+
+## NGC 2024
+The Flame Nebula is an emission nebula about 1,400 light-years away in Orion, beside Alnitak, the easternmost star of Orion's Belt. Dark dust lanes divide its glowing gas, and a young cluster of stars is hidden within it.
+Imaging: Bright; frame with the Horsehead Nebula and keep Alnitak's glare under control.
+
+## IC 1396
+IC 1396 is a large emission nebula and young cluster about 2,400 light-years away in Cepheus, spanning about 3 degrees. Its best-known feature is the Elephant's Trunk Nebula, a dark globule sculpted by radiation from the hot star HD 206267 at the region's centre.
+Imaging: Spans about 3 degrees; narrowband shows the Elephant's Trunk well.
+
+## NGC 7635
+The Bubble Nebula is a shell of gas about 7,000 to 8,000 light-years away in Cassiopeia, inflated by the fast stellar wind of the massive young star BD+60 2522. The bubble is about 7 light-years across and sits inside a larger cloud of glowing hydrogen.
+Imaging: Narrowband shows the shell; M52 is nearby.
+
+## NGC 281
+The Pacman Nebula is an emission nebula about 9,500 light-years away in Cassiopeia, named for a dark lane that resembles the open mouth of the video-game character. It is lit by the young cluster IMC 1 and contains dark Bok globules, dense clumps that may be collapsing to form stars.
+Imaging: Narrowband shows its globules and ionisation fronts.
+
+## IC 405
+The Flaming Star Nebula is an emission and reflection nebula about 1,500 light-years away in Auriga. It is lit by AE Aurigae, a hot runaway star ejected from the Orion region millions of years ago and now passing through the cloud.
+Imaging: Pair with IC 410 in a wide field.
+
+## IC 410
+IC 410 is an emission nebula about 12,000 light-years away in Auriga, surrounding the young cluster NGC 1893. It contains the "Tadpoles", dense streamers of gas whose tails point away from the cluster's hot stars.
+Imaging: Narrowband reveals the Tadpoles; pairs with IC 405.
+
+## NGC 1499
+The California Nebula is a large emission nebula about 1,000 light-years away in Perseus, whose shape resembles the US state of California. It is energised by Xi Persei, a hot, massive star, and spans about 2.5 degrees of sky.
+Imaging: Spans about 2.5 degrees; ideal for short focal lengths with Hα.
+
+## NGC 7293
+The Helix Nebula is one of the nearest planetary nebulae, about 650 light-years away in Aquarius, and appears about half the width of the full Moon. A dying Sun-like star has shed its outer layers into nested rings, and close-up images show thousands of comet-shaped knots where dense gas resists the star's radiation. Its central white dwarf is the exposed core of the original star.
+Imaging: Large but low in surface brightness and low in the sky for northern observers in autumn. Hα and OIII show the red outer ring and blue-green interior; long integrations reveal faint outer loops.
+
+## NGC 253
+The Sculptor Galaxy (Silver Coin) is a bright, dusty starburst spiral about 11 million light-years away and the dominant member of the Sculptor Group. Caroline Herschel discovered it in 1783. Intense star formation in its inner disc drives gas out of the galaxy.
+Imaging: Large (about 27 × 7 arcmin) and bright, but low for northern observers; image near the meridian in autumn. Its mottled dust lanes reward longer focal lengths.
+
+## NGC 891
+NGC 891 is a spiral galaxy seen exactly edge-on, about 30 million light-years away in Andromeda. It is often described as a close analogue of the Milky Way. Its thin central dust lane is fringed with filaments of dust rising above and below the disc, lifted by star formation and supernovae.
+Imaging: Faint and slender (about 13 × 3 arcmin); a focal length above 800 mm and long integrations show the dust filaments.
+
+## NGC 4565
+The Needle Galaxy is a large spiral seen almost exactly edge-on, about 40 million light-years away in Coma Berenices. A sharp dust lane runs its full length and a small bulge rises at its centre. It is one of the finest edge-on galaxies in the northern sky.
+Imaging: About 16 arcmin long; a focal length of 800 mm or more shows the dust lane and the peanut-shaped bulge. A spring target.
+
+## NGC 6946
+The Fireworks Galaxy is a face-on spiral about 25 million light-years away on the border of Cepheus and Cygnus. It is named for its high rate of supernovae: ten have been recorded since 1917. Its light is dimmed by dust in the Milky Way's plane.
+Imaging: Hα highlights its many star-forming regions. The open cluster NGC 6939 lies about 40 arcmin away, making a classic pairing.
+
+## NGC 7331
+NGC 7331 is a spiral galaxy about 40 million light-years away in Pegasus, often compared to the Milky Way in size and structure. Several small background galaxies nearby are sometimes called the "Deer Lick Group". The compact galaxy group Stephan's Quintet lies about half a degree to the south-west.
+Imaging: A moderate focal length frames NGC 7331 and Stephan's Quintet together in autumn.
+
+## NGC 869
+NGC 869 (h Persei) is one half of the Double Cluster in Perseus, about 7,500 light-years away. Its stars are only about 14 million years old and include many hot blue giants, with a few red supergiants.
+Imaging: The Double Cluster spans about a degree; frame NGC 869 and NGC 884 together at short focal lengths with short subs to preserve star colour.
+
+## NGC 884
+NGC 884 (chi Persei) is the second half of the Double Cluster in Perseus, at a similar distance and age to NGC 869. It contains several conspicuous orange-red supergiants.
+Imaging: Frame with NGC 869 at short focal lengths; the colour contrast between blue and red supergiants is a highlight.
+
+## NGC 3372
+The Carina Nebula is one of the largest and brightest nebulae in the sky, about 7,500 light-years away and several times larger than the Orion Nebula. It contains Eta Carinae, a massive unstable star system that brightened dramatically in the 1840s, as well as the Keyhole Nebula and the pillar known as Mystic Mountain.
+Imaging: A southern target spanning about 2 degrees. Narrowband or dual-band filters reveal its complex structure; Eta Carinae and the Homunculus need short exposures.
+
+## IC 443
+The Jellyfish Nebula is a supernova remnant about 5,000 light-years away in Gemini, between the stars Eta and Mu Geminorum. The expanding blast wave is colliding with a nearby molecular cloud, producing its bright, curved filaments.
+Imaging: Hα and OIII show its rim and filaments; keep the bright star Propus (Eta Geminorum) just inside or outside the frame to control glare.
+
+## NGC 7023
+The Iris Nebula is a reflection nebula about 1,300 light-years away in Cepheus, lit by the young star HD 200775. Dust scatters its blue starlight, and the nebula sits within a large region of dark dust.
+Imaging: Broadband suits its blue reflection. Long integrations from dark skies reveal the surrounding brown and grey dust clouds.
+
+## NGC 2359
+Thor's Helmet is a bubble of gas about 12,000 to 15,000 light-years away in Canis Major, inflated by the strong wind of the Wolf-Rayet star WR 7. Its winged shape is the source of the name.
+Imaging: OIII shows the blue-green helmet and Hα the surrounding filaments. A winter target, low for northern observers.
+
+## NGC 6543
+The Cat's Eye Nebula is a planetary nebula about 3,300 light-years away in Draco, with a complex structure of nested shells, jets and knots. In 1864 William Huggins found its spectrum consisted of emission lines, showing for the first time that such nebulae are glowing gas.
+Imaging: The bright core is small; a long focal length and short subs show it, while long Hα and OIII integrations reveal its faint outer halo.
+
+## NGC 2392
+The Eskimo (Clown Face) Nebula is a planetary nebula about 5,000 light-years away in Gemini. An inner bubble is surrounded by a ring of comet-shaped filaments that resemble a fur hood.
+Imaging: Small and bright; a long focal length and good seeing show its structure.
+
+## NGC 5128
+Centaurus A is a peculiar galaxy about 12 million light-years away, among the nearest active galaxies. A broad dust lane crosses its elliptical body, the remains of a merger with a spiral galaxy, and its supermassive black hole powers radio jets.
+Imaging: A southern target; deep images reveal faint shells of stars around it.
+
+## NGC 4631
+The Whale Galaxy is an edge-on spiral about 25 million light-years away in Canes Venatici. Interaction with its neighbours has distorted it, and it has a large halo of hot gas.
+Imaging: Frame with the companion NGC 4627 and the bent Hockey Stick Galaxy (NGC 4656) in one field.
+
+## NGC 3628
+NGC 3628, sometimes called the Hamburger Galaxy, is an edge-on spiral in the Leo Triplet about 35 million light-years away. Interaction with M65 and M66 has drawn out a faint tidal tail hundreds of thousands of light-years long.
+Imaging: Frame with M65 and M66 in spring. Very long integrations reveal the faint tidal tail.
+
+## IC 5146
+The Cocoon Nebula is an emission and reflection nebula about 4,000 light-years away in Cygnus. It lies at the end of a long dark nebula, Barnard 168, making a striking contrast.
+Imaging: Broadband captures both the nebula and the dark lane; a moderate focal length frames them together.
+
+## SH2-129
+The Flying Bat Nebula is a large emission nebula in Cepheus. Within it lies the much fainter Squid Nebula (Ou4), discovered in 2011 by the French amateur astrophotographer Nicolas Outters and visible almost only in OIII.
+Imaging: The Squid needs very long OIII integration; combine with Hα for the Flying Bat.
+
+## IC 2118
+The Witch Head Nebula is a faint reflection nebula about 900 light-years away in Eridanus, lit by Rigel. Its profile resembles a witch's head, and its blue colour comes from dust scattering Rigel's light.
+Imaging: Spans several degrees; use a short focal length and dark skies.
+
+## NGC 6188
+The Fighting Dragons of Ara is an emission nebula about 4,000 light-years away in Ara, sculpted by the young cluster NGC 6193. Its bright rims are being eroded by the cluster's massive stars.
+Imaging: A southern target, rich in narrowband detail.
+
+## NGC 2070
+The Tarantula Nebula is the most active star-forming region in the Local Group, in the Large Magellanic Cloud about 160,000 light-years away. Its central cluster, R136, contains some of the most massive stars known, and supernova SN 1987A occurred nearby.
+Imaging: A southern target; narrowband shows its filaments, and a wide field includes the surrounding LMC.
+
+## NGC 7380
+The Wizard Nebula is an emission nebula and young open cluster about 7,000 light-years away in Cepheus. Its glowing gas and dark lanes form the outline of a figure in a wizard's hat.
+Imaging: Narrowband shows the Wizard's outline and pillars.
+
+## NGC 2264
+NGC 2264 is a star-forming region about 2,500 light-years away in Monoceros. It includes the Christmas Tree Cluster, the dark Cone Nebula at its southern tip and the Fox Fur Nebula.
+Imaging: Hα and broadband together show the Cone, the Fox Fur and the blue reflection around S Monocerotis.
+
+## IC 63
+The Ghost of Cassiopeia is an emission and reflection nebula near Gamma Cassiopeiae, about 550 light-years away. The bright star's radiation is ionising and slowly eroding the cloud, which glows red where it is ionised and blue where it reflects starlight.
+Imaging: Keep Gamma Cas just outside the frame; Hα shows the red emission and broadband the blue reflection.
+
+## NGC 1333
+NGC 1333 is a reflection nebula and young star cluster about 1,000 light-years away in Perseus, one of the most active nearby nurseries. Infrared images reveal many young stars and outflows hidden inside its dust.
+Imaging: Broadband shows the blue reflection and surrounding dark dust.
+
+## IC 4604
+The Rho Ophiuchi cloud complex, about 460 light-years away, is one of the nearest star-forming regions. Blue, yellow and red nebulae surround Antares and Rho Ophiuchi, with dark dust lanes running east.
+Imaging: Spans several degrees; use short focal lengths and long broadband integrations.
+
+## NGC 6334
+The Cat's Paw Nebula is a large star-forming region about 5,500 light-years away in Scorpius. Its glowing "pads" are cavities lit by massive young stars, and it is one of the most active nurseries in the Milky Way.
+Imaging: Low for northern observers; narrowband shows its structure. NGC 6357 is nearby.
+
+## NGC 6357
+The Lobster (War and Peace) Nebula is a star-forming region about 5,500 to 8,000 light-years away in Scorpius. It contains the massive cluster Pismis 24, whose stars are among the most massive known in the Milky Way.
+Imaging: Low for northern observers; narrowband shows its structure.
+
+## NGC 1977
+The Running Man Nebula is a reflection and emission nebula in Orion, about 1,350 light-years away and just north of the Orion Nebula. Dark lanes in its blue glow suggest a running figure.
+Imaging: Normally framed with M42 and M43; broadband shows its blue reflection.
+
+## NGC 2174
+The Monkey Head Nebula is an emission nebula about 6,400 light-years away in Orion, near its border with Gemini. Radiation from young stars sculpts its dust into pillars.
+Imaging: Narrowband shows its pillars.
+
+## IC 417
+The Spider Nebula is an emission nebula about 10,000 light-years away in Auriga, energised by a young cluster. The small, bright Fly Nebula (NGC 1931) lies nearby.
+Imaging: Narrowband shows its structure; frame with NGC 1931.
+
+## IC 342
+The Hidden Galaxy is a large face-on spiral about 11 million light-years away in Camelopardalis. It would be one of the brightest galaxies in the sky if it were not dimmed by dust in the Milky Way's plane.
+Imaging: Needs long integrations and dark skies.
+
+## NGC 2403
+NGC 2403 is a spiral galaxy about 10 million light-years away in Camelopardalis, an outlying member of the M81 group. Its many bright star-forming regions resemble those of M33.
+Imaging: Hα highlights its star-forming regions.
+
+## NGC 7822
+NGC 7822 is a large star-forming region about 3,000 light-years away in Cepheus. Radiation from young, massive stars carves its gas and dust into dark pillars resembling those in the Eagle Nebula.
+Imaging: Narrowband shows its pillars.
+
+## NGC 5139
+Omega Centauri is the largest and brightest globular cluster in the Milky Way, about 17,000 light-years away with around 10 million stars. Its stars have a range of ages and compositions, suggesting it is the core of a dwarf galaxy absorbed long ago.
+Imaging: A southern target that resolves easily.
+
+## NGC 104
+47 Tucanae is the second brightest globular cluster, about 15,000 light-years away, appearing beside the Small Magellanic Cloud. Its dense core contains many millisecond pulsars.
+Imaging: A southern target with a dense, bright core.
+
+## NGC 1365
+The Great Barred Spiral Galaxy is a large barred spiral about 56 million light-years away in the Fornax Cluster, roughly 200,000 light-years across. Its prominent bar channels gas toward an active nucleus.
+Imaging: A southern target.
+
+## NGC 4038
+The Antennae Galaxies (NGC 4038 and NGC 4039) are a pair of colliding galaxies about 45 to 65 million light-years away in Corvus. Their collision has triggered bursts of star formation and drawn out two long tidal tails.
+Imaging: Long integrations reveal the long tidal tails.
+
+## NGC 6302
+The Butterfly Nebula is a planetary nebula about 3,400 light-years away in Scorpius. Its central star is among the hottest known, and a dense torus of dust pinches its outflow into two wings.
+Imaging: Low for northern observers.
+
+## LMC
+The Large Magellanic Cloud is a satellite galaxy of the Milky Way about 160,000 light-years away, visible to the unaided eye from the southern hemisphere. It contains the Tarantula Nebula and was the site of supernova SN 1987A.
+Imaging: A southern target for wide fields.
+
+## SMC
+The Small Magellanic Cloud is a satellite galaxy of the Milky Way about 200,000 light-years away, visible to the unaided eye from the southern hemisphere. It appears beside the globular cluster 47 Tucanae.
+Imaging: A southern target for wide fields.

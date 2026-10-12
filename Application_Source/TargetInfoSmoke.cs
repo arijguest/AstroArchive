@@ -39,7 +39,7 @@ namespace AstroArchive {
      var loadedCard=targetInformation.Find("M31",CancellationToken.None).Cards.Single();
      var labels=PopupChildren<TextBlock>(state.View).Select(t=>t.Text).ToList();
      if(!labels.Contains(Localization.T("TARGET INFO"))||!labels.Contains(Localization.T("Sources and catalogue details")))throw new Exception("Info controls did not use the selected language.");
-     if(!labels.Contains(loadedCard.name)||!labels.Contains(TargetInfoPresentation.Summary(loadedCard)))throw new Exception("Translation changed catalogue data.");
+     if(!labels.Contains(loadedCard.name)||!labels.Contains(TargetInfoPresentation.DisplaySummary(loadedCard)))throw new Exception("Translation changed catalogue data.");
      // Collapsed expanders have no rendered content in WPF. Open the credit
      // before checking the text the user can actually read.
      foreach(var expander in PopupChildren<Expander>(state.View))expander.IsExpanded=true;PumpPopupLayout();

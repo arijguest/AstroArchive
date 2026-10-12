@@ -43,7 +43,9 @@ namespace AstroArchive {
    Begin(card.name);CurrentId=card.id;
    if(!string.IsNullOrEmpty(context))content.Children.Add(Data(context,"Muted","UiFontCaption"));
    string constellation=TargetInfoPresentation.Constellation(card.constellation);
-   content.Children.Add(Data(card.id+" · "+card.type_label+(constellation==null?"":" · "+constellation),"Muted"));
+   // The ID is shown once: in the heading when the object has no other name, otherwise here.
+   content.Children.Add(Data(TargetInfoPresentation.Tagline(card,constellation),"Muted"));
+   var curated=TargetDescriptions.For(card.id);
    if(card.identity_status=="disputed"||card.domain=="historical_designation")content.Children.Add(Text("Historical designation · identity is disputed.","Muted"));
    if(card.Thumbnail!=null&&card.image!=null){try{
     var bitmap=new BitmapImage();using(var stream=new MemoryStream(card.Thumbnail)){bitmap.BeginInit();bitmap.CacheOption=BitmapCacheOption.OnLoad;bitmap.DecodePixelWidth=960;bitmap.StreamSource=stream;bitmap.EndInit();bitmap.Freeze();}
@@ -52,9 +54,11 @@ namespace AstroArchive {
    }catch(NotSupportedException){}catch(IOException){}catch(ArgumentException){}}
    body=new Grid();body.ColumnDefinitions.Add(new ColumnDefinition());body.ColumnDefinitions.Add(new ColumnDefinition());body.RowDefinitions.Add(new RowDefinition{Height=GridLength.Auto});body.RowDefinitions.Add(new RowDefinition{Height=GridLength.Auto});content.Children.Add(body);
    article=new StackPanel();body.Children.Add(article);
-   string summary=TargetInfoPresentation.Summary(card);article.Children.Add(string.IsNullOrWhiteSpace(summary)?Text("No information is available for this target.","Muted"):Data(summary));
-   if(!string.IsNullOrWhiteSpace(card.fact)){var fact=new Border{Padding=new Thickness(10),CornerRadius=new CornerRadius(6),Margin=new Thickness(0,2,0,10),Child=Data(card.fact)};fact.SetResourceReference(Border.BackgroundProperty,"SurfaceAlt");article.Children.Add(fact);}
-   var facts=Facts();article.Children.Add(facts);
+   string summary=TargetInfoPresentation.DisplaySummary(card);string factText=curated!=null&&!string.IsNullOrWhiteSpace(curated.Fact)?curated.Fact:card.fact;
+   article.Children.Add(Section("OVERVIEW",true));article.Children.Add(string.IsNullOrWhiteSpace(summary)?Text("No information is available for this target.","Muted"):Data(summary));
+   if(!string.IsNullOrWhiteSpace(factText))article.Children.Add(Callout(Data(factText)));
+   if(curated!=null&&!string.IsNullOrWhiteSpace(curated.Imaging)){article.Children.Add(Section("IMAGING NOTES"));article.Children.Add(Callout(Data(curated.Imaging)));}
+   article.Children.Add(Section("AT A GLANCE"));var facts=Facts();article.Children.Add(facts);
    if(!string.IsNullOrEmpty(card.parent_body))AddFact(facts,"Parent",card.parent_body,null);
    var measurements=card.measurements??new TargetInfoMeasurement[0];
    var ra=measurements.FirstOrDefault(m=>m.field=="RA");var dec=measurements.FirstOrDefault(m=>m.field=="Dec");
@@ -65,7 +69,7 @@ namespace AstroArchive {
    var magnitude=measurements.FirstOrDefault(m=>m.field=="V-Mag")??measurements.FirstOrDefault(m=>m.field=="B-Mag");
    if(magnitude!=null)AddFact(facts,Localization.F("Magnitude ({0})",magnitude.field.Substring(0,1)),magnitude.value.ToString("0.##",CultureInfo.InvariantCulture),Evidence(card,magnitude));
    if(card.domain=="deep_sky"){
-    mapPanel=new StackPanel{Margin=new Thickness(0,4,0,10)};body.Children.Add(mapPanel);mapPanel.Children.Add(Text("LOCATION IN THE SKY","Muted","UiFontCaption"));
+    mapPanel=new StackPanel{Margin=new Thickness(0,4,0,10)};body.Children.Add(mapPanel);mapPanel.Children.Add(Section("LOCATION IN THE SKY"));
     if(ra!=null&&dec!=null){
      var sky=CaptureSky.Resolve(new Frame{Target=card.id,RA=ra.value,Dec=dec.value},null);sky.TargetLabel=card.name;sky.TimeLabel="J2000 catalogue position";sky.Summary="Celestial sky";sky.Key="target-info:"+card.id;sky.Evidence="J2000 catalogue coordinates; no observing time or local horizon is implied.";
      mapHost=new Grid{Height=230,MinHeight=160};mapPanel.Children.Add(mapHost);
@@ -76,13 +80,14 @@ namespace AstroArchive {
     }else mapPanel.Children.Add(Text("Catalogue coordinates are not available for this target.","Muted"));
    }
    var sources=new StackPanel();
-   var aliases=(card.aliases??new string[0]).Where(a=>TargetInfoCatalog.Normalize(a)!=TargetInfoCatalog.Normalize(card.id)&&!string.Equals(a,card.name,StringComparison.OrdinalIgnoreCase)).Distinct(StringComparer.OrdinalIgnoreCase).ToArray();
+   var hidden=curated==null?new string[0]:curated.HiddenAliases;
+   var aliases=(card.aliases??new string[0]).Where(a=>TargetInfoCatalog.Normalize(a)!=TargetInfoCatalog.Normalize(card.id)&&!string.Equals(a,card.name,StringComparison.OrdinalIgnoreCase)&&!hidden.Contains(a,StringComparer.OrdinalIgnoreCase)).Distinct(StringComparer.OrdinalIgnoreCase).ToArray();
    if(aliases.Length>0)sources.Children.Add(Data(Localization.F("Catalogue names: {0}",string.Join(" · ",aliases)),"Muted","UiFontCaption"));
    var moreFacts=Facts();
    foreach(var measurement in measurements.Where(m=>new[]{"PosAng","SurfBr","RadVel","Redshift"}.Contains(m.field)))AddFact(moreFacts,MeasurementLabel(measurement.field),measurement.value.ToString("0.#####",CultureInfo.InvariantCulture)+(measurement.unit=="dimensionless"?"":" "+measurement.unit),Evidence(card,measurement));
    if(moreFacts.Children.Count>0)sources.Children.Add(moreFacts);
-   foreach(var source in TargetInfoPresentation.Sources(card))sources.Children.Add(Link(source.Title,source.Url));
-   if(sources.Children.Count>0)content.Children.Add(Disclosure("Sources and catalogue details",sources));
+   foreach(var source in TargetInfoPresentation.Sources(card,curated!=null&&!string.IsNullOrWhiteSpace(curated.Overview)))sources.Children.Add(Link(source.Title,source.Url));
+   if(sources.Children.Count>0){content.Children.Add(Section("SOURCES"));content.Children.Add(Disclosure("Sources and catalogue details",sources));}
    content.Children.Add(Text("Select a file to return to its image preview.","Muted","UiFontCaption"));ArrangeBody();
   }
   void AddImageCredit(TargetInfoImage image){
@@ -91,6 +96,13 @@ namespace AstroArchive {
    if(longCredit){var full=new StackPanel();full.Children.Add(Data(image.attribution,"Muted","UiFontCaption"));content.Children.Add(Disclosure("Full image credit",full));}
    string caption=TargetInfoPresentation.Caption(image.representation);if(caption.Length>0)content.Children.Add(Data(caption,"Muted","UiFontCaption"));
   }
+  // Sections share a quiet caption and divider so the pane reads as distinct parts.
+  static FrameworkElement Section(string title,bool first=false){
+   var panel=new StackPanel{Margin=new Thickness(0,first?6:12,0,6)};
+   if(!first){var rule=new Border{Height=1,Margin=new Thickness(0,0,0,8),Opacity=0.7};rule.SetResourceReference(Border.BackgroundProperty,"Border");panel.Children.Add(rule);}
+   var caption=Text(title,"Muted","UiFontCaption");caption.FontWeight=FontWeights.SemiBold;caption.Margin=new Thickness(0);panel.Children.Add(caption);return panel;
+  }
+  static Border Callout(UIElement child){var callout=new Border{Padding=new Thickness(10,8,10,2),CornerRadius=new CornerRadius(6),Margin=new Thickness(0,2,0,8),Child=child};callout.SetResourceReference(Border.BackgroundProperty,"SurfaceAlt");return callout;}
   static Grid Facts(){var grid=new Grid{Margin=new Thickness(0,4,0,10)};grid.ColumnDefinitions.Add(new ColumnDefinition{Width=GridLength.Auto,MaxWidth=115});grid.ColumnDefinitions.Add(new ColumnDefinition{Width=new GridLength(1,GridUnitType.Star)});return grid;}
   static void AddFact(Grid grid,string label,string value,string evidence){
    int row=grid.RowDefinitions.Count;grid.RowDefinitions.Add(new RowDefinition{Height=GridLength.Auto});var key=Text(label,"Muted");key.Margin=new Thickness(0,0,12,7);Grid.SetRow(key,row);grid.Children.Add(key);var val=Data(value);if(!string.IsNullOrWhiteSpace(evidence))val.ToolTip=Data(evidence,"Text","UiFontSmall");Grid.SetRow(val,row);Grid.SetColumn(val,1);grid.Children.Add(val);

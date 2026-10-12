@@ -1,12 +1,12 @@
-AstroArchive 3.2.2 — prerelease
-Package 3.2.2.1
+AstroArchive 3.2.3 — prerelease
+Package 3.2.3.1
 
-Analytics: choose each chart's type (donut, bars or columns; the timeline stays in date order) below the chart list. Export as now shows Images & documents and Video & GIF with their formats; resolution, video timing and size sit under Export options. The AstroArchive wordmark on chart outputs is larger and centred on the logo.
+Eclipses: Sun and Moon captures taken during a solar or lunar eclipse now list under Solar Eclipse or Lunar Eclipse in the target list (files and folders are unchanged). Capture details show the eclipse kind, how much of the Sun or Moon was covered, and its magnitude; the sky map adds a close-up of both discs to scale. Coverage comes from the bundled Moon and Sun models and matches NASA eclipse magnitudes closely; solar eclipses need an observing location.
 
-Target cards in Analytics: make cards for your top 3-25 targets (by integration or light frames) or targets you choose, within the current telescope and date scope. Save one image, a ZIP of images, or an MP4/GIF slideshow at Standard, High 2x or Sharing size. Cards show a larger logo and the AstroArchive website. Choose any image of a target, including Edited images without an archive link (linked images come first), and adjust its zoom and position.
+Sky maps: Sun captures get a daytime map with the Sun and Moon. Moon and planet stacks that recorded a blank pointing, lacked a clock, or used a lunar/solar capture mode now show their map, and a Moon computed below the horizon keeps its map with a hint to check the capture timezone. The map's reset button stays at the globe's corner and scales with it.
 
-Repository, Import and Edited tables each end with a centred path bar; click it to open that folder. Settings now notes beside the Astrometry.net option that ASTAP is much quicker and recommended, with a link to set it up.
+Target information: all 110 Messier objects and about 60 popular NGC, IC, Sharpless and southern targets have new in-depth overviews and imaging notes. The pane is divided into clear sections, the object ID is no longer repeated under the title, and resizing the target pane works again.
 
-Also includes target information and analytics refinements since 3.2.1: lengthy image credits fold into a disclosure, split Serpens constellations resolve correctly, analytics previews stay visible in short windows with larger text, and saved stacks with an existing frame count recover their total exposure.
+Image quality: an on-demand quality score for deep-sky subs (star width, roundness, star count and noise) and a sharpness score for planetary, lunar and solar stills, with a QUALITY column, filters and best-first ordering within sessions.
 
 This is a prerelease for testing. Stable releases remain available separately.

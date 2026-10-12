@@ -134,20 +134,17 @@ namespace AstroArchive {
     if(sky.HasHorizon){var local=sky.Orientation.MapOfDate(moon.Topocentric);moon.Altitude=Math.Asin(Math.Max(-1,Math.Min(1,local.Z)))*180/Math.PI;moon.Azimuth=SkyOrientation.Wrap(Math.Atan2(local.X,local.Y)*180/Math.PI);}
     sky.Moon=moon;
    }
-   // Mount pointing in solar-system stacks is often blank (0°, 0°) or stale, so a
-   // calculated body position replaces pointing that is far from it.
+   // Lunar, solar and planetary modes often write a blank mount pointing (0°, 0°).
+   // That is not a measurement, so the calculated body position replaces it;
+   // any other recorded or solved pointing keeps priority.
    bool pointingReplaced=false;
-   if(sky.HasPosition&&sky.Utc.HasValue&&body!=null&&sky.Moon!=null){
-    SkyVector expected=new SkyVector();double ignored;bool known=body=="Moon"||body=="Sun"||PlanetEphemeris.TryAt(body,sky.Utc.Value,out expected,out ignored);
-    if(known){expected=body=="Moon"?sky.Moon.Geocentric:body=="Sun"?sky.Moon.Sun:sky.Orientation.Precess(expected);
-     bool blank=Math.Abs(sky.RA)<1e-6&&Math.Abs(sky.Dec)<1e-6;if(blank||MoonEphemeris.Separation(expected,sky.TargetOfDate)>5){sky.HasPosition=false;pointingReplaced=true;}}
-   }
+   if(sky.HasPosition&&sky.Utc.HasValue&&body!=null&&Math.Abs(sky.RA)<1e-6&&Math.Abs(sky.Dec)<1e-6){sky.HasPosition=false;pointingReplaced=true;}
    if(!sky.HasPosition&&sky.Utc.HasValue&&body!=null){
     SkyVector direction=new SkyVector();bool found=false;double distance;
     if(body=="Moon"&&sky.Moon!=null){direction=sky.Moon.Topocentric;found=true;}
     else if(body=="Sun"&&sky.Moon!=null){direction=sky.Moon.Sun;double sunLongitude,sunDistance;MoonEphemeris.Sun(sky.Utc.Value,out sunLongitude,out sunDistance);if(site)direction=PlanetEphemeris.Topocentric(direction,sunDistance/149597870.7,sky.Utc.Value,sky.Latitude,sky.Longitude);found=true;}
     else if(PlanetEphemeris.TryAt(body,sky.Utc.Value,out direction,out distance)){direction=sky.Orientation.Precess(direction);if(site)direction=PlanetEphemeris.Topocentric(direction,distance,sky.Utc.Value,sky.Latitude,sky.Longitude);found=true;}
-    if(found){sky.RA=SkyOrientation.Wrap(Math.Atan2(direction.Y,direction.X)*180/Math.PI);sky.Dec=Math.Asin(Math.Max(-1,Math.Min(1,direction.Z)))*180/Math.PI;sky.HasPosition=true;sky.PositionOfDate=true;sky.ApproximatePosition=true;sky.Evidence="Approximate "+body+" position calculated at the recorded capture time"+(site?" (observer location)":" (geocentric)")+"\n"+(body=="Moon"||body=="Sun"?"Meeus lunar/solar model":"JPL approximate Keplerian model · 1800–2050")+(pointingReplaced?"\nThe file's recorded pointing was blank or far from the "+body+" and is not used.":"");}
+    if(found){sky.RA=SkyOrientation.Wrap(Math.Atan2(direction.Y,direction.X)*180/Math.PI);sky.Dec=Math.Asin(Math.Max(-1,Math.Min(1,direction.Z)))*180/Math.PI;sky.HasPosition=true;sky.PositionOfDate=true;sky.ApproximatePosition=true;sky.Evidence="Approximate "+body+" position calculated at the recorded capture time"+(site?" (observer location)":" (geocentric)")+"\n"+(body=="Moon"||body=="Sun"?"Meeus lunar/solar model":"JPL approximate Keplerian model · 1800–2050")+(pointingReplaced?"\nThe file's recorded pointing was blank (0°, 0°) and is not used.":"");}
    }
    if(sky.Utc.HasValue&&body!=null)sky.Eclipse=Eclipses.For(body,sky.Utc,site,sky.Latitude,sky.Longitude);
    if(sky.Moon!=null&&sky.HasHorizon){var sunLocal=sky.Orientation.MapOfDate(sky.Moon.Sun);sky.SunAltitude=Math.Asin(Math.Max(-1,Math.Min(1,sunLocal.Z)))*180/Math.PI;}

@@ -1988,3 +1988,11 @@ Image quality	画質
 Measure image quality after each import	インポートごとに画質を測定する
 Compare deep-sky frames across the whole target instead of each session	ディープスカイのフレームをセッションごとではなく対象全体で比較する
 Nothing to measure	測定するものがありません
+OVERVIEW	概要
+IMAGING NOTES	撮影メモ
+AT A GLANCE	概要データ
+SOURCES	出典
+Solar eclipse	日食
+Lunar eclipse	月食
+Solar Eclipse	日食
+Lunar Eclipse	月食

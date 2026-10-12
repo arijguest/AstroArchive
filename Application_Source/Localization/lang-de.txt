@@ -1956,3 +1956,11 @@ Image quality	Bildqualität
 Measure image quality after each import	Bildqualität nach jedem Import messen
 Compare deep-sky frames across the whole target instead of each session	Deep-Sky-Aufnahmen über das ganze Objekt statt je Session vergleichen
 Nothing to measure	Nichts zu messen
+OVERVIEW	ÜBERBLICK
+IMAGING NOTES	AUFNAHMEHINWEISE
+AT A GLANCE	AUF EINEN BLICK
+SOURCES	QUELLEN
+Solar eclipse	Sonnenfinsternis
+Lunar eclipse	Mondfinsternis
+Solar Eclipse	Sonnenfinsternis
+Lunar Eclipse	Mondfinsternis

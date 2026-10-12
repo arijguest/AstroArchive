@@ -28,6 +28,18 @@ catalogue summaries and cited measurements remain available. Targets without a
 checked description or image have a useful text state rather than fabricated
 content. Missing/corrupt information packs do not prevent file previews.
 
+## Curated overviews
+
+`Application_Source/TargetDescriptions.txt` (embedded in the application) gives all
+110 Messier objects and about 60 popular NGC, IC, Sharpless and southern targets a
+written overview and imaging notes, replacing generated catalogue sentences such as
+"NGC 7000 is a h ii region in Cyg". Distances are rounded published values. Each
+curated card links SIMBAD and, for Messier objects, NASA's Hubble Messier page.
+A `Not:` line hides catalogue names the pack wrongly attaches (IC 434 is not the
+Flame Nebula). The pane is divided into Overview, Imaging notes, At a glance,
+Location in the sky and Sources, and the object ID appears once: in the heading
+when the object has no other name, otherwise in the line beneath it.
+
 ## Offline data
 
 `Application_Source/TargetInfo.zip` is a runtime projection of AstroArchive database

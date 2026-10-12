@@ -1972,3 +1972,11 @@ Image quality	Qualità dell'immagine
 Measure image quality after each import	Misura la qualità dell'immagine dopo ogni importazione
 Compare deep-sky frames across the whole target instead of each session	Confronta i fotogrammi deep-sky sull'intero oggetto invece che per sessione
 Nothing to measure	Niente da misurare
+OVERVIEW	PANORAMICA
+IMAGING NOTES	NOTE DI RIPRESA
+AT A GLANCE	IN SINTESI
+SOURCES	FONTI
+Solar eclipse	Eclissi solare
+Lunar eclipse	Eclissi lunare
+Solar Eclipse	Eclissi solare
+Lunar Eclipse	Eclissi lunare

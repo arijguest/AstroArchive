@@ -1987,3 +1987,11 @@ Image quality	图像质量
 Measure image quality after each import	每次导入后测量图像质量
 Compare deep-sky frames across the whole target instead of each session	按整个目标而非每个会话比较深空帧
 Nothing to measure	没有可测量的内容
+OVERVIEW	概述
+IMAGING NOTES	拍摄提示
+AT A GLANCE	速览
+SOURCES	来源
+Solar eclipse	日食
+Lunar eclipse	月食
+Solar Eclipse	日食
+Lunar Eclipse	月食

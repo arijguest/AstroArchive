@@ -6,6 +6,18 @@ using System.Threading;
 namespace AstroArchive {
  public partial class Tests {
   static void TargetInfoTests(){
+   Test("Curated overviews cover common imaging targets and the tagline shows an ID once",()=>{
+    Check(TargetDescriptions.Count>=150,"Too few curated overviews: "+TargetDescriptions.Count);
+    for(int m=1;m<=110;m++){var entry=TargetDescriptions.For("M"+m);Check(entry!=null&&!string.IsNullOrWhiteSpace(entry.Imaging),"Messier "+m+" lacks a curated entry");Check(m==1||m==33||entry.Overview!=null&&entry.Overview.Length>=160&&!entry.Overview.Contains("(IAU constellation code)"),"Messier "+m+" overview is too thin");}
+    foreach(string id in new[]{"NGC 7000","IC 1805","NGC 6888","NGC 2237","B 33","IC 434","NGC 7293","SH2-129"})Check(TargetDescriptions.For(id)!=null&&TargetDescriptions.For(id).Overview.Length>=100,id+" lacks a curated overview");
+    Check(TargetDescriptions.For("IC 434").HiddenAliases.Contains("Flame Nebula")&&TargetDescriptions.For("m31")!=null,"Alias correction or case-insensitive lookup is missing");
+    var parsed=TargetDescriptions.Parse("# note\n## X 1\nFirst line.\nSecond line.\nImaging: Use Hα.\nFact: True.\nNot: A, B\n## X 2\nImaging: Only notes.");
+    Check(parsed["X 1"].Overview=="First line. Second line."&&parsed["X 1"].Imaging=="Use Hα."&&parsed["X 1"].Fact=="True."&&parsed["X 1"].HiddenAliases.Length==2&&parsed["X 2"].Overview==null,"Description format was misread");
+    Check(TargetInfoPresentation.Tagline(new TargetInfoCard{id="IC 434",name="IC 434",type_label="H II region"},"Orion")=="H II region · Orion","Tagline repeated the ID shown in the heading");
+    Check(TargetInfoPresentation.Tagline(new TargetInfoCard{id="NGC 2237",name="NGC 2237 (Rosette A)",type_label="Emission nebula"},null)=="Emission nebula","Tagline repeated an ID contained in the heading");
+    Check(TargetInfoPresentation.Tagline(new TargetInfoCard{id="M31",name="Andromeda Galaxy",type_label="Spiral galaxy"},"Andromeda")=="M31 · Spiral galaxy · Andromeda","Tagline dropped the ID of a named object");
+    var sources=TargetInfoPresentation.Sources(new TargetInfoCard{id="M42"},true);Check(sources.Any(x=>x.Url.EndsWith("/messier-42/"))&&sources.Any(x=>x.Url.Contains("simbad")),"Curated overview sources are missing");
+   });
    var catalog=new TargetInfoCatalog(Path.Combine(AppDomain.CurrentDomain.BaseDirectory,"TargetInfo.zip"));
    Test("Target info resolves complete aliases and preserves disputed identities",()=>{
     foreach(string label in new[]{"M31","Messier 031","NGC 0224","Andromeda Galaxy"}){var result=catalog.Find(label,CancellationToken.None);Check(result.Status=="matched"&&result.Cards.Single().id=="M31","Wrong identity for "+label);}

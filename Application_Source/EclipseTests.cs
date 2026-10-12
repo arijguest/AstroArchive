@@ -38,6 +38,20 @@ namespace AstroArchive {
     }
     Check(Eclipses.Lunar(Utc(2025,3,1,12,0,0))==null&&Eclipses.Lunar(Utc(2025,3,14,0,0,0))==null,"A lunar eclipse was reported outside an eclipse");
    });
+   Test("Sun, Moon and eclipse captures resolve their body, map and section",()=>{
+    var sun=new Frame{Target="Sun",Kind="Light",Observed="2024-04-08T18:17:16Z",TimeSource="FITS UTC",Latitude=25.29,Longitude=-104.14};
+    var sky=CaptureSky.Resolve(sun,null);Check(sky.Body=="Sun"&&sky.Daytime&&sky.Eclipse!=null&&sky.Eclipse.Solar&&sky.Eclipse.Kind=="Total"&&sky.HasPosition,"Total solar eclipse capture lacks its eclipse or daytime context");
+    // A blank mount pointing (0°, 0°) must not override the calculated Moon.
+    var moon=new Frame{Target="Moon",Kind="Stack",Observed="2025-03-14T06:58:43Z",TimeSource="FITS UTC",RA=0,Dec=0};
+    var lunar=CaptureSky.Resolve(moon,null);Check(lunar.HasPosition&&MoonEphemeris.Separation(lunar.TargetOfDate,lunar.Moon.Geocentric)<1.5&&lunar.Eclipse!=null&&lunar.Eclipse.Kind=="Total","Blank pointing replaced the Moon or the lunar eclipse was missed");
+    var mode=new Frame{Target="Unknown",ObservationMode="Lunar mode",Kind="Stack",Observed="2025-03-14T06:58:43Z",TimeSource="FITS UTC"};Check(CaptureSky.Resolve(mode,null).Body=="Moon","A lunar capture mode did not name the Moon");
+    // A Moon computed below the horizon (a wrong clock) keeps its map.
+    var wrong=new Frame{Target="Moon",Kind="Light",Observed="2025-03-14T12:58:43Z",TimeSource="FITS UTC",Latitude=51.5,Longitude=0};var hidden=CaptureSky.Resolve(wrong,null);
+    Check(hidden.HasHorizon&&hidden.Altitude<0&&hidden.BodyBelowHorizon&&!hidden.BelowHorizon&&hidden.Summary.Contains("timezone"),"A below-horizon Moon hid its map or gave no clock hint");
+    var deepSky=new Frame{Target="M31",Kind="Light",Observed="2024-04-08T18:17:16Z",TimeSource="FITS UTC",Latitude=25.29,Longitude=-104.14};Check(CaptureSky.Resolve(deepSky,null).Eclipse==null,"A deep-sky capture was given an eclipse");
+    var sections=TargetNavigation.Build(new[]{sun,new Frame{Target="Sun",Kind="Light"}},f=>f==sun?Eclipses.SolarSection:f.Target);
+    Check(sections.Any(t=>t.Name==Eclipses.SolarSection&&t.Files==1&&t.Group=="Solar system")&&sections.Any(t=>t.Name=="Sun"&&t.Files==1),"Eclipse captures did not list in their own Solar system section");
+   });
    Test("Disc overlap covers none, partial, contained and equal discs",()=>{
     Check(Eclipses.Overlap(1,1,2.5)==0&&Math.Abs(Eclipses.Overlap(1,0.5,0.2)-Math.PI*0.25)<1e-12&&Math.Abs(Eclipses.Overlap(1,1,0)-Math.PI)<1e-12,"Overlap limits are wrong");
     double half=Eclipses.Overlap(1,1,1);Check(Math.Abs(half-(2*Math.PI/3-Math.Sqrt(3)/2))<1e-9,"Lens area is wrong: "+half);
