@@ -1,32 +1,22 @@
-AstroArchive 3.2.4 — prerelease
-Package 3.2.4.1
+AstroArchive 3.2.5 — prerelease
+Package 3.2.5.1
 
-Analytics: the window now has three columns: the chart list, the preview and a grouped options panel. Each chart can have its own type, order, title and subtitle. Documents get colour palettes and can leave charts out, every choice is remembered, and Hide options gives the preview the full width. All existing charts, layouts and export formats still work.
+Celestron Origin: AstroArchive can now find a Celestron Origin on your network and import its captures, reading the telescope's own metadata for target, exposure and camera details.
 
-Sky maps and eclipses: click a constellation to outline it and show its name, then click again, click empty sky or press Escape to hide it. Clicking the Moon, Sun or target opens Capture details. Eclipse captures show an illustrated card with the coverage at capture time, a coverage curve for the whole eclipse, and the maximum, start, end and duration, all worked out offline.
+Image quality: subs keep a steady best-first order within each group, run reports are clearer, stacks are scored too, and Shift-click range selection respects groups. Clearing the repository selection now also forgets the Shift anchor.
 
-Menus: the Import, Export and Repository menus are reorganised. Each USB telescope appears once, reports and telescope tools have their own submenus, Catalogue CSV is a single item, and Delete archive data sits under Clean up, away from routine maintenance.
+Target overlay: rings are white with the catalogue ID inside each ring, and every catalogued object in the frame is marked. Catalogue IDs now read with a space throughout the app (M 45, NGC 7000, Sh2-155).
 
-Open in Stellarium: a new button in the preview header shows the selected capture in Stellarium, with its position and field of view plus the capture time and place when known. Nothing leaves your PC. A running Stellarium with Remote Control switched on is reused; otherwise a new Stellarium window opens.
+Analytics target cards: card images can be rotated, each target remembers its card choices, and the preview shows a clearer loading state. The AstroArchive logo and title on Analytics outputs are smaller.
 
-Target overlay: a new button beside Open in Stellarium circles catalogued targets in the previewed frame using its plate solution. It is off by default and remembers your choice; unsolved frames show a short note instead.
+Sun, Moon and planets: dim captures are scaled to their brightest samples instead of previewing almost black. PARAMETERS for the Moon add its orbit, distance range and gravity, planets list their known moon counts, and comets show derived orbit facts. Image credits are simplified to one creator and licence line.
 
-Target information: AT A GLANCE is now PARAMETERS. Planets and the largest dwarf planets list their nominal orbit, diameter, mass and major moons; the Sun shows its diameter and mass. The Moon's information pane no longer flickers as its scrollbar appears and disappears.
+Capture details: you can set the capture town or city per file, and targets that were below the horizon at capture time are flagged.
 
-Comets: every comet target now opens an information page with an overview, imaging notes and PARAMETERS (orbit type, perihelion, period and eccentricity), with written overviews for 33 well-known comets and links to NASA/JPL.
+Progress: every running process now shows an ETA, including target identification and metadata work.
 
-Cleaner text: tooltips that only repeated their label are gone, dialog introductions are shorter, and stale guide and translation text has been removed.
+Stellarium: if Stellarium is not installed, Open in Stellarium opens Stellarium Web at the same position instead.
 
-Moon and lunar stacks: lunar and solar stacks from colour cameras no longer preview green, and Seestar stacks with millisecond timestamps in their names show their Stack() count again. Moon captures whose clock has no timezone, or only a date, now show the Moon on the sky map at an approximate position.
+Parsing: metadata from off-spec FITS and XISF files is kept, folder names no longer decide the frame type, Seestar DSO_Stacked totals are counted as stack count × sub exposure, Plate solve… is offered whenever a capture can be solved, and the Deer Lick Group is matched to NGC 7331.
 
-Network live import: Start live import now opens a setup dialog like Watch a capture folder, with the check interval, transfer limit and the option to also import captures already in the telescope folder.
-
-Import page: the search bar has proper spacing below the source card, and the totals line only appears when the import table has files, listing only categories that have any.
-
-Edited page: Add images, Import folder, Refresh and Export to sit in one toolbar beside search, and the preview column follows the shape of the image being shown while keeping the table at least 440 px wide.
-
-Backups and notifications: a small indicator beside the repository path shows when a backup is running, even after its notice is dismissed. The notifications menu always lists every notification, including dismissed ones, and its bell shows when a process is active.
-
-Includes everything in 3.2.3: eclipse detection, daytime and lunar sky maps, in-depth target overviews and image-quality scoring.
-
-This is a prerelease for testing. Stable releases remain available separately.
+Includes everything in 3.2.4: the Analytics overhaul, Open in Stellarium, the target overlay, eclipse details, reorganised menus, PARAMETERS, comet information pages and the backup indicator.
