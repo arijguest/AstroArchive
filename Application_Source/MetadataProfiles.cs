@@ -161,7 +161,7 @@ namespace AstroArchive {
             f.CalibrationSteps=h.Get("CALSTAT");
             string obs=h.Get("DATE-OBS","DATEOBS","DATE_OBS"),timeSystem=h.Get("TIMESYS");
             DateTimeOffset utc;
-            bool eligible=obs.Length>10&&(timeSystem.Length==0||timeSystem.Equals("UTC",StringComparison.OrdinalIgnoreCase))&&(f.Format=="FITS"||Regex.IsMatch(obs,@"(Z|[+-]\d\d:\d\d)$"));
+            bool eligible=obs.Length>10&&(timeSystem.Length==0||timeSystem.Equals("UTC",StringComparison.OrdinalIgnoreCase))&&(f.Format=="FITS"||timeSystem.Equals("UTC",StringComparison.OrdinalIgnoreCase)||Regex.IsMatch(obs,@"(Z|[+-]\d\d:\d\d)$"));
             if(eligible&&DateTimeOffset.TryParse(obs,CultureInfo.InvariantCulture,DateTimeStyles.AssumeUniversal|DateTimeStyles.AdjustToUniversal,out utc)) {
                 f.ObservedUtc=utc.UtcDateTime.ToString("o");
                 f.TimeZoneId="UTC";

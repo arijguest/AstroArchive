@@ -62,7 +62,7 @@ namespace AstroArchive {
    ToolTip=value.TargetLabel+"\n"+value.TimeLabel+" · "+value.Summary+(value.ApproximatePosition?" · approximate":"")+(lunar.Length>0?"\n"+lunar:"")+"\n"+NavigationHelp;AutomationProperties.SetName(this,"Capture sky. "+value.TargetLabel+". "+value.TimeLabel+". "+value.Summary+(lunar.Length>0?". "+lunar:""));
    if(!changed)return;
    if(value.Moon!=null){moon=value.Orientation.MapOfDate(value.Moon.Topocentric);sun=value.Orientation.MapOfDate(value.Moon.Sun);}
-   var target=value.Orientation.Map(SkyVector.Equatorial(value.RA,value.Dec));Camera.SetHome(value.HasPosition?Math.Atan2(target.X,target.Y)*180/Math.PI:180,value.HasHorizon&&value.Altitude<0?-25:25);
+   var target=value.TargetOnGlobe;Camera.SetHome(value.HasPosition?Math.Atan2(target.X,target.Y)*180/Math.PI:180,value.HasHorizon&&value.Altitude<0?-25:25);
    stars=SkyFigures.Stars.Select(value.Orientation.Map).ToArray();drawing=null;InvalidateVisual();
   }
   Point Project(SkyVector vector){return new Point(centre.X+radius*vector.Dot(right),centre.Y-radius*vector.Dot(up));}
@@ -122,7 +122,7 @@ namespace AstroArchive {
   }
   DrawingGroup Build(Brush line,Brush text,Brush accent,Brush surface){
    var group=new DrawingGroup();centre=new Point(ActualWidth/2,ActualHeight/2);radius=Math.Max(5,Math.Min(ActualWidth/2-14,ActualHeight/2-14))*Camera.Zoom;
-   var target=context.Orientation.Map(SkyVector.Equatorial(context.RA,context.Dec));double yaw=Camera.Yaw*Math.PI/180,tilt=Camera.Tilt*Math.PI/180;
+   var target=context.TargetOnGlobe;double yaw=Camera.Yaw*Math.PI/180,tilt=Camera.Tilt*Math.PI/180;
    right=new SkyVector(Math.Cos(yaw),-Math.Sin(yaw),0);up=new SkyVector(-Math.Sin(yaw)*Math.Sin(tilt),-Math.Cos(yaw)*Math.Sin(tilt),Math.Cos(tilt));front=new SkyVector(Math.Sin(yaw)*Math.Cos(tilt),Math.Cos(yaw)*Math.Cos(tilt),Math.Sin(tilt));
    Pen horizon=Stroke(line,0.85,1),grid=Stroke(line,0.22,0.7),rear=Stroke(line,0.10,0.7),below=Stroke(line,0.13,0.7),figures=Stroke(line,0.60,0.8),near=Stroke(line,0.9,1);
    using(var dc=group.Open()){

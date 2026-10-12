@@ -262,6 +262,14 @@ choose Show target info to clear the current file selection and reveal this view
 Escape also clears a file selection. Select a file to return to its image preview.
 The information wraps and scrolls in small panes; expand Sources or Image credit
 for details. Ambiguous names offer object choices without renaming your files.
+For recorded captures without pointing coordinates, the sky map can calculate
+approximate Sun, Moon and major-planet positions from the capture time. AVI, SER
+and other videos use their retained capture timestamp, not recording duration.
+If a capture supplies a time without its timezone, the map uses your selected
+observing town/city timezone, including daylight saving at the capture date.
+A timezone or UTC time in capture metadata takes priority. The metadata editor
+lets you set a capture timezone explicitly. The map uses your observing location
+for the local horizon.
 Repository's wider preview pane is adjustable by dragging its divider.
 Sidebars sample still images, normally to 1,400 pixels on the longest edge.
 Large still/SER windows decode native pixels within format limits.

@@ -22,6 +22,7 @@ or packaging this folder. The embedded offline guide comes from
 | --- | --- | --- |
 | Targets, search, selection, Edited export, guide | `test.ps1 -TargetsOnly` | `--targets-only` |
 | Target information, offline thumbnails and sky location | `test.ps1 -TargetInfoOnly` | `--info-only` |
+| Planetary sky positions, capture clocks, AVI/SER | `test.ps1 -SkyOnly` | `--sky-only` |
 | Preview resolution, layout, sub exposure labels | `test.ps1 -PreviewOnly` | `--preview-only` |
 | Analytics calculations, layout and export | `test.ps1 -AnalyticsOnly` | `--analytics-only` |
 | Checkbox, focus, disabled or theme states | Build the app | `--controls-only` |

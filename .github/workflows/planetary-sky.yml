@@ -1,0 +1,50 @@
+name: Planetary sky positions
+on:
+  pull_request:
+    paths:
+      - 'Application_Source/Planet*'
+      - 'Application_Source/MoonContext*'
+      - 'Application_Source/Sky*'
+      - 'Application_Source/MetadataProfiles.cs'
+      - 'Application_Source/CityTimeZones.cs'
+      - 'Application_Source/city-timezones*'
+      - 'scripts/build-city-timezones.py'
+      - 'Application_Source/PreviewUi.cs'
+      - 'Application_Source/App.cs'
+      - 'Application_Source/test.ps1'
+      - '.github/workflows/planetary-sky.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  planetary:
+    runs-on: windows-2022
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - name: Check planetary references, capture clocks and recordings
+        shell: powershell
+        run: .\Application_Source\test.ps1 -SkyOnly
+      - name: Build WPF application
+        shell: powershell
+        run: .\Application_Source\build.ps1
+      - name: Check planetary markers and Moon alignment
+        shell: powershell
+        run: |
+          $output = Join-Path $pwd 'Application_Source\test-data\planetary-sky'
+          $process = Start-Process '.\Application_Source\dist\AstroArchive.exe' -ArgumentList @('--ui-test', $output, '--sky-only', '--no-updates') -PassThru
+          if (-not $process.WaitForExit(120000)) { $process.Kill(); throw 'Planetary sky UI check timed out.' }
+          if ($process.ExitCode -ne 0) {
+            $errorFile = Join-Path $output 'ui-smoke-error.txt'
+            if (Test-Path $errorFile) { Get-Content $errorFile }
+            throw 'Planetary sky UI check failed.'
+          }
+          Get-Content (Join-Path $output 'planetary-sky-smoke.txt')
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: astroarchive-planetary-sky-preview
+          path: |
+            Application_Source/test-data/planetary-sky/*.png
+            Application_Source/test-data/planetary-sky/*.txt
+          retention-days: 7
