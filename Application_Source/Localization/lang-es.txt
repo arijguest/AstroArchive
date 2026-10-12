@@ -2077,3 +2077,19 @@ Eclipse coverage over time	Cobertura del eclipse a lo largo del tiempo
 Eclipse times are for the observing location.	Las horas del eclipse son para el lugar de observación.
 Eclipse times run from the Moon entering Earth's outer shadow to leaving it.	Las horas del eclipse van desde que la Luna entra en la penumbra de la Tierra hasta que sale de ella.
 Eclipse coverage comes from the bundled Moon and Sun models at the recorded time; check the capture clock if it looks wrong.	La cobertura del eclipse procede de los modelos de la Luna y el Sol incluidos, a la hora registrada; comprueba el reloj de la captura si parece incorrecta.
+Set capture town / city…	Definir localidad / ciudad de captura…
+Capture town / city	Localidad / ciudad de captura
+Choose where these files were captured. A chosen town or city replaces any capture location recorded in the files. Without a choice, the recorded location is used, then your observing town / city from Settings.	Elija dónde se capturaron estos archivos. Una localidad o ciudad elegida sustituye cualquier ubicación de captura registrada en los archivos. Sin elección, se usa la ubicación registrada y después su localidad / ciudad de observación de Ajustes.
+Location used for sky views, Stellarium and eclipse times.	Ubicación usada para vistas del cielo, Stellarium y horas de eclipses.
+Use default location	Usar ubicación predeterminada
+Default location	Ubicación predeterminada
+Save location	Guardar ubicación
+Mixed	Mixto
+Not set	Sin definir
+Recorded in file metadata	Registrada en los metadatos del archivo
+Settings default	Predeterminada de Ajustes
+Chosen capture town / city	Localidad / ciudad de captura elegida
+Target below horizon	Objetivo bajo el horizonte
+Set the capture town / city for this file (right-click › Set capture town / city…), or correct the capture timezone in metadata.	Defina la localidad / ciudad de captura de este archivo (clic derecho › Definir localidad / ciudad de captura…) o corrija la zona horaria de captura en los metadatos.
+Set capture town / city for selected…	Definir localidad / ciudad de captura para la selección…
+Targets below the horizon at the predicted capture time usually need the capture town / city or timezone set.	Los objetivos bajo el horizonte en la hora de captura prevista suelen necesitar la localidad / ciudad o la zona horaria de captura.
