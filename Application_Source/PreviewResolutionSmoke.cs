@@ -16,7 +16,7 @@ namespace AstroArchive {
    Readable(title.Foreground,surface.Background,"All Targets");list.SelectedItem=entry;PumpPopupLayout();if(!row.IsSelected||!object.Equals(surface.Background,Window.FindResource("Selection")))throw new Exception("All Targets background concealed selection.");
   }
   public void SmokePreviewResolution(string output){
-   Directory.CreateDirectory(output);Window.Show();GoToPage(0);settings.ShowPreview=true;SetPreviewVisibility();PumpPopupLayout();
+   Directory.CreateDirectory(output);Window.Show();GoToPage(0);settings.ShowPreview=true;SetPreviewVisibility();HideTargetInformation("");PumpPopupLayout();
    var previewColumn=(ColumnDefinition)Window.FindName("PreviewColumn");var previewHost=(Grid)Window.FindName("PreviewHost");WindowState originalWindowState=Window.WindowState;
    Window.WindowState=WindowState.Maximized;PumpPopupLayout();
    if(previewColumn.Width.Value!=340||previewHost.ActualWidth<310||((Border)Window.FindName("PreviewPane")).Padding.Left!=8)throw new Exception("Fullscreen Repository preview is too narrow for the full-size toolbar.");
