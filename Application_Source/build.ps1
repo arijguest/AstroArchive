@@ -14,6 +14,7 @@ $arguments = @('/nologo', '/target:winexe', '/platform:x64', '/optimize+', '/utf
 & $compiler @arguments @startupResources @languageResources
 if ($LASTEXITCODE -ne 0) { throw 'Compilation failed.' }
 Copy-Item (Join-Path $PSScriptRoot 'Remote\lib\SMBLibrary.dll') $OutputDirectory -Force
+Copy-Item (Join-Path $PSScriptRoot 'TargetInfo.zip') $OutputDirectory -Force
 $thirdParty = Join-Path $OutputDirectory 'ThirdParty'
 New-Item -ItemType Directory -Force -Path $thirdParty | Out-Null
 Get-ChildItem (Join-Path $PSScriptRoot 'Remote\lib') | Where-Object { $_.Name -ne 'SMBLibrary.dll' } | Copy-Item -Destination $thirdParty -Force

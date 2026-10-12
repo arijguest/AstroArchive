@@ -14,11 +14,13 @@ namespace AstroArchive {
    foreach(var list in new[]{Targets,EditedTargets}){
     var targetList=list;targetList.ContextMenu=ThemedMenu();
     targetList.PreviewMouseRightButtonDown+=(s,e)=>{var item=ItemsControl.ContainerFromElement(targetList,e.OriginalSource as DependencyObject) as ListBoxItem;if(item!=null)targetList.SelectedItem=item.DataContext;};
-    targetList.ContextMenuOpening+=(s,e)=>{
-     var target=targetList.SelectedItem as TargetSummary;if(target==null||target.Name=="All targets"||Catalog.IsAmbiguous(target.Name)){e.Handled=true;return;}
-     var menu=targetList.ContextMenu;menu.Items.Clear();menu.Items.Add(TargetNamesAction(target.Name));string name=target.Name;menu.Items.Add(FileAction("Create target card…",()=>ShowTargetCard(name),repo!=null&&!RepositoryOperationBlocked&&IntegrationTarget(name)));
-    };
+    targetList.ContextMenuOpening+=(s,e)=>{if(!PopulateTargetMenu(targetList))e.Handled=true;};
    }
+  }
+  bool PopulateTargetMenu(ListBox list){
+   var target=list.SelectedItem as TargetSummary;if(target==null||target.Name=="All targets")return false;
+   var menu=list.ContextMenu;menu.Items.Clear();menu.Items.Add(FileAction("Show target info",()=>OpenTargetInformation(list),true));
+   if(!Catalog.IsAmbiguous(target.Name)){menu.Items.Add(new Separator());menu.Items.Add(TargetNamesAction(target.Name));menu.Items.Add(FileAction("Create target card…",()=>ShowTargetCard(target.Name),repo!=null&&!RepositoryOperationBlocked&&IntegrationTarget(target.Name)));}return true;
   }
   MenuItem TargetNamesAction(string target){return FileAction("Edit name and aliases…",()=>EditTargetNames(target),!RepositoryOperationBlocked&&!ActiveSearchBlocked);}
   FormWindow TargetNameDialog(string target,out TargetNameFields fields){

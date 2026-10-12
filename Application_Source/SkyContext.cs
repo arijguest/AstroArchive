@@ -26,7 +26,7 @@ namespace AstroArchive {
   public void Magnify(double factor){if(!CaptureSky.Finite(factor)||factor<=0)return;Zoom=Math.Max(0.6,Math.Min(3,Zoom*factor));}
  }
  public sealed class SkyFigure {
-  public string Name;public SkyVector Label;public int[][] Paths;
+  public string Id,Name;public SkyVector Label;public int[][] Paths;
  }
  public static class SkyFigures {
   public static readonly SkyVector[] Stars;
@@ -36,7 +36,7 @@ namespace AstroArchive {
    using(var stream=Assembly.GetExecutingAssembly().GetManifestResourceStream("sky-constellations.txt"))using(var reader=new StreamReader(stream)){
     string line;while((line=reader.ReadLine())!=null){if(line.StartsWith("#")||line.Length==0)continue;var fields=line.Split('|');var paths=new List<int[]>();
      foreach(string path in fields[3].Split('/')){var points=new List<int>();foreach(string text in path.Split(new[]{' '},StringSplitOptions.RemoveEmptyEntries)){int index;if(!indices.TryGetValue(text,out index)){index=stars.Count;indices[text]=index;stars.Add(Coordinate(text));}points.Add(index);}paths.Add(points.ToArray());}
-     figures.Add(new SkyFigure{Name=fields[1],Label=Coordinate(fields[2]),Paths=paths.ToArray()});
+     figures.Add(new SkyFigure{Id=fields[0],Name=fields[1],Label=Coordinate(fields[2]),Paths=paths.ToArray()});
     }
    }
    Stars=stars.ToArray();Figures=figures.ToArray();

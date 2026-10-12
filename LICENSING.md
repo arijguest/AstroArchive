@@ -38,3 +38,13 @@ The first-party licence does not restrict replacement of SMBLibrary with a compa
 modified version, or reverse engineering of the combined application solely to debug
 those modifications, as permitted by LGPL section 4. These permissions apply even
 where the first-party licence would otherwise restrict those activities.
+
+## Offline target information
+
+`Application_Source/TargetInfo.zip` contains a runtime projection of AstroArchive
+object database 2.1.0 and its approved images. Catalogue data and images retain
+their individual licences. The pack contains `LICENSES_AND_ATTRIBUTION.md`,
+OpenNGC source/licence notices, and full per-image attribution, representation,
+modification descriptions and licence/source links. These are also accessible
+through the information pane. Preserve the pack when distributing the programme;
+the application licence does not replace these third-party terms.
