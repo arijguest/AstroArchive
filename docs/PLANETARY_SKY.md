@@ -50,6 +50,11 @@ editing and/or retained metadata. SER uses its UTC capture header. This change
 does not introduce parsing of arbitrary acquisition logs or treating generic video
 creation metadata as a capture time.
 
+Capture details shows “Not out (below the horizon)” when the Moon was below the
+local horizon at acquisition. Its phase glyph, illumination and separation facts
+are then omitted. Without an observing site, phase information remains available
+but the app does not assume the Moon was visible.
+
 ## Independent reference checks
 
 The planet tests compare against [JPL Horizons](https://ssd.jpl.nasa.gov/horizons/)

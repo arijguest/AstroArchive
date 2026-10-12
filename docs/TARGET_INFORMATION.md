@@ -1,6 +1,7 @@
 # Target information in the preview pane
 
-Repository and Edited show target information when there are no selected files.
+Repository and Edited show target information when the current target has no
+selected files. Selections retained in other target groups stay selected.
 Select a target to see its catalogue overview, available offline thumbnail,
 measured properties and sources. Deep-sky objects also have an interactive map
 centred on their J2000 position. This is a celestial map, without an inferred
@@ -13,7 +14,11 @@ its image preview. File selections on the other page are independent.
 
 The pane wraps text and uses one vertical scrollbar. At narrow widths, the map
 sits below the overview and facts; at 540 pixels or wider it sits alongside them.
-Sources and image credits expand in the same scroll area. The information view
+Thumbnails retain their aspect ratio and use the available width, with a height
+limit based on the pane. Compact creator and licence links sit immediately below
+the image; long mandatory credits can be expanded there. Catalogue references
+appear once in Sources and catalogue details. Constellations use their full names.
+The map uses the same icon reset control as the image preview. The information view
 has a minimum column width of 220 pixels and honours the programme's text scale,
 theme and keyboard navigation. It does not reserve space in an image preview.
 
@@ -26,10 +31,12 @@ content. Missing/corrupt information packs do not prevent file previews.
 ## Offline data
 
 `Application_Source/TargetInfo.zip` is a runtime projection of AstroArchive database
-2.1.0, data version `2026.10.11.2`. It contains 13,524 cards and the 325 approved
+2.1.0, data version `2026.10.11.2`. It contains 13,524 cards and the 326 approved
 thumbnail assignments (314 unique image files), exact alias/ambiguity indexes,
 measurement citations, image credits, licence links and catalogue notices.
-The complete pack is about 48 MiB. Build and installer scripts distribute it
+IC 434 shares the existing credited Horsehead field image with Barnard 33,
+without merging their identities or storing another image. The complete pack is
+about 48 MiB. Build and installer scripts distribute it
 beside the executable as one managed file; Python and an SQLite provider are not
 application dependencies.
 
@@ -63,14 +70,9 @@ The dedicated Windows workflow also runs these checks and saves screenshots.
 UI coverage includes Repository/Edited, retained selections, restored raster
 previews, cancelled target loads, southern sky markers, 240/570-pixel pane widths,
 650-pixel window heights, both themes, 100/150% text and expanded sources/credits.
-The broader target suite also includes the information engine checks. Translation
-tables under development on `temp2` are separate from these focused checks.
+The broader target suite also includes the information engine checks. All seven
+interface languages are checked with unchanged catalogue prose and attribution.
 
-Local verification on 12 October 2026: application and installer-test compilation
-against .NET Framework 4.8 references passed; all six focused information tests
-passed under Mono. The complete runtime pack passed alias/card/image/citation
-checks, covered all 314 priority targets and reproduced identically. A test using
-the complete pack passed installation, repair and uninstall while retaining a
-capture fixture. Windows WPF rendering and screenshot checks remain pending.
-The broader target run passed 84 checks and failed its existing language-table
-check because those translation files are still being developed on `temp2`.
+Local verification on 12 October 2026: compilation against .NET Framework 4.8
+references and 90 focused target/metadata/information/language checks passed.
+Windows checks cover all seven interface languages and installed-app rendering.

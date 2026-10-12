@@ -24,11 +24,13 @@ namespace AstroArchive {
     var pixels=Enumerable.Repeat((byte)110,64*48*3).ToArray();var encoder=new PngBitmapEncoder();encoder.Frames.Add(BitmapFrame.Create(BitmapSource.Create(64,48,96,96,PixelFormats.Rgb24,null,pixels,64*3)));using(var stream=File.Create(repo.FilePath(all[0])))encoder.Save(stream);
     var project=repo.AddEditedImages(new[]{repo.FilePath(all[0])},null,"Info fixture",CancellationToken.None,null);
     repo.SaveEditedMetadata(project,repo.EditedImages(project),new EditedMetadata{Object="M31"},CancellationToken.None);
-    editedImages=EditedGallery.Read(repo,new[]{"M31"},CancellationToken.None).Images;
+    pixels[0]=120;encoder=new PngBitmapEncoder();encoder.Frames.Add(BitmapFrame.Create(BitmapSource.Create(64,48,96,96,PixelFormats.Rgb24,null,pixels,64*3)));string other=Path.Combine(repo.Root,"other.png");using(var stream=File.Create(other))encoder.Save(stream);
+    var otherProject=repo.AddEditedImages(new[]{other},null,"Other target",CancellationToken.None,null);repo.SaveEditedMetadata(otherProject,repo.EditedImages(otherProject),new EditedMetadata{Object="M45"},CancellationToken.None);
+    editedImages=EditedGallery.Read(repo,new[]{"M31","M45"},CancellationToken.None).Images;
     Filter(true);FilterEditedImages();WaitForSearches();
     foreach(int tab in new[]{0,2}){
      stage="select target on page "+tab;GoToPage(tab);WaitForSearches();var list=tab==0?Targets:EditedTargets;list.SelectedItem=list.Items.OfType<TargetSummary>().Single(t=>t.Name=="M31");WaitForSearches();
-     if(tab==0){librarySelection.Add(all[1]);G("FramesGrid").SelectedItem=all[0];}else G("EditedGrid").SelectedItem=editedImages[0];
+     if(tab==0){librarySelection.Add(all[1]);G("FramesGrid").SelectedItems.Clear();PreviewSelected();WaitForTargetInformation(libraryInfo,"M31");if(librarySelection.Count!=1)throw new Exception("Opening info cleared another target selection.");G("FramesGrid").SelectedItem=all[0];}else{editedSelection.Add(editedImages.Single(i=>i.Metadata.Object=="M45"));G("EditedGrid").SelectedItems.Clear();LoadEditedPreview();WaitForTargetInformation(editedInfo,"M31");if(editedSelection.Count!=1)throw new Exception("Edited info cleared another target selection.");G("EditedGrid").SelectedItem=editedImages.Single(i=>i.Metadata.Object=="M31");}
      if(!PopulateTargetMenu(list))throw new Exception("Target info menu missing.");
      var action=list.ContextMenu.Items.OfType<MenuItem>().Single(i=>Convert.ToString(i.Header)=="Show target info");action.RaiseEvent(new RoutedEventArgs(MenuItem.ClickEvent));
      var state=tab==0?libraryInfo:editedInfo;string prefix=tab==0?"":"Edited";WaitForTargetInformation(state,"M31");
@@ -36,11 +38,11 @@ namespace AstroArchive {
      var loadedCard=targetInformation.Find("M31",CancellationToken.None).Cards.Single();
      var labels=PopupChildren<TextBlock>(state.View).Select(t=>t.Text).ToList();
      if(!labels.Contains(Localization.T("TARGET INFO"))||!labels.Contains(Localization.T("Sources and catalogue details")))throw new Exception("Info controls did not use the selected language.");
-     if(!labels.Contains(loadedCard.name)||!labels.Contains(loadedCard.summary))throw new Exception("Translation changed catalogue data.");
+     if(!labels.Contains(loadedCard.name)||!labels.Contains(TargetInfoPresentation.Summary(loadedCard)))throw new Exception("Translation changed catalogue data.");
      // Collapsed expanders have no rendered content in WPF. Open the credit
      // before checking the text the user can actually read.
      foreach(var expander in PopupChildren<Expander>(state.View))expander.IsExpanded=true;PumpPopupLayout();
-     if(!PopupChildren<TextBlock>(state.View).Any(t=>t.Text==loadedCard.image.attribution))throw new Exception("Translation changed image attribution.");
+     if(!PopupChildren<TextBlock>(state.View).Any(t=>t.Text.Contains(loadedCard.image.creator)))throw new Exception("Image creator credit is missing.");
      foreach(var expander in PopupChildren<Expander>(state.View))expander.IsExpanded=false;PumpPopupLayout();
      if((tab==0?librarySelection.Count:editedSelection.Count)!=0||G(tab==0?"FramesGrid":"EditedGrid").SelectedItems.Count!=0)throw new Exception("Info action retained visible/hidden file selection.");
      if(((FrameworkElement)Window.FindName(prefix+"PreviewHost")).Visibility!=Visibility.Collapsed)throw new Exception("Image preview still occupies target information space.");
@@ -49,6 +51,8 @@ namespace AstroArchive {
       state.PreferredWidth=paneWidth;Window.MinWidth=paneWidth==240?minWidth:1600;Window.Width=paneWidth==240?1060:1600;Window.Height=650;settings.ThemeMode=theme;settings.TextScalePercent=textScale;ApplyAppearance();
       var column=tab==0?(ColumnDefinition)Window.FindName("PreviewColumn"):((Grid)Window.FindName("EditedBody")).ColumnDefinitions[3];if(tab==2)editedPreviewManualWidth=paneWidth;column.Width=new GridLength(paneWidth);PumpPopupLayout();
       var scroll=PopupChildren<ScrollViewer>(state.View).First();if(scroll.ScrollableWidth>0.5||scroll.ViewportHeight<60)throw new Exception("Info pane has horizontal overflow or no reading area.");
+      var thumbnail=PopupChildren<Image>(state.View).Single(i=>i.Source is BitmapSource);var thumbnailBitmap=thumbnail.Source as BitmapSource;
+      if(thumbnail.ActualWidth>scroll.ViewportWidth+1||thumbnail.ActualHeight>341||Math.Abs(thumbnail.ActualWidth/thumbnail.ActualHeight-thumbnailBitmap.PixelWidth/(double)thumbnailBitmap.PixelHeight)>0.01)throw new Exception("Thumbnail is cropped, stretched, excessive or wider than the pane.");
       var map=PopupChildren<SkyGlobeView>(state.View).Single();if(!map.Context.HasPosition||map.Context.HasHorizon)throw new Exception("Target map lost its position or inferred a horizon.");
       scroll.ScrollToEnd();PumpPopupLayout();if(scroll.VerticalOffset<scroll.ScrollableHeight-1)throw new Exception("Info credits cannot be reached in a short window.");scroll.ScrollToTop();
       var body=(Grid)Window.FindName(tab==0?"LibraryBody":"EditedBody");var pane=(FrameworkElement)Window.FindName(prefix+"PreviewPane");if(pane.TranslatePoint(new Point(pane.ActualWidth,0),body).X>body.ActualWidth+1)throw new Exception("Target info pane overflows the window.");
@@ -65,13 +69,15 @@ namespace AstroArchive {
       C("LibraryViewBox").SelectedItem="Show all files";Filter(false);WaitForSearches();settings.ShowPreview=false;SetPreviewVisibility();OpenTargetInformation(list);WaitForTargetInformation(state,"M31");if(!settings.ShowPreview)throw new Exception("Info action did not reveal the hidden preview pane.");
      }
      stage="image preview on page "+tab;
-     if(tab==0)G("FramesGrid").SelectedItem=all[0];else G("EditedGrid").SelectedItem=editedImages[0];PumpPopupLayout();
+     if(tab==0)G("FramesGrid").SelectedItem=all[0];else G("EditedGrid").SelectedItem=editedImages.Single(i=>i.Metadata.Object=="M31");PumpPopupLayout();
      if(((FrameworkElement)Window.FindName(prefix+"TargetInfoPane")).Visibility!=Visibility.Collapsed)throw new Exception("Selecting a file did not restore the image preview.");
      var image=(Image)Window.FindName(prefix+"PreviewImage");var timer=System.Diagnostics.Stopwatch.StartNew();while(image.Source==null&&timer.Elapsed.TotalSeconds<15){PumpPopupLayout();Thread.Sleep(10);}if(image.Source==null)throw new Exception("Returning from info did not decode the selected file.");
      ClearTargetSelection(tab==0?"FramesGrid":"EditedGrid");WaitForTargetInformation(state,"M31");
      LoadTargetInformation(prefix,"M45",null);LoadTargetInformation(prefix,"M31",null);WaitForTargetInformation(state,"M31");
+     var reset=PopupChildren<Button>(state.View).Single(b=>b.Content is System.Windows.Shapes.Path);var testedMap=PopupChildren<SkyGlobeView>(state.View).Single();double home=testedMap.Camera.Yaw;testedMap.RotateView(25,10);reset.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));if(Math.Abs(testedMap.Camera.Yaw-home)>0.001||reset.BorderThickness!=new Thickness(0))throw new Exception("Info sky reset differs from the preview control.");
      stage="southern target on page "+tab;var southern=targetInformation.Find("NGC6744",CancellationToken.None).Cards.Single();state.View.ShowCard(southern);PumpPopupLayout();var southMap=PopupChildren<SkyGlobeView>(state.View).Single();southMap.BringIntoView();PumpPopupLayout();if(!southMap.TargetMarkerDrawn)throw new Exception("Southern target is hidden behind the default globe view.");state.View.ShowCard(targetInformation.Find("M31",CancellationToken.None).Cards.Single());
     }
+    stage="IC 434 image";var ic434=targetInformation.Find("IC434",CancellationToken.None).Cards.Single();editedInfo.View.ShowCard(ic434);PumpPopupLayout();if(!PopupChildren<Image>(editedInfo.View).Any(i=>i.Source is BitmapSource)||!PopupChildren<TextBlock>(editedInfo.View).Any(t=>t.Text.Contains("Orion")))throw new Exception("IC 434 has no visible credited image or full constellation name.");Capture(Path.Combine(output,"AstroArchive_Info_IC434.png"));
     stage="catalogue name preservation";GoToPage(0);WaitForSearches();OpenTargetInformation(Targets);WaitForTargetInformation(libraryInfo,"M31");
     libraryInfo.View.ShowCard(targetInformation.Find("Moon",CancellationToken.None).Cards.Single());PumpPopupLayout();
     if(!PopupChildren<TextBlock>(libraryInfo.View).Any(t=>t.Text=="Moon"))throw new Exception("A catalogue name was translated as an interface label.");

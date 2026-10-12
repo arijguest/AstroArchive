@@ -1889,3 +1889,11 @@ Choose a target on the left to see its overview and sky location. Select a file 
 Calibration frames do not have a celestial target. Select a file to preview it.	Kalibrierungsbilder haben kein Himmelsziel. Wähle eine Datei für die Vorschau.
 Identify this target to see its catalogue information. Select a file to preview it.	Identifiziere dieses Ziel, um seine Kataloginformationen zu sehen. Wähle eine Datei für die Vorschau.
 Target information is unavailable. You can still select and preview your files.	Zielinformationen sind nicht verfügbar. Du kannst weiterhin Dateien auswählen und ansehen.
+
+# Target details and analytics output modes
+No information is available for this target.	Für dieses Ziel sind keine Informationen verfügbar.
+Full image credit	Vollständiger Bildnachweis
+Images & documents	Bilder und Dokumente
+Video & GIF	Video und GIF
+Not out (below the horizon)	Nicht sichtbar (unter dem Horizont)
+Output	Ausgabe

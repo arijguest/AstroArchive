@@ -24,6 +24,10 @@ def build(database):
     uncertain = [r[0] for r in con.execute("SELECT DISTINCT term FROM designation WHERE status='uncertain' ORDER BY term")]
     nonexistent = [r[0] for r in con.execute("SELECT DISTINCT term FROM designation WHERE status='nonexistent' ORDER BY term")]
     entries, images, buckets = {}, {}, {}
+    image_assignments = 0
+    # The licensed Horsehead field also depicts the surrounding IC 434 emission
+    # nebula. Share its bytes while keeping the two catalogue identities distinct.
+    shared_fields = {"IC 434": "B 33"}
     for row in con.execute('SELECT * FROM object ORDER BY id'):
         card = dict(row)
         ident = card['id']
@@ -38,8 +42,17 @@ def build(database):
         card['citations'] = [dict(r) for r in con.execute('SELECT * FROM citation WHERE object_id=? ORDER BY id', (ident,))]
         card['source_urls'] = json.loads(row['source_urls']) if checked else []
         image = con.execute("SELECT * FROM image WHERE object_id=? AND status='approved_local' ORDER BY id LIMIT 1", (ident,)).fetchone()
+        shared = ident in shared_fields and image is None
+        if shared:
+            image = con.execute("SELECT * FROM image WHERE object_id=? AND status='approved_local' ORDER BY id LIMIT 1", (shared_fields[ident],)).fetchone()
+            if image is None:
+                raise ValueError('Missing approved Horsehead/IC 434 field image')
         card['image'] = dict(image) if image else None
+        if shared:
+            card['image'].update(object_id=ident, id=image['id'] + ':ic434',
+                                 representation='IC 434 emission nebula behind the dark Horsehead Nebula (Barnard 33).')
         if image:
+            image_assignments += 1
             path = root / image['local_path']
             data = path.read_bytes()
             if hashlib.sha256(data).hexdigest() != image['sha256']:
@@ -52,7 +65,7 @@ def build(database):
     manifest.update(format_version=1, entries=entries, aliases=aliases,
                     uncertain=uncertain, nonexistent=nonexistent,
                     database_sha256=hashlib.sha256(database.read_bytes()).hexdigest(),
-                    image_assignments=con.execute('SELECT count(*) FROM image').fetchone()[0])
+                    image_assignments=image_assignments, runtime_shared_fields=shared_fields)
     yield 'index.json', json.dumps(manifest, ensure_ascii=False, separators=(',', ':')).encode()
     for path, data in sorted(images.items()):
         yield path, data

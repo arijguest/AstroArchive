@@ -25,7 +25,7 @@ namespace AstroArchive {
       fields.NewFolder.IsChecked=true;PumpPopupLayout();if(!fields.FolderName.IsVisible||!fields.FolderName.IsEnabled||!fields.FolderName.Text.StartsWith("AstroArchive_export_"))throw new Exception("New folder name did not appear.");fields.NewFolder.IsChecked=false;PumpPopupLayout();if(fields.FolderName.IsVisible)throw new Exception("New folder name stayed visible.");
       CheckExportLabels(dialog,mode+" files");CapturePopup(dialog.Window,Path.Combine(output,"AstroArchive_Export_"+mode+".png"));
       SelectExportCategory(fields,ExportCategory.Stacking);
-      if(Convert.ToString(fields.Primary.Content)!="Export stacking folder"||!fields.Destination.IsVisible||fields.StackAstroBin.IsChecked!=true||Convert.ToString(fields.StackInputs.SelectedItem)!="Both")throw new Exception("Stacking folder defaults are wrong; the AstroBin CSV must be offered by default.");
+      if(Convert.ToString(fields.Primary.Content)!="Export stacking folder"||!fields.Destination.IsVisible||fields.StackAstroBin.IsChecked!=false||Convert.ToString(fields.StackInputs.SelectedItem)!="Both")throw new Exception("Stacking folder defaults are wrong; the AstroBin CSV must be off by default.");
       fields.StackAfter.SelectedItem="Siril";fields.StackInputs.SelectedItem="Subs";if(fields.StackAfter.IsEnabled||Convert.ToString(fields.StackAfter.SelectedItem)!="None")throw new Exception("Ineligible export retained a Siril launch.");fields.StackInputs.SelectedItem="Both";
       CheckExportLabels(dialog,mode+" stacking");CapturePopup(dialog.Window,Path.Combine(output,"AstroArchive_Export_Stacking_"+mode+".png"));
       SelectExportCategory(fields,ExportCategory.Application);

@@ -97,7 +97,7 @@ namespace AstroArchive {
    return matches.GroupBy(o=>o.Name).Select(g=>g.First()).Take(50).Select(o=>new CatalogObject{Name=o.Name,Common=CommonName(o.Name),Aliases=Aliases(o.Name),Type=o.Type,RA=o.RA,Dec=o.Dec,Diameter=o.Diameter,Magnitude=o.Magnitude}).ToList();
   }
  }
- public static class Classifier {
+ public static partial class Classifier {
   public sealed class ShotsMetadata {public Dictionary<string,object> Raw;public Dictionary<string,string> Values=new Dictionary<string,string>(StringComparer.OrdinalIgnoreCase);public string Path;public string Note;public FileStamp Stamp;}
   internal static readonly string[] KindHeaderKeys={"IMAGETYP","IMAGETYPE","IMTYPE","IMGTYP","FRAME","FRAMETYP","OBSTYPE","CALTYPE","PROCTYPE","PROCESS","FILETYPE"};
   static bool KindHeader(string key){return Regex.IsMatch(key??"",@".*(?:IMAGE|IMAG|FRAME|OBSTYPE|CALTYPE|PROCTYPE|PROCESS|FILETYPE).*",RegexOptions.IgnoreCase|RegexOptions.CultureInvariant);}
@@ -131,7 +131,7 @@ namespace AstroArchive {
    count=0;total=seconds=0;double? sub,gain;
    if(make!="DWARFLAB"||!Regex.IsMatch(Path.GetFileName(filename??""),@"(?:^|[_-])stacked-(?:16|32)_",RegexOptions.IgnoreCase)||!FilenameExposureGain(filename,out sub,out gain))return false;
    // Device stack EXPTIME is integration; the filename carries exposure per sub.
-   if(!string.IsNullOrWhiteSpace(header.Get("NCOMBINE","STACKCNT","NSTACK","STACKNUM","NSUBS","SUBCOUNT")))return false;
+   if(!string.IsNullOrWhiteSpace(header.Get(StackCountKeys)))return false;
    double? explicitSub=header.Number("SUBEXP","SUBEXPT","EXPOSUB","EXP_SUB","SUBTIME");if(explicitSub.HasValue&&Math.Abs(explicitSub.Value-sub.Value)>0.000001)return false;
    double? integration=header.Number("TOTALEXP","TOTEXP","EXPTOTAL","INTTIME","INTEGRAT");
    string comment;header.Comments.TryGetValue("EXPTIME",out comment);
@@ -148,7 +148,7 @@ namespace AstroArchive {
    frame.StackCount=count;if(frame.Facts==null)frame.Facts=new Dictionary<string,MetadataFact>();
    StackFact(frame,"StackCount",new MetadataFact{Value=count.ToString(CultureInfo.InvariantCulture),Raw=frame.OriginalName,Source="DWARF stack integration: "+Util.Num(total)+" s total / "+Util.Num(seconds)+" s per sub"});return true;
   }
-  public static bool ApplyStackMetadata(Frame frame){return ApplySeestarStackExposure(frame)|ApplyDwarfStackCount(frame)|ApplyExposureStackCount(frame);}
+  public static bool ApplyStackMetadata(Frame frame){return ApplySeestarStackExposure(frame)|ApplyStackExposure(frame)|ApplyDwarfStackCount(frame)|ApplyExposureStackCount(frame);}
   // Any stack with a total and a per-sub exposure but no recorded count: the count is total ÷ sub, used only when it is a whole number.
   public static bool ExposureStackCount(double? total,double? sub,out int count){
    count=0;if(!total.HasValue||!sub.HasValue||total.Value<=0||sub.Value<=0||double.IsNaN(total.Value)||double.IsNaN(sub.Value)||double.IsInfinity(total.Value)||double.IsInfinity(sub.Value))return false;
@@ -159,10 +159,10 @@ namespace AstroArchive {
    if(frame.Kind!="Stack"||frame.StackCount>0||UserMetadata(frame,"StackCount"))return false;
    var image=frame.Images==null?null:frame.Images.FirstOrDefault(i=>i.Key==frame.ImageKey)??frame.Images.FirstOrDefault();var header=image==null?new FitsHeader():new FitsHeader{Values=image.Headers??new Dictionary<string,string>(),Comments=image.Comments??new Dictionary<string,string>()};
    // A declared count that was rejected (e.g. fractional) is not replaced by a derived one.
-   if(!string.IsNullOrWhiteSpace(header.Get("NCOMBINE","STACKCNT","NSTACK","STACKNUM","NSUBS","SUBCOUNT")))return false;
+   if(!string.IsNullOrWhiteSpace(header.Get(StackCountKeys)))return false;
    string comment;header.Comments.TryGetValue("EXPTIME",out comment);bool perSubExptime=Regex.IsMatch(comment??"",@"per[ _-]?(sub|frame)|individual|single",RegexOptions.IgnoreCase);
-   double? total=header.Number("TOTALEXP","TOTEXP","EXPTOTAL","INTTIME","INTEGRAT");if(!total.HasValue&&!perSubExptime&&!Regex.IsMatch(comment??"",@"milliseconds?|\[ms\]",RegexOptions.IgnoreCase))total=frame.Exposure;
-   double? sub=header.Number("SUBEXP","SUBEXPT","EXPOSUB","EXP_SUB","SUBTIME"),gain;if(!sub.HasValue&&perSubExptime)sub=header.Number("EXPTIME");if(!sub.HasValue)FilenameExposureGain(frame.OriginalName,out sub,out gain);
+   double? total=ExposureSeconds(header,StackTotalKeys);if(!total.HasValue&&!perSubExptime&&!UserMetadata(frame,"Exposure")&&!Regex.IsMatch(comment??"",@"milliseconds?|\[ms\]",RegexOptions.IgnoreCase))total=frame.Exposure;
+   double? sub=StackSubExposure(frame,header),gain;if(!sub.HasValue&&perSubExptime)sub=ExposureSeconds(header,"EXPTIME");if(!sub.HasValue)FilenameExposureGain(frame.OriginalName,out sub,out gain);if(!sub.HasValue&&header.Number(StackTotalKeys).HasValue)sub=ExposureSeconds(header,"EXPTIME");
    int count;if(!ExposureStackCount(total,sub,out count))return false;
    frame.StackCount=count;if(frame.Facts==null)frame.Facts=new Dictionary<string,MetadataFact>();
    StackFact(frame,"StackCount",new MetadataFact{Value=count.ToString(CultureInfo.InvariantCulture),Raw=frame.OriginalName,Source="Total exposure ÷ sub exposure: "+Util.Num(total.Value)+" s / "+Util.Num(sub.Value)+" s"});return true;
@@ -175,7 +175,7 @@ namespace AstroArchive {
    if(!UserMetadata(frame,"StackCount")&&frame.StackCount<=0){frame.StackCount=count;StackFact(frame,"StackCount",new MetadataFact{Value=count.ToString(CultureInfo.InvariantCulture),Raw=frame.OriginalName,Source="Seestar stacked filename"});changed=true;}
    if(!UserMetadata(frame,"Exposure")){
     var image=frame.Images==null?null:frame.Images.FirstOrDefault(i=>i.Key==frame.ImageKey)??frame.Images.FirstOrDefault();var header=image==null?new FitsHeader():new FitsHeader{Values=image.Headers??new Dictionary<string,string>(),Comments=image.Comments??new Dictionary<string,string>()};
-    double? total=header.Number("TOTALEXP","TOTEXP","EXPTOTAL","INTTIME","INTEGRAT");string comment;header.Comments.TryGetValue("EXPTIME",out comment);
+    double? total=ExposureSeconds(header,StackTotalKeys);string comment;header.Comments.TryGetValue("EXPTIME",out comment);
     if(!total.HasValue&&Regex.IsMatch(comment??"",@"total|integrat",RegexOptions.IgnoreCase))total=header.Number("EXPTIME");
     bool explicitTotal=total.HasValue&&total.Value>0&&!double.IsInfinity(total.Value)&&!double.IsNaN(total.Value);
     if(!explicitTotal)total=(frame.StackCount>0?frame.StackCount:count)*seconds;
@@ -210,7 +210,7 @@ namespace AstroArchive {
    double? filenameExposure,filenameGain;if(FilenameExposureGain(f.OriginalName,out filenameExposure,out filenameGain)){if(!f.Gain.HasValue)f.Gain=filenameGain;if(!f.Exposure.HasValue&&f.Kind=="Light")f.Exposure=filenameExposure;}
    f.Temperature=h.Number("CCD-TEMP","CCDTEMP","SENSOR_T","SENSORT","CAMTEMP","TEMPERAT","SETTEMP");if(!f.Temperature.HasValue)f.Temperature=MatchNumber(text,@"(?:^|[_ -])T?(-?\d+(?:\.\d+)?)\s*°?C(?:[_ .-]|$)");
    double? bin=MatchNumber(text,@"BIN(?:NING)?[_ =-](\d+)");if(bin.HasValue&&f.BinX==0)f.BinX=(int)bin.Value;if(bin.HasValue&&f.BinY==0)f.BinY=(int)bin.Value;
-   double? stackCount=h.Number("NCOMBINE","STACKCNT","NSTACK","STACKNUM","NSUBS","SUBCOUNT");
+   double? stackCount=h.Number(StackCountKeys);
    if(!stackCount.HasValue)stackCount=MatchNumber(name,@"(?:^|[_ -])(\d+)x\d+(?:\.\d+)?(?:sec|s)(?=[_ .-]|$)")??MatchNumber(name,@"(?:stack[_-]?|^)(\d+)(?:x|$|_)");
    if(stackCount.HasValue&&stackCount.Value>0&&stackCount.Value<=int.MaxValue&&stackCount.Value==Math.Floor(stackCount.Value))f.StackCount=(int)stackCount.Value;
    if(f.Kind=="Light"&&f.StackCount>1){f.Kind="Stack";f.Notes+="Header indicates multiple combined exposures. ";}
@@ -254,7 +254,7 @@ namespace AstroArchive {
    if(h.Get("REGISTER","REGISTRD","DEROTATE")=="T"||Regex.IsMatch(name,@"^(r_|r_pp_|registered[_-])")||low.Contains("/registered/"))f.Calibration="Registered";
    if(f.Kind=="Stack")f.Calibration="Device stack";if(f.Kind.StartsWith("Master")||f.Kind=="Dark"||f.Kind=="Flat"||f.Kind=="Bias")f.Calibration="Calibration frame";
    if(f.Target=="Unknown")f.Notes+="Target needs identification. ";if(f.Kind=="Unknown")f.Notes+="Frame type needs review. ";
-   f.Sky=SkyWcs.FromHeader(h,f.Width,f.Height);if(classification!=null)classification.Complete();MetadataProfiles.Apply(f,h,asset);if(declaredKinds.Count>1)f.MetadataConflicts.Add("Kind: conflicting frame-type metadata values.");CameraDetection.DefaultForTarget(f);if(f.Camera=="Unknown")f.Notes+="Camera channel unknown. ";f.Session=Util.HashText(telescope+"|"+sourceSession+"|"+f.Night+"|"+f.Target+"|"+f.Camera+"|"+f.Width+"x"+f.Height).Substring(0,16);if(selectedImage!=null)f.ImageKey=selectedImage.Key;ApplyStackMetadata(f);if(f.Kind=="Video")MediaFiles.ApplyVideoDuration(f,asset.DurationSeconds,asset.DurationSource);return f;
+   f.Sky=SkyWcs.FromHeader(h,f.Width,f.Height);if(classification!=null)classification.Complete();MetadataProfiles.Apply(f,h,asset);if(declaredKinds.Count>1)f.MetadataConflicts.Add("Kind: conflicting frame-type metadata values.");CameraDetection.DefaultForTarget(f);if(f.Camera=="Unknown")f.Notes+="Camera channel unknown. ";f.Session=Util.HashText(telescope+"|"+sourceSession+"|"+f.Night+"|"+f.Target+"|"+f.Camera+"|"+f.Width+"x"+f.Height).Substring(0,16);if(selectedImage!=null)f.ImageKey=selectedImage.Key;ApplyStackSessionMetadata(f,shots);ApplyStackMetadata(f);if(f.Kind=="Video")MediaFiles.ApplyVideoDuration(f,asset.DurationSeconds,asset.DurationSource);return f;
    }
   }
   static Dictionary<string,string> ReadShots(string path,string root,Frame f,Dictionary<string,ShotsMetadata> cache,Action<int> counted,System.Threading.CancellationToken ct,PipelineMetrics metrics){

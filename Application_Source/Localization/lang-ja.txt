@@ -1922,3 +1922,11 @@ Choose a target on the left to see its overview and sky location. Select a file 
 Calibration frames do not have a celestial target. Select a file to preview it.	キャリブレーション画像には天体がありません。ファイルを選択してプレビューしてください。
 Identify this target to see its catalogue information. Select a file to preview it.	この天体を同定するとカタログ情報が表示されます。ファイルを選択してプレビューしてください。
 Target information is unavailable. You can still select and preview your files.	天体情報を利用できません。ファイルの選択とプレビューは引き続き可能です。
+
+# Target details and analytics output modes
+No information is available for this target.	この天体に関する情報はありません。
+Full image credit	画像クレジット全文
+Images & documents	画像とドキュメント
+Video & GIF	動画とGIF
+Not out (below the horizon)	地平線の下にあります
+Output	出力

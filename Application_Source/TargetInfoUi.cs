@@ -55,7 +55,7 @@ namespace AstroArchive {
     if(token.IsCancellationRequested||generation!=state.Generation||Window.Dispatcher.HasShutdownStarted)return;
     if(result.Status=="matched")state.View.ShowCard(result.Cards[0],id==null?null:"Reading a candidate for "+Catalog.Label(target));
     else if(result.Status=="ambiguous")state.View.ShowChoices(Catalog.Label(target),result);
-    else state.View.ShowMessage(Catalog.Label(target),result.Message+" Your files and target name are unchanged.");
+    else state.View.ShowMessage(Catalog.Label(target),"No information is available for this target.");
    }catch(OperationCanceledException){}catch(Exception error){if(generation!=state.Generation||Window.Dispatcher.HasShutdownStarted)return;state.View.ShowMessage(Catalog.Label(target),"Target information is unavailable. You can still select and preview your files.");state.View.ToolTip=error.Message;}
   }
   void OpenTargetInformation(ListBox list){

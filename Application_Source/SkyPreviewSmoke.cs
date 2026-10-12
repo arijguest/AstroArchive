@@ -65,6 +65,11 @@ namespace AstroArchive {
    globe.ResetView();PumpPopupLayout();var moon=globe.Context.Moon;if(moon==null)throw new Exception("Timed capture lacks Moon context");
    // The default view stays clean: the phase shows on the map and in Capture details only.
    if(Window.FindName("PreviewMoonButton")!=null)throw new Exception("Moon indicator added to the default preview header");
+   if(moon.HasHorizon&&moon.Altitude<0){
+    var belowFacts=((Grid)Window.FindName("SkyFacts")).Children.OfType<TextBlock>().Select(t=>t.Text).ToList();
+    if(!belowFacts.Contains("Not out (below the horizon)")||((Grid)Window.FindName("SkyFacts")).Children.OfType<DockPanel>().Any())throw new Exception("Below-horizon Moon still shows illumination details");
+    return;
+   }
    var icon=((Grid)Window.FindName("SkyFacts")).Children.OfType<DockPanel>().SelectMany(d=>d.Children.OfType<MoonPhaseIcon>()).FirstOrDefault();if(icon==null||Math.Abs(icon.Illumination-moon.Illumination)>1e-9||icon.Waxing!=moon.Waxing)throw new Exception("Capture details phase glyph disagrees with the map");
    var facts=((Grid)Window.FindName("SkyFacts")).Children.OfType<FrameworkElement>().Select(e=>e is TextBlock?((TextBlock)e).Text:string.Join(" ",((Panel)e).Children.OfType<TextBlock>().Select(t=>t.Text))).ToList();
    if(!facts.Contains("Moon")||!facts.Any(t=>t.Contains(moon.IlluminationText+" illuminated"))||!facts.Contains("Moon elevation")||!facts.Contains("Target elevation")||!facts.Contains("Moon to target"))throw new Exception("Capture details omit the Moon breakdown: "+string.Join(" | ",facts));

@@ -27,7 +27,7 @@ namespace AstroArchive {
   public string id,source_url,source_title,publisher,applies_to,review_status;
  }
  public sealed class TargetInfoImage {
-  public string local_path,attribution,licence,licence_url,file_page_url,representation,modifications,sha256;
+  public string object_id,local_path,creator,attribution,licence,licence_url,file_page_url,representation,modifications,sha256;
  }
  public sealed class TargetInfoResult {
   public string Status,Message;

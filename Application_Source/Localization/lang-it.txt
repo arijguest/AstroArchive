@@ -1905,3 +1905,11 @@ Choose a target on the left to see its overview and sky location. Select a file 
 Calibration frames do not have a celestial target. Select a file to preview it.	Le immagini di calibrazione non hanno un oggetto celeste. Seleziona un file per visualizzarlo.
 Identify this target to see its catalogue information. Select a file to preview it.	Identifica questo oggetto per vedere le informazioni del catalogo. Seleziona un file per visualizzarlo.
 Target information is unavailable. You can still select and preview your files.	Le informazioni sull’oggetto non sono disponibili. Puoi comunque selezionare e visualizzare i file.
+
+# Target details and analytics output modes
+No information is available for this target.	Non sono disponibili informazioni per questo oggetto.
+Full image credit	Crediti completi dell’immagine
+Images & documents	Immagini e documenti
+Video & GIF	Video e GIF
+Not out (below the horizon)	Non visibile (sotto l’orizzonte)
+Output	Output

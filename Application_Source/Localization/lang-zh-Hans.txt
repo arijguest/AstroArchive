@@ -1921,3 +1921,11 @@ Choose a target on the left to see its overview and sky location. Select a file 
 Calibration frames do not have a celestial target. Select a file to preview it.	校准帧没有天体目标。选择文件以预览。
 Identify this target to see its catalogue information. Select a file to preview it.	识别此目标以查看星表信息。选择文件以预览。
 Target information is unavailable. You can still select and preview your files.	目标信息不可用。你仍可选择和预览文件。
+
+# Target details and analytics output modes
+No information is available for this target.	此目标没有可用信息。
+Full image credit	完整图片署名
+Images & documents	图像和文档
+Video & GIF	视频和 GIF
+Not out (below the horizon)	未升起（在地平线下方）
+Output	输出

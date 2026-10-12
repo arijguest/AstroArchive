@@ -46,7 +46,8 @@ namespace AstroArchive {
    panel.Visibility=relevant&&(moon!=null||sky.HasPosition&&sky.HasHorizon)?Visibility.Visible:Visibility.Collapsed;
    if(!relevant)return;
    if(sky.HasPosition&&sky.HasHorizon)SkyFact(facts,"Target elevation",(sky.ApproximatePosition?"≈ ":"")+CaptureSky.Elevation(sky.Altitude,sky.Azimuth));
-   if(moon!=null){
+   if(moon!=null&&moon.HasHorizon&&moon.Altitude<0){SkyFact(facts,"Moon","Not out (below the horizon)");}
+   else if(moon!=null){
     var icon=new MoonPhaseIcon{Width=14,Height=14,Margin=new Thickness(0,1,6,0),VerticalAlignment=VerticalAlignment.Center};icon.Show(moon);
     SkyFact(facts,"Moon",moon.PhaseName+" · "+moon.IlluminationText+" illuminated",icon);
     if(moon.HasHorizon)SkyFact(facts,"Moon elevation",CaptureSky.Elevation(moon.Altitude,moon.Azimuth));
