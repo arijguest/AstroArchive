@@ -2084,6 +2084,21 @@ Eclipse coverage over time	食の推移
 Eclipse times are for the observing location.	食の時刻は観測地のものです。
 Eclipse times run from the Moon entering Earth's outer shadow to leaving it.	食の時刻は、月が地球の半影に入ってから出るまでです。
 Eclipse coverage comes from the bundled Moon and Sun models at the recorded time; check the capture clock if it looks wrong.	食分は、同梱の月と太陽のモデルで記録時刻から計算しています。おかしい場合は撮影時刻を確認してください。
+# Target card descriptions, drag and zoom, and the preview loading pane
+Preparing preview…	プレビューを準備しています…
+Preparing preview	プレビューを準備しています
+Preparing target cards…	ターゲットカードを準備しています…
+Adjust card…	カードを調整…
+Choose another image of this target, including any Edited image, adjust its zoom and position, and add a short description.	このターゲットの別の画像 (編集済み画像を含む) を選び、ズームと位置を調整して、短い説明を追加します。
+Drag the preview to move the image, and hold Ctrl while scrolling to zoom.	プレビューをドラッグすると画像を移動でき、Ctrl キーを押しながらスクロールするとズームできます。
+Short description (optional)	短い説明 (任意)
+A line or two under the target name, in card images and videos. Leave blank for none.	カードの画像と動画で、ターゲット名の下に 1〜2 行で表示されます。不要なら空欄のままにします。
+↺ Rotate left	↺ 左に回転
+Rotate right ↻	右に回転 ↻
+Rotate left	左に回転
+Rotate right	右に回転
+Turn the image a quarter turn anticlockwise.	画像を反時計回りに 90° 回転します。
+Turn the image a quarter turn clockwise.	画像を時計回りに 90° 回転します。
 Set capture town / city…	撮影地の市区町村を設定…
 Capture town / city	撮影地の市区町村
 Choose where these files were captured. A chosen town or city replaces any capture location recorded in the files. Without a choice, the recorded location is used, then your observing town / city from Settings.	これらのファイルの撮影地を選択します。選択した市区町村は、ファイルに記録された撮影地より優先されます。選択しない場合は記録された撮影地、次に設定の観測地の市区町村が使われます。

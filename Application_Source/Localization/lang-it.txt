@@ -2067,6 +2067,21 @@ Eclipse coverage over time	Copertura dell’eclissi nel tempo
 Eclipse times are for the observing location.	Gli orari dell’eclissi si riferiscono al luogo di osservazione.
 Eclipse times run from the Moon entering Earth's outer shadow to leaving it.	Gli orari dell’eclissi vanno dall’ingresso della Luna nella penombra della Terra alla sua uscita.
 Eclipse coverage comes from the bundled Moon and Sun models at the recorded time; check the capture clock if it looks wrong.	La copertura deriva dai modelli lunare e solare inclusi all’ora registrata; controlla l’orologio della ripresa se sembra errata.
+# Target card descriptions, drag and zoom, and the preview loading pane
+Preparing preview…	Preparazione dell’anteprima…
+Preparing preview	Preparazione dell’anteprima
+Preparing target cards…	Preparazione delle schede degli oggetti…
+Adjust card…	Regola scheda…
+Choose another image of this target, including any Edited image, adjust its zoom and position, and add a short description.	Scegli un’altra immagine di questo oggetto, comprese le immagini modificate, regola zoom e posizione e aggiungi una breve descrizione.
+Drag the preview to move the image, and hold Ctrl while scrolling to zoom.	Trascina l’anteprima per spostare l’immagine e tieni premuto Ctrl mentre scorri per lo zoom.
+Short description (optional)	Breve descrizione (facoltativa)
+A line or two under the target name, in card images and videos. Leave blank for none.	Una o due righe sotto il nome dell’oggetto, nelle immagini e nei video delle schede. Lascia vuoto per non mostrarla.
+↺ Rotate left	↺ Ruota a sinistra
+Rotate right ↻	Ruota a destra ↻
+Rotate left	Ruota a sinistra
+Rotate right	Ruota a destra
+Turn the image a quarter turn anticlockwise.	Ruota l’immagine di un quarto di giro in senso antiorario.
+Turn the image a quarter turn clockwise.	Ruota l’immagine di un quarto di giro in senso orario.
 Set capture town / city…	Imposta località di ripresa…
 Capture town / city	Località di ripresa
 Choose where these files were captured. A chosen town or city replaces any capture location recorded in the files. Without a choice, the recorded location is used, then your observing town / city from Settings.	Scegli dove sono stati ripresi questi file. Una località scelta sostituisce qualsiasi posizione di ripresa registrata nei file. Senza scelta si usa la posizione registrata, poi la località di osservazione delle Impostazioni.

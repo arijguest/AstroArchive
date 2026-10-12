@@ -135,12 +135,15 @@ Right-click a target > Create target card… makes a shareable image with your b
 image of the target, its integration, light frames, nights and filters.
 Choose any image of the target: Edited images linked to its captures come first,
 then starred and newer Edited images (no link is needed), then stacks and lights.
-Adjust image position sets zoom and placement. Pick a layout for posts, stories or
-video, Dark or Light, a resolution (Standard, High 2x or Sharing), and an optional
-credit line. Cards show the AstroArchive logo and website. Save PNG/JPEG or Copy.
+Drag the preview to move the image, Ctrl+scroll to zoom it and Rotate left/right to
+turn it, or use Adjust image position. Add an optional short description under the
+target name. Each target remembers its image, framing and description for next time. Pick a layout
+for posts, stories or video, Dark or Light, a resolution (Standard, High 2x or
+Sharing), and an optional credit line. Cards show the AstroArchive logo and website. Save PNG/JPEG or Copy.
 More cards & video… opens Analytics > Target cards: cards for your top 3-25
 targets (by integration or light frames) or targets you choose, saved as one
-image, a ZIP of images, or an MP4/GIF slideshow.
+image, a ZIP of images, or an MP4/GIF slideshow. Adjust card… changes one card's
+image, zoom, position and short description; the description also shows in videos.
 
 ## Eclipses
 Sun and Moon captures taken during an eclipse list under Solar Eclipse or Lunar
