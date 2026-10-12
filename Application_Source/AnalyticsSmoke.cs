@@ -24,7 +24,8 @@ namespace AstroArchive {
       try{
        dialog.Show();PumpPopupLayout();var image=PopupChildren<Image>(dialog).Single(i=>AutomationProperties.GetName(i)=="Branded analytics export preview");
        var status=PopupChildren<TextBlock>(dialog).Single(t=>AutomationProperties.GetName(t)=="Analytics status");
-       SmokeSearchWait(()=>image.Source!=null);PumpPopupLayout();VerifyWindowIcon(dialog);Readable(dialog.Foreground,dialog.Background,"Analytics "+mode);
+       SmokeSearchWait(()=>image.Source!=null);PumpPopupLayout();VerifyWindowIcon(dialog);
+       if(!image.IsVisible||PopupChildren<ProgressBar>(dialog).Any(b=>AutomationProperties.GetName(b)=="Preparing preview"&&b.IsVisible))throw new Exception("The loading pane stayed over a ready preview.");Readable(dialog.Foreground,dialog.Background,"Analytics "+mode);
        var choices=PopupChildren<ListBox>(dialog).Single(c=>AutomationProperties.GetName(c)=="Analytics charts");if(choices.Items.Count!=8)throw new Exception("Analytics chart navigation is incomplete.");
        var exportOptions=PopupChildren<Expander>(dialog).Single(c=>AutomationProperties.GetName(c)=="Export options");if(exportOptions.IsExpanded)throw new Exception("Detailed export options are open before they are wanted.");
        var chartType=PopupChildren<ComboBox>(dialog).Single(c=>AutomationProperties.GetName(c)=="Chart type");if(!chartType.IsVisible||chartType.Items.Count!=3)throw new Exception("Chart type choice is unavailable.");
@@ -107,6 +108,13 @@ namespace AstroArchive {
     File.WriteAllText(overwrite,"keep on failure");bool failed=false;try{AnalyticsExport.Save(overwrite,new[]{pages[0]},"invalid",150);}catch(ArgumentException){failed=true;}
     if(!failed||File.ReadAllText(overwrite)!="keep on failure"||Directory.GetFiles(output,"*.tmp").Length!=0)throw new Exception("Failed export changed the destination or retained partial output.");
     SmokeAnalyticsMedia(output,data);
+    // A card's short description is drawn in every layout, and long text stays inside the card.
+    var cardData=TargetCards.Build(source,"M31");
+    foreach(TargetCardLayout layout in Enum.GetValues(typeof(TargetCardLayout))){
+     var plain=TargetCardRenderer.Render(cardData,null,layout,true,true,"",null,1,null);var described=TargetCardRenderer.Render(cardData,null,layout,true,true,"",null,1,new string('w',TargetCardRenderer.DescriptionLength));
+     int w=plain.PixelWidth,h=plain.PixelHeight;var a=new byte[w*h*4];var b=new byte[w*h*4];plain.CopyPixels(a,w*4,0);described.CopyPixels(b,w*4,0);
+     if(a.SequenceEqual(b)||described.PixelWidth!=w||described.PixelHeight!=h)throw new Exception("Target card description was not drawn: "+layout);
+    }
     File.WriteAllText(Path.Combine(output,"analytics-smoke.txt"),"PASS: Repository menu, six reports, combined preview, landscape default and five social layout selectors, exact social pixel sizes, dark/light document and application themes, single/combined PNG/JPEG/PDF/SVG exports, telescope/date scoping, stale-export prevention, decoding and atomic overwrite checks.");
    }finally{repo=savedRepo;Theme.Apply(Window,theme);}
   }

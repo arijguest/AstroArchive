@@ -2077,3 +2077,12 @@ Eclipse coverage over time	Cobertura del eclipse a lo largo del tiempo
 Eclipse times are for the observing location.	Las horas del eclipse son para el lugar de observación.
 Eclipse times run from the Moon entering Earth's outer shadow to leaving it.	Las horas del eclipse van desde que la Luna entra en la penumbra de la Tierra hasta que sale de ella.
 Eclipse coverage comes from the bundled Moon and Sun models at the recorded time; check the capture clock if it looks wrong.	La cobertura del eclipse procede de los modelos de la Luna y el Sol incluidos, a la hora registrada; comprueba el reloj de la captura si parece incorrecta.
+# Target card descriptions, drag and zoom, and the preview loading pane
+Preparing preview…	Preparando la vista previa…
+Preparing preview	Preparando la vista previa
+Preparing target cards…	Preparando las tarjetas de objetos…
+Adjust card…	Ajustar tarjeta…
+Choose another image of this target, including any Edited image, adjust its zoom and position, and add a short description.	Elija otra imagen de este objeto, incluida cualquier imagen editada, ajuste su zoom y posición, y añada una descripción breve.
+Drag the preview to move the image, and hold Ctrl while scrolling to zoom.	Arrastre la vista previa para mover la imagen y mantenga Ctrl mientras desplaza la rueda para hacer zoom.
+Short description (optional)	Descripción breve (opcional)
+A line or two under the target name, in card images and videos. Leave blank for none.	Una o dos líneas bajo el nombre del objeto, en las imágenes y vídeos de las tarjetas. Déjela en blanco para no mostrar ninguna.

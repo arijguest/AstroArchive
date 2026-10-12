@@ -35,7 +35,7 @@ namespace AstroArchive {
  public sealed partial class AnalyticsWindow:Window {
   public const int CardsIndex=7,CombinedIndex=6;
   readonly List<Frame> frames;readonly ListBox charts;readonly Image preview;readonly TextBlock summary,status,previewTitle,exportHint;
-  readonly RadioButton imagesOutput,videoOutput;readonly ComboBox telescope,format,resolution,previewPage,documentTheme,documentLayout,chartStyle,chartOrder,palette;readonly DatePicker from,to;readonly CheckBox rejected;readonly TextBox caption,chartTitle,chartSubtitle;readonly Border paper,optionsPanel;
+  readonly RadioButton imagesOutput,videoOutput;readonly ComboBox telescope,format,resolution,previewPage,documentTheme,documentLayout,chartStyle,chartOrder,palette;readonly DatePicker from,to;readonly CheckBox rejected;readonly TextBox caption,chartTitle,chartSubtitle;readonly Border paper,optionsPanel,loadingPane;readonly TextBlock loadingText;
   readonly Button export,exportAll,close,resetChart,resetAll,optionsToggle;readonly Expander scope,exportOptions;readonly DispatcherTimer debounce,designDebounce;readonly Grid body;readonly FrameworkElement chartStyleField,chartOrderField,layoutField,paletteField,captionField;
   readonly StackPanel chartSection,combinedSection,cardSection;readonly List<CheckBox> combinedCharts=new List<CheckBox>();readonly List<TextBlock> chartDetails=new List<TextBlock>();
   readonly StackPanel motionControls;readonly ComboBox pace,transition,videoSize;readonly Button play;readonly TextBlock motionSummary;readonly ProgressBar progress;readonly DispatcherTimer playback;
@@ -91,7 +91,12 @@ namespace AstroArchive {
    // The title gives way to the page picker and options button on one line, so it never wraps into a tall column.
    previewTitle=Label("Preview",16,true);previewTitle.VerticalAlignment=VerticalAlignment.Center;previewTitle.TextWrapping=TextWrapping.NoWrap;previewTitle.TextTrimming=TextTrimming.CharacterEllipsis;previewHeader.Children.Add(previewTitle);
    preview=new Image{Stretch=Stretch.Uniform,Margin=new Thickness(12),HorizontalAlignment=HorizontalAlignment.Stretch,VerticalAlignment=VerticalAlignment.Center};AccessibleName(preview,"Branded analytics export preview");RenderOptions.SetBitmapScalingMode(preview,BitmapScalingMode.HighQuality);
-   paper=new Border{Background=Brushes.White,BorderThickness=new Thickness(1),Child=preview};Theme.Bind(paper,Border.BorderBrushProperty,"Border");Grid.SetRow(paper,1);pane.Children.Add(paper);
+   // A themed pane stands in for the page while analytics, cards or video scenes are prepared.
+   var loadingStack=new StackPanel{HorizontalAlignment=HorizontalAlignment.Center,VerticalAlignment=VerticalAlignment.Center};loadingText=Label("Preparing preview…",14);loadingText.HorizontalAlignment=HorizontalAlignment.Center;Theme.Bind(loadingText,TextBlock.ForegroundProperty,"Muted");
+   var spinner=new ProgressBar{IsIndeterminate=true,Width=180,Height=4,Margin=new Thickness(0,0,0,12)};Theme.Bind(spinner,Control.ForegroundProperty,"Accent");Theme.Bind(spinner,Control.BackgroundProperty,"Border");spinner.BorderThickness=new Thickness(0);AccessibleName(spinner,"Preparing preview");
+   loadingStack.Children.Add(spinner);loadingStack.Children.Add(loadingText);loadingPane=new Border{Child=loadingStack};Theme.Bind(loadingPane,Border.BackgroundProperty,"SurfaceAlt");AutomationProperties.SetLiveSetting(loadingText,AutomationLiveSetting.Polite);
+   var stage=new Grid();stage.Children.Add(preview);stage.Children.Add(loadingPane);preview.Visibility=Visibility.Hidden;
+   paper=new Border{BorderThickness=new Thickness(1),Child=stage};Theme.Bind(paper,Border.BackgroundProperty,"SurfaceAlt");Theme.Bind(paper,Border.BorderBrushProperty,"Border");Grid.SetRow(paper,1);pane.Children.Add(paper);
    optionsPanel=new Border{BorderThickness=new Thickness(1),CornerRadius=new CornerRadius(8),Margin=new Thickness(18,0,0,0)};Theme.Bind(optionsPanel,Border.BackgroundProperty,"Surface");Theme.Bind(optionsPanel,Border.BorderBrushProperty,"Border");Grid.SetColumn(optionsPanel,2);body.Children.Add(optionsPanel);
    var options=new StackPanel{Margin=new Thickness(16,14,16,16)};var optionsScroll=new ScrollViewer{Content=options,VerticalScrollBarVisibility=ScrollBarVisibility.Auto,HorizontalScrollBarVisibility=ScrollBarVisibility.Disabled};AccessibleName(optionsScroll,"Analytics options");optionsPanel.Child=optionsScroll;
    // What is being made comes first, since it decides the formats and controls below.
@@ -270,7 +275,7 @@ namespace AstroArchive {
   bool ValidDate(DatePicker picker){DateTime parsed;return string.IsNullOrWhiteSpace(picker.Text)||(picker.SelectedDate.HasValue&&DateTime.TryParse(picker.Text,out parsed)&&parsed.Date==picker.SelectedDate.Value.Date);}
   async void RefreshData(){
    if(!ValidDate(from)||!ValidDate(to)){status.Text="Enter a valid date or clear the date field.";return;}
-   int request=++generation;snapshot=null;export.IsEnabled=false;exportAll.IsEnabled=false;play.IsEnabled=false;status.Text="Updating analytics…";
+   int request=++generation;snapshot=null;export.IsEnabled=false;exportAll.IsEnabled=false;play.IsEnabled=false;status.Text="Updating analytics…";ShowLoading("Preparing preview…");
    var selected=telescope.SelectedItem as ComboBoxItem;var options=new AnalyticsOptions{Telescope=selected==null?null:Convert.ToString(selected.Tag),From=from.SelectedDate,To=to.SelectedDate,IncludeRejected=rejected.IsChecked==true,Caption=caption.Text.Trim()};
    // An unknown telescope is represented by empty metadata; normalise just this
    // snapshot so it remains selectable independently of All telescopes.
@@ -282,8 +287,11 @@ namespace AstroArchive {
     scope.Header="Scope · "+(selected==null?"All telescopes":Convert.ToString(selected.Content))+(options.From.HasValue||options.To.HasValue?" · Date range":" · All dates");
     status.Text=result.Captures==0?(result.Seconds>0?"No light frames match this scope; standalone stack integration is included.":"No light frames match this scope. Adjust the telescope or date range."):result.UnknownExposure+" images with unknown exposure · "+result.UnknownDate+" undated light frames · "+result.ExcludedRejected+" rejected light frames excluded"+(result.ExcludedUndated>0?" · "+result.ExcludedUndated+" undated light frames excluded by date range":"")+". Integration includes standalone stacks; matching stacks, videos and calibrations are excluded.";
     RenderPreview();
-   }catch(Exception error){if(closed||request!=generation)return;status.Text=error.Message;}
+   }catch(Exception error){if(closed||request!=generation)return;status.Text=error.Message;HideLoading();}
   }
+  void ShowLoading(string text){loadingText.Text=text;loadingPane.Visibility=Visibility.Visible;preview.Visibility=Visibility.Hidden;}
+  void HideLoading(){loadingPane.Visibility=Visibility.Collapsed;preview.Visibility=Visibility.Visible;}
+  bool Loading{get{return loadingPane.Visibility==Visibility.Visible;}}
   void BuildPages(){
    bool dark=documentTheme.SelectedIndex!=1;var layout=(AnalyticsLayout)Math.Max(0,documentLayout.SelectedIndex);
    reportPages=Enumerable.Range(0,6).Select(i=>AnalyticsGraphics.Pages(snapshot,i,dark,layout,prefs.Chart(i),prefs.Palette)).ToArray();pages=prefs.IncludedCharts().SelectMany(i=>reportPages[i]).ToList();
@@ -298,11 +306,12 @@ namespace AstroArchive {
    var selected=all?pages:reportPages[charts.SelectedIndex];previewPage.Items.Clear();previewPage.Items.Add("All pages");for(int i=0;i<selected.Count;i++)previewPage.Items.Add(new ComboBoxItem{Content="Page "+(i+1)+" of "+selected.Count,ToolTip=selected[i].Title});previewPage.Visibility=selected.Count>1?Visibility.Visible:Visibility.Collapsed;previewPage.SelectedIndex=all&&documentLayout.SelectedIndex==0&&!IsMotion?0:1;
    previewTitle.Text=all?CombinedName()+(documentLayout.SelectedIndex>0?" · Social pages":" · Combined preview"):selected[0].Title+" · Export preview";
    export.Content=all?"Export all…":"Export chart…";exportAll.Visibility=all?Visibility.Collapsed:Visibility.Visible;export.IsEnabled=exportAll.IsEnabled=play.IsEnabled=(snapshot.Captures>0||snapshot.RepositorySeconds>0)&&!exporting;Hints();
+   if(Loading)DrawPreview();
   }
   void DrawPreview(){
    if(!ready||snapshot==null||charts.SelectedIndex<0||previewPage.SelectedIndex<0)return;
    StopPlayback();
-   var selected=SelectedPages();if(selected==null||selected.Count==0)return;int page=previewPage.SelectedIndex-1;if(page>=selected.Count)return;preview.Source=AnalyticsExport.Preview(page<0?selected:new List<AnalyticsPage>{selected[page]});
+   var selected=SelectedPages();if(selected==null||selected.Count==0)return;int page=previewPage.SelectedIndex-1;if(page>=selected.Count)return;preview.Source=AnalyticsExport.Preview(page<0?selected:new List<AnalyticsPage>{selected[page]});HideLoading();
   }
   void Hints(){
    if(!ready)return;string value=Convert.ToString(format.SelectedItem);bool still=value=="PNG"||value=="JPEG";

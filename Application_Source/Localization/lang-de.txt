@@ -2052,3 +2052,12 @@ Eclipse coverage over time	Bedeckung der Finsternis im Zeitverlauf
 Eclipse times are for the observing location.	Die Finsterniszeiten gelten für den Beobachtungsort.
 Eclipse times run from the Moon entering Earth's outer shadow to leaving it.	Die Finsterniszeiten reichen vom Eintritt des Mondes in den Halbschatten der Erde bis zu seinem Austritt.
 Eclipse coverage comes from the bundled Moon and Sun models at the recorded time; check the capture clock if it looks wrong.	Die Bedeckung stammt aus den mitgelieferten Mond- und Sonnenmodellen zum aufgezeichneten Zeitpunkt; prüfen Sie die Aufnahmeuhr, falls sie falsch wirkt.
+# Target card descriptions, drag and zoom, and the preview loading pane
+Preparing preview…	Vorschau wird vorbereitet…
+Preparing preview	Vorschau wird vorbereitet
+Preparing target cards…	Zielkarten werden vorbereitet…
+Adjust card…	Karte anpassen…
+Choose another image of this target, including any Edited image, adjust its zoom and position, and add a short description.	Wählen Sie ein anderes Bild dieses Ziels, auch ein bearbeitetes Bild, passen Sie Zoom und Position an und fügen Sie eine kurze Beschreibung hinzu.
+Drag the preview to move the image, and hold Ctrl while scrolling to zoom.	Ziehen Sie die Vorschau, um das Bild zu verschieben, und scrollen Sie mit gedrückter Strg-Taste, um zu zoomen.
+Short description (optional)	Kurzbeschreibung (optional)
+A line or two under the target name, in card images and videos. Leave blank for none.	Ein bis zwei Zeilen unter dem Zielnamen, in Kartenbildern und Videos. Leer lassen, um keine anzuzeigen.

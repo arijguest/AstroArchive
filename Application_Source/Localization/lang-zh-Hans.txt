@@ -2083,3 +2083,12 @@ Eclipse coverage over time	食分随时间变化
 Eclipse times are for the observing location.	食的时间以观测地点为准。
 Eclipse times run from the Moon entering Earth's outer shadow to leaving it.	食的时间从月球进入地球半影开始，到离开半影为止。
 Eclipse coverage comes from the bundled Moon and Sun models at the recorded time; check the capture clock if it looks wrong.	遮挡程度由内置的月球和太阳模型按记录时间计算；如看起来不对，请检查拍摄时间。
+# Target card descriptions, drag and zoom, and the preview loading pane
+Preparing preview…	正在准备预览…
+Preparing preview	正在准备预览
+Preparing target cards…	正在准备目标卡片…
+Adjust card…	调整卡片…
+Choose another image of this target, including any Edited image, adjust its zoom and position, and add a short description.	选择此目标的其他图像 (包括任何已编辑图像)，调整其缩放和位置，并添加简短说明。
+Drag the preview to move the image, and hold Ctrl while scrolling to zoom.	拖动预览可移动图像，按住 Ctrl 滚动可缩放。
+Short description (optional)	简短说明 (可选)
+A line or two under the target name, in card images and videos. Leave blank for none.	在卡片图像和视频中显示于目标名称下方的一两行文字。留空则不显示。
