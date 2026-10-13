@@ -167,6 +167,8 @@ It follows your Windows language, or choose one in **Settings → General → La
 
 ### Fresh from the latest releases
 
+**[3.2.8 prerelease](https://github.com/arijguest/AstroArchive/releases/tag/v3.2.8.1)** rebuilds Help as a help centre with guided fixes and tours that walk the real window, adds Report a problem with the app log attached, groups comets under one target with a fuller information pane, applies capture-town timezones to local capture clocks, and repairs thumbnail credits.
+
 **[3.2.7](https://github.com/arijguest/AstroArchive/releases/tag/v3.2.7.2)** retains the 3.2.6 application improvements and makes publisher signing optional. Unsigned publication keeps checksum and update-feed validation; Windows may still block unsigned packages.
 
 **[3.2.6](https://github.com/arijguest/AstroArchive/releases/tag/v3.2.6.1)** reorganises the information pane with the overview before the image, a highlighted fun fact, compact or expandable image credits, and a single expandable Sources heading. It also simplifies solar eclipse displays, moves capture town/city editing into Edit metadata, improves DSO obstruction scoring, and hardens FITS and very dark previews.
