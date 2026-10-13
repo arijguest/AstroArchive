@@ -56,7 +56,7 @@ namespace AstroArchive {
     if(sky.Eclipse!=null||!sky.BodyBelowHorizon||sky.Longitude!=139.7||FrameEclipse(changed,all)!=null)throw new Exception("Saved town retained an old solar preview or eclipse section");
    }finally{CancelPreview();all=previous;settings.ShowPreview=shown;SetPreviewVisibility();UpdateCaptureSky("",oldFrame);}
   }
-  // Eclipse captures show a cartoon, the coverage at capture, the event as a curve and its times.
+  // Eclipse captures show a cartoon, the coverage at capture, the event as a curve and its times; solar ones leave out the Moon's own phase.
   void SmokeEclipseDetails(string output){
    SmokeEclipseFitsPreviews(output);
    GoToPage(0);string theme=settings.ThemeMode;var details=(Popup)Window.FindName("PreviewDetailsPopup");var facts=(Grid)Window.FindName("SkyFacts");
@@ -66,16 +66,12 @@ namespace AstroArchive {
    try{
     foreach(var c in cases){
      var sky=CaptureSky.Resolve(c.Frame,null);UpdateMoonDetails(sky,c.Frame);PumpPopupLayout();
-     if(c.Name=="Solar"){
-      var solarLabels=facts.Children.OfType<TextBlock>().Select(t=>t.Text).ToList();
-      if(!solarLabels.Contains("Sun obscured")||!solarLabels.Contains(MoonEphemeris.Percent(sky.Eclipse.Obscuration))||facts.Children.OfType<Border>().Any(b=>b.Name=="EclipseCard")||solarLabels.Any(t=>c.Rows.Contains(t)))throw new Exception("Solar details are not limited to capture obscuration");
-      foreach(string mode in new[]{"Dark","Light"}){Theme.Apply(Window,mode);details.IsOpen=true;PumpPopupLayout();SavePopup((FrameworkElement)details.Child,Path.Combine(output,"AstroArchive_Eclipse_Details_Solar_"+mode+".png"));details.IsOpen=false;}
-      continue;
-     }
      var card=facts.Children.OfType<Border>().FirstOrDefault(b=>b.Name=="EclipseCard");if(card==null)throw new Exception(c.Name+" eclipse card missing from Capture details");
      var parts=((Grid)card.Child).Children;var icon=parts.OfType<EclipseIcon>().FirstOrDefault();var curve=parts.OfType<EclipseCurve>().FirstOrDefault();
      if(icon==null||icon.Info!=sky.Eclipse||curve==null||curve.Event==null||curve.Event.Solar!=sky.Eclipse.Solar)throw new Exception(c.Name+" eclipse card lacks its cartoon or coverage curve");
      var labels=facts.Children.OfType<TextBlock>().Select(t=>t.Text).ToList();var missing=c.Rows.Where(r=>!labels.Contains(r)).ToList();if(missing.Count>0)throw new Exception(c.Name+" eclipse details omit: "+string.Join(", ",missing));
+     // Solar eclipse details drop the Moon's phase, elevation and separation; the card carries the eclipse itself.
+     if(c.Name=="Solar"&&(labels.Contains("Moon")||labels.Contains("Moon elevation")||labels.Contains("Moon to target")||facts.Children.OfType<DockPanel>().Any()))throw new Exception("Solar eclipse details still show the Moon's illumination, phase diagram or distance to the target");
      foreach(string mode in new[]{"Dark","Light"}){Theme.Apply(Window,mode);details.IsOpen=true;PumpPopupLayout();SavePopup((FrameworkElement)details.Child,Path.Combine(output,"AstroArchive_Eclipse_Details_"+c.Name+"_"+mode+".png"));details.IsOpen=false;}
     }
    }finally{details.IsOpen=false;Theme.Apply(Window,theme);}

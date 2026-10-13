@@ -59,7 +59,7 @@ namespace AstroArchive {
    var actions=new WrapPanel{Margin=new Thickness(0,0,0,4)};
    if(!string.IsNullOrEmpty(back)&&GoBack!=null){var up=ActionButton(back,true);up.Name="BackToSection";up.Click+=(s,e)=>GoBack();actions.Children.Add(up);}
    var stellarium=OpenInStellarium==null?null:Stellarium.ForCard(card);
-   if(stellarium!=null){var open=ActionButton("Open in Stellarium",false);open.Name="OpenInStellarium";UiHelp.Hint(open,Localization.T(Stellarium.CardTooltip(stellarium)));open.Click+=(s,e)=>OpenInStellarium(stellarium);actions.Children.Add(open);}
+   if(stellarium!=null){var open=StellariumIconButton();open.Name="OpenInStellarium";AutomationProperties.SetName(open,Localization.T("Open in Stellarium"));UiHelp.Hint(open,Localization.T(Stellarium.CardTooltip(stellarium)));open.Click+=(s,e)=>OpenInStellarium(stellarium);actions.Children.Add(open);}
    if(actions.Children.Count>0)content.Children.Add(actions);
    var curated=TargetDescriptions.For(card.id);
    if(card.identity_status=="disputed"||card.domain=="historical_designation")content.Children.Add(Text("Historical designation · identity is disputed.","Muted"));
@@ -171,6 +171,11 @@ namespace AstroArchive {
    var text=Text(label);text.Margin=new Thickness(0);var face=new StackPanel{Orientation=Orientation.Horizontal};
    if(back){var arrow=Text("←");arrow.Margin=new Thickness(0,0,6,0);face.Children.Add(arrow);}face.Children.Add(text);
    return new Button{Content=face,Margin=new Thickness(0,0,6,6),Padding=new Thickness(10,3,10,3),HorizontalAlignment=HorizontalAlignment.Left};
+  }
+  // Icon-only, like the Stellarium button in the preview pane header (same glyph, size and padding).
+  static Button StellariumIconButton(){
+   var glyph=new System.Windows.Shapes.Path{Data=Geometry.Parse(Stellarium.IconGeometry),StrokeThickness=1.6,StrokeLineJoin=PenLineJoin.Round,StrokeStartLineCap=PenLineCap.Round,StrokeEndLineCap=PenLineCap.Round};glyph.SetResourceReference(System.Windows.Shapes.Shape.StrokeProperty,"Text");
+   return new Button{Content=new Viewbox{Child=glyph},Width=28,Height=28,MinHeight=0,Padding=new Thickness(6),Margin=new Thickness(0,0,6,6),HorizontalAlignment=HorizontalAlignment.Left};
   }
   static Border Callout(UIElement child){var callout=new Border{Padding=new Thickness(10,8,10,2),CornerRadius=new CornerRadius(6),Margin=new Thickness(0,2,0,8),Child=child};callout.SetResourceReference(Border.BackgroundProperty,"SurfaceAlt");return callout;}
   static Grid Facts(){var grid=new Grid{Margin=new Thickness(0,4,0,10)};grid.ColumnDefinitions.Add(new ColumnDefinition{Width=GridLength.Auto,MaxWidth=115});grid.ColumnDefinitions.Add(new ColumnDefinition{Width=new GridLength(1,GridUnitType.Star)});return grid;}

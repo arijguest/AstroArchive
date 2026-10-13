@@ -26,6 +26,18 @@
       "representation": "Narrowband astrophotography in the Hubble palette from 47.5 hours of Hα/OIII and SII/OIII duo-band data; assigned colour.",
       "subject_review": "Visually inspected 2026-10-13; the trunk, its bright rim and the surrounding IC 1396 emission agree with the file caption and target."
     },
+    "IC 1396": {
+      "file": "ic-1396-commons-donatiello-2024.jpg",
+      "file_page_url": "https://commons.wikimedia.org/wiki/File:IC_1396_in_Cepheus_(52547531946).jpg",
+      "commons_path": "3/32/IC_1396_in_Cepheus_(52547531946).jpg",
+      "creator": "Giuseppe Donatiello",
+      "attribution": "Giuseppe Donatiello — IC 1396 in Cepheus (52547531946).jpg (CC0 1.0), via Wikimedia Commons",
+      "rights_holder": "Giuseppe Donatiello (gjdonatiello), who dedicated the work to the public domain",
+      "licence": "CC0 1.0",
+      "licence_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "representation": "Wide-field astrophotography of the whole IC 1396 nebula with Mu Cephei at the right edge: about 8 hours of 200-300 mm telephoto data gathered 2019-2023; processed colour.",
+      "subject_review": "Visually inspected 2026-10-13; the complete IC 1396 emission region, its dark globules and the Elephant's Trunk agree with the file description and target. Replaces a faint, mostly empty star field."
+    },
     "NGC 7640": {
       "file": "ngc-7640-commons-esa-hubble-potw1706a.jpg",
       "file_page_url": "https://commons.wikimedia.org/wiki/File:NGC_7640_a_spiral_in_Andromeda.jpg",

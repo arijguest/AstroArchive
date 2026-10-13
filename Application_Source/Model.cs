@@ -59,7 +59,7 @@ namespace AstroArchive {
   public string SessionGroup {get{return SessionKey;}}
   public string Make {get;set;} public string MakeEvidence {get;set;} public string TargetEvidence {get;set;} public string SourceDisposition {get;set;}
   public string ObservationMode {get;set;} public string Kind {get;set;} public string Calibration {get;set;} public string Filter {get;set;} public string Bayer {get;set;}
-  [ScriptIgnore]public string KindLabel{get{return Kind=="Stack"&&StackCount>0?"Stack ("+StackCount.ToString(CultureInfo.InvariantCulture)+")":Kind;}}
+  [ScriptIgnore]public string KindLabel{get{return Kind=="Stack"&&StackCount>1?"Stack ("+StackCount.ToString(CultureInfo.InvariantCulture)+")":Kind;}}
   public string Mount {get;set;} public string MountEvidence {get;set;} public string Observed {get;set;} public string TimeSource {get;set;}
   [ScriptIgnore]public string MountText{get{return MountLabels.Display(this);}}
   [ScriptIgnore]public string MountEvidenceText{get{return MountLabels.Evidence(this);}}

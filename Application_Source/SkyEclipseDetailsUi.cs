@@ -91,9 +91,8 @@ namespace AstroArchive {
   // as a curve, followed by its times as ordinary facts.
   void EclipseDetails(Grid facts,CaptureSky sky,Frame frame){
    var at=sky.Eclipse;
-   if(at.Solar){SkyFact(facts,"Sun obscured",MoonEphemeris.Percent(at.Obscuration));return;}
    var utc=sky.Utc.Value;var e=Eclipses.Event(at,utc,sky.Latitude,sky.Longitude);
-   if(e==null){SkyFact(facts,at.Title,at.Summary);return;}
+   if(e==null){SkyFact(facts,at.Solar?"Sun obscured":at.Title,at.Solar?MoonEphemeris.Percent(at.Obscuration):at.Summary);return;}
    var zone=EclipseZone(frame);
    var card=new Border{CornerRadius=new CornerRadius(6),Padding=new Thickness(10,8,10,8),Margin=new Thickness(0,0,0,8)};card.SetResourceReference(Border.BackgroundProperty,"SurfaceAlt");
    var layout=new Grid();layout.ColumnDefinitions.Add(new ColumnDefinition{Width=GridLength.Auto});layout.ColumnDefinitions.Add(new ColumnDefinition{Width=new GridLength(1,GridUnitType.Star)});

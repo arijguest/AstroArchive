@@ -135,6 +135,9 @@ target, folders and file names are unchanged. The sky map adds a close-up of
 both discs to scale; clicking it, the Moon, the Sun or the target opens Capture
 details.
 
+For solar eclipse captures Capture details omit the Moon's own illumination, phase
+glyph, elevation and separation from the target; the eclipse card carries the story.
+
 Capture details open with an eclipse card: a cartoon of the discs at the capture
 time (true sizes and separation, fixed direction), the coverage at capture, and a
 curve of coverage across the whole event with the capture marked. Below it are the

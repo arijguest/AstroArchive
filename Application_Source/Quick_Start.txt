@@ -411,10 +411,12 @@ ECLIPSES
 @keywords eclipse solar lunar sun moon obscuration contact
 Sun and Moon captures taken during an observable eclipse list under **Solar Eclipse** or
 **Lunar Eclipse** in the target list; files and folders are unchanged.
-- Solar captures show obscuration on the Sun in the sky map; Capture details shows the
-  percentage of the Sun obscured.
+- Solar captures show obscuration on the Sun in the sky map. Capture details shows the
+  percentage of the Sun obscured at capture, a coverage curve with start and end
+  times, and the duration of totality or annularity. The Moon's own phase,
+  illumination and distance to the target are left out.
 - The local Sun and Moon must both be above the horizon for a solar eclipse to show.
-- Lunar eclipse details keep the coverage curve and contact times.
+- Lunar eclipse details show the same curve and contact times.
 - Moon-to-target separation is omitted when the target is the Moon.
 
 ## When eclipses don't show

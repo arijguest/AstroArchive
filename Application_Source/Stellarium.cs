@@ -64,6 +64,8 @@ namespace AstroArchive {
   }
   public static string EclipseCard(bool solar){return solar?"SOLAR ECLIPSE":"LUNAR ECLIPSE";}
   static StellariumView Body(string name,double field){return new StellariumView{ByName=true,Name=name.Trim(),FieldDegrees=field};}
+  // Same glyph as PreviewStellariumIcon in MainWindow.xaml.
+  public const string IconGeometry="M13,2 A8,8 0 1 0 18,13 A6.5,6.5 0 0 1 13,2 Z M4,2 L4,6 M2,4 L6,4";
   public static string CardTooltip(StellariumView view){return view.ByName?"Open in Stellarium, centred on this object now. Uses Stellarium Web when Stellarium is not installed.":"Open in Stellarium at the catalogue position. Uses Stellarium Web when Stellarium is not installed.";}
   public static string Tooltip(StellariumView view){
    if(view==null)return "Open in Stellarium (needs a light frame with a known position)";
