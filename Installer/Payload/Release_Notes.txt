@@ -1,4 +1,4 @@
-AstroArchive 3.2.6 — development
+AstroArchive 3.2.6
 Package 3.2.6.1
 
 Target information: the pane now reads from the object name and catalogue details through the overview, image, highlighted fun fact and parameters. Short image credits remain visible; long credits expand beneath the image. Sources is itself an expandable heading containing references and catalogue details.
