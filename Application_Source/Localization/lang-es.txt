@@ -2402,3 +2402,10 @@ Set UTC date	Fijar fecha UTC
 UTC date (YYYY-MM-DD). Press Enter or Set UTC date.	Fecha UTC (AAAA-MM-DD). Pulsa Intro o Fijar fecha UTC.
 Enter a valid UTC date (YYYY-MM-DD) between 1972 and 2026.	Introduce una fecha UTC válida (AAAA-MM-DD) entre 1972 y 2026.
 Drag to rotate · Shift-drag to pan · Focus/Ctrl + wheel or pinch to zoom.	Arrastra para girar · Mayús y arrastrar para desplazar · Enfoca/Ctrl y rueda o pellizca para ampliar.
+Earth MOID	MOID con la Tierra
+Observations	Observaciones
+{0} observations	{0} observaciones
+Meteor showers	Lluvias de meteoros
+Suspected parent of	Presunto progenitor de
+Parabolic	Parabólico
+Chiron-type	Tipo Quirón

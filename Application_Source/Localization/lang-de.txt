@@ -2377,3 +2377,10 @@ Set UTC date	UTC-Datum setzen
 UTC date (YYYY-MM-DD). Press Enter or Set UTC date.	UTC-Datum (JJJJ-MM-TT). Drücken Sie Enter oder UTC-Datum setzen.
 Enter a valid UTC date (YYYY-MM-DD) between 1972 and 2026.	Geben Sie ein gültiges UTC-Datum (JJJJ-MM-TT) zwischen 1972 und 2026 ein.
 Drag to rotate · Shift-drag to pan · Focus/Ctrl + wheel or pinch to zoom.	Ziehen zum Drehen · Umschalt+Ziehen zum Verschieben · Fokus/Strg+Mausrad oder zwei Finger zum Zoomen.
+Earth MOID	MOID zur Erde
+Observations	Beobachtungen
+{0} observations	{0} Beobachtungen
+Meteor showers	Meteorströme
+Suspected parent of	Mutmaßlicher Mutterkomet von
+Parabolic	Parabolisch
+Chiron-type	Chiron-Typ

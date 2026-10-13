@@ -171,12 +171,13 @@ namespace AstroArchive {
     AddFact(facts,"Orbit type",Localization.T(CometInfo.ClassLabel(orbit)),CometInfo.SourceTitle);
     AddFact(facts,"Perihelion",CometInfo.Perihelion(orbit),"Closest distance to the Sun. "+CometInfo.SourceTitle);
     if(CometInfo.ShowsAphelion(orbit))AddFact(facts,"Aphelion",CometInfo.Aphelion(orbit),"Farthest distance from the Sun. "+CometInfo.SourceTitle);
-    if(complete!=null&&complete.perihelion_time.HasValue)AddFact(facts,"Perihelion (TDB)","JD "+complete.perihelion_time.Value.ToString("0.#####",CultureInfo.InvariantCulture),CometInfo.SourceTitle);else if(CometInfo.ShowsPerihelionDate(orbit))AddFact(facts,"Perihelion date",CometInfo.PerihelionDate(orbit),CometInfo.SourceTitle);
+    if(complete!=null&&complete.perihelion_time.HasValue)AddFact(facts,"Perihelion (TDB)",(CometInfo.ShowsPerihelionDate(orbit)?CometInfo.PerihelionDate(orbit)+" · ":"")+"JD "+complete.perihelion_time.Value.ToString("0.#####",CultureInfo.InvariantCulture),CometInfo.SourceTitle);else if(CometInfo.ShowsPerihelionDate(orbit))AddFact(facts,"Perihelion date",CometInfo.PerihelionDate(orbit),CometInfo.SourceTitle);
     if(orbit.PeriodYears>0)AddFact(facts,"Orbital period",CometInfo.Period(orbit),CometInfo.SourceTitle);
     AddFact(facts,"Eccentricity",CometInfo.Eccentricity(orbit),"0 is a circle; 1 or more is an open orbit. "+CometInfo.SourceTitle);
     if(CometInfo.HasSemiMajorAxis(orbit))AddFact(facts,"Semi-major axis",CometInfo.SemiMajorAxis(orbit),"Average distance from the Sun. "+CometInfo.SourceTitle);
     AddFact(facts,"Perihelion speed",CometInfo.PerihelionSpeed(orbit),"Speed at closest approach to the Sun, from the orbit. "+CometInfo.SourceTitle);
     if(CometInfo.ShowsEscapeSpeed(orbit))AddFact(facts,"Speed at infinity",CometInfo.EscapeSpeed(orbit),"Speed left once far from the Sun on an open orbit. "+CometInfo.SourceTitle);
+    AddCometSnapshot(facts,card);
     return;
    }
    var set=card.domain=="solar_system"?TargetParameters.For(card.id):null;if(set==null)return;
@@ -187,6 +188,17 @@ namespace AstroArchive {
    if(set.Gravity>0)AddFact(facts,"Surface gravity",TargetParameters.SurfaceGravity(set),"In Earth gravities (1 g = 9.80665 m/s²). NASA Planetary Fact Sheet");
    if(TargetParameters.ShowsMoonCount(set))AddFact(facts,"Known moons",set.MoonCount.ToString(CultureInfo.InvariantCulture),"Confirmed moons. NASA Solar System Exploration");
    if(set.Moons.Length>0)AddFact(facts,"Major moons",TargetParameters.Moons(set),null);
+  }
+  // Facts only the bundled Small-Body Database snapshot holds: Earth MOID, the observations behind the orbit and meteor-shower parentage.
+  static void AddCometSnapshot(Grid facts,TargetInfoCard card){
+   var comet=CometCatalog.Find(card.id);if(comet==null)return;
+   if(comet.EarthMoid.HasValue)AddFact(facts,"Earth MOID",Localization.F("{0} AU",comet.EarthMoid.Value.ToString("0.####",CultureInfo.InvariantCulture)),"Minimum orbit intersection distance: how close the two orbital paths come to each other. It is not the comet's current distance from Earth. "+CometInfo.SourceTitle);
+   if(comet.Observations>0){string span=comet.FirstObservation!=null&&comet.LastObservation!=null?comet.FirstObservation.Substring(0,Math.Min(4,comet.FirstObservation.Length))+"–"+comet.LastObservation.Substring(0,Math.Min(4,comet.LastObservation.Length)):null;
+    AddFact(facts,"Observations",Localization.F("{0} observations",comet.Observations.ToString("#,##0",CultureInfo.InvariantCulture))+(span==null?"":" · "+span),"Observations used to fit "+(comet.OrbitId??"this orbit")+(comet.ArcDays.HasValue?" over a data arc of "+comet.ArcDays.Value.ToString("#,##0",CultureInfo.InvariantCulture)+" days":"")+". "+CometInfo.SourceTitle);}
+   var showers=CometCatalog.ShowersOf(card.id);if(showers.Count==0)return;
+   string listed=CometCatalog.ShowerNames(showers,false),suspected=CometCatalog.ShowerNames(showers,true),evidence=CometCatalog.ShowerEvidence(showers);
+   if(listed.Length>0)AddFact(facts,"Meteor showers",listed,evidence);
+   if(suspected.Length>0)AddFact(facts,"Suspected parent of",suspected,evidence);
   }
   // Short creator/licence credits stay visible. Longer attribution is available
   // inline through a keyboard-accessible disclosure, including processing notes.

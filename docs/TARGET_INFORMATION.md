@@ -102,6 +102,49 @@ previews shown at about 600 pixels and re-encoded as JPEG. Credits use the same
 fields and display as the other thumbnails. The pack now has 330 image assignments
 over 318 files, and `index.json` records `runtime_overrides`.
 
+## Distance and comet data in 3.2.9
+
+Two standalone companion datasets (snapshot 13 October 2026) are merged offline.
+Neither adds a runtime database or any download.
+
+**Distances.** `scripts/target-info-overrides/wikidata-distances.json.gz` holds one
+referenced Wikidata P2583 estimate (CC0) for each of 5,210 catalogue identities (5,059 galaxies, 151 nebulae and
+remnants), reduced from the companion by `scripts/build-distance-overlay.py`. `scripts/target_info_companions.py`
+merges it into the pack after the redshift distances (and `build-target-info.py` runs it
+before the essentials projection). Rules:
+
+- Only the companion's `single_referenced_estimate` rows are used. Objects with competing
+  estimates (for example M 42), unreferenced statements or identity questions get no
+  distance rather than an averaged or chosen one.
+- A Wikidata estimate replaces a redshift-derived distance on the same card; the two kinds
+  are never shown together. Both read as approximate ("≈"); the tooltip says which kind it is,
+  keeps the original quantity and unit and links the Wikidata item.
+- A galaxy distance below 20,000 light-years is rejected as a unit slip (19 cards).
+- Where the estimate and the redshift distance differ by more than two times, neither is
+  shown until reviewed (52 cards, listed in `index.json` `runtime_companions`).
+- 5,139 cards end up with a Wikidata distance, 4,604 of them replacing a redshift value.
+
+**Comets.** `Application_Source/CometCatalog.tsv.gz` holds 4,080 comets from the NASA/JPL
+Small-Body Database (API 1.0), with full-precision osculating elements, 1-sigma values,
+MOIDs and observation spans; `MeteorShowers.json` holds 33 named showers and their listed or
+suspected comet parents. `scripts/build-comet-catalog.py` projects them from the companion.
+`CometCatalog.cs` serves them:
+
+- `OrbitalCatalog.For` returns a complete orbit for any snapshot comet, after fresh downloaded
+  orbits, the planets and the 14 audited essentials, so the 3D orbit works offline for every
+  comet. Eleven historical comets from before AD 763 fall outside the orbit model and show no 3D orbit.
+- `CometInfo.Orbit` keeps its reviewed values for the 33 well-known comets and falls back to the snapshot.
+- A discoverer's name alone resolves to a page only when exactly one comet carries it ("Hale-Bopp");
+  shared names (ATLAS, NEOWISE, Hyakutake) stay ambiguous. Fragments keep their own designation.
+- The comet page adds Earth MOID, the observations behind the orbit and, for parent comets,
+  "Meteor showers" or "Suspected parent of". Peaks are approximate, not forecasts, and a missing
+  parent means "not recorded here".
+- `CometCatalog.Showers` and `CometCatalog.ShowersOf(id)` are the API for a Meteors pane.
+
+Because the snapshot orbits retrieved on 13 October 2026 count as fresh for seven days,
+Hybrid mode does not re-download them during that week. Licences are recorded in
+`LICENSING.md`, the pack's `LICENSES_AND_ATTRIBUTION.md` and `InformationProviders.json`.
+
 ## Offline data
 
 `Application_Source/TargetInfo.zip` is a runtime projection of AstroArchive database

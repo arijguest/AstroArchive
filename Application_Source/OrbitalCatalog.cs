@@ -20,7 +20,9 @@ namespace AstroArchive {
   public static OrbitRecord For(TargetInfoCard card){
    if(card==null||card.domain!="solar_system")return null;if(OrbitalModel.Valid(card.orbit))return card.orbit;
    var planet=PlanetEphemeris.Orbit(card.id,new DateTime(2000,1,1,12,0,0,DateTimeKind.Utc));if(planet!=null)return planet;
-   OrbitRecord record;return essentials.Value.TryGetValue(card.id,out record)&&OrbitalModel.Valid(record)?record:null;
+   OrbitRecord record;if(essentials.Value.TryGetValue(card.id,out record)&&OrbitalModel.Valid(record))return record;
+   // Every other comet uses the bundled Small-Body Database snapshot, so 3D orbits work offline.
+   return CometInfo.IsComet(card)?CometCatalog.Orbit(card.id):null;
   }
   public static OrbitScene Scene(OrbitRecord orbit,CancellationToken token){
    if(!OrbitalModel.Valid(orbit))return null;var scene=new OrbitScene{Record=orbit,Full=OrbitalModel.Path(orbit,false,token),Inner=OrbitalModel.Path(orbit,true,token)};

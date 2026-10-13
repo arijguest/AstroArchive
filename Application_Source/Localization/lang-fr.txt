@@ -2375,3 +2375,10 @@ Set UTC date	Définir la date UTC
 UTC date (YYYY-MM-DD). Press Enter or Set UTC date.	Date UTC (AAAA-MM-JJ). Appuyez sur Entrée ou Définir la date UTC.
 Enter a valid UTC date (YYYY-MM-DD) between 1972 and 2026.	Saisissez une date UTC valide (AAAA-MM-JJ) entre 1972 et 2026.
 Drag to rotate · Shift-drag to pan · Focus/Ctrl + wheel or pinch to zoom.	Glisser pour tourner · Maj+glisser pour déplacer · Sélection/Ctrl + molette ou pincement pour zoomer.
+Earth MOID	MOID avec la Terre
+Observations	Observations
+{0} observations	{0} observations
+Meteor showers	Pluies de météores
+Suspected parent of	Comète mère présumée de
+Parabolic	Parabolique
+Chiron-type	Type Chiron

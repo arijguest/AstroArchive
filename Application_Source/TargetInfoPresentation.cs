@@ -6,9 +6,10 @@ using System.Text.RegularExpressions;
 namespace AstroArchive {
  public sealed class TargetInfoSource {public string Title,Url;}
  public static class TargetInfoPresentation {
-  // A distance in light-years, rounded to two significant figures; redshift distances are marked approximate.
+  // A distance in light-years, rounded to two significant figures. Redshift calculations and
+  // collected literature estimates (Wikidata) are marked approximate; their tooltips say which.
   public static string Distance(TargetInfoMeasurement m){
-   double ly=m.value;string approximate=m.band=="redshift"?"≈ ":"";
+   double ly=m.value;string approximate=m.band=="redshift"||m.band=="wikidata"?"≈ ":"";
    if(ly>=1e9)return approximate+Localization.F("{0} billion light-years",Significant(ly/1e9));
    if(ly>=1e6)return approximate+Localization.F("{0} million light-years",Significant(ly/1e6));
    return approximate+Localization.F("{0} light-years",Significant(ly));
@@ -66,7 +67,7 @@ namespace AstroArchive {
    };
    foreach(var citation in card.citations??new TargetInfoCitation[0])if(citation.review_status!="draft")add(citation.source_title,citation.source_url);
    foreach(string url in card.source_urls??new string[0])add(null,url);
-   if(CometInfo.IsComet(card)){if(CometInfo.Orbit(card.id)!=null||curated)add(CometInfo.SourceTitle+" · "+card.id,CometInfo.LookupUrl(card.id));}
+   if(CometInfo.IsComet(card)){if(CometInfo.Orbit(card.id)!=null||curated)add(CometInfo.SourceTitle+" · "+card.id,CometInfo.LookupUrl(card.id));if(CometCatalog.ShowersOf(card.id).Count>0)add(CometCatalog.ShowerSource,CometCatalog.ShowerUrl);}
    // Eclipse and section pages are not catalogue objects, so SIMBAD has nothing for them.
    else if(curated&&card.domain!="event"&&card.domain!="group"){
     var messier=Regex.Match(card.id??"",@"^M(\d{1,3})$");if(messier.Success)add("NASA Hubble Messier Catalog · Messier "+messier.Groups[1].Value,"https://science.nasa.gov/mission/hubble/science/explore-the-night-sky/hubble-messier-catalog/messier-"+messier.Groups[1].Value+"/");

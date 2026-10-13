@@ -21,6 +21,17 @@ def encoded(value):
     return json.dumps(value, ensure_ascii=False, sort_keys=True, separators=(',', ':')).encode()
 
 
+def seal(files):
+    """Refresh the manifest's entry hashes after a later stage changed pack entries."""
+    manifest = json.loads(files['essentials.json'])
+    manifest['entries'] = {name: hashlib.sha256(data).hexdigest() for name, data in sorted(files.items()) if name != 'essentials.json'}
+    index = json.loads(files['index.json'])
+    manifest['identity_count'] = len(index['entries'])
+    manifest['alias_count'] = len(index['aliases'])
+    files['essentials.json'] = encoded(manifest)
+    return files
+
+
 def apply(files):
     index = json.loads(files['index.json'])
     if index.get('essentials_revision') == 1:
@@ -33,6 +44,8 @@ def apply(files):
     for bucket in cards.values():
         for card in bucket.values():
             for citation in card.get('citations', []):
+                if citation.get('dataset_id') == 'wikidata':
+                    continue  # Per-item Wikidata links stay inline; see target_info_companions.py.
                 common = {key: citation.pop(key) for key in ('source_url', 'publisher', 'retrieved_on', 'dataset_id', 'catalogue_version') if key in citation}
                 key = hashlib.sha256(encoded(common)).hexdigest()[:24]
                 if key in references and references[key] != common:
