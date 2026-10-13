@@ -1,10 +1,16 @@
-AstroArchive 3.2.7
-Package 3.2.7.2
+AstroArchive 3.3.1 — complete prerelease feature set, stable
+Package 3.3.1.1
 
-Signing is optional for this release. It can publish a checksum-verified unsigned installer when publisher signing is not configured. If signing is enabled, trusted RSA publisher signatures and timestamps are verified on the application, launcher and installer before publication; checksums describe the final bytes.
+Promotes the complete application feature set from 3.2.6.1 and its 3.2.5 prerelease ancestry. Retains the later installer repair fix and optional signing policy.
 
-Installer repair now retries transient Windows shortcut file locks before failing, while preserving errors for access restrictions and application-control policy.
+Solar and lunar eclipses: captures group under Solar Eclipse and Lunar Eclipse. Eclipse FITS stacks and subframes preview correctly. Solar capture details show obscured percentage, with coverage on the sky map; below-horizon Sun/Moon checks prevent impossible local solar eclipse views. Lunar captures omit Moon-to-target separation. Capture town/city editing lives in Edit metadata and refreshes the sky and eclipse checks.
 
-Includes the application changes from 3.2.6: reordered information panes, compact and expandable image credits, simplified solar eclipse displays, per-file capture towns in Edit metadata, refreshed sky and eclipse checks, DSO foreground-obstruction scoring, FITS preview recovery, display-only brightness correction for very dark frames, and no Moon-to-target separation for lunar images.
+Target information: prominent object names, secondary catalogue details, overview, image with compact/expandable credits, highlighted fun facts, parameters and a combined expandable Sources section. Includes extensive offline descriptions and images, planetary/moon/comet parameters and seven interface languages.
 
-Unsigned packages can still be blocked by Smart App Control or SmartScreen. This release does not claim to bypass or remedy those Windows trust decisions. Repositories, images and settings are retained.
+Image quality and previews: quality scoring for DSO subframes and stacks, best-first ordering and quality filters, improved detection of trees/branches/roofs/buildings, FITS preview recovery and bounded display-only brightening of very dark frames.
+
+Imports and workflow: Celestron Origin discovery/import, continuous progress with ETA, sturdier FITS/XISF metadata parsing, white catalogue target overlays, Open in Stellarium with a web fallback, and configurable Analytics charts and image cards.
+
+Release validation now checks the actual solar and lunar eclipse target-list entries and selection in addition to their FITS previews, sky maps and capture details. All prerelease features are built into the installed application.
+
+Signing remains optional. This package may be unsigned and Windows Smart App Control or SmartScreen may still block it. Repository files, images and settings are retained during an in-place upgrade.
