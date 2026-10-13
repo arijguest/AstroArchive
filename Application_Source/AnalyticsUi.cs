@@ -28,7 +28,7 @@ namespace AstroArchive {
    // Choices are saved when the window closes. Card layout and credit are shared
    // with Create target card, so both places open with the same card.
    var preferences=AnalyticsPreferences.Load(settings.Analytics,settings.AnalyticsCharts);var cardSource=CardSource(cardTarget);
-   Action save=()=>{settings.Analytics=preferences;settings.AnalyticsCharts=null;settings.CardLayout=cardSource.Layout;settings.CardCredit=cardSource.Credit;SaveSettings();};
+   Action save=()=>{settings.Analytics=preferences;settings.AnalyticsCharts=null;settings.CardLayout=cardSource.Layout;settings.CardCredit=cardSource.Credit;settings.CardAutoDescription=cardSource.AutoDescription;SaveSettings();};
    new AnalyticsWindow(Window,frames,caption,index,cardSource,preferences,save).ShowDialog();
   }
  }
@@ -225,7 +225,7 @@ namespace AstroArchive {
    prefs.LightDocument=documentTheme.SelectedIndex==1;prefs.Layout=Math.Max(0,documentLayout.SelectedIndex);if(documentLayout.SelectedIndex==0)prefs.ScreenResolution=resolution.SelectedIndex==1;
    prefs.Palette=palette.SelectedIndex>0?AnalyticsPreferences.Palettes[palette.SelectedIndex]:null;RememberFormat();prefs.Video=videoOutput.IsChecked==true;prefs.ImageFormat=lastImageFormat;prefs.CardFormat=lastCardFormat;prefs.VideoFormat=lastVideoFormat;
    prefs.Pace=pace.SelectedIndex;prefs.Transition=transition.SelectedIndex;if(prefs.Video)prefs.VideoSize=videoSize.SelectedIndex;prefs.CardResolution=cardResolution.SelectedIndex;
-   cards.Layout=Math.Max(0,cardLayout.SelectedIndex);cards.Credit=cardCredit.Text.Trim();prefs.Normalise();
+   cards.Layout=Math.Max(0,cardLayout.SelectedIndex);cards.Credit=cardCredit.Text.Trim();cards.AutoDescription=cardAuto.IsChecked==true;prefs.Normalise();
    if(savePreferences!=null)savePreferences();
   }
   // Rebuilds every chart for a design change and shows the result.

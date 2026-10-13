@@ -2302,3 +2302,13 @@ Start tour:	Lancer la visite :
 Step-by-step fixes for common problems, on AstroArchive's own screens.	Solutions pas à pas aux problèmes courants, sur les écrans d'AstroArchive.
 Short tours of importing, exporting and backups.	Courtes visites de l'importation, de l'exportation et des sauvegardes.
 Search the guide, or start a guided fix or tour.	Rechercher dans le guide, ou lancer une solution guidée ou une visite.
+Add automatic descriptions	Ajouter des descriptions automatiques
+Add automatic description	Ajouter une description automatique
+Under each target name, say what it is, its constellation, how far away it is and how bright, when known. Your own description on a card still wins; Adjust card changes one card.	Sous le nom de chaque cible, indique ce que c'est, sa constellation, sa distance et sa luminosité, lorsqu'elles sont connues. La description propre à une carte reste prioritaire ; « Ajuster la carte » modifie une seule carte.
+What the target is, its constellation, how far away it is and how bright, when known. It replaces your own text while ticked; your text is kept.	Ce qu'est la cible, sa constellation, sa distance et sa luminosité, lorsqu'elles sont connues. Cochée, elle remplace votre propre texte, qui est conservé.
+Nothing is known about this target yet, so there is no automatic description.	On ne sait encore rien de cette cible, il n'y a donc pas de description automatique.
+magnitude {0}	magnitude {0}
+blue magnitude {0}	magnitude bleue {0}
+{0} light-years	{0} années-lumière
+{0} million light-years	{0} millions d'années-lumière
+{0} billion light-years	{0} milliards d'années-lumière

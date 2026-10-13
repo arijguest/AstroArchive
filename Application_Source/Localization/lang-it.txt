@@ -2319,3 +2319,13 @@ Start tour:	Avvia tour:
 Step-by-step fixes for common problems, on AstroArchive's own screens.	Correzioni passo passo per i problemi comuni, direttamente nelle schermate di AstroArchive.
 Short tours of importing, exporting and backups.	Brevi tour su importazione, esportazione e backup.
 Search the guide, or start a guided fix or tour.	Cerca nella guida o avvia una correzione guidata o un tour.
+Add automatic descriptions	Aggiungi descrizioni automatiche
+Add automatic description	Aggiungi descrizione automatica
+Under each target name, say what it is, its constellation, how far away it is and how bright, when known. Your own description on a card still wins; Adjust card changes one card.	Sotto il nome di ogni bersaglio indica cos'è, la costellazione, a che distanza si trova e quanto è luminoso, se noto. La descrizione scritta da te su una scheda ha la precedenza; «Regola scheda» modifica una sola scheda.
+What the target is, its constellation, how far away it is and how bright, when known. It replaces your own text while ticked; your text is kept.	Cos'è il bersaglio, la sua costellazione, la distanza e la luminosità, se noti. Finché è spuntata sostituisce il tuo testo, che viene conservato.
+Nothing is known about this target yet, so there is no automatic description.	Di questo bersaglio non si sa ancora nulla, quindi non c'è una descrizione automatica.
+magnitude {0}	magnitudine {0}
+blue magnitude {0}	magnitudine blu {0}
+{0} light-years	{0} anni luce
+{0} million light-years	{0} milioni di anni luce
+{0} billion light-years	{0} miliardi di anni luce

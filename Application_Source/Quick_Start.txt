@@ -619,7 +619,11 @@ image of the target, its integration, light frames, nights and filters.
    images, then stacks and lights.
 2. Drag to move it, `Ctrl`+scroll to zoom, **Rotate left/right** to turn it, or use
    **Adjust image position**.
-3. Add an optional short description under the target name.
+3. Add an optional short description under the target name, or tick **Add automatic
+   description** for what it is, its constellation, how far away it is and how bright
+   (shown only when known; your own text is kept and comes back when you untick it).
+   In **Analytics → Target cards**, **Add automatic descriptions** does this for every
+   card without a description of its own.
 4. Pick a layout for posts, stories or video, Dark or Light, a resolution (Standard,
    High 2x or Sharing) and an optional credit line.
 5. **Save** PNG / JPEG, or **Copy**.
