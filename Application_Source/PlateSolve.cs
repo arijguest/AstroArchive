@@ -44,19 +44,34 @@ namespace AstroArchive {
    if(item.Type=="*"||item.Type=="**"||item.Type=="Other"||item.Type=="Dup"||item.Type=="NonEx")return false;
    return System.Text.RegularExpressions.Regex.IsMatch(item.Name??"",@"^M\d+$")||System.Text.RegularExpressions.Regex.IsMatch(item.Aliases??"",@"(?:^|,)\s*C\d+\s*(?:,|$)")||!string.IsNullOrWhiteSpace(Catalog.CommonName(item.Name))||!string.IsNullOrWhiteSpace(item.Common)||item.Diameter>=10.0/60||item.Magnitude.HasValue&&item.Magnitude<=10;
   }
+  // How major a target is: headline objects (Messier, Caldwell, named) outrank other
+  // major entries, then apparent size in doubling steps (M31 over M110), then the
+  // catalogue family. Zero means minor. Equal ranks fall back to distance from centre.
+  public static int Rank(CatalogObject item){
+   if(item==null||!Major(item))return 0;
+   bool messier=System.Text.RegularExpressions.Regex.IsMatch(item.Name??"",@"^M\d+$"),caldwell=System.Text.RegularExpressions.Regex.IsMatch(item.Aliases??"",@"(?:^|,)\s*C\d+\s*(?:,|$)"),named=!string.IsNullOrWhiteSpace(Catalog.CommonName(item.Name))||!string.IsNullOrWhiteSpace(item.Common);
+   double arcminutes=item.Diameter*60;int size=arcminutes>=1?(int)Math.Floor(Math.Log(arcminutes,2))+1:0;
+   return (messier||caldwell||named?1000:0)+Math.Max(0,Math.Min(size,15))*10+(messier?2:caldwell?1:0)+1;
+  }
   public static void MatchTargets(SolveResult result,IEnumerable<CatalogObject> catalogue=null){
    if(result==null||!SkyWcs.ValidPosition(result.RA,result.Dec))throw new InvalidDataException("Plate solution has invalid sky coordinates.");
    if(result.Sky!=null&&SkyWcs.ValidPosition(result.Sky.RA,result.Sky.Dec)){result.RA=result.Sky.RA;result.Dec=result.Sky.Dec;if(result.Sky.HasFootprint)result.Radius=result.Sky.Corners.Max(p=>Catalog.Distance(result.RA,result.Dec,p.RA,p.Dec));}
    double radius=result.Radius>0&&!double.IsNaN(result.Radius)&&!double.IsInfinity(result.Radius)?Math.Min(90,result.Radius):1;
-   var nearby=(catalogue??Catalog.Objects).Where(o=>SkyWcs.ValidPosition(o.RA,o.Dec)).Select(o=>new{Object=o,Distance=Catalog.Distance(result.RA,result.Dec,o.RA,o.Dec)}).Where(o=>o.Distance<=radius&&InField(result,o.Object)).OrderBy(o=>o.Distance).ThenBy(o=>o.Object.Name,StringComparer.Ordinal).GroupBy(o=>o.Object.Name).Select(g=>g.First()).ToList();
-   var major=nearby.Where(o=>Major(o.Object)).ToList();result.Suggested=major.Count==0?null:major[0].Object.Name;
+   var nearby=(catalogue??Catalog.Objects).Where(o=>SkyWcs.ValidPosition(o.RA,o.Dec)).Select(o=>new{Object=o,Distance=Catalog.Distance(result.RA,result.Dec,o.RA,o.Dec)}).Where(o=>o.Distance<=radius+Extent(o.Object)&&InField(result,o.Object)).OrderBy(o=>o.Distance).ThenBy(o=>o.Object.Name,StringComparer.Ordinal).GroupBy(o=>o.Object.Name).Select(g=>g.First()).ToList();
+   var major=nearby.Where(o=>Major(o.Object)).OrderByDescending(o=>Rank(o.Object)).ThenBy(o=>o.Distance).ToList();result.Suggested=major.Count==0?null:major[0].Object.Name;
    result.Candidates=major.Concat(nearby.Where(o=>!Major(o.Object))).Take(50).Select(o=>new Candidate{Name=o.Object.Name,Common=string.IsNullOrEmpty(Catalog.CommonName(o.Object.Name))?o.Object.Common:Catalog.CommonName(o.Object.Name),Separation=o.Distance}).ToList();
-   result.MatchReason=major.Count==0?"No major target in the solved field; choose a target":"Nearest major target · "+major[0].Distance.ToString("0.000",CultureInfo.InvariantCulture)+"° from centre";
+   result.MatchReason=major.Count==0?"No major target in the solved field; choose a target":"Most prominent target in the field · "+major[0].Distance.ToString("0.000",CultureInfo.InvariantCulture)+"° from centre";
   }
+  // A large object whose centre lies just outside the frame still fills part of it.
+  static double Extent(CatalogObject item){return double.IsNaN(item.Diameter)||double.IsInfinity(item.Diameter)||item.Diameter<=0?0:Math.Min(item.Diameter,10)/2;}
   static bool InField(SolveResult result,CatalogObject item){
    if(result.Sky==null||!result.Sky.HasFootprint)return true;
    var point=SkyWcs.Project(new SkyPoint(item.RA,item.Dec),result.RA,result.Dec);var corners=result.Sky.Corners.Select(p=>SkyWcs.Project(p,result.RA,result.Dec)).ToList();if(point==null||corners.Any(p=>p==null))return false;
-   bool positive=false,negative=false;for(int i=0;i<corners.Count;i++){var a=corners[i];var b=corners[(i+1)%corners.Count];double cross=(b[0]-a[0])*(point[1]-a[1])-(b[1]-a[1])*(point[0]-a[0]);if(cross>1e-9)positive=true;if(cross< -1e-9)negative=true;}return !(positive&&negative);
+   bool positive=false,negative=false;for(int i=0;i<corners.Count;i++){var a=corners[i];var b=corners[(i+1)%corners.Count];double cross=(b[0]-a[0])*(point[1]-a[1])-(b[1]-a[1])*(point[0]-a[0]);if(cross>1e-9)positive=true;if(cross< -1e-9)negative=true;}
+   if(!(positive&&negative))return true;
+   double reach=Extent(item);if(reach<=0)return false;
+   for(int i=0;i<corners.Count;i++){var a=corners[i];var b=corners[(i+1)%corners.Count];double dx=b[0]-a[0],dy=b[1]-a[1],length=dx*dx+dy*dy,t=length<=0?0:Math.Max(0,Math.Min(1,((point[0]-a[0])*dx+(point[1]-a[1])*dy)/length));if(Math.Sqrt(Math.Pow(point[0]-a[0]-t*dx,2)+Math.Pow(point[1]-a[1]-t*dy,2))<=reach)return true;}
+   return false;
   }
   static string Quote(string s){if(s.Contains("\""))throw new ArgumentException("Quotes are not valid in a file path.");return "\""+s+"\"";}
   static SolveResult Local(string source,Settings settings,CancellationToken ct,Action<string> progress,Action<int> counted){

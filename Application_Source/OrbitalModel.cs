@@ -17,7 +17,7 @@ namespace AstroArchive {
   public bool IsClosed {get{return e<1;}}
  }
  public sealed class OrbitPath {
-  public OrbitPoint[] Points;public bool Closed,Clipped;public double Extent;
+  public OrbitPoint[] Points;public bool Closed,Clipped;public double Extent;public string Name;
  }
  public sealed class OrbitScene {
   public OrbitRecord Record;public OrbitPath Full,Inner;public List<OrbitPath> Context=new List<OrbitPath>();
