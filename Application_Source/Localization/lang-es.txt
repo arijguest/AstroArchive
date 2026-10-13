@@ -2336,3 +2336,66 @@ Distance	Distancia
 {0} billion light-years	{0} mil millones de años luz
 {0} million light-years	{0} millones de años luz
 {0} light-years	{0} años luz
+
+# Hybrid information, native 3D orbit and setup connectivity.
+Online access	Acceso en línea
+Hybrid (recommended)	Híbrido (recomendado)
+Offline	Sin conexión
+Connectivity	Conectividad
+Essential information is included. Additional information downloads when you open a target and is saved for later.	Se incluye la información esencial. La información adicional se descarga al abrir un objeto y se guarda para más adelante.
+Uses essential and saved information. Additional targets may have limited information.	Usa la información esencial y guardada. Otros objetos pueden tener información limitada.
+Choose how AstroArchive gets information	Elige cómo obtiene información AstroArchive
+Use Hybrid (recommended)	Usar híbrido (recomendado)
+Use Offline	Usar sin conexión
+You can change this in Preferences > General > Online access. Local telescope connections remain available.	Puedes cambiarlo en Preferencias > General > Acceso en línea. Las conexiones locales del telescopio siguen disponibles.
+Choose Hybrid in Preferences > General > Online access to reconnect.	Elige Híbrido en Preferencias > General > Acceso en línea para reconectar.
+Online access is paused. Automatic update checks resume in Hybrid.	El acceso en línea está en pausa. Las comprobaciones automáticas de actualizaciones se reanudan en modo híbrido.
+Downloaded information limit (MiB)	Límite de información descargada (MiB)
+Downloaded information: {0} MiB	Información descargada: {0} MiB
+Downloaded information	Información descargada
+Downloaded information is unavailable.	La información descargada no está disponible.
+Clear downloaded information	Borrar información descargada
+Refresh information	Actualizar información
+Download missing or updated information for this target.	Descargar información nueva o que falta sobre este objeto.
+Saved information · retrieved {0}	Información guardada · obtenida {0}
+ORBIT	ÓRBITA
+3D orbit	Órbita 3D
+Drag or use arrows to rotate. Shift-drag to pan. Focus the orbit or hold Ctrl to zoom with the wheel. Pinch to zoom.	Arrastra o usa las flechas para girar. Mayús y arrastrar para desplazar. Enfoca la órbita o mantén Ctrl para ampliar con la rueda. Pellizca para ampliar.
+Reset orbit	Restablecer órbita
+Top view	Vista superior
+Orbit plane	Plano orbital
+Fit orbit	Ajustar órbita
+Inner solar system	Sistema solar interior
+Expand orbit	Ampliar órbita
+Collapse orbit	Contraer órbita
+Orbit epoch	Época orbital
+Marker date (UTC)	Fecha del marcador (UTC)
+Marker: {0} UTC	Marcador: {0} UTC
+Marker at orbit epoch: JD {0} {1}	Marcador en época orbital: JD {0} {1}
+Source epoch: JD {0} {1} · {2}	Época de origen: JD {0} {1} · {2}
+Dated position unavailable for this solution. Use Orbit epoch.	La posición por fecha no está disponible para esta solución. Usa Época orbital.
+Complete orbital elements are unavailable. No orientation has been assumed.	No hay elementos orbitales completos. No se ha supuesto ninguna orientación.
+Preparing 3D orbit…	Preparando órbita 3D…
+The orbit could not be drawn.	No se pudo dibujar la órbita.
+Approximate orbit · linear distances; body markers enlarged.	Órbita aproximada · distancias lineales; marcadores de cuerpos ampliados.
+J2000 ecliptic · two-body geometry, not a precision ephemeris. UTC → TT; TDB differs by less than 2 ms.	Eclíptica J2000 · geometría de dos cuerpos, no efemérides precisas. UTC → TT; TDB difiere menos de 2 ms.
+Earth uses the Earth–Moon barycentre approximation.	La Tierra usa la aproximación del baricentro Tierra–Luna.
+Solar-system overview	Vista general del sistema solar
+Extent clipped	Extensión recortada
+Perihelion (TDB)	Perihelio (TDB)
+Perigee	Perigeo
+Hyperbolic	Hiperbólica
+1 · Installation folder	1 · Carpeta de instalación
+2 · Online access	2 · Acceso en línea
+Retry launch	Reintentar inicio
+Installation completed, but the app could not start.	La instalación terminó, pero la aplicación no pudo iniciarse.
+Installation complete: AstroArchive package {0} is ready.	Instalación terminada: el paquete AstroArchive {0} está listo.
+Repair complete: AstroArchive package {0} is ready.	Reparación terminada: el paquete AstroArchive {0} está listo.
+Update complete: AstroArchive package {0} is installed.	Actualización terminada: el paquete AstroArchive {0} está instalado.
+Albedo	Albedo
+Rotation period	Período de rotación
+Snapshot positions are shown only at the orbit epoch.	Las posiciones de la instantánea se muestran solo en la época orbital.
+Perihelion beyond the inner solar system	Perihelio fuera del sistema solar interior
+Updating information…	Actualizando información…
+Information updated.	Información actualizada.
+No additional information was downloaded. Essential and saved information remain available.	No se descargó información adicional. La información esencial y guardada sigue disponible.

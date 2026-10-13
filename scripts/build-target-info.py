@@ -11,6 +11,7 @@ from pathlib import Path
 import sqlite3
 from target_image_credits import repair_image
 import target_info_overrides
+import target_info_essentials
 
 
 def build(database):
@@ -86,5 +87,5 @@ if __name__ == '__main__':
     # and card corrections (scripts/target-info-overrides) are applied to the projection.
     entries = list(build(args.database))
     files = target_info_overrides.apply(dict(entries))
-    target_info_overrides.write(files, args.output, {name: i for i, (name, _) in enumerate(entries)})
+    target_info_essentials.write(target_info_essentials.apply(files), args.output)
     print(str(args.output) + ': ' + str(args.output.stat().st_size) + ' bytes')

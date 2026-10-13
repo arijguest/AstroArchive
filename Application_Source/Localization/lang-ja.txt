@@ -2343,3 +2343,66 @@ Distance	距離
 {0} billion light-years	{0}十億光年
 {0} million light-years	{0}百万光年
 {0} light-years	{0}光年
+
+# Hybrid information, native 3D orbit and setup connectivity.
+Online access	オンラインアクセス
+Hybrid (recommended)	ハイブリッド（推奨）
+Offline	オフライン
+Connectivity	接続モード
+Essential information is included. Additional information downloads when you open a target and is saved for later.	基本情報は含まれています。追加情報は対象を開くとダウンロードされ、後で使えるように保存されます。
+Uses essential and saved information. Additional targets may have limited information.	基本情報と保存済み情報を使用します。その他の対象の情報は限られる場合があります。
+Choose how AstroArchive gets information	AstroArchiveの情報取得方法を選択
+Use Hybrid (recommended)	ハイブリッドを使用（推奨）
+Use Offline	オフラインを使用
+You can change this in Preferences > General > Online access. Local telescope connections remain available.	設定 > 一般 > オンラインアクセスで変更できます。ローカルの望遠鏡接続は引き続き利用できます。
+Choose Hybrid in Preferences > General > Online access to reconnect.	再接続するには、設定 > 一般 > オンラインアクセスでハイブリッドを選択してください。
+Online access is paused. Automatic update checks resume in Hybrid.	オンラインアクセスは停止中です。ハイブリッドで自動更新確認を再開します。
+Downloaded information limit (MiB)	ダウンロード情報の上限（MiB）
+Downloaded information: {0} MiB	ダウンロード済み情報：{0} MiB
+Downloaded information	ダウンロード済み情報
+Downloaded information is unavailable.	ダウンロード済み情報を利用できません。
+Clear downloaded information	ダウンロード済み情報を消去
+Refresh information	情報を更新
+Download missing or updated information for this target.	この対象の不足情報や更新情報をダウンロードします。
+Saved information · retrieved {0}	保存済み情報 · 取得日時 {0}
+ORBIT	軌道
+3D orbit	3D軌道
+Drag or use arrows to rotate. Shift-drag to pan. Focus the orbit or hold Ctrl to zoom with the wheel. Pinch to zoom.	ドラッグまたは矢印キーで回転。Shift＋ドラッグで移動。軌道にフォーカスするかCtrlを押しながらホイールで拡大縮小。ピンチでも操作できます。
+Reset orbit	軌道表示をリセット
+Top view	上面表示
+Orbit plane	軌道面
+Fit orbit	軌道全体を表示
+Inner solar system	内側の太陽系
+Expand orbit	軌道表示を拡大
+Collapse orbit	軌道表示を縮小
+Orbit epoch	軌道元期
+Marker date (UTC)	マーカーの日付（UTC）
+Marker: {0} UTC	マーカー：{0} UTC
+Marker at orbit epoch: JD {0} {1}	軌道元期のマーカー：JD {0} {1}
+Source epoch: JD {0} {1} · {2}	出典元期：JD {0} {1} · {2}
+Dated position unavailable for this solution. Use Orbit epoch.	この解の指定日時の位置は利用できません。「軌道元期」を使用してください。
+Complete orbital elements are unavailable. No orientation has been assumed.	完全な軌道要素がありません。軌道の向きは推定していません。
+Preparing 3D orbit…	3D軌道を準備中…
+The orbit could not be drawn.	軌道を描画できませんでした。
+Approximate orbit · linear distances; body markers enlarged.	概略軌道 · 距離は線形尺度、天体マーカーは拡大表示。
+J2000 ecliptic · two-body geometry, not a precision ephemeris. UTC → TT; TDB differs by less than 2 ms.	J2000黄道面 · 二体問題の概略図で、精密な天体暦ではありません。UTC → TT、TDBとの差は2 ms未満。
+Earth uses the Earth–Moon barycentre approximation.	地球には地球・月の重心による近似を使用します。
+Solar-system overview	太陽系の概要
+Extent clipped	表示範囲外あり
+Perihelion (TDB)	近日点（TDB）
+Perigee	近地点
+Hyperbolic	双曲線軌道
+1 · Installation folder	1 · インストール先
+2 · Online access	2 · オンラインアクセス
+Retry launch	起動を再試行
+Installation completed, but the app could not start.	インストールは完了しましたが、アプリを起動できませんでした。
+Installation complete: AstroArchive package {0} is ready.	インストール完了：AstroArchiveパッケージ {0} を使用できます。
+Repair complete: AstroArchive package {0} is ready.	修復完了：AstroArchiveパッケージ {0} を使用できます。
+Update complete: AstroArchive package {0} is installed.	更新完了：AstroArchiveパッケージ {0} がインストールされました。
+Albedo	アルベド
+Rotation period	自転周期
+Snapshot positions are shown only at the orbit epoch.	スナップショットの位置は軌道元期のみ表示します。
+Perihelion beyond the inner solar system	近日点は内側の太陽系の外
+Updating information…	情報を更新中…
+Information updated.	情報を更新しました。
+No additional information was downloaded. Essential and saved information remain available.	追加情報はダウンロードされませんでした。基本情報と保存済み情報は引き続き利用できます。

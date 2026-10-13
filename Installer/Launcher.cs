@@ -10,12 +10,13 @@ using System.Threading.Tasks;
 namespace AstroArchive.Installation {
  static class Launcher {
   static bool ConfirmUpdate(UpdateManifest update,string current,string notes){
-   using(var form=new Form{Text="Install AstroArchive release",ClientSize=new System.Drawing.Size(680,490),MinimumSize=new System.Drawing.Size(600,440),StartPosition=FormStartPosition.CenterScreen,Font=new System.Drawing.Font("Segoe UI",10),Padding=new Padding(24)}){
-    var title=new Label{Text="Package "+update.package_version+" is available. Installed: "+current+".\nYour repositories, images and settings will be retained.",Dock=DockStyle.Top,Height=76};
+   using(var form=new Form{Text="Install AstroArchive release",StartPosition=FormStartPosition.CenterScreen,Font=new System.Drawing.Font("Segoe UI",10),Padding=new Padding(24)}){
+    InstallerLayout.Configure(form,720,540,560,360);
+    var title=new Label{Text="Package "+update.package_version+" is available. Installed: "+current+".\nYour repositories, images and settings will be retained.",Dock=DockStyle.Top,AutoSize=true,MaximumSize=new System.Drawing.Size(620,0),Padding=new Padding(0,0,0,16)};
     var body=new TextBox{Text=notes,ReadOnly=true,Multiline=true,ScrollBars=ScrollBars.Vertical,Dock=DockStyle.Fill,BackColor=System.Drawing.Color.White};
     var actions=new FlowLayoutPanel{Dock=DockStyle.Bottom,Height=58,FlowDirection=FlowDirection.RightToLeft,Padding=new Padding(0,12,0,0)};
-    var install=new Button{Text="Install release",AutoSize=true,MinimumSize=new System.Drawing.Size(150,38),DialogResult=DialogResult.OK};var skip=new Button{Text="Later",AutoSize=true,MinimumSize=new System.Drawing.Size(100,38),DialogResult=DialogResult.Cancel};
-    actions.Controls.Add(install);actions.Controls.Add(skip);form.Controls.Add(body);form.Controls.Add(actions);form.Controls.Add(title);form.AcceptButton=install;form.CancelButton=skip;return form.ShowDialog()==DialogResult.OK;
+    var install=new Button{Text=AstroArchive.Localization.T("Install and restart"),AutoSize=true,MinimumSize=new System.Drawing.Size(150,38),DialogResult=DialogResult.OK};var skip=new Button{Text=AstroArchive.Localization.T("Later"),AutoSize=true,MinimumSize=new System.Drawing.Size(100,38),DialogResult=DialogResult.Cancel};
+    actions.Controls.Add(install);actions.Controls.Add(skip);form.Controls.Add(body);form.Controls.Add(actions);form.Controls.Add(title);form.AcceptButton=install;form.CancelButton=skip;form.SizeChanged+=(sender,args)=>title.MaximumSize=new System.Drawing.Size(Math.Max(100,form.ClientSize.Width-form.Padding.Horizontal),0);form.Shown+=(sender,args)=>InstallerLayout.Style(form);return form.ShowDialog()==DialogResult.OK;
    }
   }
   static bool Update(string root, InstallRecord record, bool explicitCheck) {
@@ -32,19 +33,22 @@ namespace AstroArchive.Installation {
     accepted = true;
     string cache = UpdateClient.InstallationCache(root);
     Exception downloadError = null;
-    using (var progress = new Form { Text = "Updating AstroArchive", ClientSize = new System.Drawing.Size(560,170), Padding=new Padding(24), Font=new System.Drawing.Font("Segoe UI",10),
-      StartPosition = FormStartPosition.CenterScreen, FormBorderStyle = FormBorderStyle.FixedDialog,
+    using (var progress = new Form { Text = "Updating AstroArchive",  Padding=new Padding(24), Font=new System.Drawing.Font("Segoe UI",10),
+      StartPosition = FormStartPosition.CenterScreen, FormBorderStyle = FormBorderStyle.Sizable,
       ControlBox = false }) {
+     InstallerLayout.Configure(progress,560,240,460,220);using(var cancellation=new CancellationTokenSource()){
+     var cancel=new Button{Text=AstroArchive.Localization.T("Cancel download"),Dock=DockStyle.Bottom,Height=38};cancel.Click+=(sender,args)=>{cancellation.Cancel();cancel.Enabled=false;};progress.Controls.Add(cancel);
      var label=new Label{Text="Downloading and verifying the update…",Dock=DockStyle.Fill,TextAlign=System.Drawing.ContentAlignment.MiddleCenter};var bar=new ProgressBar{Dock=DockStyle.Bottom,Height=12,Maximum=100};progress.Controls.Add(label);progress.Controls.Add(bar);
      client.Progress=p=>{if(progress.IsDisposed||!progress.IsHandleCreated)return;try{progress.BeginInvoke(new Action(()=>{if(progress.IsDisposed)return;bar.Value=p.Percent;label.Text="Downloading package "+update.package_version+": "+p.Percent+"%\n"+(p.Received/1048576.0).ToString("0.0")+" / "+(p.Total/1048576.0).ToString("0.0")+" MB";}));}catch(InvalidOperationException){}};
      progress.Shown += async (sender, args) => {
-      try { setup = await Task.Run(() => client.Prepare(update, cache)); }
+      try { setup = await Task.Run(() => client.Prepare(update, cache,cancellation.Token)); }
       catch (Exception error) { downloadError = error; }
       finally { client.Progress=null;progress.Close(); }
      };
-     progress.ShowDialog();
+     progress.Shown+=(sender,args)=>InstallerLayout.Style(progress);progress.ShowDialog();
+     }
     }
-    if (downloadError != null) throw downloadError;
+    if(downloadError is OperationCanceledException)return false;if (downloadError != null) throw downloadError;
     if (setup == null) throw new IOException("The update download did not complete.");
     // The installer waits for this launcher to exit before changing application files.
     var start=UpdateClient.InstallerStartInfo(update,setup,root,Process.GetCurrentProcess().Id);attemptedUtc=DateTime.UtcNow;
@@ -65,7 +69,7 @@ namespace AstroArchive.Installation {
 
   [STAThread] static int Main(string[] args) {
    try {
-    Application.EnableVisualStyles();
+    InstallerLayout.InitializeLanguage();Application.EnableVisualStyles();ConnectivityPolicy.Apply(ConnectivityPolicy.Read());
     ShellIdentity.InitializeProcess();
     string root = InstallCore.Root(Path.GetDirectoryName(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)));
     var record = InstallCore.Read(root);
@@ -76,6 +80,7 @@ namespace AstroArchive.Installation {
       try { held = mutex.WaitOne(0); } catch (AbandonedMutexException) { held = true; }
       if (!held) throw new IOException("AstroArchive is already running for this installation.");
       bool explicitCheck = Array.IndexOf(args, "--updates") >= 0;
+      if(explicitCheck&&!ConnectivityPolicy.AllowsInternet){MessageBox.Show(AstroArchive.Localization.T("Choose Hybrid in Preferences > General > Online access to reconnect."),AstroArchive.Localization.T("Online access"));return 0;}
       if (explicitCheck && Array.IndexOf(args, "--no-updates") < 0 && Update(root, record, true)) return 0;
       if (explicitCheck) return 0;
       string executable = InstallCore.Managed(root, record.ActiveDirectory + "\\AstroArchive.exe");

@@ -107,3 +107,27 @@ Microsoft → Windows → CodeIntegrity → Operational can identify the blocked
 See [Microsoft's Smart App Control documentation](https://learn.microsoft.com/windows/apps/develop/smart-app-control/overview).
 Report app issues with the package version and exact error at
 [GitHub Issues](https://github.com/arijguest/AstroArchive/issues).
+
+## Online access and the 3.2.9 installer
+
+Setup includes location and online-access steps. Hybrid is recommended; the
+complete installation still works without an internet connection. Offline uses
+bundled and previously downloaded information. Existing choices survive updates,
+repair and reinstall. Silent installations and portable/older first launches ask
+for a choice in the application; Pending blocks automatic internet access.
+
+Preferences > General > Online access changes the mode and shows the information
+cache limit, usage and clear action. Offline cancels enrichment/downloads and
+suspends automatic release checks without changing the separately saved update
+preference or the Astrometry.net solver choice. Local LAN telescope and Stellarium
+connections continue to work. Internet actions ask you to reconnect through
+Preferences; they do not switch modes automatically.
+
+Only `AstroArchive3.2.9.1.exe` is produced. The Offline-Setup duplicate is retired.
+Current updaters accept its concise name. An original 1.2.0 launcher needs a manual
+installation of the current single installer. Historical releases remain available.
+
+Successful install, update and repair write a one-time completion receipt. With
+Open after install checked, setup closes after a successful launch; launch failure
+leaves a retry action. With it unchecked, Finish stays visible and the next app
+launch shows the receipt. A rollback shows recovery instead of success.

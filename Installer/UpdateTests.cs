@@ -24,6 +24,15 @@ static class UpdateTests {
   throw new Exception("Expected update refusal.");
  }
  public static void Run(Action<string, Action> test, string scratch) {
+  test("The reviewed 3.2.9 updater accepts the single 3.2.9.1 installer from 3.2.8.1",()=>{
+   var manifest=Manifest("3.2.9",1);manifest.url=manifest.download_url=UpdateClient.Repository+"/releases/download/v3.2.9.1/"+UpdateClient.InstallerName(manifest);
+   var client=Client(manifest);var available=client.Check(Installed("3.2.8",1));Check(available!=null&&available.url.EndsWith("/AstroArchive3.2.9.1.exe"),"Concise-only feed was refused");
+   string cache=Path.Combine(scratch,"hybrid-bridge-cache");string prepared=client.Prepare(available,cache);Check(File.ReadAllBytes(prepared).SequenceEqual(Installer)&&Path.GetFileName(prepared)=="AstroArchive3.2.9.1.exe","Single installer was not verified/prepared");Check(!Directory.EnumerateFiles(cache,"*Offline*",SearchOption.AllDirectories).Any(),"A dedicated offline installer was created");
+  });
+  test("Install, repair and update receipts are one-time and version-bound",()=>{
+   string root=Path.Combine(scratch,"completion-receipts");new InstallCore().Install(root,FixturePackage("3.2.9",1),Installer);
+   foreach(string operation in new[]{"install","repair","update"}){UpdateClient.RecordInstalledUpdate(root,"3.2.8.1",operation);Check(UpdateClient.ConsumeInstalledUpdate(root,"3.2.8.1")==null,"Wrong version consumed completion");var receipt=UpdateClient.ConsumeInstalledUpdate(root,"3.2.9.1");Check(receipt!=null&&receipt.Operation==operation&&UpdateClient.ConsumeInstalledUpdate(root,"3.2.9.1")==null,"Receipt kind/one-time semantics lost");}
+  });
   test("Canceled update preparations leave no installer or partial cache",()=>{
    var manifest=Manifest();string cache=Path.Combine(scratch,"cancel-download");using(var stop=new System.Threading.CancellationTokenSource()){
     var client=Client(manifest);client.Progress=p=>{if(p.Received>0)stop.Cancel();};bool canceled=false;try{client.Prepare(manifest,cache,stop.Token);}catch(OperationCanceledException){canceled=true;}Check(canceled,"Cancellation did not stop preparation");Check(!Directory.Exists(cache)||!Directory.EnumerateFiles(cache,"*",SearchOption.AllDirectories).Any(),"Canceled preparation left a cached installer");

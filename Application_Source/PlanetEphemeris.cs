@@ -19,6 +19,12 @@ namespace AstroArchive {
    {19.18916464,0.04725744,0.77263783,313.23810451,170.95427630,74.01692503,-0.00196176,-0.00004397,-0.00242939,428.48202785,0.40805281,0.04240589},
    {30.06992276,0.00859048,1.77004347,-55.12002969,44.96476227,131.78422574,0.00026291,0.00005105,0.00035372,218.45945325,-0.32241464,-0.00508664}
   };
+  // Orbital display uses the same reviewed JPL Table 1 as the sky globe.
+  public static OrbitRecord Orbit(string id,DateTime utc){
+   string[] names={"MERCURY","VENUS","EARTH","MARS","JUPITER","SATURN","URANUS","NEPTUNE"};int body=Array.IndexOf(names,(id??"").ToUpperInvariant());
+   if(body<0||utc.Year<1800||utc.Year>2050)return null;double day=OrbitalModel.Julian(utc),t=(day-2451545)/36525;var v=new double[6];for(int k=0;k<6;k++)v[k]=Elements[body,k]+t*Elements[body,k+6];
+   return new OrbitRecord{object_id=names[body],central_body="Sun",reference_plane="ecliptic",coordinate_frame="J2000",time_standard="TDB",epoch=day,e=v[1],q=v[0]*(1-v[1]),i=Math.Abs(v[2]),ascending_node=v[2]<0?v[5]+180:v[5],argument_of_perihelion=v[4]-v[5]-(v[2]<0?180:0),mean_anomaly=(v[3]-v[4])%360,valid_from=OrbitalModel.Julian(new DateTime(1800,1,1,0,0,0,DateTimeKind.Utc)),valid_to=OrbitalModel.Julian(new DateTime(2050,12,31,0,0,0,DateTimeKind.Utc)),solution_id="JPL Table 1 (1800–2050)",source="https://ssd.jpl.nasa.gov/planets/approx_pos.html",rights=OrbitalCatalog.Rights("https://ssd.jpl.nasa.gov/planets/approx_pos.html","Table 1",new DateTime(2026,10,13,0,0,0,DateTimeKind.Utc),"planetary-approximation")};
+  }
   static SkyVector Heliocentric(int body,double t){
    var v=new double[6];for(int i=0;i<6;i++)v[i]=Elements[body,i]+t*Elements[body,i+6];
    double a=v[0],e=v[1],inclination=v[2]*R,node=v[5]*R,perihelion=(v[4]-v[5])*R;

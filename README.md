@@ -181,6 +181,8 @@ It follows your Windows language, or choose one in **Settings → General → La
 
 **[3.2.2 prerelease](https://github.com/arijguest/AstroArchive/releases/tag/v3.2.2.1)** adds chart types, target cards for your top or chosen targets as images or video, adjustable card images, and centred folder bars under each table.
 
+**3.2.9** adds a single hybrid installer, an explicit Hybrid/Offline connectivity choice, bounded downloaded information, and native 3D orbit views. [Read the hybrid information guide](docs/HYBRID_INFORMATION.md).
+
 **[3.2.1 prerelease](https://github.com/arijguest/AstroArchive/releases/tag/v3.2.1.1)** adds offline target information and thumbnails, seven interface languages, and corrected planetary sky positions from capture times.
 
 **[3.1.9](https://github.com/arijguest/AstroArchive/releases/tag/v3.1.9.1)** opens

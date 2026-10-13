@@ -36,20 +36,17 @@ if ($RequireSigned) {
 } elseif (Test-Path (Join-Path $OutputDirectory 'signatures.json')) {
     Remove-Item (Join-Path $OutputDirectory 'signatures.json')
 }
-# Signing changes bytes: refresh checksums and the compatibility copy afterwards.
+# Signing changes bytes: refresh the single hybrid installer's checksum.
 $installerHash = (Get-FileHash $installer -Algorithm SHA256).Hash.ToLowerInvariant()
 Set-Content "$installer.sha256" "$installerHash  $([IO.Path]::GetFileName($installer))" -Encoding ASCII
-# Keep the asset name expected by 1.2.0 launchers so existing users can upgrade.
-$compatibility = Join-Path $OutputDirectory "AstroArchive-$version-Windows-x64-Offline-Setup.exe"
-Copy-Item $installer $compatibility -Force
-$compatibilityHash = (Get-FileHash $compatibility -Algorithm SHA256).Hash.ToLowerInvariant()
-Set-Content "$compatibility.sha256" "$compatibilityHash  $([IO.Path]::GetFileName($compatibility))" -Encoding ASCII
+# Remove stale generated aliases when reusing an artifact directory. Historical releases are retained.
+Get-ChildItem $OutputDirectory -Filter 'AstroArchive-*-Windows-x64-Offline-Setup.exe*' | Remove-Item -Force
 $feed = [ordered]@{
     schema = 1
     application_version = $version
     package_version = $package
     authenticode_signed = [bool]$RequireSigned
-    url = "https://github.com/arijguest/AstroArchive/releases/download/$tag/$([IO.Path]::GetFileName($compatibility))"
+    url = "https://github.com/arijguest/AstroArchive/releases/download/$tag/$([IO.Path]::GetFileName($installer))"
     download_url = "https://github.com/arijguest/AstroArchive/releases/download/$tag/$([IO.Path]::GetFileName($installer))"
     release_notes = [IO.File]::ReadAllText((Join-Path $PSScriptRoot '..\Installer\Payload\Release_Notes.txt'))
     sha256 = (Get-FileHash $installer -Algorithm SHA256).Hash.ToLowerInvariant()
