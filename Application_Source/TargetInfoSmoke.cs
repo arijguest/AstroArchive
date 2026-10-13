@@ -133,10 +133,11 @@ namespace AstroArchive {
     if(member==null||!PopupChildren<Image>(libraryInfo.View).Any(i=>i.Source is BitmapSource)||PopupChildren<Button>(libraryInfo.View).Any(b=>b.Name=="OpenInStellarium"))throw new Exception("Comets page lacks its image or comet list, or offers Stellarium for a group.");
     member.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));WaitForTargetInformation(libraryInfo,"12P");
     var back=PopupChildren<Button>(libraryInfo.View).SingleOrDefault(b=>b.Name=="BackToSection");
-    if(back==null||!PopupChildren<Button>(libraryInfo.View).Any(b=>b.Name=="OpenInStellarium"))throw new Exception("A comet read from Comets has no way back or no Stellarium button.");
+    if(back==null||PopupChildren<Button>(libraryInfo.View).Any(b=>b.Name=="OpenInStellarium"))throw new Exception("A comet read from Comets has no way back, or offers Stellarium.");
     back.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));WaitForTargetInformation(libraryInfo,"COMETS");
     stage="eclipse page";libraryInfo.View.ShowCard(targetInformation.Find(Eclipses.SolarSection,CancellationToken.None).Cards.Single());PumpPopupLayout();
     if(!PopupChildren<Image>(libraryInfo.View).Any(i=>i.Source is BitmapSource)||!PopupChildren<TextBlock>(libraryInfo.View).Any(t=>t.Text==Localization.T("IMAGING NOTES")))throw new Exception("Solar eclipse page lacks its image or imaging notes.");
+    if(PopupChildren<Button>(libraryInfo.View).Any(b=>b.Name=="OpenInStellarium"))throw new Exception("The solar eclipse page offers Stellarium.");
     stage="Iris credits";var iris=targetInformation.ById("NGC 7023",CancellationToken.None).Cards.Single();libraryInfo.View.ShowCard(iris);PumpPopupLayout();
     if(iris.image.creator!="Andreigusan"||PopupChildren<TextBlock>(libraryInfo.View).Any(t=>t.Text.Contains("featured picture")))throw new Exception("Contaminated Iris thumbnail credit was rendered.");
     stage="comet page";libraryInfo.View.ShowCard(targetInformation.Find("C/2023 A3 (Tsuchinshan-ATLAS)",CancellationToken.None).Cards.Single());PumpPopupLayout();
