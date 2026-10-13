@@ -21,7 +21,7 @@ namespace AstroArchive {
   public TargetCardComposition Copy(){var copy=(TargetCardComposition)MemberwiseClone();copy.Placement=Placement.Copy();return copy;}
  }
  public sealed class TargetCardEdit {
-  public Window Owner;public TargetCardData Data;public TargetCardLayout Layout;public bool Dark;public string Credit;public bool DefaultAuto;public TargetCardComposition Current;
+  public Window Owner;public TargetCardData Data;public TargetCardLayout Layout;public bool Dark;public string Credit;public bool DefaultAuto;public TargetCardFacts Facts;public TargetCardComposition Current;
  }
  // What Analytics needs from the main window to make cards. Without image
  // callbacks every card uses the star field.
@@ -51,7 +51,7 @@ namespace AstroArchive {
   }
  }
  public sealed partial class AnalyticsWindow {
-  sealed class CardJob {public string Target,Description;public TargetCardData Data;public TargetCardComposition Composition;}
+  sealed class CardJob {public TargetCardFacts Facts;public string Target,Description;public TargetCardData Data;public TargetCardComposition Composition;}
   AnalyticsCardSource cards;List<AnalyticsPage> cardPages=new List<AnalyticsPage>();List<CardJob> cardJobs=new List<CardJob>();List<TargetCardChoice> ranked;
   readonly Dictionary<string,TargetCardComposition> compositions=new Dictionary<string,TargetCardComposition>(StringComparer.Ordinal);
   CheckBox cardAuto;readonly Dictionary<string,TargetCardFacts> cardFacts=new Dictionary<string,TargetCardFacts>(StringComparer.Ordinal);Button cardTargets,adjustCard;ComboBox cardLayout,cardResolution;TextBox cardCredit;FrameworkElement cardLayoutField,cardResolutionField,cardCreditField;DispatcherTimer cardDebounce;
@@ -113,7 +113,7 @@ namespace AstroArchive {
      if(cards.Facts!=null&&!cardFacts.TryGetValue(targets[i],out facts)){string lookup=targets[i];facts=await Task.Run(()=>cards.Facts(lookup),loading.Token);if(closed||request!=cardGeneration)return;cardFacts[lookup]=facts;}
      string description=TargetCards.CardDescription(composition.Description,composition.AutoDescription,automatic,facts);
      var data=TargetCards.Build(scoped,targets[i],includeRejected);var bitmap=TargetCardRenderer.Render(data,composition.Image,layout,dark,composition.Fill,credit,composition.Placement,1,description);
-     jobs.Add(new CardJob{Target=targets[i],Data=data,Composition=composition,Description=description});result.Add(CardPage(data,bitmap,layout,dark));
+     jobs.Add(new CardJob{Target=targets[i],Data=data,Composition=composition,Description=description,Facts=facts});result.Add(CardPage(data,bitmap,layout,dark));
      // Let the window repaint between cards rather than freezing for the whole set.
      await System.Windows.Threading.Dispatcher.Yield(DispatcherPriority.Background);if(closed||request!=cardGeneration)return;
     }
@@ -134,7 +134,7 @@ namespace AstroArchive {
   int CurrentCardIndex(){int index=previewPage.SelectedIndex-1;return Math.Max(0,Math.Min(cardJobs.Count-1,index));}
   void AdjustCurrentCard(){
    if(cards.Adjust==null||cardJobs.Count==0||exporting)return;int index=CurrentCardIndex();var job=cardJobs[index];
-   var result=cards.Adjust(new TargetCardEdit{Owner=this,Data=job.Data,Layout=CurrentCardLayout(),Dark=documentTheme.SelectedIndex==0,Credit=cardCredit.Text,DefaultAuto=cardAuto.IsChecked==true,Current=job.Composition});
+   var result=cards.Adjust(new TargetCardEdit{Owner=this,Data=job.Data,Layout=CurrentCardLayout(),Dark=documentTheme.SelectedIndex==0,Credit=cardCredit.Text,DefaultAuto=cardAuto.IsChecked==true,Facts=job.Facts,Current=job.Composition});
    if(result==null)return;compositions[job.Target]=result;RenderCards();
   }
   void ChooseCardTargets(){
@@ -272,13 +272,17 @@ namespace AstroArchive {
   }
   // The short description box with its tick-box for the automatic description.
   sealed class CardNote {
-   public readonly StackPanel Panel=new StackPanel();public readonly TextBox Box;public readonly CheckBox Auto;public bool? Choice;readonly TargetCardFacts facts;readonly bool byDefault;
+   public readonly StackPanel Panel=new StackPanel();public readonly TextBox Box;public readonly CheckBox Auto;public bool? Choice;TargetCardFacts facts;readonly bool byDefault;readonly Action changed;
    public CardNote(string own,bool? choice,bool byDefault,TargetCardFacts facts,Action changed){
-    Box=CardDescription(own);Choice=choice;this.facts=facts;this.byDefault=byDefault;bool known=TargetCards.Describe(facts)!=null;
-    Auto=new CheckBox{Content=new TextBlock{Text="Add automatic description",TextWrapping=TextWrapping.Wrap},Margin=new Thickness(0,0,0,6),IsEnabled=known,IsChecked=known&&(choice.HasValue?choice.Value:string.IsNullOrWhiteSpace(own)&&byDefault)};
-    AutomationProperties.SetName(Auto,"Add automatic description");UiHelp.Hint(Auto,known?"What the target is, its constellation, how far away it is and how bright, when known. It replaces your own text while ticked; your text is kept.":"Nothing is known about this target yet, so there is no automatic description.");
-    Panel.Children.Add(Auto);Panel.Children.Add(Box);Sync();
+    Box=CardDescription(own);Choice=choice;this.byDefault=byDefault;this.changed=changed;
+    Auto=new CheckBox{Content=new TextBlock{Text="Add automatic description",TextWrapping=TextWrapping.Wrap},Margin=new Thickness(0,0,0,6)};AutomationProperties.SetName(Auto,"Add automatic description");
+    Panel.Children.Add(Auto);Panel.Children.Add(Box);SetFacts(facts,false);
     Auto.Click+=(s,e)=>{Choice=Auto.IsChecked==true;Sync();changed();};Box.TextChanged+=(s,e)=>changed();
+   }
+   // Facts may arrive after the window opens, so the tick-box starts disabled and enables itself.
+   public void SetFacts(TargetCardFacts value,bool redraw){
+    facts=value;bool known=TargetCards.Describe(facts)!=null;Auto.IsEnabled=known;Auto.IsChecked=known&&(Choice.HasValue?Choice.Value:string.IsNullOrWhiteSpace(Box.Text)&&byDefault);
+    UiHelp.Hint(Auto,known?"What the target is, its constellation, how far away it is and how bright, when known. It replaces your own text while ticked; your text is kept.":"Nothing is known about this target yet, so there is no automatic description.");Sync();if(redraw)changed();
    }
    void Sync(){Box.IsEnabled=!(Auto.IsEnabled&&Auto.IsChecked==true);}
    public string Own{get{return string.IsNullOrWhiteSpace(Box.Text)?null:Box.Text.Trim();}}
@@ -302,7 +306,7 @@ namespace AstroArchive {
    var imageBox=new ComboBox{ItemsSource=choices,SelectedIndex=selected,MaxDropDownHeight=320,Margin=new Thickness(0,0,0,10)};AutomationProperties.SetName(imageBox,"Image");UiHelp.Hint(imageBox,"Linked Edited images come first, then starred and newer images, then archive stacks and lights.");options.Children.Add(imageBox);
    var fill=new CheckBox{Content=new TextBlock{Text="Fill the frame (crop edges)",TextWrapping=TextWrapping.Wrap},IsChecked=work.Fill,Margin=new Thickness(0,2,0,12)};AutomationProperties.SetName(fill,"Fill the frame");options.Children.Add(fill);
    var noteCaption=new TextBlock{Text="Short description (optional)",Margin=new Thickness(0,0,0,5)};noteCaption.SetResourceReference(TextBlock.FontSizeProperty,"UiFontBody");options.Children.Add(noteCaption);
-   Action draw=null;var note=new CardNote(work.Description,work.AutoDescription,edit.DefaultAuto,CardFacts(edit.Data.Target),()=>{if(draw!=null)draw();});note.Panel.Margin=new Thickness(0,0,0,12);options.Children.Add(note.Panel);
+   Action draw=null;var note=new CardNote(work.Description,work.AutoDescription,edit.DefaultAuto,edit.Facts,()=>{if(draw!=null)draw();});note.Panel.Margin=new Thickness(0,0,0,12);options.Children.Add(note.Panel);
    bool loading=false;int generation=0;var cancel=new CancellationTokenSource();
    draw=()=>{work.Description=note.Own;work.AutoDescription=note.Choice;try{preview.Source=TargetCardRenderer.Render(edit.Data,work.Image,edit.Layout,edit.Dark,work.Fill,edit.Credit,work.Placement,.6,note.Text());}catch(Exception e){if(!(e is ArgumentException||e is InvalidOperationException||e is OutOfMemoryException))throw;status.Text="The card could not be drawn: "+e.Message;}};
    var placement=CardPlacementControls(work.Placement,draw);options.Children.Add(placement);

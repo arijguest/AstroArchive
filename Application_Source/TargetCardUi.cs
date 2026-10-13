@@ -185,7 +185,7 @@ namespace AstroArchive {
    var themeBox=(ComboBox)labelled("Theme",new ComboBox{ItemsSource=new[]{"Dark","Light"},SelectedItem=settings.CardTheme=="Light"?"Light":"Dark"});LocalizedInterface.SetContext(themeBox,"Theme");
    var fill=new CheckBox{Content=new TextBlock{Text="Fill the frame (crop edges)",TextWrapping=TextWrapping.Wrap},IsChecked=remembered>=0?memory.Fill:settings.CardFill,Margin=new Thickness(0,2,0,12)};AutomationProperties.SetName(fill,"Fill the frame");options.Children.Add(fill);
    var placement=new TargetCardPlacement();TargetCardPlacement pending=remembered>=0?memory.Placement():null;Action redraw=null;var adjust=CardPlacementControls(placement,()=>{if(redraw!=null)redraw();});options.Children.Add(adjust);
-   Action redrawNote=null;var note=new CardNote(memory==null?null:memory.Description,memory==null?null:memory.AutoDescription,settings.CardAutoDescription,CardFacts(target),()=>{if(redrawNote!=null)redrawNote();});labelled("Short description (optional)",note.Panel);
+   Action redrawNote=null;var note=new CardNote(memory==null?null:memory.Description,memory==null?null:memory.AutoDescription,settings.CardAutoDescription,null,()=>{if(redrawNote!=null)redrawNote();});labelled("Short description (optional)",note.Panel);
    var credit=(TextBox)labelled("Credit line (optional)",new TextBox{Text=settings.CardCredit??"",MaxLength=80});UiHelp.Hint(credit,"For example, your name or handle. Leave blank for “Made with AstroArchive”.");
    var format=(ComboBox)labelled("Format",new ComboBox{ItemsSource=new[]{"PNG","JPEG"},SelectedItem=settings.CardFormat=="JPEG"?"JPEG":"PNG"});
    var resolution=(ComboBox)labelled("Resolution",new ComboBox{ItemsSource=TargetCardRenderer.ResolutionLabels,SelectedIndex=0});UiHelp.Hint(resolution,"Standard matches the layout's social size. High doubles it for print or large screens. Sharing makes a smaller file for messages.");
@@ -223,6 +223,8 @@ namespace AstroArchive {
    d.CloseOnly();d.Window.Closed+=(s,e)=>{if(loading!=null)loading.Cancel();var choice=imageBox.SelectedItem as CardImage;bool untouched=memory==null&&imageBox.SelectedIndex==(images.Count>0?1:0)&&placement.Zoom==1&&placement.PanX==0&&placement.PanY==0&&placement.Rotation==0&&note.Own==null&&note.Choice==null&&fill.IsChecked==settings.CardFill;
     // Untouched defaults are not pinned, so a newer Edited image can still become the default.
     if(pending==null&&!untouched)RememberCard(data.Target,choice==null||choice.Path==null?"":choice.Path,new TargetCardComposition{Fill=fill.IsChecked==true,Placement=placement,Description=note.Own,AutoDescription=note.Choice});};
+   var closedWindow=false;d.Window.Closed+=(s,e)=>closedWindow=true;
+   Task.Run(()=>CardFacts(target)).ContinueWith(t=>{if(t.Status==TaskStatus.RanToCompletion&&!closedWindow)Window.Dispatcher.BeginInvoke(new Action(()=>{if(!closedWindow)note.SetFacts(t.Result,true);}));});
    draw();loadImage();d.Show();if(more)ShowAnalytics(AnalyticsWindow.CardsIndex,target);
   }
   static bool CardStill(string name){return !string.IsNullOrEmpty(name)&&Util.IsImageAsset(name)&&!MediaFiles.Motion(name);}
