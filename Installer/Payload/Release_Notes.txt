@@ -14,3 +14,5 @@ Help has been rebuilt as a help centre. It opens on a home page with guided fixe
 Report a problem… (in Help, About and the error prompt) previews system details, recent activity and the app log with local paths removed, lets you untick any section, and opens a prefilled GitHub issue. AstroArchive now keeps a small rolling log in %LOCALAPPDATA%\AstroArchive\logs.
 
 Deep-sky information pages show an approximate distance in light-years for galaxies whose catalogue redshift is large enough to measure it. Under each image the short description now sits directly below it, followed by the Credits arrow and label, which are vertically aligned.
+
+Meteors now have an information page with a Perseid photograph, a year chart of the annual meteor showers (when each is active, how strong, and what your observing location can see) and a guide to what meteor colours mean. A meteor capture taken within a known shower's dates now shows the shower's name in Capture details.

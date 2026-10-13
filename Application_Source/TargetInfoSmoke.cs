@@ -141,6 +141,10 @@ namespace AstroArchive {
     var back=PopupChildren<Button>(libraryInfo.View).SingleOrDefault(b=>b.Name=="BackToSection");
     if(back==null||PopupChildren<Button>(libraryInfo.View).Any(b=>b.Name=="OpenInStellarium"))throw new Exception("A comet read from Comets has no way back, or offers Stellarium.");
     back.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));WaitForTargetInformation(libraryInfo,"COMETS");
+    stage="meteors page";libraryInfo.View.ObserverSite=()=>new CaptureSite{Latitude=51.5,Longitude=0,Label="London"};libraryInfo.View.ShowCard(targetInformation.Find("Meteor",CancellationToken.None).Cards.Single());PumpPopupLayout();
+    var meteorCalendar=PopupChildren<MeteorCalendar>(libraryInfo.View).SingleOrDefault();if(meteorCalendar==null||meteorCalendar.ActualHeight<100||meteorCalendar.ActualWidth<150||!PopupChildren<FrameworkElement>(libraryInfo.View).Any(e=>e.Name=="MeteorColoursHeading")||!PopupChildren<Image>(libraryInfo.View).Any(x=>x.Source is BitmapSource))throw new Exception("The Meteors page lacks its year chart, colour guide or photo.");
+    if(!meteorCalendar.Describe(Array.FindIndex(MeteorShowers.All,s=>s.Code=="PER")).Contains("London"))throw new Exception("The Meteors chart does not name the observing location.");
+    libraryInfo.View.ObserverSite=()=>CaptureSite.For(null,settings);
     stage="eclipse page";libraryInfo.View.ShowCard(targetInformation.Find(Eclipses.SolarSection,CancellationToken.None).Cards.Single());PumpPopupLayout();
     if(!PopupChildren<Image>(libraryInfo.View).Any(i=>i.Source is BitmapSource)||!PopupChildren<TextBlock>(libraryInfo.View).Any(t=>t.Text==Localization.T("IMAGING NOTES")))throw new Exception("Solar eclipse page lacks its image or imaging notes.");
     if(PopupChildren<Button>(libraryInfo.View).Any(b=>b.Name=="OpenInStellarium"))throw new Exception("The solar eclipse page offers Stellarium.");

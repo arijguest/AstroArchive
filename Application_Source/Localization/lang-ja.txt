@@ -2343,3 +2343,10 @@ Distance	距離
 {0} billion light-years	{0}十億光年
 {0} million light-years	{0}百万光年
 {0} light-years	{0}光年
+Meteor shower	流星群
+Showers are matched by date only; the meteor's direction was not checked against a radiant.	流星群は日付だけで照合しています。流星の向きを放射点と照合してはいません。
+METEOR SHOWERS THROUGH THE YEAR	一年を通した流星群
+WHAT COLOURS CAN MEAN	色が意味しうること
+Showers are shown as seen from anywhere on Earth, at their zenithal hourly rate. Choose an observing town in Settings to see the rates from your location.	流星群は、地球上のどこから見ても、天頂での1時間あたりの出現数で表示しています。設定で観測地を選ぶと、その場所での出現数が表示されます。
+Each bar spans a shower's usual dates and rises to its peak; the taller the peak, the stronger the shower. The vertical line is today, a dot marks the peak, and a ring means the Moon is more than 60% lit then. Hover a row for details.	各バーは流星群の通常の活動期間を示し、極大に向けて高くなります。極大が高いほど強い流星群です。縦線は今日、点は極大、輪はその時の月の照明が60%を超えることを示します。行にカーソルを合わせると詳細が表示されます。
+As seen from {0} (latitude {1}°). Rows end in the hourly rate you could expect at the radiant's highest; a dashed line means the radiant stays too low to see.	{0}（緯度{1}°）からの見え方です。各行の右端は、放射点が最も高いときに期待できる1時間あたりの出現数です。破線は放射点が低すぎて見えないことを示します。

@@ -18,6 +18,7 @@ namespace AstroArchive {
    state.View.ChooseMember=member=>LoadTargetInformation(prefix,state.Target,null,member);
    state.View.GoBack=()=>LoadTargetInformation(prefix,state.Target,null);
    state.View.OpenInStellarium=OpenStellariumView;
+   state.View.ObserverSite=()=>CaptureSite.For(null,settings);
    var body=(Grid)Window.FindName(prefix.Length==0?"LibraryBody":"EditedBody");body.SizeChanged+=(s,e)=>ConstrainTargetInformationWidth(prefix);
    // A Grid may retain its minimum desired size while an ancestor clips it.
    // Recheck its allotted slot after layout, including preview divider changes.

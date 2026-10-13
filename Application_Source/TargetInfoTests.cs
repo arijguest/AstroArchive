@@ -6,6 +6,16 @@ using System.Threading;
 namespace AstroArchive {
  public partial class Tests {
   static void TargetInfoTests(){
+   MeteorShowerTests();
+   Test("Meteors have a page with a licensed image reachable by every common name",()=>{
+    var meteorPack=new TargetInfoCatalog(Path.Combine(AppDomain.CurrentDomain.BaseDirectory,"TargetInfo.zip"));
+    foreach(var name in new[]{"Meteor","Meteors","Meteor shower","Shooting star"}){
+     var result=meteorPack.Find(name,CancellationToken.None);Check(result.Status=="matched"&&result.Cards.Single().id=="METEORS","Meteor name not found: "+name);
+    }
+    var card=meteorPack.ById("METEORS",CancellationToken.None).Cards.Single();
+    Check(card.image!=null&&card.image.licence=="CC-BY-4.0"&&card.image.creator.Contains("Guisard")&&TargetInfoPresentation.DisplaySummary(card).Contains("meteoroid")&&TargetInfoPresentation.Imaging(card).Contains("tripod"),"Meteors card lacks its image, summary or imaging notes");
+    Check(MeteorColours.All.Length==6&&MeteorColours.All.All(c=>c.Cause.Length>20&&c.Hex.StartsWith("#")),"Meteor colour guide is incomplete");
+   });
    Test("Curated overviews cover common imaging targets and the tagline shows an ID once",()=>{
     Check(TargetDescriptions.Count>=150,"Too few curated overviews: "+TargetDescriptions.Count);
     for(int m=1;m<=110;m++){var entry=TargetDescriptions.For("M"+m);Check(entry!=null&&!string.IsNullOrWhiteSpace(entry.Imaging),"Messier "+m+" lacks a curated entry");Check(m==1||m==33||entry.Overview!=null&&entry.Overview.Length>=160&&!entry.Overview.Contains("(IAU constellation code)"),"Messier "+m+" overview is too thin");}

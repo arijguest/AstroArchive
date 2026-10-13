@@ -51,7 +51,7 @@ class CreditsTests(unittest.TestCase):
                         self.assertEqual(hashlib.sha256(archive.read(image['local_path'])).hexdigest(), image['sha256'])
                         self.assertEqual(repair_image(image), image)
             self.assertEqual(count, json.loads(archive.read('index.json'))['image_assignments'])
-            self.assertEqual(count, 330)
+            self.assertEqual(count, 331)
 
 
 if __name__ == '__main__':
