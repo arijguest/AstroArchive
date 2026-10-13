@@ -1,4 +1,4 @@
-// Distributed star detection, triangle matching and robust similarity fitting.
+// Distributed star detection, triangle matching and robust similarity fitting for plate solving.
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -10,7 +10,7 @@ namespace AstroArchive {
  public struct Star {public double X,Y,Flux;public Star(double x,double y,double f){X=x;Y=y;Flux=f;}}
  public class Triangle {public double A,B;public int I,J,K;public int Sign;}
  public class Transform {public double C,S,Tx,Ty;public Star Apply(Star p){return new Star(C*p.X-S*p.Y+Tx,S*p.X+C*p.Y+Ty,0);} }
- public static class Rotation {
+ public static class StarMatching {
   public static double Median(IEnumerable<double> a){double[] s=a.OrderBy(x=>x).ToArray();if(s.Length==0)return 0;return s.Length%2==0?(s[s.Length/2]+s[s.Length/2-1])/2:s[s.Length/2];}
   public static List<Star> Detect(FitsImage image,int maximum=100){
    int w=image.Width,h=image.Height;double[] p=image.Pixels;var found=new List<Star>();
@@ -56,41 +56,6 @@ namespace AstroArchive {
    if(rmsFinal>1.2||fraction<0.22||coverage<0.12||Math.Abs(sc-1)>0.01)throw new InvalidDataException("Match failed residual, scale or spatial-coverage checks.");
    double cx=pts.Average(p=>p.X),cy=pts.Average(p=>p.Y),lever=Math.Sqrt(pts.Sum(p=>(p.X-cx)*(p.X-cx)+(p.Y-cy)*(p.Y-cy)));
    return new PairResult{Angle=Math.Atan2(transform.S,transform.C)*180/Math.PI,Rms=rmsFinal,Scale=sc,Matches=best.Count,Coverage=coverage,Uncertainty=Math.Max(0.003,rmsFinal/lever*180/Math.PI)};
-  }
-  static double[] Unwrap(double[] angles){double[] q=new double[angles.Length];if(angles.Length==0)return q;q[0]=angles[0];for(int i=1;i<angles.Length;i++){double d=angles[i]-angles[i-1];while(d>180)d-=360;while(d<-180)d+=360;q[i]=q[i-1]+d;}return q;}
-  public static double Parallactic(DateTime utc,double ra,double dec,double lat,double lon){double days=(utc-new DateTime(2000,1,1,12,0,0,DateTimeKind.Utc)).TotalDays;double gst=280.46061837+360.98564736629*days;double hour=(gst+lon-ra)%360;if(hour>180)hour-=360;double k=Math.PI/180;return Math.Atan2(Math.Sin(hour*k),Math.Tan(lat*k)*Math.Cos(dec*k)-Math.Sin(dec*k)*Math.Cos(hour*k))/k;}
-  public static RotationResult Analyze(Repository repo,List<Frame> frames,double? lat,double? lon,CancellationToken ct,Action<ProgressInfo> progress,Action<int> counted=null){
-   var result=new RotationResult{Session=frames.First().Session,Mount="Unknown",Evidence="",AnalyzedAt=DateTime.UtcNow.ToString("o")};
-   var eligible=frames.Where(f=>f.Kind=="Light"&&!f.Rejected&&f.Calibration!="Registered"&&!string.IsNullOrEmpty(f.Observed)&&(string.IsNullOrEmpty(f.ClassificationVersion)||!string.IsNullOrEmpty(f.ObservedUtc))&&Assets.CanDecode(f)&&f.Format!="SER"&&(Assets.Selected(f)==null||Assets.Selected(f).Count<=1)).OrderBy(f=>f.ObservedUtc??f.Observed,StringComparer.Ordinal).ToList();
-   // Never bridge a long interruption or combine mixed exposure/calibration groups.
-   var segments=new List<List<Frame>>();foreach(var f in eligible){DateTime? d=Util.Time(f.ObservedUtc??f.Observed);if(!d.HasValue)continue;if(segments.Count==0||((d.Value-Util.Time(segments.Last().Last().ObservedUtc??segments.Last().Last().Observed).Value).TotalMinutes>45))segments.Add(new List<Frame>());segments.Last().Add(f);}
-   var group=segments.OrderByDescending(s=>(Util.Time(s.Last().ObservedUtc??s.Last().Observed).Value-Util.Time(s.First().ObservedUtc??s.First().Observed).Value).TotalMinutes).FirstOrDefault();
-   if(group==null||group.Count<5){result.Evidence="At least five timestamped individual light frames in one uninterrupted session are required.";return result;}
-   int count=Math.Min(18,group.Count);var sampled=Enumerable.Range(0,count).Select(i=>group[(int)Math.Round(i*(group.Count-1.0)/(count-1))]).Distinct().ToList();
-   List<Star> reference=null;FitsImage refImage=null;DateTime start=DateTime.MinValue;var accepted=new List<Frame>();
-   for(int i=0;i<sampled.Count;i++){ct.ThrowIfCancellationRequested();Frame f=sampled[i];progress(new ProgressInfo{Done=i,Total=sampled.Count,Text="Matching stars: "+f.OriginalName});try{FitsImage image=Assets.Analysis(f,repo.FilePath(f),ct,counted);var stars=Detect(image);if(stars.Count<12)throw new InvalidDataException("Fewer than 12 usable stars.");
-    DateTime time=Util.Time(f.ObservedUtc??f.Observed).Value;
-    if(reference==null){reference=stars;refImage=image;start=time;result.Points.Add(new RotationPoint{File=f.OriginalName,Time=f.Observed,Minutes=0,Angle=0,Stars=stars.Count,Error=0.003});accepted.Add(f);continue;}
-    if(image.Width!=refImage.Width||image.Height!=refImage.Height)throw new InvalidDataException("Different image dimensions.");
-    var m=Match(reference,stars,image.Width,image.Height,ct);result.Points.Add(new RotationPoint{File=f.OriginalName,Time=f.Observed,Minutes=(time-start).TotalMinutes,Angle=m.Angle,Rms=m.Rms,Stars=m.Matches,Error=m.Uncertainty});accepted.Add(f);
-   }catch(OperationCanceledException){throw;}catch(Exception e){result.Rejected.Add(f.OriginalName+": "+e.Message);}}
-   if(result.Points.Count<5){result.Evidence="Too few reliable star matches ("+result.Points.Count+"). "+string.Join("; ",result.Rejected.Take(2));return result;}
-   double[] y=Unwrap(result.Points.Select(p=>p.Angle).ToArray());double[] x=result.Points.Select(p=>p.Minutes).ToArray();for(int i=0;i<y.Length;i++)result.Points[i].Angle=y[i];
-   result.SpanMinutes=x.Last()-x.First();result.DriftDegrees=y.Max()-y.Min();
-   if(result.SpanMinutes<10){result.Evidence="Only "+result.SpanMinutes.ToString("0.0")+" minutes available; mount classification needs a longer span.";return result;}
-   var slopes=new List<double>();for(int i=0;i<x.Length;i++)for(int j=i+1;j<x.Length;j++)if(x[j]-x[i]>1)slopes.Add((y[j]-y[i])/(x[j]-x[i]));double slope=Median(slopes),offset=Median(y.Select((v,i)=>v-slope*x[i]));double res=1.4826*Median(y.Select((v,i)=>Math.Abs(v-offset-slope*x[i])));double error=Median(result.Points.Select(p=>p.Error));result.RateDegreesMinute=slope;result.ResidualDegrees=res;
-   Frame baseFrame=accepted.First();double? latitude=lat??baseFrame.Latitude,longitude=lon??baseFrame.Longitude;
-   bool geometry=latitude.HasValue&&longitude.HasValue&&baseFrame.RA.HasValue&&baseFrame.Dec.HasValue&&accepted.All(f=>f.TimeSource=="FITS UTC");
-   string context="Matched "+result.Points.Count+"/"+sampled.Count+" frames over "+result.SpanMinutes.ToString("0.0")+" min; angular range "+result.DriftDegrees.ToString("0.000")+"°, median fit error "+Median(result.Points.Skip(1).Select(p=>p.Rms)).ToString("0.00")+" binned pixels. ";
-   if(geometry){
-    double[] q=Unwrap(accepted.Select(f=>Parallactic(Util.Time(f.ObservedUtc??f.Observed).Value,baseFrame.RA.Value,baseFrame.Dec.Value,latitude.Value,longitude.Value)).ToArray());double predicted=q.Max()-q.Min();
-    double fitPlus=Median(y.Select((v,i)=>v-q[i])),fitMinus=Median(y.Select((v,i)=>v+q[i]));double rPlus=Math.Sqrt(y.Select((v,i)=>Math.Pow(v-q[i]-fitPlus,2)).Average()),rMinus=Math.Sqrt(y.Select((v,i)=>Math.Pow(v+q[i]-fitMinus,2)).Average());double modelError=Math.Min(rPlus,rMinus);
-    if(predicted>0.5&&result.DriftDegrees>0.35&&modelError<Math.Max(0.08,Math.Min(0.5,predicted*0.05))&&result.DriftDegrees>error*8){result.Mount="Alt-Az?";result.Evidence=context+"Measured rotation agrees with the Alt-Az parallactic-angle model (RMS "+modelError.ToString("0.000")+"°). This remains an inference.";}
-    else if(predicted>2&&result.SpanMinutes>=15&&result.DriftDegrees<Math.Max(0.08,error*6)&&res<0.03){result.Mount="EQ?";result.Evidence=context+"Stable orientation where Alt-Az predicts "+predicted.ToString("0.00")+"° rotation. Registered or derotated files can mimic EQ; only analyze acquisition subs.";}
-    else result.Evidence=context+"Neither mount model is sufficiently supported. Alt-Az expected angular range: "+predicted.ToString("0.00")+"°.";
-   }else if(result.DriftDegrees>0.6&&Math.Abs(slope)*result.SpanMinutes>0.5&&res<Math.Max(0.05,result.DriftDegrees*0.08)&&result.DriftDegrees>error*10){result.Mount="Alt-Az?";result.Evidence=context+"Coherent rotation suggests Alt-Az. Without site and pointing data, poor EQ polar alignment or a rotating camera cannot be excluded.";}
-   else result.Evidence=context+"Low or inconsistent rotation cannot establish EQ. Choose an observing town/city in Settings and add solved pointing to test the Alt-Az model.";
-   return result;
   }
  }
 }

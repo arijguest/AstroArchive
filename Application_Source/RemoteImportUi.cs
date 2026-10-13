@@ -205,7 +205,7 @@ namespace AstroArchive {
   internal Task StartRemoteImport(RemoteImportRequest request,Func<RemoteConnection,ISource> factory=null,ImportResumeRecord recovery=null){
    if(NetworkImportBlocked||repo==null)throw new InvalidOperationException("Wait for the current operation before starting a telescope import.");string issue=ValidateRemoteRequest(request);if(issue!=null)throw new IOException(issue);
    var previous=TelescopeProfiles.Find(settings,request.Profile.Id);if(previous!=null)settings.Telescopes.Remove(previous);settings.Telescopes.Add(request.Profile);settings.SelectedTelescope=request.Profile.Id;ReloadScopes(request.Profile.Id,true);
-   ((CheckBox)Window.FindName("DeleteOriginalsCheck")).IsChecked=false;C("ImportSolveMode").SelectedItem="Off";C("ImportRotationMode").SelectedItem="Off";((TabControl)Window.FindName("MainTabs")).SelectedIndex=1;
+   ((CheckBox)Window.FindName("DeleteOriginalsCheck")).IsChecked=false;C("ImportSolveMode").SelectedItem="Off";((TabControl)Window.FindName("MainTabs")).SelectedIndex=1;
    bool local=RemoteCapturePaths.LocalFolder(request.Connection);if(local)RemoteCapturePaths.CheckWatchedFolder(request.Connection,repo.Root);
    string cache=Path.Combine(Path.GetDirectoryName(config),"RemoteDownloads");if(remoteSessions.Count==0){T("SourceBox").Text=local?request.Connection.Folder:cache;plan=null;BeginLive(true);}SaveSettings();
    var record=recovery??RemoteImportRecord(request);record.State="Running";ResumeStore.Save(record);

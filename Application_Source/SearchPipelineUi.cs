@@ -32,7 +32,7 @@ namespace AstroArchive {
    state.Timer.Tick+=(s,e)=>{state.Timer.Stop();ExecuteSearch(name,state);};searchPanels[name]=state;return state;
   }
   IEnumerable<string> SearchControls(string name){
-   return name=="SearchBox"?new[]{"FramesGrid","TargetList","ExportButton","RotationButton","AnalyzeQualityButton","SolveButton","EditButton","MoreButton","ScreenLibraryButton","ReviewLibraryButton"}:
+   return name=="SearchBox"?new[]{"FramesGrid","TargetList","ExportButton","AnalyzeQualityButton","SolveButton","EditButton","MoreButton","ScreenLibraryButton","ReviewLibraryButton"}:
     name=="ImportSearchBox"?new[]{"ImportGrid","ImportButton","ScreenImportsButton","ReviewImportsButton","RetryImportsButton","AssignUnknownTargetButton","ImportToolsButton"}:
     new[]{"EditedGrid","EditedTargetList","EditedPreviewButton","EditedDetailsButton","EditedEditorButton","EditedOpenPreviewButton"};
   }

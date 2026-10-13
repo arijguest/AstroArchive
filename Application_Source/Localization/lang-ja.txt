@@ -97,7 +97,6 @@ Import tools ▾	インポート ツール ▾
 Report	レポート
 Import options	インポート オプション
 TARGET ANALYSIS	ターゲット解析
-ROTATION ANALYSIS	回転解析
 Ignore failed	失敗を無視
 Skip filenames containing “failed”; keep originals.	ファイル名に “failed” を含むものをスキップし、元ファイルは保持します。
 Delete originals after verified import	検証済みのインポート後に元ファイルを削除
@@ -161,7 +160,6 @@ Importing edited images	Edited の画像をインポート中
 Identifying targets	ターゲットを識別中
 Applying target metadata	ターゲットのメタデータを適用中
 Analyze	解析
-Analysing rotation	回転を解析中
 Screening captures	キャプチャをスクリーニング中
 Backing up archive	アーカイブをバックアップ中
 Changing originals protection	元ファイルの保護を変更中
@@ -289,8 +287,6 @@ Wide	広角
 Off	オフ
 Ambiguous only	あいまいなもののみ
 All light/stack files	すべてのライト/スタック ファイル
-Ambiguous mounts	あいまいな架台
-All light sessions	すべてのライト セッション
 Preparing browsing and capture tools…	参照ツールとキャプチャ ツールを準備しています…
 Choose a mirrored telescope folder	ミラーされた望遠鏡フォルダーを選択
 Canceled	キャンセル済み
@@ -340,10 +336,6 @@ User	ユーザー
 Saving final archive index and report	最終的なアーカイブ インデックスとレポートを保存中
 Import report	インポート レポート
 Explicit	明示的
-Choose a target with individual light frames. Stacks cannot establish acquisition rotation.	個々のライトフレームがあるターゲットを選択してください。スタックからは撮影時の回転を特定できません。
-Individual subs required	個々のサブが必要です
-Rotation analysis complete.	回転解析が完了しました。
-Rotation analysis	回転解析
 Restore	復元
 Duplicate in source	ソース内で重複
 Failed	失敗
@@ -845,9 +837,7 @@ Windows language	Windows の言語
 Language	言語
 Applies after AstroArchive restarts. The offline guide stays in English.	AstroArchive の再起動後に適用されます。オフライン ガイドは英語のままです。
 Observing town / city	観測地の市区町村
-Select your nearest town or city. Its centre is used for rotation analysis; without a selection, capture location metadata is used when available.	最寄りの市区町村を選択してください。その中心が回転解析に使用されます。選択しない場合は、キャプチャの位置メタデータがあればそれが使用されます。
 Town / city	市区町村
-Saved location used for sky views and mount analysis.	空の表示と架台の解析に使用される保存済みの場所です。
 Choose town / city…	市区町村を選択…
 Clear observing location	観測地をクリア
 Choose observing town / city	観測地の市区町村の選択
@@ -958,7 +948,6 @@ Group subs by session	サブをセッションごとにグループ化
 Filters…	フィルター…
 Review and analysis	確認と解析
 Identify targets…	ターゲットを識別…
-Analyse rotation…	回転を解析…
 Maintenance	メンテナンス
 Delete archive data…	アーカイブ データを削除…
 Diagnostics	診断
@@ -1428,11 +1417,8 @@ Inbox for captures waiting to be imported.	インポート待ちのキャプチ�
 Import inbox captures; delete verified science originals and keep calibration frames.	受信トレイのキャプチャをインポートします。検証済みのサイエンス用元ファイルは削除し、キャリブレーション フレームは保持します。
 Condense acquisition subs into session rows.	撮影したサブをセッションごとの行にまとめます。
 Create a verified copy of the archive.	アーカイブの検証済みコピーを作成します。
-Review captures, identify objects and assess mount rotation.	キャプチャを確認し、天体を識別し、架台による回転を評価します。
 Identify targets	ターゲットを識別
 Solve light groups and stacks to identify objects.	ライトのグループとスタックをプレートソルブして天体を識別します。
-Analyse rotation	回転を解析
-Estimate EQ or Alt-Az from acquisition subs.	撮影したサブから EQ か Alt-Az かを推定します。
 Verify, reindex or remove archive files.	アーカイブ ファイルの検証、再インデックス、または削除を行います。
 Delete archive files with 'failed' in their filenames.	ファイル名に「failed」を含むアーカイブ ファイルを削除します。
 Delete indexed PNG/JPG/JPEG/MP4 copies; keep source originals.	インデックスされた PNG/JPG/JPEG/MP4 のコピーを削除します。ソースの元ファイルは保持します。
@@ -1524,7 +1510,6 @@ Metadata, target identification and scan report.	メタデータ、ターゲッ�
 Open the guide (F1).	ガイドを開きます (F1)。
 Choose telescope folders or files, then confirm a full scan and import. Keep originals.	望遠鏡のフォルダーまたはファイルを選択し、完全なスキャンとインポートを確定します。元ファイルは保持されます。
 Clear search, filters and target selection.	検索、フィルター、ターゲットの選択をクリアします。
-Assess mount mode from rotation in acquisition subs.	撮影したサブの回転から架台の方式を評価します。
 Solve selected Light groups and stacks; review batch target matches.	選択したライトのグループとスタックをプレートソルブし、ターゲットの一致を一括で確認します。
 Edit selected files, or all visible files if none selected.	選択したファイルを編集します。選択がない場合は表示中のすべてのファイルを編集します。
 Archive tools.	アーカイブ ツール。
@@ -1536,7 +1521,6 @@ Use a unique name for each physical telescope.	物理的な望遠鏡ごとに一
 Auto detects each capture’s model.	各キャプチャのモデルを自動検出します。
 Overrides apply to every scanned capture.	上書きはスキャンしたすべてのキャプチャに適用されます。
 Choose which targets to solve; requires a configured solver.	プレートソルブするターゲットを選択します。プレートソルバーの構成が必要です。
-Choose which acquisition sessions to analyse.	解析する撮影セッションを選択します。
 Measured work by stage; concurrent times can overlap.	段階ごとに計測した処理時間です。並行処理の時間は重なる場合があります。
 Import timings and error diagnostics.	インポートの所要時間とエラーの診断情報。
 Stop safely; completed imports remain.	安全に停止します。完了したインポートは残ります。

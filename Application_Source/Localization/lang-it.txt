@@ -95,7 +95,6 @@ Retry failed imports	Riprova importazioni non riuscite
 Import tools ▾	Strumenti importazione ▾
 Import options	Opzioni di importazione
 TARGET ANALYSIS	ANALISI TARGET
-ROTATION ANALYSIS	ANALISI ROTAZIONE
 Ignore failed	Ignora non riuscite
 Skip filenames containing “failed”; keep originals.	Salta i nomi file che contengono “failed”; conserva gli originali.
 Delete originals after verified import	Elimina gli originali dopo l'importazione verificata
@@ -159,7 +158,6 @@ Importing edited images	Importazione delle immagini elaborate
 Identifying targets	Identificazione dei target
 Applying target metadata	Applicazione dei metadati dei target
 Analyze	Analizza
-Analysing rotation	Analisi della rotazione
 Screening captures	Controllo delle acquisizioni
 Backing up archive	Backup dell'archivio
 Changing originals protection	Modifica della protezione degli originali
@@ -286,8 +284,6 @@ Wide	Grandangolo
 Off	Disattivato
 Ambiguous only	Solo ambigui
 All light/stack files	Tutti i file light/stack
-Ambiguous mounts	Montature ambigue
-All light sessions	Tutte le sessioni light
 Preparing browsing and capture tools…	Preparazione degli strumenti di navigazione e acquisizione…
 Choose a mirrored telescope folder	Scegli una copia della cartella del telescopio
 Canceled	Annullato
@@ -335,10 +331,6 @@ User	Utente
 Saving final archive index and report	Salvataggio dell'indice finale dell'archivio e del report
 Import report	Report di importazione
 Explicit	Esplicito
-Choose a target with individual light frames. Stacks cannot establish acquisition rotation.	Scegli un target con singoli light. Gli stack non consentono di determinare la rotazione di acquisizione.
-Individual subs required	Pose singole obbligatorie
-Rotation analysis complete.	Analisi della rotazione completata.
-Rotation analysis	Analisi della rotazione
 Restore	Ripristina
 Duplicate in source	Duplicato nell'origine
 Failed	Non riuscito
@@ -829,9 +821,7 @@ Windows language	Lingua di Windows
 Language	Lingua
 Applies after AstroArchive restarts. The offline guide stays in English.	Viene applicata al riavvio di AstroArchive. La guida offline resta in inglese.
 Observing town / city	Località di osservazione
-Select your nearest town or city. Its centre is used for rotation analysis; without a selection, capture location metadata is used when available.	Seleziona la località più vicina. Il suo centro viene usato per l'analisi della rotazione; in assenza di una selezione, vengono usati i metadati di posizione dell'acquisizione, se disponibili.
 Town / city	Località
-Saved location used for sky views and mount analysis.	Posizione salvata usata per le viste del cielo e l'analisi della montatura.
 Choose town / city…	Scegli località…
 Clear observing location	Cancella località di osservazione
 Choose observing town / city	Scegli la località di osservazione
@@ -942,7 +932,6 @@ Group subs by session	Raggruppa pose per sessione
 Filters…	Filtri…
 Review and analysis	Verifica e analisi
 Identify targets…	Identifica target…
-Analyse rotation…	Analizza rotazione…
 Maintenance	Manutenzione
 Delete archive data…	Elimina dati dell'archivio…
 Diagnostics	Diagnostica
@@ -1410,11 +1399,8 @@ Inbox for captures waiting to be imported.	Cartella di arrivo per le acquisizion
 Import inbox captures; delete verified science originals and keep calibration frames.	Importa le acquisizioni in arrivo; elimina gli originali scientifici verificati e mantieni i frame di calibrazione.
 Condense acquisition subs into session rows.	Raggruppa le pose di acquisizione in righe di sessione.
 Create a verified copy of the archive.	Crea una copia verificata dell'archivio.
-Review captures, identify objects and assess mount rotation.	Verifica le acquisizioni, identifica gli oggetti e valuta la rotazione della montatura.
 Identify targets	Identifica target
 Solve light groups and stacks to identify objects.	Esegui il plate solving di gruppi di light e stack per identificare gli oggetti.
-Analyse rotation	Analizza rotazione
-Estimate EQ or Alt-Az from acquisition subs.	Stima EQ o Alt-Az dalle pose di acquisizione.
 Verify, reindex or remove archive files.	Verifica, reindicizza o rimuovi i file dell'archivio.
 Delete archive files with 'failed' in their filenames.	Elimina i file dell'archivio con 'failed' nel nome file.
 Delete indexed PNG/JPG/JPEG/MP4 copies; keep source originals.	Elimina le copie PNG/JPG/JPEG/MP4 indicizzate; mantieni gli originali di origine.
@@ -1506,7 +1492,6 @@ Metadata, target identification and scan report.	Metadati, identificazione dei t
 Open the guide (F1).	Apri la guida (F1).
 Choose telescope folders or files, then confirm a full scan and import. Keep originals.	Scegli cartelle o file del telescopio, quindi conferma una scansione completa e l'importazione. Gli originali vengono mantenuti.
 Clear search, filters and target selection.	Cancella ricerca, filtri e selezione del target.
-Assess mount mode from rotation in acquisition subs.	Valuta la modalità della montatura dalla rotazione nelle pose di acquisizione.
 Solve selected Light groups and stacks; review batch target matches.	Esegui il plate solving dei gruppi Light e degli stack selezionati; verifica in blocco le corrispondenze dei target.
 Edit selected files, or all visible files if none selected.	Modifica i file selezionati o, se non ce ne sono, tutti i file visibili.
 Archive tools.	Strumenti dell'archivio.
@@ -1518,7 +1503,6 @@ Use a unique name for each physical telescope.	Usa un nome univoco per ogni tele
 Auto detects each capture’s model.	Automatico rileva il modello di ogni acquisizione.
 Overrides apply to every scanned capture.	Le impostazioni manuali si applicano a ogni acquisizione scansionata.
 Choose which targets to solve; requires a configured solver.	Scegli i target da risolvere; richiede un software di plate solving configurato.
-Choose which acquisition sessions to analyse.	Scegli le sessioni di acquisizione da analizzare.
 Measured work by stage; concurrent times can overlap.	Lavoro misurato per fase; i tempi delle attività simultanee possono sovrapporsi.
 Import timings and error diagnostics.	Tempi di importazione e diagnostica degli errori.
 Stop safely; completed imports remain.	Interrompi in sicurezza; le importazioni completate restano.
