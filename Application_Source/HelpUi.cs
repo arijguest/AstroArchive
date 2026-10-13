@@ -114,13 +114,13 @@ namespace AstroArchive {
   Button Card(string heading,string text,string action,object tag,Action click){
    var body=new StackPanel();var name=new TextBlock{Text=heading,TextWrapping=TextWrapping.Wrap,FontWeight=FontWeights.SemiBold};body.Children.Add(name);
    var detail=new TextBlock{Text=text,TextWrapping=TextWrapping.Wrap,FontWeight=FontWeights.Normal,Margin=new Thickness(0,4,0,0)};Theme.Bind(detail,TextBlock.ForegroundProperty,"Muted");detail.SetResourceReference(TextBlock.FontSizeProperty,"UiFontSmall");body.Children.Add(detail);
-   var go=new TextBlock{Text=action,Margin=new Thickness(0,8,0,0)};Theme.Bind(go,TextBlock.ForegroundProperty,"Accent");go.SetResourceReference(TextBlock.FontSizeProperty,"UiFontSmall");body.Children.Add(go);
+   var go=new TextBlock{Text=action,Margin=new Thickness(0,8,0,0)};Theme.Bind(go,TextBlock.ForegroundProperty,"Link");go.SetResourceReference(TextBlock.FontSizeProperty,"UiFontSmall");body.Children.Add(go);
    var card=new Button{Content=body,Tag=tag,Width=272,HorizontalContentAlignment=HorizontalAlignment.Stretch,VerticalContentAlignment=VerticalAlignment.Top,Padding=new Thickness(14,12,14,12),Margin=new Thickness(0,0,12,12)};Theme.Bind(card,Control.BackgroundProperty,"Surface");
    AutomationProperties.SetName(card,heading);AutomationProperties.SetHelpText(card,text);card.Click+=(s,e)=>click();HomeCards.Add(card);return card;
   }
   FrameworkElement ArticleView(){
    var view=new Grid();foreach(var height in new[]{GridLength.Auto,GridLength.Auto,new GridLength(1,GridUnitType.Star),GridLength.Auto})view.RowDefinitions.Add(new RowDefinition{Height=height});
-   var header=new StackPanel{Margin=new Thickness(0,0,0,12)};Theme.Bind(category,TextBlock.ForegroundProperty,"Accent");category.SetResourceReference(TextBlock.FontSizeProperty,"UiFontCaption");header.Children.Add(category);
+   var header=new StackPanel{Margin=new Thickness(0,0,0,12)};Theme.Bind(category,TextBlock.ForegroundProperty,"Link");category.SetResourceReference(TextBlock.FontSizeProperty,"UiFontCaption");header.Children.Add(category);
    title.SetResourceReference(TextBlock.FontSizeProperty,"UiFontTitle");Theme.Bind(title,TextBlock.ForegroundProperty,"Text");header.Children.Add(title);
    Theme.Bind(summary,TextBlock.ForegroundProperty,"Muted");header.Children.Add(summary);
    Theme.Bind(showMe,Control.BackgroundProperty,"Accent");Theme.Bind(showMe,Control.ForegroundProperty,"AccentText");Theme.Bind(showMe,Control.BorderBrushProperty,"Accent");showMe.Click+=(s,e)=>{var topic=SelectedTopic;if(topic!=null&&topic.Walkthrough!=null)Start(topic.Walkthrough);};UiHelp.Describe(showMe,"Walk through this on AstroArchive's own screens.");header.Children.Add(showMe);

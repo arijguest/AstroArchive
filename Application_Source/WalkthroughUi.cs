@@ -54,7 +54,7 @@ namespace AstroArchive {
             var title = new StackPanel(); layout.Children.Add(title);
             var caption = new DockPanel(); title.Children.Add(caption);
             DockPanel.SetDock(Count, Dock.Right); caption.Children.Add(Count); caption.Children.Add(Guide);
-            Guide.Text = guide.Title; Theme.Bind(Guide, TextBlock.ForegroundProperty, "Accent"); Guide.SetResourceReference(TextBlock.FontSizeProperty, "UiFontCaption"); Guide.FontWeight = FontWeights.SemiBold;
+            Guide.Text = guide.Title; Theme.Bind(Guide, TextBlock.ForegroundProperty, "Link"); Guide.SetResourceReference(TextBlock.FontSizeProperty, "UiFontCaption"); Guide.FontWeight = FontWeights.SemiBold;
             Theme.Bind(Count, TextBlock.ForegroundProperty, "Muted"); Count.SetResourceReference(TextBlock.FontSizeProperty, "UiFontCaption"); Count.FontWeight = FontWeights.SemiBold; Count.Margin = new Thickness(12, 0, 0, 0);
             Progress.SetResourceReference(Control.ForegroundProperty, "Accent"); Progress.SetResourceReference(Control.BackgroundProperty, "SurfaceAlt"); Progress.BorderThickness = new Thickness(0); AutomationProperties.SetName(Progress, "Walkthrough progress"); title.Children.Add(Progress);
             Heading.SetResourceReference(TextBlock.FontSizeProperty, "UiFontTitle"); Heading.Margin = new Thickness(0, 0, 0, 12); title.Children.Add(Heading);

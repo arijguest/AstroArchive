@@ -26,7 +26,7 @@ namespace AstroArchive {
     var paragraph=new Paragraph{Margin=new Thickness(0,0,0,12)};
     if(block.Kind==HelpBlockKind.Callout){
      // Tips and notes sit in a tinted panel with an accent rule; "Important" uses the warm warning tint.
-     bool important=block.Label=="Important";var label=new Run((Localized?Localization.T(block.Label):block.Label)+"  "){FontWeight=FontWeights.SemiBold};label.SetResourceReference(TextElement.ForegroundProperty,important?"StarAccent":"Accent");paragraph.Inlines.Add(label);AddInlines(paragraph,block.Text);paragraph.Margin=new Thickness(0);
+     bool important=block.Label=="Important";var label=new Run((Localized?Localization.T(block.Label):block.Label)+"  "){FontWeight=FontWeights.SemiBold};label.SetResourceReference(TextElement.ForegroundProperty,important?"StarAccent":"Link");paragraph.Inlines.Add(label);AddInlines(paragraph,block.Text);paragraph.Margin=new Thickness(0);
      var panel=new Section(paragraph){BorderThickness=new Thickness(4,0,0,0),Padding=new Thickness(14,10,14,10),Margin=new Thickness(0,2,0,14)};panel.SetResourceReference(TextElement.BackgroundProperty,important?"Starred":"SupportSurface");panel.SetResourceReference(Block.BorderBrushProperty,important?"StarAccent":"Accent");
      list=null;document.Blocks.Add(panel);continue;
     }
@@ -42,7 +42,7 @@ namespace AstroArchive {
    int position=0;foreach(Match match in HelpCatalog.Inlines(text)){
     if(match.Index>position)paragraph.Inlines.Add(new Run(text.Substring(position,match.Index-position)));
     if(match.Groups[3].Success){
-     string target=match.Groups[4].Value;var link=new Hyperlink(new Run(match.Groups[3].Value)){Cursor=System.Windows.Input.Cursors.Hand,ToolTip=target.StartsWith("walkthrough:")?Localization.T("Start this guided walkthrough."):Localization.T("Open this help topic.")};link.SetResourceReference(TextElement.ForegroundProperty,"Accent");
+     string target=match.Groups[4].Value;var link=new Hyperlink(new Run(match.Groups[3].Value)){Cursor=System.Windows.Input.Cursors.Hand,ToolTip=target.StartsWith("walkthrough:")?Localization.T("Start this guided walkthrough."):Localization.T("Open this help topic.")};link.SetResourceReference(TextElement.ForegroundProperty,"Link");
      link.Click+=(s,e)=>RaiseLink(target);AutomationProperties.SetName(link,match.Groups[3].Value);paragraph.Inlines.Add(link);
     }else{
      var run=new Run(match.Groups[1].Success?match.Groups[1].Value:match.Groups[2].Value);

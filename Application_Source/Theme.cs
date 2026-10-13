@@ -17,6 +17,8 @@ namespace AstroArchive {
    if(contrast){light=new[]{"#FFFFFF","#FFFFFF","#F3F3F3","#000000","#000000","#000000","#1D4ED8","#DDEBFF"};night=new[]{"#000000","#000000","#151515","#FFFFFF","#FFFFFF","#FFFFFF","#1D4ED8","#183E69"};}
    window.Resources["Focus"]=new SolidColorBrush(dark?Color.FromRgb(251,191,36):Color.FromRgb(29,78,216));
    for(int i=0;i<keys.Length;i++){var brush=new SolidColorBrush((Color)ColorConverter.ConvertFromString((dark?night:light)[i]));brush.Freeze();window.Resources[keys[i]]=brush;}
+   // Accent-coloured text (links, captions, callout labels): the accent itself is too dim for small text on dark surfaces.
+   var link=new SolidColorBrush((Color)ColorConverter.ConvertFromString(contrast?(dark?"#8AB4FF":"#1D4ED8"):(dark?"#B7B4FF":"#5951D6")));link.Freeze();window.Resources["Link"]=link;
    window.Resources["AccentText"]=new SolidColorBrush(contrast||!dark?Colors.White:Color.FromRgb(12,18,32));
    string[] controlKeys={"ControlBorder","DisabledSurface","DisabledText","DisabledBorder","SelectionIndicator"};
    string[] controlColours=contrast?(dark?new[]{"#FFFFFF","#151515","#FFFFFF","#FFFFFF","#FFFFFF"}:new[]{"#000000","#F3F3F3","#000000","#000000","#000000"}):(dark?new[]{"#94A5C0","#202C40","#A8B5CA","#71829D","#B7B4FF"}:new[]{"#64748B","#E3E8F0","#536077","#64748B","#5951D6"});
