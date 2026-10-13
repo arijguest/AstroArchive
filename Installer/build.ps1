@@ -82,11 +82,11 @@ $manifest.Save((Join-Path $build 'app.manifest'))
 $languages = @(Get-ChildItem (Join-Path $PSScriptRoot '..\Application_Source\Localization') -Filter 'lang-*.txt' | ForEach-Object { "/resource:$($_.FullName),$($_.Name)" })
 $shared = @('/nologo', '/langversion:5', '/target:winexe', '/platform:x64', '/optimize+',
     '/r:System.Core.dll', '/r:System.Web.Extensions.dll', '/r:System.Windows.Forms.dll', '/r:System.Drawing.dll',
-    "/win32icon:$PSScriptRoot\Assets\AstroArchive.ico", "/resource:$PSScriptRoot\Assets\AstroArchive.ico,AstroArchive.ico", "/win32manifest:$build\app.manifest", "$PSScriptRoot\..\Application_Source\Localization.cs") + $languages
+    "/win32icon:$PSScriptRoot\Assets\AstroArchive.ico", "/resource:$PSScriptRoot\Assets\AstroArchive.ico,AstroArchive.ico", "/win32manifest:$build\app.manifest") + $languages
 if (-not $UsePreparedPayload) {
     $launcherArgs = $shared + @('/define:LAUNCHER', "/out:$payload\Start.exe",
         "$PSScriptRoot\ConnectivityPolicy.cs", "$PSScriptRoot\InstallerLayout.cs", "$PSScriptRoot\ReleaseMonitor.cs", "$PSScriptRoot\InstallCore.cs", "$PSScriptRoot\LaunchSafety.cs", "$PSScriptRoot\Launcher.cs", "$PSScriptRoot\Updates.cs",
-        "$PSScriptRoot\WindowsIntegration.cs", "$PSScriptRoot\ShellIdentity.cs", "$build\GeneratedVersion.cs")
+        "$PSScriptRoot\WindowsIntegration.cs", "$PSScriptRoot\ShellIdentity.cs", "$PSScriptRoot\..\Application_Source\Localization.cs", "$build\GeneratedVersion.cs")
     & $compiler @launcherArgs
     if ($LASTEXITCODE -ne 0) { throw 'Launcher compilation failed.' }
 }
@@ -127,7 +127,7 @@ $setupArgs = $shared + @("/out:$setupPath", '/r:System.Drawing.dll', '/r:System.
     "/resource:$build\payload.zip,payload.zip", "/resource:$build\payload.json,payload.json",
     "/resource:$PSScriptRoot\Assets\AstroArchive_Logo.png,logo.png",
     "$PSScriptRoot\InstallCore.cs", "$PSScriptRoot\LaunchSafety.cs", "$PSScriptRoot\WindowsIntegration.cs", "$PSScriptRoot\ShellIdentity.cs", "$PSScriptRoot\NativeFolderPicker.cs",
-    "$PSScriptRoot\ConnectivityPolicy.cs", "$PSScriptRoot\InstallerLayout.cs", "$PSScriptRoot\Setup.cs", "$PSScriptRoot\Updates.cs", "$build\GeneratedVersion.cs")
+    "$PSScriptRoot\ConnectivityPolicy.cs", "$PSScriptRoot\InstallerLayout.cs", "$PSScriptRoot\Setup.cs", "$PSScriptRoot\Updates.cs", "$PSScriptRoot\..\Application_Source\Localization.cs", "$build\GeneratedVersion.cs")
 & $compiler @setupArgs
 if ($LASTEXITCODE -ne 0) { throw 'Installer compilation failed.' }
 $actual = [Diagnostics.FileVersionInfo]::GetVersionInfo($setupPath).FileVersion
