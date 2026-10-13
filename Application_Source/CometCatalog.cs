@@ -19,7 +19,7 @@ namespace AstroArchive {
   public Dictionary<string,string> Sigmas=new Dictionary<string,string>();
  }
  public sealed class MeteorParent {public string Comet,ListedAs,Status;public string[] Sources;}
- public sealed class MeteorShower {public string Code,Name,Peak;public List<MeteorParent> Parents=new List<MeteorParent>();}
+ public sealed class ParentShower {public string Code,Name,Peak;public List<MeteorParent> Parents=new List<MeteorParent>();}
  // Offline comet orbits for every comet in the snapshot and the meteor showers they feed.
  // CometCatalog.tsv.gz and MeteorShowers.json are produced by scripts/build-comet-catalog.py.
  // Reviewed values and fresh downloaded orbits keep precedence over this snapshot.
@@ -29,11 +29,11 @@ namespace AstroArchive {
   public const string ShowerUrl="https://ssd.jpl.nasa.gov/sb/meteor_streams.html";
   static readonly Lazy<Dictionary<string,CometRecord>> records=new Lazy<Dictionary<string,CometRecord>>(()=>Load(Open("CometCatalog.tsv.gz")));
   static readonly Lazy<ILookup<string,CometRecord>> names=new Lazy<ILookup<string,CometRecord>>(()=>records.Value.Values.Where(r=>!string.IsNullOrEmpty(r.Name)).ToLookup(r=>NameKey(r.Name)));
-  static readonly Lazy<List<MeteorShower>> showers=new Lazy<List<MeteorShower>>(LoadShowers);
+  static readonly Lazy<List<ParentShower>> showers=new Lazy<List<ParentShower>>(LoadShowers);
   static Stream Open(string resource){return Assembly.GetExecutingAssembly().GetManifestResourceStream(resource);}
   public static int Count{get{return records.Value.Count;}}
   public static IEnumerable<CometRecord> All{get{return records.Value.Values;}}
-  public static IList<MeteorShower> Showers{get{return showers.Value;}}
+  public static IList<ParentShower> Showers{get{return showers.Value;}}
   static string NameKey(string name){return Regex.Replace((name??"").ToUpperInvariant(),@"[^A-Z0-9]+","");}
   static double? Number(string text){double value;return !string.IsNullOrWhiteSpace(text)&&double.TryParse(text,NumberStyles.Float,CultureInfo.InvariantCulture,out value)&&!double.IsNaN(value)&&!double.IsInfinity(value)?(double?)value:null;}
   static Dictionary<string,CometRecord> Load(Stream stream){
@@ -53,12 +53,12 @@ namespace AstroArchive {
    }
    return result;
   }
-  static List<MeteorShower> LoadShowers(){
-   var result=new List<MeteorShower>();using(var stream=Open("MeteorShowers.json")){if(stream==null)return result;
+  static List<ParentShower> LoadShowers(){
+   var result=new List<ParentShower>();using(var stream=Open("MeteorShowers.json")){if(stream==null)return result;
     using(var reader=new StreamReader(stream,System.Text.Encoding.UTF8)){
      var root=new JavaScriptSerializer{MaxJsonLength=262144,RecursionLimit=12}.Deserialize<Dictionary<string,object>>(reader.ReadToEnd());object list;if(!root.TryGetValue("showers",out list))return result;
      foreach(var row in ((System.Collections.IEnumerable)list).Cast<Dictionary<string,object>>()){
-      var shower=new MeteorShower{Code=(string)row["code"],Name=(string)row["name"],Peak=row.ContainsKey("peak")?(string)row["peak"]:null};
+      var shower=new ParentShower{Code=(string)row["code"],Name=(string)row["name"],Peak=row.ContainsKey("peak")?(string)row["peak"]:null};
       foreach(var parent in ((System.Collections.IEnumerable)row["parents"]).Cast<Dictionary<string,object>>())shower.Parents.Add(new MeteorParent{Comet=(string)parent["comet"],ListedAs=(string)parent["listed_as"],Status=(string)parent["status"],Sources=((System.Collections.IEnumerable)parent["sources"]).Cast<object>().Select(s=>(string)s).ToArray()});
       result.Add(shower);
      }
@@ -85,13 +85,13 @@ namespace AstroArchive {
    return OrbitalModel.Valid(record)?record:null;
   }
   // Showers whose parent is, or is suspected to be, this comet. Fragments are matched on their own designation only.
-  public static List<KeyValuePair<MeteorShower,MeteorParent>> ShowersOf(string id){
-   var result=new List<KeyValuePair<MeteorShower,MeteorParent>>();string canonical=CometInfo.Canonical((id??"").Trim());if(canonical.Length==0)return result;
-   foreach(var shower in showers.Value)foreach(var parent in shower.Parents)if(string.Equals(CometInfo.Canonical(parent.Comet),canonical,StringComparison.OrdinalIgnoreCase))result.Add(new KeyValuePair<MeteorShower,MeteorParent>(shower,parent));
+  public static List<KeyValuePair<ParentShower,MeteorParent>> ShowersOf(string id){
+   var result=new List<KeyValuePair<ParentShower,MeteorParent>>();string canonical=CometInfo.Canonical((id??"").Trim());if(canonical.Length==0)return result;
+   foreach(var shower in showers.Value)foreach(var parent in shower.Parents)if(string.Equals(CometInfo.Canonical(parent.Comet),canonical,StringComparison.OrdinalIgnoreCase))result.Add(new KeyValuePair<ParentShower,MeteorParent>(shower,parent));
    return result;
   }
-  public static string ShowerNames(IEnumerable<KeyValuePair<MeteorShower,MeteorParent>> pairs,bool suspected){return string.Join(", ",pairs.Where(p=>(p.Value.Status!="listed")==suspected).Select(p=>p.Key.Name).Distinct());}
-  public static string ShowerEvidence(IEnumerable<KeyValuePair<MeteorShower,MeteorParent>> pairs){
+  public static string ShowerNames(IEnumerable<KeyValuePair<ParentShower,MeteorParent>> pairs,bool suspected){return string.Join(", ",pairs.Where(p=>(p.Value.Status!="listed")==suspected).Select(p=>p.Key.Name).Distinct());}
+  public static string ShowerEvidence(IEnumerable<KeyValuePair<ParentShower,MeteorParent>> pairs){
    var peaks=pairs.Where(p=>!string.IsNullOrEmpty(p.Key.Peak)).Select(p=>p.Key.Name+": "+p.Key.Peak).Distinct();
    return "Parent comets as listed by NASA/JPL Meteor Streams and NASA Science. Suspected or candidate parents are marked as such; sources disagree on some. Peaks are approximate, not a forecast. Not listed here does not mean no shower.\n"+string.Join("\n",peaks)+"\n"+ShowerUrl;
   }
