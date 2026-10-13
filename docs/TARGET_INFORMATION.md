@@ -16,7 +16,7 @@ The pane wraps text and uses one vertical scrollbar. At narrow widths, the map
 sits below the overview and facts; at 540 pixels or wider it sits alongside them.
 Thumbnails retain their aspect ratio and use the available width, with a height
 limit based on the pane. Compact creator and licence links sit immediately below
-the image; long mandatory credits can be expanded there. Catalogue references
+the image; full ESA/Hubble mandatory credits stay visible, with supplementary processing details expandable. Catalogue references
 appear once in Sources and catalogue details. Constellations use their full names.
 The map uses the same icon reset control as the image preview. The information view
 has a minimum column width of 220 pixels and honours the programme's text scale,
@@ -60,8 +60,8 @@ any other comet's overview explains what its designation records (type and
 discovery half-month). Parameters show the orbit type, perihelion distance, aphelion (periodic comets), period
 and eccentricity from the NASA/JPL Small-Body Database, with the perihelion date for
 one-off and long-period passages. Imaging notes describe comet-aligned stacking.
-Comets have no fixed sky position, so their pages have no map, and they cite JPL
-instead of SIMBAD. The pack has no comet images yet; a comet card shows one as soon
+Comets have no fixed catalogue sky position. Complete solutions have a native 3D orbit, and they cite JPL
+instead of SIMBAD. Individual comet images require independently reviewed file mappings; a comet card shows one as soon
 as the pack carries an approved image for it.
 
 ## Comets, eclipse pages and Stellarium in 3.2.8

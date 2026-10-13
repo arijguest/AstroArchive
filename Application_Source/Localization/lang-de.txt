@@ -2318,3 +2318,71 @@ WHAT COLOURS CAN MEAN	WAS FARBEN BEDEUTEN KÖNNEN
 Showers are shown as seen from anywhere on Earth, at their zenithal hourly rate. Choose an observing town in Settings to see the rates from your location.	Die Ströme werden von irgendeinem Ort der Erde aus mit ihrer zenitalen stündlichen Rate gezeigt. Wählen Sie in den Einstellungen einen Beobachtungsort, um die Raten für Ihren Standort zu sehen.
 Each bar spans a shower's usual dates and rises to its peak; the taller the peak, the stronger the shower. The vertical line is today, a dot marks the peak, and a ring means the Moon is more than 60% lit then. Hover a row for details.	Jeder Balken umfasst die üblichen Daten eines Stroms und steigt zum Maximum an; je höher das Maximum, desto stärker der Strom. Die senkrechte Linie ist heute, ein Punkt markiert das Maximum, ein Ring bedeutet, dass der Mond dann zu mehr als 60 % beleuchtet ist. Zeigen Sie auf eine Zeile für Details.
 As seen from {0} (latitude {1}°). Rows end in the hourly rate you could expect at the radiant's highest; a dashed line means the radiant stays too low to see.	Gesehen von {0} (Breite {1}°). Die Zeilen enden mit der stündlichen Rate, die Sie bei höchstem Stand des Radianten erwarten können; eine gestrichelte Linie bedeutet, dass der Radiant zu tief bleibt.
+
+# Hybrid information, native 3D orbit and setup connectivity.
+Online access	Onlinezugriff
+Hybrid (recommended)	Hybrid (empfohlen)
+Offline	Offline
+Connectivity	Verbindung
+Essential information is included. Additional information downloads when you open a target and is saved for later.	Wesentliche Informationen sind enthalten. Zusätzliche Informationen werden beim Öffnen eines Ziels heruntergeladen und für später gespeichert.
+Uses essential and saved information. Additional targets may have limited information.	Verwendet wesentliche und gespeicherte Informationen. Zu weiteren Zielen sind möglicherweise nur begrenzte Informationen vorhanden.
+Choose how AstroArchive gets information	Wählen Sie, wie AstroArchive Informationen abruft
+Use Hybrid (recommended)	Hybrid verwenden (empfohlen)
+Use Offline	Offline verwenden
+You can change this in Preferences > General > Online access. Local telescope connections remain available.	Dies lässt sich unter Einstellungen > Allgemein > Onlinezugriff ändern. Lokale Teleskopverbindungen bleiben verfügbar.
+Choose Hybrid in Preferences > General > Online access to reconnect.	Wählen Sie Hybrid unter Einstellungen > Allgemein > Onlinezugriff, um die Verbindung wiederherzustellen.
+Online access is paused. Automatic update checks resume in Hybrid.	Der Onlinezugriff ist pausiert. Automatische Updateprüfungen werden im Hybridmodus fortgesetzt.
+Downloaded information limit (MiB)	Limit für heruntergeladene Informationen (MiB)
+Downloaded information: {0} MiB	Heruntergeladene Informationen: {0} MiB
+Downloaded information	Heruntergeladene Informationen
+Downloaded information is unavailable.	Heruntergeladene Informationen sind nicht verfügbar.
+Clear downloaded information	Heruntergeladene Informationen löschen
+Refresh information	Informationen aktualisieren
+Download missing or updated information for this target.	Fehlende oder aktualisierte Informationen zu diesem Ziel herunterladen.
+Saved information · retrieved {0}	Gespeicherte Informationen · abgerufen {0}
+ORBIT	UMLAUFBAHN
+3D orbit	3D-Umlaufbahn
+Drag or use arrows to rotate. Shift-drag to pan. Focus the orbit or hold Ctrl to zoom with the wheel. Pinch to zoom.	Ziehen oder Pfeiltasten zum Drehen. Umschalt+Ziehen zum Verschieben. Zum Zoomen mit dem Mausrad die Umlaufbahn fokussieren oder Strg halten. Mit zwei Fingern zoomen.
+Reset orbit	Umlaufbahn zurücksetzen
+Top view	Ansicht von oben
+Orbit plane	Bahnebene
+Fit orbit	Umlaufbahn einpassen
+Inner solar system	Inneres Sonnensystem
+Expand orbit	Umlaufbahn vergrößern
+Collapse orbit	Umlaufbahn verkleinern
+Orbit epoch	Bahnepoche
+Marker date (UTC)	Markierungsdatum (UTC)
+Marker: {0} UTC	Markierung: {0} UTC
+Marker at orbit epoch: JD {0} {1}	Markierung zur Bahnepoche: JD {0} {1}
+Source epoch: JD {0} {1} · {2}	Quellepoche: JD {0} {1} · {2}
+Dated position unavailable for this solution. Use Orbit epoch.	Für diese Lösung ist keine datierte Position verfügbar. Verwenden Sie Bahnepoche.
+Complete orbital elements are unavailable. No orientation has been assumed.	Vollständige Bahnelemente sind nicht verfügbar. Es wurde keine Ausrichtung angenommen.
+Preparing 3D orbit…	3D-Umlaufbahn wird vorbereitet…
+The orbit could not be drawn.	Die Umlaufbahn konnte nicht gezeichnet werden.
+Approximate orbit · linear distances; body markers enlarged.	Ungefähre Umlaufbahn · lineare Entfernungen; Körpermarkierungen vergrößert.
+J2000 ecliptic · two-body geometry, not a precision ephemeris. UTC → TT; TDB differs by less than 2 ms.	J2000-Ekliptik · Zweikörpergeometrie, keine Präzisionsephemeride. UTC → TT; TDB weicht um weniger als 2 ms ab.
+Earth uses the Earth–Moon barycentre approximation.	Für die Erde wird die Näherung des Erde-Mond-Schwerpunkts verwendet.
+Solar-system overview	Überblick über das Sonnensystem
+Extent clipped	Ausdehnung abgeschnitten
+Perihelion (TDB)	Perihel (TDB)
+Perigee	Perigäum
+Hyperbolic	Hyperbolisch
+1 · Installation folder	1 · Installationsordner
+2 · Online access	2 · Onlinezugriff
+Retry launch	Start erneut versuchen
+Installation completed, but the app could not start.	Die Installation ist abgeschlossen, aber die App konnte nicht gestartet werden.
+Installation complete: AstroArchive package {0} is ready.	Installation abgeschlossen: AstroArchive-Paket {0} ist bereit.
+Repair complete: AstroArchive package {0} is ready.	Reparatur abgeschlossen: AstroArchive-Paket {0} ist bereit.
+Update complete: AstroArchive package {0} is installed.	Update abgeschlossen: AstroArchive-Paket {0} ist installiert.
+Albedo	Albedo
+Rotation period	Rotationsperiode
+Snapshot positions are shown only at the orbit epoch.	Snapshot-Positionen werden nur zur Bahnepoche angezeigt.
+Perihelion beyond the inner solar system	Perihel außerhalb des inneren Sonnensystems
+Updating information…	Informationen werden aktualisiert…
+Information updated.	Informationen aktualisiert.
+No additional information was downloaded. Essential and saved information remain available.	Es wurden keine zusätzlichen Informationen heruntergeladen. Wesentliche und gespeicherte Informationen bleiben verfügbar.
+Today	Heute
+Set UTC date	UTC-Datum setzen
+UTC date (YYYY-MM-DD). Press Enter or Set UTC date.	UTC-Datum (JJJJ-MM-TT). Drücken Sie Enter oder UTC-Datum setzen.
+Enter a valid UTC date (YYYY-MM-DD) between 1972 and 2026.	Geben Sie ein gültiges UTC-Datum (JJJJ-MM-TT) zwischen 1972 und 2026 ein.
+Drag to rotate · Shift-drag to pan · Focus/Ctrl + wheel or pinch to zoom.	Ziehen zum Drehen · Umschalt+Ziehen zum Verschieben · Fokus/Strg+Mausrad oder zwei Finger zum Zoomen.

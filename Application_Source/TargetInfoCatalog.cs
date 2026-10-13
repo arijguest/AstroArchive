@@ -17,17 +17,19 @@ namespace AstroArchive {
   public TargetInfoMeasurement[] measurements;
   public TargetInfoCitation[] citations;
   public TargetInfoImage image;
-  public byte[] Thumbnail;
+  public byte[] Thumbnail;[ScriptIgnore]public object DecodedThumbnail;
+  public OrbitRecord orbit;public InformationRights text_rights,identity_rights,measurement_rights;public string downloaded_at;
  }
  public sealed class TargetInfoMeasurement {
   public string id,object_id,field,unit,epoch,band,uncertainty,qualifier,citation_id;
   public double value;
  }
  public sealed class TargetInfoCitation {
-  public string id,source_url,source_title,publisher,applies_to,review_status;
+  public string id,source_url,source_title,publisher,applies_to,review_status,reference_id,retrieved_on,dataset_id,catalogue_version;
  }
  public sealed class TargetInfoImage {
-  public string object_id,local_path,creator,attribution,licence,licence_url,file_page_url,representation,modifications,sha256;
+  public string object_id,local_path,creator,attribution,licence,licence_url,file_page_url,representation,modifications,sha256,reviewed_at,subject_review;
+  public InformationRights rights;
  }
  public sealed class TargetInfoResult {
   public string Status,Message;
@@ -38,7 +40,7 @@ namespace AstroArchive {
   public string data_version;
   public Dictionary<string,string> entries;
   public Dictionary<string,string[]> aliases;
-  public string[] uncertain,nonexistent;
+  public Dictionary<string,TargetInfoCitation> references;public string[] uncertain,nonexistent;
  }
  public sealed class TargetInfoCatalog {
   readonly string path;readonly object gate=new object();TargetInfoIndex index;
@@ -47,6 +49,7 @@ namespace AstroArchive {
   public TargetInfoCatalog(string path){this.path=path;}
   static JavaScriptSerializer Json(){return new JavaScriptSerializer{MaxJsonLength=16*1024*1024,RecursionLimit=64};}
   static byte[] Read(ZipArchive zip,string name,int limit){
+   if(string.IsNullOrEmpty(name)||name.StartsWith("/")||name.Contains("..")||name.Contains("\\")||name.Contains(":"))throw new InvalidDataException("Unsafe target information entry.");
    var entry=zip.GetEntry(name);if(entry==null||entry.Length>limit)throw new InvalidDataException("Target information pack is incomplete.");
    using(var input=entry.Open())using(var output=new MemoryStream()){var buffer=new byte[8192];int n;while((n=input.Read(buffer,0,buffer.Length))>0){if(output.Length+n>limit)throw new InvalidDataException("Target information entry is too large.");output.Write(buffer,0,n);}return output.ToArray();}
   }
@@ -70,7 +73,9 @@ namespace AstroArchive {
    token.ThrowIfCancellationRequested();var cards=Json().Deserialize<Dictionary<string,TargetInfoCard>>(Encoding.UTF8.GetString(Read(zip,entry,8*1024*1024)));
    if(cards==null||!cards.TryGetValue(id,out card))throw new InvalidDataException("Target card is missing.");
    if(card==null||card.id!=id)throw new InvalidDataException("Target card identity is invalid.");
+   foreach(var citation in card.citations??new TargetInfoCitation[0])if(citation.reference_id!=null){TargetInfoCitation source;if(index.references==null||!index.references.TryGetValue(citation.reference_id,out source))throw new InvalidDataException("Missing shared measurement source.");citation.source_url=source.source_url;citation.publisher=source.publisher;citation.retrieved_on=source.retrieved_on;citation.dataset_id=source.dataset_id;citation.catalogue_version=source.catalogue_version;}
    if(card.image!=null){try{card.Thumbnail=Read(zip,card.image.local_path,2*1024*1024);}catch(InvalidDataException){card.Thumbnail=null;}}
+   if(card.orbit!=null&&!OrbitalModel.Valid(card.orbit))card.orbit=null;
    cache[id]=card;recent.AddLast(id);while(recent.Count>12){cache.Remove(recent.First.Value);recent.RemoveFirst();}return card;
   }
   public TargetInfoResult Find(string query,CancellationToken token){return Load(query,false,token);}
@@ -83,7 +88,7 @@ namespace AstroArchive {
      if(byId)ids=index.entries.ContainsKey(query)?new[]{query}:new string[0];
      else if(!index.aliases.TryGetValue(term,out ids))ids=new string[0];
      // Comet targets carry the discoverer ("C/2023 A3 (Tsuchinshan-ATLAS)"); the pack files them by designation.
-     string comet=!byId&&ids.Length==0&&CometTargets.IsComet(query)?CometInfo.Canonical(CometTargets.Designation(query)):null;
+     string comet=!byId&&ids.Length==0&&CometTargets.IsComet(query)?CometInfo.InformationDesignation(query):null;
      if(comet!=null&&!index.aliases.TryGetValue(Normalize(comet),out ids))ids=index.entries.ContainsKey(comet)?new[]{comet}:new string[0];
      bool uncertain=!byId&&(index.uncertain??new string[0]).Contains(term);
      result.Status=ids.Length==1&&!uncertain?"matched":ids.Length>0?"ambiguous":"not_found";

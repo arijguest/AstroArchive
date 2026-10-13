@@ -22,10 +22,10 @@ class PublicationGateTests(unittest.TestCase):
         self.publisher = 'CN=Test Publisher'
         data = b'signed installer fixture'
         digest = hashlib.sha256(data).hexdigest()
-        for name in (self.installer, self.alias):
+        for name in (self.installer,):
             (self.directory / name).write_bytes(data)
             (self.directory / f'{name}.sha256').write_text(f'{digest}  {name}\n', encoding='ascii')
-        self.feed = {'package_version': '1.8.4.2', 'application_version': '1.8.4', 'sha256': digest, 'size': len(data), 'authenticode_signed': True}
+        self.feed = {'package_version': '1.8.4.2', 'application_version': '1.8.4', 'sha256': digest, 'size': len(data), 'authenticode_signed': True, 'url': 'https://github.com/arijguest/AstroArchive/releases/download/v1.8.4.2/'+self.installer, 'download_url': 'https://github.com/arijguest/AstroArchive/releases/download/v1.8.4.2/'+self.installer}
         self.report = {'schema': 1, 'files': [
             {'file': name, 'sha256': digest, 'status': 'Valid', 'publisher': self.publisher,
              'thumbprint': 'TEST', 'timestamp_publisher': 'CN=Timestamp'}
@@ -59,8 +59,9 @@ class PublicationGateTests(unittest.TestCase):
 
     def test_alias_and_feed_drift_are_rejected(self):
         (self.directory / self.alias).write_bytes(b'different installer')
-        with self.assertRaisesRegex(ValueError, 'Compatibility installer differs'):
+        with self.assertRaisesRegex(ValueError, 'Unexpected executable'):
             module.verify(self.directory, self.publisher)
+        (self.directory / self.alias).unlink()
         self.feed['size'] += 1
         self.write_metadata()
         with self.assertRaisesRegex(ValueError, 'changed after Windows signature verification'):

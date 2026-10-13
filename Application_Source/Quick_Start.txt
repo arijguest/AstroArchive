@@ -2,7 +2,7 @@ AstroArchive user guide
 @title About this guide
 @category Reference
 @summary Which version this guide describes and what AstroArchive needs to run.
-Application 3.2.8; package 3.2.8.1.
+Application 3.2.9; package 3.2.9.1.
 Windows 10/11 x64; .NET Framework 4.8.
 
 Press `F1` on any page for help with that page. Guide topics stay in English;
@@ -1006,3 +1006,38 @@ Source-available under PolyForm Noncommercial 1.0.0.
 - Your images and outputs remain yours; third-party data keeps its own licences.
 
 See LICENSE and LICENSING.md for terms and required notices.
+
+HYBRID INFORMATION AND ORBITS
+@title Online access and 3D orbits
+@category Reference
+@summary Choose connectivity, read saved target information and explore native 3D orbits.
+@keywords hybrid offline internet cache information comet orbit zoom pan
+Setup asks you to choose **Hybrid (recommended)** or **Offline**. Both install
+without internet. Hybrid downloads missing information only when you open a target
+and saves it for later. Offline uses bundled and saved information. An older or
+portable first run asks before making automatic internet requests.
+
+Change the mode in **Preferences → General → Online access**. This also shows
+cache usage, a size limit and **Clear downloaded information**. Offline pauses
+automatic update checks and downloads; your update and solver preferences stay
+saved. Local telescope and Stellarium connections remain available. Internet
+links and solving require explicit reconnection through Preferences.
+
+Solar-system and comet pages show **ORBIT** beside Parameters in a wide pane,
+or below in a narrow pane. Drag or use arrow keys to rotate in 3D; Shift-drag to
+pan. Use +/− or pinch to zoom. The wheel zooms only when the orbit has focus or
+Ctrl is held, so the information page remains easy to scroll. Reset, Top view,
+Orbit plane, Fit orbit, Inner solar system and Expand orbit are available.
+
+Body markers are enlarged and distances use a linear scale. Open paths have
+continuation arrows; clipped extents are labelled. Orbit epoch shows the marker
+at the source epoch.
+
+Today and a UTC date are enabled only for supported dated
+positions. Small-body and Moon snapshots use epoch-only markers. Complete elements
+are required; an unavailable orbit never receives an assumed orientation.
+
+The view is approximate geometry, not a precision ephemeris or telescope-pointing
+tool. Sources show the reference plane, epoch, time standard and solution. Reviewed
+information stays authoritative, and failures keep useful local content visible.
+Refresh information preserves your scroll position, disclosures and orbit camera.

@@ -10,15 +10,14 @@ using System.Windows.Controls;
 namespace AstroArchive {
  public partial class MainUi {
   readonly TargetInfoCatalog targetInformation=new TargetInfoCatalog(Path.Combine(AppDomain.CurrentDomain.BaseDirectory,"TargetInfo.zip"));
-  sealed class TargetInfoState {public TargetInfoView View;public CancellationTokenSource Cancel;public int Generation;public string Target,Member;public double? PreferredWidth;public bool Dragging,Constraining;}
+  sealed class TargetInfoState {public TargetInfoView View;public CancellationTokenSource Cancel;public int Generation;public TargetInfoCard LocalCard,Card;public string Context,Back,CacheKey;public IList<TargetInfoMember> Members;public string Target,Member;public double? PreferredWidth;public bool Dragging,Constraining,Refreshing;}
   readonly TargetInfoState libraryInfo=new TargetInfoState(),editedInfo=new TargetInfoState();
   void InitializeTargetInformation(string prefix){
    var state=prefix.Length==0?libraryInfo:editedInfo;state.View=new TargetInfoView{Focusable=true};((Border)Window.FindName(prefix+"TargetInfoPane")).Child=state.View;
    state.View.ChooseObject=id=>LoadTargetInformation(prefix,state.Target,id,state.Member);
    state.View.ChooseMember=member=>LoadTargetInformation(prefix,state.Target,null,member);
    state.View.GoBack=()=>LoadTargetInformation(prefix,state.Target,null);
-   state.View.OpenInStellarium=OpenStellariumView;
-   state.View.ObserverSite=()=>CaptureSite.For(null,settings);
+   state.View.OpenInStellarium=OpenStellariumView;state.View.ObserverSite=()=>CaptureSite.For(null,settings);state.View.InternetAvailable=AstroArchive.Installation.ConnectivityPolicy.AllowsInternet;state.View.RefreshInformation=()=>EnrichTargetInformation(state,true);
    var body=(Grid)Window.FindName(prefix.Length==0?"LibraryBody":"EditedBody");body.SizeChanged+=(s,e)=>ConstrainTargetInformationWidth(prefix);
    // A Grid may retain its minimum desired size while an ancestor clips it.
    // Recheck its allotted slot after layout, including preview divider changes.
@@ -44,7 +43,7 @@ namespace AstroArchive {
    if(visible)ConstrainTargetInformationWidth(prefix);else if(prefix.Length>0)SizeEditedPreview();
   }
   void HideTargetInformation(string prefix){
-   var state=prefix.Length==0?libraryInfo:editedInfo;state.Generation++;if(state.Cancel!=null){state.Cancel.Cancel();state.Cancel.Dispose();state.Cancel=null;}state.Target=null;state.Member=null;if(state.View!=null){SetTargetInformationVisible(prefix,false);state.View.ToolTip=null;state.View.ShowMessage("Target information","");}
+   var state=prefix.Length==0?libraryInfo:editedInfo;state.Generation++;if(state.Cancel!=null){state.Cancel.Cancel();state.Cancel.Dispose();state.Cancel=null;}if(informationCache!=null&&state.CacheKey!=null)informationCache.Protect(state.CacheKey,false);state.Refreshing=false;state.CacheKey=null;state.LocalCard=state.Card=null;state.Target=null;state.Member=null;if(state.View!=null){SetTargetInformationVisible(prefix,false);state.View.ToolTip=null;state.View.ShowMessage("Target information","");}
   }
   void ShowTargetInformation(string prefix){
    var state=prefix.Length==0?libraryInfo:editedInfo;if(state.View==null)return;
@@ -83,11 +82,25 @@ namespace AstroArchive {
     if(token.IsCancellationRequested||generation!=state.Generation||Window.Dispatcher.HasShutdownStarted)return;
     string back=member!=null&&comets?"All comets":null;
     if(member!=null&&id==null)note=Localization.F("One of your comets · {0}",TargetNavigation.ShortName(member));
-    if(result.Status=="matched")state.View.ShowCard(result.Cards[0],id==null?note:"Reading a candidate for "+Catalog.Label(member??target),members,"YOUR COMETS",back);
+    if(result.Status=="matched"){
+     state.LocalCard=result.Cards[0];state.Context=id==null?note:"Reading a candidate for "+Catalog.Label(member??target);state.Members=members;state.Back=back;
+     state.Card=InformationCoordinator.Clone(state.LocalCard);state.View.ShowCard(state.Card,state.Context,members,"YOUR COMETS",back);
+     string provider=InformationCoordinator.Provider(state.Card);if(provider!=null){state.CacheKey=InformationCache.Lookup(provider,state.Card.id,Localization.Current);informationCache.Protect(state.CacheKey,true);}
+     var local=state.LocalCard;var saved=await Task.Run(()=>informationDownloads.Saved(local,Localization.Current),token);if(token.IsCancellationRequested||generation!=state.Generation)return;
+     if(saved!=null){state.Card=InformationCoordinator.Merge(state.LocalCard,saved);state.View.UpdateCard(state.Card,state.Context,members,"YOUR COMETS",back);}
+     EnrichTargetInformation(state,false);
+    }
     else if(result.Status=="ambiguous")state.View.ShowChoices(Catalog.Label(member??target),result);
     else if(members!=null)state.View.ShowCard(CometInfo.GroupCard(),null,members,"YOUR COMETS",null);
     else state.View.ShowMessage(Catalog.Label(member??target),"No information is available for this target.");
    }catch(OperationCanceledException){}catch(Exception error){if(generation!=state.Generation||Window.Dispatcher.HasShutdownStarted)return;state.View.ShowMessage(Catalog.Label(target),"Target information is unavailable. You can still select and preview your files.");state.View.ToolTip=error.Message;}
+  }
+  async void EnrichTargetInformation(TargetInfoState state,bool refresh){
+   if(state.LocalCard==null||!AstroArchive.Installation.ConnectivityPolicy.AllowsInternet||state.Refreshing&&!refresh)return;if(refresh){state.Refreshing=true;state.View.InformationStatus("Updating information…",true);}int generation=state.Generation;var local=state.LocalCard;
+   DownloadedInformation record;try{record=await informationDownloads.Enrich(local,Localization.Current,refresh);}catch(Exception){record=null;}
+   if(generation!=state.Generation||Window.Dispatcher.HasShutdownStarted||!AstroArchive.Installation.ConnectivityPolicy.AllowsInternet)return;if(!refresh&&state.Refreshing)return;if(refresh)state.Refreshing=false;
+   if(record==null||refresh&&state.Card!=null&&record.retrieved_at==state.Card.downloaded_at){if(refresh)state.View.InformationStatus("No additional information was downloaded. Essential and saved information remain available.",false);return;}
+   if(!refresh&&state.Card!=null&&record.retrieved_at==state.Card.downloaded_at)return;state.Card=InformationCoordinator.Merge(local,record);state.View.UpdateCard(state.Card,state.Context,state.Members,"YOUR COMETS",state.Back);if(refresh)state.View.InformationStatus("Information updated.",false);
   }
   void OpenTargetInformation(ListBox list){
    bool edited=object.ReferenceEquals(list,EditedTargets);
