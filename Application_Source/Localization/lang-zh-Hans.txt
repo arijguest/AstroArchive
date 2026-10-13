@@ -2333,9 +2333,6 @@ blue magnitude {0}	蓝星等 {0}
 {0} million light-years	{0} 百万光年
 {0} billion light-years	{0} 十亿光年
 Distance	距离
-{0} billion light-years	{0}十亿光年
-{0} million light-years	{0}百万光年
-{0} light-years	{0}光年
 Meteor shower	流星雨
 Showers are matched by date only; the meteor's direction was not checked against a radiant.	仅按日期匹配流星雨；未将流星方向与辐射点比对。
 METEOR SHOWERS THROUGH THE YEAR	全年流星雨
