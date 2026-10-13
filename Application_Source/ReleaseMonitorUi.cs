@@ -45,9 +45,11 @@ namespace AstroArchive {
    if(releaseChanged!=null)releaseChanged();
   }
   string ReleaseStatusText(){
-   if(!AstroArchive.Installation.ConnectivityPolicy.AllowsInternet)return Localization.T("Online access is paused. Automatic update checks resume in Hybrid.");if(releaseMonitor==null)return "Release information has not been checked yet.";
-   var state=releaseMonitor.State;string status=state.Available==null?(state.CheckedUtc==null?"Release information has not been checked yet.":"No newer release was found at the last successful check."):"AstroArchive "+state.Available.application_version+" (package "+state.Available.package_version+") is available.";
+   bool paused=!AstroArchive.Installation.ConnectivityPolicy.AllowsInternet;string pausedNote=Localization.T("Online access is paused. Automatic update checks resume in Hybrid.");
+   if(releaseMonitor==null)return paused?pausedNote:"Release information has not been checked yet.";
+   var state=releaseMonitor.State;if(paused&&state.Available==null)return pausedNote;string status=state.Available==null?(state.CheckedUtc==null?"Release information has not been checked yet.":"No newer release was found at the last successful check."):"AstroArchive "+state.Available.application_version+" (package "+state.Available.package_version+") is available.";
    DateTime date;if(DateTime.TryParse(state.CheckedUtc,out date))status+="\nLast successful check: "+date.ToLocalTime().ToString("g");
+   if(paused)return status+"\n"+pausedNote;
    if(releaseMonitor.Busy)status+="\nChecking releases…";else if(state.Error!=null)status+="\nThe latest check could not finish: "+state.Error;
    return status;
   }
@@ -56,7 +58,7 @@ namespace AstroArchive {
    var check=dialog.Button("Check now",async()=>{checkReleaseButtonBusy=true;try{await CheckReleaseAsync();}catch(Exception error){status.Text="Could not check for releases. "+error.Message;}finally{checkReleaseButtonBusy=false;if(!releaseMonitorDisposed)PublishReleaseState();}});
    var notes=dialog.Button("Release notes",()=>{if(releaseMonitor!=null&&releaseMonitor.State.Available!=null)OpenWebsite(UpdateClient.ReleasePage(releaseMonitor.State.Available));});
    var install=dialog.Button("Install and restart",()=>{if(releaseMonitor!=null&&releaseMonitor.State.Available!=null&&!RepositoryOperationBlocked){var manifest=releaseMonitor.State.Available;dialog.Window.Close();ConfirmReleaseInstallation(manifest);}});
-   bool closed=false;Action refresh=()=>{if(closed)return;status.Text=ReleaseStatusText();check.IsEnabled=AstroArchive.Installation.ConnectivityPolicy.AllowsInternet&&!checkReleaseButtonBusy&&(releaseMonitor==null||!releaseMonitor.Busy)&&!releaseInstalling;notes.IsEnabled=releaseMonitor!=null&&releaseMonitor.State.Available!=null;install.IsEnabled=notes.IsEnabled&&!RepositoryOperationBlocked;install.ToolTip=RepositoryOperationBlocked?"Available when the current operation finishes.":null;};
+   bool closed=false;Action refresh=()=>{if(closed)return;status.Text=ReleaseStatusText();check.IsEnabled=AstroArchive.Installation.ConnectivityPolicy.AllowsInternet&&!checkReleaseButtonBusy&&(releaseMonitor==null||!releaseMonitor.Busy)&&!releaseInstalling;notes.IsEnabled=releaseMonitor!=null&&releaseMonitor.State.Available!=null;install.IsEnabled=notes.IsEnabled&&!RepositoryOperationBlocked&&AstroArchive.Installation.ConnectivityPolicy.AllowsInternet;install.ToolTip=RepositoryOperationBlocked?"Available when the current operation finishes.":!AstroArchive.Installation.ConnectivityPolicy.AllowsInternet?Localization.T("Choose Hybrid in Preferences > General > Online access to reconnect."):null;};
    releaseChanged+=refresh;dialog.Window.Closed+=(s,e)=>{closed=true;releaseChanged-=refresh;};refresh();
   }
   bool checkReleaseButtonBusy;
