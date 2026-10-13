@@ -2410,3 +2410,19 @@ Set UTC date	设置 UTC 日期
 UTC date (YYYY-MM-DD). Press Enter or Set UTC date.	UTC 日期（YYYY-MM-DD）。按 Enter 或“设置 UTC 日期”。
 Enter a valid UTC date (YYYY-MM-DD) between 1972 and 2026.	请输入 1972 至 2026 年间的有效 UTC 日期（YYYY-MM-DD）。
 Drag to rotate · Shift-drag to pan · Focus/Ctrl + wheel or pinch to zoom.	拖动旋转 · Shift 拖动平移 · 聚焦/Ctrl 加滚轮或双指缩放。
+Ascending node	升交点
+Descending node	降交点
+Apogee	远地点
+Play	播放
+Epoch {0}	历元 {0}
+Marker date slider	标记日期滑块
+Play or pause the marker date. Space does the same while the orbit has focus.	播放或暂停标记日期。轨道获得焦点时，按空格键也可以。
+Orbit|Sun	太阳
+Orbit|Earth	地球
+Orbit|Mercury	水星
+Orbit|Venus	金星
+Orbit|Mars	火星
+Orbit|Jupiter	木星
+Orbit|Saturn	土星
+Orbit|Uranus	天王星
+Orbit|Neptune	海王星

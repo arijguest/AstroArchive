@@ -61,17 +61,38 @@ No owned manifests or viewer code are downloaded.
 
 ## Orbit model and interaction
 
-The original native WPF renderer projects physical 3D coordinates and depth-sorts
-the cached paths. Linear distance scaling, a scale bar, enlarged body markers,
-perihelion/perigee, direction and subdued context orbits support inspection.
-There is one information scrollbar. Wheel zoom requires focus/Ctrl; Shift-drag
-pans, drag/arrows rotate, +/− and pinch zoom. Reset, Top view, Orbit plane, full
-fit, inner-system fit and expansion are local operations.
+The native WPF renderer projects physical 3D coordinates in the ecliptic frame and
+draws in the sky globe's visual language, from the same palette. The backdrop is the
+sky globe's constellation figures turned into that frame, so it rotates with the
+camera; the reference plane is a faint disc with distance rings (round numbers of AU,
+or kilometres at the Earth–Moon scale) and 30° spokes. The target orbit is solid above
+the ecliptic and dashed below, fading with depth in a few batched strokes; ascending
+(filled) and descending (open) nodes, perihelion/aphelion or perigee/apogee, a filled
+direction arrow, a ringed marker and subdued tinted context orbits support inspection.
+Labels are name pills placed by priority so the target and Sun win and the rest drop
+out rather than overlap. Enlarged body markers are explicitly labelled and the scale
+bar and axis triad stay put. There is one information scrollbar. Wheel zoom requires
+focus/Ctrl; Shift-drag pans, drag/arrows rotate, +/− and pinch zoom, Home or a
+double-click resets. Reset, Top view, Orbit plane, full fit, inner-system fit and
+expansion are icon buttons over the view and chips below it; the camera eases to each
+view in a fraction of a second, or jumps when Reduce motion or Windows' animation
+setting is off. Orbit plane is a different frame from yaw and tilt, so it never
+blends.
 
 Ellipses close; parabolic/hyperbolic paths remain open with continuation arrows.
 Bounded adaptive paths handle extreme extents. Stable Kepler/Barker equations
 retain near-parabolic eccentricities and retrograde orientation. Geometry runs
-off the UI thread; no API request or animation timer runs per frame.
+off the UI thread; no API request runs per frame. The only timers are the camera
+glide (the frame clock, only while it moves) and optional playback, which starts
+paused, steps at four frames a second under Reduce motion, and stops when the pane
+is hidden, the card changes or the user scrubs or sets a date.
+
+Where dated positions are supported (planets and the solar-system overview) a
+timeline spans 1972–2026, with Today, a UTC date, Orbit epoch and Play/Pause. Playback
+runs about twelve seconds per revolution, by elapsed time rather than frame count.
+The planets are drawn at the marker date from the same JPL Table 1 model, so a
+comet or the Moon is seen among them; with nothing chosen yet, a dated body starts
+at today.
 
 Planets use the existing JPL Table 1 numerical approximation (1800–2050), with
 Earth explicitly representing the Earth–Moon barycentre. The Sun presents a

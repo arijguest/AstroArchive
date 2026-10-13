@@ -2379,3 +2379,19 @@ Set UTC date	UTC-Datum setzen
 UTC date (YYYY-MM-DD). Press Enter or Set UTC date.	UTC-Datum (JJJJ-MM-TT). Drücken Sie Enter oder UTC-Datum setzen.
 Enter a valid UTC date (YYYY-MM-DD) between 1972 and 2026.	Geben Sie ein gültiges UTC-Datum (JJJJ-MM-TT) zwischen 1972 und 2026 ein.
 Drag to rotate · Shift-drag to pan · Focus/Ctrl + wheel or pinch to zoom.	Ziehen zum Drehen · Umschalt+Ziehen zum Verschieben · Fokus/Strg+Mausrad oder zwei Finger zum Zoomen.
+Ascending node	Aufsteigender Knoten
+Descending node	Absteigender Knoten
+Apogee	Apogäum
+Play	Abspielen
+Epoch {0}	Epoche {0}
+Marker date slider	Regler für das Markierungsdatum
+Play or pause the marker date. Space does the same while the orbit has focus.	Spielt das Markierungsdatum ab oder hält es an. Die Leertaste tut dasselbe, solange die Umlaufbahn den Fokus hat.
+Orbit|Sun	Sonne
+Orbit|Earth	Erde
+Orbit|Mercury	Merkur
+Orbit|Venus	Venus
+Orbit|Mars	Mars
+Orbit|Jupiter	Jupiter
+Orbit|Saturn	Saturn
+Orbit|Uranus	Uranus
+Orbit|Neptune	Neptun

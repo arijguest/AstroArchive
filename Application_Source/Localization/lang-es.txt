@@ -2404,3 +2404,19 @@ Set UTC date	Fijar fecha UTC
 UTC date (YYYY-MM-DD). Press Enter or Set UTC date.	Fecha UTC (AAAA-MM-DD). Pulsa Intro o Fijar fecha UTC.
 Enter a valid UTC date (YYYY-MM-DD) between 1972 and 2026.	Introduce una fecha UTC válida (AAAA-MM-DD) entre 1972 y 2026.
 Drag to rotate · Shift-drag to pan · Focus/Ctrl + wheel or pinch to zoom.	Arrastra para girar · Mayús y arrastrar para desplazar · Enfoca/Ctrl y rueda o pellizca para ampliar.
+Ascending node	Nodo ascendente
+Descending node	Nodo descendente
+Apogee	Apogeo
+Play	Reproducir
+Epoch {0}	Época {0}
+Marker date slider	Control deslizante de la fecha del marcador
+Play or pause the marker date. Space does the same while the orbit has focus.	Reproduce o pausa la fecha del marcador. La barra espaciadora hace lo mismo mientras la órbita tiene el foco.
+Orbit|Sun	Sol
+Orbit|Earth	Tierra
+Orbit|Mercury	Mercurio
+Orbit|Venus	Venus
+Orbit|Mars	Marte
+Orbit|Jupiter	Júpiter
+Orbit|Saturn	Saturno
+Orbit|Uranus	Urano
+Orbit|Neptune	Neptuno
