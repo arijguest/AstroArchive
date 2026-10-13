@@ -94,6 +94,22 @@ namespace AstroArchive {
     QualityAnnotator.Apply(frames,measurements,false);
     var ordered=QualityOrdering.Order(frames);for(int i=1;i<ordered.Count;i++)Check(ordered[i-1].QualityOrder>=ordered[i].QualityOrder,"Scores restart part-way through a session: "+string.Join(",",ordered.Select(f=>f.Hash)));
    });
+   Test("Quality: the library table lists subs best first inside each session whatever order it was in before, until the user sorts by date",()=>{
+    var frames=new List<Frame>();var measurements=new Dictionary<string,QualityMeasurement>();double[] widths={3.4,2.1,2.8,2.0,3.9,2.5,3.1,2.2,3.6,2.9};
+    for(int i=0;i<10;i++){var f=QualitySub("d"+i,"night","2026-10-05T"+((20+i)%24).ToString("00")+":30:00Z");f.Observed=(i<4?"2026-10-05T":"2026-10-06T")+((20+i)%24).ToString("00")+":30:00Z";frames.Add(f);measurements[f.Hash]=QualityShot(f.Hash,widths[i]);}
+    var other=QualitySub("o0","two","2026-10-12T21:00:00Z");frames.Add(other);measurements["o0"]=QualityShot("o0",2.5);var other2=QualitySub("o1","two","2026-10-12T22:00:00Z");frames.Add(other2);measurements["o1"]=QualityShot("o1",3.5);
+    QualityAnnotator.Apply(frames,measurements,false);
+    Func<List<Frame>,string,bool> bestFirst=(rows,session)=>{var s=rows.Where(f=>f.Session==session).ToList();for(int i=1;i<s.Count;i++)if(s[i-1].QualityOrder<s[i].QualityOrder)return false;return true;};
+    var kind=new[]{new SearchSort{Property="Kind"}};var date=new[]{new SearchSort{Property="AcquisitionDateLabel"}};var none=System.Threading.CancellationToken.None;var culture=System.Globalization.CultureInfo.InvariantCulture;
+    // The default table order (frame type) leaves every session best first, for any sessions mode and from any starting order.
+    foreach(bool grouped in new[]{false,true}){
+     var def=RepositoryOrdering.Order(frames.AsEnumerable().Reverse(),kind,culture,true,grouped,none);Check(bestFirst(def,"night")&&bestFirst(def,"two"),"Default order lost the best-first ranking (grouped="+grouped+")");
+     // The user picks date ordering, then returns to the default: the earlier date order must not leak into the ranking.
+     var byDate=RepositoryOrdering.Order(def,date,culture,true,grouped,none);var back=RepositoryOrdering.Order(byDate,kind,culture,true,grouped,none);
+     Check(bestFirst(back,"night")&&bestFirst(back,"two"),"Returning to the default order after a date sort kept the date order (grouped="+grouped+")");
+     var again=RepositoryOrdering.Order(def,kind,culture,true,grouped,none);Check(back.SequenceEqual(again),"The default order depended on the sort history (grouped="+grouped+")");
+    }
+   });
    Test("Quality: filter by rank, flags, exposure and score range",()=>{
     var frames=new List<Frame>();var measurements=new Dictionary<string,QualityMeasurement>();
     for(int i=0;i<12;i++){var f=QualitySub("f"+i,"one","2026-10-05T"+(10+i)+":00:00Z");frames.Add(f);measurements[f.Hash]=QualityShot(f.Hash,2.0+0.25*i,i==11?30:200);}
