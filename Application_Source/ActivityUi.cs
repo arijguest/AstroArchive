@@ -14,7 +14,7 @@ namespace AstroArchive {
  public sealed class ActivityEntry {
   public string Title,Status,ReportTitle,Report,OutputPath,ActionLabel,RepositoryRoot,CancelLabel,ImportKind,ProcessContext,ProcessOutcome;
   public DateTime StartedUtc=DateTime.UtcNow;
-  public bool Running,Unread,NeedsReview,Failed,Canceled,NetworkImport,LiveImport,ProcessTracked,BannerDismissed,BannerAutoHidden,WasRunning;
+  public bool Logged,Running,Unread,NeedsReview,Failed,Canceled,NetworkImport,LiveImport,ProcessTracked,BannerDismissed,BannerAutoHidden,WasRunning;
   public double? DurationSeconds;
   public ProgressInfo Progress;
   public Action Review,Cancel,Pause,Resume,Discard;public Func<bool> ResumeAvailable;
@@ -72,11 +72,12 @@ namespace AstroArchive {
    CloseActivity(false);
   }
   ActivityEntry AddActivity(string title,bool running=false){
-   var entry=new ActivityEntry{Title=title,Running=running,WasRunning=running,ProcessTracked=running&&title!="Loading image preview",Status=running?"Preparing…":"",RepositoryRoot=repo==null?null:repo.Root};activities.Insert(0,entry);
+   var entry=new ActivityEntry{Title=title,Running=running,WasRunning=running,ProcessTracked=running&&title!="Loading image preview",Status=running?"Preparing…":"",RepositoryRoot=repo==null?null:repo.Root};activities.Insert(0,entry);if(running)AppLog.Info("Started: "+title);
    foreach(var old in activities.Where(a=>!a.Running&&!a.NeedsReview&&a.Review==null).Skip(40).ToList())activities.Remove(old);RenderActivity();return entry;
   }
   void NotifyActivity(ActivityEntry entry){
    if(activityDisposed||closing)return;
+   if(!entry.Running&&(entry.WasRunning||entry.Failed&&!entry.Logged)){entry.Logged=true;string outcome=entry.Failed?"Failed: ":entry.Canceled?"Cancelled: ":"Finished: ";string line=outcome+entry.Title+(string.IsNullOrEmpty(entry.Status)?"":" — "+entry.Status)+(entry.DurationSeconds.HasValue?" ("+Math.Round(entry.DurationSeconds.Value)+" s)":"");if(entry.Failed)AppLog.Warn(line);else AppLog.Info(line);}
    if(!entry.Running&&entry.WasRunning){entry.WasRunning=false;entry.BannerAutoHidden=false;if(entry.ProcessTracked)RetireCompletedProcessSummaries(entry);}
    bool notify=!entry.BannerDismissed&&!entry.Running&&entry.DurationSeconds.HasValue&&entry.DurationSeconds.Value>300;
    entry.Unread=notify&&(activityPanel==null||activityPanel.Visibility!=Visibility.Visible);RenderActivity();

@@ -21,9 +21,22 @@ namespace AstroArchive {
     Check(report.Contains("System.IO.IOException")&&report.Contains("Scan failed"),"Diagnostics omitted error context.");
     Check(!report.Contains("C:\\Users\\sample")&&report.Contains("[local path]"),"Diagnostics exposed a local path.");
     string url=AppErrorReporting.IssueUrl(report);
-    Check(url.StartsWith("https://github.com/arijguest/AstroArchive/issues/new?template=bug_report.md&"),"Issue draft points to an unexpected destination.");
+    Check(url.StartsWith("https://github.com/arijguest/AstroArchive/issues/new?title="),"Issue draft points to an unexpected destination.");
     Check(Uri.UnescapeDataString(url).Contains("[local path]"),"Issue draft did not contain sanitized diagnostics.");
     Check(AppErrorReporting.Diagnostics(null,"Manual report").Contains("Exception: None captured"),"Manual reports do not handle missing exceptions.");
+   });
+   Test("Problem reports include the app log, honour section choices and fit a GitHub link",()=>{
+    AppLog.Stop();AppLog.Info("Started: Scanning D:\\Captures\\M31");AppLog.Error("Import failed",new IOException("Disk full at E:\\Archive"));
+    var sections=AppErrorReporting.Sections(new InvalidOperationException("Broken at C:\\Users\\sample\\x.fits"),"Import",new System.Collections.Generic.Dictionary<string,string>{{"Page","Import"}});
+    string text=AppErrorReporting.Compose(sections);
+    Check(text.Contains("### System details")&&text.Contains("Page: Import")&&text.Contains("### Error")&&text.Contains("### Recent app log")&&text.Contains("Started: Scanning")&&text.Contains("Import failed"),"Report sections missing: "+text);
+    Check(!text.Contains("sample")&&!text.Contains("Captures\\M31")&&text.Contains("[local path]"),"Report exposed a local path.");
+    sections.Single(s=>s.Title=="Recent app log").Include=false;Check(!AppErrorReporting.Compose(sections).Contains("Recent app log"),"Unticked sections were still included.");
+    bool truncated;string url=AppErrorReporting.IssueUrl("Import stops","It stops at 40%.",sections,out truncated);string body=Uri.UnescapeDataString(url);
+    Check(!truncated&&url.Length<=AppErrorReporting.UrlLimit&&body.Contains("title=Import stops")&&body.Contains("It stops at 40%.")&&body.Contains("### System details"),"Short reports should fit unchanged.");
+    var huge=new System.Collections.Generic.List<ReportSection>{new ReportSection{Title="Recent app log",Text=string.Join("\n",Enumerable.Range(1,3000).Select(i=>"line "+i+" with some detail")),KeepEnd=true,Cap=50000}};
+    url=AppErrorReporting.IssueUrl(null,null,huge,out truncated);body=Uri.UnescapeDataString(url);
+    Check(truncated&&url.Length<=AppErrorReporting.UrlLimit&&body.Contains("line 3000 with")&&!body.Contains("line 1 with")&&body.Contains("clipboard"),"Long reports must keep the newest lines and fit a link.");
    });
   }
   public static int Main(string[] args){if(args.Length==2&&args[0]=="--sqlite-load-probe")return SecuritySqliteProbe(args[1]);AppContext.SetSwitch("Switch.System.IO.UseLegacyPathHandling",false);AppContext.SetSwitch("Switch.System.IO.BlockLongPaths",false);root=Path.GetFullPath(args.Length>0?args[0]:"test-data");Directory.CreateDirectory(root);Repository.LocalIndexBase=Path.Combine(root,"working-indexes");

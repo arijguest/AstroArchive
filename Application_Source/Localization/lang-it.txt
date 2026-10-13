@@ -2112,6 +2112,197 @@ Sun obscured	Sole oscurato
 Check capture metadata	Controllare i metadati di acquisizione
 Suspected obstruction	Possibile ostruzione
 A chosen town or city sets the capture location and its historical timezone. Local capture clocks are converted to UTC again when the town changes; explicit UTC or clock offsets keep their instant. Use default location to return to file metadata, then Settings. Changes are applied when you save metadata.	La località scelta imposta il luogo di ripresa e il suo fuso orario storico. Gli orari locali vengono riconvertiti in UTC quando la località cambia; gli orari UTC espliciti o con scostamento mantengono lo stesso istante. Usa la posizione predefinita per tornare ai metadati del file, poi alle Impostazioni. Le modifiche si applicano quando salvi i metadati.
+# Help centre, guided walkthroughs and problem reports
+Use the purple **PAGE** selector to move around AstroArchive. It sits beside the toolbar, or below it in smaller windows.\n\n- Choose **Repository**, **Edited** or **Import**.\n- Search, filters, selections and import progress stay in place.\n- Use `Ctrl+1–3` to select a page or `Ctrl+Tab` to cycle pages.	Usa il selettore viola **PAGINA** per spostarti in AstroArchive. Si trova accanto alla barra degli strumenti o, nelle finestre più piccole, sotto di essa.\n\n- Scegli **Archivio**, **Edited** o **Importa**.\n- Ricerca, filtri, selezioni e avanzamento dell'importazione restano invariati.\n- Usa `Ctrl+1–3` per selezionare una pagina o `Ctrl+Tab` per scorrere le pagine.
+Your repository holds verified capture copies and the archive index.\n\n1. Open **Settings → General**.\n2. Choose your archive folder.\n\nClick the repository path on the main page to open it in Explorer.	Il tuo archivio contiene le copie verificate delle acquisizioni e il relativo indice.\n\n1. Apri **Impostazioni → Generale**.\n2. Scegli la cartella dell'archivio.\n\nFai clic sul percorso dell'archivio nella pagina principale per aprirlo in Esplora file.
+Select a saved telescope or **Browse** its capture folder. Give each physical telescope its own device ID.\n\n- **Import from Seestar… / Dwarflab…** selects USB folders/files and confirms a full scan and import. Choose target folders for faster scans.\n- **Telescopes** saves, renames or recovers profiles.\n- **Scan folder** skips matching filenames and known DWARF sessions; Seestar scans still find new filenames.\n- Enable **Robust file matching** in Import options to revisit edits and additions inside skipped sessions.\n- **Review and repair → Full rescan** reads and hashes every file for a complete check.	Seleziona un telescopio salvato oppure usa **Sfoglia** per scegliere la sua cartella delle acquisizioni. Assegna a ogni telescopio fisico un proprio ID dispositivo.\n\n- **Importa da Seestar… / Dwarflab…** seleziona cartelle o file USB e conferma una scansione e un'importazione complete. Scegli le cartelle dei target per scansioni più rapide.\n- **Telescopi** salva, rinomina o recupera i profili.\n- **Scansiona cartella** salta i nomi file corrispondenti e le sessioni DWARF già note; le scansioni Seestar trovano comunque i nuovi nomi file.\n- Attiva **Confronto file approfondito** in Opzioni di importazione per rivedere modifiche e aggiunte nelle sessioni saltate.\n- **Verifica e riparazione → Nuova scansione completa** legge ed esegue l'hash di ogni file per un controllo completo.
+Check each file’s **status** and **review reason** in the scan table.\n\n- **Review and repair** opens flagged captures and transfer retries.\n- **Import options** controls analysis and original removal.\n- The policy summary stays visible. **Originals are kept by default.**	Controlla lo **stato** e il **motivo della verifica** di ogni file nella tabella di scansione.\n\n- **Verifica e riparazione** apre le acquisizioni segnalate e i nuovi tentativi di trasferimento.\n- **Opzioni di importazione** controlla l'analisi e la rimozione degli originali.\n- Il riepilogo dei criteri resta visibile. **Per impostazione predefinita gli originali vengono conservati.**
+Browse targets and sessions, or narrow the view with **Search** and **Filters**.\n\n## Select and organise\n- `Ctrl/Shift` selects files; right-click opens file actions.\n- **Group subs by session** switches between compact sessions and files.\n\n## Sort and choose columns\n- Click a heading to sort; click again to reverse. `Shift-click` adds a heading.\n- ▲ / ▼ show direction; numbers show sort priority.\n- Right-click a heading to choose columns.	Sfoglia target e sessioni oppure restringi la vista con **Cerca** e **Filtri**.\n\n## Seleziona e organizza\n- `Ctrl/Shift` seleziona i file; il clic destro apre le azioni sui file.\n- **Raggruppa pose per sessione** passa dalle sessioni compatte ai singoli file.\n\n## Ordina e scegli le colonne\n- Fai clic su un'intestazione per ordinare; fai di nuovo clic per invertire. `Shift-clic` aggiunge un'intestazione.\n- ▲ / ▼ indicano la direzione; i numeri indicano la priorità di ordinamento.\n- Fai clic con il tasto destro su un'intestazione per scegliere le colonne.
+Select captures, then choose **Export**: copy originals, prepare a ready-to-stack folder, open them in an app, or create an AstroBin acquisition CSV.\n\n- Stacks copy to the destination; subs keep compatible input folders.\n- Matching calibrations include reasons; scientific conversion is explicit.\n- **Add Metadata** and **Create new folder** start off. Existing files are kept.\n\nStacking takes place in your chosen processing software.	Seleziona le acquisizioni, quindi scegli **Esporta**: copia gli originali, prepara una cartella pronta per lo stacking, aprili in un'app o crea un CSV di acquisizione AstroBin.\n\n- Gli stack vengono copiati nella destinazione; le pose mantengono cartelle di input compatibili.\n- Le calibrazioni corrispondenti includono i motivi; la conversione scientifica è esplicita.\n- **Aggiungi metadati** e **Crea nuova cartella** sono disattivati per impostazione predefinita. I file esistenti vengono conservati.\n\nLo stacking avviene nel software di elaborazione che hai scelto.
+Pick the captures	Scegli le acquisizioni
+Choose a target on the left, then select the subs you want in the table.\n\n- `Ctrl`-click adds files; `Shift`-click selects a range.\n- Selecting a session row includes all of its subs.\n- The counter at the top right shows how many files are selected.	Scegli un target a sinistra, poi seleziona nella tabella le pose che vuoi.\n\n- `Ctrl`-clic aggiunge file; `Shift`-clic seleziona un intervallo.\n- Selezionando una riga di sessione si includono tutte le sue pose.\n- Il contatore in alto a destra mostra quanti file sono selezionati.
+Prepare a stacking folder	Prepara una cartella di stacking
+Choose **Export**, then **Stacking folder**.\n\n- **Subs**, **Stacks** or **Both** decides what is copied.\n- Matching calibration frames are offered with the reason they match.\n- Existing files in the destination are never overwritten.	Scegli **Esporta**, poi **Cartella di stacking**.\n\n- **Pose**, **Stack** o **Entrambi** stabiliscono cosa viene copiato.\n- I frame di calibrazione corrispondenti vengono proposti insieme al motivo della corrispondenza.\n- I file già presenti nella destinazione non vengono mai sovrascritti.
+Open Export	Apri Esporta
+Open it in your stacking app	Aprilo nella tua app di stacking
+**Open in app** can hand the exported files to Siril, DSS or another stacker.\n\n- Set application locations under **Settings → Export**.\n- AstroArchive never starts stacking for you.	**Apri in un'app** può passare i file esportati a Siril, DSS o a un altro programma di stacking.\n\n- Imposta i percorsi delle applicazioni in **Impostazioni → Esporta**.\n- AstroArchive non avvia mai lo stacking al posto tuo.
+Open export preferences	Apri le preferenze di esportazione
+Make your first backup	Fai il tuo primo backup
+Choose **Repository → Back up archive…** and pick a folder on a separate drive.\n\n- A folder keeps later backups small; a ZIP is one file.\n- Close editors that write into the archive first.\n- Cancelling removes the unfinished backup and keeps earlier ones.	Scegli **Archivio → Esegui backup dell'archivio…** e seleziona una cartella su un'unità separata.\n\n- Una cartella mantiene piccoli i backup successivi; uno ZIP è un unico file.\n- Chiudi prima gli editor che scrivono nell'archivio.\n- Annullando, il backup incompleto viene rimosso e quelli precedenti restano.
+Repeat it automatically	Ripetilo automaticamente
+After a backup, AstroArchive offers to repeat it daily, weekly or monthly.\n\n- Change the schedule in **Settings → Backups**.\n- If the backup drive is missing when one is due, Activity reminds you.	Dopo un backup, AstroArchive ti propone di ripeterlo ogni giorno, ogni settimana o ogni mese.\n\n- Cambia la pianificazione in **Impostazioni → Backup**.\n- Se l'unità di backup manca quando ne è previsto uno, Attività te lo ricorda.
+Open backup preferences	Apri le preferenze di backup
+Protect your originals	Proteggi i tuoi originali
+**Settings → Backups → Protect originals** prevents accidental deletion or renaming on local NTFS drives.\n\n> Note: Protection is not a backup. Turn it off before moving the archive in Explorer.	**Impostazioni → Backup → Proteggi originali** impedisce l'eliminazione o la ridenominazione accidentale sulle unità NTFS locali.\n\n> Note: La protezione non è un backup. Disattivala prima di spostare l'archivio in Esplora file.
+Choose a repository	Scegli un archivio
+Import copies files into your repository, so one must be chosen first.\n\n1. Open **Settings → General**.\n2. Choose your archive folder and save.	L'importazione copia i file nel tuo archivio, quindi prima ne serve uno.\n\n1. Apri **Impostazioni → Generale**.\n2. Scegli la cartella dell'archivio e salva.
+Let other work finish	Lascia finire l'altro lavoro
+Only one archive job runs at a time. A scan, import, backup or analysis keeps Import unavailable until it ends.\n\n- The bell opens **Activity**, which shows what is running.\n- Wait for it to finish, or pause or cancel it there.	Viene eseguita una sola operazione sull'archivio alla volta. Una scansione, un'importazione, un backup o un'analisi mantengono Importa non disponibile fino alla fine.\n\n- La campanella apre **Attività**, che mostra cosa è in esecuzione.\n- Aspetta che finisca oppure sospendila o annullala da lì.
+Open Activity	Apri Attività
+Pick a source	Scegli un'origine
+Select a saved telescope, or **Browse** to the folder your captures are in.\n\n- A USB telescope appears as **Import from Seestar…** or **Import from Dwarflab…** in the Import menu.\n- For Wi-Fi, use **Connect over network** instead.	Seleziona un telescopio salvato oppure usa **Sfoglia** per andare alla cartella con le tue acquisizioni.\n\n- Un telescopio USB compare come **Importa da Seestar…** o **Importa da Dwarflab…** nel menu Importa.\n- Per il Wi-Fi, usa invece **Connetti in rete**.
+Browse for a folder…	Cerca una cartella…
+Scan the source	Scansiona l'origine
+**Scan folder** reads the source and lists what can be imported. Nothing is copied yet.\n\n- Files already in the archive are skipped.\n- A large folder can take a while; progress shows in Activity.	**Scansiona cartella** legge l'origine ed elenca ciò che si può importare. Non viene ancora copiato nulla.\n\n- I file già presenti nell'archivio vengono saltati.\n- Una cartella grande può richiedere un po' di tempo; l'avanzamento è visibile in Attività.
+Make sure files are ready	Controlla che i file siano pronti
+Import copies the **ready** files in the current view. If none are ready:\n\n- Clear the Import search box and **Filters**.\n- Check the **Status** and **Review** columns: duplicates and failed files are skipped.\n- **Import → Review and repair** shows flagged captures.	Importa copia i file **pronti** della vista corrente. Se nessuno è pronto:\n\n- Svuota la casella di ricerca di Importa e i **Filtri**.\n- Controlla le colonne **Stato** e **Verifica**: i duplicati e i file non riusciti vengono saltati.\n- **Importa → Verifica e riparazione** mostra le acquisizioni segnalate.
+Clear search and filters	Cancella ricerca e filtri
+Open the network connection	Apri la connessione di rete
+Choose **Connect over network** beside Saved telescope. Discovery starts by itself; no IP address is needed for Seestar, DWARF or Celestron Origin.	Scegli **Connetti in rete** accanto a Telescopio salvato. Il rilevamento parte da solo; per Seestar, DWARF o Celestron Origin non serve alcun indirizzo IP.
+Use the same network	Usa la stessa rete
+- Wake the telescope and connect it to your home Wi-Fi, or join the telescope's own hotspot from this PC.\n- Guest Wi-Fi and client isolation block discovery.\n- Click **Search** again after changing networks.	- Attiva il telescopio e collegalo al Wi-Fi di casa, oppure collega questo PC all'hotspot del telescopio.\n- Il Wi-Fi ospiti e l'isolamento dei client bloccano il rilevamento.\n- Fai di nuovo clic su **Cerca** dopo aver cambiato rete.
+Enter the address yourself	Inserisci tu l'indirizzo
+If discovery still finds nothing, open **Advanced** in the connection window.\n\n1. Find the telescope's IP address in its app or your router's device list.\n2. Enter it as the IPv4 address and leave **Storage path** blank.\n\n> Note: Use the telescope's address, not this PC's.	Se il rilevamento non trova ancora nulla, apri **Avanzate** nella finestra di connessione.\n\n1. Trova l'indirizzo IP del telescopio nella sua app o nell'elenco dei dispositivi del router.\n2. Inseriscilo come indirizzo IPv4 e lascia vuoto **Percorso di archiviazione**.\n\n> Note: Usa l'indirizzo del telescopio, non quello di questo PC.
+Check the telescope keeps frames	Verifica che il telescopio conservi i frame
+- **Seestar:** turn on **Save Each Frame** and use current firmware.\n- **Celestron Origin:** turn on **Save Raw Images** (Menu → Settings → Advanced).\n- **DWARF:** check the FTP port and credentials under **Advanced**.	- **Seestar:** attiva **Save Each Frame** e usa il firmware più recente.\n- **Celestron Origin:** attiva **Save Raw Images** (Menu → Impostazioni → Avanzate).\n- **DWARF:** controlla la porta FTP e le credenziali in **Avanzate**.
+Connect it as a drive	Collegalo come unità
+Connect the telescope by USB and check that it appears as a drive in **File Explorer**.\n\n- Some telescopes need USB storage mode turned on in their app.\n- Wake or unlock the telescope if Windows shows no drive.	Collega il telescopio via USB e verifica che compaia come unità in **Esplora file**.\n\n- Alcuni telescopi richiedono che la modalità di archiviazione USB sia attiva nella loro app.\n- Riattiva o sblocca il telescopio se Windows non mostra nessuna unità.
+Choose **Import → Telescopes → Refresh USB devices**. A recognised telescope then appears as **Import from Seestar…** or **Import from Dwarflab…** in the Import menu.	Scegli **Importa → Telescopi → Aggiorna dispositivi USB**. Un telescopio riconosciuto comparirà quindi come **Importa da Seestar…** o **Importa da Dwarflab…** nel menu Importa.
+Or browse to the drive	Oppure vai direttamente all'unità
+If it still isn't recognised, **Browse** to the capture folder on the telescope drive and scan it like any folder. Save it as a telescope so it's remembered.	Se ancora non viene riconosciuto, usa **Sfoglia** per andare alla cartella delle acquisizioni sull'unità del telescopio e scansionala come qualsiasi altra cartella. Salvala come telescopio per ricordarla.
+Check the right archive is open	Verifica che sia aperto l'archivio giusto
+The strip under the table shows which repository is open. If it's the wrong one, choose another in **Settings → General**.	La barra sotto la tabella indica quale archivio è aperto. Se è quello sbagliato, scegline un altro in **Impostazioni → Generale**.
+A search term or active **Filters** hide everything that doesn't match.\n\n- **Clear** empties the search and resets filters.\n- The Filters button shows how many are active, for example **Filters (2)**.	Un termine di ricerca o dei **Filtri** attivi nascondono tutto ciò che non corrisponde.\n\n- **Cancella** svuota la ricerca e reimposta i filtri.\n- Il pulsante Filtri indica quanti sono attivi, ad esempio **Filtri (2)**.
+Choose All Targets	Scegli Tutti i target
+The target list on the left limits the table to one object. **All Targets**, at the top, shows everything.	L'elenco dei target a sinistra limita la tabella a un solo oggetto. **Tutti i target**, in alto, mostra tutto.
+Select All Targets	Seleziona Tutti i target
+Expand sessions	Espandi le sessioni
+Subs are grouped into one row per session. Expand a row, or turn off **Repository → Group subs by session**, to see every file.	Le pose sono raggruppate in una riga per sessione. Espandi una riga oppure disattiva **Archivio → Raggruppa pose per sessione** per vedere ogni file.
+Open Repository menu	Apri il menu Archivio
+Import the files	Importa i file
+If the archive is empty, the files haven't been imported yet. Go to **Import**, scan the folder and import.	Se l'archivio è vuoto, i file non sono ancora stati importati. Vai a **Importa**, scansiona la cartella e importa.
+Go to Import	Vai a Importa
+Turn the preview on	Attiva l'anteprima
+The preview pane can be hidden. Turn on **Show image preview** in **Settings → General**.	Il pannello di anteprima può essere nascosto. Attiva **Mostra anteprima immagine** in **Impostazioni → Generale**.
+Select one file	Seleziona un file
+Select a single file in the table. With nothing selected, the pane shows information about the target instead.	Seleziona un solo file nella tabella. Se non è selezionato nulla, il pannello mostra invece le informazioni sul target.
+Check the file format	Controlla il formato del file
+- FITS, XISF, TIFF, PNG, JPEG and SER preview directly.\n- RAW camera files (CR2, NEF, ARW, DNG) need a Windows image codec.\n- Tile-compressed FITS needs the optional CFITSIO codec.\n\n**Settings → General → Image compatibility** shows what is installed.	- FITS, XISF, TIFF, PNG, JPEG e SER hanno l'anteprima diretta.\n- I file RAW delle fotocamere (CR2, NEF, ARW, DNG) richiedono un codec immagini di Windows.\n- Il FITS compresso a tessere richiede il codec CFITSIO opzionale.\n\n**Impostazioni → Generale → Compatibilità immagini** mostra cosa è installato.
+Set the app's location	Imposta il percorso dell'app
+AstroArchive looks for common processing apps where they normally install. If yours is elsewhere:\n\n1. Open **Settings → Export**.\n2. Under **Application locations**, choose the program's main `.exe`.\n3. Save preferences.	AstroArchive cerca le app di elaborazione più comuni dove di solito vengono installate. Se la tua si trova altrove:\n\n1. Apri **Impostazioni → Esporta**.\n2. In **Percorsi delle applicazioni**, scegli il file `.exe` principale del programma.\n3. Salva le preferenze.
+Try it again	Riprova
+Select files, then choose **Export → Open in app…**. Copies are verified before the app opens them; your originals are never changed.	Seleziona i file, poi scegli **Esporta → Apri in un'app…**. Le copie vengono verificate prima che l'app le apra; i tuoi originali non vengono mai modificati.
+Set your observing town	Imposta la tua località di osservazione
+Sky details depend on where and when a capture was taken. Open **Settings → Sky & solving** and search for your town, or enter coordinates.	I dettagli del cielo dipendono da dove e quando è stata scattata un'acquisizione. Apri **Impostazioni → Cielo e plate solving** e cerca la tua località, oppure inserisci le coordinate.
+Open sky preferences	Apri le preferenze del cielo
+Fix individual captures	Correggi singole acquisizioni
+If only some captures are wrong, select them and right-click **Edit metadata → Capture**.\n\n- Set the **town / city** where they were taken.\n- Set the **timezone** if the camera clock wasn't on local time.\n- Changes are saved with the archive; files are never rewritten.	Se solo alcune acquisizioni sono sbagliate, selezionale e fai clic con il tasto destro su **Modifica metadati → Acquisizione**.\n\n- Imposta la **località** in cui sono state scattate.\n- Imposta il **fuso orario** se l'orologio della fotocamera non era sull'ora locale.\n- Le modifiche vengono salvate con l'archivio; i file non vengono mai riscritti.
+Check the details again	Ricontrolla i dettagli
+Select a capture and open the **i** button above the preview. Target and Moon heights, Moon phase and eclipse details update straight away.	Seleziona un'acquisizione e apri il pulsante **i** sopra l'anteprima. Altezza del target e della Luna, fase lunare e dettagli sulle eclissi si aggiornano subito.
+Set up a plate solver	Configura il plate solving
+Plate solving works out where in the sky an image points. Open **Settings → Sky & solving → Plate solver setup** and choose **ASTAP** with its star database, or **Astrometry.net** with an API key.	Il plate solving calcola dove punta un'immagine nel cielo. Apri **Impostazioni → Cielo e plate solving → Configurazione del plate solving** e scegli **ASTAP** con il suo database stellare, oppure **Astrometry.net** con una chiave API.
+Select the captures	Seleziona le acquisizioni
+Select the Unknown captures, or a whole session row. One frame per session is solved and the result applies to the session.	Seleziona le acquisizioni con target Sconosciuto, oppure un'intera riga di sessione. Viene risolto un frame per sessione e il risultato vale per tutta la sessione.
+Choose **Repository → Review and analysis → Identify targets…**. Review the matches before applying them; cancelling keeps what's already done.	Scegli **Archivio → Verifica e analisi → Identifica target…**. Controlla le corrispondenze prima di applicarle; annullando, ciò che è già fatto viene conservato.
+Or name it yourself	Oppure dagli un nome tu
+If you know the target, right-click **Edit metadata** and type it. Names such as M31, NGC 7000 or Andromeda Galaxy are all recognised.	Se conosci il target, fai clic con il tasto destro su **Modifica metadati** e scrivilo. Nomi come M31, NGC 7000 o Galassia di Andromeda vengono tutti riconosciuti.
+A quick tour of pages, importing, browsing, exporting and settings.	Un rapido tour di pagine, importazione, navigazione, esportazione e impostazioni.
+Choose a repository, pick a source, scan it and import verified copies.	Scegli un archivio, seleziona un'origine, scansionala e importa copie verificate.
+Export captures for stacking	Esporta le acquisizioni per lo stacking
+Pick subs, prepare a ready-to-stack folder and open it in your stacking app.	Scegli le pose, prepara una cartella pronta per lo stacking e aprila nella tua app di stacking.
+Back up your archive	Esegui il backup dell'archivio
+Make a verified copy on another drive and keep it up to date automatically.	Crea una copia verificata su un'altra unità e mantienila aggiornata automaticamente.
+Import button is greyed out	Il pulsante Importa è disattivato
+Checks each thing Import needs and takes you to whatever is missing.	Controlla tutto ciò che serve a Importa e ti porta a ciò che manca.
+Telescope not found over Wi-Fi	Telescopio non trovato via Wi-Fi
+Get discovery working, or connect by IP address, for Seestar, DWARF and Origin.	Fai funzionare il rilevamento oppure connettiti tramite indirizzo IP, per Seestar, DWARF e Origin.
+USB telescope isn't detected	Il telescopio USB non viene rilevato
+Make the telescope show up as a drive, refresh devices, or browse to it directly.	Fai comparire il telescopio come unità, aggiorna i dispositivi oppure sfoglialo direttamente.
+My files don't show in Repository	I miei file non compaiono in Archivio
+Find captures hidden by search, filters, the target list or grouping.	Trova le acquisizioni nascoste da ricerca, filtri, elenco dei target o raggruppamento.
+Preview shows no image	L'anteprima non mostra nessuna immagine
+Turn the preview on, select one file and check the format is supported.	Attiva l'anteprima, seleziona un file e verifica che il formato sia supportato.
+Open in app can't find my software	Apri in un'app non trova il mio software
+Point AstroArchive at Siril, DSS, PixInsight or another app installed somewhere else.	Indica ad AstroArchive dove si trovano Siril, DSS, PixInsight o un'altra app installata altrove.
+Sky, Moon or eclipse details look wrong	I dettagli di cielo, Luna o eclissi sembrano sbagliati
+Set where and when captures were taken so heights, phases and eclipses are right.	Imposta dove e quando sono state scattate le acquisizioni, così altezze, fasi ed eclissi risultano corrette.
+Captures show an Unknown target	Le acquisizioni mostrano un target Sconosciuto
+Plate solve captures, or name the target yourself.	Esegui il plate solving delle acquisizioni oppure dai tu un nome al target.
+Search help, for example USB, backup or greyed out	Cerca nella guida, ad esempio USB, backup o disattivato
+Home	Home
+How can we help?	Come possiamo aiutarti?
+Guided fixes and tours open on AstroArchive's own screens. They highlight each control, check your setup as you go, and never import or delete anything for you.	Le correzioni guidate e i tour si aprono sulle schermate di AstroArchive. Evidenziano ogni controllo, verificano la tua configurazione man mano e non importano né eliminano mai nulla al posto tuo.
+Fix a problem	Risolvi un problema
+Learn by doing	Impara facendo
+Browse the guide	Sfoglia la guida
+Start guided fix ›	Avvia correzione guidata ›
+Start tour ›	Avvia tour ›
+{#0} topic ›	{0} argomento ›
+{#0} topics ›	{0} argomenti ›
+Related topics	Argomenti correlati
+Start guided fix:	Avvia correzione guidata:
+Show me in AstroArchive:	Mostrami in AstroArchive:
+Guided fix:	Correzione guidata:
+Tour:	Tour:
+{#0} topics · F1 for page help · Ctrl+F to search	{0} argomenti · F1 per la guida della pagina · Ctrl+F per cercare
+{#0} of {#1} topics match	{0} di {1} argomenti corrispondono
+Tip	Suggerimento
+Important	Importante
+Start this guided walkthrough.	Avvia questo tour guidato.
+Open this help topic.	Apri questo argomento della guida.
+Guided fixes	Correzioni guidate
+Guided tours	Tour guidati
+Open a GitHub bug report with your system details and recent log filled in.	Apri una segnalazione di bug su GitHub con i dettagli del sistema e il log recente già compilati.
+Step {#0} of {#1}	Passaggio {0} di {1}
+Looks good	Tutto a posto
+Repository: {0}	Archivio: {0}
+No repository is chosen yet.	Non è ancora stato scelto nessun archivio.
+Nothing else is running.	Non è in esecuzione nient'altro.
+Another task is running. Import waits until it finishes.	È in esecuzione un'altra attività. Importa attende che termini.
+Source: {0}	Origine: {0}
+No source folder or telescope is chosen yet.	Non è ancora stata scelta nessuna cartella di origine né nessun telescopio.
+The chosen source folder isn't available. Reconnect the drive or choose another folder.	La cartella di origine scelta non è disponibile. Ricollega l'unità o scegli un'altra cartella.
+Scanned: {#0} files found.	Scansionati: {0} file trovati.
+This source hasn't been scanned yet.	Questa origine non è ancora stata scansionata.
+Files are ready to import.	I file sono pronti per l'importazione.
+No files are ready to import in this view.	Nessun file è pronto per l'importazione in questa vista.
+Search and filters are clear.	Ricerca e filtri sono vuoti.
+Search or filters are hiding some files.	La ricerca o i filtri stanno nascondendo alcuni file.
+All Targets is selected.	È selezionato Tutti i target.
+Only one target is shown.	Viene mostrato un solo target.
+{#0} captures in this archive.	{0} acquisizioni in questo archivio.
+This archive has no captures yet.	Questo archivio non contiene ancora acquisizioni.
+The preview pane is on.	Il pannello di anteprima è attivo.
+The preview pane is turned off.	Il pannello di anteprima è disattivato.
+One file is selected.	È selezionato un file.
+No file is selected.	Nessun file selezionato.
+Several files are selected. Select just one.	Sono selezionati più file. Selezionane solo uno.
+{#0} files selected.	{0} file selezionati.
+No files are selected yet.	Nessun file è ancora selezionato.
+Observing location: {0}	Località di osservazione: {0}
+coordinates set	coordinate impostate
+No observing town is set.	Nessuna località di osservazione impostata.
+A plate solver is set up.	Il plate solving è configurato.
+No plate solver is set up yet.	Il plate solving non è ancora configurato.
+Found: {0}	Trovato: {0}
+No USB telescope is detected right now.	Al momento non viene rilevato nessun telescopio USB.
+Last backup: {0}	Ultimo backup: {0}
+No backup has been made yet.	Non è ancora stato eseguito nessun backup.
+Describe what went wrong. AstroArchive adds the details you tick below so the problem can be reproduced. Nothing is sent until you submit the issue on GitHub.	Descrivi cosa è andato storto. AstroArchive aggiunge i dettagli che selezioni qui sotto, per poter riprodurre il problema. Non viene inviato nulla finché non invii la segnalazione su GitHub.
+AstroArchive hit an error:	AstroArchive ha riscontrato un errore:
+Title (optional)	Titolo (facoltativo)
+What happened?	Cos'è successo?
+Preview of the diagnostics	Anteprima della diagnostica
+Folder paths are replaced with [local path]. Images and archive files are never attached. Remove anything else you'd rather not share in GitHub before submitting.	I percorsi delle cartelle vengono sostituiti con [local path]. Immagini e file dell'archivio non vengono mai allegati. Rimuovi su GitHub tutto ciò che preferisci non condividere prima di inviare.
+Open GitHub issue	Apri segnalazione su GitHub
+Copy report	Copia report
+Save report…	Salva report…
+System details	Dettagli di sistema
+Error	Errore
+Recent activity	Attività recente
+Recent app log	Log recente dell'app
+Install and update errors	Errori di installazione e aggiornamento
+Last scan or import report	Ultimo report di scansione o importazione
+About {#0} characters.	Circa {0} caratteri.
+Copy the description and diagnostics to the clipboard.	Copia la descrizione e la diagnostica negli Appunti.
+Save the description and diagnostics as a text file.	Salva la descrizione e la diagnostica come file di testo.
+Opens a prefilled issue in your browser to review and submit.	Apre nel browser una segnalazione precompilata da rivedere e inviare.
+The report is too long for a web link, so the issue draft has a shortened copy. The full report is on your clipboard: paste it into the issue before submitting.	Il report è troppo lungo per un link web, quindi la bozza della segnalazione contiene una copia abbreviata. Il report completo è negli Appunti: incollalo nella segnalazione prima di inviarla.
+Could not open GitHub. The report has not been sent. Use Copy report or Save report… and attach it to an issue at github.com/arijguest/AstroArchive/issues.	Impossibile aprire GitHub. Il report non è stato inviato. Usa Copia report o Salva report… e allegalo a una segnalazione su github.com/arijguest/AstroArchive/issues.
+The report could not be copied	Impossibile copiare il report
+The report could not be saved	Impossibile salvare il report
+Would you like to report this problem? You can review everything before it is sent.	Vuoi segnalare questo problema? Puoi rivedere tutto prima dell'invio.
+Walk through this on AstroArchive's own screens.	Segui questa procedura sulle schermate di AstroArchive.
 Open in Stellarium	Apri in Stellarium
 All comets	Tutte le comete
 YOUR COMETS	LE TUE COMETE

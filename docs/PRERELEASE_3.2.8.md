@@ -26,6 +26,20 @@ installer recovery and optional-signing changes are retained.
 - Windows smoke checks exercise refreshed preview identity and eclipse-cache
   invalidation after a capture-town edit. Metadata help is translated in all six
   bundled non-English languages.
+- Help is now a help centre: a home page with guided fixes, tours and guide
+  categories, ranked search, and 38 shorter topics with summaries, numbered
+  steps, tip/important callouts and links to related topics. F1 opens help for
+  the current page.
+- Guided fixes (import button greyed out, Wi-Fi/LAN and USB telescopes, missing
+  files, blank previews, app not found, wrong sky, unidentified targets) and
+  tours (first import, export and stacking, backups) walk the real window: each
+  step spotlights the control, can do the step for you, and shows a live check
+  of whether it is done. Fixes end with "Still stuck?" and a problem report.
+- Help, About and unhandled-error prompts can report a problem: the report
+  window previews system details, recent activity and the app log (local paths
+  removed, each section optional), then opens a prefilled GitHub issue. Long
+  reports are shortened in the link and copied in full to the clipboard. The app
+  now keeps a rolling log in `%LOCALAPPDATA%\AstroArchive\logs`.
 
 - The target list shows one Comets entry; its page lists your comets, and each
   comet's files stay together. Imaging notes are always open, surface gravity is
