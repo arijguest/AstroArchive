@@ -79,7 +79,7 @@ namespace AstroArchive {
    if(card.domain=="deep_sky"){
     facts.Constellation=TargetInfoPresentation.Constellation(card.constellation);var measurements=card.measurements??new TargetInfoMeasurement[0];
     var distance=measurements.FirstOrDefault(m=>m.field=="Distance"&&m.value>0&&LightYears(m.value,m.unit).HasValue);
-    if(distance!=null){facts.LightYears=LightYears(distance.value,distance.unit);facts.ApproximateDistance=(distance.qualifier??"").StartsWith("Approximate",StringComparison.OrdinalIgnoreCase);}
+    if(distance!=null){facts.LightYears=LightYears(distance.value,distance.unit);facts.ApproximateDistance=distance.band=="redshift"||(distance.qualifier??"").StartsWith("Approximate",StringComparison.OrdinalIgnoreCase);}
     var visual=measurements.FirstOrDefault(m=>m.field=="V-Mag"&&m.unit=="mag");var blue=measurements.FirstOrDefault(m=>m.field=="B-Mag"&&m.unit=="mag");
     if(visual!=null)facts.Magnitude=visual.value;else if(blue!=null){facts.Magnitude=blue.value;facts.BlueMagnitude=true;}
    }
