@@ -1,6 +1,8 @@
 import hashlib
 import importlib.util
 import json
+import subprocess
+import sys
 from pathlib import Path
 import tempfile
 import unittest
@@ -89,6 +91,20 @@ class PublicationGateTests(unittest.TestCase):
 
     def test_required_signing_accepts_verified_publisher_and_installer(self):
         module.verify(self.directory, self.publisher, require_signed=True)
+
+    def test_cli_obeys_optional_or_required_package_signing_policy(self):
+        self.feed['authenticode_signed'] = False
+        self.write_metadata()
+        (self.directory / 'signatures.json').unlink()
+        policy_path = Path(__file__).resolve().parent.parent / 'Installer' / 'release.json'
+        required = json.loads(policy_path.read_text(encoding='utf-8')).get('require_signing') is True
+        result = subprocess.run([sys.executable, str(spec.origin), str(self.directory), '--allow-unsigned'], capture_output=True, text=True)
+        if required:
+            self.assertNotEqual(result.returncode, 0)
+            self.assertIn('Unsigned release blocked', result.stderr)
+        else:
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertIn('PASS', result.stdout)
 
     def test_unsigned_mode_cannot_downgrade_a_package_marked_as_signed(self):
         (self.directory / 'signatures.json').unlink()
