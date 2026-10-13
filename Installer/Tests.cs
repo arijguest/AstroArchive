@@ -60,6 +60,25 @@ class Tests {
   Test("Drive root and linked installation directories are rejected",()=>{Expect(()=>InstallCore.Root(Path.GetPathRoot(scratch)));if(Environment.OSVersion.Platform==PlatformID.Unix){Directory.CreateDirectory(Root("link-target"));Check(symlink(Root("link-target"),Root("linked"))==0,"Unable to create fixture link");Expect(()=>Install("linked"));Check(!Directory.EnumerateFileSystemEntries(Root("link-target")).Any(),"Linked target changed");}});
   Test("Version fields must agree between app and installer",()=>{var p=Package();p.PackageVersion="1.1.0.1";Expect(()=>Install("mismatched-version",p));});
   Test("Progress display failures cannot damage a completed installation",()=>{Install("progress-failure");var core=new InstallCore{Progress=s=>{throw new InvalidOperationException("Disposed progress window");}};core.Install(Root("progress-failure"),Package("1.3.0"),Setup);Check(InstallCore.Read(Root("progress-failure")).Version=="1.3.0"&&File.Exists(Path.Combine(Root("progress-failure"),"app-1.3.0-r1","AstroArchive.exe")),"Display failure rolled back a committed upgrade");});
+  Test("Shortcut property writes recover from transient sharing and lock violations",()=>{
+   foreach(int code in new[]{unchecked((int)0x80070020),unchecked((int)0x80070021)}){
+    int calls=0,waits=0;
+    ShellIdentity.RetryShortcutWrite(()=>{if(++calls<3)Marshal.ThrowExceptionForHR(code);},delay=>{Check(delay==250,"Unexpected retry interval");waits++;});
+    Check(calls==3&&waits==2,"Transient shortcut lock was not retried");
+   }
+  });
+  Test("Persistent shortcut locks stop after a bounded retry period",()=>{
+   int calls=0,waits=0;Exception failure=null;
+   try{ShellIdentity.RetryShortcutWrite(()=>{calls++;Marshal.ThrowExceptionForHR(unchecked((int)0x80070020));},delay=>waits++);}catch(Exception error){failure=error;}
+   Check(failure!=null&&failure.HResult==unchecked((int)0x80070020)&&calls==20&&waits==19,"Persistent lock was swallowed or retried indefinitely");
+  });
+  Test("Shortcut access and policy failures are reported without retries",()=>{
+   foreach(int code in new[]{unchecked((int)0x80070005),unchecked((int)0x800711c7)}){
+    int calls=0,waits=0;Exception failure=null;
+    try{ShellIdentity.RetryShortcutWrite(()=>{calls++;Marshal.ThrowExceptionForHR(code);},delay=>waits++);}catch(Exception error){failure=error;}
+    Check(failure!=null&&failure.HResult==code&&calls==1&&waits==0,"Permanent shortcut failure was hidden or retried");
+   }
+  });
   UpdateTests.Run(Test, scratch);ReleaseMonitorTests.Run(Test,scratch);LaunchSafetyTests.Run(Test,scratch);
   Test("Application Control failures explain the policy and preserve the rejected file",()=>{
    foreach(int code in new[]{1260,4551,577}){

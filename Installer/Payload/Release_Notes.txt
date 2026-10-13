@@ -1,7 +1,9 @@
 AstroArchive 3.2.7
-Package 3.2.7.1
+Package 3.2.7.2
 
 Signing is optional for this release. It can publish a checksum-verified unsigned installer when publisher signing is not configured. If signing is enabled, trusted RSA publisher signatures and timestamps are verified on the application, launcher and installer before publication; checksums describe the final bytes.
+
+Installer repair now retries transient Windows shortcut file locks before failing, while preserving errors for access restrictions and application-control policy.
 
 Includes the application changes from 3.2.6: reordered information panes, compact and expandable image credits, simplified solar eclipse displays, per-file capture towns in Edit metadata, refreshed sky and eclipse checks, DSO foreground-obstruction scoring, FITS preview recovery, display-only brightness correction for very dark frames, and no Moon-to-target separation for lunar images.
 

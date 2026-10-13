@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Threading;
 namespace AstroArchive.Installation {
  // A stable shell identity joins the versioned launcher, shortcuts and WPF window.
  public static class ShellIdentity {
@@ -43,7 +44,18 @@ namespace AstroArchive.Installation {
    try{Set(store,5,AppId);Set(store,2,WindowsIntegration.Quote(executable));Set(store,3,EnsureIcon()+",0");Set(store,4,"AstroArchive");}finally{Marshal.FinalReleaseComObject(store);}
   }
   public static string WindowProperty(IntPtr window,uint id){var iid=propertyStoreId;IPropertyStore store;Marshal.ThrowExceptionForHR(SHGetPropertyStoreForWindow(window,ref iid,out store));try{return Read(store,id);}finally{Marshal.FinalReleaseComObject(store);}}
-  public static void ConfigureShortcut(string path){var iid=propertyStoreId;IPropertyStore store;Marshal.ThrowExceptionForHR(SHGetPropertyStoreFromParsingName(path,IntPtr.Zero,2,ref iid,out store));try{Set(store,5,AppId);Marshal.ThrowExceptionForHR(store.Commit());}finally{Marshal.FinalReleaseComObject(store);}Notify(path);}
+  // Explorer and scanners can briefly hold a shortcut after it is saved. Reopen
+  // its property store on each retry and keep permanent failures visible.
+  internal static void RetryShortcutWrite(Action write,Action<int> wait){
+   for(int attempt=0;;attempt++){
+    try{write();return;}
+    catch(Exception error){
+     if(attempt>=19||(error.HResult!=unchecked((int)0x80070020)&&error.HResult!=unchecked((int)0x80070021)))throw;
+     wait(250);
+    }
+   }
+  }
+  public static void ConfigureShortcut(string path){RetryShortcutWrite(()=>{var iid=propertyStoreId;IPropertyStore store;Marshal.ThrowExceptionForHR(SHGetPropertyStoreFromParsingName(path,IntPtr.Zero,2,ref iid,out store));try{Set(store,5,AppId);Marshal.ThrowExceptionForHR(store.Commit());}finally{Marshal.FinalReleaseComObject(store);}},Thread.Sleep);Notify(path);}
   public static string ShortcutId(string path){var iid=propertyStoreId;IPropertyStore store;Marshal.ThrowExceptionForHR(SHGetPropertyStoreFromParsingName(path,IntPtr.Zero,0,ref iid,out store));try{return Read(store,5);}finally{Marshal.FinalReleaseComObject(store);}}
   public static void Notify(string path){SHChangeNotify(0x2000,5,path,IntPtr.Zero);}
  }
