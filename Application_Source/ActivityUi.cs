@@ -8,6 +8,7 @@ using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Media.Animation;
 using System.Windows.Threading;
 
 namespace AstroArchive {
@@ -23,7 +24,7 @@ namespace AstroArchive {
   readonly List<ActivityEntry> activities=new List<ActivityEntry>();
   readonly Dictionary<ActivityEntry,ActivityCard> activityCards=new Dictionary<ActivityEntry,ActivityCard>();
   ActivityEntry currentActivity,completionActivity,reviewingActivity;
-  Border activityPanel,activityToast;StackPanel activityItems;Button activityBell;TextBlock activityBadge,activityToastText;System.Windows.Shapes.Ellipse activityRunning;
+  Border activityPanel,activityToast;StackPanel activityItems;Button activityBell;TextBlock activityToastText;System.Windows.Shapes.Ellipse activityBadge;System.Windows.Shapes.Path activityBellShape;ScaleTransform activityBellPulse;bool activityBellBusy;
   DispatcherTimer activityToastTimer;
   string nextActivityTitle;
   bool activityOpeningReport,activityDisposed;
@@ -39,8 +40,11 @@ namespace AstroArchive {
    activityBell.SetResourceReference(Control.BackgroundProperty,"SurfaceAlt");activityBell.SetResourceReference(Control.BorderBrushProperty,"Border");
    foreach(var property in new[]{FrameworkElement.HeightProperty,FrameworkElement.WidthProperty})activityBell.SetBinding(property,new Binding("ActualHeight"){Source=TopMenu("CoffeeMenu")});
    var icon=new Grid();icon.SetResourceReference(FrameworkElement.WidthProperty,"UiToolbarIconSize");icon.SetResourceReference(FrameworkElement.HeightProperty,"UiToolbarIconSize");
-   var bell=new System.Windows.Shapes.Path{Data=Geometry.Parse("M18,8 C18,4.7 15.3,2 12,2 C8.7,2 6,4.7 6,8 C6,15 3,15 3,17 L21,17 C21,15 18,15 18,8 Z M10,21 C11,22.3 13,22.3 14,21"),StrokeThickness=1.6,StrokeStartLineCap=PenLineCap.Round,StrokeEndLineCap=PenLineCap.Round,StrokeLineJoin=PenLineJoin.Round,Stretch=Stretch.Uniform};bell.SetResourceReference(System.Windows.Shapes.Shape.StrokeProperty,"Text");icon.Children.Add(bell);
-   activityBadge=new TextBlock{Margin=new Thickness(0,-6,-6,0),HorizontalAlignment=HorizontalAlignment.Right,VerticalAlignment=VerticalAlignment.Top,FontWeight=FontWeights.Bold,Visibility=Visibility.Collapsed};activityBadge.SetResourceReference(TextBlock.FontSizeProperty,"UiFontCaption");activityBadge.SetResourceReference(TextBlock.ForegroundProperty,"Accent");activityBadge.SetResourceReference(TextBlock.BackgroundProperty,"SurfaceAlt");icon.Children.Add(activityBadge);activityRunning=new System.Windows.Shapes.Ellipse{Width=8,Height=8,StrokeThickness=1.5,HorizontalAlignment=HorizontalAlignment.Right,VerticalAlignment=VerticalAlignment.Bottom,Margin=new Thickness(0,0,-3,-3),IsHitTestVisible=false,Visibility=Visibility.Collapsed};activityRunning.SetResourceReference(System.Windows.Shapes.Shape.FillProperty,"Accent");activityRunning.SetResourceReference(System.Windows.Shapes.Shape.StrokeProperty,"SurfaceAlt");icon.Children.Add(activityRunning);activityBell.Content=icon;
+   var bell=new System.Windows.Shapes.Path{Data=Geometry.Parse("M18,8 C18,4.7 15.3,2 12,2 C8.7,2 6,4.7 6,8 C6,15 3,15 3,17 L21,17 C21,15 18,15 18,8 Z M10,21 C11,22.3 13,22.3 14,21"),StrokeThickness=1.6,StrokeStartLineCap=PenLineCap.Round,StrokeEndLineCap=PenLineCap.Round,StrokeLineJoin=PenLineJoin.Round,Stretch=Stretch.Uniform};bell.SetResourceReference(System.Windows.Shapes.Shape.StrokeProperty,"Text");activityBellShape=bell;
+   activityBellPulse=new ScaleTransform(1,1);icon.RenderTransformOrigin=new Point(0.5,0.5);icon.RenderTransform=activityBellPulse;icon.Children.Add(bell);
+   // The unread dot sits inside the icon's top-right corner so the button never clips it; it is hidden while the bell is filled for running work.
+   activityBadge=new System.Windows.Shapes.Ellipse{Width=9,Height=9,StrokeThickness=1.5,HorizontalAlignment=HorizontalAlignment.Right,VerticalAlignment=VerticalAlignment.Top,Margin=new Thickness(0,-1,-1,0),IsHitTestVisible=false,Visibility=Visibility.Collapsed};activityBadge.SetResourceReference(System.Windows.Shapes.Shape.FillProperty,"Accent");activityBadge.SetResourceReference(System.Windows.Shapes.Shape.StrokeProperty,"SurfaceAlt");icon.Children.Add(activityBadge);
+   activityBell.Content=icon;
    AutomationProperties.SetName(activityBell,"Activity and notifications");UiHelp.Hint(activityBell,"Activity and notifications (Ctrl+Shift+N)");Grid.SetColumn(activityBell,1);toolbar.Children.Add(activityBell);
    activityPanel=new Border{Padding=new Thickness(18),CornerRadius=new CornerRadius(8),BorderThickness=new Thickness(1),HorizontalAlignment=HorizontalAlignment.Right,VerticalAlignment=VerticalAlignment.Stretch,Visibility=Visibility.Collapsed,Margin=new Thickness(0,0,0,6)};
    activityPanel.SetResourceReference(Border.BackgroundProperty,"Surface");activityPanel.SetResourceReference(Border.BorderBrushProperty,"Border");Grid.SetRow(activityPanel,2);Panel.SetZIndex(activityPanel,20);root.Children.Add(activityPanel);
@@ -97,9 +101,20 @@ namespace AstroArchive {
   }
   Button ActivityAction(string label,Action action){var button=new Button{Content=label,Margin=new Thickness(0,0,6,6),Padding=new Thickness(8,4,8,4)};button.Click+=(s,e)=>{try{action();}catch(Exception error){var entry=AddActivity(label);entry.Failed=true;entry.Status=error.Message;NotifyActivity(entry);}};return button;}
   void UpdateActivityBadge(){
-   if(activityBell==null)return;int unread=activities.Count(a=>a.Unread),running=activities.Count(a=>a.Running),review=activities.Count(a=>a.NeedsReview);bool backup=activities.Any(a=>a.Running&&IsBackupActivity(a));activityBadge.Text=unread.ToString();activityBadge.Visibility=unread==0?Visibility.Collapsed:Visibility.Visible;
-   activityRunning.Visibility=running==0?Visibility.Collapsed:Visibility.Visible;var backupIcon=Window.FindName("BackupRunningIcon") as UIElement;if(backupIcon!=null)backupIcon.Visibility=backup?Visibility.Visible:Visibility.Collapsed;
+   if(activityBell==null)return;int unread=activities.Count(a=>a.Unread),running=activities.Count(a=>a.Running),review=activities.Count(a=>a.NeedsReview);bool backup=activities.Any(a=>a.Running&&IsBackupActivity(a));activityBellBusy=running>0;activityBadge.Visibility=unread==0||activityBellBusy?Visibility.Collapsed:Visibility.Visible;SetActivityBellBusy(activityBellBusy);var backupIcon=Window.FindName("BackupRunningIcon") as UIElement;if(backupIcon!=null)backupIcon.Visibility=backup?Visibility.Visible:Visibility.Collapsed;
    string description="Activity: "+running+" running, "+unread+" unread, "+review+" need attention";AutomationProperties.SetName(activityBell,description);activityBell.ToolTip=description+" (Ctrl+Shift+N)";
+  }
+  // Running work fills the bell with the page selector's accent and pulses it gently; finished work reverts to the unread dot.
+  void SetActivityBellBusy(bool busy){
+   if(activityBellShape==null)return;
+   if(busy){activityBellShape.SetResourceReference(System.Windows.Shapes.Shape.FillProperty,"Accent");activityBellShape.SetResourceReference(System.Windows.Shapes.Shape.StrokeProperty,"AccentText");}
+   else{activityBellShape.ClearValue(System.Windows.Shapes.Shape.FillProperty);activityBellShape.SetResourceReference(System.Windows.Shapes.Shape.StrokeProperty,"Text");}
+   if(busy&&!settings.ReducedMotion){
+    if(activityBellPulse.IsSealed||activityBellPulse.HasAnimatedProperties)return;
+    foreach(var property in new[]{ScaleTransform.ScaleXProperty,ScaleTransform.ScaleYProperty})activityBellPulse.BeginAnimation(property,new DoubleAnimation(1,1.14,TimeSpan.FromMilliseconds(900)){AutoReverse=true,RepeatBehavior=RepeatBehavior.Forever,EasingFunction=new SineEase{EasingMode=EasingMode.EaseInOut}});
+   }else{
+    activityBellPulse.BeginAnimation(ScaleTransform.ScaleXProperty,null);activityBellPulse.BeginAnimation(ScaleTransform.ScaleYProperty,null);
+   }
   }
   static bool IsBackupActivity(ActivityEntry entry){return entry.Title=="Backing up archive"||entry.Title=="Automatic backup";}
   static string ActivityRate(ActivityEntry entry){
