@@ -1,5 +1,5 @@
 AstroArchive user guide
-Application 3.2.6; package 3.2.6.2.
+Application 3.2.7; package 3.2.7.1.
 Windows 10/11 x64; .NET Framework 4.8.
 
 START HERE

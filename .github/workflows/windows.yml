@@ -44,7 +44,7 @@ jobs:
           $release = Get-Content 'Installer/release.json' -Raw | ConvertFrom-Json
           $requiresSigning = $null -ne $release.PSObject.Properties['require_signing'] -and $release.require_signing -eq $true
           if ($env:GITHUB_EVENT_NAME -ne 'pull_request' -and $requiresSigning -and -not $enabled) {
-            throw 'This repair package requires trusted publisher signing. Configure Microsoft Artifact Signing in docs/RELEASING.md before publishing; an unsigned rebuild does not remedy Smart App Control blocking.'
+            throw 'This package explicitly requires trusted publisher signing. Configure signing in docs/RELEASING.md, or set require_signing to false if an unsigned release is intended.'
           }
           "enabled=$($enabled.ToString().ToLowerInvariant())" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
       - name: Test application, installer and updater; prepare Windows payload

@@ -1,6 +1,8 @@
-AstroArchive 3.2.6 — installer repair
-Package 3.2.6.2
+AstroArchive 3.2.7
+Package 3.2.7.1
 
-This repair package requires trusted publisher signatures on the application, launcher and installer before publication. It addresses Smart App Control rejecting the newly released unsigned 3.2.6.1 package. Signatures and timestamps are verified after packaging, and checksums describe the final signed bytes.
+Signing is optional for this release. It can publish a checksum-verified unsigned installer when publisher signing is not configured. If signing is enabled, trusted RSA publisher signatures and timestamps are verified on the application, launcher and installer before publication; checksums describe the final bytes.
 
-Includes the application changes from 3.2.6.1; repositories, images and settings are retained.
+Includes the application changes from 3.2.6: reordered information panes, compact and expandable image credits, simplified solar eclipse displays, per-file capture towns in Edit metadata, refreshed sky and eclipse checks, DSO foreground-obstruction scoring, FITS preview recovery, display-only brightness correction for very dark frames, and no Moon-to-target separation for lunar images.
+
+Unsigned packages can still be blocked by Smart App Control or SmartScreen. This release does not claim to bypass or remedy those Windows trust decisions. Repositories, images and settings are retained.
