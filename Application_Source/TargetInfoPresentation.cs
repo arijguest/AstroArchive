@@ -6,6 +6,17 @@ using System.Text.RegularExpressions;
 namespace AstroArchive {
  public sealed class TargetInfoSource {public string Title,Url;}
  public static class TargetInfoPresentation {
+  // A distance in light-years, rounded to two significant figures; redshift distances are marked approximate.
+  public static string Distance(TargetInfoMeasurement m){
+   double ly=m.value;string approximate=m.band=="redshift"?"≈ ":"";
+   if(ly>=1e9)return approximate+Localization.F("{0} billion light-years",Significant(ly/1e9));
+   if(ly>=1e6)return approximate+Localization.F("{0} million light-years",Significant(ly/1e6));
+   return approximate+Localization.F("{0} light-years",Significant(ly));
+  }
+  static string Significant(double value){
+   int decades=(int)Math.Floor(Math.Log10(Math.Abs(value)));double rounded=Math.Round(value/Math.Pow(10,decades-1))*Math.Pow(10,decades-1);
+   return rounded.ToString(decades>=2?"#,##0":decades==1?"0":"0.0",System.Globalization.CultureInfo.InvariantCulture);
+  }
   public static string Constellation(string value){
    if(new[]{"Ser","Se1","Se2","Serpens","Serpens Caput","Serpens Cauda"}.Any(v=>string.Equals(v,value,StringComparison.OrdinalIgnoreCase)))return "Serpens";
    if(new[]{"CrA","Corona Austrina","Corona Australis"}.Any(v=>string.Equals(v,value,StringComparison.OrdinalIgnoreCase)))return "Corona Australis";

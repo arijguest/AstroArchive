@@ -2307,3 +2307,7 @@ Start tour:	Tour starten:
 Step-by-step fixes for common problems, on AstroArchive's own screens.	Schritt-für-Schritt-Lösungen für häufige Probleme, direkt in AstroArchive.
 Short tours of importing, exporting and backups.	Kurze Touren zu Import, Export und Sicherungen.
 Search the guide, or start a guided fix or tour.	Hilfe durchsuchen oder eine geführte Lösung bzw. Tour starten.
+Distance	Entfernung
+{0} billion light-years	{0} Milliarden Lichtjahre
+{0} million light-years	{0} Millionen Lichtjahre
+{0} light-years	{0} Lichtjahre

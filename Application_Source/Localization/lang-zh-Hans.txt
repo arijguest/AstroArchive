@@ -2338,3 +2338,7 @@ Start tour:	开始导览：
 Step-by-step fixes for common problems, on AstroArchive's own screens.	在 AstroArchive 界面中逐步解决常见问题。
 Short tours of importing, exporting and backups.	关于导入、导出和备份的简短导览。
 Search the guide, or start a guided fix or tour.	搜索指南，或开始引导式修复或导览。
+Distance	距离
+{0} billion light-years	{0}十亿光年
+{0} million light-years	{0}百万光年
+{0} light-years	{0}光年

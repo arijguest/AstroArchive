@@ -2339,3 +2339,7 @@ Start tour:	ツアーを開始:
 Step-by-step fixes for common problems, on AstroArchive's own screens.	よくある問題を AstroArchive の画面上で順を追って解決します。
 Short tours of importing, exporting and backups.	インポート、エクスポート、バックアップの短いツアーです。
 Search the guide, or start a guided fix or tour.	ガイドを検索するか、ガイド付き修正やツアーを開始します。
+Distance	距離
+{0} billion light-years	{0}十億光年
+{0} million light-years	{0}百万光年
+{0} light-years	{0}光年
