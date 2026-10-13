@@ -23,16 +23,23 @@ namespace AstroArchive {
   }
   // Session values with explicit second units can supply durations omitted from
   // newer DWARF filenames. Never interpret the 16/32 bit-depth prefix as a count.
+  // DWARF's own shotsInfo.json names the per-sub exposure "exp" and the frames that
+  // really stacked "shotsStacked"; a stack total that disagrees with them belongs to
+  // another stack (a Mega Stack, say), so no duration is taken from the session.
   public static bool ApplyStackSessionMetadata(Frame frame,Dictionary<string,string> values){
    if(frame.Kind!="Stack"||values==null)return false;var header=StackHeader(frame);
    string comment;header.Comments.TryGetValue("EXPTIME",out comment);
    if(PositiveExposure(ExposureSeconds(header,StackSubKeys))||Regex.IsMatch(comment??"",@"per[ _-]?(sub|frame)|individual|single",RegexOptions.IgnoreCase)&&PositiveExposure(ExposureSeconds(header,"EXPTIME"))||UserMetadata(frame,"SubExposure"))return false;
    double? duration=null;string source=null,sourceRaw=null;
-   foreach(string key in new[]{"exposure_s","exposureSeconds","exposureTimeSec"}){
+   foreach(string key in new[]{"exposure_s","exposureSeconds","exposureTimeSec","exp"}){
     string raw;double seconds;if(!values.TryGetValue(key,out raw)||string.IsNullOrWhiteSpace(raw))continue;
     if(!double.TryParse(raw,NumberStyles.Float,CultureInfo.InvariantCulture,out seconds)||!PositiveExposure(seconds)||duration.HasValue&&Math.Abs(duration.Value-seconds)>0.000001)return false;
     if(!duration.HasValue){duration=seconds;source=key;sourceRaw=raw;}
-   }if(!duration.HasValue)return false;if(frame.Facts==null)frame.Facts=new Dictionary<string,MetadataFact>();
+   }if(!duration.HasValue)return false;
+   double? named,namedGain;if(FilenameExposureGain(frame.OriginalName,out named,out namedGain)&&Math.Abs(named.Value-duration.Value)>0.000001)return false;
+   string stackedRaw;double stacked;
+   if(values.TryGetValue("shotsStacked",out stackedRaw)&&double.TryParse(stackedRaw,NumberStyles.Float,CultureInfo.InvariantCulture,out stacked)&&stacked>0&&PositiveExposure(frame.Exposure)&&Math.Abs(frame.Exposure.Value/duration.Value-stacked)>0.000001*Math.Max(1,stacked))return false;
+   if(frame.Facts==null)frame.Facts=new Dictionary<string,MetadataFact>();
    return StackFact(frame,"SubExposure",new MetadataFact{Value=duration.Value.ToString("R",CultureInfo.InvariantCulture),Raw=sourceRaw,Source="Session metadata: "+source,Unit="s"});
   }
   public static bool ApplyStackExposure(Frame frame){
