@@ -28,7 +28,7 @@ try {
     Assert-Rejected 'unsigned executable' 'Invalid Authenticode'
     $signatureFixture = [pscustomobject]@{
         Status = 'Valid'
-        SignerCertificate = [pscustomobject]@{ Subject = $publisher; Thumbprint = 'TEST' }
+        SignerCertificate = [pscustomobject]@{ Subject = $publisher; Thumbprint = 'TEST'; PublicKey = [pscustomobject]@{ Oid = [pscustomobject]@{ Value = '1.2.840.113549.1.1.1' } } }
         TimeStamperCertificate = [pscustomobject]@{ Subject = 'CN=Timestamp' }
     }
     $signatureFixture.Status = 'HashMismatch'
@@ -39,6 +39,9 @@ try {
     $signatureFixture.SignerCertificate.Subject = 'CN=Other Publisher'
     Assert-Rejected 'different publisher' 'Unexpected signing publisher'
     $signatureFixture.SignerCertificate.Subject = $publisher
+    $signatureFixture.SignerCertificate.PublicKey.Oid.Value = '1.2.840.10045.2.1'
+    Assert-Rejected 'ECC certificate unsupported by Smart App Control' 'requires an RSA'
+    $signatureFixture.SignerCertificate.PublicKey.Oid.Value = '1.2.840.113549.1.1.1'
     $signatureFixture.TimeStamperCertificate = $null
     Assert-Rejected 'missing timestamp' 'Missing trusted timestamp'
     $signatureFixture.TimeStamperCertificate = [pscustomobject]@{ Subject = 'CN=Timestamp' }

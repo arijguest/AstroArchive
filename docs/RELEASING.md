@@ -91,3 +91,26 @@ signing, the script produces an unsigned local build.
 For user-facing Windows policy troubleshooting, see [installation and updates](UPDATES.md#smartscreen-and-application-control).
 
 To publish a prerelease from a development branch, manually run **Windows build and release** on that branch with **prerelease** enabled. It runs the same package validation, publishes the matching package tag as a prerelease, and leaves the latest stable release unchanged. Do not push a version tag first: tag pushes use the stable publication path.
+
+## Smart App Control repair: package 3.2.6.2
+
+3.2.6.1 is unsigned. Smart App Control can accept a previous unsigned file by
+reputation and reject a new version: reputation is evaluated per file hash.
+The repair must establish trusted publisher identity rather than generate another
+unsigned hash. See [Microsoft's reputation explanation](https://learn.microsoft.com/en-us/windows/apps/package-and-deploy/smartscreen-reputation).
+
+`Installer/release.json` sets `require_signing: true` for this repair. Publication
+fails before building when signing is disabled, and the release integrity verifier
+also rejects an unsigned package even with `--allow-unsigned`. Pull requests may
+still build unsigned validation artifacts; they cannot publish the repair.
+
+Use the Microsoft Artifact Signing setup above with a validated Public Trust
+profile. Sign **AstroArchive.exe**, **Start.exe**, then the final installer; the
+uninstaller uses the signed installer bytes. Smart App Control requires RSA
+certificates, which the signature gate now checks as well as publisher, trust,
+timestamps and final hashes. All distributed executables need trusted signatures.
+
+Signing account access and publisher identity validation are prerequisites. Do not
+publish v3.2.6.2 or label it a Smart App Control fix until the signed publication
+workflow passes. A valid signature helps an unknown legitimate app pass Smart App
+Control; it does not override a malware determination or an explicit managed policy.

@@ -7,7 +7,9 @@ import re
 import sys
 
 
-def verify(directory, publisher, allow_unsigned=False):
+def verify(directory, publisher, allow_unsigned=False, require_signed=False):
+    if require_signed:
+        allow_unsigned = False
     feed = json.loads((directory / 'update.json').read_text(encoding='utf-8'))
     signed = feed.get('authenticode_signed')
     if signed not in (True, False) or not isinstance(signed, bool):
@@ -48,7 +50,8 @@ def verify(directory, publisher, allow_unsigned=False):
 
 if __name__ == '__main__':
     try:
-        verify(Path(sys.argv[1]), os.environ.get('SIGNING_PUBLISHER', ''), allow_unsigned=sys.argv[2:] == ['--allow-unsigned'])
+        policy = json.loads((Path(__file__).resolve().parent.parent / "Installer" / "release.json").read_text(encoding="utf-8"))
+        verify(Path(sys.argv[1]), os.environ.get("SIGNING_PUBLISHER", ""), allow_unsigned=sys.argv[2:] == ["--allow-unsigned"], require_signed=policy.get("require_signing") is True)
     except (ValueError, KeyError, OSError, IndexError, TypeError) as error:
         sys.exit(str(error))
     print('PASS release signing policy, installer integrity, alias and update feed agree')

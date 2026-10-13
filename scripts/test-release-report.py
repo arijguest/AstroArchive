@@ -80,6 +80,16 @@ class PublicationGateTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, 'changed after Windows signature verification'):
             module.verify(self.directory, '', allow_unsigned=True)
 
+    def test_required_signing_cannot_be_overridden_by_unsigned_mode(self):
+        self.feed['authenticode_signed'] = False
+        self.write_metadata()
+        (self.directory / 'signatures.json').unlink()
+        with self.assertRaisesRegex(ValueError, 'Unsigned release blocked'):
+            module.verify(self.directory, '', allow_unsigned=True, require_signed=True)
+
+    def test_required_signing_accepts_verified_publisher_and_installer(self):
+        module.verify(self.directory, self.publisher, require_signed=True)
+
     def test_unsigned_mode_cannot_downgrade_a_package_marked_as_signed(self):
         (self.directory / 'signatures.json').unlink()
         with self.assertRaisesRegex(ValueError, 'Unsigned release blocked'):

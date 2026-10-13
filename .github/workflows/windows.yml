@@ -41,6 +41,11 @@ jobs:
         run: |
           $publishRef = $env:GITHUB_REF -eq 'refs/heads/main' -or $env:GITHUB_REF.StartsWith('refs/tags/v')
           $enabled = $env:GITHUB_EVENT_NAME -ne 'pull_request' -and $publishRef -and $env:SIGNING_ENABLED -eq 'true'
+          $release = Get-Content 'Installer/release.json' -Raw | ConvertFrom-Json
+          $requiresSigning = $null -ne $release.PSObject.Properties['require_signing'] -and $release.require_signing -eq $true
+          if ($env:GITHUB_EVENT_NAME -ne 'pull_request' -and $requiresSigning -and -not $enabled) {
+            throw 'This repair package requires trusted publisher signing. Configure Microsoft Artifact Signing in docs/RELEASING.md before publishing; an unsigned rebuild does not remedy Smart App Control blocking.'
+          }
           "enabled=$($enabled.ToString().ToLowerInvariant())" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
       - name: Test application, installer and updater; prepare Windows payload
         shell: powershell

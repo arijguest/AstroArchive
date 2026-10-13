@@ -1,10 +1,6 @@
-AstroArchive 3.2.6
-Package 3.2.6.1
+AstroArchive 3.2.6 — installer repair
+Package 3.2.6.2
 
-Target information: the pane now reads from the object name and catalogue details through the overview, image, highlighted fun fact and parameters. Short image credits remain visible; long credits expand beneath the image. Sources is itself an expandable heading containing references and catalogue details.
+This repair package requires trusted publisher signatures on the application, launcher and installer before publication. It addresses Smart App Control rejecting the newly released unsigned 3.2.6.1 package. Signatures and timestamps are verified after packaging, and checksums describe the final signed bytes.
 
-Eclipses and capture location: solar obscuration is drawn on the sky map's Sun, with only obscured percentage in Capture details. Sun/Moon horizon checks prevent impossible local solar eclipse views. Per-file town/city choices now live in Edit metadata > Capture and refresh the saved sky/eclipses. Lunar captures omit Moon-to-target separation.
-
-Preview reliability: missing cached FITS image descriptors/headers are recovered from the file for stacks and subframes. Very dark linear previews receive a bounded display-only brightness boost; normal previews and source pixels stay unchanged.
-
-DSO quality: star-poor connected regions with abrupt background boundaries now contribute suspected-obstruction evidence. Trees, branches, roofs and buildings reduce quality even when stars in the clear part of the frame are sharp. Older measurements refresh on the next quality analysis.
+Includes the application changes from 3.2.6.1; repositories, images and settings are retained.
