@@ -27,6 +27,19 @@ namespace AstroArchive {
    var reasons=rows.Select(QualityEligibility.Reason).Where(r=>r.Length>0).GroupBy(r=>r).OrderByDescending(g=>g.Count()).Take(2).Select(g=>g.Key).ToList();
    return "Nothing in view can be scored"+(reasons.Count>0?": "+string.Join("; ",reasons)+".":".");
   }
+  // Capture details: the score, its rank among similar frames and any flags.
+  static string QualityFact(Frame f){
+   if(!f.QualityScore.HasValue)return "";
+   return Math.Round(f.QualityScore.Value).ToString(System.Globalization.CultureInfo.InvariantCulture)+" of 100 · "+f.QualityRank.ToLowerInvariant()+(string.IsNullOrEmpty(f.QualityFlags)?"":" · "+f.QualityFlags);
+  }
+  // Session details: the spread of scores across the group.
+  static string QualityGroupFact(IList<Frame> frames){
+   var scores=frames.Where(f=>f.QualityScore.HasValue).Select(f=>f.QualityScore.Value).OrderBy(v=>v).ToList();if(scores.Count==0)return "";
+   Func<double,string> n=v=>Math.Round(v).ToString(System.Globalization.CultureInfo.InvariantCulture);
+   double median=scores.Count%2==1?scores[scores.Count/2]:(scores[scores.Count/2-1]+scores[scores.Count/2])/2;
+   int flagged=frames.Count(f=>f.QualityScore.HasValue&&!string.IsNullOrEmpty(f.QualityFlags)),unscored=frames.Count-scores.Count;
+   return "median "+n(median)+" · best "+n(scores[scores.Count-1])+" · weakest "+n(scores[0])+(flagged>0?" · "+flagged+" flagged":"")+(unscored>0?" · "+unscored+" not scored":"");
+  }
   void InitializeQuality(){
    B("AnalyzeQualityButton").Click+=(s,e)=>AnalyzeQuality(false);
    ApplyQualitySettings();

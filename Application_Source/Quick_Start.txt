@@ -740,12 +740,15 @@ ranks among its neighbours, not how good the night was.
 - **Linear stacks** are compared only with other stacks of the same target.
 
 Star-poor regions with abrupt background edges can flag a suspected foreground
-obstruction (trees, roofs, buildings) even if the remaining stars are sharp. Smooth
-gradients alone don't count.
+obstruction (trees, roofs, buildings), and so can a frame whose stars cover clearly
+less of the field than its companions'. A partly blocked frame always ranks below every
+clear frame it is compared with, however sharp its remaining stars. Smooth gradients
+alone don't count.
 
 ## Reading the results
 - A flag beside a score (Clouded, Trailed, Clipped…) is explained in its tooltip.
-- Hover any score for the reasons.
+- Hover any score for the reasons, or select a capture to see its score, rank and
+  measurements in the capture details.
 - **Filters → Quality rank** keeps the top or weakest frames, flagged frames or unscored ones.
 - Subs inside each session are listed best first when scores exist.
 
@@ -757,8 +760,9 @@ the tooltip gives the reason. Files found unsuitable while measuring are set asi
 listed in the run report.
 
 Measuring is on demand, or after each import via **Settings → General**. Results are
-remembered per file content, so renamed or moved files aren't measured twice.
-**Re-measure image quality** repeats it; older results refresh when next requested.
+remembered per file content in the repository's index, so renamed or moved files
+aren't measured twice and scores survive program updates. **Re-measure image
+quality** repeats it; results from an earlier version stay until next requested.
 
 ARCHIVE SAFETY AND BACKUPS
 @title Backups and protection
