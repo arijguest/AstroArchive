@@ -27,6 +27,13 @@ installer recovery and optional-signing changes are retained.
   invalidation after a capture-town edit. Metadata help is translated in all six
   bundled non-English languages.
 
+- The target list shows one Comets entry; its page lists your comets, and each
+  comet's files stay together. Imaging notes are always open, surface gravity is
+  shown in g, and information pages have Open in Stellarium (Stellarium Web
+  fallback). Solar/Lunar Eclipse pages, a full-disk Sun, a new Elephant's Trunk
+  image and an NGC 7640 image (barred spiral) come from reviewed pack overrides.
+  See [Comets, eclipse pages and Stellarium](TARGET_INFORMATION.md#comets-eclipse-pages-and-stellarium-in-328).
+
 ## Validation
 
 Local Linux/Mono verification on 13 October 2026:

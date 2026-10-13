@@ -58,12 +58,12 @@ namespace AstroArchive {
    // A pending query owns membership. Resubmit it with the latest column ordering.
    if(state.Pending&&!state.SortOnly){ScheduleSearch(name,false,true);return;}
    var view=source as ListCollectionView;var rows=view==null?source:view.SourceCollection;var sorts=SearchSorts(gridName);var culture=grid.Items.Culture??CultureInfo.CurrentCulture;
-   var target=Targets.SelectedItem as TargetSummary;bool allTargets=target==null||target.Name=="All targets",sessions=Convert.ToString(C("LibraryViewBox").SelectedItem)=="Session summaries";
+   var target=Targets.SelectedItem as TargetSummary;var editedTarget=EditedTargets.SelectedItem as TargetSummary;bool editedComets=editedTarget!=null&&editedTarget.Name==TargetNavigation.CometsSection;bool allTargets=target==null||target.Name=="All targets",sessions=Convert.ToString(C("LibraryViewBox").SelectedItem)=="Session summaries";
    var frames=gridName=="EditedGrid"?null:rows.Cast<Frame>().ToArray();var images=gridName=="EditedGrid"?rows.Cast<EditedImage>().ToArray():null;
    int version=++state.Version;state.Timer.Stop();state.Worker.Cancel();state.Pending=true;state.SortOnly=true;
    try{
     var result=await state.Worker.Submit(token=>{
-     if(images!=null)return new SearchResult{Images=SearchOrdering.Order(images,sorts,culture,token)};
+     if(images!=null){var sortedImages=SearchOrdering.Order(images,sorts,culture,token);return new SearchResult{Images=editedComets?TargetNavigation.GroupByTarget(sortedImages,EditedTarget):sortedImages};}
      if(gridName=="ImportGrid")return new SearchResult{Frames=SearchOrdering.Order(frames,sorts,culture,token)};
      List<SubframeSession> groups;var ordered=RepositoryOrdering.Order(frames,sorts,culture,allTargets,sessions,token,out groups);return new SearchResult{Frames=ordered,Sessions=groups,Summary=CaptureGroups.Summarize(ordered,token)};
     });
@@ -85,9 +85,10 @@ namespace AstroArchive {
      var source=editedImages.ToArray();string imageClass=Convert.ToString(C("EditedClassFilter").SelectedItem);string target=EditedTargets.SelectedItem is TargetSummary?((TargetSummary)EditedTargets.SelectedItem).Name:"All targets";
      var sorts=SearchSorts("EditedGrid");var culture=G("EditedGrid").Items.Culture??CultureInfo.CurrentCulture;var index=state.Edited??(state.Edited=new SearchIndex<EditedImage>(EditedSearchDocument));
      work=token=>{var query=FileSearch.Parse(text);var rows=index.Find(source,query,i=>imageClass=="All images"||i.Metadata.ImageClass==imageClass,token);token.ThrowIfCancellationRequested();
-      var targets=TargetNavigation.Build(rows.Select(i=>new Frame{Target=i.Metadata.ImageClass=="Meteor"?"Meteor":i.Metadata.Object,Kind="Edited image"}),token).Select(t=>(TargetSummary)new EditedTargetSummary{Name=t.Name,Files=t.Files}).ToList();
-      string active=targets.Any(t=>t.Name==target)?target:"All targets";if(active!="All targets")rows=rows.Where(i=>Catalog.CanonicalTarget(i.Metadata.ImageClass=="Meteor"?"Meteor":i.Metadata.Object)==active).ToList();
-      return new SearchResult{Query=query,Targets=targets,Target=active,Images=SearchOrdering.Order(rows,sorts,culture,token)};};
+      var targets=TargetNavigation.BuildSections(rows.Select(i=>new Frame{Target=i.Metadata.ImageClass=="Meteor"?"Meteor":i.Metadata.Object,Kind="Edited image"}),token).Select(t=>(TargetSummary)new EditedTargetSummary{Name=t.Name,Files=t.Files}).ToList();
+      string active=targets.Any(t=>t.Name==target)?target:"All targets";if(active!="All targets")rows=rows.Where(i=>EditedSection(i)==active).ToList();
+      var ordered=SearchOrdering.Order(rows,sorts,culture,token);if(active==TargetNavigation.CometsSection)ordered=TargetNavigation.GroupByTarget(ordered,EditedTarget);
+      return new SearchResult{Query=query,Targets=targets,Target=active,Images=ordered};};
     }else{
      bool imports=name=="ImportSearchBox";var source=(imports?CurrentImportRows():all).ToArray();var criteria=(imports?importFilters:libraryFilters).Snapshot();bool skip=SkipFlagged;
      string target=Targets.SelectedItem is TargetSummary?((TargetSummary)Targets.SelectedItem).Name:"All targets";string mode=Convert.ToString(C("LibraryViewBox").SelectedItem);

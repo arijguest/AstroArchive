@@ -2094,3 +2094,13 @@ Sun obscured	Soleil occulté
 Check capture metadata	Vérifier les métadonnées de capture
 Suspected obstruction	Obstruction possible
 A chosen town or city sets the capture location and its historical timezone. Local capture clocks are converted to UTC again when the town changes; explicit UTC or clock offsets keep their instant. Use default location to return to file metadata, then Settings. Changes are applied when you save metadata.	La ville choisie définit le lieu de capture et son fuseau horaire historique. Les heures locales sont reconverties en UTC lorsque la ville change ; les heures UTC explicites ou avec décalage conservent leur instant. Utilisez le lieu par défaut pour revenir aux métadonnées du fichier, puis aux Paramètres. Les modifications sont appliquées lors de l’enregistrement des métadonnées.
+Open in Stellarium	Ouvrir dans Stellarium
+All comets	Toutes les comètes
+YOUR COMETS	VOS COMÈTES
+One of your comets · {0}	Une de vos comètes · {0}
+{0} files	{0} fichiers
+{0} images	{0} images
+1 file	1 fichier
+1 image	1 image
+Open in Stellarium, centred on this object now. Uses Stellarium Web when Stellarium is not installed.	Ouvrir dans Stellarium, centré maintenant sur cet objet. Stellarium Web est utilisé si Stellarium n'est pas installé.
+Open in Stellarium at the catalogue position. Uses Stellarium Web when Stellarium is not installed.	Ouvrir dans Stellarium à la position du catalogue. Stellarium Web est utilisé si Stellarium n'est pas installé.

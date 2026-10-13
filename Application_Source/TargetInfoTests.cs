@@ -97,6 +97,32 @@ namespace AstroArchive {
     Check(!CometInfo.ShowsPerihelionDate(CometInfo.Orbit("67P"))&&CometInfo.ClassLabel(CometInfo.Orbit("2I"))=="Hyperbolic (interstellar)"&&CometInfo.ClassLabel(CometInfo.Orbit("C/2023 A3"))=="Near-parabolic","Comet orbit classes wrong");
     Check(!CometInfo.IsComet(catalog.Find("M31",CancellationToken.None).Cards.Single())&&!CometInfo.IsComet(catalog.Find("Jupiter",CancellationToken.None).Cards.Single())&&catalog.Find("Rosette field",CancellationToken.None).Status=="not_found","Non-comets treated as comets");
    });
+   Test("Section and eclipse pages, new images and the corrected galaxy type come from the pack",()=>{
+    foreach(var pair in new[]{new[]{Eclipses.SolarSection,"SOLAR ECLIPSE"},new[]{Eclipses.LunarSection,"LUNAR ECLIPSE"},new[]{TargetNavigation.CometsSection,"COMETS"}}){
+     var result=catalog.Find(pair[0],CancellationToken.None);Check(result.Status=="matched"&&result.Cards.Single().id==pair[1],"No page for "+pair[0]);
+     var card=result.Cards.Single();Check(card.Thumbnail!=null&&card.image.licence.Length>0&&TargetInfoPresentation.DisplaySummary(card).Length>=200&&TargetInfoPresentation.Imaging(card)!=null&&!string.IsNullOrWhiteSpace(card.fact),pair[0]+" page lacks an image, overview, fact or imaging notes");
+     Check(!TargetInfoPresentation.Sources(card,TargetDescriptions.For(card.id)!=null).Any(s=>s.Url.Contains("simbad")),pair[0]+" cites SIMBAD");
+    }
+    Check(catalog.Find("Comet ATLAS",CancellationToken.None).Cards.Single().id!="COMETS","A named comet opened the Comets page");
+    var sun=catalog.Find("Sun",CancellationToken.None).Cards.Single().image;Check(sun.file_page_url.Contains("HMI")&&sun.representation.Contains("Full solar disk"),"Sun still uses a close-up image");
+    var trunk=catalog.Find("Elephant's Trunk Nebula",CancellationToken.None).Cards.Single();Check(trunk.id=="IC 1396A"&&trunk.image.creator=="Astropizza"&&TargetDescriptions.For("IC 1396A").Overview!=null,"Elephant's Trunk image or overview not updated");
+    var galaxy=catalog.Find("NGC 7640",CancellationToken.None).Cards.Single();Check(galaxy.type_label=="Barred spiral galaxy"&&galaxy.Thumbnail!=null&&galaxy.image.creator=="ESA/Hubble & NASA"&&TargetDescriptions.For("NGC 7640").Overview.Contains("SB(s)c"),"NGC 7640 lacks its image or galaxy type");
+   });
+   Test("Surface gravity is shown in Earth gravities beside the measured value",()=>{
+    Check(TargetParameters.SurfaceGravity(TargetParameters.For("EARTH"))=="1.00 g (9.8 m/s²)"&&TargetParameters.SurfaceGravity(TargetParameters.For("MOON"))=="0.17 g (1.62 m/s²)","Earth or Moon gravity in g wrong");
+    Check(TargetParameters.SurfaceGravity(TargetParameters.For("JUPITER"))=="2.53 g (24.79 m/s²)"&&TargetParameters.SurfaceGravity(TargetParameters.For("SUN"))=="27.9 g (274 m/s²)"&&TargetParameters.SurfaceGravity(TargetParameters.For("PLUTO"))=="0.063 g (0.62 m/s²)","Gravity in g formatted wrongly");
+   });
+   Test("Information pages open in Stellarium at a catalogue position or by name",()=>{
+    var m31=Stellarium.ForCard(catalog.Find("M31",CancellationToken.None).Cards.Single());Check(m31!=null&&!m31.ByName&&Math.Abs(m31.RA-10.68)<0.1&&m31.Name=="M31"&&m31.FieldDegrees>3,"Deep-sky page did not open at its position and size");
+    Check(Stellarium.Script(m31).Contains("core.moveToRaDecJ2000(")&&!Stellarium.Script(m31).Contains("setDate"),"Catalogue view should not change Stellarium's time");
+    var jupiter=Stellarium.ForCard(catalog.Find("Jupiter",CancellationToken.None).Cards.Single());string script=Stellarium.Script(jupiter);
+    Check(jupiter.ByName&&script.Contains("core.selectObjectByName(\"Jupiter\", true);")&&script.Contains("setFlagTracking(true)")&&!script.Contains("moveToRaDecJ2000"),"Planet not opened by name");
+    Check(Stellarium.WebUrl(jupiter).StartsWith(Stellarium.WebAddress+"skysource/Jupiter?"),"Stellarium Web did not select the planet");
+    var comet=Stellarium.ForCard(catalog.Find("C/2023 A3 (Tsuchinshan-ATLAS)",CancellationToken.None).Cards.Single());Check(comet!=null&&comet.ByName&&comet.Name=="C/2023 A3 (Tsuchinshan-ATLAS)"&&Stellarium.ForCard(catalog.Find("12P/Pons-Brooks",CancellationToken.None).Cards.Single()).Name=="12P/Pons-Brooks"&&Stellarium.ForCard(catalog.Find("Halley",CancellationToken.None).Cards.Single()).Name=="1P/Halley","Comet not opened by its Stellarium name");
+    Check(Stellarium.ForCard(catalog.Find(Eclipses.SolarSection,CancellationToken.None).Cards.Single()).Name=="Sun"&&Stellarium.ForCard(catalog.Find(Eclipses.LunarSection,CancellationToken.None).Cards.Single()).Name=="Moon","Eclipse pages should show the eclipsed body");
+    Check(Stellarium.ForCard(catalog.Find(TargetNavigation.CometsSection,CancellationToken.None).Cards.Single())==null&&Stellarium.ForCard(CometInfo.GroupCard())==null&&Stellarium.ForCard(null)==null,"A group page offered a single Stellarium target");
+    Check(Stellarium.Script(new StellariumView{ByName=true,Name="Bad \"name\"\n"}).Contains("\"Bad \\\"name\\\" \""),"Script name not escaped");
+   });
    Test("Target info cancels obsolete loads and fails safely without a pack",()=>{
     using(var cancellation=new CancellationTokenSource()){cancellation.Cancel();bool canceled=false;try{catalog.Find("M31",cancellation.Token);}catch(OperationCanceledException){canceled=true;}Check(canceled,"Canceled card lookup ran");}
     bool missing=false;try{new TargetInfoCatalog(Path.Combine(root,"missing-info.zip")).Find("M31",CancellationToken.None);}catch(IOException){missing=true;}Check(missing,"Missing pack silently matched");

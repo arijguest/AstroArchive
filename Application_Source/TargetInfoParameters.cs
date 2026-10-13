@@ -36,6 +36,12 @@ namespace AstroArchive {
   }
   public static string DistanceRange(TargetParameterSet set){var inv=CultureInfo.InvariantCulture;return set.PerigeeKm.ToString("#,##0",inv)+" to "+set.ApogeeKm.ToString("#,##0",inv)+" km";}
   public static string Gravity(TargetParameterSet set){return Localization.F("{0} m/s²",set.Gravity.ToString(set.Gravity<1?"0.00":set.Gravity<100?"0.0#":"0",CultureInfo.InvariantCulture));}
+  public const double StandardGravity=9.80665;
+  // Surface gravity in Earth gravities, with the measured value alongside: "0.17 g (1.62 m/s²)".
+  public static string SurfaceGravity(TargetParameterSet set){
+   double g=set.Gravity/StandardGravity;
+   return Localization.F("{0} g ({1})",g.ToString(g<0.1?"0.000":g<10?"0.00":"0.0",CultureInfo.InvariantCulture),Gravity(set));
+  }
   public static bool ShowsMoonCount(TargetParameterSet set){return set.MoonCount>set.Moons.Length;}
   public static string Diameter(TargetParameterSet set){return set.DiameterKm.ToString("#,##0",CultureInfo.InvariantCulture)+" km";}
   public static string Mass(TargetParameterSet set){

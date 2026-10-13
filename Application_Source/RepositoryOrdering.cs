@@ -14,7 +14,9 @@ namespace AstroArchive {
    var sections=Enumerable.Range(0,5).Select(i=>new List<Frame>()).ToArray();foreach(var frame in SearchOrdering.Order(rows,sorting,culture,token)){
     token.ThrowIfCancellationRequested();int section=CaptureSky.IsCalibration(frame)?4:allTargets?(frame.Kind=="Video"?3:sessionSummaries&&membership.Merged(frame)||!sessionSummaries&&frame.Kind=="Light"?0:frame.Kind=="Stack"?1:2):frame.Kind=="Video"?0:frame.Kind=="Stack"?1:2;sections[section].Add(frame);
    }
-   var ordered=sections.SelectMany(s=>s).ToList();sessions=sessionSummaries?SubframeSessions.Build(ordered,membership,token):null;return ordered;
+   var ordered=sections.SelectMany(s=>s).ToList();
+   // A section such as Comets holds several targets; list each one's captures together, in the sorted order.
+   if(!allTargets)ordered=TargetNavigation.GroupByTarget(ordered,f=>f.Target);sessions=sessionSummaries?SubframeSessions.Build(ordered,membership,token):null;return ordered;
   }
  }
 }

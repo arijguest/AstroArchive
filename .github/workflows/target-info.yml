@@ -13,6 +13,8 @@ on:
       - 'Application_Source/test.ps1'
       - 'scripts/build-target-info.py'
       - 'scripts/target_image_credits.py'
+      - 'scripts/target_info_overrides.py'
+      - 'scripts/target-info-overrides/**'
       - 'scripts/test-target-image-credits.py'
       - 'Installer/InstallCore.cs'
       - 'Installer/Tests.cs'

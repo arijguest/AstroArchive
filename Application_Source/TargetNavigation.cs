@@ -7,13 +7,22 @@ using System.Threading;
 namespace AstroArchive {
  public static class TargetNavigation {
   public static readonly string[] Groups={"Solar system","Nebulae","Galaxies","Star clusters","Stars","Meteors","Other targets","Calibration","Unidentified"};
+  // Every comet is listed under one Comets entry; its captures stay grouped by comet inside it.
+  public const string CometsSection="Comets";
+  // Called for every capture while filtering, so each distinct target name is classified once.
+  static readonly System.Collections.Concurrent.ConcurrentDictionary<string,bool> comets=new System.Collections.Concurrent.ConcurrentDictionary<string,bool>(StringComparer.Ordinal);
+  public static string Section(string target){return target!=null&&target!=CometsSection&&comets.GetOrAdd(target,CometTargets.IsComet)?CometsSection:target;}
+  // Derived entries that hold several stored targets (Comets) or captures of one body (eclipses).
+  public static bool IsSection(string name){return name==CometsSection||Eclipses.IsSection(name);}
+  // Keeps each target's rows together, in the order its first row appears, without reordering within a target.
+  public static List<T> GroupByTarget<T>(IEnumerable<T> rows,Func<T,string> target){return rows.GroupBy(target,StringComparer.OrdinalIgnoreCase).SelectMany(g=>g).ToList();}
   static readonly Lazy<Dictionary<string,string>> types=new Lazy<Dictionary<string,string>>(()=>Catalog.Objects.GroupBy(o=>o.Name).ToDictionary(g=>g.Key,g=>g.First().Type,StringComparer.OrdinalIgnoreCase));
   public static string Group(string name){
    if(name=="All targets")return "";string target=Catalog.CanonicalTarget(name);string type;
    if(target.Equals("Unknown",StringComparison.OrdinalIgnoreCase))return "Unidentified";
    if(target.Equals("Meteor",StringComparison.OrdinalIgnoreCase))return "Meteors";
    if(target=="Calibration")return "Calibration";
-   if(Eclipses.IsSection(name))return "Solar system";
+   if(IsSection(name))return "Solar system";
    if(Regex.IsMatch(target,@"^(Sun|Solar|Moon|Lunar|Mercury|Venus|Mars|Jupiter|Saturn|Uranus|Neptune|Pluto|Planetary)$",RegexOptions.IgnoreCase))return "Solar system";
    if(types.Value.TryGetValue(target,out type)){
     switch(type){
@@ -31,10 +40,12 @@ namespace AstroArchive {
    return hints.Count==1?hints.First():"Other targets";
   }
   public static List<TargetSummary> Build(IEnumerable<Frame> frames,CancellationToken token=default(CancellationToken)){return Build(frames,null,token);}
+  // Edited images and other lists without derived sections list every comet under Comets.
+  public static List<TargetSummary> BuildSections(IEnumerable<Frame> frames,CancellationToken token=default(CancellationToken)){return Build(frames,f=>Section(f.Target),token);}
   // The section key lets derived groups (eclipses) list captures apart from their stored target.
   public static List<TargetSummary> Build(IEnumerable<Frame> frames,Func<Frame,string> section,CancellationToken token=default(CancellationToken)){
    var rows=frames.ToList();var result=new List<TargetSummary>{Summarize("All targets",rows,token)};
-   result.AddRange(rows.GroupBy(section??(f=>f.Target)).Select(g=>Summarize(g.Key,g,token)).OrderBy(t=>Array.IndexOf(Groups,t.Group)).ThenBy(t=>CometTargets.IsComet(t.Name)?1:0).ThenBy(t=>t.DisplayName,StringComparer.OrdinalIgnoreCase).ThenBy(t=>t.Name,StringComparer.OrdinalIgnoreCase));token.ThrowIfCancellationRequested();return result;
+   result.AddRange(rows.GroupBy(section??(f=>f.Target)).Select(g=>Summarize(g.Key,g,token)).OrderBy(t=>Array.IndexOf(Groups,t.Group)).ThenBy(t=>t.Name==CometsSection||CometTargets.IsComet(t.Name)?1:0).ThenBy(t=>t.DisplayName,StringComparer.OrdinalIgnoreCase).ThenBy(t=>t.Name,StringComparer.OrdinalIgnoreCase));token.ThrowIfCancellationRequested();return result;
   }
   static Match CometName(string name){return Regex.Match(name??"",@"^([CPDXAI]\s*/?\s*\d{4}\s*[A-Z]{1,2}\d{1,3}\b|\d{1,4}\s*[PDI]\b)\s*[/ -]?\s*(.*)$",RegexOptions.IgnoreCase|RegexOptions.CultureInvariant);}
   public static string ShortName(string name){

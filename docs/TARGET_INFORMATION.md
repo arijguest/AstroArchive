@@ -55,6 +55,44 @@ Comets have no fixed sky position, so their pages have no map, and they cite JPL
 instead of SIMBAD. The pack has no comet images yet; a comet card shows one as soon
 as the pack carries an approved image for it.
 
+## Comets, eclipse pages and Stellarium in 3.2.8
+
+Every comet target sits under one **Comets** entry in Repository and Edited. Selecting
+it shows all comet files, each comet's files kept together in the current sort order
+(`TargetNavigation.Section` and `GroupByTarget`). The Comets information page has a
+general overview, the Hale-Bopp image, imaging notes and a **Your comets** list with
+file counts; choosing a comet opens its usual page with an **All comets** button back.
+Comets has no rename or target-card actions, like the eclipse sections.
+
+Solar Eclipse and Lunar Eclipse sections open their own pages (overview, fun fact,
+imaging notes and an image), with the original capture note beneath the heading. An
+older pack without these pages falls back to the Sun or Moon page.
+
+Imaging notes are a full section, not a disclosure. Surface gravity reads, for
+example, "2.53 g (24.79 m/s²)" with 1 g = 9.80665 m/s². Pages with one target have
+**Open in Stellarium**: deep-sky objects open at their J2000 position framed to about
+three times their size; the Sun, Moon, planets and comets are selected by name and
+tracked at Stellarium's current time (comets as "12P/Pons-Brooks" or
+"C/2023 A3 (Tsuchinshan-ATLAS)"); eclipse pages show the Sun or Moon. As in the
+preview header, a running Stellarium receives the view through Remote Control, an
+installed one is started with a script, and otherwise Stellarium Web opens.
+
+### Pack overrides
+
+`scripts/target-info-overrides/overrides.json` and its `assets/` hold reviewed
+changes applied on top of the database projection by `scripts/target_info_overrides.py`
+(called by `build-target-info.py`, or run directly on an existing pack once). In 3.2.8
+they replace the Sun's granulation close-up with a full-disk SDO/HMI white-light image
+(public domain), replace the Elephant's Trunk (IC 1396A) image with Astropizza's 2025
+Hubble-palette image (CC BY-SA 4.0), add ESA/Hubble's NGC 7640 image (CC BY 4.0) and
+change its type to barred spiral galaxy, and add Solar Eclipse (Michael S Adler,
+CC BY-SA 4.0), Lunar Eclipse (Alfredo Garcia, Jr, CC BY-SA 2.0) and Comets
+(E. Kolmhofer, H. Raab, Johannes-Kepler-Observatory, CC BY-SA 3.0) pages. Each file
+page and licence was checked on 13 October 2026; the thumbnails are Commons 960-pixel
+previews shown at about 600 pixels and re-encoded as JPEG. Credits use the same
+fields and display as the other thumbnails. The pack now has 330 image assignments
+over 318 files, and `index.json` records `runtime_overrides`.
+
 ## Offline data
 
 `Application_Source/TargetInfo.zip` is a runtime projection of AstroArchive database
