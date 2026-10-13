@@ -2349,3 +2349,4 @@ blue magnitude {0}	青色光度 {0}等
 {0} light-years	{0}光年
 {0} million light-years	{0}百万光年
 {0} billion light-years	{0}十億光年
+Distance	距離

@@ -12,7 +12,8 @@ namespace AstroArchive {
   public string ObjectLabel{get{return ImageClass=="Meteor"?"Meteor":string.IsNullOrEmpty(Object)?"Unknown":Catalog.Label(Object);}}
   public string ObjectId{get{return ImageClass=="Meteor"?"":Catalog.ObjectId(Object);}}
   public string TargetName{get{string common=Catalog.CommonName(Object);return ImageClass=="Meteor"?"Meteor":common.Length>0?common:ObjectId.Length==0?ObjectLabel:"";}}
-  public string TotalExposureText{get{return TotalExposure.HasValue?TotalExposure.Value.ToString("0.###",CultureInfo.InvariantCulture)+" s":"Unknown";}}
+  // Totals of a minute or more read as minutes, or hours and minutes, like Stack exposures in the repository.
+  public string TotalExposureText{get{return !TotalExposure.HasValue?"Unknown":TotalExposure.Value>=60?TargetNavigation.Exposure(TotalExposure.Value):TotalExposure.Value.ToString("0.###",CultureInfo.InvariantCulture)+" s";}}
   public string SubExposureText{get{return SubExposure.HasValue?SubExposure.Value.ToString("0.###",CultureInfo.InvariantCulture)+" s":"Unknown / mixed";}}
   public string SubsText{get{return Subs.HasValue?Subs.Value.ToString(CultureInfo.InvariantCulture):"Unknown";}}
   public string FiltersLabel{get{return string.IsNullOrWhiteSpace(Filters)?"Unknown":Filters;}}

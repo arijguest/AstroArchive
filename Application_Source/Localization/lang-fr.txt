@@ -2315,3 +2315,4 @@ blue magnitude {0}	magnitude bleue {0}
 {0} light-years	{0} années-lumière
 {0} million light-years	{0} millions d'années-lumière
 {0} billion light-years	{0} milliards d'années-lumière
+Distance	Distance

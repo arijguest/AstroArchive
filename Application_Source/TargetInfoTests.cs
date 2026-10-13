@@ -29,6 +29,15 @@ namespace AstroArchive {
     var halleyOrbit=CometInfo.Orbit("1P");Check(CometInfo.SemiMajorAxis(halleyOrbit)=="17.9 AU"&&CometInfo.PerihelionSpeed(halleyOrbit)=="55.1 km/s"&&!CometInfo.ShowsEscapeSpeed(halleyOrbit)&&!CometInfo.HasSemiMajorAxis(CometInfo.Orbit("C/1996 B2"))&&CometInfo.ShowsEscapeSpeed(CometInfo.Orbit("2I"))&&CometInfo.EscapeSpeed(CometInfo.Orbit("2I"))=="32.3 km/s","Comet derived orbit facts wrong");
    });
    var catalog=new TargetInfoCatalog(Path.Combine(AppDomain.CurrentDomain.BaseDirectory,"TargetInfo.zip"));
+   Test("Galaxy distances come from catalogue redshifts and read as approximate light-years",()=>{
+    Func<double,string,TargetInfoMeasurement> m=(v,b)=>new TargetInfoMeasurement{field="Distance",unit="ly",value=v,band=b};
+    Check(TargetInfoPresentation.Distance(m(142000000,"redshift"))=="≈ 140 million light-years","Mid-range redshift distance wrong: "+TargetInfoPresentation.Distance(m(142000000,"redshift")));
+    Check(TargetInfoPresentation.Distance(m(4230000,"redshift"))=="≈ 4.2 million light-years"&&TargetInfoPresentation.Distance(m(42300000,null))=="42 million light-years","Small distance formatted wrongly");
+    Check(TargetInfoPresentation.Distance(m(1370000000,"redshift"))=="≈ 1.4 billion light-years"&&TargetInfoPresentation.Distance(m(1500,null))=="1,500 light-years","Large or tiny distance formatted wrongly");
+    var card=catalog.ById("M77",CancellationToken.None).Cards.Single();var distance=(card.measurements??new TargetInfoMeasurement[0]).FirstOrDefault(x=>x.field=="Distance");
+    Check(distance!=null&&distance.band=="redshift"&&distance.value>1e7&&distance.value<2e8&&!string.IsNullOrEmpty(distance.qualifier),"A galaxy with a catalogue redshift lacks its approximate distance");
+    Check(!(catalog.ById("M31",CancellationToken.None).Cards.Single().measurements??new TargetInfoMeasurement[0]).Any(x=>x.field=="Distance"),"A blueshifted galaxy was given a redshift distance");
+   });
    Test("Thumbnail credits contain creators and acknowledgements without Commons page templates",()=>{
     var iris=catalog.ById("NGC 7023",CancellationToken.None).Cards.Single().image;
     Check(iris.creator=="Andreigusan"&&iris.attribution.StartsWith("Andreigusan — ")&&iris.licence=="CC-BY-SA-4.0","Iris thumbnail credit or licence is wrong");
@@ -118,8 +127,8 @@ namespace AstroArchive {
     var jupiter=Stellarium.ForCard(catalog.Find("Jupiter",CancellationToken.None).Cards.Single());string script=Stellarium.Script(jupiter);
     Check(jupiter.ByName&&script.Contains("core.selectObjectByName(\"Jupiter\", true);")&&script.Contains("setFlagTracking(true)")&&!script.Contains("moveToRaDecJ2000"),"Planet not opened by name");
     Check(Stellarium.WebUrl(jupiter).StartsWith(Stellarium.WebAddress+"skysource/Jupiter?"),"Stellarium Web did not select the planet");
-    var comet=Stellarium.ForCard(catalog.Find("C/2023 A3 (Tsuchinshan-ATLAS)",CancellationToken.None).Cards.Single());Check(comet!=null&&comet.ByName&&comet.Name=="C/2023 A3 (Tsuchinshan-ATLAS)"&&Stellarium.ForCard(catalog.Find("12P/Pons-Brooks",CancellationToken.None).Cards.Single()).Name=="12P/Pons-Brooks"&&Stellarium.ForCard(catalog.Find("Halley",CancellationToken.None).Cards.Single()).Name=="1P/Halley","Comet not opened by its Stellarium name");
-    Check(Stellarium.ForCard(catalog.Find(Eclipses.SolarSection,CancellationToken.None).Cards.Single()).Name=="Sun"&&Stellarium.ForCard(catalog.Find(Eclipses.LunarSection,CancellationToken.None).Cards.Single()).Name=="Moon","Eclipse pages should show the eclipsed body");
+    Check(Stellarium.ForCard(catalog.Find("C/2023 A3 (Tsuchinshan-ATLAS)",CancellationToken.None).Cards.Single())==null&&Stellarium.ForCard(catalog.Find("12P/Pons-Brooks",CancellationToken.None).Cards.Single())==null&&Stellarium.ForCard(catalog.Find("Halley",CancellationToken.None).Cards.Single())==null,"Comet pages should not offer Stellarium");
+    Check(Stellarium.ForCard(catalog.Find(Eclipses.SolarSection,CancellationToken.None).Cards.Single())==null&&Stellarium.ForCard(catalog.Find(Eclipses.LunarSection,CancellationToken.None).Cards.Single())==null,"Eclipse pages should not open Stellarium");
     Check(Stellarium.ForCard(catalog.Find(TargetNavigation.CometsSection,CancellationToken.None).Cards.Single())==null&&Stellarium.ForCard(CometInfo.GroupCard())==null&&Stellarium.ForCard(null)==null,"A group page offered a single Stellarium target");
     Check(Stellarium.Script(new StellariumView{ByName=true,Name="Bad \"name\"\n"}).Contains("\"Bad \\\"name\\\" \""),"Script name not escaped");
    });

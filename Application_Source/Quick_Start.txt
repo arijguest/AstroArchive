@@ -511,7 +511,9 @@ or coordinates. Empty or unchanged fields keep their values; files are not rewri
 - `120x60s` means 120 subs of 60 seconds; `30s40` means sub exposure / gain.
 - Seestar's `Stacked_36_NGC 7000_5.0s_…` means 36 subs of 5 seconds: 180 seconds in total.
 - DWARF's `stacked-16` is bit depth. For recognised DWARF stacks, total integration divided
-  by the filename's per-sub exposure gives a count only when it is a whole number.
+  by the per-sub exposure gives a count only when it is a whole number. The per-sub
+  exposure comes from the filename (`30s40`) or, when the name omits it, from the
+  session's `shotsInfo.json` (`exp`); a `shotsStacked` value must agree with the total.
 - Starless and Stars only labels are recognised.
 
 ## Which value wins

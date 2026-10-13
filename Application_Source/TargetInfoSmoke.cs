@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -16,7 +17,8 @@ namespace AstroArchive {
    if(state.View.CurrentId!=expected)throw new Exception("Target information did not load: "+expected);
   }
   void CheckInfoReadingOrder(TargetInfoView view){
-   string[] order={"ObjectTitle","ObjectDetails","OverviewHeading","OverviewText","ObjectImage","ImageCredits","FunFact","ParametersHeading","Sources"};
+   var order=new List<string>{"ObjectTitle","ObjectDetails","OverviewHeading","OverviewText","ObjectImage","ImageCredits","FunFact","ParametersHeading","Sources"};
+   if(PopupChildren<FrameworkElement>(view).Any(e=>e.Name=="ImageCaption"))order.Insert(order.IndexOf("ImageCredits"),"ImageCaption");
    double bottom=double.NegativeInfinity;
    foreach(string name in order){
     var element=PopupChildren<FrameworkElement>(view).Single(e=>e.Name==name);double top=element.TranslatePoint(new Point(0,0),view).Y;
@@ -38,10 +40,14 @@ namespace AstroArchive {
     if(!(shortCredit is TextBlock)||!shortCredit.IsVisible)throw new Exception("Short image credit is hidden behind a disclosure.");
     CheckInfoReadingOrder(view);Capture(Path.Combine(output,"AstroArchive_Info_Short_Credits.png"));
     string attribution=string.Join(" ",Enumerable.Repeat("A collaboration of observatories and contributing image processors.",5));
-    card.image=new TargetInfoImage{creator="Example Observatory",attribution=attribution,modifications="Cropped and colour adjusted.",licence="CC0",file_page_url=original.file_page_url,licence_url=original.licence_url};
+    card.image=new TargetInfoImage{creator="Example Observatory",attribution=attribution,modifications="Cropped and colour adjusted.",representation="Example processed colour image.",licence="CC0",file_page_url=original.file_page_url,licence_url=original.licence_url};
     view.ShowCard(card);PumpPopupLayout();CheckInfoReadingOrder(view);
+    if(!PopupChildren<FrameworkElement>(view).Any(e=>e.Name=="ImageCaption"))throw new Exception("The image description is missing under the image.");
     var credit=PopupChildren<Expander>(view).Single(e=>e.Name=="ImageCredits");
     if(credit.IsExpanded||((TextBlock)credit.Header).Text!=Localization.T("Credits"))throw new Exception("Long credits are not collapsed under Credits.");
+    var arrow=PopupChildren<System.Windows.Shapes.Path>(credit).Single(e=>e.Name=="DisclosureArrow");var header=(TextBlock)credit.Header;
+    double arrowMiddle=arrow.TranslatePoint(new Point(0,arrow.ActualHeight/2),view).Y,headerMiddle=header.TranslatePoint(new Point(0,header.ActualHeight/2),view).Y;
+    if(Math.Abs(arrowMiddle-headerMiddle)>1)throw new Exception("The Credits arrow and label are not vertically aligned.");
     credit.IsExpanded=true;PumpPopupLayout();credit.BringIntoView();PumpPopupLayout();
     var labels=PopupChildren<TextBlock>(credit).Select(t=>t.Text).ToList();
     if(!labels.Contains(attribution)||!labels.Contains(card.image.modifications)||!PopupChildren<TextBlock>(credit).Any(t=>t.Inlines.OfType<Hyperlink>().Any()))throw new Exception("Expanded credits lost attribution, processing notes or links.");
@@ -133,10 +139,13 @@ namespace AstroArchive {
     if(member==null||!PopupChildren<Image>(libraryInfo.View).Any(i=>i.Source is BitmapSource)||PopupChildren<Button>(libraryInfo.View).Any(b=>b.Name=="OpenInStellarium"))throw new Exception("Comets page lacks its image or comet list, or offers Stellarium for a group.");
     member.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));WaitForTargetInformation(libraryInfo,"12P");
     var back=PopupChildren<Button>(libraryInfo.View).SingleOrDefault(b=>b.Name=="BackToSection");
-    if(back==null||!PopupChildren<Button>(libraryInfo.View).Any(b=>b.Name=="OpenInStellarium"))throw new Exception("A comet read from Comets has no way back or no Stellarium button.");
+    if(back==null||PopupChildren<Button>(libraryInfo.View).Any(b=>b.Name=="OpenInStellarium"))throw new Exception("A comet read from Comets has no way back, or offers Stellarium.");
     back.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));WaitForTargetInformation(libraryInfo,"COMETS");
     stage="eclipse page";libraryInfo.View.ShowCard(targetInformation.Find(Eclipses.SolarSection,CancellationToken.None).Cards.Single());PumpPopupLayout();
     if(!PopupChildren<Image>(libraryInfo.View).Any(i=>i.Source is BitmapSource)||!PopupChildren<TextBlock>(libraryInfo.View).Any(t=>t.Text==Localization.T("IMAGING NOTES")))throw new Exception("Solar eclipse page lacks its image or imaging notes.");
+    if(PopupChildren<Button>(libraryInfo.View).Any(b=>b.Name=="OpenInStellarium"))throw new Exception("The solar eclipse page offers Stellarium.");
+    stage="lunar eclipse page";libraryInfo.View.ShowCard(targetInformation.Find(Eclipses.LunarSection,CancellationToken.None).Cards.Single());PumpPopupLayout();
+    if(PopupChildren<Button>(libraryInfo.View).Any(b=>b.Name=="OpenInStellarium"))throw new Exception("The lunar eclipse page offers Stellarium.");
     stage="Iris credits";var iris=targetInformation.ById("NGC 7023",CancellationToken.None).Cards.Single();libraryInfo.View.ShowCard(iris);PumpPopupLayout();
     if(iris.image.creator!="Andreigusan"||PopupChildren<TextBlock>(libraryInfo.View).Any(t=>t.Text.Contains("featured picture")))throw new Exception("Contaminated Iris thumbnail credit was rendered.");
     stage="comet page";libraryInfo.View.ShowCard(targetInformation.Find("C/2023 A3 (Tsuchinshan-ATLAS)",CancellationToken.None).Cards.Single());PumpPopupLayout();

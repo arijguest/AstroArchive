@@ -91,6 +91,8 @@ namespace AstroArchive {
    if(major!=null)AddFact(facts,"Apparent size",major.value.ToString("0.##",CultureInfo.InvariantCulture)+(minor==null?"":" × "+minor.value.ToString("0.##",CultureInfo.InvariantCulture))+" arcmin",Evidence(card,major));
    var magnitude=measurements.FirstOrDefault(m=>m.field=="V-Mag")??measurements.FirstOrDefault(m=>m.field=="B-Mag");
    if(magnitude!=null)AddFact(facts,Localization.F("Magnitude ({0})",magnitude.field.Substring(0,1)),magnitude.value.ToString("0.##",CultureInfo.InvariantCulture),Evidence(card,magnitude));
+   var distance=measurements.FirstOrDefault(m=>m.field=="Distance");
+   if(distance!=null)AddFact(facts,"Distance",TargetInfoPresentation.Distance(distance),Evidence(card,distance));
    AddParameters(facts,card);
    string imaging=TargetInfoPresentation.Imaging(card);
    // Imaging notes are always shown in full, not behind a disclosure.
@@ -148,6 +150,8 @@ namespace AstroArchive {
    string credit=TargetInfoPresentation.Credit(image);string who=!string.IsNullOrWhiteSpace(image.creator)?image.creator:credit.Length>0&&credit.Length<=60&&!credit.Contains("://")?credit:"Wikimedia Commons";
    string attribution=(image.attribution??"").Trim(),modifications=(image.modifications??"").Trim();
    string full=(attribution+"\n"+modifications).Trim();
+   // The short description sits directly under the image; the credits follow it.
+   string caption=TargetInfoPresentation.Caption(image.representation);if(caption.Length>0){var described=Data(caption,"Muted","UiFontCaption");described.Name="ImageCaption";described.TextAlignment=TextAlignment.Center;content.Children.Add(described);}
    var line=Text("","Muted","UiFontCaption");line.TextAlignment=TextAlignment.Center;line.ToolTip=Data(full,"Text","UiFontSmall");
    line.Inlines.Add(new Run(Localization.T("Image:")+" "));line.Inlines.Add(Linked(who,image.file_page_url));
    if(!string.IsNullOrWhiteSpace(image.licence)){line.Inlines.Add(new Run(" · "));line.Inlines.Add(Linked(image.licence,image.licence_url));}
@@ -158,7 +162,6 @@ namespace AstroArchive {
     if(modifications.Length>0)credits.Children.Add(Data(modifications,"Muted","UiFontCaption"));
     var disclosure=Disclosure("Credits",credits);disclosure.Name="ImageCredits";content.Children.Add(disclosure);
    }else{line.Name="ImageCredits";content.Children.Add(line);}
-   string caption=TargetInfoPresentation.Caption(image.representation);if(caption.Length>0)content.Children.Add(Data(caption,"Muted","UiFontCaption"));
   }
   // Sections share a quiet caption and divider so the pane reads as distinct parts.
   static StackPanel Section(string title,bool first=false){
@@ -185,7 +188,8 @@ namespace AstroArchive {
   static string MeasurementLabel(string field){switch(field){case "PosAng":return "Position angle";case "SurfBr":return "Surface brightness";case "RadVel":return "Radial velocity";case "Redshift":return "Redshift";default:return field;}}
   static string Hours(double degrees){int seconds=(int)Math.Round(degrees/15*3600)%86400;return (seconds/3600).ToString("00")+"h "+(seconds%3600/60).ToString("00")+"m "+(seconds%60).ToString("00")+"s";}
   static string Evidence(TargetInfoCard card,TargetInfoMeasurement m){var citation=(card.citations??new TargetInfoCitation[0]).FirstOrDefault(c=>c.id==m.citation_id);return m.qualifier+(citation==null?"":"\n"+citation.source_title+"\n"+citation.source_url);}
-  static Expander Disclosure(string title,StackPanel panel){return new Expander{Header=Text(title,"Muted"),Content=panel,Margin=new Thickness(0,2,0,6),HorizontalContentAlignment=HorizontalAlignment.Stretch};}
+  // The header carries no bottom margin so its text centres on the disclosure arrow.
+  static Expander Disclosure(string title,StackPanel panel){var header=Text(title,"Muted");header.Margin=new Thickness(0);return new Expander{Header=header,Content=panel,Margin=new Thickness(0,2,0,6),HorizontalContentAlignment=HorizontalAlignment.Stretch};}
   internal static Inline Linked(string label,string url){
    Uri uri;if(!Uri.TryCreate(url,UriKind.Absolute,out uri)||(uri.Scheme!="https"&&uri.Scheme!="http"))return new Run(label);
    var link=new Hyperlink(new Run(label)){NavigateUri=uri,ToolTip=url};link.SetResourceReference(Hyperlink.ForegroundProperty,"Accent");link.RequestNavigate+=(s,e)=>{try{Process.Start(new ProcessStartInfo(uri.AbsoluteUri){UseShellExecute=true});}catch(System.ComponentModel.Win32Exception){}e.Handled=true;};return link;

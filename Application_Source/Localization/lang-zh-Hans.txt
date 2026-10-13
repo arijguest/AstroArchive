@@ -2348,3 +2348,4 @@ blue magnitude {0}	蓝星等 {0}
 {0} light-years	{0} 光年
 {0} million light-years	{0} 百万光年
 {0} billion light-years	{0} 十亿光年
+Distance	距离

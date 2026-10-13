@@ -2342,3 +2342,4 @@ blue magnitude {0}	magnitud azul {0}
 {0} light-years	{0} años luz
 {0} million light-years	{0} millones de años luz
 {0} billion light-years	{0} mil millones de años luz
+Distance	Distancia

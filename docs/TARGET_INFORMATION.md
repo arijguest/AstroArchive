@@ -71,9 +71,9 @@ older pack without these pages falls back to the Sun or Moon page.
 Imaging notes are a full section, not a disclosure. Surface gravity reads, for
 example, "2.53 g (24.79 m/s²)" with 1 g = 9.80665 m/s². Pages with one target have
 **Open in Stellarium**: deep-sky objects open at their J2000 position framed to about
-three times their size; the Sun, Moon, planets and comets are selected by name and
-tracked at Stellarium's current time (comets as "12P/Pons-Brooks" or
-"C/2023 A3 (Tsuchinshan-ATLAS)"); eclipse pages show the Sun or Moon. As in the
+three times their size; the Sun, Moon and planets are selected by name and
+tracked at Stellarium's current time. The eclipse pages and comet pages have no
+button. As in the
 preview header, a running Stellarium receives the view through Remote Control, an
 installed one is started with a script, and otherwise Stellarium Web opens.
 
@@ -166,6 +166,17 @@ for fast motion/long focal lengths, followed by inspection for trailing. They al
 give the one-pixel drift limit from image scale and apparent angular motion. Notes
 are shown only when guidance exists; empty entries have no disclosure. Engine and
 Windows UI checks cover repaired Iris credits and empty imaging-note entries.
+
+Deep-sky pages show an approximate **Distance** in light-years when the catalogue
+redshift is large enough to outweigh the galaxy's own motion (recession velocity of
+at least 1,000 km/s). `scripts/target_info_distances.py` calculates it for a flat
+universe (H0 = 70 km/s/Mpc, matter density 0.3) from the OpenNGC redshift already in
+the pack, so no other catalogue is involved. The value carries a "≈" and its tooltip
+gives the redshift and assumptions. Nearby galaxies, nebulae and star clusters show
+no distance, because the pack holds no licensed measured distance for them.
+
+Below the image, the short image description now comes first and the Credits
+disclosure follows, with its arrow centred on the label.
 
 Verified on Windows on 13 October 2026: the credit audit, focused engine and
 installer checks, and information-pane rendering in all seven languages passed

@@ -2317,3 +2317,4 @@ blue magnitude {0}	blaue Helligkeit {0} mag
 {0} light-years	{0} Lichtjahre
 {0} million light-years	{0} Millionen Lichtjahre
 {0} billion light-years	{0} Milliarden Lichtjahre
+Distance	Entfernung
