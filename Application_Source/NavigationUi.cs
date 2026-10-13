@@ -150,7 +150,7 @@ namespace AstroArchive {
             L("ImportPolicyLabel").FontWeight = cleanup ? FontWeights.SemiBold : FontWeights.Normal;
             L("RateLabel").Visibility = RepositoryOperationBlocked ? Visibility.Visible : Visibility.Collapsed;
             ((ProgressBar)Window.FindName("ProgressBar")).Visibility = RepositoryOperationBlocked ? Visibility.Visible : Visibility.Collapsed;
-
+            ApplyBackgroundAvailability();
         }
         void PopulateNavigation(string name) {
             var menu = TopMenu(name);
