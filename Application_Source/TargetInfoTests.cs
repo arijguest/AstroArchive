@@ -119,7 +119,7 @@ namespace AstroArchive {
     Check(jupiter.ByName&&script.Contains("core.selectObjectByName(\"Jupiter\", true);")&&script.Contains("setFlagTracking(true)")&&!script.Contains("moveToRaDecJ2000"),"Planet not opened by name");
     Check(Stellarium.WebUrl(jupiter).StartsWith(Stellarium.WebAddress+"skysource/Jupiter?"),"Stellarium Web did not select the planet");
     Check(Stellarium.ForCard(catalog.Find("C/2023 A3 (Tsuchinshan-ATLAS)",CancellationToken.None).Cards.Single())==null&&Stellarium.ForCard(catalog.Find("12P/Pons-Brooks",CancellationToken.None).Cards.Single())==null&&Stellarium.ForCard(catalog.Find("Halley",CancellationToken.None).Cards.Single())==null,"Comet pages should not offer Stellarium");
-    Check(Stellarium.ForCard(catalog.Find(Eclipses.SolarSection,CancellationToken.None).Cards.Single())==null&&Stellarium.ForCard(catalog.Find(Eclipses.LunarSection,CancellationToken.None).Cards.Single()).Name=="Moon","Only the lunar eclipse page should open Stellarium, on the Moon");
+    Check(Stellarium.ForCard(catalog.Find(Eclipses.SolarSection,CancellationToken.None).Cards.Single())==null&&Stellarium.ForCard(catalog.Find(Eclipses.LunarSection,CancellationToken.None).Cards.Single())==null,"Eclipse pages should not open Stellarium");
     Check(Stellarium.ForCard(catalog.Find(TargetNavigation.CometsSection,CancellationToken.None).Cards.Single())==null&&Stellarium.ForCard(CometInfo.GroupCard())==null&&Stellarium.ForCard(null)==null,"A group page offered a single Stellarium target");
     Check(Stellarium.Script(new StellariumView{ByName=true,Name="Bad \"name\"\n"}).Contains("\"Bad \\\"name\\\" \""),"Script name not escaped");
    });

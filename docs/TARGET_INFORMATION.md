@@ -72,8 +72,8 @@ Imaging notes are a full section, not a disclosure. Surface gravity reads, for
 example, "2.53 g (24.79 m/s²)" with 1 g = 9.80665 m/s². Pages with one target have
 **Open in Stellarium**: deep-sky objects open at their J2000 position framed to about
 three times their size; the Sun, Moon and planets are selected by name and
-tracked at Stellarium's current time; the lunar eclipse page shows the Moon. The
-solar eclipse page and comet pages have no button. As in the
+tracked at Stellarium's current time. The eclipse pages and comet pages have no
+button. As in the
 preview header, a running Stellarium receives the view through Remote Control, an
 installed one is started with a script, and otherwise Stellarium Web opens.
 

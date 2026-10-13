@@ -39,7 +39,7 @@ namespace AstroArchive {
    return Math.Max(MinField,Math.Min(MaxField,side*FieldMargin));
   }
   // A target information page: deep-sky objects open at their J2000 catalogue position, framed to their size;
-  // the Sun, Moon and planets open by name. The lunar eclipse page shows the Moon; the solar eclipse page, comets and groups offer none.
+  // the Sun, Moon and planets open by name. Eclipse pages, comets and groups offer none.
   public static StellariumView ForCard(TargetInfoCard card){
    if(card==null||string.IsNullOrWhiteSpace(card.id))return null;
    var measurements=card.measurements??new TargetInfoMeasurement[0];
@@ -49,9 +49,8 @@ namespace AstroArchive {
     return new StellariumView{RA=ra.value,Dec=dec.value,FieldDegrees=field??DefaultFieldDegrees,Name=card.id.Trim()};
    }
    string id=card.id.Trim().ToUpperInvariant();
-   // The solar eclipse page and comet pages offer no Stellarium button.
-   if(id==EclipseCard(true))return null;
-   if(id==EclipseCard(false))return Body("Moon",2);
+   // Eclipse pages and comet pages offer no Stellarium button.
+   if(id==EclipseCard(true)||id==EclipseCard(false))return null;
    if(card.domain!="solar_system"||CometInfo.IsComet(card))return null;
    return Body(card.name??card.id,id=="SUN"||id=="MOON"?2:0.5);
   }
