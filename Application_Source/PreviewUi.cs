@@ -55,7 +55,7 @@ namespace AstroArchive {
      C("StretchMode").IsEnabled=!data.SkipStretch;if(data.SkipStretch){choosingStretch=true;C("StretchMode").SelectedItem="Linear";choosingStretch=false;}
      previewViewport.SetImage(bitmap,reload&&firstPaint);firstPaint=false;UpdateTargetOverlay();L("PreviewMessage").Visibility=Visibility.Collapsed;L("PreviewInfo").Text=data.SourceWidth+" × "+data.SourceHeight+" pixels";L("PreviewInfo").ToolTip=data.Description+" · "+data.DisplayMode+(provisional?" · applying selected stretch":"")+(data.SourceWidth>data.Width?" · sampled preview":"");PreviewSize();
     });
-   }catch(OperationCanceledException){}catch(Exception error){if(!Window.Dispatcher.HasShutdownStarted)Window.Dispatcher.Invoke(new Action(()=>{if(generation!=previewGeneration)return;if(((Image)Window.FindName("PreviewImage")).Source==null)previewViewport.BeginLoading();PreviewMessage("Preview unavailable\n\n"+error.Message);L("PreviewInfo").Text=ScientificPreview(path)?"FITS / XISF preview":"RAW formats require a compatible Windows image codec.";}));}
+   }catch(OperationCanceledException){}catch(Exception error){if(!Window.Dispatcher.HasShutdownStarted)Window.Dispatcher.Invoke(new Action(()=>{if(generation!=previewGeneration)return;if(((Image)Window.FindName("PreviewImage")).Source==null)previewViewport.BeginLoading();L("PreviewMessage").ToolTip=AppErrorReporting.Diagnostics(error,"Capture preview");PreviewMessage("Preview unavailable\n\n"+error.Message);L("PreviewInfo").Text=ScientificPreview(path)?"FITS / XISF preview":"RAW formats require a compatible Windows image codec.";}));}
   }
   void PreviewSize(){previewViewport.Resize();}
   void SmokePreview(string output){

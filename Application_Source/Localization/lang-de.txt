@@ -2091,3 +2091,8 @@ Targets below the horizon at the predicted capture time usually need the capture
 # Information pane, 3.2.6
 Credits	Bildnachweise
 FUN FACT	WISSENSWERTES
+
+# Capture checks, 3.2.6
+Sun obscured	Sonne verdeckt
+Check capture metadata	Aufnahmemetadaten prüfen
+Suspected obstruction	Mögliche Abschattung

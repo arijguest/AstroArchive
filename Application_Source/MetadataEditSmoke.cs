@@ -24,6 +24,7 @@ namespace AstroArchive {
       var editor=new MetadataEditor(Window,batch?new List<Frame>{first,second}:new List<Frame>{first});
       try{
        editor.Form.Window.Show();PumpPopupLayout();
+       if(editor.CaptureTown==null||!editor.CaptureTown.IsReadOnly||!editor.CaptureTown.IsVisible)throw new Exception("Capture town choice is missing from Edit metadata > Capture.");
        if(editor.Model.Patch().Count!=0)throw new Exception("Opening metadata editor generated overrides.");
        foreach(var entry in editor.Inputs){var box=entry.Value as TextBox;var combo=entry.Value as ComboBox;string shown=box!=null?box.Text:Convert.ToString(combo.SelectedItem);var value=editor.Model[entry.Key];string expected=value.Field.Options.Length>0&&value.Initial.Length==0?value.KeepLabel:value.Initial;if(shown!=expected)throw new Exception("Current metadata missing: "+entry.Key);Readable(entry.Value.Foreground,entry.Value.Background,mode+" metadata "+entry.Key);}
        if(!batch&&((ComboBox)editor.Inputs["Mount"]).SelectedItem.ToString()!="EQ?")throw new Exception("Unknown mount suggestion hidden.");

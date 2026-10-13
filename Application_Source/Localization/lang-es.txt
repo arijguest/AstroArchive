@@ -2116,3 +2116,8 @@ Targets below the horizon at the predicted capture time usually need the capture
 # Information pane, 3.2.6
 Credits	Créditos
 FUN FACT	DATO CURIOSO
+
+# Capture checks, 3.2.6
+Sun obscured	Sol oculto
+Check capture metadata	Revisar metadatos de captura
+Suspected obstruction	Posible obstrucción

@@ -7,6 +7,15 @@ namespace AstroArchive {
  public partial class Tests {
   static Frame EditableFixture(){return new Frame{OriginalName="Light_M33.fit",Target="M33",TargetEvidence="FITS OBJECT",Telescope="Unit-01",Model="Custom observatory",Camera="Telephoto",Kind="Light",Mount="Unknown",MountEvidence="Not analyzed",Exposure=30.123456789,Gain=0,Temperature=-12.75,Filter="Broadband",Calibration="Custom calibration",BinX=2,BinY=1,TelescopeModel="Reflector",CameraModel="Camera 1",CameraId="Serial 123",Offset=0,ReadoutMode="Slow",Roi="0,0,128,96",OpticalConfiguration="Reducer",TimeZoneId="UTC",LinearData=false,GainUnit="dB",Bayer="RGGB",RegistrationState="Unregistered",CalibrationSteps="Dark, flat",Notes="Recorded notes",Observed="2026-10-06T22:00:00",ObservedUtc="2026-10-06T22:00:00Z",TimeSource="FITS",Facts=new Dictionary<string,MetadataFact>{{"Exposure",new MetadataFact{Value="30.123456789",Raw="EXPTIME=30.123456789",Source="FITS header",Unit="s"}}}};}
   static void MetadataEditingTests(){
+   Test("Capture town is staged with metadata, supports batch edits and resets",()=>{
+    var a=EditableFixture();var b=a.Clone();string original=Util.Serialize(a);var model=new MetadataEditing(new[]{a,b});
+    var city=new ObservingCity{Id=1,Name="Eclipse site",Latitude=25.29,Longitude=-104.14};model.SetCaptureCity(city);
+    Check(model.Patch().Count==1&&Util.Serialize(a)==original,"Choosing a capture town saved before metadata acceptance");
+    var changed=model.Patch().Apply(a);Check(changed.CaptureCityId==1&&CaptureSite.HasChoice(changed)&&changed.Facts["CaptureLatitude"].Source=="User","Metadata patch lost town choice or provenance");
+    Check(model.Patch().Apply(b).CaptureLongitude==-104.14,"Batch town selection did not apply consistently");
+    model.ResetCaptureSite();Check(model.Patch().Count==0,"Reset changes retained a pending town choice");
+    model.SetCaptureCity(null);Check(!CaptureSite.HasChoice(model.Patch().Apply(changed)),"Default location did not clear the override");
+   });
    Test("Single metadata editor populates every editable value, including zero and custom choices",()=>{
     var f=EditableFixture();var model=new MetadataEditing(new[]{f});
     foreach(var value in model.Values)Check(!value.Mixed&&value.Initial.Length>0&&!value.Changed,"Missing or dirty initial field: "+value.Field.Key);

@@ -14,6 +14,7 @@ namespace AstroArchive {
  public static class QualityScorer {
   public const int MinimumCohort=8;
   public const double WeightFwhm=0.35,WeightSnr=0.25,WeightStars=0.20,WeightEcc=0.20;
+  public const double WeightObstruction=0.30;
   public const double WeightDetail=0.40,WeightLimb=0.30,WeightDiscSnr=0.30;
   public const double SoftFraction=0.02,SoftRatio=1.25,ClipCap=40,ClipShare=0.02;
   static readonly string[] Ceilings={"1","255","1023","4095","16383","65535"};
@@ -61,14 +62,21 @@ namespace AstroArchive {
     }
     {double zs=cohort&&stS.Count>=MinimumCohort?Z(Math.Log(1+m.Stars),stS,false):(Math.Log(1+m.Stars/mp)-Math.Log(1+150))/0.8;terms.Add(new[]{WeightStars,Logistic(zs)});}
     if(Finite(m.Snr)&&m.Snr>0){double zn=cohort&&snS.Count>=MinimumCohort?Z(Math.Log(Math.Max(m.Snr,0.1)),snS,false):(Math.Log(Math.Max(m.Snr,0.1))-Math.Log(25))/0.8;terms.Add(new[]{WeightSnr,Logistic(zn)});}
-    double score=Combine(terms);if(!haveShape)score=Math.Min(score,30);
+    double obstruction=Finite(m.Obstruction)?Math.Max(0,Math.Min(1,m.Obstruction)):0;
+    if(Finite(m.Obstruction))terms.Add(new[]{WeightObstruction,100*Math.Pow(1-obstruction,3)});
+    double score=Combine(terms);
+    // Absolute loss of usable field remains a penalty even if every comparison
+    // frame has the same obstruction; sharp surviving stars cannot compensate.
+    if(obstruction>=0.25)score=Math.Min(score,35);else if(obstruction>=0.10)score=Math.Min(score,60);
+    if(!haveShape)score=Math.Min(score,30);
     o.Score=score;
     // Flags
     var flags=new List<string>();string hint="";
-    bool clouded=m.Status==QualityStatus.TooFewStars||(cohort&&p90Stars>0&&m.Stars<0.5*p90Stars);
+    bool clouded=obstruction<0.03&&(m.Status==QualityStatus.TooFewStars||(cohort&&p90Stars>0&&m.Stars<0.5*p90Stars));
     bool soft=haveShape&&(m.Fwhm/m.Width>SoftFraction||(cohort&&Finite(p10)&&m.Fwhm>SoftRatio*p10));
     bool trailed=haveShape&&(m.Ecc>0.65||(cohort&&ecS.Count>=MinimumCohort&&Z(m.Ecc,ecS,false)>3&&m.Ecc>0.5));
     bool bright=Finite(m.Gradient)&&m.Gradient>0.6||(cohort&&bg.Count>=MinimumCohort&&Finite(m.Bg)&&Z(m.Bg,bgS,false)>3);
+    if(obstruction>=0.03)flags.Add("Suspected obstruction");
     if(clouded)flags.Add("Clouded");
     if(soft){flags.Add("Soft");hint=FocusHint(m);}
     if(trailed){flags.Add("Trailed");hint="likely tracking or guiding";}
@@ -84,6 +92,8 @@ namespace AstroArchive {
     d.Append("\nStars ").Append(m.Stars).Append(" detected · ").Append(m.StarsUsed).Append(" measured");
     if(Finite(m.Snr))d.Append(" · SNR ").Append(m.Snr.ToString("0",CultureInfo.InvariantCulture));
     if(Finite(m.Bg))d.Append("\nSky level ").Append(m.Bg.ToString("0",CultureInfo.InvariantCulture)).Append(Finite(m.Gradient)?" · gradient "+(100*m.Gradient).ToString("0",CultureInfo.InvariantCulture)+"%":"");
+    if(Finite(m.Obstruction))d.Append("\nSuspected obstructed field ").Append((100*obstruction).ToString("0",CultureInfo.InvariantCulture)).Append("% · star-poor regions with sharp background boundaries");
+    if(Finite(m.StarCoverage))d.Append("\nSpatial star coverage ").Append((100*m.StarCoverage).ToString("0",CultureInfo.InvariantCulture)).Append("% of expected occupied regions");
     if(flags.Count>0)d.Append("\nFlags: ").Append(o.Flags).Append(hint.Length>0?" ("+hint+")":"");
     o.Detail=d.ToString();
    }

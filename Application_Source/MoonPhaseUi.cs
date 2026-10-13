@@ -46,16 +46,17 @@ namespace AstroArchive {
    panel.Visibility=relevant&&(moon!=null||sky.Eclipse!=null||sky.HasPosition&&sky.HasHorizon)?Visibility.Visible:Visibility.Collapsed;
    if(!relevant)return;
    if(sky.Eclipse!=null)EclipseDetails(facts,sky,frame);
+   if(sky.BodyBelowHorizon)SkyFact(facts,"Check capture metadata",sky.Body+" is predicted below the horizon. Check the target, capture town / city, clock and timezone in Edit metadata.");
    if(sky.HasPosition&&sky.HasHorizon)SkyFact(facts,"Target elevation",(sky.ApproximatePosition?"≈ ":"")+CaptureSky.Elevation(sky.Altitude,sky.Azimuth));
    if(moon!=null&&moon.HasHorizon&&moon.Altitude<0){SkyFact(facts,"Moon","Not out (below the horizon)");}
    else if(moon!=null){
     var icon=new MoonPhaseIcon{Width=14,Height=14,Margin=new Thickness(0,1,6,0),VerticalAlignment=VerticalAlignment.Center};icon.Show(moon);
     SkyFact(facts,"Moon",moon.PhaseName+" · "+moon.IlluminationText+" illuminated",icon);
     if(moon.HasHorizon)SkyFact(facts,"Moon elevation",CaptureSky.Elevation(moon.Altitude,moon.Azimuth));
-    if(moon.HasTarget)SkyFact(facts,"Moon to target",(sky.ApproximatePosition?"≈ ":"")+Degrees(moon.TargetSeparation)+" apart");
+    if(moon.HasTarget&&sky.Body!="Moon")SkyFact(facts,"Moon to target",(sky.ApproximatePosition?"≈ ":"")+Degrees(moon.TargetSeparation)+" apart");
    }
    note.Text=moon==null?"":!moon.HasHorizon?(sky.Body=="Sun"&&!moon.HasTopocentric?"Choose an observing town / city in Settings > Sky & solving for elevations and solar eclipse detection.":"Choose an observing town / city in Settings > Sky & solving for elevations."):"Geometric elevations at the capture time; refraction excluded.";
-   if(sky.Eclipse!=null)note.Text+=(sky.Eclipse.Solar?" Eclipse times are for the observing location.":" Eclipse times run from the Moon entering Earth's outer shadow to leaving it.")+" Eclipse coverage comes from the bundled Moon and Sun models at the recorded time; check the capture clock if it looks wrong.";
+   if(sky.Eclipse!=null&&!sky.Eclipse.Solar)note.Text+=(sky.Eclipse.Solar?" Eclipse times are for the observing location.":" Eclipse times run from the Moon entering Earth's outer shadow to leaving it.")+" Eclipse coverage comes from the bundled Moon and Sun models at the recorded time; check the capture clock if it looks wrong.";
   }
  }
 }

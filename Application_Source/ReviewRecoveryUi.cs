@@ -22,7 +22,7 @@ namespace AstroArchive {
    var reason=new TextBox{IsReadOnly=true,TextWrapping=TextWrapping.Wrap,VerticalScrollBarVisibility=ScrollBarVisibility.Auto,Height=110};d.Add(reason);
    grid.SelectionChanged+=(s,e)=>{var frame=grid.SelectedItem as Frame;reason.Text=frame==null?"Select a capture to read its full reason.":frame.TargetLabel+"\n"+frame.ReviewReason+"\n"+(imports?frame.SourcePath:frame.RelativePath);};if(rows.Count>0)grid.SelectedIndex=0;
    d.Button("Show flagged captures in the main view",()=>{(imports?importFilters:libraryFilters).Values["Review"]="Needs review";ApplyFilters(imports);d.Window.Close();});
-   d.Button("Set capture town / city for selected…",()=>{var selected=grid.SelectedItems.Cast<Frame>().ToList();if(selected.Count==0)return;d.Window.Close();SetCaptureSite(imports,selected);});
+   d.Button("Edit metadata for selected…",()=>{var selected=grid.SelectedItems.Cast<Frame>().ToList();if(selected.Count==0)return;d.Window.Close();Edit(imports,selected);});
    d.Button("Screen selected captures again",()=>{var selected=grid.SelectedItems.Cast<Frame>().ToList();if(selected.Count==0)return;d.Window.Close();ScreenSelection(selected,imports);});
    d.CloseOnly();d.Show();
   }

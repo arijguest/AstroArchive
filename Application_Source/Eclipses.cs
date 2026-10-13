@@ -57,7 +57,16 @@ namespace AstroArchive {
    moon=snapshot.Geocentric;moonKm=snapshot.DistanceKm;sun=snapshot.Sun;
   }
   // Null unless the Moon covers part of the Sun as seen from this site.
-  public static EclipseInfo Solar(DateTime utc,double latitude,double longitude){var info=SolarGeometry(utc,latitude,longitude);return OuterMargin(info)>0?info:null;}
+  public static EclipseInfo Solar(DateTime utc,double latitude,double longitude){
+   // An overlap below the local horizon is not an observable solar eclipse.
+   // Check both ephemeris bodies independently of the file's recorded pointing.
+   if(!ObservingCities.ValidCoordinates(latitude,longitude))return null;
+   var moon=MoonEphemeris.At(utc,true,latitude,longitude);var orientation=new SkyOrientation(utc,true,latitude,longitude);
+   double sunLongitude,sunKm;MoonEphemeris.Sun(utc,out sunLongitude,out sunKm);
+   var sun=PlanetEphemeris.Topocentric(moon.Sun,sunKm/AuKm,utc,latitude,longitude);
+   if(orientation.MapOfDate(sun).Z<0||orientation.MapOfDate(moon.Topocentric).Z<0)return null;
+   var info=SolarGeometry(utc,latitude,longitude);return OuterMargin(info)>0?info:null;
+  }
   // Disc sizes and separation at any time, eclipsed or not, so contacts can be found.
   static EclipseInfo SolarGeometry(DateTime utc,double latitude,double longitude){
    SkyVector moon,sun;double moonKm,sunKm;Vectors(utc,out moon,out moonKm,out sun,out sunKm);

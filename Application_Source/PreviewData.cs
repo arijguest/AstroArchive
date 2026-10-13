@@ -58,16 +58,15 @@ namespace AstroArchive {
    if(linear){
     DisplayMode="Linear"+(SkipStretch?" · solar / planetary":"");
     for(int c=0;c<Channels;c++){black[c]=Minimum;white[c]=Maximum;mid[c]=0.5;if(!(white[c]>black[c]))white[c]=black[c]+Math.Max(1,Math.Abs(black[c])*0.001);}
-    if(SkipStretch){
-     // Sun, Moon and planet captures often fill a small part of the sample range
-     // (short solar exposures, 12-bit sensors in 16-bit files). Scale linearly to
-     // the brightest samples so the disc is visible; no curve is applied.
-     var highs=GetStatistics(ct).Colours.Select(s=>s.Count>0?s.High-Minimum:0).ToArray();double top=highs.Max(),range=Maximum-Minimum;
-     if(top>0&&top<range){for(int c=0;c<Channels;c++)white[c]=black[c]+top;DisplayMode+=" · scaled to data";}
-     if(Mosaic&&Channels==3&&top>0&&highs.All(h=>h>0)){
-      // Unbalanced Bayer samples look green; match each channel's bright end so a grey Moon stays grey.
-      for(int c=0;c<3;c++)white[c]=black[c]+(white[c]-black[c])*highs[c]/top;DisplayMode+=" · mosaic balanced";
-     }
+    // Rescue only severely dark linear previews. A robust bright-end estimate
+    // ignores isolated hot pixels, and one bounded gain preserves RGB ratios.
+    var displayStats=GetStatistics(ct);var highs=displayStats.Colours.Select(s=>s.Count>0?s.High-Minimum:0).ToArray();double top=highs.Max(),range=Maximum-Minimum;
+    if(top>0&&range>0&&top/range<0.18&&displayStats.Linked.High>displayStats.Linked.Low){
+     double gain=Math.Min(16,0.92*range/top);for(int c=0;c<Channels;c++)white[c]=black[c]+range/gain;DisplayMode+=" · dark preview brightened";
+    }
+    if(SkipStretch&&Mosaic&&Channels==3&&top>0&&highs.All(h=>h>0)){
+     // Preserve the existing Bayer response correction for solar/lunar mosaics.
+     for(int c=0;c<3;c++)white[c]=black[c]+(white[c]-black[c])*highs[c]/top;DisplayMode+=" · mosaic balanced";
     }
     return RenderPixels(black,white,mid,true,ct);
    }

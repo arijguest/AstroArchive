@@ -180,8 +180,16 @@ namespace AstroArchive {
   static readonly Color SunLight=Color.FromRgb(255,206,84);
   void DrawSun(DrawingContext dc,double opacity){
    var point=Project(sun);double size=Math.Max(6,Math.Min(12,radius*0.07));if(opacity<1)dc.PushOpacity(opacity);
-   var glow=new RadialGradientBrush(Color.FromArgb(110,255,214,110),Color.FromArgb(0,255,214,110));glow.Freeze();dc.DrawEllipse(glow,null,point,size*2.2,size*2.2);
-   var disc=new SolidColorBrush(SunLight);disc.Freeze();dc.DrawEllipse(disc,null,point,size,size);if(opacity<1)dc.Pop();SunDrawn=true;SunBounds=new Rect(point.X-size,point.Y-size,2*size,2*size);
+   bool eclipsed=context.Eclipse!=null&&context.Eclipse.Solar;
+   if(!eclipsed){var glow=new RadialGradientBrush(Color.FromArgb(110,255,214,110),Color.FromArgb(0,255,214,110));glow.Freeze();dc.DrawEllipse(glow,null,point,size*2.2,size*2.2);}
+   var disc=new SolidColorBrush(SunLight);disc.Freeze();dc.DrawEllipse(disc,null,point,size,size);
+   if(eclipsed){
+    var e=context.Eclipse;var other=Project(moon);double dx=other.X-point.X,dy=other.Y-point.Y,length=Math.Sqrt(dx*dx+dy*dy);if(length<1e-9){dx=1;dy=0;length=1;}
+    double scale=size/e.SunRadiusArcmin;var shadow=new SolidColorBrush(Color.FromRgb(22,26,38));shadow.Freeze();
+    dc.PushClip(new EllipseGeometry(point,size,size));dc.DrawEllipse(shadow,null,new Point(point.X+dx/length*e.SeparationArcmin*scale,point.Y+dy/length*e.SeparationArcmin*scale),e.MoonRadiusArcmin*scale,e.MoonRadiusArcmin*scale);dc.Pop();
+    dc.DrawEllipse(null,Stroke(disc,0.6,0.6),point,size,size);EclipseDrawn=true;EclipseBounds=new Rect(point.X-size,point.Y-size,2*size,2*size);
+   }
+   if(opacity<1)dc.Pop();SunDrawn=true;SunBounds=new Rect(point.X-size,point.Y-size,2*size,2*size);
   }
   // Companion close-up for an eclipse: the discs at their true relative size and
   // separation, oriented as on the globe, with the covered fraction.
@@ -248,16 +256,16 @@ namespace AstroArchive {
     // The Sun sits beneath a near-side Moon, so an eclipse reads correctly on the globe.
     SunDrawn=false;SunBounds=Rect.Empty;if(context.Moon!=null&&(context.Daytime||context.Body=="Sun")&&sun.Dot(front)>=0)DrawSun(dc,context.HasHorizon&&sun.Z<0?0.45:1);
     // A near-side Moon covers stars and figure lines but never the target marker.
-    if(context.Moon!=null&&moon.Dot(front)>=0)DrawMoon(dc,line,text,context.HasHorizon&&moon.Z<0?0.45:1);
+    if(context.Moon!=null&&moon.Dot(front)>=0&&!(context.Eclipse!=null&&context.Eclipse.Solar))DrawMoon(dc,line,text,context.HasHorizon&&moon.Z<0?0.45:1);
     TargetMarkerDrawn=false;TargetBounds=Rect.Empty;
-    if(context.HasPosition&&target.Dot(front)>=0){
+    if(context.HasPosition&&target.Dot(front)>=0&&!(context.Eclipse!=null&&context.Eclipse.Solar)){
      TargetMarkerDrawn=true;
      var point=Project(target);TargetBounds=new Rect(point.X-10,point.Y-6,20,12);dc.DrawEllipse(Tint(accent,0.12),Stroke(accent,1,1.5),point,6,6);dc.DrawEllipse(accent,null,point,2,2);
      dc.DrawLine(Stroke(accent,0.8,1),new Point(point.X-10,point.Y),new Point(point.X-7,point.Y));dc.DrawLine(Stroke(accent,0.8,1),new Point(point.X+7,point.Y),new Point(point.X+10,point.Y));
     }
     DrawCardinals(dc,text);
     ConstellationLabelBounds=Rect.Empty;if(selectedFigure>=0)DrawConstellationName(dc,text,accent,surface,points);
-    if(context.Eclipse!=null)DrawEclipse(dc,line,text);
+    if(context.Eclipse!=null&&!context.Eclipse.Solar)DrawEclipse(dc,line,text);
    }group.Freeze();return group;
   }
  }

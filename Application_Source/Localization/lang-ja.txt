@@ -2123,3 +2123,8 @@ Targets below the horizon at the predicted capture time usually need the capture
 # Information pane, 3.2.6
 Credits	クレジット
 FUN FACT	豆知識
+
+# Capture checks, 3.2.6
+Sun obscured	太陽の遮蔽率
+Check capture metadata	撮影メタデータを確認
+Suspected obstruction	遮蔽物の疑い
