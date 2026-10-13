@@ -128,3 +128,7 @@ for fast motion/long focal lengths, followed by inspection for trailing. They al
 give the one-pixel drift limit from image scale and apparent angular motion. Notes
 are shown only when guidance exists; empty entries have no disclosure. Engine and
 Windows UI checks cover repaired Iris credits and empty imaging-note entries.
+
+Verified on Windows on 13 October 2026: the credit audit, focused engine and
+installer checks, and information-pane rendering in all seven languages passed
+in [run 38337070529](https://github.com/arijguest/AstroArchive/actions/runs/38337070529).

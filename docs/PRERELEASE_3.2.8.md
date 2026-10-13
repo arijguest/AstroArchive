@@ -41,8 +41,12 @@ Local Linux/Mono verification on 13 October 2026:
   terms/links, source links, identities, scientific data and notices are unchanged.
 - `git diff --check` passed.
 
-Run the dedicated **Target information pane** and **Planetary sky positions**
-Windows workflows on this branch for rendering checks. Publishing is separate:
+Windows validation passed for implementation commit `68839b3`:
+
+- [Target information pane](https://github.com/arijguest/AstroArchive/actions/runs/38337070529): engine, installer, build and rendering checks in all seven languages.
+- [Planetary sky positions](https://github.com/arijguest/AstroArchive/actions/runs/38337070069): all 52 engine checks, application build, and marker/metadata-refresh/cache rendering checks.
+
+Publishing is separate:
 the release workflow supports an explicit `prerelease` input. This handoff does
 not publish a release or change the stable update feed.
 

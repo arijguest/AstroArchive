@@ -192,3 +192,7 @@ for published totality/contact predictions.
 The preview already resolves a saved capture by hash after repository metadata is
 reloaded, and eclipse-section cache keys include location, timezone and resolved
 UTC. Regression checks now cover that refresh and cache invalidation explicitly.
+
+Verified on Windows on 13 October 2026: all 52 focused checks and the planetary
+rendering/metadata-refresh/cache smoke checks passed in
+[run 38337070069](https://github.com/arijguest/AstroArchive/actions/runs/38337070069).
