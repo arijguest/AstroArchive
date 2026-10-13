@@ -26,6 +26,9 @@ namespace AstroArchive {
   public Action GoBack;
   // Shown only when a card has something Stellarium can point at.
   public Action<StellariumView> OpenInStellarium;
+  // The observing location the Meteors page uses to say which showers can be seen; null when none is set.
+  public Func<CaptureSite> ObserverSite;
+  public const string MeteorCardId="METEORS";
   public string CurrentId{get;private set;}
   public TargetInfoView(){
    // Always reserve the scrollbar gutter: with Auto, text rewrapping at the narrower width toggled the bar on and off.
@@ -79,6 +82,7 @@ namespace AstroArchive {
     var list=Section(membersTitle??"YOUR TARGETS");list.Name="SectionMembers";content.Children.Add(list);
     foreach(var member in members){string name=member.Target;var button=new Button{Content=Data(member.Label+"\n"+member.Detail),HorizontalContentAlignment=HorizontalAlignment.Stretch,Margin=new Thickness(0,0,0,6),Padding=new Thickness(10,8,10,4)};AutomationProperties.SetName(button,"Read about "+member.Label);button.Click+=(s,e)=>{if(ChooseMember!=null)ChooseMember(name);};content.Children.Add(button);}
    }
+   if(card.id==MeteorCardId)AddMeteors();
    if(!string.IsNullOrWhiteSpace(factText)){
     var fact=new StackPanel();var caption=Text("FUN FACT","Muted","UiFontCaption");caption.FontWeight=FontWeights.SemiBold;fact.Children.Add(caption);fact.Children.Add(Data(factText));
     var box=Callout(fact);box.Name="FunFact";content.Children.Add(box);
@@ -99,6 +103,8 @@ namespace AstroArchive {
    if(distance!=null)AddFact(facts,"Distance",TargetInfoPresentation.Distance(distance),Evidence(card,distance));
    AddParameters(facts,card);
    foreach(var m in measurements.Where(m=>new[]{"Diameter","Rotation period","Albedo"}.Contains(m.field))){if(m.field=="Diameter"&&TargetParameters.For(card.id)!=null)continue;AddFact(facts,m.field,m.value.ToString("0.#####",CultureInfo.InvariantCulture)+(string.IsNullOrEmpty(m.uncertainty)?"":" ± "+m.uncertainty)+(m.unit=="dimensionless"?"":" "+m.unit),Evidence(card,m));}
+   // Meteors have no catalogue parameters; their page shows the shower calendar instead.
+   if(card.id==MeteorCardId&&facts.Children.Count==0){article.Children.Remove(parameters);article.Children.Remove(facts);}
    string imaging=TargetInfoPresentation.Imaging(card);
    // Imaging notes are always shown in full, not behind a disclosure.
    if(!string.IsNullOrWhiteSpace(imaging)){var notes=Section("IMAGING NOTES");notes.Name="ImagingNotes";article.Children.Add(notes);var text=Data(imaging);text.Name="ImagingNotesText";article.Children.Add(text);}
@@ -129,6 +135,23 @@ namespace AstroArchive {
    foreach(var source in TargetInfoPresentation.Sources(card,curated!=null&&!string.IsNullOrWhiteSpace(curated.Overview)))sources.Children.Add(Link(source.Title,source.Url));
    if(sources.Children.Count>0){var disclosure=Disclosure("SOURCES",sources);disclosure.Name="Sources";var heading=(TextBlock)disclosure.Header;heading.FontWeight=FontWeights.SemiBold;heading.SetResourceReference(TextBlock.FontSizeProperty,"UiFontCaption");heading.Margin=new Thickness(0);disclosure.Margin=new Thickness(0,12,0,6);content.Children.Add(disclosure);}
    content.Children.Add(Text("Select a file to return to its image preview.","Muted","UiFontCaption"));ArrangeBody();
+  }
+  // The Meteors page: when each annual shower is active and how strong it is from the observer's latitude, then what a meteor's colour means.
+  void AddMeteors(){
+   var site=ObserverSite==null?null:ObserverSite();var today=DateTime.Now;
+   var heading=Section("METEOR SHOWERS THROUGH THE YEAR");heading.Name="MeteorShowersHeading";content.Children.Add(heading);
+   var calendar=new MeteorCalendar(site==null?(double?)null:site.Latitude,site==null?null:site.Label,today){Name="MeteorCalendar",Margin=new Thickness(0,2,0,4)};content.Children.Add(calendar);
+   content.Children.Add(site==null?Text("Showers are shown as seen from anywhere on Earth, at their zenithal hourly rate. Choose an observing town in Settings to see the rates from your location.","Muted","UiFontCaption"):Data(Localization.F("As seen from {0} (latitude {1}°). Rows end in the hourly rate you could expect at the radiant's highest; a dashed line means the radiant stays too low to see.",site.Label,site.Latitude.ToString("0.#",CultureInfo.InvariantCulture)),"Muted","UiFontCaption"));
+   content.Children.Add(Text("Each bar spans a shower's usual dates and rises to its peak; the taller the peak, the stronger the shower. The vertical line is today, a dot marks the peak, and a ring means the Moon is more than 60% lit then. Hover a row for details.","Muted","UiFontCaption"));
+   var colours=Section("WHAT COLOURS CAN MEAN");colours.Name="MeteorColoursHeading";content.Children.Add(colours);
+   var list=new Grid{Margin=new Thickness(0,2,0,6)};list.ColumnDefinitions.Add(new ColumnDefinition{Width=GridLength.Auto});list.ColumnDefinitions.Add(new ColumnDefinition{Width=GridLength.Auto,MaxWidth=110});list.ColumnDefinitions.Add(new ColumnDefinition{Width=new GridLength(1,GridUnitType.Star)});
+   foreach(var colour in MeteorColours.All){
+    int row=list.RowDefinitions.Count;list.RowDefinitions.Add(new RowDefinition{Height=GridLength.Auto});
+    var swatch=new System.Windows.Shapes.Ellipse{Width=12,Height=12,Fill=new SolidColorBrush((Color)ColorConverter.ConvertFromString(colour.Hex)),Margin=new Thickness(0,3,8,0),VerticalAlignment=VerticalAlignment.Top};Grid.SetRow(swatch,row);list.Children.Add(swatch);
+    var name=Text(colour.Name,"Text");name.Margin=new Thickness(0,0,10,7);name.FontWeight=FontWeights.SemiBold;Grid.SetRow(name,row);Grid.SetColumn(name,1);list.Children.Add(name);
+    var cause=Data(colour.Cause,"Muted");cause.Margin=new Thickness(0,0,0,7);Grid.SetRow(cause,row);Grid.SetColumn(cause,2);list.Children.Add(cause);
+   }
+   content.Children.Add(list);content.Children.Add(Data(MeteorColours.Speed,"Muted","UiFontCaption"));
   }
   public void InformationStatus(string message,bool busy){if(informationStatus!=null){double offset=scroll.VerticalOffset,before=informationStatus.Visibility==Visibility.Visible?informationStatus.DesiredSize.Height:0;informationStatus.Text=Localization.T(message??"");informationStatus.Visibility=string.IsNullOrEmpty(message)?Visibility.Collapsed:Visibility.Visible;UpdateLayout();double after=informationStatus.Visibility==Visibility.Visible?informationStatus.DesiredSize.Height:0;if(offset>0)scroll.ScrollToVerticalOffset(offset+after-before);}if(refreshButton!=null)refreshButton.IsEnabled=InternetAvailable&&!busy;}
   static IEnumerable<FrameworkElement> NamedVisuals(DependencyObject parent){for(int k=0;k<VisualTreeHelper.GetChildrenCount(parent);k++){var child=VisualTreeHelper.GetChild(parent,k);var element=child as FrameworkElement;if(element!=null&&anchorNames.Contains(element.Name)&&element.IsVisible)yield return element;foreach(var nested in NamedVisuals(child))yield return nested;}}

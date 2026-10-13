@@ -802,3 +802,6 @@ Imaging: Never look at or image the Sun without a certified solar filter over th
 
 ## LUNAR ECLIPSE
 Imaging: No filter is needed. The Moon dims by thousands of times between the partial phases and mid-totality, so expose by the histogram: around 1/250 s at ISO 200 and f/8 for the uneclipsed limb, then several seconds at higher ISO in totality. A tracking mount keeps long totality exposures sharp; without one, keep them under about 2 seconds at 1000 mm. A sequence on a fixed composition records the Moon's path through Earth's shadow.
+
+## METEORS
+Imaging: Use a wide, fast lens (14 to 24 mm at f/2.8 or faster) on a fixed tripod, ISO 1600 to 3200 and 10 to 20 second exposures, and shoot hundreds of frames in a continuous burst; only a few will catch a meteor. Point about 45 to 60 degrees from the radiant, where the trails are longest, and keep the exposure short enough to avoid star trails. Set a fixed white balance so colours compare between frames, and shoot RAW to keep the faint green and violet tones.

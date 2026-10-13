@@ -2300,6 +2300,13 @@ blue magnitude {0}	magnitude bleue {0}
 {0} million light-years	{0} millions d'années-lumière
 {0} billion light-years	{0} milliards d'années-lumière
 Distance	Distance
+Meteor shower	Pluie de météores
+Showers are matched by date only; the meteor's direction was not checked against a radiant.	Les pluies sont associées uniquement par la date ; la direction du météore n'a pas été comparée à un radiant.
+METEOR SHOWERS THROUGH THE YEAR	PLUIES DE MÉTÉORES TOUT AU LONG DE L'ANNÉE
+WHAT COLOURS CAN MEAN	CE QUE LES COULEURS PEUVENT SIGNIFIER
+Showers are shown as seen from anywhere on Earth, at their zenithal hourly rate. Choose an observing town in Settings to see the rates from your location.	Les pluies sont montrées telles qu'on les voit de n'importe où sur Terre, avec leur taux horaire zénithal. Choisissez une ville d'observation dans les Réglages pour voir les taux depuis votre position.
+Each bar spans a shower's usual dates and rises to its peak; the taller the peak, the stronger the shower. The vertical line is today, a dot marks the peak, and a ring means the Moon is more than 60% lit then. Hover a row for details.	Chaque barre couvre les dates habituelles d'une pluie et monte jusqu'à son maximum ; plus le maximum est haut, plus la pluie est forte. La ligne verticale marque aujourd'hui, un point indique le maximum et un anneau signifie que la Lune est éclairée à plus de 60 % à ce moment. Survolez une ligne pour les détails.
+As seen from {0} (latitude {1}°). Rows end in the hourly rate you could expect at the radiant's highest; a dashed line means the radiant stays too low to see.	Vu depuis {0} (latitude {1}°). Chaque ligne se termine par le taux horaire attendu lorsque le radiant est au plus haut ; une ligne en pointillés signifie que le radiant reste trop bas pour être vu.
 
 # Hybrid information, native 3D orbit and setup connectivity.
 Online access	Accès en ligne

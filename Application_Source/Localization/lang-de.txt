@@ -2302,6 +2302,13 @@ blue magnitude {0}	blaue Helligkeit {0} mag
 {0} million light-years	{0} Millionen Lichtjahre
 {0} billion light-years	{0} Milliarden Lichtjahre
 Distance	Entfernung
+Meteor shower	Meteorstrom
+Showers are matched by date only; the meteor's direction was not checked against a radiant.	Ströme werden nur nach dem Datum zugeordnet; die Richtung des Meteors wurde nicht mit einem Radianten verglichen.
+METEOR SHOWERS THROUGH THE YEAR	METEORSTRÖME IM JAHRESVERLAUF
+WHAT COLOURS CAN MEAN	WAS FARBEN BEDEUTEN KÖNNEN
+Showers are shown as seen from anywhere on Earth, at their zenithal hourly rate. Choose an observing town in Settings to see the rates from your location.	Die Ströme werden von irgendeinem Ort der Erde aus mit ihrer zenitalen stündlichen Rate gezeigt. Wählen Sie in den Einstellungen einen Beobachtungsort, um die Raten für Ihren Standort zu sehen.
+Each bar spans a shower's usual dates and rises to its peak; the taller the peak, the stronger the shower. The vertical line is today, a dot marks the peak, and a ring means the Moon is more than 60% lit then. Hover a row for details.	Jeder Balken umfasst die üblichen Daten eines Stroms und steigt zum Maximum an; je höher das Maximum, desto stärker der Strom. Die senkrechte Linie ist heute, ein Punkt markiert das Maximum, ein Ring bedeutet, dass der Mond dann zu mehr als 60 % beleuchtet ist. Zeigen Sie auf eine Zeile für Details.
+As seen from {0} (latitude {1}°). Rows end in the hourly rate you could expect at the radiant's highest; a dashed line means the radiant stays too low to see.	Gesehen von {0} (Breite {1}°). Die Zeilen enden mit der stündlichen Rate, die Sie bei höchstem Stand des Radianten erwarten können; eine gestrichelte Linie bedeutet, dass der Radiant zu tief bleibt.
 
 # Hybrid information, native 3D orbit and setup connectivity.
 Online access	Onlinezugriff

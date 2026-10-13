@@ -15,7 +15,7 @@ explicit reconnection through Preferences.
 
 ## Information and rights
 
-The deterministic ZIP keeps 13,527 identities and 66,165 alias-index entries,
+The deterministic ZIP keeps 13,528 identities and 66,171 alias-index entries,
 including ambiguity and nonexistent-designation indexes. All Messier and 207
 curated descriptions remain available. Essential photography is reduced to
 640 pixels; shared source fields and image bytes are deduplicated. The shipped

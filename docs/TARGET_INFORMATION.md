@@ -40,6 +40,15 @@ Flame Nebula). The pane is divided into Overview, Imaging notes, Parameters,
 Location in the sky and Sources, and the object ID appears once: in the heading
 when the object has no other name, otherwise in the line beneath it.
 
+## Meteors
+
+The Meteors target (and any alias such as "Meteor shower" or "Shooting star") has its own page with a licensed Perseid photograph (ESO/S. Guisard, CC BY 4.0). Below the overview it shows:
+
+- **Meteor showers through the year**: a ridgeline chart of the 19 annual showers in the International Meteor Organization's working list (`MeteorShowers.cs`), ordered by peak date. Each bar spans the shower's usual dates and its height eases up to the peak; the tallest point scales with the hourly rate. The location comes from the observing town in Settings (`CaptureSite.For(null, settings)`): the latitude sets how high each radiant climbs, so the rate is the shower's zenithal rate times the sine of that height, and a dashed line replaces a shower whose radiant never clears 10 degrees. With no town set the chart shows the raw zenithal rates. A line marks today, a dot marks the peak and a ring means the Moon is more than 60% lit at that year's peak. Hovering a row gives the dates, rate, radiant height and Moon.
+- **What colours can mean**: sodium, iron, magnesium, calcium, the air and oxygen trains, and how speed and camera white balance shift them.
+
+In Capture details, a frame whose target is Meteor and whose capture time falls inside a shower's usual dates gains a **Meteor shower** row (for example "Perseids (peak 12 Aug)"), naming up to three showers and ranking by activity and, when a site is known, by what that latitude can see. Showers are matched by date only; the meteor's direction is not compared with a radiant.
+
 ## Comets
 
 Every comet target has a page. The information pack holds only name stubs for 21

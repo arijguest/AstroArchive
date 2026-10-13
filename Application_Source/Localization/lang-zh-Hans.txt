@@ -2333,6 +2333,16 @@ blue magnitude {0}	蓝星等 {0}
 {0} million light-years	{0} 百万光年
 {0} billion light-years	{0} 十亿光年
 Distance	距离
+{0} billion light-years	{0}十亿光年
+{0} million light-years	{0}百万光年
+{0} light-years	{0}光年
+Meteor shower	流星雨
+Showers are matched by date only; the meteor's direction was not checked against a radiant.	仅按日期匹配流星雨；未将流星方向与辐射点比对。
+METEOR SHOWERS THROUGH THE YEAR	全年流星雨
+WHAT COLOURS CAN MEAN	颜色可能意味着什么
+Showers are shown as seen from anywhere on Earth, at their zenithal hourly rate. Choose an observing town in Settings to see the rates from your location.	流星雨按地球上任意地点所见、以天顶每小时流量显示。请在设置中选择观测城镇，以查看您所在位置的流量。
+Each bar spans a shower's usual dates and rises to its peak; the taller the peak, the stronger the shower. The vertical line is today, a dot marks the peak, and a ring means the Moon is more than 60% lit then. Hover a row for details.	每条横条覆盖流星雨的常见日期，并升至极大；极大越高，流星雨越强。竖线表示今天，圆点标出极大，圆环表示当时月亮被照亮的比例超过60%。将指针移到某一行可查看详情。
+As seen from {0} (latitude {1}°). Rows end in the hourly rate you could expect at the radiant's highest; a dashed line means the radiant stays too low to see.	从{0}（纬度{1}°）看到的情况。每行末尾是辐射点最高时可预期的每小时流量；虚线表示辐射点太低而无法看到。
 
 # Hybrid information, native 3D orbit and setup connectivity.
 Online access	在线访问

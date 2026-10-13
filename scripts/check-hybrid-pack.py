@@ -14,8 +14,8 @@ with zipfile.ZipFile(pack) as archive:
     assert all(not n.startswith('/') and '..' not in n and '\\' not in n and ':' not in n for n in names)
     manifest = json.loads(archive.read('essentials.json'))
     index = json.loads(archive.read('index.json'))
-    assert manifest['identity_count'] == len(index['entries']) == 13527
-    assert manifest['alias_count'] == len(index['aliases']) == 66165
+    assert manifest['identity_count'] == len(index['entries']) == 13528
+    assert manifest['alias_count'] == len(index['aliases']) == 66171
     assert index['uncertain'] and index['nonexistent']
     for name, digest in manifest['entries'].items():
         assert hashlib.sha256(archive.read(name)).hexdigest() == digest, name
