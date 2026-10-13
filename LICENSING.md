@@ -39,7 +39,7 @@ modified version, or reverse engineering of the combined application solely to d
 those modifications, as permitted by LGPL section 4. These permissions apply even
 where the first-party licence would otherwise restrict those activities.
 
-## Offline target information
+## Bundled and downloaded target information
 
 `Application_Source/TargetInfo.zip` contains a runtime projection of AstroArchive
 object database 2.1.0 and its approved images. Catalogue data and images retain
@@ -48,3 +48,27 @@ OpenNGC source/licence notices, and full per-image attribution, representation,
 modification descriptions and licence/source links. These are also accessible
 through the information pane. Preserve the pack when distributing the programme;
 the application licence does not replace these third-party terms.
+
+The 3.2.9 essentials projection preserves OpenNGC identities, measurements, aliases,
+ambiguities, corrections, CC BY-SA 4.0 notices and acknowledgements. Its 640-pixel
+photographic thumbnails document resizing, black compositing of transparent pixels
+and JPEG conversion in `essentials.json`, with original file credits and exact
+licence versions. Full ESA/Hubble mandatory image credits stay visible.
+
+Provider capability decisions are embedded in
+[InformationProviders.json](Application_Source/InformationProviders.json). Unknown
+permissions deny display/cache/bundle/redistribution. Wikidata structured identifiers
+are CC0; Wikipedia introductions are independently checked for CC BY-SA 4.0 with
+revision/history attribution and share-alike for adaptations. Commons files require
+an independently reviewed astronomical association and current per-file rights.
+A NASA-hosted file is not automatically public domain. SIMBAD, VizieR and NED
+enrichment remain disabled until selected dataset rights are documented.
+
+The audited JPL snapshots and coefficient table contain scientific numerical facts,
+with the factual-data reuse basis (17 USC 102(b)), source, solution, epoch, units and
+uncertainties recorded. This is not a blanket CC0 claim or a licence for JPL prose,
+media or software. The separate JPL API fair-use policy requires single requests,
+identifying User-Agent, caching and backoff. Physical measurement reports retain
+their original references; no physical records are newly bundled. Runtime content
+and its rights metadata are cached together. The native orbit engine and viewer are
+original application code, governed by the first-party licence.

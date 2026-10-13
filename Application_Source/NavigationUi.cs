@@ -234,6 +234,7 @@ namespace AstroArchive {
             catch (Exception ex) { LocalizedMessage.Show(Window, ex.Message, "Folder could not be opened", MessageBoxButton.OK, MessageBoxImage.Warning); }
         }
         void OpenWebsite(string url) {
+            if(!InternetAction())return;
             try { Process.Start(new ProcessStartInfo(url) { UseShellExecute = true }); }
             catch (Exception ex) { LocalizedMessage.Show(Window, "Visit " + url + "\n\n" + ex.Message, "Browser could not be opened", MessageBoxButton.OK, MessageBoxImage.Information); }
         }

@@ -62,13 +62,14 @@ namespace AstroArchive {
   // A page for a comet the information pack does not hold, built from its designation.
   public static TargetInfoCard Card(string target){
    string label=CometTargets.FromLabel(target)??Regex.Replace((target??"").Trim(),@"^Comet\s+","",RegexOptions.IgnoreCase);
-   string designation=Canonical(CometTargets.Designation(target));
+   string designation=InformationDesignation(target);if(designation!=null&&designation.Contains("-"))label=(target??designation).Trim();
    return new TargetInfoCard{id=designation??label,name=label,domain="solar_system",type_label=designation==null?"Comet":TypeLabel(designation),parent_body="Sun",review_status="derived",content_tier="basic",aliases=new string[0],measurements=new TargetInfoMeasurement[0],citations=new TargetInfoCitation[0],source_urls=new string[0]};
   }
   // The Comets entry's page when the information pack has no group page.
   public static TargetInfoCard GroupCard(){return new TargetInfoCard{id="COMETS",name="Comets",domain="group",type_label="Your comet captures",review_status="derived",content_tier="basic",aliases=new string[0],measurements=new TargetInfoMeasurement[0],citations=new TargetInfoCitation[0],source_urls=new string[0]};}
   // Explains what the designation says when no written overview exists.
   public static string Overview(TargetInfoCard card){
+   if(Regex.IsMatch(card.id??"",@"-[A-Z0-9]+$"))return (card.name??card.id)+" is a separately designated comet fragment. Its orbit is resolved independently of the parent comet.";
    string id=card.id??"",name=string.IsNullOrWhiteSpace(card.name)?id:card.name;
    var dated=Regex.Match(id,@"^([CPDXA])/(\d{4}) ([A-Z])([A-Z])?(\d{1,3})$");var numbered=Regex.Match(id,@"^(\d{1,4})([PDI])$");
    if(numbered.Success&&numbered.Groups[2].Value=="I")return name+" is an interstellar object, the "+Ordinal(int.Parse(numbered.Groups[1].Value))+" known visitor from outside the Solar System. It passes through once on an open orbit and will not return.";
@@ -83,8 +84,11 @@ namespace AstroArchive {
   }
   public const string Imaging="Start with 10–30 second sub-exposures on a star-tracking mount to keep the comet's head sharp; try 5–10 seconds for a fast-moving comet or a long focal length. Inspect the head at full size and shorten the exposure if it trails. The limit depends on the comet's apparent motion and your image scale: for no more than one pixel of drift, maximum exposure in seconds = 60 × image scale (arcsec/pixel) ÷ motion (arcsec/min). At 2 arcsec/pixel and 6 arcsec/min, use 20 seconds or less. Stack twice, once aligned on the comet and once on the stars, then blend the two. Siril, DeepSkyStacker and PixInsight offer comet alignment.";
   public static string ClassLabel(CometOrbit orbit){
-   switch(orbit.Class){case "HTC":return "Halley-type";case "JFc":return "Jupiter-family";case "ETc":return "Encke-type";case "COM":return "Long-period";default:return orbit.E>=1.1?"Hyperbolic (interstellar)":"Near-parabolic";}
+   switch(orbit.Class){case "HTC":return "Halley-type";case "JFc":return "Jupiter-family";case "ETc":return "Encke-type";case "COM":return "Long-period";default:return orbit.E>=1.1?"Hyperbolic":"Near-parabolic";}
   }
+  public static CometOrbit FromComplete(OrbitRecord record){var date=record.perihelion_time.HasValue?OrbitalModel.Utc(record.perihelion_time.Value):null;return new CometOrbit{Class=record.orbit_class??"",Q=record.q,E=record.e,PeriodYears=record.e<1?2*Math.PI*Math.Sqrt(Math.Pow(record.q/(1-record.e),3)/OrbitalModel.SunMu)/365.25:0,Perihelion=date??new DateTime(2000,1,1)};}
+  // Information identity preserves fragments without altering archive target names.
+  public static string InformationDesignation(string target){var m=Regex.Match(target??"",@"(?<![A-Z0-9])(?:[CPDXAI]/\d{4} [A-Z]{1,2}\d{1,3}|\d{1,4}[PDI])(?:-[A-Z0-9]+)?(?![A-Z0-9])",RegexOptions.IgnoreCase);return m.Success?Canonical(m.Value.ToUpperInvariant()):Canonical(CometTargets.Designation(target));}
   public static string Perihelion(CometOrbit orbit){return Localization.F("{0} AU from the Sun",orbit.Q.ToString("0.0##",CultureInfo.InvariantCulture));}
   public static string Period(CometOrbit orbit){return Localization.F("{0} years per orbit",orbit.PeriodYears.ToString(orbit.PeriodYears<100?"0.##":"#,##0",CultureInfo.InvariantCulture));}
   // Farthest point from the Sun, shown for periodic comets only: for long-period

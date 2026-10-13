@@ -70,7 +70,7 @@ namespace AstroArchive.Installation {
   }
  }
  public sealed class UpdateDownloadProgress {public long Received,Total;public int Percent {get{return Total<=0?0:(int)Math.Max(0,Math.Min(100,Received*100/Total));}}}
- public sealed class UpdateReceipt {public int Schema=1;public string PackageVersion,PreviousPackageVersion,InstalledUtc;}
+ public sealed class UpdateReceipt {public int Schema=1;public string PackageVersion,PreviousPackageVersion,InstalledUtc,Operation;}
  public sealed class UpdateTarget {
   public string Root, Cache;
   public InstallRecord Running, Existing;
@@ -112,7 +112,7 @@ namespace AstroArchive.Installation {
   public static string InstallationCache(string root){return Path.Combine(InstallCore.Root(root),"updates");}
   public static string ReleasePage(UpdateManifest manifest){Validate(manifest);return Repository+"/releases/tag/v"+manifest.package_version;}
   public string ReleaseNotes(UpdateManifest manifest){
-   Validate(manifest);if(!string.IsNullOrWhiteSpace(manifest.release_notes))return manifest.release_notes;
+   ConnectivityPolicy.RequireInternet();Validate(manifest);if(!string.IsNullOrWhiteSpace(manifest.release_notes))return manifest.release_notes;
    byte[] bytes=Fetch(new Uri("https://api.github.com/repos/arijguest/AstroArchive/releases/tags/v"+manifest.package_version),256*1024);
    if(bytes==null||bytes.Length>256*1024)throw new IOException("Release notes response is too large.");
    var release=InstallCore.Json().Deserialize<System.Collections.Generic.Dictionary<string,object>>(Encoding.UTF8.GetString(bytes));object body;
@@ -120,10 +120,10 @@ namespace AstroArchive.Installation {
    return string.IsNullOrWhiteSpace(notes)?"No release notes were provided for this package.":notes.Substring(0,Math.Min(notes.Length,48000));
   }
   static string ReceiptPath(string root){string path=Path.Combine(InstallCore.Root(root),"update-receipt.json");InstallCore.NoLinks(path);return path;}
-  public static void RecordInstalledUpdate(string root,string previousPackage){
+  public static void RecordInstalledUpdate(string root,string previousPackage,string operation="update"){
    var record=InstallCore.Read(root);if(record==null)throw new IOException("Cannot record an update without an active installation.");
    string path=ReceiptPath(root);string temp=path+"."+Guid.NewGuid().ToString("N")+".tmp";
-   try{File.WriteAllText(temp,InstallCore.Json().Serialize(new UpdateReceipt{PackageVersion=record.PackageVersion??record.Version,PreviousPackageVersion=previousPackage,InstalledUtc=DateTime.UtcNow.ToString("o")}),new UTF8Encoding(false));if(File.Exists(path))File.Replace(temp,path,null);else File.Move(temp,path);}finally{if(File.Exists(temp))File.Delete(temp);}
+   try{File.WriteAllText(temp,InstallCore.Json().Serialize(new UpdateReceipt{PackageVersion=record.PackageVersion??record.Version,PreviousPackageVersion=previousPackage,Operation=operation,InstalledUtc=DateTime.UtcNow.ToString("o")}),new UTF8Encoding(false));if(File.Exists(path))File.Replace(temp,path,null);else File.Move(temp,path);}finally{if(File.Exists(temp))File.Delete(temp);}
   }
   public static UpdateReceipt ConsumeInstalledUpdate(string root,string runningPackage){
    string path=ReceiptPath(root);if(!File.Exists(path))return null;if(new FileInfo(path).Length>4096)throw new IOException("Invalid update confirmation.");
@@ -162,7 +162,7 @@ namespace AstroArchive.Installation {
 
   // Packages that Windows refused to start on this installation are not offered again.
   public UpdateManifest Check(InstallRecord installed,string root=null) {
-   byte[] bytes = Fetch(new Uri(Feed), 64 * 1024);
+   ConnectivityPolicy.RequireInternet();byte[] bytes = Fetch(new Uri(Feed), 64 * 1024);
    if (bytes == null || bytes.Length > 64 * 1024) throw new IOException("Update feed is too large.");
    var manifest = InstallCore.Json().Deserialize<UpdateManifest>(Encoding.UTF8.GetString(bytes));
    Validate(manifest);
@@ -174,7 +174,7 @@ namespace AstroArchive.Installation {
 
   public string Prepare(UpdateManifest manifest,string cache){return Prepare(manifest,cache,CancellationToken.None);}
   public string Prepare(UpdateManifest manifest, string cache,CancellationToken token) {
-   token.ThrowIfCancellationRequested();
+   ConnectivityPolicy.RequireInternet();token.ThrowIfCancellationRequested();
    Validate(manifest);
    Action<long> report=received=>{token.ThrowIfCancellationRequested();if(Progress!=null)Progress(new UpdateDownloadProgress{Received=received,Total=manifest.size});};report(0);
    var uri=new Uri(manifest.download_url ?? manifest.url);
@@ -200,15 +200,15 @@ namespace AstroArchive.Installation {
 
   static byte[] Download(Uri uri,long limit){return DownloadProgressive(uri,limit,null);}
   static byte[] DownloadProgressive(Uri uri, long limit,Action<long> progress,CancellationToken token=default(CancellationToken)) {
-   if (limit < 1 || limit > MaximumInstallerSize) throw new IOException("Invalid download limit.");
+   ConnectivityPolicy.RequireInternet();if (limit < 1 || limit > MaximumInstallerSize) throw new IOException("Invalid download limit.");
    // TLS and certificate validation remain enabled. Every redirect is checked.
    ServicePointManager.SecurityProtocol |= SecurityProtocolType.Tls12;
    for (int hop = 0; hop < 6; hop++) {
-    token.ThrowIfCancellationRequested();if (!TrustedDownload(uri)) throw new IOException("Untrusted update download destination.");
+    token.ThrowIfCancellationRequested();ConnectivityPolicy.RequireInternet();if (!TrustedDownload(uri)) throw new IOException("Untrusted update download destination.");
     var request = (HttpWebRequest)WebRequest.Create(uri);
     request.AllowAutoRedirect = false; request.Timeout = 10000; request.ReadWriteTimeout = 15000;
     request.UserAgent = "AstroArchive-Updater";
-    try{using(token.Register(()=>request.Abort()))
+    try{using(token.Register(()=>request.Abort()))using(ConnectivityPolicy.Token.Register(()=>request.Abort()))
     using (var response = (HttpWebResponse)request.GetResponse()) {
      int status = (int)response.StatusCode;
      if (status == 301 || status == 302 || status == 303 || status == 307 || status == 308) {

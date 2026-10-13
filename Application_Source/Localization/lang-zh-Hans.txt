@@ -2349,3 +2349,71 @@ blue magnitude {0}	蓝星等 {0}
 {0} million light-years	{0} 百万光年
 {0} billion light-years	{0} 十亿光年
 Distance	距离
+
+# Hybrid information, native 3D orbit and setup connectivity.
+Online access	在线访问
+Hybrid (recommended)	混合模式（推荐）
+Offline	离线模式
+Connectivity	连接模式
+Essential information is included. Additional information downloads when you open a target and is saved for later.	已包含基本信息。打开目标时会下载更多信息，并保存以供日后使用。
+Uses essential and saved information. Additional targets may have limited information.	使用基本信息和已保存的信息。其他目标的信息可能有限。
+Choose how AstroArchive gets information	选择 AstroArchive 获取信息的方式
+Use Hybrid (recommended)	使用混合模式（推荐）
+Use Offline	使用离线模式
+You can change this in Preferences > General > Online access. Local telescope connections remain available.	可在“偏好设置 > 常规 > 在线访问”中更改。本地望远镜连接仍可使用。
+Choose Hybrid in Preferences > General > Online access to reconnect.	要重新连接，请在“偏好设置 > 常规 > 在线访问”中选择混合模式。
+Online access is paused. Automatic update checks resume in Hybrid.	在线访问已暂停。切换到混合模式后恢复自动更新检查。
+Downloaded information limit (MiB)	已下载信息容量上限（MiB）
+Downloaded information: {0} MiB	已下载信息：{0} MiB
+Downloaded information	已下载信息
+Downloaded information is unavailable.	已下载信息不可用。
+Clear downloaded information	清除已下载信息
+Refresh information	刷新信息
+Download missing or updated information for this target.	下载此目标缺少或已更新的信息。
+Saved information · retrieved {0}	已保存信息 · 获取时间 {0}
+ORBIT	轨道
+3D orbit	三维轨道
+Drag or use arrows to rotate. Shift-drag to pan. Focus the orbit or hold Ctrl to zoom with the wheel. Pinch to zoom.	拖动或使用方向键旋转。按住 Shift 拖动可平移。聚焦轨道或按住 Ctrl 可用滚轮缩放。也可双指缩放。
+Reset orbit	重置轨道视图
+Top view	俯视图
+Orbit plane	轨道平面
+Fit orbit	适合轨道大小
+Inner solar system	内太阳系
+Expand orbit	展开轨道视图
+Collapse orbit	收起轨道视图
+Orbit epoch	轨道历元
+Marker date (UTC)	标记日期（UTC）
+Marker: {0} UTC	标记：{0} UTC
+Marker at orbit epoch: JD {0} {1}	轨道历元标记：JD {0} {1}
+Source epoch: JD {0} {1} · {2}	数据历元：JD {0} {1} · {2}
+Dated position unavailable for this solution. Use Orbit epoch.	此轨道解不支持指定日期的位置。请使用“轨道历元”。
+Complete orbital elements are unavailable. No orientation has been assumed.	完整轨道要素不可用。未假定轨道方向。
+Preparing 3D orbit…	正在准备三维轨道…
+The orbit could not be drawn.	无法绘制轨道。
+Approximate orbit · linear distances; body markers enlarged.	近似轨道 · 线性距离比例；天体标记已放大。
+J2000 ecliptic · two-body geometry, not a precision ephemeris. UTC → TT; TDB differs by less than 2 ms.	J2000 黄道面 · 二体几何示意，并非精密星历。UTC → TT；TDB 差异小于 2 毫秒。
+Earth uses the Earth–Moon barycentre approximation.	地球采用地月质心近似。
+Solar-system overview	太阳系概览
+Extent clipped	范围已裁切
+Perihelion (TDB)	近日点（TDB）
+Perigee	近地点
+Hyperbolic	双曲线轨道
+1 · Installation folder	1 · 安装文件夹
+2 · Online access	2 · 在线访问
+Retry launch	重试启动
+Installation completed, but the app could not start.	安装已完成，但应用无法启动。
+Installation complete: AstroArchive package {0} is ready.	安装完成：AstroArchive 软件包 {0} 已就绪。
+Repair complete: AstroArchive package {0} is ready.	修复完成：AstroArchive 软件包 {0} 已就绪。
+Update complete: AstroArchive package {0} is installed.	更新完成：已安装 AstroArchive 软件包 {0}。
+Albedo	反照率
+Rotation period	自转周期
+Snapshot positions are shown only at the orbit epoch.	快照位置仅在轨道历元显示。
+Perihelion beyond the inner solar system	近日点位于内太阳系之外
+Updating information…	正在更新信息…
+Information updated.	信息已更新。
+No additional information was downloaded. Essential and saved information remain available.	未下载更多信息。基本信息和已保存的信息仍可使用。
+Today	今天
+Set UTC date	设置 UTC 日期
+UTC date (YYYY-MM-DD). Press Enter or Set UTC date.	UTC 日期（YYYY-MM-DD）。按 Enter 或“设置 UTC 日期”。
+Enter a valid UTC date (YYYY-MM-DD) between 1972 and 2026.	请输入 1972 至 2026 年间的有效 UTC 日期（YYYY-MM-DD）。
+Drag to rotate · Shift-drag to pan · Focus/Ctrl + wheel or pinch to zoom.	拖动旋转 · Shift 拖动平移 · 聚焦/Ctrl 加滚轮或双指缩放。

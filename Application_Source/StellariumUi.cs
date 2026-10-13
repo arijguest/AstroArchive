@@ -26,7 +26,7 @@ namespace AstroArchive {
   }
   // Stellarium is not installed, so show the same view in Stellarium Web in the default browser.
   void OpenStellariumWeb(StellariumView view){
-   string url=Stellarium.WebUrl(view);
+   if(!InternetAction())return;string url=Stellarium.WebUrl(view);
    try{Process.Start(new ProcessStartInfo(url){UseShellExecute=true});}
    catch(Exception error){if(!(error is Win32Exception||error is InvalidOperationException))throw;LocalizedMessage.Show("Stellarium is not installed and your browser could not open Stellarium Web. Visit "+url+"\n\n"+error.Message,"Open in Stellarium",MessageBoxButton.OK,MessageBoxImage.Information);}
   }

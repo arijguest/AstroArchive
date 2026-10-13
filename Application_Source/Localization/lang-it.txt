@@ -2333,3 +2333,71 @@ blue magnitude {0}	magnitudine blu {0}
 {0} million light-years	{0} milioni di anni luce
 {0} billion light-years	{0} miliardi di anni luce
 Distance	Distanza
+
+# Hybrid information, native 3D orbit and setup connectivity.
+Online access	Accesso online
+Hybrid (recommended)	Ibrido (consigliato)
+Offline	Offline
+Connectivity	Connettività
+Essential information is included. Additional information downloads when you open a target and is saved for later.	Le informazioni essenziali sono incluse. Le informazioni aggiuntive vengono scaricate quando apri un oggetto e salvate per dopo.
+Uses essential and saved information. Additional targets may have limited information.	Usa le informazioni essenziali e salvate. Altri oggetti potrebbero avere informazioni limitate.
+Choose how AstroArchive gets information	Scegli come AstroArchive ottiene le informazioni
+Use Hybrid (recommended)	Usa modalità ibrida (consigliata)
+Use Offline	Usa modalità offline
+You can change this in Preferences > General > Online access. Local telescope connections remain available.	Puoi cambiarlo in Preferenze > Generale > Accesso online. Le connessioni locali al telescopio restano disponibili.
+Choose Hybrid in Preferences > General > Online access to reconnect.	Scegli Ibrido in Preferenze > Generale > Accesso online per riconnetterti.
+Online access is paused. Automatic update checks resume in Hybrid.	L’accesso online è sospeso. I controlli automatici degli aggiornamenti riprendono in modalità ibrida.
+Downloaded information limit (MiB)	Limite delle informazioni scaricate (MiB)
+Downloaded information: {0} MiB	Informazioni scaricate: {0} MiB
+Downloaded information	Informazioni scaricate
+Downloaded information is unavailable.	Le informazioni scaricate non sono disponibili.
+Clear downloaded information	Cancella le informazioni scaricate
+Refresh information	Aggiorna informazioni
+Download missing or updated information for this target.	Scarica le informazioni mancanti o aggiornate per questo oggetto.
+Saved information · retrieved {0}	Informazioni salvate · recuperate il {0}
+ORBIT	ORBITA
+3D orbit	Orbita 3D
+Drag or use arrows to rotate. Shift-drag to pan. Focus the orbit or hold Ctrl to zoom with the wheel. Pinch to zoom.	Trascina o usa le frecce per ruotare. Maiusc+trascina per spostare. Seleziona l’orbita o tieni premuto Ctrl per usare la rotella. Pizzica per zoomare.
+Reset orbit	Ripristina orbita
+Top view	Vista dall’alto
+Orbit plane	Piano orbitale
+Fit orbit	Adatta orbita
+Inner solar system	Sistema solare interno
+Expand orbit	Espandi orbita
+Collapse orbit	Riduci orbita
+Orbit epoch	Epoca orbitale
+Marker date (UTC)	Data indicatore (UTC)
+Marker: {0} UTC	Indicatore: {0} UTC
+Marker at orbit epoch: JD {0} {1}	Indicatore all’epoca orbitale: JD {0} {1}
+Source epoch: JD {0} {1} · {2}	Epoca della fonte: JD {0} {1} · {2}
+Dated position unavailable for this solution. Use Orbit epoch.	La posizione datata non è disponibile per questa soluzione. Usa Epoca orbitale.
+Complete orbital elements are unavailable. No orientation has been assumed.	Gli elementi orbitali completi non sono disponibili. Non è stato ipotizzato alcun orientamento.
+Preparing 3D orbit…	Preparazione orbita 3D…
+The orbit could not be drawn.	Impossibile disegnare l’orbita.
+Approximate orbit · linear distances; body markers enlarged.	Orbita approssimativa · distanze lineari; indicatori dei corpi ingranditi.
+J2000 ecliptic · two-body geometry, not a precision ephemeris. UTC → TT; TDB differs by less than 2 ms.	Eclittica J2000 · geometria a due corpi, non un’effemeride di precisione. UTC → TT; TDB differisce di meno di 2 ms.
+Earth uses the Earth–Moon barycentre approximation.	La Terra usa l’approssimazione del baricentro Terra–Luna.
+Solar-system overview	Panoramica del sistema solare
+Extent clipped	Estensione ritagliata
+Perihelion (TDB)	Perielio (TDB)
+Perigee	Perigeo
+Hyperbolic	Iperbolica
+1 · Installation folder	1 · Cartella di installazione
+2 · Online access	2 · Accesso online
+Retry launch	Riprova avvio
+Installation completed, but the app could not start.	Installazione completata, ma l’app non si è avviata.
+Installation complete: AstroArchive package {0} is ready.	Installazione completata: il pacchetto AstroArchive {0} è pronto.
+Repair complete: AstroArchive package {0} is ready.	Riparazione completata: il pacchetto AstroArchive {0} è pronto.
+Update complete: AstroArchive package {0} is installed.	Aggiornamento completato: il pacchetto AstroArchive {0} è installato.
+Albedo	Albedo
+Rotation period	Periodo di rotazione
+Snapshot positions are shown only at the orbit epoch.	Le posizioni dell’istantanea sono mostrate solo all’epoca orbitale.
+Perihelion beyond the inner solar system	Perielio oltre il sistema solare interno
+Updating information…	Aggiornamento informazioni…
+Information updated.	Informazioni aggiornate.
+No additional information was downloaded. Essential and saved information remain available.	Non sono state scaricate informazioni aggiuntive. Le informazioni essenziali e salvate restano disponibili.
+Today	Oggi
+Set UTC date	Imposta data UTC
+UTC date (YYYY-MM-DD). Press Enter or Set UTC date.	Data UTC (AAAA-MM-GG). Premi Invio o Imposta data UTC.
+Enter a valid UTC date (YYYY-MM-DD) between 1972 and 2026.	Inserisci una data UTC valida (AAAA-MM-GG) tra il 1972 e il 2026.
+Drag to rotate · Shift-drag to pan · Focus/Ctrl + wheel or pinch to zoom.	Trascina per ruotare · Maiusc+trascina per spostare · Seleziona/Ctrl + rotella o pizzica per zoomare.

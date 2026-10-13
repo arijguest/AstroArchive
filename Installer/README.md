@@ -55,3 +55,15 @@ The [Windows build and release workflow](../.github/workflows/windows.yml) valid
 update feed; [v3 validation](../docs/V3_VALIDATION.md) records the earlier preview.
 See [development](../docs/DEVELOPMENT.md) for a complete build and
 [releasing](../docs/RELEASING.md) for package versions and signing.
+
+From 3.2.9, packaging produces one hybrid installer and one checksum. There is no
+new Offline-Setup output. Historical packages remain unchanged. Setup presents
+location, then Hybrid/Offline; it writes an atomic per-user connectivity choice
+without replacing `settings.json`. Silent installation preserves existing choices;
+an unrecorded choice remains Pending until the app asks at startup.
+
+Design sizes are 760×600 DIP (setup), 720×540 (update review) and 560×240 (download).
+Actual WinForms bounds and minima are converted for DPI and clamped to the active
+monitor work area. The body scrolls and actions stay visible. Theme and language
+follow saved app preferences or Windows. Completed installation/repair/update
+receipts are consumed once, while recovery notices take precedence.

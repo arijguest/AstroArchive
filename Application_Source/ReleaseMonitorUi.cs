@@ -20,21 +20,21 @@ namespace AstroArchive {
   async Task<ReleaseMonitor> EnsureReleaseMonitor(){
    if(releaseMonitor!=null)return releaseMonitor;
    if(releaseMonitorLoading==null)releaseMonitorLoading=Task.Run(()=>{var target=ReleaseTarget();return new ReleaseMonitor(target.Root,target.Comparison,()=>new UpdateClient().Check(target.Comparison,target.Root));});
-   try{var monitor=await releaseMonitorLoading;if(releaseMonitorDisposed)return monitor;releaseMonitor=monitor;monitor.SetAutomatic(!settings.DisableAutomaticReleaseChecks);PublishReleaseState();return monitor;}
+   try{var monitor=await releaseMonitorLoading;if(releaseMonitorDisposed)return monitor;releaseMonitor=monitor;monitor.SetAutomatic(AstroArchive.Installation.ConnectivityPolicy.AllowsInternet&&!settings.DisableAutomaticReleaseChecks);PublishReleaseState();return monitor;}
    finally{releaseMonitorLoading=null;}
   }
   async Task PeriodicReleaseCheck(){
-   if(releaseMonitorDisposed||closing||releaseInstalling||settings.DisableAutomaticReleaseChecks)return;
+   if(releaseMonitorDisposed||closing||releaseInstalling||settings.DisableAutomaticReleaseChecks||!AstroArchive.Installation.ConnectivityPolicy.AllowsInternet)return;
    try{var monitor=await EnsureReleaseMonitor();if(!releaseMonitorDisposed&&monitor.Due)await CheckReleaseAsync();}catch{/* Quiet retry on the next timer tick; explicit checks expose errors. */}
   }
   Task<UpdateManifest> CheckReleaseAsync(){
-   if(releaseRefreshTask!=null)return releaseRefreshTask;var task=RefreshReleaseAsync();releaseRefreshTask=task.IsCompleted?null:task;return task;
+   AstroArchive.Installation.ConnectivityPolicy.RequireInternet();if(releaseRefreshTask!=null)return releaseRefreshTask;var task=RefreshReleaseAsync();releaseRefreshTask=task.IsCompleted?null:task;return task;
   }
   async Task<UpdateManifest> RefreshReleaseAsync(){
    try{var monitor=await EnsureReleaseMonitor();var task=monitor.CheckAsync();PublishReleaseState();return await task;}
    finally{releaseRefreshTask=null;if(!releaseMonitorDisposed)PublishReleaseState();}
   }
-  void ApplyReleaseMonitoringPreference(){if(releaseMonitor!=null)releaseMonitor.SetAutomatic(!settings.DisableAutomaticReleaseChecks);}
+  void ApplyReleaseMonitoringPreference(){if(releaseMonitor!=null)releaseMonitor.SetAutomatic(AstroArchive.Installation.ConnectivityPolicy.AllowsInternet&&!settings.DisableAutomaticReleaseChecks);if(releaseChanged!=null)releaseChanged();}
   void PublishReleaseState(){
    if(releaseMonitorDisposed||releaseMonitor==null)return;var state=releaseMonitor.State;
    if(state.Available!=null){
@@ -45,7 +45,7 @@ namespace AstroArchive {
    if(releaseChanged!=null)releaseChanged();
   }
   string ReleaseStatusText(){
-   if(releaseMonitor==null)return "Release information has not been checked yet.";
+   if(!AstroArchive.Installation.ConnectivityPolicy.AllowsInternet)return Localization.T("Online access is paused. Automatic update checks resume in Hybrid.");if(releaseMonitor==null)return "Release information has not been checked yet.";
    var state=releaseMonitor.State;string status=state.Available==null?(state.CheckedUtc==null?"Release information has not been checked yet.":"No newer release was found at the last successful check."):"AstroArchive "+state.Available.application_version+" (package "+state.Available.package_version+") is available.";
    DateTime date;if(DateTime.TryParse(state.CheckedUtc,out date))status+="\nLast successful check: "+date.ToLocalTime().ToString("g");
    if(releaseMonitor.Busy)status+="\nChecking releases…";else if(state.Error!=null)status+="\nThe latest check could not finish: "+state.Error;
@@ -56,17 +56,17 @@ namespace AstroArchive {
    var check=dialog.Button("Check now",async()=>{checkReleaseButtonBusy=true;try{await CheckReleaseAsync();}catch(Exception error){status.Text="Could not check for releases. "+error.Message;}finally{checkReleaseButtonBusy=false;if(!releaseMonitorDisposed)PublishReleaseState();}});
    var notes=dialog.Button("Release notes",()=>{if(releaseMonitor!=null&&releaseMonitor.State.Available!=null)OpenWebsite(UpdateClient.ReleasePage(releaseMonitor.State.Available));});
    var install=dialog.Button("Install and restart",()=>{if(releaseMonitor!=null&&releaseMonitor.State.Available!=null&&!RepositoryOperationBlocked){var manifest=releaseMonitor.State.Available;dialog.Window.Close();ConfirmReleaseInstallation(manifest);}});
-   bool closed=false;Action refresh=()=>{if(closed)return;status.Text=ReleaseStatusText();check.IsEnabled=!checkReleaseButtonBusy&&(releaseMonitor==null||!releaseMonitor.Busy)&&!releaseInstalling;notes.IsEnabled=releaseMonitor!=null&&releaseMonitor.State.Available!=null;install.IsEnabled=notes.IsEnabled&&!RepositoryOperationBlocked;install.ToolTip=RepositoryOperationBlocked?"Available when the current operation finishes.":null;};
+   bool closed=false;Action refresh=()=>{if(closed)return;status.Text=ReleaseStatusText();check.IsEnabled=AstroArchive.Installation.ConnectivityPolicy.AllowsInternet&&!checkReleaseButtonBusy&&(releaseMonitor==null||!releaseMonitor.Busy)&&!releaseInstalling;notes.IsEnabled=releaseMonitor!=null&&releaseMonitor.State.Available!=null;install.IsEnabled=notes.IsEnabled&&!RepositoryOperationBlocked;install.ToolTip=RepositoryOperationBlocked?"Available when the current operation finishes.":null;};
    releaseChanged+=refresh;dialog.Window.Closed+=(s,e)=>{closed=true;releaseChanged-=refresh;};refresh();
   }
   bool checkReleaseButtonBusy;
   void ConfirmReleaseInstallation(UpdateManifest release){
    if(RepositoryOperationBlocked)return;
-   var dialog=new FormWindow(Window,"Install AstroArchive release",620,430);dialog.Text("Install package "+release.package_version,true);dialog.Text("The release will download and be verified in the background. AstroArchive will then close, install it and restart. Repositories, images and settings are retained.");dialog.Button("Read release notes",()=>OpenWebsite(UpdateClient.ReleasePage(release)));dialog.Accept("Install and restart",()=>true);if(dialog.Show())StartBackgroundReleaseInstallation(release);
+   var dialog=new FormWindow(Window,"Install AstroArchive release",720,540);dialog.Text("Install package "+release.package_version,true);dialog.Text("The release will download and be verified in the background. AstroArchive will then close, install it and restart. Repositories, images and settings are retained.");dialog.Button("Read release notes",()=>OpenWebsite(UpdateClient.ReleasePage(release)));dialog.Accept("Install and restart",()=>true);if(dialog.Show())StartBackgroundReleaseInstallation(release);
   }
   async void StartBackgroundReleaseInstallation(UpdateManifest release){await InstallReleaseInBackground(release);}
   async Task InstallReleaseInBackground(UpdateManifest release){
-   if(RepositoryOperationBlocked||closing)return;releaseInstalling=true;releaseDownloadCancel=new CancellationTokenSource();var token=releaseDownloadCancel.Token;var entry=AddActivity("Installing AstroArchive "+release.package_version,true);entry.RepositoryRoot=null;entry.Status="Downloading and verifying the release…";entry.Cancel=()=>releaseDownloadCancel.Cancel();RenderActivity();SetBusy(true);if(releaseChanged!=null)releaseChanged();
+   if(RepositoryOperationBlocked||closing||!InternetAction())return;releaseInstalling=true;releaseDownloadCancel=new CancellationTokenSource();var token=releaseDownloadCancel.Token;var entry=AddActivity("Installing AstroArchive "+release.package_version,true);entry.RepositoryRoot=null;entry.Status="Downloading and verifying the release…";entry.Cancel=()=>releaseDownloadCancel.Cancel();RenderActivity();SetBusy(true);if(releaseChanged!=null)releaseChanged();
    var watch=Stopwatch.StartNew();var eta=new EtaEstimate();string verified=null;DateTime attemptedUtc=DateTime.MinValue;bool handedOff=false;Exception installFailure=null;var client=new UpdateClient();
    try{
     SaveMainWindowPlacement();SaveSettings();var target=ReleaseTarget();

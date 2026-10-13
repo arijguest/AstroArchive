@@ -215,6 +215,3 @@ jobs:
           else
             gh release edit "$tag" --draft=false --latest --notes-file release-artifacts/Release_Notes.txt
           fi
-          if ! gh release view v1.2.0.1 >/dev/null 2>&1; then
-            gh release create v1.2.0.1 releases/offline-1.2.0/*.exe releases/offline-1.2.0/*.sha256 --target "$GITHUB_SHA" --title 'AstroArchive 1.2.0 — original offline installer' --notes-file releases/offline-1.2.0/README.md --latest=false
-          fi

@@ -103,7 +103,7 @@ namespace AstroArchive {
     Check(TargetInfoPresentation.DisplaySummary(catalog.Find("C/2099 B12",CancellationToken.None).Cards.Single()).Contains("12th comet reported in the second half of January 2099"),"Designation not explained");
     Check(TargetInfoPresentation.DisplaySummary(CometInfo.Card("Comet ATLAS")).Contains("designation"),"Name-only comet lacks guidance");
     var halley=CometInfo.Orbit("1P");Check(CometInfo.Period(halley)=="75.9 years per orbit"&&CometInfo.Perihelion(halley)=="0.575 AU from the Sun"&&CometInfo.ClassLabel(halley)=="Halley-type"&&CometInfo.ShowsPerihelionDate(halley)&&CometInfo.PerihelionDate(halley)=="8 Feb 1986"&&CometInfo.ShowsAphelion(halley)&&CometInfo.Aphelion(halley)=="35.3 AU from the Sun"&&CometInfo.Aphelion(CometInfo.Orbit("2P"))=="4.1 AU from the Sun"&&!CometInfo.ShowsAphelion(CometInfo.Orbit("C/1995 O1")),"Halley orbit formatted wrongly");
-    Check(!CometInfo.ShowsPerihelionDate(CometInfo.Orbit("67P"))&&CometInfo.ClassLabel(CometInfo.Orbit("2I"))=="Hyperbolic (interstellar)"&&CometInfo.ClassLabel(CometInfo.Orbit("C/2023 A3"))=="Near-parabolic","Comet orbit classes wrong");
+    Check(!CometInfo.ShowsPerihelionDate(CometInfo.Orbit("67P"))&&CometInfo.ClassLabel(CometInfo.Orbit("2I"))=="Hyperbolic"&&CometInfo.ClassLabel(CometInfo.Orbit("C/2023 A3"))=="Near-parabolic","Comet orbit classes wrong");
     Check(!CometInfo.IsComet(catalog.Find("M31",CancellationToken.None).Cards.Single())&&!CometInfo.IsComet(catalog.Find("Jupiter",CancellationToken.None).Cards.Single())&&catalog.Find("Rosette field",CancellationToken.None).Status=="not_found","Non-comets treated as comets");
    });
    Test("Section and eclipse pages, new images and the corrected galaxy type come from the pack",()=>{

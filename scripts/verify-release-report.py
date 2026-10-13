@@ -19,7 +19,6 @@ def verify(directory, publisher, allow_unsigned=False, require_signed=False):
     if not re.fullmatch(r'\d+\.\d+\.\d+\.\d+', package) or package.rsplit('.', 1)[0] != version:
         raise ValueError('Invalid release version.')
     installer = f'AstroArchive{package}.exe'
-    alias = f'AstroArchive-{version}-Windows-x64-Offline-Setup.exe'
     records = None
     if not allow_unsigned or signed or (directory / 'signatures.json').exists():
         if not signed or not publisher or not (directory / 'signatures.json').is_file():
@@ -38,11 +37,12 @@ def verify(directory, publisher, allow_unsigned=False, require_signed=False):
     record = next(entry for entry in records if entry['file'] == installer) if records else None
     if (record and digest != record['sha256']) or digest != feed['sha256'] or len(primary) != feed['size']:
         raise ValueError('Installer changed after Windows signature verification.')
-    if (directory / alias).read_bytes() != primary:
-        raise ValueError('Compatibility installer differs from the verified installer.')
-    if {path.name for path in directory.glob('*.exe')} != {installer, alias}:
+    if {path.name for path in directory.glob('*.exe')} != {installer}:
         raise ValueError('Unexpected executable in release artifacts.')
-    for name in (installer, alias):
+    expected_url = f'https://github.com/arijguest/AstroArchive/releases/download/v{package}/{installer}'
+    if feed.get('url') != expected_url or feed.get('download_url') != expected_url:
+        raise ValueError('Update feed must point to the single hybrid installer.')
+    for name in (installer,):
         expected = f'{digest}  {name}'
         if (directory / f'{name}.sha256').read_text(encoding='ascii').strip() != expected:
             raise ValueError(f'Checksum does not match the signed file: {name}.')
@@ -54,4 +54,4 @@ if __name__ == '__main__':
         verify(Path(sys.argv[1]), os.environ.get("SIGNING_PUBLISHER", ""), allow_unsigned=sys.argv[2:] == ["--allow-unsigned"], require_signed=policy.get("require_signing") is True)
     except (ValueError, KeyError, OSError, IndexError, TypeError) as error:
         sys.exit(str(error))
-    print('PASS release signing policy, installer integrity, alias and update feed agree')
+    print('PASS release signing policy, single installer integrity and update feed agree')
