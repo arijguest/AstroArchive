@@ -41,7 +41,7 @@ namespace AstroArchive {
      Check(night.BodyBelowHorizon&&night.SunAltitude<0&&night.Eclipse==null&&CaptureScreening.HorizonIssue(frame)!=null,"Night-side Sun was treated as an observable eclipse or left unflagged");
      // A recorded pointing above the horizon cannot override the physical Sun check.
      frame.RA=SkyOrientation.Sidereal(night.Utc.Value,139.7);frame.Dec=35.7;var pointing=CaptureSky.Resolve(frame,null);
-     Check(pointing.Altitude>0&&pointing.BodyBelowHorizon&&pointing.Eclipse==null,"Stored pointing hid an impossible Sun capture");
+     Check(pointing.BodyBelowHorizon&&pointing.Eclipse==null&&pointing.Altitude<0,"Stored pointing hid an impossible Sun capture");
      frame.RA=null;frame.Dec=null;CaptureSite.Apply(frame,null);var restored=CaptureSky.Resolve(frame,null);
      Check(restored.Eclipse!=null&&!restored.BodyBelowHorizon&&CaptureScreening.HorizonIssue(frame)==null,"Clearing the town kept stale eclipse/review results");
      foreach(double latitude in new[]{-70.0,-30,0,30,70})foreach(double longitude in new[]{-180.0,-120,-60,0,60,120,180}){
@@ -112,6 +112,15 @@ namespace AstroArchive {
     var dated=CaptureSky.Resolve(new Frame{Target="Moon",Kind="Light",Observed="2025-03-14",TimeSource="FITS date only"},null);
     Check(dated.HasPosition&&!dated.HasHorizon&&MoonEphemeris.Separation(dated.TargetOfDate,exact.TargetOfDate)<8,"A date-only lunar capture lost its Moon position");
     Check(!CaptureSky.Resolve(new Frame{Target="Mars",Kind="Light",Observed="2025-03-14T08:58:43"},null).HasPosition,"A planet was placed without a clock");
+    // A stored pointing far from the Moon at the capture time is stale and must not place the target marker; a nearby one or a real solve is kept.
+    var stale=CaptureSky.Resolve(new Frame{Target="Moon",Kind="Stack",Observed="2025-03-14T06:58:43Z",TimeSource="FITS UTC",RA=SkyOrientation.Wrap(exact.RA+90),Dec=-exact.Dec},null);
+    Check(stale.HasPosition&&stale.PositionOfDate&&MoonEphemeris.Separation(stale.TargetOfDate,exact.TargetOfDate)<0.01&&stale.Evidence.Contains("is not used"),"A stale lunar pointing placed the Moon target far from the Moon");
+    var staleDated=CaptureSky.Resolve(new Frame{Target="Moon",Kind="Stack",Observed="2025-03-14T08:58:43",TimeSource="Capture timestamp",RA=SkyOrientation.Wrap(exact.RA+90),Dec=-exact.Dec},null);
+    Check(staleDated.HasPosition&&MoonEphemeris.Separation(staleDated.TargetOfDate,exact.TargetOfDate)<1.5,"A stale lunar pointing survived an unzoned clock");
+    var near=CaptureSky.Resolve(new Frame{Target="Moon",Kind="Stack",Observed="2025-03-14T06:58:43Z",TimeSource="FITS UTC",RA=SkyOrientation.Wrap(exact.RA+1.5),Dec=exact.Dec},null);
+    Check(near.HasPosition&&!near.PositionOfDate&&Math.Abs(near.RA-SkyOrientation.Wrap(exact.RA+1.5))<1e-9,"A pointing near the Moon was replaced");
+    var solved=CaptureSky.Resolve(new Frame{Target="Moon",Kind="Stack",Observed="2025-03-14T06:58:43Z",TimeSource="FITS UTC",Sky=new SkyGeometry{RA=SkyOrientation.Wrap(exact.RA+90),Dec=-exact.Dec,Evidence="Plate solved"}},null);
+    Check(solved.HasPosition&&!solved.PositionOfDate&&Math.Abs(solved.RA-SkyOrientation.Wrap(exact.RA+90))<1e-9,"A plate-solved lunar position was replaced by the calculated Moon");
     var deepSky=new Frame{Target="M31",Kind="Light",Observed="2024-04-08T18:17:16Z",TimeSource="FITS UTC",Latitude=25.29,Longitude=-104.14};Check(CaptureSky.Resolve(deepSky,null).Eclipse==null,"A deep-sky capture was given an eclipse");
     var sections=TargetNavigation.Build(new[]{sun,new Frame{Target="Sun",Kind="Light"}},f=>f==sun?Eclipses.SolarSection:f.Target);
     Check(sections.Any(t=>t.Name==Eclipses.SolarSection&&t.Files==1&&t.Group=="Solar system")&&sections.Any(t=>t.Name=="Sun"&&t.Files==1),"Eclipse captures did not list in their own Solar system section");

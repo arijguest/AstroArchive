@@ -53,6 +53,11 @@ namespace AstroArchive {
     var rows=new[]{new Frame{Kind="Light",Target="M31",Session="one",Telescope="A",Exposure=10},new Frame{Kind="Stack",Target="M31",Exposure=100},new Frame{Kind="Light",Target="M31",Session="one",Telescope="A",Exposure=5},new Frame{Kind="Light",Target="M31",Session="one",Telescope="B",Exposure=20},new Frame{Kind="Bias",Target="Calibration",Exposure=0}};
     List<SubframeSession> groups;var ordered=RepositoryOrdering.Order(rows,new[]{new SearchSort{Property="Exposure",Descending=true}},CultureInfo.InvariantCulture,true,true,ct,out groups);
     Check(ordered.SequenceEqual(new[]{rows[0],rows[2],rows[1],rows[3],rows[4]}),"Section partition merged a singleton/instrument or lost user ordering");Check(groups.Count==1&&groups[0].Frames.SequenceEqual(new[]{rows[0],rows[2]})&&groups[0].Label.Contains("5–10s"),"Session frame order or label changed");
+    // One target's table keeps loose files and stacks together and lists the grouped subs last, ahead of calibration.
+    var moon=new[]{new Frame{Kind="Light",Target="Moon",Session="one",Telescope="A",Exposure=10},new Frame{Kind="Light",Target="Moon",Session="two",Telescope="A",Exposure=3},new Frame{Kind="Light",Target="Moon",Session="one",Telescope="A",Exposure=5},new Frame{Kind="Stack",Target="Moon",Exposure=100},new Frame{Kind="Light",Target="Moon",Session="two",Telescope="A",Exposure=4},new Frame{Kind="Light",Target="Moon",Session="lone",Telescope="A",Exposure=2},new Frame{Kind="Bias",Target="Calibration",Exposure=0}};
+    var single=RepositoryOrdering.Order(moon,new SearchSort[0],CultureInfo.InvariantCulture,false,true,ct);
+    Check(single.SequenceEqual(new[]{moon[3],moon[5],moon[0],moon[1],moon[2],moon[4],moon[6]}),"A single target's grouped subs were not listed after its stacks and loose files");
+    Check(RepositoryOrdering.Order(moon,new SearchSort[0],CultureInfo.InvariantCulture,false,false,ct).SequenceEqual(new[]{moon[3],moon[0],moon[1],moon[2],moon[4],moon[5],moon[6]}),"Ungrouped single-target ordering changed");
     Check(SearchOrdering.Order(rows,new SearchSort[0],null,ct).SequenceEqual(rows),"Empty sort descriptors changed order");using(var cancel=new CancellationTokenSource()){cancel.Cancel();Expect(()=>SearchOrdering.Order(new Frame[0],new SearchSort[0],null,cancel.Token),"Empty sort ignored cancellation");}
    });
   }
