@@ -1188,7 +1188,6 @@
    <Button x:Name="MoreButton" Content="Tools ▾" Margin="0" />
    <Button x:Name="ReviewLibraryButton" Content="Review flagged" />
    <Button x:Name="ScreenLibraryButton" Content="Screen for failures" />
-   <Button x:Name="RotationButton" Content="Rotation" Padding="10,5" />
    <Button x:Name="AnalyzeQualityButton" Content="Analyse image quality" />
    <Button x:Name="SolveButton" Content="Identify target" Padding="10,5" />
    <Button x:Name="EditButton" Content="Edit metadata" Padding="10,5" Margin="0" />
@@ -1211,7 +1210,6 @@
         <ColumnDefinition Width="*" />
         <ColumnDefinition Width="*" />
         <ColumnDefinition Width="*" />
-        <ColumnDefinition Width="*" />
        </Grid.ColumnDefinitions>
        <StackPanel Margin="0,0,12,0">
         <TextBlock Text="MODEL" FontSize="{DynamicResource UiFontCaption}" />
@@ -1221,13 +1219,9 @@
         <TextBlock Text="CAMERA" FontSize="{DynamicResource UiFontCaption}" />
         <ComboBox x:Name="CameraBox" Margin="0,5,0,0" />
        </StackPanel>
-       <StackPanel Grid.Column="2" Margin="0,0,12,0">
+       <StackPanel Grid.Column="2">
         <TextBlock Text="TARGET ANALYSIS" FontSize="{DynamicResource UiFontCaption}" />
         <ComboBox x:Name="ImportSolveMode" Margin="0,5,0,0" />
-       </StackPanel>
-       <StackPanel Grid.Column="3">
-        <TextBlock Text="ROTATION ANALYSIS" FontSize="{DynamicResource UiFontCaption}" />
-        <ComboBox x:Name="ImportRotationMode" Margin="0,5,0,0" />
        </StackPanel>
       </Grid>
       <CheckBox x:Name="IgnoreFailedCheck" IsChecked="False" Content="Ignore failed" Margin="0,12,0,0" />

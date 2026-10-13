@@ -12,7 +12,7 @@ namespace AstroArchive {
   public DateTime UpdatedUtc=DateTime.UtcNow;
   public Connection Connection;public TelescopeProfile Profile;public List<Entry> Files;
   public List<Frame> Frames;public ImportSelection Selection;public RemoteLiveState LiveState;public string[] EditedFiles;public EditedImportPlan EditedPlan;
-  public int Workers;public bool IgnoreFailed,IgnoreRaster,DeleteOriginals;public string Solve="Off",Rotation="Off";
+  public int Workers;public bool IgnoreFailed,IgnoreRaster,DeleteOriginals;public string Solve="Off";
  }
  public sealed class ImportResumeStore {
   readonly string root;readonly object sync=new object();

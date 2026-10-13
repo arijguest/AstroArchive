@@ -107,7 +107,7 @@ IMPORT WORKFLOW
 4. Check the **Status** and **Review** columns, then **Import**.
 
 Import copies the eligible captures in the filtered view and verifies each copy.
-Target and rotation analysis default to Off.
+Target analysis defaults to Off.
 
 > Tip: Import greyed out? [Run the guided fix](walkthrough:import-disabled).
 
@@ -470,7 +470,7 @@ OBSERVING TOWN / CITY
 @related CAPTURE DETAILS AND SKY | ECLIPSES
 @keywords location town city coordinates latitude longitude site timezone
 **Settings → Sky & solving** offers an offline town / city search or manual coordinates.
-- Place centres approximate your site; use precise coordinates for rotation analysis.
+- Place centres approximate your site; use precise coordinates for accurate sky views.
 - Location search never sends your position to a network service.
 - Individual captures can have their own town: right-click **Edit metadata → Capture**.
 
@@ -695,10 +695,10 @@ image and SVG exports arrange pages on one sheet.
 METADATA AND OPTIONAL ANALYSIS
 @title Metadata and target identification
 @category Analysis and metadata
-@summary Edit capture details, re-detect metadata, plate solve targets and analyse rotation.
+@summary Edit capture details, re-detect metadata, plate solve targets.
 @walkthrough identify-targets
 @related IMAGE QUALITY | CATALOGUE IDENTITIES | EDITED METADATA AND EXPOSURE
-@keywords metadata edit plate solve astap astrometry identify target unknown rotation mount
+@keywords metadata edit plate solve astap astrometry identify target unknown mount
 ## Edit metadata
 Right-click **Edit metadata** to change indexed labels; source headers are kept.
 - **More actions → Re-detect metadata and review** compares detected values before
@@ -715,10 +715,9 @@ Right-click **Edit metadata** to change indexed labels; source headers are kept.
 - Online solving sends detected star coordinates, not your image.
 - Cancel keeps completed changes. Recognised names can identify files without a solver.
 
-## Rotation analysis
-Needs timestamped acquisition subs with enough time coverage and site / pointing data.
-Stacks and registered images are unsuitable. Mount labels ending in ? are suggestions;
-confirm them through **Edit metadata**.
+## Mount labels
+Mount labels ending in ? are suggestions from exposure length; confirm them through
+**Edit metadata**.
 
 IMAGE QUALITY
 @title Image quality scores

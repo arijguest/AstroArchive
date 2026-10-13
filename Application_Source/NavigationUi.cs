@@ -143,7 +143,7 @@ namespace AstroArchive {
                 B("OpenRepositoryFolderButton").ToolTip = "Open repository folder\n" + repo.Root;
                 AutomationProperties.SetName(B("OpenRepositoryFolderButton"), "Open active repository: " + repo.Root);
             }
-            var analysis = Convert.ToString(C("ImportSolveMode").SelectedItem) != "Off" || Convert.ToString(C("ImportRotationMode").SelectedItem) != "Off";
+            var analysis = Convert.ToString(C("ImportSolveMode").SelectedItem) != "Off";
             var cleanup = ((CheckBox)Window.FindName("DeleteOriginalsCheck")).IsChecked == true;
             L("ImportPolicyLabel").Text=(cleanup?"Delete after import ON · Calibration kept":"Originals kept")+(analysis?" · Analysis enabled":"")+(!SkipFlagged?" · Flagged files included":"")+(unknownImportTarget.Length>0?" · Unknown → "+Catalog.Label(unknownImportTarget):"");
             UiHelp.Tip(L("ImportPolicyLabel"),(SkipFlagged?"Flagged captures excluded":"Flagged captures included")+" · "+(settings.IgnoreFailed?"Failed filenames ignored":"Failed filenames included")+" · "+(settings.RobustImportMatching?"Robust matching":"Filename matching")+(settings.IgnoreRasterImports?" · PNG/JPG/JPEG/MP4 ignored":" · PNG/JPG/JPEG/MP4 included"));
@@ -198,7 +198,7 @@ namespace AstroArchive {
             menu.Items.Add(new Separator());
             menu.Items.Add(AnalyticsMenu());
             var review=Branch("Review and analysis",ButtonAction("Review flagged files…","ReviewLibraryButton",0),ButtonAction("Screen for failures","ScreenLibraryButton",0));
-            review.Items.Add(new Separator());foreach(var item in new[]{ButtonAction("Identify targets…","SolveButton",0),ButtonAction("Analyse rotation…","RotationButton",0),ButtonAction("Analyse image quality…","AnalyzeQualityButton",0),MenuAction("Re-measure image quality…",()=>{GoToPage(0);AnalyzeQuality(true);},B("AnalyzeQualityButton").IsEnabled)})review.Items.Add(item);menu.Items.Add(review);
+            review.Items.Add(new Separator());foreach(var item in new[]{ButtonAction("Identify targets…","SolveButton",0),ButtonAction("Analyse image quality…","AnalyzeQualityButton",0),MenuAction("Re-measure image quality…",()=>{GoToPage(0);AnalyzeQuality(true);},B("AnalyzeQualityButton").IsEnabled)})review.Items.Add(item);menu.Items.Add(review);
             menu.Items.Add(new Separator());
             menu.Items.Add(MenuAction("Back up archive…",BackUpArchive,repo!=null));
             var tools=BuildRepositoryTools();

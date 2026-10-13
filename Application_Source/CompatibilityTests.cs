@@ -322,13 +322,11 @@ namespace AstroArchive {
                     Check(frame.Make==(model.StartsWith("Vespera")?"Vaonis":"Unistellar")&&frame.Telescope=="Physical-01"&&frame.TelescopeModel==model,"Device profile incorrect");
                 }
             });
-            Test("Timezone evidence excludes filename times from rotation",()=> {
+            Test("Timezone evidence excludes filename times from UTC",()=> {
                 string p=Path.Combine(root,"Light_M45_10s_2026-10-07-01-00-00.fits");
                 Write(p,4,4,(x,y)=>100,new Dictionary<string,string>());
                 var frame=Classifier.Read(p,root,"Rig","Auto");
                 Check(frame.Observed.Length>0&&frame.ObservedUtc==null,"Guessed filename UTC");
-                var result=Rotation.Analyze(null,Enumerable.Repeat(frame,6).ToList(),null,null,ct,NoProgress);
-                Check(result.Points.Count==0&&result.Mount=="Unknown","Unknown timezone used for mount classification");
             });
             Test("Re-detection preserves user overrides and archive identity",()=> {
                 string p=Path.Combine(root,"review.fits");

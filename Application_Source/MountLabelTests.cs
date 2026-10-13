@@ -19,7 +19,7 @@ namespace AstroArchive {
      var frame=new Frame{Mount=label,Exposure=60};Check(frame.MountText=="Alt-Az?"&&MountLabels.Normalize(label)=="Alt-Az?","Old Alt-Az inference or formatting lost: "+label);
     }
     foreach(string label in new[]{"EQ (likely)","Equatorial (inferred)","EQ tentative","EQ?"})Check(new Frame{Mount=label,Exposure=10}.MountText=="EQ?"&&MountLabels.Normalize(label)=="EQ?","EQ inference changed to exposure guess: "+label);
-    Check(MountLabels.Normalize("Unknown")=="Unknown","Inconclusive rotation result became a confirmed mount");
+    Check(MountLabels.Normalize("Unknown")=="Unknown","Inconclusive result became a confirmed mount");
     var grouped=new[]{new Frame{Mount="EQ"},new Frame{Mount="EQ?"},new Frame{Mount="Alt-Az"},new Frame{Mount="Alt-Az?"},new Frame{Mount="Alt/Az (likely)"}};
     var filters=new CaptureFilters();filters.Values["Mount"]="EQ";Check(filters.Apply(grouped,"").Count==2,"EQ and EQ? split into different filter groups");filters.Values["Mount"]="Alt-Az";Check(filters.Apply(grouped,"").Count==3,"Confirmed, inferred and legacy Alt-Az split into different filter groups");
    });

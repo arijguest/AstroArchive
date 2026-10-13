@@ -22,7 +22,7 @@ namespace AstroArchive {
                 string[] expected = { "ImportMenu", "ExportMenu", "RepositoryMenu", "SettingsMenu", "GuideMenu", "CoffeeMenu" };
                 if (!TopMenus().Select(item => item.Name).SequenceEqual(expected)) throw new Exception("Top-level menu order changed.");
                 if (Convert.ToString(((TabItem)tabs.Items[0]).Header) != "Repository") throw new Exception("Repository tab retains the Library label.");
-                if (B("ThemeButton").IsVisible || B("MoreButton").IsVisible || B("PerformanceButton").IsVisible || B("RotationButton").IsVisible) throw new Exception("Secondary action buttons remain visible.");
+                if (B("ThemeButton").IsVisible || B("MoreButton").IsVisible || B("PerformanceButton").IsVisible) throw new Exception("Secondary action buttons remain visible.");
                 if (!B("ExportButton").IsVisible || !B("RepositoryImportButton").IsVisible) throw new Exception("Primary repository actions are missing.");
                 var brand = (FrameworkElement)Window.FindName("BrandPanel");
                 var path = B("OpenRepositoryFolderButton");

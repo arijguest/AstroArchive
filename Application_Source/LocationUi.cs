@@ -10,9 +10,9 @@ namespace AstroArchive {
  public partial class MainUi {
   ObservingSiteChoice AddObservingSite(FormWindow dialog){
    var choice=new ObservingSiteChoice(settings);dialog.Text("Observing town / city",true);
-   dialog.Text("Select your nearest town or city. Its centre is used for rotation analysis; without a selection, capture location metadata is used when available.");
+   dialog.Text("Select your nearest town or city. Its centre is used for sky views; without a selection, capture location metadata is used when available.");
    var label=dialog.Input("Town / city",choice.Label);label.IsReadOnly=true;
-   UiHelp.Hint(label,"Saved location used for sky views and mount analysis.");
+   UiHelp.Hint(label,"Saved location used for sky views.");
    dialog.Button("Choose town / city…",()=>{var picker=new CityPicker(dialog.Window,choice.CityLabel);try{if(picker.Show()){choice.Select(picker.SelectedCity);label.Text=choice.Label;}}finally{picker.Dispose();}});
    dialog.Button("Clear observing location",()=>{choice.Clear();label.Text=choice.Label;});return choice;
   }
