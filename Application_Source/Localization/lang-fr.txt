@@ -2299,3 +2299,9 @@ Open in Stellarium at the catalogue position. Uses Stellarium Web when Stellariu
 Quality	Qualité
 Sharpness	Netteté
 Measurements	Mesures
+# Help navigation
+Your first import	Votre première importation
+Start tour:	Lancer la visite :
+Step-by-step fixes for common problems, on AstroArchive's own screens.	Solutions pas à pas aux problèmes courants, sur les écrans d'AstroArchive.
+Short tours of importing, exporting and backups.	Courtes visites de l'importation, de l'exportation et des sauvegardes.
+Search the guide, or start a guided fix or tour.	Rechercher dans le guide, ou lancer une solution guidée ou une visite.

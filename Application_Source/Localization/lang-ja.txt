@@ -2333,3 +2333,9 @@ Open in Stellarium at the catalogue position. Uses Stellarium Web when Stellariu
 Quality	品質
 Sharpness	シャープネス
 Measurements	測定値
+# Help navigation
+Your first import	はじめてのインポート
+Start tour:	ツアーを開始:
+Step-by-step fixes for common problems, on AstroArchive's own screens.	よくある問題を AstroArchive の画面上で順を追って解決します。
+Short tours of importing, exporting and backups.	インポート、エクスポート、バックアップの短いツアーです。
+Search the guide, or start a guided fix or tour.	ガイドを検索するか、ガイド付き修正やツアーを開始します。

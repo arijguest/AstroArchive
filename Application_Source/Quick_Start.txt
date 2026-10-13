@@ -45,7 +45,7 @@ Switch pages with the purple selector, `Ctrl+1–3` or `Ctrl+Tab`.
 - **Import / Export** handle files coming in and going out.
 - **Repository** holds view options, analysis, backups, maintenance and clean-up.
 - **Settings** opens Preferences.
-- **Guide** opens this help, guided fixes, the walkthrough and About AstroArchive.
+- **Guide** opens this help, Report a problem and About AstroArchive.
 
 Right-click files for preview, metadata, export, working copies or deletion.
 
@@ -54,7 +54,7 @@ Right-click files for preview, metadata, export, working copies or deletion.
 - Checkboxes show an empty outline when off, a tick when on and a dash when mixed.
 - Unavailable controls keep their recorded state and readable labels.
 
-> Tip: Not sure where something is? **Guide → Guided fixes** walks you through common problems on the real screens.
+> Tip: Not sure where something is? **Guided fixes** and **Guided tours**, at the top left of this window, walk you through it on the real screens.
 
 APPEARANCE AND ACCESSIBILITY
 @title Appearance and accessibility
@@ -878,7 +878,7 @@ INSTALLATION AND UPDATES
 @title Installation and updates
 @category Keep your archive safe
 @summary Install, update, repair or uninstall AstroArchive.
-@related REPORTING A PROBLEM
+@related WINDOWS SMART APP CONTROL | REPORTING A PROBLEM
 @keywords install update upgrade repair uninstall version setup offline
 Run the installer to install, update or repair. The default location is
 `%LOCALAPPDATA%\Programs\AstroArchive` and needs no administrator access.
@@ -887,9 +887,34 @@ Run the installer to install, update or repair. The default location is
   **Guide → About AstroArchive** show what's available. Turn checks off in **Settings → Updates**.
 - Downloads show progress and **Cancel** in Activity. A failed download keeps the current app.
 - If Windows blocks a new version from starting, setup restores the newest earlier version
-  that starts and doesn't offer the blocked package again.
+  that starts and doesn't offer the blocked package again. See [Smart App Control](topic:WINDOWS SMART APP CONTROL).
 - Manual installation works offline; `Start.exe --no-updates` skips automatic checks.
 - Uninstall from Windows Installed Apps; your repositories, settings and codecs stay.
+
+WINDOWS SMART APP CONTROL
+@title Windows Smart App Control
+@category Fix a problem
+@summary Why Windows may block an update, and why your current version is safe.
+@related INSTALLATION AND UPDATES | TROUBLESHOOTING | REPORTING A PROBLEM
+@keywords smart app control smartscreen blocked block windows security update install installer policy app control unsigned
+Smart App Control is a Windows 11 security feature that blocks apps Windows doesn't
+recognise yet. A new AstroArchive release can be blocked while installing or the first
+time it starts, even though the version you already have runs normally.
+
+> Important: Your current installation is safe. If Windows blocks an update, AstroArchive keeps or returns to the version you already had, and your archive, settings and captures are untouched.
+
+## If an update is blocked
+1. Close the Windows message.
+2. Try the update again from **Settings → Updates → Install and restart**, or run the
+   downloaded installer again.
+3. Still blocked? Keep using your current version and try again later.
+
+## Check Smart App Control
+- Open **Windows Security → App & browser control → Smart App Control settings**.
+- **On** blocks apps Windows doesn't recognise; **Evaluation** decides for you; **Off** doesn't block.
+- On a work or school PC, your IT team may need to approve AstroArchive.
+
+> Note: You don't need to turn Smart App Control off to keep using AstroArchive.
 
 TROUBLESHOOTING
 @title Troubleshooting
@@ -909,7 +934,7 @@ setup as you go.
 - **Unknown metadata:** inspect Image details; ambiguous values aren't guessed. [Identify targets](walkthrough:identify-targets)
 - **Unknown exposure:** check the Exposure tooltip; EXPTIME or a filename gain alone isn't total integration.
 - **Analysis uncertain:** check the solver, site and time, and camera / processing metadata. [Guided fix](walkthrough:sky-wrong)
-- **Windows policy block:** check signing status and Windows Security; managed PCs may need publisher approval.
+- **Windows blocked an update:** try again; your current version keeps working. [Smart App Control](topic:WINDOWS SMART APP CONTROL)
 
 ## Logs
 - Setup log: `%TEMP%\AstroArchive-setup-error.txt`

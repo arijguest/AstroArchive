@@ -2332,3 +2332,9 @@ Open in Stellarium at the catalogue position. Uses Stellarium Web when Stellariu
 Quality	质量
 Sharpness	锐度
 Measurements	测量值
+# Help navigation
+Your first import	你的首次导入
+Start tour:	开始导览：
+Step-by-step fixes for common problems, on AstroArchive's own screens.	在 AstroArchive 界面中逐步解决常见问题。
+Short tours of importing, exporting and backups.	关于导入、导出和备份的简短导览。
+Search the guide, or start a guided fix or tour.	搜索指南，或开始引导式修复或导览。

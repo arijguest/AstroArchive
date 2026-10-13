@@ -6,7 +6,7 @@ namespace AstroArchive {
    Test("Bundled help retains workflows and ranks searches by title, summary and text",()=>{
     var topics=HelpCatalog.Load();foreach(string key in new[]{"START HERE","IMPORT OVER WI-FI / LAN","IMPORT WORKFLOW","LIBRARY WORKFLOW","USB TRANSFER AND SAVED TELESCOPES","IMAGE PREVIEW AND TABLES","STACKING PROJECTS AND SESSIONS","TROUBLESHOOTING","KEYBOARD SHORTCUTS","FRAME TYPES AND GLOSSARY","REPORTING A PROBLEM"})Check(topics.Any(t=>t.Key==key&&!string.IsNullOrWhiteSpace(t.Body)),"Missing guide topic: "+key);
     Check(topics.Select(t=>t.Key).Distinct().Count()==topics.Count,"Duplicate guide topics");Check(HelpCatalog.Search(topics,"PINCH").First().Key=="IMAGE PREVIEW AND TABLES","Full-text search is case sensitive or ranks preview text poorly");Check(HelpCatalog.Search(topics,"USB volume").Any(t=>t.Key=="USB TRANSFER AND SAVED TELESCOPES"),"Search does not combine title and body");Check(HelpCatalog.Search(topics,"no-such-help-topic-123456").Count==0&&HelpCatalog.Search(topics," \t").Count==topics.Count,"Empty search and no-result behavior");
-    Check(HelpCatalog.Search(topics,"backup").First().Key=="ARCHIVE SAFETY AND BACKUPS"&&HelpCatalog.Search(topics,"bug").First().Key=="REPORTING A PROBLEM","Titles and keywords do not outrank passing mentions");
+    Check(HelpCatalog.Search(topics,"backup").First().Key=="ARCHIVE SAFETY AND BACKUPS"&&HelpCatalog.Search(topics,"bug").First().Key=="REPORTING A PROBLEM"&&HelpCatalog.Search(topics,"smart app control").First().Key=="WINDOWS SMART APP CONTROL","Titles and keywords do not outrank passing mentions");
     var parsed=HelpCatalog.Parse("About\r\n\r\nFIRST TOPIC\r\nFirst paragraph.\r\n\r\nSecond paragraph.\r\nSECOND TOPIC\r\nLast paragraph.");Check(parsed.Count==3&&parsed[1].Body.Contains("Second paragraph.")&&parsed[2].Body=="Last paragraph.","Help parser lost paragraphs or final topic");
    });
    Test("Guide topics carry their category, summary, walkthrough and related topics",()=>{
@@ -27,7 +27,7 @@ namespace AstroArchive {
    });
    Test("Every guide topic is filed, summarised and links only to topics and walkthroughs that exist",()=>{
     var topics=HelpCatalog.Load();
-    Check(topics.Count==38&&HelpCatalog.Blocks(topics.Single(t=>t.Key=="START HERE").Body).Count(b=>b.Kind==HelpBlockKind.Numbered)==5,"Bundled guide lost topics or first-import steps: "+topics.Count);
+    Check(topics.Count==39&&HelpCatalog.Blocks(topics.Single(t=>t.Key=="START HERE").Body).Count(b=>b.Kind==HelpBlockKind.Numbered)==5,"Bundled guide lost topics or first-import steps: "+topics.Count);
     Check(HelpCatalog.Blocks(topics.Single(t=>t.Key=="KEYBOARD SHORTCUTS").Body).Count(b=>b.Kind==HelpBlockKind.Bullet)==5&&HelpCatalog.Blocks(topics.Single(t=>t.Key=="TROUBLESHOOTING").Body).Count(b=>b.Kind==HelpBlockKind.Bullet)==13,"Shortcut or troubleshooting entries lost list structure");
     foreach(var topic in topics){
      Check(!string.IsNullOrWhiteSpace(topic.Summary)&&topic.Summary.Length<=110,"Topic needs a one-line summary: "+topic.Key);
