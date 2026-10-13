@@ -37,13 +37,22 @@ namespace AstroArchive {
   }
   void SmokeEclipseFitsPreviews(string output){
    var previous=all;var oldFrame=previewSkyFrame;bool shown=settings.ShowPreview;
+   var filters=libraryFilters.Snapshot();string query=T("SearchBox").Text;
+   string selected=Targets.SelectedItem is TargetSummary?((TargetSummary)Targets.SelectedItem).Name:"All targets";
    try{
+    libraryFilters.Reset();T("SearchBox").Text="";
     settings.ShowPreview=true;SetPreviewVisibility();GoToPage(0);
     foreach(string body in new[]{"Sun","Moon"})foreach(string kind in new[]{"Light","Stack"}){
      string path=Path.Combine(output,"eclipse-preview-fixture",body+"-"+kind+".fits");RemoteSmokeFits(path,4000);
      var frame=new Frame{Hash=body+kind,Target=body,Kind=kind,OriginalName=kind=="Stack"?"Stack(1).fits":"Light.fits",Format="FITS",Images=null,ObservedUtc=body=="Sun"?"2024-04-08T18:17:16Z":"2025-03-14T06:58:43Z",Latitude=body=="Sun"?25.29:40.7,Longitude=body=="Sun"?-104.14:-74.0};
      all=new System.Collections.Generic.List<Frame>{frame};
      if(TargetSection(frame)!= (body=="Sun"?Eclipses.SolarSection:Eclipses.LunarSection))throw new Exception("Eclipse fixture was not grouped under its section");
+     // Verify the displayed target list and selection as well as classification.
+     Filter(true);PumpPopupLayout();
+     var section=Targets.Items.Cast<TargetSummary>().SingleOrDefault(t=>t.Name==(body=="Sun"?Eclipses.SolarSection:Eclipses.LunarSection));
+     if(section==null||section.Group!="Solar system"||section.Files!=1)throw new Exception("Eclipse section missing from the library target list");
+     Targets.SelectedItem=section;PumpPopupLayout();
+     if(displayed.Count!=1||displayed[0]!=frame)throw new Exception("Selecting the eclipse section did not show its capture");
      CancelPreview();LoadPreview(path,true,frame);
      WaitPreview(()=>((System.Windows.Controls.Image)Window.FindName("PreviewImage")).Source!=null||L("PreviewMessage").Text.StartsWith("Preview unavailable"),"Eclipse FITS preview did not finish");
      if(L("PreviewMessage").Text.StartsWith("Preview unavailable")||previewData==null||previewData.SourceWidth!=64)throw new Exception("Eclipse "+body+" "+kind+" preview failed: "+L("PreviewMessage").Text);
@@ -54,7 +63,11 @@ namespace AstroArchive {
     var changed=original.Clone();CaptureSite.Apply(changed,new ObservingCity{Id=3,Name="Tokyo",Latitude=35.7,Longitude=139.7});all[0]=changed;RefreshSkyPreviews();
     var sky=((SkyGlobeView)Window.FindName("PreviewSky")).Context;
     if(sky.Eclipse!=null||!sky.BodyBelowHorizon||sky.Longitude!=139.7||FrameEclipse(changed,all)!=null)throw new Exception("Saved town retained an old solar preview or eclipse section");
-   }finally{CancelPreview();all=previous;settings.ShowPreview=shown;SetPreviewVisibility();UpdateCaptureSky("",oldFrame);}
+   }finally{
+    CancelPreview();all=previous;settings.ShowPreview=shown;SetPreviewVisibility();UpdateCaptureSky("",oldFrame);
+    libraryFilters.Reset();foreach(var entry in filters.Values)libraryFilters.Values[entry.Key]=entry.Value;foreach(var entry in filters.Ranges)libraryFilters.Ranges[entry.Key]=entry.Value;
+    T("SearchBox").Text=query;Filter(true);Targets.SelectedItem=Targets.Items.Cast<TargetSummary>().FirstOrDefault(t=>t.Name==selected)??Targets.Items.Cast<TargetSummary>().FirstOrDefault();
+   }
   }
   // Eclipse captures show a cartoon, the coverage at capture, the event as a curve and its times.
   void SmokeEclipseDetails(string output){
