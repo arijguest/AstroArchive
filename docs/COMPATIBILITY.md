@@ -57,7 +57,9 @@ and processing state remain explicit; conflicting values need review.
 
 For Edited images, explicit filename products such as `120x60s` establish sub count
 and total integration. `30s40` means sub exposure/gain, and DWARF's `stacked-16`
-is bit depth. Unspecified `EXPTIME` is not assumed to be per-sub or total.
+is bit depth. When a DWARF name omits the sub exposure, the session's `shotsInfo.json`
+supplies it (`exp`, seconds per sub); its `shotsStacked` must equal total ÷ sub, or the
+file is treated as another stack and no count is guessed. Unspecified `EXPTIME` is not assumed to be per-sub or total.
 Seestar's `Stacked_36_NGC 7000_5.0s_LP_20260906-...` explicitly supplies 36
 subs at 5 seconds each. Repository exposure is therefore 180 seconds, and Edited
 metadata retains both the count and per-sub duration. Explicit header counts/totals
