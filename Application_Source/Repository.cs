@@ -14,6 +14,8 @@ using System.Security.Cryptography;
 namespace AstroArchive {
  public sealed class Database:IDisposable {
   IntPtr db;readonly object sync=new object();readonly string databasePath;long generation;public long Generation{get{lock(sync)return generation;}}
+  // The connection's lock. Holding it makes a read followed by a write atomic against every other thread.
+  public object Gate{get{return sync;}}
   [DefaultDllImportSearchPaths(DllImportSearchPath.System32)][DllImport("winsqlite3.dll",CallingConvention=CallingConvention.Cdecl)]static extern int sqlite3_open_v2(byte[] name,out IntPtr db,int flags,IntPtr vfs);
   [DefaultDllImportSearchPaths(DllImportSearchPath.System32)][DllImport("winsqlite3.dll",CallingConvention=CallingConvention.Cdecl)]static extern int sqlite3_close(IntPtr db);
   [DefaultDllImportSearchPaths(DllImportSearchPath.System32)][DllImport("winsqlite3.dll",CallingConvention=CallingConvention.Cdecl)]static extern int sqlite3_prepare_v2(IntPtr db,byte[] sql,int n,out IntPtr stmt,IntPtr tail);
@@ -49,7 +51,10 @@ namespace AstroArchive {
    try{string portable=Path.Combine(Meta,"index.sqlite");if(!File.Exists(WorkingIndex)&&File.Exists(portable)){using(var original=new Database(portable))original.BackupTo(WorkingIndex,CancellationToken.None);}db=new Database(WorkingIndex);db.ManifestSchema();protection=new ArchiveProtection(Root,Meta);RecoverTelescopeRename();NormalizeStoredMetadata();}catch{Dispose();throw;}
   }
   public void Checkpoint(CancellationToken ct){ct.ThrowIfCancellationRequested();if(db.Generation==checkpointGeneration&&File.Exists(Path.Combine(Meta,"index.sqlite"))&&FileStamp.Read(Path.Combine(Meta,"index.sqlite")).VerifiedUnchanged(checkpointStamp)){return;}long snapshotGeneration=db.Generation;string local=WorkingIndex+"."+Guid.NewGuid().ToString("N")+".snapshot",target=Path.Combine(Meta,"index.sqlite"),temp=target+"."+Guid.NewGuid().ToString("N")+".partial";try{db.BackupTo(local,ct);string hash=Util.Hash(local,ct);CopyVerified(local,temp,hash,ct);CommitTemporary(temp,target,ct);checkpoint=DateTime.UtcNow;checkpointGeneration=snapshotGeneration;checkpointStamp=FileStamp.Read(target);}finally{TryRemove(local);TryRemove(local+"-wal");TryRemove(local+"-shm");TryRemove(temp);}}
-  public void Dispose(){editedHeaders.Clear();if(db!=null){try{Checkpoint(CancellationToken.None);}catch{}db.Dispose();db=null;}if(held){mutex.ReleaseMutex();held=false;}if(mutex!=null)mutex.Dispose();}
+  public void Dispose(){
+   // Background processes read the index and the captures, so they stop (and keep what they stored) before it closes.
+   Background.Close();Background.CancelAll();bool stopped=Background.WaitAll(TimeSpan.FromSeconds(10));
+   editedHeaders.Clear();if(db!=null){try{Checkpoint(CancellationToken.None);}catch{}if(stopped){db.Dispose();db=null;}}if(held){mutex.ReleaseMutex();held=false;}if(mutex!=null)mutex.Dispose();}
   public List<Frame> All(){var frames=db.Query("SELECT data FROM files").Select(Util.Deserialize<Frame>).ToList();QualityAnnotator.Apply(frames,QualityMeasurements(),QualityCompareTarget);return frames;}
   public Frame Find(string hash){string data=db.Query("SELECT data FROM files WHERE hash=?",hash).FirstOrDefault();return data==null?null:Util.Deserialize<Frame>(data);}
   public void Save(Frame f){f.Target=ObservationTargets.CanonicalSolar(f.Target);db.Exec("INSERT OR REPLACE INTO files(hash,data) VALUES(?,?)",f.Hash,Util.Serialize(f));RememberImportName(f);}

@@ -20,7 +20,10 @@ namespace AstroArchive {
    throw new IOException("Path is outside the archive.");
   }
   public List<string> ResetArchive(CancellationToken ct,Action<ProgressInfo> progress){
-   ct.ThrowIfCancellationRequested();var frames=All();var errors=frames.Count>0?DeleteFrames(frames,ct,progress).Errors:new List<string>();
+   using(Background.Claim("Resetting the archive",null))return ResetArchiveClaimed(ct,progress);
+  }
+  List<string> ResetArchiveClaimed(CancellationToken ct,Action<ProgressInfo> progress){
+   ct.ThrowIfCancellationRequested();var frames=All();var errors=frames.Count>0?DeleteFramesClaimed(frames,ct,progress).Errors:new List<string>();
    if(errors.Count==0){db.Transaction(()=>{db.Exec("DELETE FROM source_manifest WHERE status<>?","Deleted");db.Exec("DELETE FROM sessions");});foreach(string folder in new[]{"session-metadata","reports","staging"}){string path=Path.Combine(Meta,folder);if(Directory.Exists(path))RemoveOwnedTree(path,Root,errors,ct);}foreach(string folder in new[]{"Targets","Calibration"}){string path=Path.Combine(Root,folder);if(Directory.Exists(path))RemoveEmptyTree(path,Root,ct);}}
    if(errors.Count==0){LastReport="";TryRemove(Path.Combine(Path.GetDirectoryName(WorkingIndex),"last-import.txt"));}Checkpoint(ct);return errors;
   }

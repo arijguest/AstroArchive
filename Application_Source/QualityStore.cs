@@ -51,32 +51,43 @@ namespace AstroArchive {
   }
  }
  public sealed partial class Repository {
-  readonly object qualityGate=new object();bool qualityTable;Dictionary<string,QualityMeasurement> qualityCache;
+  // qualityGate only guards the fields below and is never held while the database lock is taken, so a background run and
+  // the interface (or an import) can use the index at the same time without waiting on each other in a circle.
+  readonly object qualityGate=new object();bool qualityTable;Dictionary<string,QualityMeasurement> qualityCache;long qualityVersion;
   // Compare against similar frames from the same target instead of the same session (star fields only).
   public bool QualityCompareTarget{get;set;}
 
   void EnsureQualityTable(){
-   lock(qualityGate){if(qualityTable)return;db.Exec("CREATE TABLE IF NOT EXISTS quality(hash TEXT PRIMARY KEY,version INTEGER NOT NULL,kind INTEGER NOT NULL,status INTEGER NOT NULL,data TEXT NOT NULL)");qualityTable=true;}
+   lock(qualityGate)if(qualityTable)return;
+   // Creating the table twice is harmless, so two threads reaching here together need no further coordination.
+   db.Exec("CREATE TABLE IF NOT EXISTS quality(hash TEXT PRIMARY KEY,version INTEGER NOT NULL,kind INTEGER NOT NULL,status INTEGER NOT NULL,data TEXT NOT NULL)");
+   lock(qualityGate)qualityTable=true;
   }
-  // All stored measurements by content hash. The dictionary is shared: treat it as read-only.
+  // All stored measurements by content hash. The dictionary is a snapshot that is never changed once handed out (a save
+  // publishes a new one), so it is safe to read from any thread while a background run keeps storing results.
   public Dictionary<string,QualityMeasurement> QualityMeasurements(){
-   lock(qualityGate){
-    if(qualityCache!=null)return qualityCache;EnsureQualityTable();var cache=new Dictionary<string,QualityMeasurement>(StringComparer.OrdinalIgnoreCase);
+   while(true){
+    long version;lock(qualityGate){if(qualityCache!=null)return qualityCache;version=qualityVersion;}
+    EnsureQualityTable();var cache=new Dictionary<string,QualityMeasurement>(StringComparer.OrdinalIgnoreCase);
     foreach(string row in db.Query("SELECT hash||'|'||version||'|'||kind||'|'||status||'|'||data FROM quality")){
-     var parts=row.Split(new[]{'|'},5);int version,kind,status;
-     if(parts.Length<5||!int.TryParse(parts[1],out version)||!int.TryParse(parts[2],out kind)||!int.TryParse(parts[3],out status))continue;
-     cache[parts[0]]=QualityMeasurement.Unpack(parts[0],version,kind,status,parts[4]);
+     var parts=row.Split(new[]{'|'},5);int number,kind,status;
+     if(parts.Length<5||!int.TryParse(parts[1],out number)||!int.TryParse(parts[2],out kind)||!int.TryParse(parts[3],out status))continue;
+     cache[parts[0]]=QualityMeasurement.Unpack(parts[0],number,kind,status,parts[4]);
     }
-    qualityCache=cache;return cache;
+    // A save that landed while the rows were being read may be missing from them; read again in that case.
+    lock(qualityGate){if(qualityCache!=null)return qualityCache;if(qualityVersion==version){qualityCache=cache;return cache;}}
    }
   }
   void SaveQuality(IList<QualityMeasurement> batch){
    if(batch.Count==0)return;EnsureQualityTable();
    db.Transaction(()=>{foreach(var m in batch)db.Exec("INSERT OR REPLACE INTO quality(hash,version,kind,status,data) VALUES(?,?,?,?,?)",m.Hash,m.Version.ToString(),m.Kind.ToString(),m.Status.ToString(),m.Pack());});
-   lock(qualityGate){if(qualityCache!=null)foreach(var m in batch)qualityCache[m.Hash]=m;}
+   lock(qualityGate){
+    qualityVersion++;
+    if(qualityCache!=null){var next=new Dictionary<string,QualityMeasurement>(qualityCache,StringComparer.OrdinalIgnoreCase);foreach(var m in batch)next[m.Hash]=m;qualityCache=next;}
+   }
   }
   // Forgets every stored measurement (used by tests and by an explicit reset).
-  public void ClearQuality(){EnsureQualityTable();db.Exec("DELETE FROM quality");lock(qualityGate)qualityCache=null;}
+  public void ClearQuality(){EnsureQualityTable();db.Exec("DELETE FROM quality");lock(qualityGate){qualityVersion++;qualityCache=null;}}
   // Refreshes the transient quality fields of captures already held in memory.
   public void ApplyQuality(IList<Frame> frames){QualityAnnotator.Apply(frames,QualityMeasurements(),QualityCompareTarget);}
 
@@ -111,7 +122,7 @@ namespace AstroArchive {
    // alone: the second try for a frame that ran out of memory beside other workers.
    Action<Frame,bool> measure=(frame,alone)=>{
     QualityMeasurement m=null;string error=null;bool unsuitable=false;
-    try{m=MeasureFrame(frame,FilePath(frame),ct);if(m.Status==QualityStatus.Failed){m.Status=QualityStatus.Unsuitable;error="the image is too small or incomplete to measure";}}
+    try{m=MeasureStored(frame,ct);if(m.Status==QualityStatus.Failed){m.Status=QualityStatus.Unsuitable;error="the image is too small or incomplete to measure";}}
     catch(OperationCanceledException){if(ct.IsCancellationRequested)throw;error="measuring stopped before it finished";}
     catch(Exception e){if(!alone&&QualityFailure.OutOfMemory(e)){lock(gate)retry.Add(frame);return;}error=QualityFailure.Describe(e);unsuitable=QualityFailure.Unsuitable(e);}
     if(m==null)m=new QualityMeasurement{Hash=frame.Hash,Version=QualityMeter.Version,Kind=QualityEligibility.KindOf(frame),Status=unsuitable?QualityStatus.Unsuitable:QualityStatus.Failed};
@@ -140,6 +151,16 @@ namespace AstroArchive {
    lock(gate)run.NotReached=Math.Max(0,todo.Count-done);
    Report(progress,new ProgressInfo{Done=done,Total=todo.Count,Workers=workers,Stage="Measuring image quality",Text=run.Summary()});
    return run;
+  }
+  // Measures an archived capture. A run holds copies of the captures from when it started, so a file that was moved since
+  // (renamed by a metadata edit or a target change) is looked for again at the place the archive now records.
+  QualityMeasurement MeasureStored(Frame frame,CancellationToken ct){
+   try{return MeasureFrame(frame,FilePath(frame),ct);}
+   catch(Exception e){
+    if(!(e is FileNotFoundException||e is DirectoryNotFoundException))throw;
+    var now=Find(frame.Hash);if(now==null||string.Equals(now.RelativePath,frame.RelativePath,StringComparison.OrdinalIgnoreCase))throw;
+    return MeasureFrame(frame,FilePath(now),ct);
+   }
   }
   // Progress display problems must not stop a measuring run.
   static void Report(Action<ProgressInfo> progress,ProgressInfo info){if(progress==null)return;try{progress(info);}catch(Exception){}}

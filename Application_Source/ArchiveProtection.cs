@@ -58,7 +58,8 @@ namespace AstroArchive {
   ArchiveProtection protection;
   public bool OriginalsProtected{get{return protection!=null&&protection.Enabled;}}
   public string ProtectionAvailability{get{return protection==null?"Open an archive first.":protection.Availability;}}
-  public void SetOriginalsProtection(bool enabled,CancellationToken ct,Action<ProgressInfo> progress){if(enabled)protection.Enable(All().Select(FilePath),ct,progress);else protection.Disable(ct,progress);}
+  public void SetOriginalsProtection(bool enabled,CancellationToken ct,Action<ProgressInfo> progress){using(Background.Claim("Changing original-file protection",null))ChangeOriginalsProtection(enabled,ct,progress);}
+  void ChangeOriginalsProtection(bool enabled,CancellationToken ct,Action<ProgressInfo> progress){if(enabled)protection.Enable(All().Select(FilePath),ct,progress);else protection.Disable(ct,progress);}
   void ProtectCapture(string path){protection.ProtectCapture(path);}
   void MoveCapture(string source,string destination){var scope=protection.Unlock(source,destination);bool moved=false;try{File.Move(source,destination);moved=true;scope.Dispose();}catch(Exception failure){try{if(moved&&File.Exists(destination)&&!File.Exists(source)){using(protection.Unlock(destination,source)){File.Move(destination,source);}}scope.Dispose();}catch(Exception recovery){throw new AggregateException("The file operation could not restore protection. Reopen the archive to recover it.",failure,recovery);}throw;}}
   void DeleteEmptyCaptureFolder(string path){using(protection.Unlock(path,null,false)){Directory.Delete(path);}}
