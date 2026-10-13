@@ -2121,3 +2121,4 @@ FUN FACT	DATO CURIOSO
 Sun obscured	Sol oculto
 Check capture metadata	Revisar metadatos de captura
 Suspected obstruction	Posible obstrucción
+A chosen town or city sets the capture location and its historical timezone. Local capture clocks are converted to UTC again when the town changes; explicit UTC or clock offsets keep their instant. Use default location to return to file metadata, then Settings. Changes are applied when you save metadata.	La localidad o ciudad elegida establece el lugar de captura y su zona horaria histórica. Las horas locales se convierten de nuevo a UTC al cambiar de localidad; las horas UTC explícitas o con desfase conservan su instante. Use la ubicación predeterminada para volver a los metadatos del archivo y después a Ajustes. Los cambios se aplican al guardar los metadatos.

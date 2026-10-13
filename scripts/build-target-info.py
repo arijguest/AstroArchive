@@ -12,6 +12,7 @@ import tempfile
 from pathlib import Path
 import sqlite3
 import zipfile
+from target_image_credits import repair_image
 
 
 def build(database):
@@ -47,7 +48,7 @@ def build(database):
             image = con.execute("SELECT * FROM image WHERE object_id=? AND status='approved_local' ORDER BY id LIMIT 1", (shared_fields[ident],)).fetchone()
             if image is None:
                 raise ValueError('Missing approved Horsehead/IC 434 field image')
-        card['image'] = dict(image) if image else None
+        card['image'] = repair_image(dict(image)) if image else None
         if shared:
             card['image'].update(object_id=ident, id=image['id'] + ':ic434',
                                  representation='IC 434 emission nebula behind the dark Horsehead Nebula (Barnard 33).')
@@ -66,6 +67,7 @@ def build(database):
                     uncertain=uncertain, nonexistent=nonexistent,
                     database_sha256=hashlib.sha256(database.read_bytes()).hexdigest(),
                     image_assignments=image_assignments, runtime_shared_fields=shared_fields)
+    manifest['runtime_credit_revision'] = 1
     yield 'index.json', json.dumps(manifest, ensure_ascii=False, separators=(',', ':')).encode()
     for path, data in sorted(images.items()):
         yield path, data

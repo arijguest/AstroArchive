@@ -164,3 +164,31 @@ A solar or lunar capture mode names the body when the target is unknown. Stacks
 without a usable clock use the median capture time of their subs in the same
 session or night. A body calculated below the horizon keeps its map and points to
 the capture timezone instead of disappearing.
+
+## Capture-town clocks in 3.2.8
+
+A chosen capture town now supplies its historical timezone even when an older
+record already contains a UTC value assumed from an unzoned FITS clock. Choosing
+or changing the town in Edit metadata converts the original `Observed` clock to
+`ObservedUtc` and stores the city's timezone with separate provenance. Conversion
+always starts from the original clock, so repeated town changes do not accumulate
+offsets. Existing chosen-town records with stale assumed UTC are repaired when
+opening the archive, including restore/source snapshots. Image bytes are unchanged.
+
+A `Z` suffix, explicit offset, or declared header time standard retains its meaning;
+only unzoned local clocks are reinterpreted. A timezone entered explicitly in the
+same edit wins over the town. Date-only and session-folder timestamps still do not
+create a capture clock. Invalid/ambiguous daylight-saving times are rejected before
+saving. Clearing the town removes its derived timezone and returns to the recorded
+clock/default-location rules.
+
+The reported Santa Ponsa example, `2026-08-12T20:32:54.797`, is local CEST (UTC+2),
+so its UTC instant is `2026-08-12T18:32:54.797Z`. Interpreting it as UTC put the Sun
+about 18° below the horizon; the corrected instant puts it about 2° above the west
+horizon and detects a solar eclipse. The rounded offline model gives about 99.8%
+coverage at this exact time/site; it is an approximate sky model, not a replacement
+for published totality/contact predictions.
+
+The preview already resolves a saved capture by hash after repository metadata is
+reloaded, and eclipse-section cache keys include location, timezone and resolved
+UTC. Regression checks now cover that refresh and cache invalidation explicitly.

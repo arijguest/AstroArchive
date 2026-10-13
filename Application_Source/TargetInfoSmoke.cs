@@ -116,6 +116,10 @@ namespace AstroArchive {
     }
     stage="IC 434 image";var ic434=targetInformation.Find("IC434",CancellationToken.None).Cards.Single();editedInfo.View.ShowCard(ic434);PumpPopupLayout();if(!PopupChildren<Image>(editedInfo.View).Any(i=>i.Source is BitmapSource)||!PopupChildren<TextBlock>(editedInfo.View).Any(t=>t.Text.Contains("Orion")))throw new Exception("IC 434 has no visible credited image or full constellation name.");Capture(Path.Combine(output,"AstroArchive_Info_IC434.png"));
     stage="catalogue name preservation";GoToPage(0);WaitForSearches();OpenTargetInformation(Targets);WaitForTargetInformation(libraryInfo,"M31");
+    stage="empty imaging notes";libraryInfo.View.ShowCard(new TargetInfoCard{id="No notes",name="No notes",domain="solar_system",summary="An entry without imaging guidance."});PumpPopupLayout();
+    if(PopupChildren<Expander>(libraryInfo.View).Any(e=>Convert.ToString((e.Header as TextBlock)==null?e.Header:((TextBlock)e.Header).Text)==Localization.T("IMAGING NOTES")))throw new Exception("An empty imaging-notes disclosure was rendered.");
+    stage="Iris credits";var iris=targetInformation.ById("NGC 7023",CancellationToken.None).Cards.Single();libraryInfo.View.ShowCard(iris);PumpPopupLayout();
+    if(iris.image.creator!="Andreigusan"||PopupChildren<TextBlock>(libraryInfo.View).Any(t=>t.Text.Contains("featured picture")))throw new Exception("Contaminated Iris thumbnail credit was rendered.");
     stage="comet page";libraryInfo.View.ShowCard(targetInformation.Find("C/2023 A3 (Tsuchinshan-ATLAS)",CancellationToken.None).Cards.Single());PumpPopupLayout();
     var cometLabels=PopupChildren<TextBlock>(libraryInfo.View).Select(t=>t.Text).ToList();
     if(!cometLabels.Contains(Localization.T("Orbit type"))||!cometLabels.Contains(Localization.T("IMAGING NOTES"))||PopupChildren<SkyGlobeView>(libraryInfo.View).Any())throw new Exception("Comet page lacks its orbit or imaging notes, or shows a fixed sky position.");

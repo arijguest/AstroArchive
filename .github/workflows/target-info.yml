@@ -12,6 +12,8 @@ on:
       - 'Application_Source/build.ps1'
       - 'Application_Source/test.ps1'
       - 'scripts/build-target-info.py'
+      - 'scripts/target_image_credits.py'
+      - 'scripts/test-target-image-credits.py'
       - 'Installer/InstallCore.cs'
       - 'Installer/Tests.cs'
       - 'Installer/build.ps1'
@@ -28,6 +30,7 @@ jobs:
       - name: Build and check offline information lookup
         shell: powershell
         run: |
+          python scripts/test-target-image-credits.py
           .\Application_Source\build.ps1
           .\Application_Source\test.ps1 -TargetsOnly
           .\Installer\test.ps1

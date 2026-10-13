@@ -79,7 +79,7 @@ namespace AstroArchive {
    string found=dated.Groups[4].Success?"its designation shows it was first catalogued in the "+when+".":"its designation shows it was the "+Ordinal(int.Parse(dated.Groups[5].Value))+" comet reported in the "+when+".";
    return name+" is "+kind+". The letter and number in "+id+" date its discovery: "+found;
   }
-  public const string Imaging="Comets move against the stars, so keep sub-exposures short enough that the head stays sharp. Stack twice, once aligned on the comet and once on the stars, then blend the two. Siril, DeepSkyStacker and PixInsight offer comet alignment.";
+  public const string Imaging="Start with 10–30 second sub-exposures on a star-tracking mount to keep the comet's head sharp; try 5–10 seconds for a fast-moving comet or a long focal length. Inspect the head at full size and shorten the exposure if it trails. The limit depends on the comet's apparent motion and your image scale: for no more than one pixel of drift, maximum exposure in seconds = 60 × image scale (arcsec/pixel) ÷ motion (arcsec/min). At 2 arcsec/pixel and 6 arcsec/min, use 20 seconds or less. Stack twice, once aligned on the comet and once on the stars, then blend the two. Siril, DeepSkyStacker and PixInsight offer comet alignment.";
   public static string ClassLabel(CometOrbit orbit){
    switch(orbit.Class){case "HTC":return "Halley-type";case "JFc":return "Jupiter-family";case "ETc":return "Encke-type";case "COM":return "Long-period";default:return orbit.E>=1.1?"Hyperbolic (interstellar)":"Near-parabolic";}
   }

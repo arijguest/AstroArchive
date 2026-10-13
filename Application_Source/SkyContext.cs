@@ -81,6 +81,10 @@ namespace AstroArchive {
   }
   public static DateTime? CaptureUtc(Frame frame,Settings settings=null){
    if(frame==null||(frame.TimeSource??"").StartsWith("Session folder",StringComparison.OrdinalIgnoreCase))return null;
+   // A chosen capture town can replace an imported, assumed UTC timezone.
+   // Resolve from the original clock each time, never from an already converted UTC value.
+   MetadataFact zoneFact;bool userZone=frame.Facts!=null&&frame.Facts.TryGetValue("TimeZoneId",out zoneFact)&&zoneFact!=null&&zoneFact.Source=="User";
+   if(CaptureSite.HasChoice(frame)&&frame.CaptureCityId.HasValue&&!userZone&&LocalClock(frame))return CityUtc(frame,frame.CaptureCityId.Value);
    foreach(string text in new[]{frame.ObservedUtc,frame.Observed}){
     // A date alone, unzoned filename timestamp or shifted night cannot place a horizon.
     if(string.IsNullOrEmpty(text)||!Regex.IsMatch(text,@"[T ]\d\d:\d\d"))continue;
@@ -115,6 +119,45 @@ namespace AstroArchive {
     }
    }
    return null;
+  }
+  static FitsHeader ClockHeader(Frame frame){
+   var image=frame.Images==null?null:frame.Images.FirstOrDefault(i=>i.Key==frame.ImageKey)??frame.Images.FirstOrDefault();
+   return new FitsHeader{Values=image==null||image.Headers==null?new Dictionary<string,string>():image.Headers};
+  }
+  static bool Zoned(string text){return Regex.IsMatch(text??"",@"(?:Z|[+-]\d\d:\d\d)$",RegexOptions.IgnoreCase);}
+  static bool LocalClock(Frame frame){var header=ClockHeader(frame);return HasClock(frame)&&!Zoned(frame.Observed)&&!Zoned(header.Get("DATE-OBS","DATEOBS","DATE_OBS"))&&header.Get("TIMESYS").Length==0&&!(frame.TimeSource??"").StartsWith("Capture clock ",StringComparison.OrdinalIgnoreCase)&&!(frame.TimeSource??"").StartsWith("Session folder",StringComparison.OrdinalIgnoreCase);}
+  static DateTime? CityUtc(Frame frame,int cityId){
+   DateTime local;var zone=CityTimeZones.ForCity(cityId);
+   if(zone==null||!DateTime.TryParse(frame.Observed,CultureInfo.InvariantCulture,DateTimeStyles.None,out local))return null;
+   local=DateTime.SpecifyKind(local,DateTimeKind.Unspecified);
+   return zone.IsInvalidTime(local)||zone.IsAmbiguousTime(local)?(DateTime?)null:TimeZoneInfo.ConvertTimeToUtc(local,zone);
+  }
+  // Persist the city's historical timezone while keeping the acquisition clock
+  // unchanged and the resolved instant in ObservedUtc. Explicit zones/standards win.
+  public static void ApplyCityClock(Frame frame){
+   MetadataFact fact;bool derived=frame.Facts!=null&&frame.Facts.TryGetValue("TimeZoneId",out fact)&&fact!=null&&fact.Source=="Capture town / city";
+   if(!CaptureSite.HasChoice(frame)||!frame.CaptureCityId.HasValue){
+    if(!derived)return;frame.TimeZoneId=null;frame.ObservedUtc=null;frame.Facts.Remove("TimeZoneId");frame.Facts.Remove("ObservedUtc");
+    MetadataFact source;if(frame.Facts.TryGetValue("TimeSource",out source)&&source!=null&&source.Source=="Capture town / city"){frame.TimeSource=source.Raw;frame.Facts.Remove("TimeSource");}
+    var fallback=CaptureUtc(frame);frame.ObservedUtc=fallback.HasValue?fallback.Value.ToString("o",CultureInfo.InvariantCulture):null;return;
+   }
+   var zone=CityTimeZones.ForCity(frame.CaptureCityId.Value);if(zone==null)return;
+   DateTime? utc=LocalClock(frame)?CityUtc(frame,frame.CaptureCityId.Value):CaptureUtc(frame);
+   if(LocalClock(frame)&&!utc.HasValue&&HasClock(frame))throw new InvalidDataException("Capture time is invalid or ambiguous in this town's timezone: "+frame.OriginalName);
+   frame.TimeZoneId=zone.Id;frame.ObservedUtc=utc.HasValue?utc.Value.ToString("o",CultureInfo.InvariantCulture):null;
+   if(frame.Facts==null)frame.Facts=new Dictionary<string,MetadataFact>();
+   foreach(string key in new[]{"TimeZoneId","ObservedUtc"}){Assets.UserFact(frame,key);frame.Facts[key].Source="Capture town / city";}
+   if(LocalClock(frame)){
+    MetadataFact source;string original=frame.Facts.TryGetValue("TimeSource",out source)&&source!=null&&source.Source=="Capture town / city"?source.Raw:frame.TimeSource;
+    frame.TimeSource="Capture town / city timezone";Assets.UserFact(frame,"TimeSource");frame.Facts["TimeSource"].Source="Capture town / city";frame.Facts["TimeSource"].Raw=original;
+   }
+  }
+  public static bool NormalizeCityClock(Frame frame){
+   if(!CaptureSite.HasChoice(frame)||!frame.CaptureCityId.HasValue||!LocalClock(frame))return false;
+   MetadataFact fact;if(frame.Facts!=null&&frame.Facts.TryGetValue("TimeZoneId",out fact)&&fact!=null&&fact.Source=="User")return false;
+   var utc=CityUtc(frame,frame.CaptureCityId.Value);var zone=CityTimeZones.ForCity(frame.CaptureCityId.Value);
+   if(!utc.HasValue||zone==null||frame.ObservedUtc==utc.Value.ToString("o",CultureInfo.InvariantCulture)&&frame.TimeZoneId==zone.Id)return false;
+   ApplyCityClock(frame);return true;
   }
   static bool HasClock(Frame frame){return Regex.IsMatch(frame.Observed??"",@"[T ]\d\d:\d\d");}
   // UTC is assumed for an unzoned clock; a date alone is taken at noon. Session-folder dates still count as dates.

@@ -2128,3 +2128,4 @@ FUN FACT	豆知識
 Sun obscured	太陽の遮蔽率
 Check capture metadata	撮影メタデータを確認
 Suspected obstruction	遮蔽物の疑い
+A chosen town or city sets the capture location and its historical timezone. Local capture clocks are converted to UTC again when the town changes; explicit UTC or clock offsets keep their instant. Use default location to return to file metadata, then Settings. Changes are applied when you save metadata.	選択した市区町村は、撮影地と撮影日時に適用されるタイムゾーンを設定します。撮影地を変更すると現地の撮影時刻をUTCに再変換します。明示的なUTC時刻や時差付き時刻は同じ瞬間を保持します。既定の撮影地を使うと、ファイルのメタデータ、次に設定に戻ります。変更はメタデータの保存時に適用されます。

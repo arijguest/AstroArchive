@@ -24,7 +24,7 @@ namespace AstroArchive {
    var curated=TargetDescriptions.For(card.id);if(curated!=null&&!string.IsNullOrWhiteSpace(curated.Overview))return curated.Overview;
    string summary=Summary(card);return string.IsNullOrWhiteSpace(summary)&&CometInfo.IsComet(card)?CometInfo.Overview(card):summary;
   }
-  public static string Imaging(TargetInfoCard card){var curated=TargetDescriptions.For(card.id);return curated!=null&&!string.IsNullOrWhiteSpace(curated.Imaging)?curated.Imaging:CometInfo.IsComet(card)?CometInfo.Imaging:null;}
+  public static string Imaging(TargetInfoCard card){if(card==null)return null;var curated=TargetDescriptions.For(card.id);string text=curated!=null&&!string.IsNullOrWhiteSpace(curated.Imaging)?curated.Imaging:CometInfo.IsComet(card)?CometInfo.Imaging:null;return string.IsNullOrWhiteSpace(text)?null:text.Trim();}
   public static string Caption(string value){
    string text=value??"";
    text=text.Replace("Astronomical observation; filter bands and colour processing unspecified.","").Replace("Optical astrophotography; processing/filter details not stated.","");

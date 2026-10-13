@@ -35,7 +35,7 @@ namespace AstroArchive {
   void NormalizeStoredMetadata(){
    db.Transaction(()=>{
     var stackSessions=new System.Collections.Generic.Dictionary<string,System.Collections.Generic.Dictionary<string,string>>(StringComparer.OrdinalIgnoreCase);
-    var frames=All();foreach(var frame in frames){bool changed=MediaFiles.ApplyVideoType(frame)|RecoverStackSession(frame,stackSessions)|Classifier.ApplyStackMetadata(frame)|CameraDetection.DefaultForTarget(frame)|MetadataProfiles.ApplyCalibrationLinearity(frame);
+    var frames=All();foreach(var frame in frames){bool changed=MediaFiles.ApplyVideoType(frame)|RecoverStackSession(frame,stackSessions)|Classifier.ApplyStackMetadata(frame)|CameraDetection.DefaultForTarget(frame)|MetadataProfiles.ApplyCalibrationLinearity(frame)|CaptureSky.NormalizeCityClock(frame);
      if(frame.Kind=="Video"&&frame.ClassificationVersion!=Assets.ClassificationVersion){
       AssetInfo asset=null;try{string path=FilePath(frame);var before=FileStamp.Read(path);asset=Assets.Inspect(path);if(!before.ContentSame(FileStamp.Read(path)))asset=null;}
       catch(IOException){}catch(UnauthorizedAccessException){}catch(NotSupportedException){}
@@ -44,8 +44,8 @@ namespace AstroArchive {
      string target=ObservationTargets.CanonicalSolar(frame.Target);if(target!=frame.Target||changed){frame.Target=target;Save(frame);}
     }
     var archived=frames.Where(f=>!string.IsNullOrEmpty(f.Hash)).ToDictionary(f=>f.Hash);
-    foreach(string data in db.Query("SELECT data FROM source_manifest")){var manifest=Util.Deserialize<SourceManifest>(data);if(manifest.Metadata==null)continue;bool changed=NormalizeVideoSnapshot(manifest.Metadata,archived)|RecoverStackSession(manifest.Metadata,stackSessions)|Classifier.ApplyStackMetadata(manifest.Metadata)|CameraDetection.DefaultForTarget(manifest.Metadata);string target=ObservationTargets.CanonicalSolar(manifest.Metadata.Target);if(target!=manifest.Metadata.Target||changed){manifest.Metadata.Target=target;Manifest(manifest);}}
-    foreach(var deletion in Deletions()){if(deletion.Metadata==null)continue;bool changed=NormalizeVideoSnapshot(deletion.Metadata,archived)|RecoverStackSession(deletion.Metadata,stackSessions)|Classifier.ApplyStackMetadata(deletion.Metadata)|CameraDetection.DefaultForTarget(deletion.Metadata);string target=ObservationTargets.CanonicalSolar(deletion.Metadata.Target);if(target!=deletion.Metadata.Target||changed){deletion.Metadata.Target=target;db.Exec("INSERT OR REPLACE INTO deleted_files(hash,data) VALUES(?,?)",deletion.Hash,Util.Serialize(deletion));}}
+    foreach(string data in db.Query("SELECT data FROM source_manifest")){var manifest=Util.Deserialize<SourceManifest>(data);if(manifest.Metadata==null)continue;bool changed=NormalizeVideoSnapshot(manifest.Metadata,archived)|RecoverStackSession(manifest.Metadata,stackSessions)|Classifier.ApplyStackMetadata(manifest.Metadata)|CameraDetection.DefaultForTarget(manifest.Metadata)|CaptureSky.NormalizeCityClock(manifest.Metadata);string target=ObservationTargets.CanonicalSolar(manifest.Metadata.Target);if(target!=manifest.Metadata.Target||changed){manifest.Metadata.Target=target;Manifest(manifest);}}
+    foreach(var deletion in Deletions()){if(deletion.Metadata==null)continue;bool changed=NormalizeVideoSnapshot(deletion.Metadata,archived)|RecoverStackSession(deletion.Metadata,stackSessions)|Classifier.ApplyStackMetadata(deletion.Metadata)|CameraDetection.DefaultForTarget(deletion.Metadata)|CaptureSky.NormalizeCityClock(deletion.Metadata);string target=ObservationTargets.CanonicalSolar(deletion.Metadata.Target);if(target!=deletion.Metadata.Target||changed){deletion.Metadata.Target=target;db.Exec("INSERT OR REPLACE INTO deleted_files(hash,data) VALUES(?,?)",deletion.Hash,Util.Serialize(deletion));}}
    });
   }
   static bool NormalizeVideoSnapshot(Frame frame,System.Collections.Generic.Dictionary<string,Frame> archived){

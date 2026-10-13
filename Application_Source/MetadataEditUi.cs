@@ -39,7 +39,7 @@ namespace AstroArchive {
     if(tab==0){
      Form.Text("Capture town / city",true);var sites=selected.Select(f=>CaptureSite.Describe(f,settings)).Distinct().ToList();string initial=sites.Count==1?sites[0]:"Mixed";
      CaptureTown=Form.Input("Town / city",initial);CaptureTown.IsReadOnly=true;CaptureTown.Name="MetadataCaptureTown";resets.Add(()=>CaptureTown.Text=initial);
-     Form.Text("A chosen town or city replaces the recorded capture location. Use default location to return to file metadata, then the observing location in Settings. Changes are applied when you save metadata.");
+     Form.Text("A chosen town or city sets the capture location and its historical timezone. Local capture clocks are converted to UTC again when the town changes; explicit UTC or clock offsets keep their instant. Use default location to return to file metadata, then Settings. Changes are applied when you save metadata.");
      Form.Button("Choose town / city…",()=>{var townPicker=new CityPicker(Form.Window,Model.CaptureCity==null?selected.Select(f=>f.CaptureCity).FirstOrDefault(c=>!string.IsNullOrEmpty(c)):Model.CaptureCity.Label);try{if(townPicker.Show()){Model.SetCaptureCity(townPicker.SelectedCity);CaptureTown.Text=townPicker.SelectedCity.Label;UpdateSummary();}}finally{townPicker.Dispose();}});
      Form.Button("Use default location",()=>{Model.SetCaptureCity(null);CaptureTown.Text="Default location";UpdateSummary();});
     }

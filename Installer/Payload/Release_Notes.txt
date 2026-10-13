@@ -1,10 +1,8 @@
-AstroArchive 3.2.7
-Package 3.2.7.2
+AstroArchive 3.2.8 prerelease
+Package 3.2.8.1
 
-Signing is optional for this release. It can publish a checksum-verified unsigned installer when publisher signing is not configured. If signing is enabled, trusted RSA publisher signatures and timestamps are verified on the application, launcher and installer before publication; checksums describe the final bytes.
+Choosing or changing a capture town now applies its historical timezone to unzoned local capture clocks and updates the UTC instant used by the sky map and eclipse checks. Existing chosen-town records with stale assumed UTC are repaired when the archive opens. Explicit UTC, clock offsets and declared header time standards retain their meaning. For the Santa Ponsa eclipse example, 12 August 2026 at 20:32:54.797 CEST resolves to 18:32:54.797 UTC, placing the Sun above the western horizon.
 
-Installer repair now retries transient Windows shortcut file locks before failing, while preserving errors for access restrictions and application-control policy.
+Thumbnail credits have been audited and repaired: Commons featured-picture notices, copyright-template instructions and talk-page controls no longer appear as creator or attribution text. Real creator, collaborator, processing and licence information is preserved. The pack exporter applies the same corrections on future rebuilds.
 
-Includes the application changes from 3.2.6: reordered information panes, compact and expandable image credits, simplified solar eclipse displays, per-file capture towns in Edit metadata, refreshed sky and eclipse checks, DSO foreground-obstruction scoring, FITS preview recovery, display-only brightness correction for very dark frames, and no Moon-to-target separation for lunar images.
-
-Unsigned packages can still be blocked by Smart App Control or SmartScreen. This release does not claim to bypass or remedy those Windows trust decisions. Repositories, images and settings are retained.
+Comet imaging notes suggest 10–30 second sub-exposures, 5–10 seconds for faster motion or longer focal lengths, and give an image-scale/motion calculation for keeping the head sharp. Entries without imaging guidance omit the imaging-notes disclosure.

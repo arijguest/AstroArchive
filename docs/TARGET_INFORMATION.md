@@ -103,3 +103,28 @@ interface languages are checked with unchanged catalogue prose and attribution.
 Local verification on 12 October 2026: compilation against .NET Framework 4.8
 references and 90 focused target/metadata/information/language checks passed.
 Windows checks cover all seven interface languages and installed-app rendering.
+
+## Credit audit and imaging notes in 3.2.8
+
+All 326 thumbnail assignments were audited. Commons featured-picture notices and
+institutional copyright-template instructions had been flattened into creator or
+source/processing attribution text; talk-page controls also appeared in two
+creators. The Iris Nebula now credits **Andreigusan** without its Persian Wikipedia
+featured-picture notice. M46's creator is **Boris Štromar**, with the existing
+permission text retained in the attribution. The Helix creator is the file's stated
+credit, **NASA, ESA, and C.R. O'Dell (Vanderbilt University)**; its full collaborator
+acknowledgements remain available. Genuine processing credits and acknowledgements
+remain intact. Whitespace was normalized in 88 assignment records. Thumbnail bytes,
+licences, file/licence links, identities and scientific values are unchanged.
+
+`scripts/target_image_credits.py` applies the same repairs during future database
+exports. The pack retains the original SQLite source hash/data version and records
+`runtime_credit_revision: 1`, distinguishing the repaired projection from the
+upstream database. `python scripts/test-target-image-credits.py` audits every
+assignment, checks image hashes and exercises export repairs.
+
+Comet notes now suggest starting with 10–30 second sub-exposures, or 5–10 seconds
+for fast motion/long focal lengths, followed by inspection for trailing. They also
+give the one-pixel drift limit from image scale and apparent angular motion. Notes
+are shown only when guidance exists; empty entries have no disclosure. Engine and
+Windows UI checks cover repaired Iris credits and empty imaging-note entries.

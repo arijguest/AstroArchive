@@ -2096,3 +2096,4 @@ FUN FACT	WISSENSWERTES
 Sun obscured	Sonne verdeckt
 Check capture metadata	Aufnahmemetadaten prüfen
 Suspected obstruction	Mögliche Abschattung
+A chosen town or city sets the capture location and its historical timezone. Local capture clocks are converted to UTC again when the town changes; explicit UTC or clock offsets keep their instant. Use default location to return to file metadata, then Settings. Changes are applied when you save metadata.	Ein gewählter Ort legt den Aufnahmeort und seine historische Zeitzone fest. Lokale Aufnahmezeiten werden bei einem Ortswechsel erneut in UTC umgerechnet; ausdrücklich angegebene UTC-Zeiten oder Zeitversätze behalten ihren Zeitpunkt. Mit dem Standardort kehren Sie zu den Dateimetadaten und dann zu den Einstellungen zurück. Änderungen werden beim Speichern der Metadaten angewendet.

@@ -95,14 +95,19 @@ namespace AstroArchive {
     if(key=="Mount"){item.MountEvidence="User assigned";facts.Add("MountEvidence");}
    }
    if(changes.ContainsKey("Gain")&&!changes.ContainsKey("GainUnit")&&string.IsNullOrWhiteSpace(item.GainUnit)){item.GainUnit="camera units";facts.Add("GainUnit");}
+   if(captureSiteChanged){CaptureSite.Apply(item,captureCity);if(!changes.ContainsKey("TimeZoneId"))CaptureSky.ApplyCityClock(item);foreach(string key in new[]{"CaptureCityId","CaptureCity","CaptureLatitude","CaptureLongitude"})facts.Add(key);}
    if(changes.ContainsKey("TimeZoneId")){
+    // An explicitly entered timezone in the same edit takes priority over the city.
+    item.TimeZoneId=changes["TimeZoneId"];
     var timezone=TimeZoneInfo.FindSystemTimeZoneById(item.TimeZoneId);DateTime? observed=Util.Time(item.Observed);
-    if(observed.HasValue){DateTime local=DateTime.SpecifyKind(observed.Value,DateTimeKind.Unspecified);
-     if(timezone.IsInvalidTime(local)||timezone.IsAmbiguousTime(local))throw new InvalidDataException("Capture time is invalid or ambiguous in this timezone: "+item.OriginalName);
-     item.ObservedUtc=TimeZoneInfo.ConvertTimeToUtc(local,timezone).ToString("o");item.TimeSource="User timezone";facts.Add("ObservedUtc");facts.Add("TimeSource");
+    if(observed.HasValue){DateTimeOffset explicitTime;
+     if(Regex.IsMatch(item.Observed??"",@"(?:Z|[+-]\d\d:\d\d)$",RegexOptions.IgnoreCase)&&DateTimeOffset.TryParse(item.Observed,CultureInfo.InvariantCulture,DateTimeStyles.AssumeUniversal|DateTimeStyles.AdjustToUniversal,out explicitTime))item.ObservedUtc=explicitTime.UtcDateTime.ToString("o");
+     else{DateTime local=DateTime.SpecifyKind(observed.Value,DateTimeKind.Unspecified);
+      if(timezone.IsInvalidTime(local)||timezone.IsAmbiguousTime(local))throw new InvalidDataException("Capture time is invalid or ambiguous in this timezone: "+item.OriginalName);
+      item.ObservedUtc=TimeZoneInfo.ConvertTimeToUtc(local,timezone).ToString("o");}
+     item.TimeSource="User timezone";facts.Add("ObservedUtc");facts.Add("TimeSource");
     }
    }
-   if(captureSiteChanged){CaptureSite.Apply(item,captureCity);foreach(string key in new[]{"CaptureCityId","CaptureCity","CaptureLatitude","CaptureLongitude"})facts.Add(key);}
    foreach(string key in facts)Assets.UserFact(item,key);
    if(facts.Contains("Gain"))item.Facts["Gain"].Unit=item.GainUnit;
    if(changes.ContainsKey("Target")&&!changes.ContainsKey("Camera"))CameraDetection.DefaultForTarget(item);

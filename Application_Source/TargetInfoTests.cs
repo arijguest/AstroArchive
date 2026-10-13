@@ -29,6 +29,17 @@ namespace AstroArchive {
     var halleyOrbit=CometInfo.Orbit("1P");Check(CometInfo.SemiMajorAxis(halleyOrbit)=="17.9 AU"&&CometInfo.PerihelionSpeed(halleyOrbit)=="55.1 km/s"&&!CometInfo.ShowsEscapeSpeed(halleyOrbit)&&!CometInfo.HasSemiMajorAxis(CometInfo.Orbit("C/1996 B2"))&&CometInfo.ShowsEscapeSpeed(CometInfo.Orbit("2I"))&&CometInfo.EscapeSpeed(CometInfo.Orbit("2I"))=="32.3 km/s","Comet derived orbit facts wrong");
    });
    var catalog=new TargetInfoCatalog(Path.Combine(AppDomain.CurrentDomain.BaseDirectory,"TargetInfo.zip"));
+   Test("Thumbnail credits contain creators and acknowledgements without Commons page templates",()=>{
+    var iris=catalog.ById("NGC 7023",CancellationToken.None).Cards.Single().image;
+    Check(iris.creator=="Andreigusan"&&iris.attribution.StartsWith("Andreigusan — ")&&iris.licence=="CC-BY-SA-4.0","Iris thumbnail credit or licence is wrong");
+    foreach(string id in new[]{"NGC 7023","NGC 6744","IC 2944","LDN 1622","M96","NGC 55","NGC 6543","NGC 6726","M3","M69"}){
+     var image=catalog.ById(id,CancellationToken.None).Cards.Single().image;string text=image.creator+image.attribution;
+     Check(!text.Contains("featured picture")&&!text.Contains("Commons:Licensing")&&!text.Contains("( talk )"),"Commons page prose remains in "+id);
+    }
+    Check(catalog.ById("M96",CancellationToken.None).Cards.Single().image.attribution.Contains("Image processing: M. Rodriguez"),"Real processing credits were stripped");
+    Check(TargetInfoPresentation.Imaging(new TargetInfoCard{id="No notes",domain="deep_sky"})==null&&TargetInfoPresentation.Imaging(null)==null,"Empty imaging notes produced a section");
+    Check(CometInfo.Imaging.Contains("10–30 second")&&CometInfo.Imaging.Contains("5–10 seconds")&&CometInfo.Imaging.Contains("20 seconds or less"),"Comet notes lack practical exposure guidance");
+   });
    Test("Target info resolves complete aliases and preserves disputed identities",()=>{
     foreach(string label in new[]{"M31","Messier 031","NGC 0224","Andromeda Galaxy"}){var result=catalog.Find(label,CancellationToken.None);Check(result.Status=="matched"&&result.Cards.Single().id=="M31","Wrong identity for "+label);}
     Check(catalog.Find("M102",CancellationToken.None).Status=="ambiguous","Disputed Messier identity picked automatically");

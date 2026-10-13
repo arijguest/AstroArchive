@@ -8,7 +8,7 @@ namespace AstroArchive {
  public partial class MainUi {
   public void SmokePlanetarySky(string output){
    Directory.CreateDirectory(output);Window.Show();PumpPopupLayout();
-   var globe=(SkyGlobeView)Window.FindName("PreviewSky");var previous=globe.Context;var savedFrame=previewSkyFrame;int page=((TabControl)Window.FindName("MainTabs")).SelectedIndex;
+   var globe=(SkyGlobeView)Window.FindName("PreviewSky");var previous=globe.Context;var savedFrame=previewSkyFrame;var savedRows=all;int page=((TabControl)Window.FindName("MainTabs")).SelectedIndex;
    string theme=settings.ThemeMode;var popup=new FormWindow(Window,"Planetary sky check",520,620);var view=new SkyGlobeView{Height=370};popup.Add(view);
    try{
     popup.Window.Show();
@@ -40,9 +40,17 @@ namespace AstroArchive {
     for(int longitude=-180;longitude<=180;longitude+=30){moonFrame.Longitude=longitude;moonProbe=CaptureSky.Resolve(moonFrame,null);if(moonProbe.Moon.Altitude<0)break;}
     UpdateMoonDetails(moonProbe,moonFrame);var moonFacts=((Grid)Window.FindName("SkyFacts")).Children;
     if(!moonFacts.OfType<TextBlock>().Any(t=>t.Text=="Not out (below the horizon)")||moonFacts.OfType<DockPanel>().Any())throw new Exception("Below-horizon Moon retained a phase glyph or illumination state");
-    SmokeSkyClicks(popup.Window,view,output);SmokeEclipseDetails(output);
+    var town=new ObservingCity{Id=6324533,Name="Santa Ponsa",Latitude=39.50868,Longitude=2.4766};
+    var eclipseFrame=new Frame{Hash="santa-ponsa-eclipse",Target="Sun",Kind="Light",Format="FITS",Observed="2026-08-12T20:32:54.797",ObservedUtc="2026-08-12T20:32:54.797Z",TimeSource="FITS UTC",TimeZoneId="UTC",Latitude=town.Latitude,Longitude=town.Longitude};
+    if(FrameEclipse(eclipseFrame,all)!=null)throw new Exception("Incorrect UTC clock did not reproduce the missing eclipse.");UpdateCaptureSky("",eclipseFrame);
+    var repaired=new MetadataPatch(new System.Collections.Generic.Dictionary<string,string>(),true,town).Apply(eclipseFrame);
+    all=new System.Collections.Generic.List<Frame>{repaired};RefreshSkyPreviews();PumpPopupLayout();
+    if(globe.Context.BodyBelowHorizon||globe.Context.Eclipse==null||globe.Context.Utc.Value.Hour!=18)throw new Exception("Metadata refresh reused the obsolete preview frame or failed to redraw the eclipse.");
+    CaptureSite.Apply(eclipseFrame,town);if(FrameEclipse(eclipseFrame,all)==null)throw new Exception("Eclipse section cached its earlier result after the town changed.");
+    view.SetContext(globe.Context);PumpPopupLayout();CapturePopup(popup.Window,Path.Combine(output,"AstroArchive_Santa_Ponsa_Eclipse.png"));
+    all=savedRows;SmokeSkyClicks(popup.Window,view,output);SmokeEclipseDetails(output);
     File.WriteAllText(Path.Combine(output,"planetary-sky-smoke.txt"),"PASS timed AVI metadata locates all nine supported bodies; target marker/camera epoch; Moon disc coincidence; cached drawing; observer horizon; absent-clock state; observing-city timezone fallback; constellation names and body clicks; eclipse details card; light/dark screenshots.");
-   }finally{popup.Window.Close();globe.SetContext(previous);previewSkyFrame=savedFrame;UpdateMoonDetails(previous,savedFrame);Theme.Apply(Window,theme);GoToPage(page);}
+   }finally{all=savedRows;popup.Window.Close();globe.SetContext(previous);previewSkyFrame=savedFrame;UpdateMoonDetails(previous,savedFrame);Theme.Apply(Window,theme);GoToPage(page);}
   }
  }
 }
