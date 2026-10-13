@@ -2409,3 +2409,19 @@ Meteor showers	Lluvias de meteoros
 Suspected parent of	Presunto progenitor de
 Parabolic	Parabólico
 Chiron-type	Tipo Quirón
+Ascending node	Nodo ascendente
+Descending node	Nodo descendente
+Apogee	Apogeo
+Play	Reproducir
+Epoch {0}	Época {0}
+Marker date slider	Control deslizante de la fecha del marcador
+Play or pause the marker date. Space does the same while the orbit has focus.	Reproduce o pausa la fecha del marcador. La barra espaciadora hace lo mismo mientras la órbita tiene el foco.
+Orbit|Sun	Sol
+Orbit|Earth	Tierra
+Orbit|Mercury	Mercurio
+Orbit|Venus	Venus
+Orbit|Mars	Marte
+Orbit|Jupiter	Júpiter
+Orbit|Saturn	Saturno
+Orbit|Uranus	Urano
+Orbit|Neptune	Neptuno

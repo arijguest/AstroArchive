@@ -1,12 +1,10 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Automation;
-using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 
@@ -15,102 +13,256 @@ namespace AstroArchive {
   public double Yaw=35,Tilt=55,Zoom=1,PanX,PanY;public bool Plane,Inner;
   public OrbitCamera Copy(){return (OrbitCamera)MemberwiseClone();}
  }
- // Cached physical 3D coordinates, depth-sorted native WPF drawing. No web/code
- // downloads, timers or network work during gestures.
+ // The real sky behind the orbits: the sky globe's stars and constellation figures, turned into
+ // the ecliptic frame the orbit scene uses, so the backdrop turns with the camera as the sky would.
+ static class OrbitSky {
+  public static readonly OrbitPoint[] Stars;public static readonly int[] Lines;
+  static OrbitSky(){
+   try{
+    Stars=SkyFigures.Stars.Select(s=>OrbitMath.Ecliptic(s.X,s.Y,s.Z)).ToArray();var pairs=new List<int>();
+    foreach(var figure in SkyFigures.Figures)foreach(var path in figure.Paths)for(int i=1;i<path.Length;i++){pairs.Add(path[i-1]);pairs.Add(path[i]);}
+    Lines=pairs.ToArray();
+   }catch(Exception){Stars=new OrbitPoint[0];Lines=new int[0];}
+  }
+ }
+ // Line segments gathered into one geometry per style: an orbit is a handful of draw calls and its joins stay smooth.
+ sealed class OrbitStrokes {
+  readonly StreamGeometry geometry=new StreamGeometry();readonly StreamGeometryContext context;Point end;bool open;public bool Any;
+  public OrbitStrokes(){context=geometry.Open();}
+  public void Add(Point a,Point b){if(!open||end!=a){context.BeginFigure(a,false,false);open=true;}context.LineTo(b,true,true);end=b;Any=true;}
+  public Geometry Done(){context.Close();geometry.Freeze();return geometry;}
+ }
+ // Cached physical 3D coordinates in the sky globe's visual language, drawn natively in WPF. No web/code
+ // downloads, timers or network work during gestures; camera moves use the frame clock only while they run.
  public sealed class OrbitView:FrameworkElement {
   static DependencyProperty BrushProperty(string name){return DependencyProperty.Register(name+"Brush",typeof(Brush),typeof(OrbitView),new FrameworkPropertyMetadata(Brushes.Gray,FrameworkPropertyMetadataOptions.AffectsRender));}
   static readonly Dictionary<string,DependencyProperty> palette=new Dictionary<string,DependencyProperty>{{"SurfaceAlt",BrushProperty("SurfaceAlt")},{"Surface",BrushProperty("Surface")},{"Text",BrushProperty("Text")},{"Muted",BrushProperty("Muted")},{"Accent",BrushProperty("Accent")},{"Border",BrushProperty("Border")}};
   static readonly DependencyProperty CaptionSizeProperty=DependencyProperty.Register("CaptionSize",typeof(double),typeof(OrbitView),new FrameworkPropertyMetadata(11.0,FrameworkPropertyMetadataOptions.AffectsRender));
+  // The main window points this at the Reduce motion setting; Windows' own animation setting also counts.
+  public static Func<bool> ReducedMotion=()=>!SystemParameters.ClientAreaAnimation;
+  static readonly Color SunLight=Color.FromRgb(255,206,84),EarthLight=Color.FromRgb(86,146,224);
+  static readonly Dictionary<string,Color> PlanetColours=new Dictionary<string,Color>{{"Mercury",Color.FromRgb(166,166,172)},{"Venus",Color.FromRgb(222,184,100)},{"Earth",Color.FromRgb(82,142,222)},{"Mars",Color.FromRgb(216,104,72)},{"Jupiter",Color.FromRgb(204,158,112)},{"Saturn",Color.FromRgb(212,184,112)},{"Uranus",Color.FromRgb(104,196,210)},{"Neptune",Color.FromRgb(96,120,224)}};
+  const double TweenSeconds=0.28;
   public OrbitCamera Camera=new OrbitCamera();public OrbitScene Scene {get;private set;}
-  public OrbitPoint? Marker;Point last;bool dragging,panning;public Action Changed;
+  public OrbitPoint? Marker;public List<KeyValuePair<string,OrbitPoint>> Bodies;public bool Overview;public string DateLabel;
+  public Action Changed,TogglePlay;Point last;bool dragging,panning;
+  OrbitCamera from,to;Stopwatch clock;bool tweening;
   public OrbitView(){
    foreach(var colour in palette)SetResourceReference(colour.Value,colour.Key);SetResourceReference(CaptionSizeProperty,"UiFontCaption");
    Cursor=Cursors.Hand;ToolTip=Localization.T("Drag or use arrows to rotate. Shift-drag to pan. Focus the orbit or hold Ctrl to zoom with the wheel. Pinch to zoom.");Focusable=true;IsManipulationEnabled=true;ClipToBounds=true;MinHeight=160;
    SetResourceReference(FocusVisualStyleProperty,SystemParameters.FocusVisualStyleKey);
    AutomationProperties.SetName(this,Localization.T("3D orbit"));AutomationProperties.SetHelpText(this,Localization.T("Drag or use arrows to rotate. Shift-drag to pan. Focus the orbit or hold Ctrl to zoom with the wheel. Pinch to zoom."));
-   MouseLeftButtonDown+=(s,e)=>{Focus();last=e.GetPosition(this);dragging=true;panning=(Keyboard.Modifiers&ModifierKeys.Shift)!=0;CaptureMouse();e.Handled=true;};
+   MouseLeftButtonDown+=(s,e)=>{Focus();StopTween();if(e.ClickCount==2){GoReset();e.Handled=true;return;}last=e.GetPosition(this);dragging=true;panning=(Keyboard.Modifiers&ModifierKeys.Shift)!=0;Cursor=panning?Cursors.ScrollAll:Cursors.SizeAll;CaptureMouse();e.Handled=true;};
    MouseMove+=(s,e)=>{if(!dragging)return;var point=e.GetPosition(this);double dx=point.X-last.X,dy=point.Y-last.Y;last=point;if(panning)Pan(dx,dy);else Rotate(dx*0.5,dy*0.5);e.Handled=true;};
-   MouseLeftButtonUp+=(s,e)=>{dragging=false;ReleaseMouseCapture();e.Handled=true;};LostMouseCapture+=(s,e)=>dragging=false;
-   PreviewMouseWheel+=(s,e)=>{if(!IsKeyboardFocusWithin&&(Keyboard.Modifiers&ModifierKeys.Control)==0)return;Zoom(Math.Exp(Math.Max(-1200,Math.Min(1200,e.Delta))/600.0),e.GetPosition(this));e.Handled=true;};
-   KeyDown+=(s,e)=>{bool handled=true;switch(e.Key){case Key.Left:Rotate(-5,0);break;case Key.Right:Rotate(5,0);break;case Key.Up:Rotate(0,5);break;case Key.Down:Rotate(0,-5);break;case Key.Add:case Key.OemPlus:Zoom(1.25);break;case Key.Subtract:case Key.OemMinus:Zoom(0.8);break;case Key.Home:Reset();break;case Key.Escape:MoveFocus(new TraversalRequest(FocusNavigationDirection.Previous));break;default:handled=false;break;}e.Handled=handled;};
-   ManipulationStarting+=(s,e)=>{dragging=false;ReleaseMouseCapture();e.Mode=ManipulationModes.Translate|ManipulationModes.Scale;e.ManipulationContainer=this;e.Handled=true;};
+   MouseLeftButtonUp+=(s,e)=>{dragging=false;Cursor=Cursors.Hand;ReleaseMouseCapture();e.Handled=true;};LostMouseCapture+=(s,e)=>{dragging=false;Cursor=Cursors.Hand;};
+   PreviewMouseWheel+=(s,e)=>{if(!IsKeyboardFocusWithin&&(Keyboard.Modifiers&ModifierKeys.Control)==0)return;StopTween();Zoom(Math.Exp(Math.Max(-1200,Math.Min(1200,e.Delta))/600.0),e.GetPosition(this));e.Handled=true;};
+   KeyDown+=(s,e)=>{bool handled=true;StopTween();switch(e.Key){case Key.Left:Rotate(-5,0);break;case Key.Right:Rotate(5,0);break;case Key.Up:Rotate(0,5);break;case Key.Down:Rotate(0,-5);break;case Key.Add:case Key.OemPlus:Zoom(1.25);break;case Key.Subtract:case Key.OemMinus:Zoom(0.8);break;case Key.Home:GoReset();break;case Key.Space:if(TogglePlay==null)handled=false;else TogglePlay();break;case Key.Escape:MoveFocus(new TraversalRequest(FocusNavigationDirection.Previous));break;default:handled=false;break;}e.Handled=handled;};
+   ManipulationStarting+=(s,e)=>{StopTween();dragging=false;ReleaseMouseCapture();e.Mode=ManipulationModes.Translate|ManipulationModes.Scale;e.ManipulationContainer=this;e.Handled=true;};
    ManipulationDelta+=(s,e)=>{Focus();double scale=e.DeltaManipulation.Scale.X;if(OrbitalModel.Finite(scale)&&scale>0)Zoom(scale,e.ManipulationOrigin);if(TouchesCapturedWithin.Concat(TouchesOver).Distinct().Count()<2)Rotate(e.DeltaManipulation.Translation.X*0.5,e.DeltaManipulation.Translation.Y*0.5);else Pan(e.DeltaManipulation.Translation.X,e.DeltaManipulation.Translation.Y);e.Handled=true;};
+   Unloaded+=(s,e)=>StopTween(true);IsVisibleChanged+=(s,e)=>{if(!IsVisible)StopTween(true);};
   }
-  public void SetScene(OrbitScene scene){Scene=scene;InvalidateVisual();}
+  public void SetScene(OrbitScene scene){Scene=scene;StopTween(true);InvalidateVisual();}
   void Update(){InvalidateVisual();if(Changed!=null)Changed();}
-  public void Reset(){Camera=new OrbitCamera();Update();}
-  public void Rotate(double yaw,double tilt){Camera.Plane=false;Camera.Yaw=(Camera.Yaw+yaw)%360;Camera.Tilt=Math.Max(-90,Math.Min(90,Camera.Tilt+tilt));Update();}
+  public void Redraw(){InvalidateVisual();}
+  public void Reset(){StopTween();Camera=new OrbitCamera();Update();}
+  public void Rotate(double yaw,double tilt){StopTween();Camera.Plane=false;Camera.Yaw=(Camera.Yaw+yaw)%360;Camera.Tilt=Math.Max(-90,Math.Min(90,Camera.Tilt+tilt));Update();}
   public void Pan(double x,double y){if(!OrbitalModel.Finite(x)||!OrbitalModel.Finite(y))return;Camera.PanX=Math.Max(-ActualWidth*2,Math.Min(ActualWidth*2,Camera.PanX+x));Camera.PanY=Math.Max(-ActualHeight*2,Math.Min(ActualHeight*2,Camera.PanY+y));Update();}
   public void Zoom(double factor){Zoom(factor,new Point(ActualWidth/2,ActualHeight/2));}
-  public void Zoom(double factor,Point anchor){if(!OrbitalModel.Finite(factor)||factor<=0)return;double next=Math.Max(0.1,Math.Min(1e10,Camera.Zoom*factor)),ratio=next/Camera.Zoom;Camera.Zoom=next;
+  public void Zoom(double factor,Point anchor){if(!OrbitalModel.Finite(factor)||factor<=0)return;StopTween();double next=Math.Max(0.1,Math.Min(1e10,Camera.Zoom*factor)),ratio=next/Camera.Zoom;Camera.Zoom=next;
    double x=anchor.X-ActualWidth/2,y=anchor.Y-ActualHeight/2;Camera.PanX=(Camera.PanX-x)*ratio+x;Camera.PanY=(Camera.PanY-y)*ratio+y;Pan(0,0);}
-  public void Fit(bool inner){Camera.Inner=inner;Camera.Zoom=1;Camera.PanX=Camera.PanY=0;Update();}
-  public void Top(){Camera.Plane=false;Camera.Tilt=90;Camera.Yaw=0;Update();}
-  public void Plane(){Camera.Plane=true;Update();}
-  Brush Colour(string key){return GetValue(palette[key]) as Brush??Brushes.Gray;}
-  double Extent {get{return Scene==null?1:Math.Max(1e-9,(Camera.Inner?Scene.Inner:Scene.Full).Extent);}}
-  OrbitPoint View(OrbitPoint p){
-   if(Camera.Plane&&Scene!=null){var o=Scene.Record;var a=OrbitalModel.Orient(o,1,0);var b=OrbitalModel.Orient(o,0,1);var n=new OrbitPoint(a.Y*b.Z-a.Z*b.Y,a.Z*b.X-a.X*b.Z,a.X*b.Y-a.Y*b.X);return new OrbitPoint(Dot(p,a),Dot(p,b),Dot(p,n));}
-   double yaw=Camera.Yaw*OrbitalModel.R,tilt=Camera.Tilt*OrbitalModel.R;double x=p.X*Math.Cos(yaw)-p.Y*Math.Sin(yaw),y=p.X*Math.Sin(yaw)+p.Y*Math.Cos(yaw);return new OrbitPoint(x,y*Math.Sin(tilt)+p.Z*Math.Cos(tilt),-y*Math.Cos(tilt)+p.Z*Math.Sin(tilt));
+  public void Fit(bool inner){StopTween();Camera.Inner=inner;Camera.Zoom=1;Camera.PanX=Camera.PanY=0;Update();}
+  public void Top(){StopTween();Camera.Plane=false;Camera.Tilt=90;Camera.Yaw=0;Update();}
+  public void Plane(){StopTween();Camera.Plane=true;Update();}
+  // The same moves as buttons use them: eased over a moment, or at once when motion is reduced.
+  public void GoReset(){GoTo(new OrbitCamera());}
+  public void GoTop(){var next=Camera.Copy();next.Plane=false;next.Tilt=90;next.Yaw=0;GoTo(next);}
+  public void GoPlane(){var next=Camera.Copy();next.Plane=true;GoTo(next);}
+  public void GoFit(bool inner){var next=Camera.Copy();next.Inner=inner;next.Zoom=1;next.PanX=next.PanY=0;GoTo(next);}
+  double ExtentOf(bool inner){return Scene==null?1:Math.Max(1e-9,(inner?Scene.Inner:Scene.Full).Extent);}
+  void GoTo(OrbitCamera target){
+   StopTween();
+   // The orbit-plane view is a different frame from yaw and tilt, so it cannot be blended.
+   if(Scene==null||Camera.Plane||target.Plane||ReducedMotion()||!IsVisible||ActualWidth<20){Camera=target;Update();return;}
+   // Switching between Fit and Inner changes the extent; keep the picture's scale continuous so the zoom eases rather than jumps.
+   if(Camera.Inner!=target.Inner){Camera.Zoom=Math.Max(0.1,Math.Min(1e10,Camera.Zoom*ExtentOf(Camera.Inner)/ExtentOf(target.Inner)));Camera.Inner=target.Inner;}
+   from=Camera.Copy();to=target;clock=Stopwatch.StartNew();tweening=true;CompositionTarget.Rendering+=Tick;
   }
+  void Tick(object sender,EventArgs e){
+   double t=Math.Min(1,clock.Elapsed.TotalSeconds/TweenSeconds),k=OrbitMath.Ease(t);
+   var step=new OrbitCamera{Yaw=OrbitMath.Angle(from.Yaw,to.Yaw,k),Tilt=from.Tilt+(to.Tilt-from.Tilt)*k,Zoom=from.Zoom*Math.Pow(to.Zoom/from.Zoom,k),PanX=from.PanX+(to.PanX-from.PanX)*k,PanY=from.PanY+(to.PanY-from.PanY)*k,Inner=to.Inner};
+   if(t>=1){step=to.Copy();StopTween();}Camera=step;Update();
+  }
+  void StopTween(bool finish=false){if(!tweening)return;tweening=false;CompositionTarget.Rendering-=Tick;if(finish&&to!=null){Camera=to.Copy();Update();}}
+  public bool Animating {get{return tweening;}}
+  Brush Colour(string key){return GetValue(palette[key]) as Brush??Brushes.Gray;}
+  static Brush Tint(Brush brush,double opacity){var copy=brush.CloneCurrentValue();copy.Opacity=opacity;copy.Freeze();return copy;}
+  static Brush Solid(Color colour,double opacity){var brush=new SolidColorBrush(colour){Opacity=opacity};brush.Freeze();return brush;}
+  static Pen Stroke(Brush brush,double opacity,double width){var pen=new Pen(Tint(brush,opacity),width){StartLineCap=PenLineCap.Round,EndLineCap=PenLineCap.Round,LineJoin=PenLineJoin.Round};pen.Freeze();return pen;}
+  static Pen Dashes(Brush brush,double opacity,double width){var pen=new Pen(Tint(brush,opacity),width){DashStyle=new DashStyle(new double[]{3,2.5},0),LineJoin=PenLineJoin.Round};pen.Freeze();return pen;}
+  static bool Finite(Point p){return OrbitalModel.Finite(p.X)&&OrbitalModel.Finite(p.Y);}
   static double Dot(OrbitPoint a,OrbitPoint b){return a.X*b.X+a.Y*b.Y+a.Z*b.Z;}
-  Point Project(OrbitPoint p){double scale=Math.Max(1,Math.Min(ActualWidth,ActualHeight)-64)*0.46/Extent*Camera.Zoom;return new Point(ActualWidth/2+Camera.PanX+p.X*scale,ActualHeight/2+Camera.PanY-p.Y*scale);}
-  sealed class Segment {public Point A,B;public double Depth;public bool Target;}
+  // One frame's camera and palette, worked out once.
+  Rect bounds;OrbitPath target;double extent,scale,cosYaw,sinYaw,cosTilt,sinTilt;OrbitPoint planeA,planeB,planeN;bool dark;List<Label> labels;
+  sealed class Label {public string Text;public Point At;public bool Accent,Force;public int Priority;}
+  void Prepare(){
+   bounds=new Rect(RenderSize);target=Camera.Inner?Scene.Inner:Scene.Full;extent=Math.Max(1e-9,target.Extent);scale=Math.Max(1,Math.Min(ActualWidth,ActualHeight)-64)*0.46*Camera.Zoom/extent;
+   double yaw=Camera.Yaw*OrbitalModel.R,tilt=Camera.Tilt*OrbitalModel.R;cosYaw=Math.Cos(yaw);sinYaw=Math.Sin(yaw);cosTilt=Math.Cos(tilt);sinTilt=Math.Sin(tilt);
+   if(Camera.Plane){var o=Scene.Record;planeA=OrbitalModel.Orient(o,1,0);planeB=OrbitalModel.Orient(o,0,1);planeN=new OrbitPoint(planeA.Y*planeB.Z-planeA.Z*planeB.Y,planeA.Z*planeB.X-planeA.X*planeB.Z,planeA.X*planeB.Y-planeA.Y*planeB.X);}
+   var surface=Colour("SurfaceAlt") as SolidColorBrush;dark=surface==null||(0.299*surface.Color.R+0.587*surface.Color.G+0.114*surface.Color.B)<128;labels=new List<Label>();
+  }
+  // Scene to view space: x right, y up, z towards the viewer. Yaw turns about the pole, tilt leans the pole towards the viewer.
+  OrbitPoint View(OrbitPoint p){
+   if(Camera.Plane)return new OrbitPoint(Dot(p,planeA),Dot(p,planeB),Dot(p,planeN));
+   double x=p.X*cosYaw-p.Y*sinYaw,y=p.X*sinYaw+p.Y*cosYaw;return new OrbitPoint(x,y*sinTilt+p.Z*cosTilt,-y*cosTilt+p.Z*sinTilt);
+  }
+  Point Project(OrbitPoint v){return new Point(ActualWidth/2+Camera.PanX+v.X*scale,ActualHeight/2+Camera.PanY-v.Y*scale);}
+  Point ProjectScene(OrbitPoint p){return Project(View(p));}
   static bool VisibleLine(ref Point a,ref Point b,Rect bounds){
    // Liang–Barsky clipping avoids huge WPF coordinates at extreme orbital extents.
    double dx=b.X-a.X,dy=b.Y-a.Y,t0=0,t1=1;double[] p={-dx,dx,-dy,dy},q={a.X-bounds.Left,bounds.Right-a.X,a.Y-bounds.Top,bounds.Bottom-a.Y};
    for(int k=0;k<4;k++){if(Math.Abs(p[k])<1e-20){if(q[k]<0)return false;}else{double t=q[k]/p[k];if(p[k]<0){if(t>t1)return false;t0=Math.Max(t0,t);}else{if(t<t0)return false;t1=Math.Min(t1,t);}}}
    var origin=a;a=new Point(origin.X+t0*dx,origin.Y+t0*dy);b=new Point(origin.X+t1*dx,origin.Y+t1*dy);return true;
   }
+  // Visits each finite, on-screen piece of a path with its view depth; true when any of it runs outside the frame.
+  bool Walk(OrbitPath path,Action<Point,Point,OrbitPoint,OrbitPoint,double> piece){
+   bool outside=false;if(path==null)return false;
+   for(int k=1;k<path.Points.Length;k++){
+    var a=View(path.Points[k-1]);var b=View(path.Points[k]);var pa=Project(a);var pb=Project(b);if(!Finite(pa)||!Finite(pb))continue;
+    if(!bounds.Contains(pa)||!bounds.Contains(pb))outside=true;
+    if(VisibleLine(ref pa,ref pb,bounds))piece(pa,pb,path.Points[k-1],path.Points[k],(a.Z+b.Z)/2);
+   }
+   return outside;
+  }
+  static void Draw(DrawingContext dc,OrbitStrokes strokes,Pen pen){var geometry=strokes.Done();if(strokes.Any)dc.DrawGeometry(null,pen,geometry);}
+  void Ask(string text,Point at,int priority,bool accent=false,bool force=false){labels.Add(new Label{Text=text,At=at,Priority=priority,Accent=accent,Force=force});}
+  FormattedText Format(string text,Brush brush,bool bold){double size=Math.Min(20,(double)GetValue(CaptionSizeProperty));return new FormattedText(text,CultureInfo.CurrentUICulture,FlowDirection.LeftToRight,new Typeface(new FontFamily("Segoe UI"),FontStyles.Normal,bold?FontWeights.SemiBold:FontWeights.Normal,FontStretches.Normal),size,brush,VisualTreeHelper.GetDpi(this).PixelsPerDip);}
+  // Rounded name pills, as on the sky globe. Lower priority numbers claim their space first; later ones that would overlap are left out.
+  void Flush(DrawingContext dc,List<Rect> placed){
+   foreach(var label in labels.OrderBy(l=>l.Priority)){
+    var format=Format(label.Text,Colour(label.Accent?"Text":"Muted"),label.Accent);format.MaxTextWidth=Math.Max(40,ActualWidth-28);format.MaxLineCount=1;format.Trimming=TextTrimming.CharacterEllipsis;
+    double width=Math.Min(format.Width,format.MaxTextWidth)+14,height=format.Height+4;var box=new Rect(Math.Max(3,Math.Min(ActualWidth-width-3,label.At.X)),Math.Max(3,Math.Min(ActualHeight-height-3,label.At.Y)),width,height);
+    if(!label.Force&&placed.Any(r=>r.IntersectsWith(box)))continue;placed.Add(box);
+    dc.DrawRoundedRectangle(Tint(Colour("Surface"),0.92),Stroke(Colour(label.Accent?"Accent":"Border"),label.Accent?0.9:0.7,1),box,height/2,height/2);dc.DrawText(format,new Point(box.X+7,box.Y+2));
+   }
+  }
+  // Stars and constellation lines on the far side of the scene, brightest straight behind it and fading to the rim.
+  void Backdrop(DrawingContext dc){
+   var stars=OrbitSky.Stars;int count=stars.Length;if(count==0)return;double radius=0.62*Math.Sqrt(bounds.Width*bounds.Width+bounds.Height*bounds.Height);
+   var at=new Point[count];var fade=new double[count];Brush text=Colour("Text"),muted=Colour("Muted");
+   for(int i=0;i<count;i++){var v=View(stars[i]);fade[i]=Math.Max(0,Math.Min(1,-v.Z/0.3));at[i]=new Point(bounds.Width/2+v.X*radius,bounds.Height/2-v.Y*radius);}
+   var lines=new[]{new OrbitStrokes(),new OrbitStrokes(),new OrbitStrokes()};var pairs=OrbitSky.Lines;
+   for(int k=0;k+1<pairs.Length;k+=2){int a=pairs[k],b=pairs[k+1];double f=Math.Min(fade[a],fade[b]);if(f<=0.03)continue;var pa=at[a];var pb=at[b];if(VisibleLine(ref pa,ref pb,bounds))lines[f<0.34?0:f<0.67?1:2].Add(pa,pb);}
+   double lineLevel=dark?0.2:0.15,dotLevel=dark?0.6:0.42;for(int bin=0;bin<3;bin++)Draw(dc,lines[bin],Stroke(muted,lineLevel*(bin+1)/3,0.8));
+   var dots=new[]{Tint(text,dotLevel*0.35),Tint(text,dotLevel*0.65),Tint(text,dotLevel)};
+   for(int i=0;i<count;i++){if(fade[i]<=0.03||!bounds.Contains(at[i]))continue;double r=i%7==0?1.5:1;dc.DrawEllipse(dots[fade[i]<0.34?0:fade[i]<0.67?1:2],null,at[i],r,r);}
+  }
+  // The reference plane: a faint disc with distance rings and 30° spokes, tilting with the orbit. Rings are round numbers of AU, or of km at the Earth–Moon scale.
+  void Grid(DrawingContext dc){
+   double perPixel=1/scale,reach=Math.Sqrt(Math.Pow(Math.Abs(Camera.PanX)+ActualWidth/2,2)+Math.Pow(Math.Abs(Camera.PanY)+ActualHeight/2,2))*perPixel;if(!OrbitalModel.Finite(reach)||reach<=0)return;
+   double unit=OrbitMath.Kilometres(reach)?OrbitMath.AuKm:1,step=OrbitMath.NiceStep(reach*unit/3.5)/unit;int rings=(int)Math.Max(1,Math.Min(20,Math.Ceiling(reach/step)));const int Sides=96;Brush muted=Colour("Muted");
+   var near=new OrbitStrokes();var rear=new OrbitStrokes();var spokes=new OrbitStrokes();var disc=new StreamGeometry();bool discOk=true;
+   using(var context=disc.Open()){
+    for(int k=1;k<=rings;k++){double r=k*step;var previous=View(new OrbitPoint(r,0,0));var from=Project(previous);
+     if(k==rings){if(Finite(from))context.BeginFigure(from,true,true);else discOk=false;}
+     for(int i=1;i<=Sides;i++){double angle=i*2*Math.PI/Sides;var v=View(new OrbitPoint(r*Math.Cos(angle),r*Math.Sin(angle),0));var point=Project(v);var a=from;var b=point;
+      if(Finite(a)&&Finite(b)&&VisibleLine(ref a,ref b,bounds))((previous.Z+v.Z)/2<0?rear:near).Add(a,b);
+      if(k==rings&&discOk){if(Finite(point))context.LineTo(point,false,false);else discOk=false;}
+      from=point;previous=v;}}
+   }
+   disc.Freeze();if(discOk)dc.DrawGeometry(Tint(muted,dark?0.06:0.09),null,disc);
+   double outer=rings*step;for(int i=0;i<12;i++){double angle=i*Math.PI/6;var a=ProjectScene(new OrbitPoint());var b=ProjectScene(new OrbitPoint(outer*Math.Cos(angle),outer*Math.Sin(angle),0));if(Finite(a)&&Finite(b)&&VisibleLine(ref a,ref b,bounds))spokes.Add(a,b);}
+   Draw(dc,spokes,Stroke(muted,0.14,0.7));Draw(dc,rear,Stroke(muted,0.11,0.8));Draw(dc,near,Stroke(muted,0.3,0.8));
+   // Ring distances sit on the near side of each ring, thinned out so they never collide.
+   int every=(int)Math.Ceiling(rings/6.0);for(int k=every;k<=rings;k+=every){var at=ProjectScene(new OrbitPoint(k*step*Math.Cos(-0.75),k*step*Math.Sin(-0.75),0));if(Finite(at)&&bounds.Contains(at))Ask(OrbitMath.Distance(k*step),new Point(at.X+3,at.Y-9),8);}
+  }
+  // Body names carry an "Orbit" context so translating "Mars" here does not also rename a target called Mars elsewhere in the app.
+  static string Body(string english){string key="Orbit|"+english;return Localization.Has(key)?Localization.T(key):Localization.T(english);}
+  static Color ColourOf(string name,Color fallback){Color value;return name!=null&&PlanetColours.TryGetValue(name,out value)?value:fallback;}
+  void Orbits(DrawingContext dc){
+   var record=Scene.Record;Brush muted=Colour("Muted"),accent=Colour("Accent"),surface=Colour("Surface");
+   // Planet orbits behind the target: three depth bins each, tinted by planet in the solar-system overview.
+   double[] context={0.14,0.24,0.4};
+   Action<OrbitPath,Brush> subdued=(path,brush)=>{var bins=new[]{new OrbitStrokes(),new OrbitStrokes(),new OrbitStrokes()};Walk(path,(a,b,p,q,depth)=>bins[depth<-0.12*extent?0:depth<0.12*extent?1:2].Add(a,b));for(int i=0;i<3;i++)Draw(dc,bins[i],Stroke(brush,context[i]*(Overview?1.4:1),1));};
+   if(Overview){foreach(var path in Scene.Context)if(path!=null)subdued(path,Solid(ColourOf(path.Name,Colors.Gray),1));subdued(target,Solid(ColourOf(target.Name,Colors.Gray),1));}
+   else{var bins=new[]{new OrbitStrokes(),new OrbitStrokes(),new OrbitStrokes()};foreach(var path in Scene.Context)Walk(path,(a,b,p,q,depth)=>bins[depth<-0.12*extent?0:depth<0.12*extent?1:2].Add(a,b));for(int i=0;i<3;i++)Draw(dc,bins[i],Stroke(muted,context[i],1));}
+   if(Overview)return;
+   // The target: a soft glow on the near side, solid above the reference plane, dashed below it, fading with depth.
+   var north=new OrbitStrokes[4];var south=new OrbitStrokes[4];for(int i=0;i<4;i++){north[i]=new OrbitStrokes();south[i]=new OrbitStrokes();}var glow=new OrbitStrokes();
+   bool clipped=Walk(target,(a,b,p,q,depth)=>{int bin=Math.Max(0,Math.Min(3,(int)Math.Floor((depth/extent+1)/2*4)));((p.Z+q.Z)/2<0?south:north)[bin].Add(a,b);if(depth>=0)glow.Add(a,b);})||target.Clipped;
+   Draw(dc,glow,Stroke(accent,0.14,6));double[] level={0.38,0.58,0.8,1};for(int i=0;i<4;i++){Draw(dc,south[i],Dashes(accent,level[i]*0.9,1.8));Draw(dc,north[i],Stroke(accent,level[i],2.2));}
+   NotedClipped=clipped;
+   // Nodes: where the path crosses the reference plane, filled when rising and hollow when falling.
+   var points=target.Points;var rising=new StreamGeometry();var falling=new StreamGeometry();var risingContext=rising.Open();var fallingContext=falling.Open();bool anyRising=false,anyFalling=false;
+   for(int k=1;k<=points.Length;k++){
+    if(k==points.Length&&!target.Closed)break;var a=points[k-1];var b=points[k%points.Length];if(a.Z==0||b.Z==0||(a.Z<0)==(b.Z<0))continue;
+    double t=a.Z/(a.Z-b.Z);var node=ProjectScene(new OrbitPoint(a.X+(b.X-a.X)*t,a.Y+(b.Y-a.Y)*t,0));if(!Finite(node)||!bounds.Contains(node))continue;
+    bool up=b.Z>a.Z;var sink=up?risingContext:fallingContext;sink.BeginFigure(new Point(node.X,node.Y-3.5),true,true);sink.LineTo(new Point(node.X+3.5,node.Y),true,false);sink.LineTo(new Point(node.X,node.Y+3.5),true,false);sink.LineTo(new Point(node.X-3.5,node.Y),true,false);
+    if(up)anyRising=true;else anyFalling=true;if(bounds.Width>=260)Ask(Localization.T(up?"Ascending node":"Descending node"),new Point(node.X+7,node.Y-8),6);
+   }
+   risingContext.Close();fallingContext.Close();rising.Freeze();falling.Freeze();var outline=Stroke(accent,0.9,1.2);if(anyRising)dc.DrawGeometry(Tint(accent,0.9),outline,rising);if(anyFalling)dc.DrawGeometry(Tint(surface,1),outline,falling);
+   // Closest and, for closed orbits, farthest points; the far one is left out when it lies beyond the drawn part or on top of the near one.
+   string near=record.central_body=="Sun"?"Perihelion":"Perigee",far=record.central_body=="Sun"?"Aphelion":"Apogee";
+   var peri=ProjectScene(OrbitalModel.AtAnomaly(record,0));bool perihelion=Finite(peri)&&bounds.Contains(peri);
+   if(perihelion){dc.DrawEllipse(surface,Stroke(accent,1,1.5),peri,3,3);Ask(Localization.T(near),new Point(peri.X+8,peri.Y+5),4);}
+   if(record.IsClosed&&record.q*(1+record.e)/(1-record.e)<=target.Extent*1.0001){var apo=ProjectScene(OrbitalModel.AtAnomaly(record,Math.PI));if(Finite(apo)&&bounds.Contains(apo)&&(!perihelion||(apo-peri).Length>9)){dc.DrawEllipse(surface,Stroke(accent,1,1.5),apo,3,3);Ask(Localization.T(far),new Point(apo.X+8,apo.Y+5),4);}}
+   // The path follows increasing true anomaly, so a filled arrowhead shows the direction of travel, retrograde included.
+   Brush ink=Tint(accent,1);int direction=points.Length/2+Math.Max(1,points.Length/12);if(direction<points.Length-1)Arrow(dc,ProjectScene(points[direction]),ProjectScene(points[direction+1]),ink);
+   if(target.Clipped){Arrow(dc,ProjectScene(points[1]),ProjectScene(points[0]),ink);Arrow(dc,ProjectScene(points[points.Length-2]),ProjectScene(points.Last()),ink);}
+  }
+  bool NotedClipped;
+  void Arrow(DrawingContext dc,Point a,Point b,Brush brush){
+   if(!bounds.Contains(b))return;double x=b.X-a.X,y=b.Y-a.Y,length=Math.Sqrt(x*x+y*y);if(length<1e-8)return;x/=length;y/=length;
+   var head=new StreamGeometry();using(var context=head.Open()){context.BeginFigure(b,true,true);context.LineTo(new Point(b.X-x*9-y*4.5,b.Y-y*9+x*4.5),true,false);context.LineTo(new Point(b.X-x*9+y*4.5,b.Y-y*9-x*4.5),true,false);}head.Freeze();dc.DrawGeometry(brush,null,head);
+  }
+  // Planets on the marker date, with a hairline down to the reference plane so their height reads.
+  void Planets(DrawingContext dc){
+   if(Bodies==null)return;Brush muted=Colour("Muted"),text=Colour("Text");var hair=Stroke(muted,0.35,0.8);
+   foreach(var body in Bodies){
+    var p=body.Value;var at=ProjectScene(p);if(!Finite(at)||!bounds.Contains(at))continue;var foot=ProjectScene(new OrbitPoint(p.X,p.Y,0));
+    if(Finite(foot)&&(foot-at).Length>3)dc.DrawLine(hair,at,foot);
+    double r=body.Key=="Jupiter"||body.Key=="Saturn"?3.6:3;dc.DrawEllipse(Solid(ColourOf(body.Key,Colors.Gray),1),Stroke(text,0.5,0.8),at,r,r);
+    Ask(Body(body.Key),new Point(at.X+6,at.Y-18),5);
+   }
+  }
+  // The central body, drawn like the sky globe's Sun and Moon: a soft glow and a disc.
+  void Centre(DrawingContext dc){
+   var middle=ProjectScene(new OrbitPoint());if(!Finite(middle))return;bool sun=Scene.Record.central_body=="Sun";Color light=sun?SunLight:EarthLight;
+   if(sun){double halo=Math.Min(bounds.Width,bounds.Height)*0.45;var haze=new RadialGradientBrush(Color.FromArgb((byte)(dark?34:50),light.R,light.G,light.B),Color.FromArgb(0,light.R,light.G,light.B));haze.Freeze();dc.DrawEllipse(haze,null,middle,halo,halo);}
+   if(!bounds.Contains(middle))return;
+   var glow=new RadialGradientBrush(Color.FromArgb((byte)(sun?120:100),light.R,light.G,light.B),Color.FromArgb(0,light.R,light.G,light.B));glow.Freeze();dc.DrawEllipse(glow,null,middle,16,16);
+   dc.DrawEllipse(Solid(light,1),dark?null:Stroke(Solid(Color.FromRgb(190,130,20),1),0.7,0.8),middle,sun?5:5.5,sun?5:5.5);Ask(Body(Scene.Record.central_body),new Point(middle.X+10,middle.Y-24),3);
+  }
+  // The target now: a ringed marker with ticks like the sky globe's, and a dashed line down to the plane.
+  void MarkerGlyph(DrawingContext dc){
+   if(!Marker.HasValue||Overview)return;Brush accent=Colour("Accent");var p=Marker.Value;var at=ProjectScene(p);var foot=ProjectScene(new OrbitPoint(p.X,p.Y,0));if(!Finite(at)||!Finite(foot))return;
+   var a=at;var b=foot;if((foot-at).Length>3){if(VisibleLine(ref a,ref b,bounds))dc.DrawLine(Dashes(accent,0.55,1),a,b);if(bounds.Contains(foot))dc.DrawEllipse(null,Stroke(accent,0.55,1),foot,3.5,1.5);}
+   if(!bounds.Contains(at))return;dc.DrawEllipse(Tint(accent,0.12),Stroke(accent,1,1.5),at,7,7);dc.DrawEllipse(accent,null,at,2.5,2.5);var tick=Stroke(accent,0.8,1);dc.DrawLine(tick,new Point(at.X-11,at.Y),new Point(at.X-8,at.Y));dc.DrawLine(tick,new Point(at.X+8,at.Y),new Point(at.X+11,at.Y));
+   Ask(Catalog.DisplayId(Scene.Record.object_id),new Point(at.X+10,at.Y-24),0,true,true);
+  }
+  // Scale bar, axis triad, marker date and notices, over everything else.
+  void Overlays(DrawingContext dc,List<Rect> placed){
+   Brush surface=Colour("Surface"),muted=Colour("Muted");
+   double raw=64/scale,unit=OrbitMath.Kilometres(raw)?OrbitMath.AuKm:1,value=OrbitMath.NiceStep(raw*unit)/unit,pixels=Math.Max(10,Math.Min(bounds.Width/2,value*scale));var bar=Stroke(muted,1,1);
+   dc.DrawLine(bar,new Point(12,ActualHeight-12),new Point(12+pixels,ActualHeight-12));dc.DrawLine(bar,new Point(12,ActualHeight-15),new Point(12,ActualHeight-9));dc.DrawLine(bar,new Point(12+pixels,ActualHeight-15),new Point(12+pixels,ActualHeight-9));
+   var scaleLabel=Format(OrbitMath.Distance(value),muted,false);var scaleAt=new Point(12,ActualHeight-14-scaleLabel.Height);dc.DrawText(scaleLabel,scaleAt);placed.Add(new Rect(scaleAt.X-3,scaleAt.Y-2,Math.Max(pixels,scaleLabel.Width)+6,scaleLabel.Height+20));
+   // Axis triad: the reference-plane axes, with Z (towards the pole) in the accent colour. A narrow pane leaves the corner to the toolbar.
+   if(ActualWidth>=250){
+    var axes=new[]{new OrbitPoint(1,0,0),new OrbitPoint(0,1,0),new OrbitPoint(0,0,1)};var origin=new Point(ActualWidth-34,36);dc.DrawEllipse(Tint(surface,0.85),Stroke(muted,0.35,1),origin,25,25);placed.Add(new Rect(origin.X-25,origin.Y-25,50,50));
+    for(int axis=0;axis<3;axis++){var v=View(axes[axis]);var end=new Point(origin.X+v.X*18,origin.Y-v.Y*18);dc.DrawLine(Stroke(Colour(axis==2?"Accent":"Muted"),1,axis==2?1.6:1.1),origin,end);var name=Format(new[]{"X","Y","Z"}[axis],muted,false);dc.DrawText(name,new Point(Math.Max(2,Math.Min(ActualWidth-name.Width-2,end.X+2)),Math.Max(2,Math.Min(ActualHeight-name.Height-2,end.Y-7))));}
+   }
+   if(!string.IsNullOrEmpty(DateLabel))Ask(DateLabel,new Point(ActualWidth,ActualHeight),1,false,true);
+   if(NotedClipped)Ask(Localization.T(Camera.Inner&&Scene.Record.central_body=="Sun"&&Scene.Record.q>40?"Perihelion beyond the inner solar system":"Extent clipped"),new Point(10,44),2,false,true);
+  }
   protected override void OnRender(DrawingContext dc){
-   base.OnRender(dc);if(ActualWidth<20||ActualHeight<20)return;var bounds=new Rect(RenderSize);dc.DrawRoundedRectangle(Colour("SurfaceAlt"),new Pen(Colour(IsKeyboardFocused?"Accent":"Border"),IsKeyboardFocused?1.5:1),bounds,8,8);if(Scene==null)return;
-   dc.PushClip(new RectangleGeometry(bounds));var segments=new List<Segment>();var target=Camera.Inner?Scene.Inner:Scene.Full;bool clipped=target.Clipped;
-   Action<OrbitPath,bool> add=(path,selected)=>{if(path==null)return;for(int k=1;k<path.Points.Length;k++){var a=View(path.Points[k-1]);var b=View(path.Points[k]);var pa=Project(a);var pb=Project(b);if(!OrbitalModel.Finite(pa.X)||!OrbitalModel.Finite(pa.Y)||!OrbitalModel.Finite(pb.X)||!OrbitalModel.Finite(pb.Y))continue;bool inside=bounds.Contains(pa)&&bounds.Contains(pb);if(selected&&!inside)clipped=true;if(VisibleLine(ref pa,ref pb,bounds))segments.Add(new Segment{A=pa,B=pb,Depth=(a.Z+b.Z)/2,Target=selected});}};
-   foreach(var context in Scene.Context)add(context,false);add(target,true);
-   foreach(var segment in segments.OrderBy(s=>s.Depth)){dc.PushOpacity(segment.Target?(segment.Depth<0?0.65:1):0.27);dc.DrawLine(new Pen(Colour(segment.Target?"Accent":"Muted"),segment.Target?2:1),segment.A,segment.B);dc.Pop();}
-   var centre=Project(new OrbitPoint());if(bounds.Contains(centre)){dc.DrawEllipse(Scene.Record.central_body=="Sun"?Brushes.Goldenrod:Colour("Accent"),null,centre,5,5);Label(dc,Localization.T(Scene.Record.central_body),new Point(centre.X+9,centre.Y-18));}
-   var peri=Project(View(OrbitalModel.AtAnomaly(Scene.Record,0)));if(bounds.Contains(peri)){dc.DrawEllipse(Colour("Surface"),new Pen(Colour("Accent"),1.5),peri,3,3);Label(dc,Localization.T(Scene.Record.central_body=="Sun"?"Perihelion":"Perigee"),new Point(peri.X+7,peri.Y+4));}
-   if(Marker.HasValue){var marker=Project(View(Marker.Value));if(bounds.Contains(marker)){dc.DrawEllipse(Colour("Accent"),new Pen(Colour("Text"),1),marker,4,4);Label(dc,Catalog.DisplayId(Scene.Record.object_id),new Point(marker.X+8,marker.Y-16));}}
-   // Arrow follows increasing true anomaly, including retrograde orbital planes.
-   int direction=target.Points.Length/2+Math.Max(1,target.Points.Length/12);if(direction<target.Points.Length-1)Arrow(dc,Project(View(target.Points[direction])),Project(View(target.Points[direction+1])),Colour("Accent"),bounds);
-   if(target.Clipped){Arrow(dc,Project(View(target.Points[1])),Project(View(target.Points[0])),Colour("Accent"),bounds);Arrow(dc,Project(View(target.Points[target.Points.Length-2])),Project(View(target.Points.Last())),Colour("Accent"),bounds);}
-   double au=50*Extent/(Math.Max(1,Math.Min(ActualWidth,ActualHeight)-64)*0.46*Camera.Zoom);var scalePen=new Pen(Colour("Muted"),1);dc.DrawLine(scalePen,new Point(10,ActualHeight-8),new Point(60,ActualHeight-8));dc.DrawLine(scalePen,new Point(10,ActualHeight-11),new Point(10,ActualHeight-5));dc.DrawLine(scalePen,new Point(60,ActualHeight-11),new Point(60,ActualHeight-5));Label(dc,au<0.01?(au*149597870.7).ToString("0",CultureInfo.InvariantCulture)+" km":au.ToString(au<1?"0.###":"0.##",CultureInfo.InvariantCulture)+" AU",new Point(10,ActualHeight-23));
-   var axes=new[]{new OrbitPoint(1,0,0),new OrbitPoint(0,1,0),new OrbitPoint(0,0,1)};var origin=new Point(ActualWidth-32,35);
-   for(int axis=0;axis<3;axis++){var v=View(axes[axis]);var end=new Point(origin.X+v.X*18,origin.Y-v.Y*18);dc.DrawLine(new Pen(Colour(axis==2?"Accent":"Muted"),1.1),origin,end);Label(dc,new[]{"X","Y","Z"}[axis],new Point(end.X+2,end.Y-7));}
-   if(clipped)Label(dc,Localization.T(Camera.Inner&&Scene.Record.central_body=="Sun"&&Scene.Record.q>40?"Perihelion beyond the inner solar system":"Extent clipped"),new Point(10,8));dc.Pop();
+   base.OnRender(dc);if(ActualWidth<20||ActualHeight<20)return;var frame=new Rect(RenderSize);
+   dc.DrawRoundedRectangle(Colour("SurfaceAlt"),null,frame,8,8);
+   if(Scene!=null){
+    Prepare();NotedClipped=false;dc.PushClip(new RectangleGeometry(frame,8,8));
+    Backdrop(dc);Grid(dc);Orbits(dc);Planets(dc);Centre(dc);MarkerGlyph(dc);var placed=new List<Rect>();Overlays(dc,placed);Flush(dc,placed);dc.Pop();
+   }
+   // The frame is drawn last so the focus ring is never hidden by the scene.
+   dc.DrawRoundedRectangle(null,new Pen(Colour(IsKeyboardFocused?"Accent":"Border"),IsKeyboardFocused?1.5:1),frame,8,8);
   }
-  static void Arrow(DrawingContext dc,Point a,Point b,Brush brush,Rect bounds){if(!bounds.Contains(b))return;double x=b.X-a.X,y=b.Y-a.Y,length=Math.Sqrt(x*x+y*y);if(length<1e-8)return;x/=length;y/=length;var pen=new Pen(brush,1.5);dc.DrawLine(pen,b,new Point(b.X-x*7-y*4,b.Y-y*7+x*4));dc.DrawLine(pen,b,new Point(b.X-x*7+y*4,b.Y-y*7-x*4));}
-  void Label(DrawingContext dc,string text,Point at){double size=(double)GetValue(CaptionSizeProperty);var formatted=new FormattedText(text,CultureInfo.CurrentUICulture,FlowDirection.LeftToRight,new Typeface("Segoe UI"),Math.Min(20,size),Colour("Muted"),VisualTreeHelper.GetDpi(this).PixelsPerDip);dc.DrawText(formatted,new Point(Math.Max(4,Math.Min(ActualWidth-formatted.Width-4,at.X)),Math.Max(3,Math.Min(ActualHeight-formatted.Height-3,at.Y))));}
- }
- public sealed class OrbitPanel:StackPanel {
-  public readonly OrbitView View=new OrbitView{Height=280};readonly TextBlock caption,status;readonly WrapPanel controls=new WrapPanel();CancellationTokenSource work;int generation;OrbitRecord record;bool overview;public DateTime? MarkerUtc;readonly Button today;readonly TextBox date;readonly WrapPanel dates;
-  public OrbitPanel(){
-   Children.Add(View);Children.Add(controls);caption=Text("Approximate orbit · linear distances; body markers enlarged.");Children.Add(caption);status=Text("");Children.Add(status);
-   Button("Reset orbit",()=>View.Reset());Button("−",()=>View.Zoom(0.8),"Zoom out");Button("+",()=>View.Zoom(1.25),"Zoom in");Button("Top view",()=>View.Top());Button("Orbit plane",()=>View.Plane());Button("Fit orbit",()=>View.Fit(false));Button("Inner solar system",()=>View.Fit(true));
-   Button expansion=null;expansion=Button("Expand orbit",()=>{View.Height=View.Height==280?440:280;expansion.Content=Localization.T(View.Height==280?"Expand orbit":"Collapse orbit");AutomationProperties.SetName(expansion,Convert.ToString(expansion.Content));});Button("Orbit epoch",()=>SetMarker(null));today=Button("Today",()=>SetMarker(DateTime.UtcNow));
-   dates=new WrapPanel();date=new TextBox{Width=110,Text=DateTime.UtcNow.ToString("yyyy-MM-dd",CultureInfo.InvariantCulture),Margin=new Thickness(0,4,6,0),Padding=new Thickness(7,3,7,3),MinHeight=28};date.SetResourceReference(Control.BackgroundProperty,"Surface");date.SetResourceReference(Control.ForegroundProperty,"Text");date.SetResourceReference(Control.BorderBrushProperty,"Border");AutomationProperties.SetName(date,Localization.T("Marker date (UTC)"));date.ToolTip=Localization.T("UTC date (YYYY-MM-DD). Press Enter or Set UTC date.");date.KeyDown+=(s,e)=>{if(e.Key==Key.Enter){ApplyDate();e.Handled=true;}};dates.Children.Add(date);
-   var applyDate=new Button{Content="Set UTC date",Margin=new Thickness(0,4,6,0),Padding=new Thickness(7,3,7,3),MinHeight=28};applyDate.Click+=(s,e)=>ApplyDate();dates.Children.Add(applyDate);controls.Children.Add(dates);
-   Children.Add(Text("Drag to rotate · Shift-drag to pan · Focus/Ctrl + wheel or pinch to zoom."));
-   Unloaded+=(s,e)=>Cancel();Loaded+=(s,e)=>{if(record!=null&&View.Scene==null)LoadScene();};
-  }
-  static TextBlock Text(string value){var text=new TextBlock{Text=value,TextWrapping=TextWrapping.Wrap,Margin=new Thickness(0,6,0,2)};text.SetResourceReference(TextBlock.ForegroundProperty,"Muted");text.SetResourceReference(TextBlock.FontSizeProperty,"UiFontCaption");return text;}
-  Button Button(string label,Action action,string accessible=null){var button=new Button{Content=label,Margin=new Thickness(0,4,6,0),Padding=new Thickness(7,3,7,3),MinHeight=28};AutomationProperties.SetName(button,Localization.T(accessible??label));button.Click+=(s,e)=>action();controls.Children.Add(button);return button;}
-  public void SetCard(TargetInfoCard card){overview=card.id=="SUN";record=overview?PlanetEphemeris.Orbit("EARTH",new DateTime(2000,1,1,12,0,0,DateTimeKind.Utc)):OrbitalCatalog.For(card);LoadScene();}
-  async void LoadScene(){Cancel();int current=++generation;
-   if(record==null){View.SetScene(null);controls.Visibility=Visibility.Collapsed;caption.Text=Localization.T("Complete orbital elements are unavailable. No orientation has been assumed.");status.Text="";return;}
-   bool supportsDate=record.valid_from.HasValue&&record.valid_to.HasValue;today.Visibility=dates.Visibility=supportsDate?Visibility.Visible:Visibility.Collapsed;today.IsEnabled=supportsDate&&OrbitalModel.Dynamical(DateTime.UtcNow).HasValue;controls.Visibility=Visibility.Visible;status.Text=Localization.T("Preparing 3D orbit…");work=new CancellationTokenSource();var token=work.Token;
-   try{var value=await Task.Run(()=>OrbitalCatalog.Scene(record,token),token);if(current!=generation||token.IsCancellationRequested)return;if(overview){value.Full.Extent=35;value.Inner.Extent=6;}Action apply=()=>{if(current!=generation||token.IsCancellationRequested)return;View.SetScene(value);SetMarker(MarkerUtc);};if(Dispatcher.CheckAccess())apply();else await Dispatcher.InvokeAsync(apply);}catch(OperationCanceledException){}catch(Exception){Action failed=()=>{if(current==generation)status.Text=Localization.T("The orbit could not be drawn.");};if(Dispatcher.CheckAccess())failed();else QueueFailure(failed);}
-  }
-  void QueueFailure(Action action){Dispatcher.BeginInvoke(action);}
-  public void Cancel(){generation++;if(work!=null){work.Cancel();work.Dispose();work=null;}}
-  void ApplyDate(){DateTime value;if(!DateTime.TryParseExact(date.Text.Trim(),"yyyy-MM-dd",CultureInfo.InvariantCulture,DateTimeStyles.AssumeUniversal|DateTimeStyles.AdjustToUniversal,out value)||value.Year<1972||value.Year>2026){status.Text=Localization.T("Enter a valid UTC date (YYYY-MM-DD) between 1972 and 2026.");date.Focus();return;}SetMarker(value);}
-  void SetMarker(DateTime? utc){
-   MarkerUtc=utc;if(record==null)return;OrbitPoint point=new OrbitPoint();bool available=false;string time;
-   if(utc.HasValue){double? day=OrbitalModel.Dynamical(utc.Value);var planet=record.rights.dataset=="planetary-approximation"?PlanetEphemeris.Orbit(record.object_id,utc.Value):null;
-    available=day.HasValue&&OrbitalModel.Position(planet??record,day.Value,out point);View.Marker=available?(OrbitPoint?)point:null;time=Localization.F("Marker: {0} UTC",utc.Value.ToString("yyyy-MM-dd HH:mm",CultureInfo.InvariantCulture));
-   }else{available=OrbitalModel.Position(record,record.epoch,out point,true);View.Marker=available?(OrbitPoint?)point:null;time=Localization.F("Marker at orbit epoch: JD {0} {1}",record.epoch.ToString("0.#####",CultureInfo.InvariantCulture),record.time_standard);}
-   if(!available)time=Localization.T("Dated position unavailable for this solution. Use Orbit epoch.");
-   caption.Text=Localization.T("Approximate orbit · linear distances; body markers enlarged.");status.Text=(overview?Localization.T("Solar-system overview")+" · ":"")+time+"\n"+Localization.F("Source epoch: JD {0} {1} · {2}",record.epoch.ToString("0.#####",CultureInfo.InvariantCulture),record.time_standard,record.solution_id)+"\n"+Localization.T("J2000 ecliptic · two-body geometry, not a precision ephemeris. UTC → TT; TDB differs by less than 2 ms.");if(!record.valid_from.HasValue||!record.valid_to.HasValue)status.Text+="\n"+Localization.T("Snapshot positions are shown only at the orbit epoch.");if(record.object_id=="EARTH")status.Text+="\n"+Localization.T("Earth uses the Earth–Moon barycentre approximation.");View.InvalidateVisual();
-  }
+  protected override void OnDpiChanged(DpiScale oldDpi,DpiScale newDpi){base.OnDpiChanged(oldDpi,newDpi);InvalidateVisual();}
  }
 }

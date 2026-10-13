@@ -17,7 +17,7 @@ namespace AstroArchive {
   public bool IsClosed {get{return e<1;}}
  }
  public sealed class OrbitPath {
-  public OrbitPoint[] Points;public bool Closed,Clipped;public double Extent;
+  public OrbitPoint[] Points;public bool Closed,Clipped;public double Extent;public string Name;
  }
  public sealed class OrbitScene {
   public OrbitRecord Record;public OrbitPath Full,Inner;public List<OrbitPath> Context=new List<OrbitPath>();
@@ -87,5 +87,28 @@ namespace AstroArchive {
   }
   static double SinDifference(double x){if(Math.Abs(x)>=0.1)return x-Math.Sin(x);double x2=x*x;return x*x2*(1.0/6-x2/120+x2*x2/5040-x2*x2*x2/362880+x2*x2*x2*x2/39916800);}
   static double SinhDifference(double x){if(Math.Abs(x)>=0.1)return Math.Sinh(x)-x;double x2=x*x;return x*x2*(1.0/6+x2/120+x2*x2/5040+x2*x2*x2/362880+x2*x2*x2*x2/39916800);}
+ }
+ // Display helpers for the orbit viewer. They hold no window state so the engine tests can check them.
+ public static class OrbitMath {
+  public const double AuKm=149597870.7,Obliquity=23.4392911*Math.PI/180;
+  // 1, 2 or 5 times a power of ten: round distances for grid rings.
+  public static double NiceStep(double raw){if(!OrbitalModel.Finite(raw)||raw<=0)return 1;double power=Math.Pow(10,Math.Floor(Math.Log10(raw))),m=raw/power;return power*(m<1.5?1:m<3.5?2:m<7.5?5:10);}
+  // Kilometres below 0.02 AU (the Earth–Moon scale), AU above; ring steps are round in the unit shown.
+  public static bool Kilometres(double au){return au<0.02;}
+  public static string Distance(double au){
+   if(Kilometres(au)){double km=au*AuKm;return km.ToString(km<10?"0.#":"#,##0",CultureInfo.InvariantCulture)+" km";}
+   return au.ToString(au<1?"0.###":au<100?"0.##":"0",CultureInfo.InvariantCulture)+" AU";
+  }
+  // J2000 equatorial direction to the J2000 ecliptic frame the orbit scene uses.
+  public static OrbitPoint Ecliptic(double x,double y,double z){double c=Math.Cos(Obliquity),s=Math.Sin(Obliquity);return new OrbitPoint(x,y*c+z*s,-y*s+z*c);}
+  // Ease-out cubic for camera moves: quick start, gentle settle.
+  public static double Ease(double t){t=Math.Max(0,Math.Min(1,t));double u=1-t;return 1-u*u*u;}
+  // Interpolates angles in degrees by the shorter way round.
+  public static double Angle(double from,double to,double t){double d=Math.IEEERemainder(to-from,360);return from+d*t;}
+  // Orbital period in days for a bound orbit around the Sun or Earth; NaN otherwise.
+  public static double Period(OrbitRecord o){
+   if(o==null||o.e>=1||o.q<=0)return double.NaN;double a=o.q/(1-o.e),mu=o.gravitational_parameter??(o.central_body=="Earth"?OrbitalModel.EarthMu:OrbitalModel.SunMu);
+   return 2*Math.PI*Math.Sqrt(a*a*a/mu);
+  }
  }
 }

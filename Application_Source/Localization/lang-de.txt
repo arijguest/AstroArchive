@@ -2384,3 +2384,19 @@ Meteor showers	Meteorströme
 Suspected parent of	Mutmaßlicher Mutterkomet von
 Parabolic	Parabolisch
 Chiron-type	Chiron-Typ
+Ascending node	Aufsteigender Knoten
+Descending node	Absteigender Knoten
+Apogee	Apogäum
+Play	Abspielen
+Epoch {0}	Epoche {0}
+Marker date slider	Regler für das Markierungsdatum
+Play or pause the marker date. Space does the same while the orbit has focus.	Spielt das Markierungsdatum ab oder hält es an. Die Leertaste tut dasselbe, solange die Umlaufbahn den Fokus hat.
+Orbit|Sun	Sonne
+Orbit|Earth	Erde
+Orbit|Mercury	Merkur
+Orbit|Venus	Venus
+Orbit|Mars	Mars
+Orbit|Jupiter	Jupiter
+Orbit|Saturn	Saturn
+Orbit|Uranus	Uranus
+Orbit|Neptune	Neptun

@@ -2399,3 +2399,19 @@ Meteor showers	Sciami meteorici
 Suspected parent of	Presunta cometa madre di
 Parabolic	Parabolica
 Chiron-type	Tipo Chirone
+Ascending node	Nodo ascendente
+Descending node	Nodo discendente
+Apogee	Apogeo
+Play	Riproduci
+Epoch {0}	Epoca {0}
+Marker date slider	Cursore della data dell’indicatore
+Play or pause the marker date. Space does the same while the orbit has focus.	Avvia o sospende la data dell’indicatore. La barra spaziatrice fa lo stesso quando l’orbita ha il focus.
+Orbit|Sun	Sole
+Orbit|Earth	Terra
+Orbit|Mercury	Mercurio
+Orbit|Venus	Venere
+Orbit|Mars	Marte
+Orbit|Jupiter	Giove
+Orbit|Saturn	Saturno
+Orbit|Uranus	Urano
+Orbit|Neptune	Nettuno

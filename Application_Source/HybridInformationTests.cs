@@ -54,6 +54,26 @@ namespace AstroArchive {
     Near(p.Y,-0.0019238922721514964,1e-12,"Horizons Moon Y");
     Near(p.Z,-0.00023077883532085408,1e-12,"Horizons Moon Z");
    });
+   Test("Orbit viewer helpers choose round rings, show the right units and keep frames, easing and playback pace sound",()=>{
+    foreach(double raw in new[]{1e-7,0.00031,0.0149,0.7,1,1.49,1.5,2.9,3.5,7.4,7.5,9.99,35,4100,2.2e6}){double step=OrbitMath.NiceStep(raw),power=Math.Pow(10,Math.Floor(Math.Log10(step)+1e-9)),mantissa=step/power;Check(Math.Abs(mantissa-1)<1e-9||Math.Abs(mantissa-2)<1e-9||Math.Abs(mantissa-5)<1e-9,"Ring step is not 1, 2 or 5 times a power of ten: "+raw+" -> "+step);Check(step/raw>0.55&&step/raw<1.5,"Ring step strays from the wanted spacing: "+raw+" -> "+step);}
+    Near(OrbitMath.NiceStep(0.7),0.5,1e-12,"Nice step");Near(OrbitMath.NiceStep(0.0003),0.0002,1e-15,"Nice step small");Check(OrbitMath.NiceStep(0)==1&&OrbitMath.NiceStep(-3)==1&&OrbitMath.NiceStep(double.NaN)==1,"Nice step lost its fallback");
+    Check(OrbitMath.Distance(1)=="1 AU"&&OrbitMath.Distance(0.5)=="0.5 AU"&&OrbitMath.Distance(30.07)=="30.07 AU"&&OrbitMath.Distance(250)=="250 AU","AU distances misformatted");
+    Check(OrbitMath.Distance(0.0001)=="14,960 km"&&OrbitMath.Distance(0.00000005)=="7.5 km"&&OrbitMath.Kilometres(0.0026)&&!OrbitMath.Kilometres(0.02),"Earth-scale distances not shown in km");
+    var pole=OrbitMath.Ecliptic(0,-Math.Sin(OrbitMath.Obliquity),Math.Cos(OrbitMath.Obliquity));Near(pole.X,0,1e-12,"Ecliptic pole X");Near(pole.Y,0,1e-12,"Ecliptic pole Y");Near(pole.Z,1,1e-12,"Ecliptic pole Z");
+    var equinox=OrbitMath.Ecliptic(1,0,0);Check(equinox.X==1&&equinox.Y==0&&equinox.Z==0,"The equinox moved between frames");var turned=OrbitMath.Ecliptic(0.3,-0.5,0.8);Near(turned.Length,Math.Sqrt(0.09+0.25+0.64),1e-12,"Frame change altered length");
+    Check(OrbitMath.Ease(0)==0&&OrbitMath.Ease(1)==1&&OrbitMath.Ease(-1)==0&&OrbitMath.Ease(2)==1,"Easing is not clamped");Near(OrbitMath.Ease(0.5),0.875,1e-12,"Ease-out midpoint");double last=-1;for(int i=0;i<=20;i++){double e=OrbitMath.Ease(i/20.0);Check(e>=last,"Easing went backwards");last=e;}
+    Near(OrbitMath.Angle(0,90,0.5),45,1e-12,"Angle midpoint");Near(Math.IEEERemainder(OrbitMath.Angle(350,10,0.5),360),0,1e-9,"Angle went the long way round");Near(Math.IEEERemainder(OrbitMath.Angle(10,350,0.5),360),0,1e-9,"Angle went the long way back");Near(OrbitMath.Angle(30,200,1),200,1e-9,"Angle end");
+    Near(OrbitMath.Period(TestOrbit(0)),365.2568983,1e-3,"Circular period at 1 AU");Check(double.IsNaN(OrbitMath.Period(TestOrbit(1)))&&double.IsNaN(OrbitMath.Period(TestOrbit(4)))&&double.IsNaN(OrbitMath.Period(null)),"An open orbit was given a period");
+    var moon=OrbitalCatalog.For(new TargetInfoCard{id="MOON",domain="solar_system"});double month=OrbitMath.Period(moon);Check(month>26&&month<29,"Moon period is not about a month: "+month);
+    Check(OrbitalCatalog.PlanetName("MARS")=="Mars"&&OrbitalCatalog.Planets.Length==8&&OrbitalCatalog.Planets[2]=="EARTH","Planet names changed");
+   });
+   Test("Planet positions at a date match the planetary record built for that date",()=>{
+    foreach(var when in new[]{new DateTime(1985,3,9,6,0,0,DateTimeKind.Utc),new DateTime(2026,10,13,12,0,0,DateTimeKind.Utc)})foreach(string id in OrbitalCatalog.Planets){
+     OrbitPoint direct,viaRecord;var record=PlanetEphemeris.Orbit(id,when);Check(PlanetEphemeris.Position(id,when,out direct)&&record!=null&&OrbitalModel.Position(record,OrbitalModel.Julian(when),out viaRecord),"Planet position missing: "+id);
+     OrbitalModel.Position(record,OrbitalModel.Julian(when),out viaRecord);Near(direct.X,viaRecord.X,2e-6,id+" X");Near(direct.Y,viaRecord.Y,2e-6,id+" Y");Near(direct.Z,viaRecord.Z,2e-6,id+" Z");}
+    OrbitPoint earth,mars,none;PlanetEphemeris.Position("earth",new DateTime(2026,10,13,12,0,0,DateTimeKind.Utc),out earth);PlanetEphemeris.Position("MARS",new DateTime(2026,10,13,12,0,0,DateTimeKind.Utc),out mars);Near(earth.Length,1,0.02,"Earth distance from the Sun");Check(mars.Length>1.3&&mars.Length<1.7,"Mars distance from the Sun");
+    Check(!PlanetEphemeris.Position("MOON",DateTime.UtcNow,out none)&&!PlanetEphemeris.Position("MARS",new DateTime(1799,12,31,0,0,0,DateTimeKind.Utc),out none)&&!PlanetEphemeris.Position("MARS",new DateTime(2051,1,1,0,0,0,DateTimeKind.Utc),out none),"Unsupported planet or date produced a position");
+   });
    Test("Provider security rejects local URLs, unsupported rights and oversized rasters",()=>{
     foreach(string url in new[]{"http://ssd-api.jpl.nasa.gov/sbdb.api","https://ssd-api.jpl.nasa.gov:444/","https://ssd-api.jpl.nasa.gov.evil.example/","https://localhost/","https://127.0.0.1/","https://user@en.wikipedia.org/"})Check(!InformationHttp.Trusted(new Uri(url)),"Unsafe URL accepted: "+url);
     foreach(string ip in new[]{"127.0.0.1","10.1.1.1","172.16.0.1","192.168.1.1","169.254.0.1","::1","fc00::1","::ffff:127.0.0.1"})Check(InformationHttp.Private(System.Net.IPAddress.Parse(ip)),"Private address accepted");

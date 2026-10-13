@@ -2416,3 +2416,19 @@ Meteor showers	流星群
 Suspected parent of	母天体の可能性があるもの：
 Parabolic	放物線
 Chiron-type	ケイロン型
+Ascending node	昇交点
+Descending node	降交点
+Apogee	遠地点
+Play	再生
+Epoch {0}	元期 {0}
+Marker date slider	マーカー日付のスライダー
+Play or pause the marker date. Space does the same while the orbit has focus.	マーカーの日付を再生または一時停止します。軌道にフォーカスがあるときは、スペースキーでも操作できます。
+Orbit|Sun	太陽
+Orbit|Earth	地球
+Orbit|Mercury	水星
+Orbit|Venus	金星
+Orbit|Mars	火星
+Orbit|Jupiter	木星
+Orbit|Saturn	土星
+Orbit|Uranus	天王星
+Orbit|Neptune	海王星
