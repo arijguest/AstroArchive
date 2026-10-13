@@ -2322,10 +2322,17 @@ Start tour:	开始导览：
 Step-by-step fixes for common problems, on AstroArchive's own screens.	在 AstroArchive 界面中逐步解决常见问题。
 Short tours of importing, exporting and backups.	关于导入、导出和备份的简短导览。
 Search the guide, or start a guided fix or tour.	搜索指南，或开始引导式修复或导览。
+Add automatic descriptions	添加自动说明
+Add automatic description	添加自动说明
+Under each target name, say what it is, its constellation, how far away it is and how bright, when known. Your own description on a card still wins; Adjust card changes one card.	在每个目标名称下注明它是什么、所在星座、距离多远以及亮度（已知时）。卡片上自己写的说明优先；“调整卡片”可单独修改一张卡片。
+What the target is, its constellation, how far away it is and how bright, when known. It replaces your own text while ticked; your text is kept.	目标是什么、所在星座、距离多远以及亮度（已知时）。勾选时会替代你自己的文字，你的文字会保留。
+Nothing is known about this target yet, so there is no automatic description.	目前还不了解该目标，因此没有自动说明。
+magnitude {0}	星等 {0}
+blue magnitude {0}	蓝星等 {0}
+{0} light-years	{0} 光年
+{0} million light-years	{0} 百万光年
+{0} billion light-years	{0} 十亿光年
 Distance	距离
-{0} billion light-years	{0}十亿光年
-{0} million light-years	{0}百万光年
-{0} light-years	{0}光年
 
 # Hybrid information, native 3D orbit and setup connectivity.
 Online access	在线访问

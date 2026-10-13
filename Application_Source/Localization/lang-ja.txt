@@ -2323,10 +2323,17 @@ Start tour:	ツアーを開始:
 Step-by-step fixes for common problems, on AstroArchive's own screens.	よくある問題を AstroArchive の画面上で順を追って解決します。
 Short tours of importing, exporting and backups.	インポート、エクスポート、バックアップの短いツアーです。
 Search the guide, or start a guided fix or tour.	ガイドを検索するか、ガイド付き修正やツアーを開始します。
-Distance	距離
-{0} billion light-years	{0}十億光年
-{0} million light-years	{0}百万光年
+Add automatic descriptions	自動の説明を追加
+Add automatic description	自動の説明を追加
+Under each target name, say what it is, its constellation, how far away it is and how bright, when known. Your own description on a card still wins; Adjust card changes one card.	各ターゲット名の下に、天体の種類、星座、距離、明るさを（分かる範囲で）表示します。カードに入力した説明が優先され、1枚だけ変えるには「カードを調整」を使います。
+What the target is, its constellation, how far away it is and how bright, when known. It replaces your own text while ticked; your text is kept.	天体の種類、星座、距離、明るさを（分かる範囲で）表示します。オンの間は入力した文章の代わりに表示され、入力内容は保持されます。
+Nothing is known about this target yet, so there is no automatic description.	このターゲットの情報はまだないため、自動の説明はありません。
+magnitude {0}	{0}等
+blue magnitude {0}	青色光度 {0}等
 {0} light-years	{0}光年
+{0} million light-years	{0}百万光年
+{0} billion light-years	{0}十億光年
+Distance	距離
 
 # Hybrid information, native 3D orbit and setup connectivity.
 Online access	オンラインアクセス

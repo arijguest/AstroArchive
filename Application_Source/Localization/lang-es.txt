@@ -2316,10 +2316,17 @@ Start tour:	Iniciar recorrido:
 Step-by-step fixes for common problems, on AstroArchive's own screens.	Soluciones paso a paso para problemas habituales, en las propias pantallas de AstroArchive.
 Short tours of importing, exporting and backups.	Recorridos breves sobre importación, exportación y copias de seguridad.
 Search the guide, or start a guided fix or tour.	Busca en la guía o inicia una solución guiada o un recorrido.
-Distance	Distancia
-{0} billion light-years	{0} mil millones de años luz
-{0} million light-years	{0} millones de años luz
+Add automatic descriptions	Añadir descripciones automáticas
+Add automatic description	Añadir descripción automática
+Under each target name, say what it is, its constellation, how far away it is and how bright, when known. Your own description on a card still wins; Adjust card changes one card.	Bajo el nombre de cada objetivo, indica qué es, su constelación, a qué distancia está y su brillo, si se conocen. La descripción propia de una tarjeta tiene prioridad; «Ajustar tarjeta» cambia una sola tarjeta.
+What the target is, its constellation, how far away it is and how bright, when known. It replaces your own text while ticked; your text is kept.	Qué es el objetivo, su constelación, a qué distancia está y su brillo, si se conocen. Mientras esté marcada, sustituye tu propio texto, que se conserva.
+Nothing is known about this target yet, so there is no automatic description.	Aún no se conoce nada de este objetivo, así que no hay descripción automática.
+magnitude {0}	magnitud {0}
+blue magnitude {0}	magnitud azul {0}
 {0} light-years	{0} años luz
+{0} million light-years	{0} millones de años luz
+{0} billion light-years	{0} mil millones de años luz
+Distance	Distancia
 
 # Hybrid information, native 3D orbit and setup connectivity.
 Online access	Acceso en línea

@@ -35,6 +35,20 @@ namespace AstroArchive {
     Check(TargetCards.QuarterTurn(450)==90&&TargetCards.QuarterTurn(-180)==180&&TargetCards.QuarterTurn(0)==0,"Rotation is not kept to quarter turns");
     Check(Util.Deserialize<Settings>(Util.Serialize(new Settings())).CardChoices==null,"Settings without card choices gained some");
    });
+   Test("Automatic card descriptions say what, where, how far and how bright, and never guess",()=>{
+    var facts=new TargetCardFacts{Kind="Spiral galaxy",Constellation="Andromeda",LightYears=2537000,ApproximateDistance=true,Magnitude=3.44};
+    string text=TargetCards.Describe(facts);Check(text=="Spiral galaxy · Andromeda · ~2.5 million light-years · magnitude 3.4","Automatic description was "+text);
+    Check(TargetCards.Describe(new TargetCardFacts{Kind="Open cluster",Magnitude=1.6,BlueMagnitude=true})=="Open cluster · blue magnitude 1.6","Missing facts were not simply left out");
+    Check(TargetCards.Describe(null)==null&&TargetCards.Describe(new TargetCardFacts())==null,"An unknown target gained a description");
+    Check(TargetCards.Distance(1350)=="1,400 light-years"&&TargetCards.Distance(4.2e9)=="4.2 billion light-years"&&TargetCards.Distance(24e6)=="24 million light-years","Distances were not rounded and scaled");
+    Check(TargetCards.CardDescription("Mine",null,true,facts)=="Mine"&&TargetCards.CardDescription(null,null,true,facts)==text&&TargetCards.CardDescription(null,null,false,facts)==null,"The default overrode a description or did not fill an empty one");
+    Check(TargetCards.CardDescription("Mine",true,false,facts)==text&&TargetCards.CardDescription("Mine",false,true,facts)=="Mine"&&TargetCards.CardDescription("Mine",true,false,null)=="Mine","A card's own choice was not honoured, or own text was lost when nothing is known");
+    var card=new TargetInfoCard{domain="deep_sky",type_label="Spiral galaxy",constellation="And",measurements=new[]{new TargetInfoMeasurement{field="Distance",value=2.5,unit="Mly",qualifier="Approximate"},new TargetInfoMeasurement{field="V-Mag",value=3.44,unit="mag"}}};
+    var read=TargetCards.Facts(card);Check(read!=null&&read.Kind=="Spiral galaxy"&&read.LightYears==2500000&&read.ApproximateDistance&&read.Magnitude==3.44&&!read.BlueMagnitude,"Facts were not read from the information card");
+    Check(TargetCards.Facts(new TargetInfoCard{domain="event",type_label="Eclipse"})==null&&TargetCards.Facts(new TargetInfoCard{domain="solar_system",type_label="Planet",measurements=card.measurements}).LightYears==null,"Events or solar-system distances were used");
+    var saved=Util.Deserialize<Settings>(Util.Serialize(new Settings{CardAutoDescription=true,CardChoices=new Dictionary<string,TargetCardMemory>{{"M31",new TargetCardMemory{Path="",AutoDescription=false}}}}));
+    Check(saved.CardAutoDescription&&saved.CardChoices["M31"].AutoDescription==false&&Util.Deserialize<Settings>("{}").CardAutoDescription==false,"Automatic description choices were not remembered");
+   });
    Test("Analytics preferences repair saved values and migrate 3.1.5 chart choices",()=>{
     var fresh=AnalyticsPreferences.Load(Util.Deserialize<Settings>("{}").Analytics,null);
     Check(fresh.ImageFormat=="PDF"&&fresh.CardFormat=="PNG"&&fresh.VideoFormat=="MP4"&&fresh.Layout==0&&!fresh.LightDocument&&!fresh.Video&&fresh.Palette==null&&fresh.Item==null&&fresh.Charts.Count==0&&fresh.IncludedCharts().Count==6,"Old settings did not start from the familiar defaults");

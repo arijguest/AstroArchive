@@ -18,8 +18,12 @@ namespace AstroArchive {
  // A target's last card choices, so its image and framing come back next time.
  // An empty Path means the star field was chosen; null Path keeps the default image.
  public sealed class TargetCardMemory {
-  public string Path{get;set;}public bool Fill{get;set;}public double Zoom{get;set;}public double PanX{get;set;}public double PanY{get;set;}public int Rotation{get;set;}public string Description{get;set;}
+  public string Path{get;set;}public bool Fill{get;set;}public double Zoom{get;set;}public double PanX{get;set;}public double PanY{get;set;}public int Rotation{get;set;}public string Description{get;set;}public bool? AutoDescription{get;set;}
   public TargetCardPlacement Placement(){return new TargetCardPlacement{Zoom=Math.Max(1,Math.Min(4,double.IsNaN(Zoom)?1:Zoom)),PanX=Math.Max(-1,Math.Min(1,double.IsNaN(PanX)?0:PanX)),PanY=Math.Max(-1,Math.Min(1,double.IsNaN(PanY)?0:PanY)),Rotation=TargetCards.QuarterTurn(Rotation)};}
+ }
+ // What is known about a target beyond the user's own files, for the automatic card description.
+ public sealed class TargetCardFacts {
+  public string Kind,Constellation;public double? LightYears;public bool ApproximateDistance;public double? Magnitude;public bool BlueMagnitude;
  }
  public sealed class TargetCardChoice {public string Target,Label;public double Seconds;public int Lights;public override string ToString(){return Label;}}
  public enum TargetCardLayout {Portrait,Vertical,Square,Widescreen}
@@ -35,6 +39,51 @@ namespace AstroArchive {
    string code=Localization.Current;if(code=="ja"||code=="zh-Hans")return date.ToString(year?"yyyy年M月d日":"M月d日",CultureInfo.InvariantCulture);
    var culture=Localization.English||Localization.Pseudo?CultureInfo.InvariantCulture:CultureInfo.GetCultureInfo(code);
    return date.ToString(code=="de"?(year?"d. MMM yyyy":"d. MMM"):(year?"d MMM yyyy":"d MMM"),culture);
+  }
+  // The automatic description: what it is, where it sits, how far away and how bright.
+  // Anything not known is left out, and nothing is guessed. Translated part by part.
+  public static string Describe(TargetCardFacts facts){
+   if(facts==null)return null;var parts=new List<string>();
+   if(!string.IsNullOrWhiteSpace(facts.Kind))parts.Add(Localization.T(facts.Kind.Trim()));
+   if(!string.IsNullOrWhiteSpace(facts.Constellation))parts.Add(Localization.T(facts.Constellation.Trim()));
+   if(facts.LightYears.HasValue&&facts.LightYears.Value>0&&!double.IsInfinity(facts.LightYears.Value))parts.Add((facts.ApproximateDistance?"~":"")+Distance(facts.LightYears.Value));
+   if(facts.Magnitude.HasValue&&!double.IsNaN(facts.Magnitude.Value))parts.Add(Localization.F(facts.BlueMagnitude?"blue magnitude {0}":"magnitude {0}",facts.Magnitude.Value.ToString("0.0",CultureInfo.CurrentCulture)));
+   return parts.Count==0?null:string.Join(" · ",parts);
+  }
+  // Two significant figures, in light-years, millions or billions of light-years.
+  public static string Distance(double lightYears){
+   double rounded=lightYears;if(lightYears>0){double scale=Math.Pow(10,Math.Floor(Math.Log10(lightYears))-1);rounded=Math.Round(lightYears/scale)*scale;}
+   var culture=CultureInfo.CurrentCulture;
+   if(rounded>=1e9)return Localization.F("{0} billion light-years",(rounded/1e9).ToString("0.#",culture));
+   if(rounded>=1e6)return Localization.F("{0} million light-years",(rounded/1e6).ToString("0.#",culture));
+   return Localization.F("{0} light-years",rounded.ToString("#,##0",culture));
+  }
+  // Their own words win unless they asked for the automatic text; the default only fills cards with none.
+  // When nothing is known about the target, their own words still show.
+  public static string CardDescription(string own,bool? choice,bool defaultAutomatic,TargetCardFacts facts){
+   bool hasOwn=!string.IsNullOrWhiteSpace(own);bool automatic=choice.HasValue?choice.Value:!hasOwn&&defaultAutomatic;
+   var text=automatic?Describe(facts):null;return text!=null?text:hasOwn?own.Trim():null;
+  }
+  static double? LightYears(double value,string unit){
+   switch((unit??"").Trim()){
+    case "ly":return value;case "kly":return value*1e3;case "Mly":return value*1e6;case "Gly":return value*1e9;
+    case "pc":return value*3.26156;case "kpc":return value*3.26156e3;case "Mpc":return value*3.26156e6;case "Gpc":return value*3.26156e9;
+    default:return null;
+   }
+  }
+  // Facts from the target information pack. Deep-sky objects get a type, constellation, distance and
+  // magnitude; solar-system bodies only a type, since their distance and brightness change by the day.
+  public static TargetCardFacts Facts(TargetInfoCard card){
+   if(card==null||card.domain!="deep_sky"&&card.domain!="solar_system")return null;
+   var facts=new TargetCardFacts();string kind=(card.type_label??"").Trim();if(kind.Length>0&&!kind.StartsWith("Uncertain",StringComparison.OrdinalIgnoreCase))facts.Kind=kind;
+   if(card.domain=="deep_sky"){
+    facts.Constellation=TargetInfoPresentation.Constellation(card.constellation);var measurements=card.measurements??new TargetInfoMeasurement[0];
+    var distance=measurements.FirstOrDefault(m=>m.field=="Distance"&&m.value>0&&LightYears(m.value,m.unit).HasValue);
+    if(distance!=null){facts.LightYears=LightYears(distance.value,distance.unit);facts.ApproximateDistance=distance.band=="redshift"||(distance.qualifier??"").StartsWith("Approximate",StringComparison.OrdinalIgnoreCase);}
+    var visual=measurements.FirstOrDefault(m=>m.field=="V-Mag"&&m.unit=="mag");var blue=measurements.FirstOrDefault(m=>m.field=="B-Mag"&&m.unit=="mag");
+    if(visual!=null)facts.Magnitude=visual.value;else if(blue!=null){facts.Magnitude=blue.value;facts.BlueMagnitude=true;}
+   }
+   return facts.Kind==null&&facts.Constellation==null&&!facts.LightYears.HasValue&&!facts.Magnitude.HasValue?null:facts;
   }
   public static int QuarterTurn(int degrees){return ((int)Math.Round(degrees/90.0)%4+4)%4*90;}
   public static bool Eligible(string target){return !string.IsNullOrWhiteSpace(target)&&target!="All targets"&&target!="Calibration"&&!Catalog.IsAmbiguous(target);}

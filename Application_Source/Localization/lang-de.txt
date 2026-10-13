@@ -2291,10 +2291,17 @@ Start tour:	Tour starten:
 Step-by-step fixes for common problems, on AstroArchive's own screens.	Schritt-für-Schritt-Lösungen für häufige Probleme, direkt in AstroArchive.
 Short tours of importing, exporting and backups.	Kurze Touren zu Import, Export und Sicherungen.
 Search the guide, or start a guided fix or tour.	Hilfe durchsuchen oder eine geführte Lösung bzw. Tour starten.
-Distance	Entfernung
-{0} billion light-years	{0} Milliarden Lichtjahre
-{0} million light-years	{0} Millionen Lichtjahre
+Add automatic descriptions	Automatische Beschreibungen hinzufügen
+Add automatic description	Automatische Beschreibung hinzufügen
+Under each target name, say what it is, its constellation, how far away it is and how bright, when known. Your own description on a card still wins; Adjust card changes one card.	Unter jedem Zielnamen angeben, was es ist, in welchem Sternbild es liegt, wie weit entfernt und wie hell es ist, soweit bekannt. Eine eigene Beschreibung auf einer Karte hat Vorrang; mit „Karte anpassen“ ändern Sie eine einzelne Karte.
+What the target is, its constellation, how far away it is and how bright, when known. It replaces your own text while ticked; your text is kept.	Was das Ziel ist, sein Sternbild, wie weit entfernt und wie hell es ist, soweit bekannt. Solange das Häkchen gesetzt ist, ersetzt sie Ihren eigenen Text; dieser bleibt erhalten.
+Nothing is known about this target yet, so there is no automatic description.	Zu diesem Ziel ist noch nichts bekannt, daher gibt es keine automatische Beschreibung.
+magnitude {0}	Helligkeit {0} mag
+blue magnitude {0}	blaue Helligkeit {0} mag
 {0} light-years	{0} Lichtjahre
+{0} million light-years	{0} Millionen Lichtjahre
+{0} billion light-years	{0} Milliarden Lichtjahre
+Distance	Entfernung
 
 # Hybrid information, native 3D orbit and setup connectivity.
 Online access	Onlinezugriff
