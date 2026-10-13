@@ -15,6 +15,8 @@ namespace AstroArchive {
   [ScriptIgnore]public double QualityPercentile{get{return qualityPercentile;}set{qualityPercentile=value;}}
   [ScriptIgnore]public string QualityFlags{get;set;}
   [ScriptIgnore]public string QualityDetail{get;set;}
+  // One line of the measurements behind the score, for the capture details panel.
+  [ScriptIgnore]public string QualitySummary{get;set;}
   [ScriptIgnore]public double? ExposureFit{get;set;}
   [ScriptIgnore]public string ExposureLabel{get;set;}
   [ScriptIgnore]public double QualityOrder{get{return QualityScore.HasValue?QualityScore.Value:-1;}}
@@ -78,7 +80,7 @@ namespace AstroArchive {
  public static class QualityAnnotator {
   // Clears and refills the transient quality properties of the supplied captures.
   public static void Apply(IList<Frame> frames,IDictionary<string,QualityMeasurement> measurements,bool compareTarget){
-   foreach(var frame in frames){frame.QualityScore=null;frame.QualityPercentile=-1;frame.QualityFlags=null;frame.QualityDetail=null;frame.ExposureFit=null;frame.ExposureLabel=null;}
+   foreach(var frame in frames){frame.QualityScore=null;frame.QualityPercentile=-1;frame.QualityFlags=null;frame.QualityDetail=null;frame.QualitySummary=null;frame.ExposureFit=null;frame.ExposureLabel=null;}
    if(measurements==null||measurements.Count==0)return;
    var items=new List<QualityItem>();var owners=new List<Frame>();
    foreach(var frame in frames){
@@ -94,7 +96,7 @@ namespace AstroArchive {
    }
    if(items.Count==0)return;
    var outcomes=QualityScorer.Compute(items);
-   for(int i=0;i<owners.Count;i++){var o=outcomes[i];var f=owners[i];f.QualityScore=o.Score;f.QualityPercentile=o.Percentile;f.QualityFlags=o.Flags;f.QualityDetail=o.Detail;f.ExposureFit=o.ExposureFit;f.ExposureLabel=o.ExposureLabel;
+   for(int i=0;i<owners.Count;i++){var o=outcomes[i];var f=owners[i];f.QualityScore=o.Score;f.QualityPercentile=o.Percentile;f.QualityFlags=o.Flags;f.QualityDetail=o.Detail;f.QualitySummary=o.Summary;f.ExposureFit=o.ExposureFit;f.ExposureLabel=o.ExposureLabel;
     if(items[i].M.Version<QualityMeter.Version&&f.QualityDetail!=null)f.QualityDetail+="\nMeasured by an earlier version. Analyse image quality refreshes it.";
     int status=items[i].M.Status;if(status==QualityStatus.Unsuitable)f.QualityDetail="Not scored: set aside as unsuitable for measuring. Re-measure image quality tries again.";else if(status==QualityStatus.Failed)f.QualityDetail="Not scored: the file could not be read last time. Analyse image quality tries again.";}
   }

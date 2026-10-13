@@ -60,9 +60,9 @@ namespace AstroArchive {
     if(QualityMeter.OldestShown<QualityMeter.Version)Check(stale.QualityScore.HasValue&&stale.QualityTooltip.Contains("earlier version"),"A program update wiped an earlier-version score");
     Check(unmeasured.QualityTooltip.Contains("Analyse image quality"),"An unmeasured sub does not say how to get a score");
     for(int i=1;i<10;i++)Check(frames[i].QualityScore.Value<frames[i-1].QualityScore.Value,"Scores did not fall with wider stars within a session");
-    Check(frames[0].QualityDetail.Contains("compared with 10 similar frames")&&frames[10].QualityDetail.Contains("compared with 10 similar frames"),"Sessions were not compared separately");
+    Check(frames[0].QualityDetail.Contains("of 10 similar frames")&&frames[10].QualityDetail.Contains("of 10 similar frames"),"Sessions were not compared separately");
     var sessionScore=frames[0].QualityScore.Value;
-    QualityAnnotator.Apply(frames,measurements,true);Check(frames[0].QualityDetail.Contains("compared with 20 similar frames")&&frames[0].QualityScore.Value!=sessionScore,"Comparing by target did not merge sessions");
+    QualityAnnotator.Apply(frames,measurements,true);Check(frames[0].QualityDetail.Contains("of 20 similar frames")&&frames[0].QualityScore.Value!=sessionScore,"Comparing by target did not merge sessions");
     QualityAnnotator.Apply(frames,new Dictionary<string,QualityMeasurement>(),false);Check(frames.All(f=>!f.QualityScore.HasValue&&f.QualityPercentile<0&&f.QualityFlags==null),"Clearing the measurements left scores behind");
    });
    Test("Quality: discs are compared per target and the exposure column is planetary only",()=>{
@@ -72,7 +72,7 @@ namespace AstroArchive {
     QualityAnnotator.Apply(frames,measurements,true);
     Check(frames.Take(9).All(f=>f.QualityScore.HasValue&&f.ExposureFit.HasValue&&f.ExposureFitText.Contains("Good")),"Discs lack a score or exposure fit");
     Check(deep.QualityScore.HasValue&&!deep.ExposureFit.HasValue&&deep.ExposureFitText=="-","A deep-sky frame received an exposure fit");
-    Check(frames[0].QualityScore.Value>frames[8].QualityScore.Value&&frames[0].QualityDetail.Contains("compared with 9"),"Disc scores were mixed with deep-sky frames");
+    Check(frames[0].QualityScore.Value>frames[8].QualityScore.Value&&frames[0].QualityDetail.Contains("of 9 similar frames"),"Disc scores were mixed with deep-sky frames");
    });
    Test("Quality: subs are listed best first inside each session and stacks never move",()=>{
     var frames=new List<Frame>();var measurements=new Dictionary<string,QualityMeasurement>();double[] widths={3.4,2.1,2.8,2.0,3.9,2.5,3.1,2.2,3.6,2.9};

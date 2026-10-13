@@ -9,12 +9,12 @@ using System.Text;
 namespace AstroArchive {
  public sealed class QualityItem {public string Cohort;public QualityMeasurement M;}
  public sealed class QualityOutcome {
-  public double? Score;public double Percentile=-1;public string Flags="";public string Detail="";public double? ExposureFit;public string ExposureLabel="";public bool Reference;public int CohortSize;
+  public double? Score;public double Percentile=-1;public string Flags="";public string Detail="";public string Summary="";public double? ExposureFit;public string ExposureLabel="";public bool Reference;public int CohortSize;
  }
  public static class QualityScorer {
   public const int MinimumCohort=8;
   public const double WeightFwhm=0.35,WeightSnr=0.25,WeightStars=0.20,WeightEcc=0.20;
-  public const double WeightObstruction=0.30;
+  public const double WeightObstruction=0.60;
   public const double WeightDetail=0.40,WeightLimb=0.30,WeightDiscSnr=0.30;
   public const double SoftFraction=0.02,SoftRatio=1.25,ClipCap=40,ClipShare=0.02;
   static readonly string[] Ceilings={"1","255","1023","4095","16383","65535"};
@@ -26,7 +26,7 @@ namespace AstroArchive {
    var outcomes=new QualityOutcome[items.Count];for(int i=0;i<outcomes.Length;i++)outcomes[i]=new QualityOutcome();
    var groups=new Dictionary<string,Group>();
    for(int i=0;i<items.Count;i++){var m=items[i].M;if(m==null||m.Status==QualityStatus.Failed||m.Status==QualityStatus.Unsuitable||m.Status==QualityStatus.NoObject)continue;string key=m.Kind+"|"+items[i].Cohort;Group g;if(!groups.TryGetValue(key,out g)){g=new Group();groups[key]=g;}g.Index.Add(i);}
-   foreach(var g in groups.Values){if(items[g.Index[0]].M.Kind==QualityKind.Disc)ScoreDiscs(items,g.Index,outcomes);else ScoreStars(items,g.Index,outcomes);Rank(g.Index,outcomes);}
+   foreach(var g in groups.Values){bool disc=items[g.Index[0]].M.Kind==QualityKind.Disc;if(disc)ScoreDiscs(items,g.Index,outcomes);else ScoreStars(items,g.Index,outcomes);Rank(g.Index,outcomes);Headline(g.Index,outcomes,disc?"Sharpness":"Quality");}
    return outcomes;
   }
 
@@ -42,16 +42,18 @@ namespace AstroArchive {
   // ----- star fields -----
   static double Mp(QualityMeasurement m){return Math.Max(0.01,m.Width*(double)m.Height/1e6);}
   static void ScoreStars(IList<QualityItem> items,List<int> index,QualityOutcome[] outcomes){
-   var fw=new List<double>();var ec=new List<double>();var st=new List<double>();var sn=new List<double>();var bg=new List<double>();var rawFwhm=new List<double>();var rawStars=new List<double>();
+   var fw=new List<double>();var ec=new List<double>();var st=new List<double>();var sn=new List<double>();var bg=new List<double>();var rawFwhm=new List<double>();var rawStars=new List<double>();var cov=new List<double>();
    foreach(int i in index){var m=items[i].M;
     if(m.Status==QualityStatus.Ok&&Finite(m.Fwhm)&&m.Fwhm>0){fw.Add(Math.Log(m.Fwhm));rawFwhm.Add(m.Fwhm);}
     if(m.Status==QualityStatus.Ok&&Finite(m.Ecc))ec.Add(m.Ecc);
     st.Add(Math.Log(1+m.Stars));rawStars.Add(m.Stars);
     if(Finite(m.Snr)&&m.Snr>0)sn.Add(Math.Log(Math.Max(m.Snr,0.1)));
-    if(Finite(m.Bg))bg.Add(m.Bg);}
-   var fwS=Robust(fw,0.04);var ecS=Robust(ec,0.04);var stS=Robust(st,0.10);var snS=Robust(sn,0.08);var bgS=new Stat();if(bg.Count>0){bgS=Robust(bg,0.02*Math.Max(1e-6,Math.Abs(QualityMeter.Median(bg))));}
+    if(Finite(m.Bg))bg.Add(m.Bg);
+    if(Finite(m.StarCoverage))cov.Add(m.StarCoverage);}
+   var fwS=Robust(fw,0.04);var ecS=Robust(ec,0.04);var stS=Robust(st,0.10);var snS=Robust(sn,0.08);var covS=Robust(cov,0.03);var bgS=new Stat();if(bg.Count>0){bgS=Robust(bg,0.02*Math.Max(1e-6,Math.Abs(QualityMeter.Median(bg))));}
    bool cohort=index.Count>=MinimumCohort;
    double p10=Percentile(rawFwhm,0.10),p90Stars=Percentile(rawStars,0.90);
+   var losses=new Dictionary<int,double>();
    foreach(int i in index){
     var m=items[i].M;var o=outcomes[i];o.CohortSize=index.Count;o.Reference=!cohort;var terms=new List<double[]>();
     bool haveShape=m.Status==QualityStatus.Ok&&Finite(m.Fwhm)&&Finite(m.Ecc);double mp=Mp(m);
@@ -62,42 +64,57 @@ namespace AstroArchive {
     }
     {double zs=cohort&&stS.Count>=MinimumCohort?Z(Math.Log(1+m.Stars),stS,false):(Math.Log(1+m.Stars/mp)-Math.Log(1+150))/0.8;terms.Add(new[]{WeightStars,Logistic(zs)});}
     if(Finite(m.Snr)&&m.Snr>0){double zn=cohort&&snS.Count>=MinimumCohort?Z(Math.Log(Math.Max(m.Snr,0.1)),snS,false):(Math.Log(Math.Max(m.Snr,0.1))-Math.Log(25))/0.8;terms.Add(new[]{WeightSnr,Logistic(zn)});}
-    double obstruction=Finite(m.Obstruction)?Math.Max(0,Math.Min(1,m.Obstruction)):0;
-    if(Finite(m.Obstruction))terms.Add(new[]{WeightObstruction,100*Math.Pow(1-obstruction,3)});
+    double loss=FieldLoss(m,cohort&&covS.Count>=MinimumCohort?(Stat?)covS:null);losses[i]=loss;
+    if(Finite(m.Obstruction)||loss>0)terms.Add(new[]{WeightObstruction,100*Math.Pow(1-loss,4)});
     double score=Combine(terms);
-    // Absolute loss of usable field remains a penalty even if every comparison
-    // frame has the same obstruction; sharp surviving stars cannot compensate.
-    if(obstruction>=0.25)score=Math.Min(score,35);else if(obstruction>=0.10)score=Math.Min(score,60);
+    // Lost field is an absolute penalty even if every comparison frame shares it; sharp surviving stars cannot compensate.
+    if(loss>=0.25)score=Math.Min(score,30);else if(loss>=0.10)score=Math.Min(score,45);else if(loss>=ObstructedAt)score=Math.Min(score,65);
     if(!haveShape)score=Math.Min(score,30);
     o.Score=score;
-    // Flags
+   }
+   // A frame with part of its field blocked ranks below every clear frame it is compared with.
+   var clear=index.Where(i=>losses[i]<ObstructedAt&&outcomes[i].Score.HasValue).Select(i=>outcomes[i].Score.Value).ToList();
+   if(clear.Count>0){double lowest=clear.Min();foreach(int i in index)if(losses[i]>=ObstructedAt)outcomes[i].Score=Math.Max(0,Math.Min(outcomes[i].Score.Value,lowest*(0.95-0.5*losses[i])));}
+   foreach(int i in index){
+    var m=items[i].M;var o=outcomes[i];double loss=losses[i];
+    bool haveShape=m.Status==QualityStatus.Ok&&Finite(m.Fwhm)&&Finite(m.Ecc);
     var flags=new List<string>();string hint="";
-    bool clouded=obstruction<0.03&&(m.Status==QualityStatus.TooFewStars||(cohort&&p90Stars>0&&m.Stars<0.5*p90Stars));
+    bool clouded=loss<ObstructedAt&&(m.Status==QualityStatus.TooFewStars||(cohort&&p90Stars>0&&m.Stars<0.5*p90Stars));
     bool soft=haveShape&&(m.Fwhm/m.Width>SoftFraction||(cohort&&Finite(p10)&&m.Fwhm>SoftRatio*p10));
     bool trailed=haveShape&&(m.Ecc>0.65||(cohort&&ecS.Count>=MinimumCohort&&Z(m.Ecc,ecS,false)>3&&m.Ecc>0.5));
     bool bright=Finite(m.Gradient)&&m.Gradient>0.6||(cohort&&bg.Count>=MinimumCohort&&Finite(m.Bg)&&Z(m.Bg,bgS,false)>3);
-    if(obstruction>=0.03)flags.Add("Suspected obstruction");
+    if(loss>=ObstructedAt)flags.Add("Suspected obstruction");
     if(clouded)flags.Add("Clouded");
     if(soft){flags.Add("Soft");hint=FocusHint(m);}
     if(trailed){flags.Add("Trailed");hint="likely tracking or guiding";}
     if(bright)flags.Add("Bright sky");
     o.Flags=string.Join(", ",flags.ToArray());
-    // Tooltip text
-    var d=new StringBuilder();
-    d.Append("Quality ").Append(Math.Round(score).ToString(CultureInfo.InvariantCulture)).Append(cohort?" · compared with "+index.Count+" similar frames":" · fixed reference (fewer than "+MinimumCohort+" similar frames)");
-    if(haveShape){d.Append("\nStar width (FWHM) ").Append(m.Fwhm.ToString("0.0",CultureInfo.InvariantCulture)).Append(" px · ").Append((100*m.Fwhm/m.Width).ToString("0.00",CultureInfo.InvariantCulture)).Append("% of width · HFD ").Append(m.Hfd.ToString("0.0",CultureInfo.InvariantCulture)).Append(" px");
-     d.Append("\nRoundness (eccentricity) ").Append(m.Ecc.ToString("0.00",CultureInfo.InvariantCulture));
-     if(Finite(m.FwhmCentre)&&Finite(m.FwhmEdge))d.Append(" · FWHM centre ").Append(m.FwhmCentre.ToString("0.0",CultureInfo.InvariantCulture)).Append(" / edge ").Append(m.FwhmEdge.ToString("0.0",CultureInfo.InvariantCulture)).Append(" px");}
-    else d.Append("\nToo few usable stars to measure star shape (").Append(m.StarsUsed).Append(" found).");
-    d.Append("\nStars ").Append(m.Stars).Append(" detected · ").Append(m.StarsUsed).Append(" measured");
-    if(Finite(m.Snr))d.Append(" · SNR ").Append(m.Snr.ToString("0",CultureInfo.InvariantCulture));
-    if(Finite(m.Bg))d.Append("\nSky level ").Append(m.Bg.ToString("0",CultureInfo.InvariantCulture)).Append(Finite(m.Gradient)?" · gradient "+(100*m.Gradient).ToString("0",CultureInfo.InvariantCulture)+"%":"");
-    if(Finite(m.Obstruction))d.Append("\nSuspected obstructed field ").Append((100*obstruction).ToString("0",CultureInfo.InvariantCulture)).Append("% · star-poor regions with sharp background boundaries");
-    if(Finite(m.StarCoverage))d.Append("\nSpatial star coverage ").Append((100*m.StarCoverage).ToString("0",CultureInfo.InvariantCulture)).Append("% of expected occupied regions");
+    // Plain-language tooltip lines; the heading with the rank is added once the cohort is ranked.
+    var d=new StringBuilder();var summary=new List<string>();
+    if(haveShape){
+     d.Append("Stars ").Append(m.Fwhm.ToString("0.0",CultureInfo.InvariantCulture)).Append(" px wide · ").Append(Roundness(m.Ecc)).Append(" · ").Append(m.Stars).Append(" found");
+     summary.Add("FWHM "+m.Fwhm.ToString("0.0",CultureInfo.InvariantCulture)+" px");summary.Add("eccentricity "+m.Ecc.ToString("0.00",CultureInfo.InvariantCulture));
+    }else d.Append("Too few usable stars to judge sharpness (").Append(m.Stars).Append(" found)");
+    summary.Add(m.Stars+" stars");
+    var signal=new List<string>();
+    if(Finite(m.Snr)){signal.Add("signal to noise "+m.Snr.ToString("0",CultureInfo.InvariantCulture));summary.Add("SNR "+m.Snr.ToString("0",CultureInfo.InvariantCulture));}
+    if(Finite(m.Gradient)){signal.Add("sky gradient "+(100*m.Gradient).ToString("0",CultureInfo.InvariantCulture)+"%");summary.Add("gradient "+(100*m.Gradient).ToString("0",CultureInfo.InvariantCulture)+"%");}
+    if(signal.Count>0)d.Append("\n").Append(Capital(string.Join(" · ",signal)));
+    if(Finite(m.Obstruction)||loss>0){string field=loss>=ObstructedAt?"about "+(100*loss).ToString("0",CultureInfo.InvariantCulture)+"% blocked":"clear";d.Append("\nField ").Append(field);summary.Add("field "+field);}
     if(flags.Count>0)d.Append("\nFlags: ").Append(o.Flags).Append(hint.Length>0?" ("+hint+")":"");
-    o.Detail=d.ToString();
+    o.Detail=d.ToString();o.Summary=string.Join(" · ",summary);
    }
   }
+  public const double ObstructedAt=0.03;
+  // Share of the field lost to a foreground obstruction: the detector's own estimate, or a clear
+  // shortfall in spatial star coverage against similar frames, which catches edges it missed.
+  static double FieldLoss(QualityMeasurement m,Stat? coverage){
+   double loss=Finite(m.Obstruction)?Math.Max(0,Math.Min(1,m.Obstruction)):0;
+   if(coverage.HasValue&&Finite(m.StarCoverage)){double deficit=coverage.Value.Median-m.StarCoverage;if(deficit>Math.Max(0.08,2.5*coverage.Value.Sigma))loss=Math.Max(loss,Math.Min(1,deficit));}
+   return loss;
+  }
+  static string Roundness(double ecc){return ecc<=0.4?"round":ecc<=0.55?"slightly elongated":"elongated";}
+  static string Capital(string text){return text.Length==0?text:char.ToUpperInvariant(text[0])+text.Substring(1);}
   static string FocusHint(QualityMeasurement m){
    if(m.Ecc>0.55)return "likely tracking or guiding";
    if(Finite(m.FwhmCentre)&&Finite(m.FwhmEdge)&&m.FwhmCentre>0&&m.FwhmEdge/m.FwhmCentre>1.3)return "likely tilt or field curvature";
@@ -137,17 +154,25 @@ namespace AstroArchive {
     if(m.BlackClip>0.3)flags.Add("Black clipped");
     if(Finite(m.Peak)&&ceiling>0){double fraction=m.Peak/ceiling;o.ExposureFit=ExposureScore(fraction,m.Sat);o.ExposureLabel=ExposureLabel(fraction,m.Sat);if(o.ExposureLabel=="Under")flags.Add("Under-exposed");else if(o.ExposureLabel=="Over"&&!flags.Contains("Clipped"))flags.Add("Over-exposed");}
     o.Flags=string.Join(", ",flags.ToArray());
-    var d=new StringBuilder();
-    if(o.Score.HasValue)d.Append("Sharpness ").Append(Math.Round(o.Score.Value).ToString(CultureInfo.InvariantCulture)).Append(cohort?" · compared with "+index.Count+" similar frames":" · fixed reference (fewer than "+MinimumCohort+" similar frames)");else d.Append("Sharpness not available for this frame");
-    if(Finite(m.Limb))d.Append("\nLimb edge width ").Append((100*m.Limb).ToString("0.00",CultureInfo.InvariantCulture)).Append("% of the object's diameter");else d.Append(m.FillsFrame?"\nObject fills the frame: no complete limb to measure":"\nLimb edge could not be measured");
-    if(Finite(m.Detail))d.Append("\nDetail ratio ").Append(m.Detail.ToString("0.00",CultureInfo.InvariantCulture));
-    if(Finite(m.Snr))d.Append("\nSNR ").Append(m.Snr.ToString("0",CultureInfo.InvariantCulture));
-    if(o.ExposureFit.HasValue&&Finite(m.Peak))d.Append("\nExposure ").Append(o.ExposureLabel).Append(" · brightest pixels at ").Append((100*m.Peak/ceiling).ToString("0",CultureInfo.InvariantCulture)).Append("% of the sensor ceiling · ").Append((100*m.Sat).ToString("0.0",CultureInfo.InvariantCulture)).Append("% clipped");
+    var d=new StringBuilder();var summary=new List<string>();
+    if(!o.Score.HasValue)d.Append("Sharpness could not be judged for this frame\n");
+    if(Finite(m.Limb)){d.Append("Edge ").Append((100*m.Limb).ToString("0.0",CultureInfo.InvariantCulture)).Append("% of the disc wide");summary.Add("edge "+(100*m.Limb).ToString("0.0",CultureInfo.InvariantCulture)+"%");}else d.Append(m.FillsFrame?"Object fills the frame, so there is no edge to measure":"Edge could not be measured");
+    if(Finite(m.Detail)){d.Append(" · detail ").Append(m.Detail.ToString("0.00",CultureInfo.InvariantCulture));summary.Add("detail "+m.Detail.ToString("0.00",CultureInfo.InvariantCulture));}
+    if(Finite(m.Snr)){d.Append(" · signal to noise ").Append(m.Snr.ToString("0",CultureInfo.InvariantCulture));summary.Add("SNR "+m.Snr.ToString("0",CultureInfo.InvariantCulture));}
+    if(o.ExposureFit.HasValue&&Finite(m.Peak)){d.Append("\nExposure ").Append(o.ExposureLabel).Append(" · peak at ").Append((100*m.Peak/ceiling).ToString("0",CultureInfo.InvariantCulture)).Append("% of the sensor range").Append(m.Sat>0.0005?" · "+(100*m.Sat).ToString("0.0",CultureInfo.InvariantCulture)+"% clipped":"");summary.Add("exposure "+o.ExposureLabel);}
     if(flags.Count>0)d.Append("\nFlags: ").Append(o.Flags);
+    o.Summary=Capital(string.Join(" · ",summary));
     o.Detail=d.ToString();
    }
   }
 
+  // First tooltip line: the score and where it stands among the frames it was compared with.
+  static void Headline(List<int> index,QualityOutcome[] outcomes,string name){
+   var scores=index.Where(i=>outcomes[i].Score.HasValue).Select(i=>outcomes[i].Score.Value).ToList();
+   foreach(int i in index){var o=outcomes[i];if(!o.Score.HasValue)continue;double s=o.Score.Value;
+    string where=o.Reference?"judged against typical values (fewer than "+MinimumCohort+" similar frames)":"ranked "+(scores.Count(v=>v>s)+1)+" of "+index.Count+" similar frames";
+    o.Detail=name+" "+Math.Round(s).ToString(CultureInfo.InvariantCulture)+" of 100 · "+where+(o.Detail.Length>0?"\n"+o.Detail:"");}
+  }
   static void Rank(List<int> index,QualityOutcome[] outcomes){
    var scored=index.Where(i=>outcomes[i].Score.HasValue).ToList();int n=scored.Count;if(n==0)return;
    var sorted=scored.Select(i=>outcomes[i].Score.Value).OrderBy(v=>v).ToArray();
