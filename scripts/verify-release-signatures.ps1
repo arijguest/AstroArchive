@@ -13,6 +13,9 @@ $records = @(
         if ($null -eq $signature.SignerCertificate -or $signature.SignerCertificate.Subject -cne $ExpectedPublisher) {
             throw "Unexpected signing publisher on $path."
         }
+        if ($signature.SignerCertificate.PublicKey.Oid.Value -ne '1.2.840.113549.1.1.1') {
+            throw "Smart App Control requires an RSA code-signing certificate on $path."
+        }
         if ($null -eq $signature.TimeStamperCertificate) { throw "Missing trusted timestamp on $path." }
         [ordered]@{
             file = [IO.Path]::GetFileName($path)

@@ -21,6 +21,9 @@ or packaging this folder. The embedded offline guide comes from
 | Change | Engine checks | UI checks |
 | --- | --- | --- |
 | Targets, search, selection, Edited export, guide | `test.ps1 -TargetsOnly` | `--targets-only` |
+| Target information, offline thumbnails and sky location | `test.ps1 -TargetInfoOnly` | `--info-only` |
+| Planetary sky positions, capture clocks, AVI/SER | `test.ps1 -SkyOnly` | `--sky-only` |
+| Export window, stacking folders, app handoffs, AstroBin CSV | `test.ps1 -ExportsOnly` | Full UI suite (Export checks) |
 | Preview resolution, layout, sub exposure labels | `test.ps1 -PreviewOnly` | `--preview-only` |
 | Analytics calculations, layout and export | `test.ps1 -AnalyticsOnly` | `--analytics-only` |
 | Checkbox, focus, disabled or theme states | Build the app | `--controls-only` |
@@ -56,8 +59,8 @@ not repeated full suites.
 
 Analytics checks cover integration accounting, missing metadata, date/telescope
 scoping, histogram boundaries, continuation rankings and SVG/PDF structure. The
-Windows UI switch checks both themes, live scope changes and all six export
-formats, including combined sheets, exact social ratios, animated preview,
+Windows UI switch checks both themes, live scope changes, chart customisation,
+remembered choices across reopening and all six export formats, including combined sheets, exact social ratios, animated preview,
 H.264 encoding, GIF decoding, progress and cancellation-safe file replacement.
 The Windows workflow independently decodes MP4/GIF with FFmpeg and Pillow to
 check frame counts, duration, orientation, palette quality and animation:

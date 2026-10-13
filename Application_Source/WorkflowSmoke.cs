@@ -15,7 +15,7 @@ namespace AstroArchive {
    CancelPreview();if(B("OpenPreviewButton").IsEnabled)throw new Exception("Show in File Explorer stayed enabled with nothing previewed.");
    var flagged=new Frame{Status="New",Rejected=true};
    if(!SkipFlagged||ImportWorkflow.Select(new[]{flagged},SkipFlagged).Count!=0)throw new Exception("Flagged captures are not skipped by default.");
-   if(L("ImportSummaryLabel").Text.Length==0)throw new Exception("Import count summary is missing.");
+   var importSummary=L("ImportSummaryLabel");if((importSummary.Visibility==System.Windows.Visibility.Visible)!=(G("ImportGrid").Items.Count>0&&importSummary.Text.Length>0))throw new Exception("Import count summary should show only when the import table has files.");
   }
  }
 }

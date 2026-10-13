@@ -20,13 +20,15 @@ namespace AstroArchive {
   EditedProject EditedImageProject{get{return ActiveEditedImage==null?null:ActiveEditedImage.Project;}}
   MotionPreview editedMotion;PreviewViewport editedPreviewViewport;CancellationTokenSource editedPreviewCancel;int editedPreviewGeneration;PreviewData editedPreviewData;
   void InitializeEditedPreview(){
+   InitializeTargetInformation("Edited");
    editedPreviewViewport=new PreviewViewport((Grid)Window.FindName("EditedPreviewHost"),(Grid)Window.FindName("EditedPreviewStage"),(Image)Window.FindName("EditedPreviewImage"));InitializeEditedPreviewLayout();
    B("EditedOpenPreviewButton").Click+=(s,e)=>PreviewEditedImage();
   }
   void CancelEditedPreview(){if(editedMotion!=null){editedMotion.Dispose();editedMotion=null;}editedPreviewGeneration++;if(editedPreviewCancel!=null){editedPreviewCancel.Cancel();editedPreviewCancel.Dispose();editedPreviewCancel=null;}editedPreviewData=null;if(editedPreviewViewport!=null)editedPreviewViewport.SetImage(null,true);}
   async void LoadEditedPreview(bool reload=true,Func<string,CancellationToken,Frame,PreviewData> decode=null){
    if(metadataPreviewSuspended)return;
-   if(!editedReady)return;var image=ActiveEditedImage;if(image==null||repo==null){CancelEditedPreview();L("EditedPreviewName").Text="Select an edited image";L("EditedPreviewMessage").Text="Select an edited image.";L("EditedPreviewMessage").Visibility=Visibility.Visible;return;}
+   if(!editedReady)return;var image=ActiveEditedImage;if(image==null||repo==null){CancelEditedPreview();L("EditedPreviewName").Text="Select an edited image";L("EditedPreviewMessage").Text="Select an edited image.";L("EditedPreviewMessage").Visibility=Visibility.Visible;ShowTargetInformation("Edited");return;}
+   HideTargetInformation("Edited");
    if(editedMotion!=null){editedMotion.Dispose();editedMotion=null;}if(editedPreviewCancel!=null){editedPreviewCancel.Cancel();editedPreviewCancel.Dispose();}editedPreviewCancel=new CancellationTokenSource();var token=editedPreviewCancel.Token;int generation=++editedPreviewGeneration;var previous=reload||editedPreviewData==null?null:editedPreviewData.Copy();
    string path;try{path=repo.EditedPath(image.Project,image.RelativePath);}catch(Exception error){L("EditedPreviewMessage").Text=error.Message;L("EditedPreviewMessage").Visibility=Visibility.Visible;return;}
    if(reload){editedPreviewData=null;editedPreviewViewport.BeginLoading();}
@@ -36,7 +38,7 @@ namespace AstroArchive {
     var data=previous??await LoadPreviewSamples(path,null,null,image.Metadata.Object,token,current,null,decode);data.ApplyContext(new Frame{Target=image.Metadata.Object},path);
     if(!current()||token.IsCancellationRequested)return;editedPreviewData=data;bool firstPaint=true;
     await RenderProgressivePreview(data,mode,previous==null,token,current,(bitmap,provisional)=>{
-     editedPreviewViewport.SetImage(bitmap,reload&&firstPaint);firstPaint=false;L("EditedPreviewMessage").Visibility=Visibility.Collapsed;
+     editedPreviewViewport.SetImage(bitmap,reload&&firstPaint);firstPaint=false;UpdateEditedTargetOverlay();L("EditedPreviewMessage").Visibility=Visibility.Collapsed;
     });
    }catch(OperationCanceledException){}catch(Exception error){if(generation!=editedPreviewGeneration||Window.Dispatcher.HasShutdownStarted)return;if(((Image)Window.FindName("EditedPreviewImage")).Source==null)editedPreviewViewport.BeginLoading();L("EditedPreviewMessage").Text="Preview unavailable\n\n"+error.Message;L("EditedPreviewMessage").Visibility=Visibility.Visible;}
   }
@@ -62,7 +64,7 @@ namespace AstroArchive {
    if(editedFocusProject!=null&&focus!=null)editedSelection.Add(focus);RestoreTargetSelection("EditedGrid",focus);editedFocusProject=null;editedFocusPath=null;SelectOpeningRow("EditedGrid");LoadEditedPreview();
   }
   void FilterEditedImages(bool rebuildTargets=true){
-   if(!editedReady)return;if(Window.IsLoaded&&editedImages.Count>2000){ScheduleSearch("EditedSearchBox",true,true);return;}CancelSearch("EditedSearchBox");var selected=ActiveEditedImage;var query=FileSearch.Parse(T("EditedSearchBox").Text);ShowSearchError("EditedSearchBox",query);L("EditedSearchHint").Visibility=query.IsEmpty?Visibility.Visible:Visibility.Collapsed;
+   if(!editedReady)return;ApplyAnnotations(editedImages);if(Window.IsLoaded&&editedImages.Count>2000){ScheduleSearch("EditedSearchBox",true,true);return;}CancelSearch("EditedSearchBox");var selected=ActiveEditedImage;var query=FileSearch.Parse(T("EditedSearchBox").Text);ShowSearchError("EditedSearchBox",query);L("EditedSearchHint").Visibility=query.IsEmpty?Visibility.Visible:Visibility.Collapsed;
    string imageClass=Convert.ToString(C("EditedClassFilter").SelectedItem);var rows=editedImages.Where(i=>(imageClass=="All images"||i.Metadata.ImageClass==imageClass)&&query.Matches(EditedSearchDocument(i))).ToList();
    if(rebuildTargets){string target=EditedTargets.SelectedItem is TargetSummary?((TargetSummary)EditedTargets.SelectedItem).Name:"All targets";var summaries=TargetNavigation.Build(rows.Select(i=>new Frame{Target=i.Metadata.ImageClass=="Meteor"?"Meteor":i.Metadata.Object,Kind="Edited image"})).Select(t=>new EditedTargetSummary{Name=t.Name,Files=t.Files}).ToList();var view=new ListCollectionView(summaries);view.GroupDescriptions.Add(new PropertyGroupDescription("Group"));refreshingEditedTargets=true;try{EditedTargets.ItemsSource=view;EditedTargets.SelectedItem=summaries.FirstOrDefault(t=>t.Name==target)??summaries.First();}finally{refreshingEditedTargets=false;}}
    var active=EditedTargets.SelectedItem as TargetSummary;if(active!=null&&active.Name!="All targets")rows=rows.Where(i=>Catalog.CanonicalTarget(i.Metadata.ImageClass=="Meteor"?"Meteor":i.Metadata.Object)==active.Name).ToList();SetRows("EditedGrid",rows);RestoreEditedSelection(rows,selected);
@@ -74,7 +76,7 @@ namespace AstroArchive {
   }
   void OpenEditedFolder(){if(repo!=null&&EditedImageProject!=null)OpenFolder(Path.GetDirectoryName(repo.EditedPath(EditedImageProject,ActiveEditedImage.RelativePath)));}
   void OpenEditedFilters(){var menu=ThemedMenu();foreach(string imageClass in C("EditedClassFilter").Items){string choice=imageClass;var item=new MenuItem{Header=choice,IsCheckable=true,IsChecked=choice==Convert.ToString(C("EditedClassFilter").SelectedItem)};item.Click+=(s,e)=>C("EditedClassFilter").SelectedItem=choice;menu.Items.Add(item);}menu.PlacementTarget=B("EditedFiltersButton");menu.IsOpen=true;}
-  void ShowEditedDetails(){if(ActiveEditedImage!=null)ShowReport(ActiveEditedImage.Filename,ActiveEditedImage.Metadata.Details+(string.IsNullOrEmpty(ActiveEditedImage.MetadataProblem)?"":"\n\nMetadata could not be read: "+ActiveEditedImage.MetadataProblem));}
+  void ShowEditedDetails(){if(ActiveEditedImage==null)return;var personal=new List<string>();AnnotationFacts(new IAnnotated[]{ActiveEditedImage},(label,value)=>personal.Add(label+": "+value));ShowReport(ActiveEditedImage.Filename,(personal.Count>0?string.Join("\n",personal)+"\n\n":"")+ActiveEditedImage.Metadata.Details+(string.IsNullOrEmpty(ActiveEditedImage.MetadataProblem)?"":"\n\nMetadata could not be read: "+ActiveEditedImage.MetadataProblem));}
   void AddEditedImages(){
    if(repo==null||RepositoryOperationBlocked)return;var picker=new OpenFileDialog{Title="Add edited images",Multiselect=true,Filter="Supported images|*.fit;*.fits;*.fts;*.fit.gz;*.fits.gz;*.fts.gz;*.xisf;*.fz;*.ser;*.tif;*.tiff;*.png;*.jpg;*.jpeg;*.bmp;*.gif;*.avi;*.mp4;*.mov;*.m4v;*.wmv;*.mkv;*.dng;*.cr2;*.cr3;*.nef;*.arw;*.raf;*.orf;*.rw2|All files|*.*"};if(picker.ShowDialog(Window)!=true)return;
    pendingImportRecord=new ImportResumeRecord{Kind="EditedFiles",Title="Edited image import",Repository=repo.Root,Source=Path.GetDirectoryName(picker.FileNames[0]),EditedFiles=picker.FileNames};
@@ -83,7 +85,7 @@ namespace AstroArchive {
   void ImportEditedFolder(){
    if(repo==null||RepositoryOperationBlocked)return;
    var dialog=new FormWindow(Window,"Import edited images",650,390);AddImportPreferencesButton(dialog,true);dialog.Text("Import files from a folder",true);dialog.Text("SOURCE FOLDER");var source=new TextBox{MinWidth=200};var browse=new Button{Content="Browse",Margin=new Thickness(8,0,0,0),Padding=new Thickness(12,8,12,8)};var controls=new DockPanel();DockPanel.SetDock(browse,Dock.Right);controls.Children.Add(browse);controls.Children.Add(source);dialog.Add(controls);
-   browse.Click+=(s,e)=>{string selected=Folder("Choose a folder of existing edited images",source.Text);if(selected!=null)source.Text=selected;};var recursive=dialog.Check("Include subfolders",true);dialog.Text("Scan first, then review images before copying. Repository/database folders and files already archived are skipped. Source files are retained.");dialog.Accept("Scan folder",()=>{if(!Directory.Exists(source.Text.Trim())){MessageBox.Show(dialog.Window,"Choose an existing source folder.");return false;}return true;});if(!dialog.Show())return;
+   browse.Click+=(s,e)=>{string selected=Folder("Choose a folder of existing edited images",source.Text);if(selected!=null)source.Text=selected;};var recursive=dialog.Check("Include subfolders",true);dialog.Text("Scan first, then review images before copying. Repository/database folders and files already archived are skipped. Source files are retained.");dialog.Accept("Scan folder",()=>{if(!Directory.Exists(source.Text.Trim())){LocalizedMessage.Show(dialog.Window,"Choose an existing source folder.");return false;}return true;});if(!dialog.Show())return;
    string folder=source.Text.Trim();bool includeSubfolders=recursive.IsChecked==true;EditedImportPlan import=null;Run(ct=>{import=repo.ScanEditedFolder(folder,includeSubfolders,ct,Progress);return "";},done=>{var archive=repo;QueueActivityReview("Edited images ready to review",()=>{if(repo!=archive)throw new InvalidOperationException("The repository changed. Scan the edited folder again.");ReviewEditedFolder(import);});});
   }
   FormWindow EditedImportDialog(EditedImportPlan import,out DataGrid table){
@@ -94,7 +96,7 @@ namespace AstroArchive {
    table=EditedImportReviewTable(import);dialog.Add(table);
    if(import.Errors.Count>0)dialog.Add(new TextBox{Text=string.Join("\n",import.Errors),IsReadOnly=true,TextWrapping=TextWrapping.Wrap,MaxHeight=90,VerticalScrollBarVisibility=ScrollBarVisibility.Auto});
    if(!import.Images.Any(i=>i.CanInclude)){dialog.Text("No new readable images to import. Existing copies are retained.");dialog.CloseOnly();return dialog;}
-   var review=table;dialog.Accept("Import selected images",()=>{review.CommitEdit(DataGridEditingUnit.Cell,true);review.CommitEdit(DataGridEditingUnit.Row,true);if(!import.Images.Any(i=>i.Include)){MessageBox.Show(dialog.Window,"Select readable images to add.");return false;}if(import.Images.Any(i=>i.Include&&!i.CanInclude)){MessageBox.Show(dialog.Window,"Exclude duplicates and images with a reported problem before importing.");return false;}return true;});return dialog;
+   var review=table;dialog.Accept("Import selected images",()=>{review.CommitEdit(DataGridEditingUnit.Cell,true);review.CommitEdit(DataGridEditingUnit.Row,true);if(!import.Images.Any(i=>i.Include)){LocalizedMessage.Show(dialog.Window,"Select readable images to add.");return false;}if(import.Images.Any(i=>i.Include&&!i.CanInclude)){LocalizedMessage.Show(dialog.Window,"Exclude duplicates and images with a reported problem before importing.");return false;}return true;});return dialog;
   }
   void ReviewEditedFolder(EditedImportPlan import){
    DataGrid table;var dialog=EditedImportDialog(import,out table);if(!dialog.Show()){if(reviewingActivity!=null){reviewingActivity.NeedsReview=true;reviewingActivity.Status="Results kept for later review.";}return;}
@@ -111,7 +113,8 @@ namespace AstroArchive {
   void EditedImportComplete(string id,EditedImportResult result){RefreshEdited();L("StatusLabel").Text=result.Summary;L("EditedImportNoticeText").Text=result.Summary;((FrameworkElement)Window.FindName("EditedImportNotice")).Visibility=Visibility.Visible;if(result.Warnings.Count>0)ShowReport("Edited duplicate checks",result.Summary+"\n\nExisting files that could not be checked:\n"+string.Join("\n",result.Warnings));}
   void PreviewEditedImage(){
    if(repo==null||RepositoryOperationBlocked||EditedImageProject==null||ActiveEditedImage==null)return;string path=repo.EditedPath(EditedImageProject,ActiveEditedImage.RelativePath);if(MediaFiles.Motion(path)){new ImagePreviewWindow(Window,ActiveEditedImage.Filename,path).ShowDialog();return;}PreviewData data=null;byte[] pixels=null;
-   Run(ct=>{data=DecodeFullPreview(path,ct);data.ApplyContext(null,path);pixels=data.Render(ScientificPreview(path)?settings.PreviewStretch??"Auto per channel":"Linear",ct);return path;},image=>new ImagePreviewWindow(Window,Path.GetFileName(image),data.Width,data.Height,pixels).ShowDialog());
+   string target=ActiveEditedImage.Metadata==null?null:ActiveEditedImage.Metadata.Object;SkyGeometry sky=null;
+   Run(ct=>{data=DecodeFullPreview(path,ct);data.ApplyContext(null,path);pixels=data.Render(ScientificPreview(path)?settings.PreviewStretch??"Auto per channel":"Linear",ct);try{sky=HeaderSky(path);}catch(Exception){sky=null;}return path;},image=>{var window=new ImagePreviewWindow(Window,Path.GetFileName(image),data.Width,data.Height,pixels);bool flip=TargetOverlay.DisplayFlip(data.FlipY,sky,image.EndsWith(".xisf",StringComparison.OrdinalIgnoreCase)?"XISF":null);AttachTargets(window,()=>{var result=TargetOverlay.For(sky,target,flip);if(sky==null)result.Note="This image has no plate solution in its header";return result;});window.ShowDialog();});
   }
   void ShowEditedEditors(){
    ExportEditedTo();

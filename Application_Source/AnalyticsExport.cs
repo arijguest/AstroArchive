@@ -26,6 +26,7 @@ namespace AstroArchive {
    else if(mark.Kind=="polygon")context.DrawGeometry(Fill(mark),null,Polygon(mark.Points));
    else if(mark.Kind=="text")context.DrawText(Text(mark),TextOrigin(mark));
    else if(mark.Kind=="logo")context.DrawImage(logo,new Rect(mark.X,mark.Y,mark.Width,mark.Height));
+   else if(mark.Kind=="image"&&mark.Image is ImageSource)context.DrawImage((ImageSource)mark.Image,new Rect(mark.X,mark.Y,mark.Width,mark.Height));
   }
   internal static BitmapSource BrandLogo(){return Logo();}
   static void Draw(DrawingContext context,IList<AnalyticsPage> pages){

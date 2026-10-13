@@ -1,8 +1,8 @@
 # Processing in external software
 
-Select Repository files and choose **Export → Export to…**. The same action is
-available on the file context menu and in Edited. One destination chooser covers
-all eight applications. Unsupported choices are disabled and explain their format
+Select Repository files and choose **Export → Open in app…**. The same option is
+available on the file context menu and in Edited, and opens the Export window
+with **Open in app** chosen. One destination chooser covers all eight applications. Unsupported choices are disabled and explain their format
 requirements on hover. Applications are installed separately.
 
 Repository images receive verified working copies in Edited before being opened.
@@ -10,7 +10,7 @@ Already Edited images open from their existing working paths. Save processed
 outputs alongside the working copy, then refresh Edited. Acquisition subframes and
 recordings are copied to an export folder outside the repository. Choose subframes
 separately from finished stacks; combining a stack with its constituent subs would
-count data twice. Rejected/failed inputs remain available through **Export files…**.
+count data twice. Rejected/failed inputs remain available through **Export → Files**.
 
 ## Supported handoffs on Windows
 
@@ -28,7 +28,7 @@ count data twice. Rejected/failed inputs remain available through **Export files
 Format lists are deliberately conservative and are not complete lists of every
 receiving application's abilities. A file extension cannot establish codec,
 precision, Bayer or RAW-camera support. Export preserves original bytes. Use
-**Stacking folder… → More options** for explicit, supported scientific
+**Export → Stacking folder → More options** for explicit, supported scientific
 FITS conversion. Gzip/tile-compressed FITS are excluded from direct AstroWizard and
 GIMP image handoffs; create an uncompressed copy first.
 
@@ -49,7 +49,7 @@ Automatic detection checks Windows App Paths and uninstall install locations in
 both registry views, PATH, Program Files, Local AppData Programs, and common
 Desktop/Downloads application folders. Searches are bounded; renamed, deeply nested
 or relocated portable folders may require Browse. A configured path takes priority.
-If it is missing, or detection cannot find an app, Export to… asks for the GUI
+If it is missing, or detection cannot find an app, Open in app asks for the GUI
 executable before any copies are created. Earlier Siril/StackingWizard preferences
 are retained. Installers and known headless executable variants are refused.
 
@@ -68,25 +68,61 @@ completed working copies/folder and offers the location and app settings. A star
 process is not confirmation that the receiver has imported its documents; decoding
 and import errors remain visible in that app.
 
-The Export menu contains **Export to…**, **Export files…**, **Stacking folder…** and
-**Catalogue CSV**. Manual working copies are on the file context menu. Optional
-metadata and advanced stacking options expand under More options. Export completion
-keeps Open folder and Close.
+## The Export window
 
-In **Edited**, right-click **Export files…** to copy selected working images.
+**Export** opens one window for every export. Its header shows how many files are
+selected (or in view) and their targets. The left list chooses **Files**,
+**Stacking folder**, **Open in app**, **AstroBin CSV** or **Catalogue CSV**; each
+shows only its own settings. Folder exports share one destination at the bottom,
+with an optional new folder. The primary button names the action. Right-click
+**Export** items and the Export menu open the same window with the relevant option
+chosen; the Export button and Ctrl+E reopen the option used last. Manual working
+copies are on the file context menu. Optional metadata and advanced stacking
+options expand under More options. Export completion keeps Open folder and Close.
+
+In **Edited**, right-click **Export → Files…** to copy selected working images.
 Selection can span targets. Copies keep their format, are verified, and receive
 suffixes for filename collisions. **Delete files…** removes only selected Edited
 copies after confirmation; source originals and archived captures remain.
 
 ## Open an exported stack in Siril
 
-The Export files and Stacking folder popups offer **Open with… after export**
+The Files and Stacking folder options offer **Open with… after export**
 for a single eligible FITS stack. Choose **Siril** to open the verified exported
 copy, including any filename collision suffix, in its actual working folder.
 Subs-only exports and multiple stacks disable this choice. Conversion stays opt-in.
 Set the default export folder and Siril location in **Settings → Export**; select
 Siril under **Application locations**. Cancellation or an export failure prevents
 launch. A launch failure keeps the completed export and shows its folder.
+
+## AstroBin acquisition CSV
+
+**AstroBin CSV** builds the table AstroBin imports under an image's acquisition
+details, using its documented
+[CSV columns](https://welcome.astrobin.com/importing-acquisitions-from-csv).
+Preview it, copy it to the clipboard or save it without exporting images.
+**Stacking folder** adds `astrobin_acquisition.csv` and
+`astrobin_acquisition_notes.txt` by default (per target when several are exported);
+clear **Add AstroBin acquisition CSV** to omit them.
+
+- Values come from the archived originals' metadata, so details lost in processed
+  files are kept. Rows combine matching subs by date, equipment, filter, exposure,
+  binning, gain and ISO; sensorCooling is the rounded mean sensor temperature.
+- Calibration frames are never integration. Darks, flats, flat darks and bias count
+  the matching archive frames (or those copied by the stacking folder), each once.
+  A master counts the frames it records combining; otherwise the count stays blank.
+- Duplicate exposures (same file, or same camera at the same recorded instant) and
+  rejected files are excluded. A stack is skipped when subs from its session or date
+  are included; overlapping live-stack snapshots count once, using the largest.
+  A stack's duration is its recorded total divided by its recorded sub count.
+- Each target gets its own CSV, as each needs its own AstroBin image. Planetary
+  recordings use the video columns with their recorded frame counts.
+- Missing values are left blank and listed under **Check before uploading**: no
+  date, exposure, sub count, local start time, Bortle, SQM, seeing or filter ID is
+  estimated. AstroBin needs its numeric filter ID: paste the filter's AstroBin page
+  address or number under **AstroBin filter IDs**; IDs are remembered.
+- Files use UTF-8 without a byte-order mark, a header line and no spaces around
+  commas. Columns without values are omitted; number and duration are always present.
 
 ## Integration references
 

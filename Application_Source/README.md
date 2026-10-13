@@ -15,7 +15,7 @@ From the repository root:
 
 Output: `Application_Source/dist/AstroArchive.exe`. No Visual Studio, SDK or NuGet
 installation is required. Distribute the whole `dist` folder: the application
-needs `SMBLibrary.dll` beside the executable. Keep `ThirdParty` and the bundled
+needs `SMBLibrary.dll` and `TargetInfo.zip` beside the executable. Keep `ThirdParty` and the bundled
 licence/notice files with the application.
 
 Use [focused checks](../docs/DEVELOPMENT.md) for the changed feature.
@@ -35,3 +35,6 @@ see the [user guide](Quick_Start.txt) for report scoping and export options.
 [Application licence](../LICENSE) · [licensing scope](../LICENSING.md) ·
 [OpenNGC](Catalogue_Notice.md) · [GeoNames](City_Catalogue_Notice.md) ·
 [constellation figures](Sky_Catalogue_Notice.md) · [SMBLibrary](Remote/lib/README.md)
+
+The [target information pane](../docs/TARGET_INFORMATION.md) uses the bundled offline
+database projection and thumbnails when no files are selected.

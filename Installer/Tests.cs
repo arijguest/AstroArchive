@@ -31,6 +31,13 @@ class Tests {
    var record=Install("remote-library",package);foreach(var file in package.Files.Where(f=>f.Name.StartsWith("SMBLibrary")||f.Name=="GPL-3.0.txt")){string path=InstallCore.Managed(Root("remote-library"),record.ActiveDirectory+"/"+file.Name);Check(InstallCore.HashFile(path)==file.Hash,"Remote dependency not installed");File.WriteAllText(path,"damaged");}
    Install("remote-library",package);foreach(var file in package.Files)Check(InstallCore.HashFile(InstallCore.Managed(Root("remote-library"),record.ActiveDirectory+"/"+file.Name))==file.Hash,"Remote dependency not repaired");new InstallCore().Uninstall(Root("remote-library"));Check(!Directory.Exists(Path.Combine(Root("remote-library"),record.ActiveDirectory)),"Remote dependency remains after uninstall");
   });
+  Test("Offline target pack installs, repairs and uninstalls while retaining captures",()=>{
+   var package=Package();byte[] bytes=Encoding.UTF8.GetBytes("offline target information and credited images");package.Files.Add(new PayloadFile{Name="TargetInfo.zip",Bytes=bytes,Hash=InstallCore.Hash(bytes)});
+   string root=Root("target-info-pack");var record=Install("target-info-pack",package);string pack=InstallCore.Managed(root,record.ActiveDirectory+"/TargetInfo.zip");Check(File.ReadAllBytes(pack).SequenceEqual(bytes),"Target pack not installed");
+   Directory.CreateDirectory(Path.Combine(root,"repository"));string capture=Path.Combine(root,"repository","keep.fits");File.WriteAllText(capture,"original capture");
+   File.WriteAllText(pack,"damaged pack");Install("target-info-pack",package);Check(InstallCore.HashFile(pack)==InstallCore.Hash(bytes),"Target pack not repaired");
+   new InstallCore().Uninstall(root);Check(!File.Exists(pack)&&File.ReadAllText(capture)=="original capture","Target pack uninstall changed captures");
+  });
   Test("Same-version rerun repairs a missing or changed application",()=>{var r=Install("repair");string p=InstallCore.Managed(Root("repair"),r.ActiveDirectory+"\\AstroArchive.exe");File.WriteAllText(p,"damaged");Install("repair");Check(InstallCore.HashFile(p)==Package().Files[0].Hash,"Damaged executable not repaired");File.Delete(p);Install("repair");Check(File.Exists(p),"Missing executable not restored");});
   Test("Legacy example record is adopted without changing unrelated files",()=>{string root=Root("legacy"),dir=Path.Combine(root,"app-1.1.0");Directory.CreateDirectory(dir);foreach(string n in new[]{"AstroArchive.exe","Start.exe","Release_Notes.txt"})File.WriteAllText(Path.Combine(dir,n),"old");File.WriteAllText(Path.Combine(root,"Uninstall.exe"),"old setup");File.WriteAllText(Path.Combine(root,"install.json"),"{\"Product\":\"AstroArchive\",\"Version\":\"1.1.0\",\"Files\":[\"app-1.1.0\\\\AstroArchive.exe\",\"app-1.1.0\\\\Start.exe\",\"app-1.1.0\\\\Release_Notes.txt\"],\"Shortcuts\":[]}");File.WriteAllText(Path.Combine(root,"unrelated.txt"),"keep");var r=Install("legacy");Check(r.Files.Length==7&&r.ActiveDirectory=="app-1.2.0-r1"&&File.ReadAllText(Path.Combine(root,"unrelated.txt"))=="keep","Legacy migration incorrect");});
   Test("Newer application installer upgrades the existing installation",()=>{Install("upgrade");var r=Install("upgrade",Package("1.3.0"));Check(r.Version=="1.3.0"&&r.ActiveDirectory=="app-1.3.0-r1"&&r.Files.Length==8,"Upgrade not activated");});
@@ -53,6 +60,25 @@ class Tests {
   Test("Drive root and linked installation directories are rejected",()=>{Expect(()=>InstallCore.Root(Path.GetPathRoot(scratch)));if(Environment.OSVersion.Platform==PlatformID.Unix){Directory.CreateDirectory(Root("link-target"));Check(symlink(Root("link-target"),Root("linked"))==0,"Unable to create fixture link");Expect(()=>Install("linked"));Check(!Directory.EnumerateFileSystemEntries(Root("link-target")).Any(),"Linked target changed");}});
   Test("Version fields must agree between app and installer",()=>{var p=Package();p.PackageVersion="1.1.0.1";Expect(()=>Install("mismatched-version",p));});
   Test("Progress display failures cannot damage a completed installation",()=>{Install("progress-failure");var core=new InstallCore{Progress=s=>{throw new InvalidOperationException("Disposed progress window");}};core.Install(Root("progress-failure"),Package("1.3.0"),Setup);Check(InstallCore.Read(Root("progress-failure")).Version=="1.3.0"&&File.Exists(Path.Combine(Root("progress-failure"),"app-1.3.0-r1","AstroArchive.exe")),"Display failure rolled back a committed upgrade");});
+  Test("Shortcut property writes recover from transient sharing and lock violations",()=>{
+   foreach(int code in new[]{unchecked((int)0x80070020),unchecked((int)0x80070021)}){
+    int calls=0,waits=0;
+    ShellIdentity.RetryShortcutWrite(()=>{if(++calls<3)Marshal.ThrowExceptionForHR(code);},delay=>{Check(delay==250,"Unexpected retry interval");waits++;});
+    Check(calls==3&&waits==2,"Transient shortcut lock was not retried");
+   }
+  });
+  Test("Persistent shortcut locks stop after a bounded retry period",()=>{
+   int calls=0,waits=0;Exception failure=null;
+   try{ShellIdentity.RetryShortcutWrite(()=>{calls++;Marshal.ThrowExceptionForHR(unchecked((int)0x80070020));},delay=>waits++);}catch(Exception error){failure=error;}
+   Check(failure!=null&&failure.HResult==unchecked((int)0x80070020)&&calls==20&&waits==19,"Persistent lock was swallowed or retried indefinitely");
+  });
+  Test("Shortcut access and policy failures are reported without retries",()=>{
+   foreach(int code in new[]{unchecked((int)0x80070005),unchecked((int)0x800711c7)}){
+    int calls=0,waits=0;Exception failure=null;
+    try{ShellIdentity.RetryShortcutWrite(()=>{calls++;Marshal.ThrowExceptionForHR(code);},delay=>waits++);}catch(Exception error){failure=error;}
+    Check(failure!=null&&failure.HResult==code&&calls==1&&waits==0,"Permanent shortcut failure was hidden or retried");
+   }
+  });
   UpdateTests.Run(Test, scratch);ReleaseMonitorTests.Run(Test,scratch);LaunchSafetyTests.Run(Test,scratch);
   Test("Application Control failures explain the policy and preserve the rejected file",()=>{
    foreach(int code in new[]{1260,4551,577}){

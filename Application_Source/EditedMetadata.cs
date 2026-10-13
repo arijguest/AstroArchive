@@ -27,6 +27,15 @@ namespace AstroArchive {
     string value=match.Groups[1].Value.ToUpperInvariant().Replace("_"," ").Replace("-"," ");filters.Add(value=="HA"||value=="H ALPHA"||value=="HALPHA"?"Ha":value=="O3"?"OIII":value=="S2"?"SII":value=="LUMINANCE"||value=="LUM"?"L":value);
    }return string.Join(", ",filters.Distinct());
   }
+  public static EditedMetadata FromCapture(Frame frame,FitsHeader header){
+   var metadata=Read(frame.OriginalName,header);if(frame.Kind!="Stack")return metadata;
+   if(frame.StackCount>0)metadata.Subs=frame.StackCount;
+   MetadataFact fact;double seconds;
+   if(frame.Facts!=null&&frame.Facts.TryGetValue("SubExposure",out fact)&&fact!=null&&fact.Unit=="s"&&double.TryParse(fact.Value,NumberStyles.Float,CultureInfo.InvariantCulture,out seconds)&&Positive(seconds).HasValue)metadata.SubExposure=metadata.SubExposure??seconds;
+   if(frame.Facts!=null&&frame.Facts.TryGetValue("Exposure",out fact)&&fact!=null&&(fact.Source=="User"||fact.Source=="Header: explicit total exposure"||(fact.Source??"").StartsWith("Stack integration:")||(fact.Source??"").StartsWith("Seestar stacked filename:")))metadata.TotalExposure=frame.Exposure;
+   else if(frame.Facts!=null&&frame.Facts.TryGetValue("StackCount",out fact)&&fact!=null&&((fact.Source??"").StartsWith("DWARF stack integration:")||(fact.Source??"").StartsWith("Total exposure ÷ sub exposure:")))metadata.TotalExposure=metadata.TotalExposure??frame.Exposure;
+   return metadata;
+  }
   public static EditedMetadata Read(string filename,FitsHeader header,EditedMetadata original=null,EditedTargetMatcher matcher=null){
    header=header??new FitsHeader();string leaf=Path.GetFileName(filename??"");string hint=leaf+" "+header.Get("IMAGETYP","PROCTYPE","PROCESS");var notes=new List<string>();
    bool starless=Regex.IsMatch(hint,@"(?:^|[^a-z])star[_ -]?less(?=$|[^a-z])",RegexOptions.IgnoreCase),stars=Regex.IsMatch(hint,@"(?:^|[^a-z])(?:stars?[_ -]?only|stars?[_ -]?layer|stars)(?=$|[^a-z])",RegexOptions.IgnoreCase);
@@ -41,7 +50,7 @@ namespace AstroArchive {
     else if(evidence!=null){targetConflict=true;notes.Add(evidence);}
    }
    result.Filters=header.Get("FILTER","FILTERID","FILTNAME");if(string.IsNullOrEmpty(result.Filters)||result.Filters.Equals("Unknown",StringComparison.OrdinalIgnoreCase)){result.Filters=FilenameFilters(leaf);if(result.Filters.Length==0)result.Filters=FilenameFilters(filename);if(result.Filters.Length>0)notes.Add("Filters/channel labels from filename");}else notes.Add("Filter from image metadata");
-   result.Subs=Count(header.Number("NCOMBINE","STACKCNT","NSTACK","STACKNUM","NSUBS","SUBCOUNT"));result.SubExposure=Positive(header.Number("SUBEXP","SUBEXPT","EXPOSUB","EXP_SUB","SUBTIME"));result.TotalExposure=Positive(header.Number("TOTALEXP","TOTEXP","EXPTOTAL","INTTIME","INTEGRAT"));result.ReportedExposure=Positive(header.Number("EXPTIME","EXPOSURE","EXP_TIME"));
+   result.Subs=Count(header.Number(Classifier.StackCountKeys));result.SubExposure=Classifier.ExposureSeconds(header,Classifier.StackSubKeys);result.TotalExposure=Classifier.ExposureSeconds(header,Classifier.StackTotalKeys);result.ReportedExposure=Classifier.ExposureSeconds(header,"EXPTIME","EXPOSURE","EXP_TIME");
    string comment;header.Comments.TryGetValue("EXPTIME",out comment);if(result.ReportedExposure.HasValue&&comment!=null){if(Regex.IsMatch(comment,@"total|integrat",RegexOptions.IgnoreCase))result.TotalExposure=result.TotalExposure??result.ReportedExposure;else if(Regex.IsMatch(comment,@"per[ _-]?(sub|frame)|individual|single",RegexOptions.IgnoreCase))result.SubExposure=result.SubExposure??result.ReportedExposure;}
    if(result.Subs.HasValue||result.SubExposure.HasValue||result.TotalExposure.HasValue)notes.Add("Exposure/sub count from image metadata");
    int seestarCount;double seestarSeconds;

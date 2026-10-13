@@ -5,7 +5,8 @@ namespace AstroArchive {
  public sealed class ImportSummary {
   public int Total,Shown,Ready,Duplicates,Deleted,Rejected,Unreadable,TransferFailed,Flagged,NotScreened,SkippedFlagged;
   public long ReadyBytes;
-  public string Text {get{return Ready+" ready ("+ImportWorkflow.Size(ReadyBytes)+")  ·  "+Duplicates+" duplicates  ·  "+Deleted+" previously deleted\n"+Rejected+" telescope rejected/reference  ·  "+Unreadable+" file problems  ·  "+TransferFailed+" transfer failures  ·  "+NotScreened+" not screened";}}
+  // Only categories with files appear, so a clean scan does not list zero counts.
+  public string Text {get{var parts=new List<string>();if(Ready>0)parts.Add(Ready+" ready ("+ImportWorkflow.Size(ReadyBytes)+")");if(Duplicates>0)parts.Add(Duplicates+" duplicates");if(Deleted>0)parts.Add(Deleted+" previously deleted");if(Rejected>0)parts.Add(Rejected+" telescope rejected/reference");if(Unreadable>0)parts.Add(Unreadable+" file problems");if(TransferFailed>0)parts.Add(TransferFailed+" transfer failures");if(NotScreened>0)parts.Add(NotScreened+" not screened");return Shown==0?"":string.Join("  ·  ",parts);}}
  }
  public static class ImportWorkflow {
   public static string Size(long bytes){return bytes>=1073741824?(bytes/1073741824.0).ToString("0.##")+" GB":bytes>=1048576?(bytes/1048576.0).ToString("0.##")+" MB":bytes>=1024?(bytes/1024.0).ToString("0.##")+" KB":bytes+" bytes";}

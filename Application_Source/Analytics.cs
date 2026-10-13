@@ -17,6 +17,7 @@ namespace AstroArchive {
  public sealed class AnalyticsReport {
   public string Id,Title,Description,Unit,Style,Note;
   public List<AnalyticsValue> Values=new List<AnalyticsValue>();
+  public AnalyticsReport Copy(){var copy=(AnalyticsReport)MemberwiseClone();copy.Values=new List<AnalyticsValue>(Values);return copy;}
  }
  public sealed class AnalyticsSnapshot {
   public int Captures,Targets,UnknownExposure,UnknownDate,ExcludedRejected,ExcludedUndated;
@@ -24,6 +25,7 @@ namespace AstroArchive {
   public double RepositorySeconds;
   public double Seconds;public string Scope,DateRange;public DateTime GeneratedUtc;
   public List<AnalyticsReport> Reports;
+  public AnalyticsSnapshot Copy(){var copy=(AnalyticsSnapshot)MemberwiseClone();copy.Reports=Reports.Select(r=>r.Copy()).ToList();return copy;}
  }
  public static class ArchiveAnalytics {
   public static readonly string[] Titles={"Targets photographed","Imaging timeline","Time per target","Time per telescope","Filter mix","Exposure lengths"};

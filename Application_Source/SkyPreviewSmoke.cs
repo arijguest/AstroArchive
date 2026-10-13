@@ -58,7 +58,25 @@ namespace AstroArchive {
        var reset=B(prefix+"PreviewSkyResetButton");var resetBounds=reset.TransformToAncestor(host).TransformBounds(new Rect(reset.RenderSize));var sphereBounds=globe.TransformToAncestor(host).TransformBounds(globe.GlobeBounds);var panel=(Grid)Window.FindName(prefix+"PreviewSkyPanel");var panelBounds=panel.TransformToAncestor(host).TransformBounds(new Rect(panel.RenderSize));
        if(Math.Abs(sphereBounds.X+sphereBounds.Width/2-(panelBounds.X+panelBounds.Width/2))>1||Math.Abs(sphereBounds.Y+sphereBounds.Height/2-(panelBounds.Y+panelBounds.Height/2))>1||Math.Abs(sphereBounds.Width-(Math.Min(panel.ActualWidth,panel.ActualHeight)-36))>1)throw new Exception("Sky sphereBounds is not centred or maximised with slight padding");
        if(reset.BorderThickness!=new Thickness(0)||Math.Abs(resetBounds.Left-sphereBounds.Left)>1||Math.Abs(resetBounds.Bottom-sphereBounds.Bottom)>1||!(reset.Content is System.Windows.Shapes.Path))throw new Exception("Reset is not borderless with an oriented icon close to the sphereBounds edge");
+       double expectedReset=Math.Round(Math.Max(22,Math.Min(40,globe.HomeRadius*0.17)));if(Math.Abs(reset.Width-expectedReset)>0.5||Math.Abs(reset.Height-expectedReset)>0.5)throw new Exception("Reset does not scale with the sky map");
+       var savedSky=globe.Context;var eclipse=new Frame{Target="Sun",Kind="Light",Observed="2024-04-08T18:17:16Z",TimeSource="FITS UTC",Latitude=25.29,Longitude=-104.14};globe.SetContext(CaptureSky.Resolve(eclipse,null));PumpPopupLayout();globe.InvalidateVisual();PumpPopupLayout();
+       if(globe.Context.Eclipse==null||!globe.EclipseDrawn||!globe.SunDrawn||globe.EclipseBounds!=globe.SunBounds||globe.MoonDrawn)throw new Exception("Solar obscuration is not drawn on the Sun itself, or a separate Moon obscures it");globe.SetContext(savedSky);PumpPopupLayout();
    }finally{preview.SetImage(original,true);PumpPopupLayout();preview.Resize();PumpPopupLayout();}
+  }
+  // The globe, header glyph and Capture details must describe the same Moon.
+  void SmokeMoonContext(SkyGlobeView globe){
+   globe.ResetView();PumpPopupLayout();var moon=globe.Context.Moon;if(moon==null)throw new Exception("Timed capture lacks Moon context");
+   // The default view stays clean: the phase shows on the map and in Capture details only.
+   if(Window.FindName("PreviewMoonButton")!=null)throw new Exception("Moon indicator added to the default preview header");
+   if(moon.HasHorizon&&moon.Altitude<0){
+    var belowFacts=((Grid)Window.FindName("SkyFacts")).Children.OfType<TextBlock>().Select(t=>t.Text).ToList();
+    if(!belowFacts.Contains("Not out (below the horizon)")||((Grid)Window.FindName("SkyFacts")).Children.OfType<DockPanel>().Any())throw new Exception("Below-horizon Moon still shows illumination details");
+    return;
+   }
+   var icon=((Grid)Window.FindName("SkyFacts")).Children.OfType<DockPanel>().SelectMany(d=>d.Children.OfType<MoonPhaseIcon>()).FirstOrDefault();if(icon==null||Math.Abs(icon.Illumination-moon.Illumination)>1e-9||icon.Waxing!=moon.Waxing)throw new Exception("Capture details phase glyph disagrees with the map");
+   var facts=((Grid)Window.FindName("SkyFacts")).Children.OfType<FrameworkElement>().Select(e=>e is TextBlock?((TextBlock)e).Text:string.Join(" ",((Panel)e).Children.OfType<TextBlock>().Select(t=>t.Text))).ToList();
+   if(!facts.Contains("Moon")||!facts.Any(t=>t.Contains(moon.IlluminationText+" illuminated"))||!facts.Contains("Moon elevation")||!facts.Contains("Target elevation")||(globe.Context.Body=="Moon"?facts.Contains("Moon to target"):!facts.Contains("Moon to target")))throw new Exception("Capture details omit the Moon breakdown: "+string.Join(" | ",facts));
+   if(!globe.MoonDrawn||globe.MoonBounds.IsEmpty||globe.MoonBehindGlobe!=(globe.Context.Orientation.MapOfDate(moon.Topocentric).Dot(new SkyVector(Math.Sin(globe.Camera.Yaw*Math.PI/180)*Math.Cos(globe.Camera.Tilt*Math.PI/180),Math.Cos(globe.Camera.Yaw*Math.PI/180)*Math.Cos(globe.Camera.Tilt*Math.PI/180),Math.Sin(globe.Camera.Tilt*Math.PI/180)))<0))throw new Exception("Moon not drawn on the correct side of the globe");
   }
   public void SmokeCaptureSky(string output){
    double width=Window.Width,height=Window.Height;int scale=settings.TextScalePercent,page=((TabControl)Window.FindName("MainTabs")).SelectedIndex;string theme=settings.ThemeMode;int cases=0;
@@ -75,13 +93,15 @@ namespace AstroArchive {
      try{
       GoToPage(prefix.Length==0?0:2);
       foreach(string mode in new[]{"Dark","Light"})foreach(int textScale in new[]{100,150}){
-       settings.ThemeMode=mode;settings.TextScalePercent=textScale;ApplyAppearance();Window.Width=1180;Window.Height=1000;UpdateCaptureSky(prefix,frame);L(prefix+"PreviewMessage").Visibility=Visibility.Collapsed;preview.SetImage(image,true);PumpPopupLayout();preview.Resize();PumpPopupLayout();CheckSkyFit(prefix,preview);
+       settings.ThemeMode=mode;settings.TextScalePercent=textScale;ApplyAppearance();Window.Width=1180;Window.Height=1000;HideTargetInformation(prefix);UpdateCaptureSky(prefix,frame);L(prefix+"PreviewMessage").Visibility=Visibility.Collapsed;preview.SetImage(image,true);PumpPopupLayout();preview.Resize();PumpPopupLayout();CheckSkyFit(prefix,preview);
        var imageArea=stage.TransformToAncestor(host).TransformBounds(new Rect(stage.RenderSize));var full=CaptureSidebar(host,Path.Combine(output,"AstroArchive_Capture_Sky_"+prefix+mode+"_"+textScale+".png"));var pixels=new byte[full.PixelWidth*full.PixelHeight*4];full.CopyPixels(pixels,full.PixelWidth*4,0);
        for(int quadrant=0;quadrant<4;quadrant++){int x=(int)(imageArea.X+imageArea.Width*(quadrant%2==0?0.2:0.8)),y=(int)(imageArea.Y+imageArea.Height*(quadrant<2?0.2:0.8)),offset=(y*full.PixelWidth+x)*4;var expected=colours[quadrant];if(Math.Abs(pixels[offset+2]-expected[0])>12||Math.Abs(pixels[offset+1]-expected[1])>12||Math.Abs(pixels[offset]-expected[2])>12||pixels[offset+3]<250)throw new Exception("Sidebar image quadrant clipped: "+prefix+mode+textScale+" quadrant "+quadrant);}
        if(!globe.Context.HasHorizon)throw new Exception("Capture sky did not use frame time/site: "+prefix+mode+textScale+"; "+globe.Context.Evidence);int builds=globe.DrawingBuilds;globe.InvalidateVisual();PumpPopupLayout();if(globe.DrawingBuilds!=builds)throw new Exception("Unchanged sky rebuilt cached drawing");
        SmokeSkyNavigation(prefix,preview,frame);
-       foreach(string control in new[]{prefix+"PreviewDetailsButton",prefix+"OpenPreviewButton","StretchMode"}){var item=(FrameworkElement)Window.FindName(control);var bounds=item.TransformToAncestor(header).TransformBounds(new Rect(item.RenderSize));if(bounds.Right>header.ActualWidth+1||bounds.Left<0||string.IsNullOrEmpty(AutomationProperties.GetName(item)))throw new Exception("Preview header control clipped or unnamed: "+control);}
+       SmokeMoonContext(globe);
+       foreach(string control in new[]{prefix+"PreviewDetailsButton",prefix+"OpenPreviewButton","StellariumButton","TargetOverlayButton","StretchMode"}){var item=(FrameworkElement)Window.FindName(control);var bounds=item.TransformToAncestor(header).TransformBounds(new Rect(item.RenderSize));if(bounds.Right>header.ActualWidth+1||bounds.Left<0||string.IsNullOrEmpty(AutomationProperties.GetName(item)))throw new Exception("Preview header control clipped or unnamed: "+control);}
        if(object.Equals(B(prefix+"OpenPreviewButton").Content,"Open image…"))throw new Exception("Open image button is not an icon");
+       if(prefix.Length==0)SmokeTargetOverlay(preview,output,mode+textScale);
        L(prefix+"PreviewInfo").Text="720 × 1280 pixels";Window.Activate();B(prefix+"PreviewDetailsButton").Focus();B(prefix+"PreviewDetailsButton").RaiseEvent(new RoutedEventArgs(Button.ClickEvent));PumpPopupLayout();if(!popup.IsOpen||!L(prefix+"PreviewInfo").IsVisible)throw new Exception("Details icon did not expose capture information");CheckSkyFit(prefix,preview);SavePopup((FrameworkElement)popup.Child,Path.Combine(output,"AstroArchive_Capture_Details_"+prefix+mode+textScale+".png"));
        popup.Child.RaiseEvent(new KeyEventArgs(Keyboard.PrimaryDevice,PresentationSource.FromVisual((Visual)popup.Child),0,Key.Escape){RoutedEvent=Keyboard.PreviewKeyDownEvent});PumpPopupLayout();if(popup.IsOpen)throw new Exception("Escape did not close capture details");
        Window.Height=650;PumpPopupLayout();preview.Resize();PumpPopupLayout();CheckSkyFit(prefix,preview);if(panel.Visibility!=Visibility.Collapsed)throw new Exception("Height-limited image still reserves a sky map");cases+=2;
@@ -107,10 +127,11 @@ namespace AstroArchive {
       var fitted=stage.RenderSize;UpdateCaptureSky(prefix,below);PumpPopupLayout();if(panel.IsVisible||stage.RenderSize!=fitted)throw new Exception("Below-horizon map was not hidden or changed image fit");
       UpdateCaptureSky(prefix,frame);PumpPopupLayout();
       frame.Dec=-60;frame.RA=160;frame.Latitude=-33.9;frame.Longitude=151.2;UpdateCaptureSky(prefix,frame);PumpPopupLayout();if(!globe.Context.Evidence.Contains("Southern celestial sky"))throw new Exception("Southern capture hemisphere lost");frame.ObservedUtc=null;UpdateCaptureSky(prefix,frame);PumpPopupLayout();if(globe.Context.HasHorizon||globe.CardinalLabels.Count!=0)throw new Exception("Missing capture clock produced a horizon or compass directions");
+      if(globe.Context.Moon!=null||globe.MoonDrawn||((Grid)Window.FindName("SkyFacts")).Children.OfType<FrameworkElement>().Any(e=>e is TextBlock&&((TextBlock)e).Text=="Moon"))throw new Exception("Missing capture clock produced a Moon");
      }finally{popup.IsOpen=false;preview.SetImage(original,true);UpdateCaptureSky(prefix,null);}
     }
    }finally{foreach(var entry in summaryVisibility)entry.Key.BannerDismissed=entry.Value;RenderProcessSummaries();settings.ThemeMode=theme;settings.TextScalePercent=scale;ApplyAppearance();Window.Width=width;Window.Height=height;GoToPage(page);UpdateCaptureSky("",previewFrame);PumpPopupLayout();}
-   File.WriteAllText(Path.Combine(output,"capture-sky-smoke.txt"),"PASS: "+cases+" Repository layouts in light/dark and 100/150% text; maximum image fit, adaptive/hidden sky, image quadrant pixels, adaptive unobscured compass labels and cached drawing, orbit without editing captures, routed scroll/keyboard gestures, view retention/reset, accessible bottom-left reset without added panel height, header icons, details popup/Escape, aspect changes and hemisphere/clock fallback.");
+   File.WriteAllText(Path.Combine(output,"capture-sky-smoke.txt"),"PASS: "+cases+" Repository layouts in light/dark and 100/150% text; maximum image fit, adaptive/hidden sky, image quadrant pixels, adaptive unobscured compass labels and cached drawing, orbit without editing captures, routed scroll/keyboard gestures, view retention/reset, accessible bottom-left reset without added panel height, header icons, Moon on the map with Sky at capture details, details popup/Escape, aspect changes and hemisphere/clock fallback.");
   }
  }
 }

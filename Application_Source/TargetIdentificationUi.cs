@@ -8,7 +8,7 @@ using System.Windows.Controls;
 using System.Windows.Data;
 namespace AstroArchive {
  public partial class MainUi {
-  volatile IdentificationProgress identificationProgress;
+  volatile IdentificationProgress identificationProgress;readonly EtaEstimate identificationEta=new EtaEstimate();
   void ShowTargetReviewWhenReady(Action review){if(!closing)QueueActivityReview("Target identification results",review);}
   void IdentificationStage(IdentificationProgress value){identificationProgress=value;var metrics=activeMetrics;if(metrics!=null){metrics.Stage=value.Stage;metrics.UpdateLegacy(value.Completed,value.Total,value.Detail);}}
   SolveResult SolveIdentification(Frame sample,bool imported,CancellationToken ct,Action<string> progress){
@@ -32,7 +32,7 @@ namespace AstroArchive {
    var chosen=jobs.Where(j=>j.Solved&&j.Include).ToList();int updated=0;var errors=new List<string>();
    cancellationMessage="Identification canceled. Metadata already applied is retained.";
    Run(ct=>{int done=0,total=chosen.Sum(j=>j.Frames.Count);foreach(var job in chosen)foreach(var original in job.Frames){ct.ThrowIfCancellationRequested();IdentificationStage(new IdentificationProgress{Completed=done,Total=total,Metadata=true,Stage="Applying target metadata",Detail=original.OriginalName+"\n"+Catalog.Label(job.Target)+" · "+job.Scope});try{if(!PendingImport(original,imported))repo.ValidateCapture(original,ct);else if(original.SourceStamp!=null&&!original.SourceStamp.ContentSame(FileStamp.Read(original.SourcePath)))throw new IOException("Source changed since identification. Scan again.");var frame=TargetSolving.Apply(job,original,job.Target);StoreIdentification(original,frame,imported,ct);updated++;}catch(OperationCanceledException){throw;}catch(Exception error){errors.Add(original.OriginalName+": "+error.Message);}done++;}IdentificationStage(new IdentificationProgress{Completed=done,Total=total,Metadata=true,Stage="Saving archive index",Detail=updated+" captures updated"});if(!imported||chosen.Any(j=>j.Frames.Any(f=>!PendingImport(f,imported))))repo.Checkpoint(ct);return "";},done=>{
-    if(imported)FilterImports();L("StatusLabel").Text=(named+updated)+" captures identified · "+jobs.Count(j=>j.Solved)+" fields solved · "+jobs.Count(j=>!j.Solved)+" failed";
+    RefreshTargetOverlays(true);if(imported)FilterImports();L("StatusLabel").Text=(named+updated)+" captures identified · "+jobs.Count(j=>j.Solved)+" fields solved · "+jobs.Count(j=>!j.Solved)+" failed";
     if(errors.Count>0||jobs.Any(j=>!j.Solved))ShowReport("Target identification report",IdentificationReport(jobs)+(errors.Count==0?"":"\n\nMetadata not applied:\n"+string.Join("\n",errors)));
    });
   }
@@ -51,7 +51,7 @@ namespace AstroArchive {
    table.Columns.Add(new DataGridTextColumn{Header="Match / failure",Binding=new Binding("Match"),IsReadOnly=true,Width=new DataGridLength(1.4,DataGridLengthUnitType.Star)});
    var rowStyle=new Style(typeof(DataGridRow));rowStyle.Setters.Add(new Setter(FrameworkElement.ToolTipProperty,new Binding("Centre")));table.RowStyle=rowStyle;dialog.Add(table);
    dialog.Button("Search target for selected row…",()=>{table.CommitEdit(DataGridEditingUnit.Cell,true);table.CommitEdit(DataGridEditingUnit.Row,true);var job=table.SelectedItem as TargetSolveJob;if(job==null||!job.Solved)return;string target=ChooseTarget(job.Result,job.Target);if(target!=null){job.Target=target;job.Include=true;table.Items.Refresh();}});
-   dialog.Accept("Apply matches",()=>{table.CommitEdit(DataGridEditingUnit.Cell,true);table.CommitEdit(DataGridEditingUnit.Row,true);var invalid=jobs.FirstOrDefault(j=>j.Include&&(!j.Solved||Catalog.IsAmbiguous(Catalog.Normalize(j.Target))));if(invalid!=null){MessageBox.Show(dialog.Window,"Choose a target for each checked, successfully solved row. Failed rows must remain unchecked.");return false;}return true;});return dialog;
+   dialog.Accept("Apply matches",()=>{table.CommitEdit(DataGridEditingUnit.Cell,true);table.CommitEdit(DataGridEditingUnit.Row,true);var invalid=jobs.FirstOrDefault(j=>j.Include&&(!j.Solved||Catalog.IsAmbiguous(Catalog.Normalize(j.Target))));if(invalid!=null){LocalizedMessage.Show(dialog.Window,"Choose a target for each checked, successfully solved row. Failed rows must remain unchecked.");return false;}return true;});return dialog;
   }
   SolveResult SolveAutomaticFrame(Frame frame,Settings config,CancellationToken token,Action<string> progress,PipelineMetrics metrics){
    using(var stage=metrics.Begin("Target identification",frame.OriginalName)){var result=repo.CachedSolve(frame,config,token,progress,n=>stage.Bytes(n));stage.Complete();return result;}

@@ -47,7 +47,13 @@ namespace AstroArchive {
                     if(root.Items.OfType<MenuItem>().Any(item=>new[]{"Browse repository","Choose repository folder…","Open repository in Explorer","Selected files"}.Contains(Convert.ToString(item.Header))))throw new Exception("Redundant repository navigation remains.");
                     if(!root.Items.OfType<MenuItem>().Any(item=>Convert.ToString(item.Header)=="Filters…"))throw new Exception("Direct filter access is missing.");
                     var analytics=root.Items.OfType<MenuItem>().SingleOrDefault(item=>Convert.ToString(item.Header)=="Analytics");
-                    if(analytics==null||analytics.Items.OfType<MenuItem>().Count()!=7)throw new Exception("Analytics navigation is missing charts or Export all.");
+                    if(analytics==null||analytics.Items.Count!=0)throw new Exception("Analytics navigation does not open its pane directly.");
+                    Func<MenuItem,string,MenuItem> menuChild=(parent,header)=>parent.Items.OfType<MenuItem>().SingleOrDefault(item=>Convert.ToString(item.Header)==header);
+                    var cleanUp=menuChild(root,"Clean up");var maintenance=menuChild(root,"Maintenance");
+                    if(cleanUp==null||menuChild(cleanUp,"Delete archive data…")==null||maintenance==null||menuChild(maintenance,"Delete archive data…")!=null||menuChild(root,"Diagnostics")!=null||menuChild(root,"Last operation…")==null)throw new Exception("Repository menu does not keep permanent deletions apart from maintenance.");
+                    var importMenu=new MenuItem();BuildImportNavigation(importMenu);var importHeaders=importMenu.Items.OfType<MenuItem>().Select(item=>Convert.ToString(item.Header)).ToList();
+                    if(importHeaders.Count!=importHeaders.Distinct().Count()||menuChild(importMenu,"Reports")==null||menuChild(importMenu,"Telescopes")==null||menuChild(importMenu,"Connected telescopes")!=null||menuChild(importMenu,"Full rescan")==null||(remoteSessions.Count==0&&menuChild(importMenu,"Live import underway…")!=null))throw new Exception("Import menu repeats items or misses its groups: "+string.Join(", ",importHeaders));
+                    if(((TabControl)Window.FindName("MainTabs")).SelectedIndex!=2){var exportMenu=new MenuItem();BuildExportNavigation(exportMenu);var catalogue=menuChild(exportMenu,"Catalogue CSV…");if(catalogue==null||catalogue.Items.Count!=0)throw new Exception("Catalogue CSV should open Export directly.");}
                     root.IsSubmenuOpen = false;
                     PumpPopupLayout();
                     ShowFilters(false);PumpPopupLayout();

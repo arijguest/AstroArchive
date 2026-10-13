@@ -1,0 +1,10 @@
+{
+  "cities": 236003,
+  "bytes": 756870,
+  "source_hashes": {
+    "cities500.zip": "0254566d8cda847ffea03f61e959e72713b77f1de641883fe024a703283463c4",
+    "windowsZones.xml": "9cf3db6a31fb382fee21b70be6feba1e82766b0fcd06e6261fb7936a73e537ff",
+    "timezone.xml": "54ce7d9f1d385101e24356df7d48ae62cf2acc4421378da60a4007d2488c1aad"
+  },
+  "output_sha256": "87835d155e18ce738a02adfd134493c3c14a77947888114658490536249763d6"
+}

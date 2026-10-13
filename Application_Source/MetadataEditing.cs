@@ -55,14 +55,22 @@ namespace AstroArchive {
    new MetadataEditField("Notes","Notes",2)
   };
   public readonly List<MetadataEditValue> Values;
+  public bool CaptureSiteChanged{get;private set;}
+  public ObservingCity CaptureCity{get;private set;}
+  public void SetCaptureCity(ObservingCity city){
+   if(city!=null&&!ObservingCities.ValidCoordinates(city.Latitude,city.Longitude))throw new ArgumentException("Choose a valid town or city.");
+   CaptureCity=city;CaptureSiteChanged=true;
+  }
+  public void ResetCaptureSite(){CaptureCity=null;CaptureSiteChanged=false;}
   public MetadataEditing(IEnumerable<Frame> frames){var selection=frames.ToList();if(selection.Count==0)throw new ArgumentException("Select at least one file.");Values=Fields.Select(f=>new MetadataEditValue(f,selection)).ToList();}
   public MetadataEditValue this[string key]{get{return Values.Single(v=>v.Field.Key==key);}}
-  public MetadataPatch Patch(){return new MetadataPatch(Values.Where(v=>v.Changed).ToDictionary(v=>v.Field.Key,v=>v.Text.Trim()));}
+  public MetadataPatch Patch(){return new MetadataPatch(Values.Where(v=>v.Changed).ToDictionary(v=>v.Field.Key,v=>v.Text.Trim()),CaptureSiteChanged,CaptureCity);}
  }
  public sealed class MetadataPatch {
   readonly Dictionary<string,string> changes;
-  public int Count{get{return changes.Count;}}
-  public MetadataPatch(IDictionary<string,string> values){changes=new Dictionary<string,string>(values);foreach(string key in changes.Keys)if(!MetadataEditing.Fields.Any(f=>f.Key==key))throw new ArgumentException("Unsupported metadata field: "+key);}
+  readonly bool captureSiteChanged;readonly ObservingCity captureCity;
+  public int Count{get{return changes.Count+(captureSiteChanged?1:0);}}
+  public MetadataPatch(IDictionary<string,string> values,bool captureSiteChanged=false,ObservingCity captureCity=null){this.captureSiteChanged=captureSiteChanged;this.captureCity=captureCity;changes=new Dictionary<string,string>(values);foreach(string key in changes.Keys)if(!MetadataEditing.Fields.Any(f=>f.Key==key))throw new ArgumentException("Unsupported metadata field: "+key);}
   public string Validate(){
    foreach(var change in changes){
     if(MetadataEditing.Numeric.Contains(change.Key)){double number;if(!double.TryParse(change.Value,NumberStyles.Float,CultureInfo.InvariantCulture,out number)||double.IsNaN(number)||double.IsInfinity(number))return Label(change.Key)+": use a finite decimal number with a dot.";}
@@ -94,6 +102,7 @@ namespace AstroArchive {
      item.ObservedUtc=TimeZoneInfo.ConvertTimeToUtc(local,timezone).ToString("o");item.TimeSource="User timezone";facts.Add("ObservedUtc");facts.Add("TimeSource");
     }
    }
+   if(captureSiteChanged){CaptureSite.Apply(item,captureCity);foreach(string key in new[]{"CaptureCityId","CaptureCity","CaptureLatitude","CaptureLongitude"})facts.Add(key);}
    foreach(string key in facts)Assets.UserFact(item,key);
    if(facts.Contains("Gain"))item.Facts["Gain"].Unit=item.GainUnit;
    if(changes.ContainsKey("Target")&&!changes.ContainsKey("Camera"))CameraDetection.DefaultForTarget(item);

@@ -10,6 +10,7 @@ namespace AstroArchive {
  public sealed class MetadataEditor {
   public readonly FormWindow Form;public readonly MetadataEditing Model;public readonly CheckBox Sessions;
   public readonly Dictionary<string,Control> Inputs=new Dictionary<string,Control>();
+  public readonly TextBox CaptureTown;
   readonly List<Action> resets=new List<Action>();readonly TextBlock summary;readonly int selectedCount,sessionCount;
   static readonly Dictionary<string,string> FieldHelp=new Dictionary<string,string>{
    {"Telescope","Unique ID for this physical telescope, separate from its model."},
@@ -23,7 +24,7 @@ namespace AstroArchive {
    {"Bayer","Sensor colour-filter pattern, such as RGGB. Leave unknown patterns unassigned."},
    {"GainUnit","Unit of the recorded gain, such as dB or camera units."}
   };
-  public MetadataEditor(Window owner,List<Frame> selected,int? sessionFileCount=null){
+  public MetadataEditor(Window owner,List<Frame> selected,int? sessionFileCount=null,Settings settings=null){
    selectedCount=selected.Count;sessionCount=sessionFileCount??selectedCount;Model=new MetadataEditing(selected);
    Form=new FormWindow(owner,"Edit metadata",780,740);
    Form.Text(selected.Count==1?selected[0].OriginalName:selected.Count+" selected files",true);
@@ -31,10 +32,18 @@ namespace AstroArchive {
    Form.Text("Existing values are filled in. Mixed fields keep each file’s value until you enter a replacement. Blank fields keep existing values.");
    summary=new TextBlock{TextWrapping=TextWrapping.Wrap,Margin=new Thickness(0,0,0,8)};Theme.Bind(summary,TextBlock.ForegroundProperty,"Muted");Form.Add(summary);
    Sessions=Form.Check("Apply changes to entire selected sessions",false);Sessions.Checked+=(s,e)=>UpdateSummary();Sessions.Unchecked+=(s,e)=>UpdateSummary();
-   Form.Button("Reset changes",()=>{foreach(var reset in resets)reset();UpdateSummary();});
+   Form.Button("Reset changes",()=>{foreach(var reset in resets)reset();Model.ResetCaptureSite();UpdateSummary();});
    Form.Tabs("Capture","Equipment","Processing","Current metadata");
    for(int tab=0;tab<3;tab++){
-    Form.Tab(tab);var grid=new Grid();grid.ColumnDefinitions.Add(new ColumnDefinition());grid.ColumnDefinitions.Add(new ColumnDefinition());Form.Add(grid);
+    Form.Tab(tab);
+    if(tab==0){
+     Form.Text("Capture town / city",true);var sites=selected.Select(f=>CaptureSite.Describe(f,settings)).Distinct().ToList();string initial=sites.Count==1?sites[0]:"Mixed";
+     CaptureTown=Form.Input("Town / city",initial);CaptureTown.IsReadOnly=true;CaptureTown.Name="MetadataCaptureTown";resets.Add(()=>CaptureTown.Text=initial);
+     Form.Text("A chosen town or city replaces the recorded capture location. Use default location to return to file metadata, then the observing location in Settings. Changes are applied when you save metadata.");
+     Form.Button("Choose town / city…",()=>{var townPicker=new CityPicker(Form.Window,Model.CaptureCity==null?selected.Select(f=>f.CaptureCity).FirstOrDefault(c=>!string.IsNullOrEmpty(c)):Model.CaptureCity.Label);try{if(townPicker.Show()){Model.SetCaptureCity(townPicker.SelectedCity);CaptureTown.Text=townPicker.SelectedCity.Label;UpdateSummary();}}finally{townPicker.Dispose();}});
+     Form.Button("Use default location",()=>{Model.SetCaptureCity(null);CaptureTown.Text="Default location";UpdateSummary();});
+    }
+    var grid=new Grid();grid.ColumnDefinitions.Add(new ColumnDefinition());grid.ColumnDefinitions.Add(new ColumnDefinition());Form.Add(grid);
     var panels=new List<FrameworkElement>();
     foreach(var value in Model.Values.Where(v=>v.Field.Tab==tab)){var panel=Field(value,selected);panels.Add(panel);grid.Children.Add(panel);}
     Action arrange=()=>{bool pair=grid.ActualWidth>=570*owner.FontSize/14;int columns=pair?2:1;grid.RowDefinitions.Clear();for(int row=0;row<(panels.Count+columns-1)/columns;row++)grid.RowDefinitions.Add(new RowDefinition{Height=GridLength.Auto});for(int i=0;i<panels.Count;i++){Grid.SetRow(panels[i],i/columns);Grid.SetColumn(panels[i],i%columns);Grid.SetColumnSpan(panels[i],pair?1:2);panels[i].Margin=new Thickness(0,0,pair&&i%2==0?16:0,10);}};
@@ -46,7 +55,7 @@ namespace AstroArchive {
    foreach(string name in new[]{"Field","Value","Source"}){var style=new Style(typeof(TextBlock));style.Setters.Add(new Setter(FrameworkElement.ToolTipProperty,new System.Windows.Data.Binding(name)));style.Setters.Add(new Setter(UiHelp.OnlyWhenTruncatedProperty,true));details.Columns.Add(new DataGridTextColumn{Header=name,Binding=new System.Windows.Data.Binding(name),ElementStyle=style,Width=new DataGridLength(name=="Value"?2:1,DataGridLengthUnitType.Star)});}
    details.ItemsSource=MetadataDetail.For(selected[0]);picker.SelectionChanged+=(s,e)=>{if(picker.SelectedIndex>=0)details.ItemsSource=MetadataDetail.For(selected[picker.SelectedIndex]);};Form.Add(details);
    Form.SelectTab(0);UpdateSummary();
-   Form.Accept("Save metadata",()=>{string error=Model.Patch().Validate();if(error==null)return true;MessageBox.Show(Form.Window,error,"Check metadata",MessageBoxButton.OK,MessageBoxImage.Information);return false;});
+   Form.Accept("Save metadata",()=>{string error=Model.Patch().Validate();if(error==null)return true;LocalizedMessage.Show(Form.Window,error,"Check metadata",MessageBoxButton.OK,MessageBoxImage.Information);return false;});
   }
   FrameworkElement Field(MetadataEditValue value,List<Frame> selected){
    var panel=new StackPanel();var caption=new TextBlock{Text=value.Field.Label,TextWrapping=TextWrapping.Wrap,Margin=new Thickness(0,8,0,5)};caption.SetResourceReference(TextBlock.FontSizeProperty,"UiFontBody");panel.Children.Add(caption);
@@ -69,7 +78,7 @@ namespace AstroArchive {
    if(hint.Length>0){var label=new TextBlock{Text=hint,TextTrimming=TextTrimming.CharacterEllipsis,Margin=new Thickness(0,4,0,0)};Theme.Bind(label,TextBlock.ForegroundProperty,"Muted");if(value.Mixed)UiHelp.Hint(label,value.Values.Length+" different values. See Current metadata.");panel.Children.Add(label);}
    return panel;
   }
-  void UpdateSummary(){if(summary==null)return;var changes=Model.Values.Where(v=>v.Changed).ToList();int count=changes.Count;summary.Text=(count==0?"No changes yet":count+" changed field"+(count==1?"":"s"))+" · "+(Sessions.IsChecked==true?sessionCount+" files in the selected sessions":selectedCount+" selected file"+(selectedCount==1?"":"s"))+"\n"+string.Join(", ",changes.Select(v=>v.Field.Label));}
+  void UpdateSummary(){if(summary==null)return;var changes=Model.Values.Where(v=>v.Changed).ToList();int count=changes.Count+(Model.CaptureSiteChanged?1:0);summary.Text=(count==0?"No changes yet":count+" changed field"+(count==1?"":"s"))+" · "+(Sessions.IsChecked==true?sessionCount+" files in the selected sessions":selectedCount+" selected file"+(selectedCount==1?"":"s"))+"\n"+string.Join(", ",changes.Select(v=>v.Field.Label).Concat(Model.CaptureSiteChanged?new[]{"Capture town / city"}:new string[0]));}
  }
  public partial class MainUi {
   bool metadataPreviewSuspended;
@@ -89,7 +98,7 @@ namespace AstroArchive {
    if(repo==null||RepositoryOperationBlocked||metadataPreviewSuspended||SearchBlocked(imported?"ImportSearchBox":"SearchBox"))return;var selected=(selection??Context(imported)).ToList();if(selected.Count==0)return;var repository=repo;
    try{
     await SuspendMetadataPreviews();if(closing||repo!=repository||RepositoryOperationBlocked)return;
-    var sessionRows=MetadataSessionRows(selected,imported);var editor=new MetadataEditor(Window,selected,sessionRows.Count);if(!editor.Form.Show())return;
+    var sessionRows=MetadataSessionRows(selected,imported);var editor=new MetadataEditor(Window,selected,sessionRows.Count,settings);if(!editor.Form.Show())return;
     MetadataPatch patch=editor.Model.Patch();if(patch.Count==0){L("StatusLabel").Text="No metadata changes.";return;}
     var items=selected;
     if(editor.Sessions.IsChecked==true)items=sessionRows;
@@ -98,7 +107,7 @@ namespace AstroArchive {
      var updates=new List<Tuple<Frame,Frame>>();foreach(var original in items){ct.ThrowIfCancellationRequested();updates.Add(Tuple.Create(original,patch.Apply(original)));}
      foreach(var update in updates){ct.ThrowIfCancellationRequested();if(!PendingImport(update.Item1,imported))repo.Refile(update.Item2,ct);if(imported){int row=plan.Frames.IndexOf(update.Item1);if(row>=0)plan.Frames[row]=update.Item2;}}
      return items.Count+" captures updated · "+patch.Count+" changed fields.";
-    },message=>{if(imported)FilterImports();L("StatusLabel").Text=message;});
+    },message=>{if(imported)FilterImports();RefreshSkyPreviews();L("StatusLabel").Text=message;});
    }finally{ResumeMetadataPreviews();}
   }
   List<Frame> MetadataSessionRows(List<Frame> selected,bool imported){var ids=new HashSet<string>(selected.Where(f=>!string.IsNullOrEmpty(f.Session)).Select(f=>f.Session));return (imported?plan.Frames:all).Where(f=>(ids.Contains(f.Session)||selected.Contains(f))&&(!imported||f.Status!="Deleted")).ToList();}

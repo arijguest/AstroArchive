@@ -22,7 +22,7 @@ namespace AstroArchive {
    d.Fields["device"]=f.Telescope+" "+f.InstrumentText+" "+f.TelescopeModel+" "+f.MakeText+" "+f.Model;d.Fields["camera"]=f.Camera+" "+f.CameraModel+" "+f.CameraId;
    d.Fields["filter"]=f.Filter;d.Fields["type"]=f.Kind;d.Fields["format"]=f.Format;d.Fields["date"]=f.AcquisitionDate+" "+f.AcquisitionDateLabel+" "+f.Night+" "+f.Observed;
    d.Fields["mount"]=f.MountText;d.Fields["notes"]=f.Notes;d.Fields["status"]=f.Status;d.Fields["review"]=f.ReviewText+" "+f.ReviewCategory+" "+f.ReviewReason;
-   d.Fields["session"]=f.Session+" "+f.SessionKey;d.Fields["hash"]=f.Hash;
+   d.Fields["session"]=f.Session+" "+f.SessionKey;d.Fields["hash"]=f.Hash;d.Fields["tag"]=f.TagsText;d.Fields["note"]=f.UserNote;
    d.Numbers["exposure"]=CaptureFilters.Number(f,"Exposure");d.Numbers["gain"]=CaptureFilters.Number(f,"Gain");d.Numbers["temperature"]=f.Temperature;return d;
   }
  }
@@ -41,7 +41,7 @@ namespace AstroArchive {
     return Exclude?!match:match;
    }
   }
-  static readonly HashSet<string> fields=new HashSet<string>(new[]{"target","file","path","device","camera","filter","type","format","date","mount","notes","status","review","session","hash","project","source","exposure","gain","temperature"});
+  static readonly HashSet<string> fields=new HashSet<string>(new[]{"target","file","path","device","camera","filter","type","format","date","mount","notes","status","review","session","hash","project","source","exposure","gain","temperature","tag","note"});
   static readonly Regex numeric=new Regex(@"^(exposure|gain|temperature)(?::)?(>=|<=|>|<|=)([-+]?\d+(?:\.\d+)?)$",RegexOptions.IgnoreCase|RegexOptions.CultureInvariant);
   readonly List<List<Term>> groups=new List<List<Term>>();
   public string Error{get;private set;}

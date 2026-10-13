@@ -89,3 +89,25 @@ sign setup, then run `-Stage Finalize` with the same signing options. Without st
 signing, the script produces an unsigned local build.
 
 For user-facing Windows policy troubleshooting, see [installation and updates](UPDATES.md#smartscreen-and-application-control).
+
+To publish a prerelease from a development branch, manually run **Windows build and release** on that branch with **prerelease** enabled. It runs the same package validation, publishes the matching package tag as a prerelease, and leaves the latest stable release unchanged. Do not push a version tag first: tag pushes use the stable publication path.
+
+## Optional signing in 3.2.7
+
+`Installer/release.json` explicitly sets `require_signing: false` for 3.2.7.
+The release may publish checksum-verified unsigned output when signing is not
+configured. The update feed and release notes record the signing status.
+
+Publisher signing remains available through the Microsoft Artifact Signing setup
+above. When used, the workflow verifies trusted RSA certificates, publisher,
+timestamps and final hashes for the application, launcher and installer.
+
+A future package can opt into mandatory signing by setting `require_signing: true`.
+That opt-in stops publication when signing is disabled, and the release verifier
+rejects unsigned output even with `--allow-unsigned`. The opt-in does not apply to
+3.2.7. Pull-request validation may use unsigned artifacts independently.
+
+Smart App Control evaluates each new unsigned file by hash. An older version's
+acceptance does not transfer to a newly rebuilt package. Publishing unsigned
+therefore cannot guarantee that Windows will allow installation or launch.
+See [Microsoft's reputation explanation](https://learn.microsoft.com/en-us/windows/apps/package-and-deploy/smartscreen-reputation).

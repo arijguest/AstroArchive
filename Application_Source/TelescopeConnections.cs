@@ -13,11 +13,11 @@ namespace AstroArchive {
   public string SourceMake{get;set;} public string RemoteIdentity{get;set;}
   public string Id{get;set;} public string SessionIdentity{get;set;} public string Model{get;set;} public string Camera{get;set;}
   public string LastSource{get;set;} public string VolumeId{get;set;} public string SourceRelativePath{get;set;}
-  public string DisplayText{get{return string.IsNullOrEmpty(Id)?"New telescope...":Id+(Model=="Auto"||string.IsNullOrEmpty(Model)?"":" · "+Model);}}
+  public string DisplayText{get{return string.IsNullOrEmpty(Id)?Localization.T("New telescope..."):Id+(Model=="Auto"||string.IsNullOrEmpty(Model)?"":" · "+Model);}}
  }
  public static class TelescopeProfiles {
-  public static string Make(TelescopeProfile profile){string make=InstrumentDetection.MakeOf(profile.Model);return make!="Unknown"?make:profile.SourceMake=="Seestar"||profile.SourceMake=="DWARFLAB"?profile.SourceMake:"Unknown";}
-  public static readonly string[] Models={"Auto","Seestar S50 Pro","Seestar S50","Seestar S30 Pro","Seestar S30","Dwarf 3","Dwarf II","Dwarf mini","Other"};
+  public static string Make(TelescopeProfile profile){string make=InstrumentDetection.MakeOf(profile.Model);return make!="Unknown"?make:profile.SourceMake=="Seestar"||profile.SourceMake=="DWARFLAB"||profile.SourceMake==CelestronOrigin.Make?profile.SourceMake:"Unknown";}
+  public static readonly string[] Models={"Auto","Seestar S50 Pro","Seestar S50","Seestar S30 Pro","Seestar S30","Dwarf 3","Dwarf II","Dwarf mini","Celestron Origin","Other"};
   public static string Model(string value){return Models.Contains(value)?value:"Auto";}
   public static void Initialize(Settings settings){
    if(settings.Telescopes==null)settings.Telescopes=new List<TelescopeProfile>();
@@ -30,7 +30,7 @@ namespace AstroArchive {
    Initialize(settings);int added=0;
    foreach(var group in frames.Where(f=>!string.IsNullOrWhiteSpace(f.Telescope)&&!string.Equals(f.Telescope.Trim(),"Unknown",StringComparison.OrdinalIgnoreCase)).GroupBy(f=>f.Telescope.Trim(),StringComparer.OrdinalIgnoreCase)){
     if(Find(settings,group.Key)!=null)continue;
-    var models=group.Select(f=>Model(f.Model)).Where(m=>m!="Auto").Distinct().ToList();var makes=group.Select(f=>f.MakeText).Where(m=>m=="Seestar"||m=="DWARFLAB").Distinct().ToList();
+    var models=group.Select(f=>Model(f.Model)).Where(m=>m!="Auto").Distinct().ToList();var makes=group.Select(f=>f.MakeText).Where(m=>m=="Seestar"||m=="DWARFLAB"||m==CelestronOrigin.Make).Distinct().ToList();
     var identities=group.Select(f=>f.TelescopeIdentity??f.Telescope).Distinct(StringComparer.OrdinalIgnoreCase).ToList();
     settings.Telescopes.Add(new TelescopeProfile{Id=group.Key,SessionIdentity=identities.Count==1?identities[0]:group.Key,Model=models.Count==1&&makes.Count<=1?models[0]:"Auto",SourceMake=makes.Count==1?makes[0]:null,Camera="Auto"});added++;
    }

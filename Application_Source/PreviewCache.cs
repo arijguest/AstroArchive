@@ -17,7 +17,7 @@ namespace AstroArchive {
   public PreviewData Get(string path,Frame frame,Func<PreviewData> decode,CancellationToken ct){
    ct.ThrowIfCancellationRequested();string key=Key(path,frame);
    lock(sync){for(var node=entries.First;node!=null;node=node.Next)if(string.Equals(node.Value.Key,key,StringComparison.OrdinalIgnoreCase)){var data=node.Value.Data.Copy();entries.Remove(node);entries.AddFirst(node);return data;}}
-   var decoded=decode();ct.ThrowIfCancellationRequested();long size=checked((long)decoded.Pixels.Length*sizeof(double));
+   var decoded=decode();ct.ThrowIfCancellationRequested();if(decoded==null||decoded.Pixels==null)throw new InvalidDataException("The image decoder returned no preview samples.");long size=checked((long)decoded.Pixels.Length*sizeof(double));
    if(size<=limit&&key==Key(path,frame))lock(sync){
     for(var node=entries.First;node!=null;){var next=node.Next;if(string.Equals(node.Value.Key,key,StringComparison.OrdinalIgnoreCase)){bytes-=node.Value.Bytes;entries.Remove(node);}node=next;}
     while(bytes+size>limit&&entries.Last!=null){bytes-=entries.Last.Value.Bytes;entries.RemoveLast();}

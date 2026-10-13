@@ -1,4 +1,5 @@
 {
-  "application_version": "3.1.9",
-  "installer_revision": 1
+  "application_version": "3.2.7",
+  "installer_revision": 2,
+  "require_signing": false
 }

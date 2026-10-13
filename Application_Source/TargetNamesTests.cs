@@ -21,10 +21,16 @@ namespace AstroArchive {
     Check(Catalog.KnownName("Antennae Galaxies")==null&&Catalog.CommonName("NGC4038").Contains("NGC4038")&&Catalog.CommonName("NGC4039").Contains("NGC4039"),"Shared galaxy names silently chose an individual object");
     string evidence;Check(Catalog.KnownName("Lobster Nebula")==null&&EditedTargetMatcher.Default.Resolve("Lobster Nebula",out evidence)==null&&Catalog.KnownName("Lobster Nebula (NGC6357)")=="NGC6357","Ambiguous nickname silently selected another nebula");
    });
+   Test("Catalogue IDs display spaced while stored and matched compact",()=>{
+    Check(Catalog.DisplayId("M45")=="M 45"&&Catalog.DisplayId("NGC7000")=="NGC 7000"&&Catalog.DisplayId("UGC8981")=="UGC 8981"&&Catalog.DisplayId("IC1396")=="IC 1396"&&Catalog.DisplayId("C23")=="C 23"&&Catalog.DisplayId("SH2155")=="Sh2-155"&&Catalog.DisplayId("SH2-119")=="Sh2-119"&&Catalog.DisplayId("PGC 057633")=="PGC 57633"&&Catalog.DisplayId("NGC2237A")=="NGC 2237A","Catalogue ID not spaced: "+Catalog.DisplayId("SH2155"));
+    Check(Catalog.DisplayId("12P")=="12P"&&Catalog.DisplayId("C/2023 A3")=="C/2023 A3"&&Catalog.DisplayId("Moon")=="Moon"&&Catalog.DisplayId("M2-9")=="M2-9"&&Catalog.DisplayId(null)==null,"Non-catalogue labels changed");
+    Check(Catalog.DisplayIds("Lobster Nebula (NGC6357)")=="Lobster Nebula (NGC 6357)"&&Catalog.DisplayIds("Minkowski M2-9")=="Minkowski M2-9","Qualified names not spaced");
+    Check(Catalog.Label("M45")=="M 45 · Pleiades"&&Catalog.RecordLabel("M45")=="M45 · Pleiades"&&new Frame{Target="M 45"}.Target=="M45"&&Catalog.Normalize("Sh2-155")==Catalog.Normalize("SH2155")&&Catalog.KnownName(Catalog.DisplayId("NGC7000"))=="NGC7000","Display IDs changed stored or matched identity");
+   });
    Test("C23 NGC891 and Silver Sliver aliases share display identity grouping and search",()=>{
     var ids=new[]{"C23","C 023","Caldwell-23","Caldwell No. 23","NGC 00891","UGC1831","PGC9031","Silver Sliver Galaxy","Outer Limits Galaxy"};
     foreach(string label in ids){var frame=new Frame{Target=label};Check(frame.Target=="NGC891"&&frame.TargetName=="Silver Sliver Galaxy"&&TargetNavigation.Group(label)=="Galaxies","Silver Sliver identity/display wrong: "+label);Check(new CaptureFilters().Apply(new[]{frame},label).Count==1&&Catalog.Search(label).First().Name=="NGC891","Alternate identity not searchable: "+label);}
-    var target=TargetNavigation.Build(ids.Select(label=>new Frame{Target=label})).Single(t=>t.Name=="NGC891");Check(target.Files==ids.Length&&target.DisplayName=="NGC891 - Silver Sliver Galaxy"&&target.Subline.StartsWith("C23")&&target.Subline.Contains("UGC1831")&&target.Subline.Contains("PGC9031"),"Aliases split targets or disappeared from the navigation row");
+    var target=TargetNavigation.Build(ids.Select(label=>new Frame{Target=label})).Single(t=>t.Name=="NGC891");Check(target.Files==ids.Length&&target.DisplayName=="NGC 891 - Silver Sliver Galaxy"&&target.Subline.StartsWith("C 23")&&target.Subline.Contains("UGC 1831")&&target.Subline.Contains("PGC 9031"),"Aliases split targets or disappeared from the navigation row");
     Check(Catalog.TargetFromFilename("C23_NGC891_Silver_Sliver_Galaxy.fit")=="NGC891"&&!Catalog.HasFilenameConflict("C23_NGC891_Silver_Sliver_Galaxy.fit"),"Equivalent names conflicted");
    });
    Test("Common-name normalization handles full catalogue prefixes accents and punctuation",()=>{

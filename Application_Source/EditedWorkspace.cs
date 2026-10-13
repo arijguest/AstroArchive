@@ -13,8 +13,17 @@ namespace AstroArchive {
   public Dictionary<string,EditedMetadata> MetadataEdits{get;set;}
   public List<EditedSource> Sources{get;set;} public override string ToString(){return Name;}
  }
- public sealed class EditedImage {
+ public sealed class EditedImage:System.ComponentModel.INotifyPropertyChanged,IAnnotated {
   [System.Web.Script.Serialization.ScriptIgnore]public EditedProject Project{get;set;}
+  bool starred;List<string> tags;string userNote;
+  [System.Web.Script.Serialization.ScriptIgnore]public string AnnotationKey{get{return Project==null||string.IsNullOrEmpty(RelativePath)?null:CaptureAnnotations.EditedKey(Project.Id,RelativePath);}}
+  [System.Web.Script.Serialization.ScriptIgnore]public bool IsStarred{get{return starred;}set{if(starred==value)return;starred=value;Changed("IsStarred");Changed("StarText");}}
+  [System.Web.Script.Serialization.ScriptIgnore]public List<string> Tags{get{return tags;}set{if(tags==value||tags!=null&&value!=null&&tags.SequenceEqual(value))return;tags=value;Changed("Tags");Changed("TagsText");}}
+  [System.Web.Script.Serialization.ScriptIgnore]public string UserNote{get{return userNote;}set{if(userNote==value)return;userNote=value;Changed("UserNote");}}
+  [System.Web.Script.Serialization.ScriptIgnore]public string StarText{get{return starred?"★":"";}}
+  [System.Web.Script.Serialization.ScriptIgnore]public string TagsText{get{return tags==null?"":string.Join(", ",tags);}}
+  public event System.ComponentModel.PropertyChangedEventHandler PropertyChanged;
+  void Changed(string name){var handler=PropertyChanged;if(handler!=null)handler(this,new System.ComponentModel.PropertyChangedEventArgs(name));}
   public string RelatedImage{get;set;} public string Filename{get;set;} public string RelativePath{get;set;} public string Kind{get;set;} public long Bytes{get;set;} public DateTime Modified{get;set;} public string Source{get;set;} public EditedMetadata Metadata{get;set;} public string MetadataProblem{get;set;}
   public string FileType{get{return MediaFiles.FileType(Filename??RelativePath);}}
  }
@@ -50,8 +59,8 @@ namespace AstroArchive {
   public EditedProject CreateEditedWorkingCopies(IEnumerable<Frame> captures,string name,string processor,CancellationToken ct,Action<ProgressInfo> progress){
    ct.ThrowIfCancellationRequested();var selected=captures.ToList();if(selected.Count==0)throw new ArgumentException("Choose archived images.");var indexed=new List<Frame>();
    foreach(var capture in selected){var stored=capture==null?null:Find(capture.Hash);if(stored==null)throw new IOException("The archived capture is unavailable.");ValidateCapture(stored,ct);indexed.Add(stored);}
-   var project=NewEditedProject(name,processor,indexed.Select(f=>f.TargetLabel).Distinct().Count()==1?indexed[0].TargetLabel:"Multiple objects");Directory.CreateDirectory(EditedProjectFolder(project));
-   try{foreach(var capture in indexed){ct.ThrowIfCancellationRequested();var metadata=EditedMetadata.Read(capture.OriginalName,Assets.Inspect(FilePath(capture)).Header);if(metadata.ImageClass!="Meteor"&&string.IsNullOrEmpty(metadata.Object)&&!Catalog.IsAmbiguous(capture.Target))metadata.Object=capture.Target;if(string.IsNullOrEmpty(metadata.Filters)&&capture.Filter!="Unknown")metadata.Filters=capture.Filter;
+   var project=NewEditedProject(name,processor,indexed.Select(f=>Catalog.RecordLabel(f.Target)).Distinct().Count()==1?Catalog.RecordLabel(indexed[0].Target):"Multiple objects");Directory.CreateDirectory(EditedProjectFolder(project));
+   try{foreach(var capture in indexed){ct.ThrowIfCancellationRequested();var metadata=EditedMetadata.FromCapture(capture,Assets.Inspect(FilePath(capture)).Header);if(metadata.ImageClass!="Meteor"&&string.IsNullOrEmpty(metadata.Object)&&!Catalog.IsAmbiguous(capture.Target))metadata.Object=capture.Target;if(string.IsNullOrEmpty(metadata.Filters)&&capture.Filter!="Unknown")metadata.Filters=capture.Filter;
     AddEditedFile(project,FilePath(capture),capture.OriginalName,capture.Hash,capture.Hash,ct,progress,null,metadata);}return project;}
    catch{RemoveNewEditedProject(project);throw;}
   }

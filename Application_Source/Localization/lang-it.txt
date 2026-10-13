@@ -1,0 +1,2113 @@
+# AstroArchive interface: Italian. One "English<TAB>Translation" per line; \n is a line break.
+# {0} and {1} stand for inserted text; {#0} only matches a number. Missing lines show English.
+Starred	Preferiti
+Expand/collapse group	Espandi/comprimi gruppo
+Expand or collapse session group	Espandi o comprimi il gruppo della sessione
+Starred session	Sessione preferita
+Choose page	Scegli pagina
+Repository	Archivio
+Import	Importa
+Dismiss	Ignora
+Search captures…	Cerca acquisizioni…
+Filters	Filtri
+Clear	Cancella
+Selected files include other targets. Click to clear the selection.	I file selezionati includono altri target. Fai clic per cancellare la selezione.
+Your sky, organised.	Il tuo cielo, in ordine.
+Choose a repository, then import your captures.	Scegli un archivio, quindi importa le tue acquisizioni.
+Open repository folder.	Apri la cartella dell'archivio.
+Repository size	Dimensioni archivio
+Choose a repository from the Repository menu	Scegli un archivio dal menu Archivio
+Preview stretch	Stretching anteprima
+Capture details	Dettagli acquisizione
+Show in File Explorer	Mostra in Esplora file
+No capture selected	Nessuna acquisizione selezionata
+Select a capture to view its details.	Seleziona un'acquisizione per visualizzarne i dettagli.
+SKY AT CAPTURE	CIELO AL MOMENTO DELL'ACQUISIZIONE
+Select a capture	Seleziona un'acquisizione
+Select a capture to preview it.	Seleziona un'acquisizione per visualizzarne l'anteprima.
+Reset capture sky view	Reimposta la vista del cielo dell'acquisizione
+SAVED TELESCOPE	TELESCOPIO SALVATO
+Connect over network…	Connetti in rete…
+Find a telescope on your network, choose captures or import live as it shoots.	Trova un telescopio nella tua rete, scegli le acquisizioni o importa in tempo reale durante le riprese.
+● Live import underway	● Importazione in tempo reale in corso
+Live telescope imports; view Activity	Importazioni in tempo reale dal telescopio; visualizza Attività
+View live telescope imports in Activity.	Visualizza le importazioni in tempo reale dal telescopio in Attività.
+Import connected telescope	Importa dal telescopio connesso
+Connect a telescope by USB, or browse its capture folder and save the telescope.	Connetti un telescopio tramite USB oppure sfoglia la sua cartella delle acquisizioni e salva il telescopio.
+SOURCE FOLDER	CARTELLA DI ORIGINE
+Browse	Sfoglia
+DEVICE ID	ID DISPOSITIVO
+Import preferences…	Preferenze di importazione…
+Watch folder…	Monitora cartella…
+Scan folder	Scansiona cartella
+Originals kept · Analysis off	Originali conservati · Analisi disattivata
+Search import results…	Cerca nei risultati dell'importazione…
+Set Unknown targets…	Imposta i target sconosciuti…
+Choose a source folder and scan to begin.	Scegli una cartella di origine e avvia la scansione per iniziare.
+DEVICE / MODEL	DISPOSITIVO / MODELLO
+Select a capture to see its review category and reason.	Seleziona un'acquisizione per visualizzarne la categoria di verifica e il motivo.
+Import 0 files	Importa 0 file
+Add images…	Aggiungi immagini…
+Import folder…	Importa cartella…
+Refresh	Aggiorna
+Edited images	Immagini elaborate
+Dismiss last Edited import summary	Ignora il riepilogo dell'ultima importazione in Edited
+Search edited images…	Cerca immagini elaborate…
+Edit metadata…	Modifica metadati…
+Image details…	Dettagli immagine…
+Preview image…	Anteprima immagine…
+Export to…	Esporta in…
+Open image folder	Apri cartella immagine
+FILE TYPE	TIPO DI FILE
+TOTAL EXPOSURE	ESPOSIZIONE TOTALE
+PER SUB	PER POSA
+COPY TYPE	TIPO DI COPIA
+FILE PATH	PERCORSO FILE
+Add edited images, or send a repository stack to an editor to create a working copy.	Aggiungi immagini elaborate o invia uno stack dell'archivio a un editor per creare una copia di lavoro.
+Select an edited image	Seleziona un'immagine elaborata
+Enlarge image	Ingrandisci immagine
+Select a capture or open an image.	Seleziona un'acquisizione o apri un'immagine.
+Processing files	Elaborazione dei file
+Ready	Pronto
+Pause imports	Sospendi importazioni
+Cancel	Annulla
+Performance details	Dettagli prestazioni
+FILES/S	FILE/S
+Ctrl / Shift to select · Right-click for file actions	Ctrl / Shift per selezionare · Clic destro per le azioni sui file
+Settings	Impostazioni
+Guide	Guida
+Columns ▾	Colonne ▾
+Preview	Anteprima
+Tools ▾	Strumenti ▾
+Review flagged	Verifica segnalate
+Screen for failures	Controlla errori
+Rotation	Rotazione
+Identify target	Identifica target
+Edit metadata	Modifica metadati
+Save telescope	Salva telescopio
+Rename	Rinomina
+Recover profiles	Recupera profili
+Refresh USB	Aggiorna USB
+Check visible captures for rejection or damaged FITS data.	Controlla se le acquisizioni visibili sono state scartate o hanno dati FITS danneggiati.
+Skip flagged captures	Salta acquisizioni segnalate
+Review flagged captures	Verifica acquisizioni segnalate
+Retry failed imports	Riprova importazioni non riuscite
+Import tools ▾	Strumenti importazione ▾
+Import options	Opzioni di importazione
+TARGET ANALYSIS	ANALISI TARGET
+ROTATION ANALYSIS	ANALISI ROTAZIONE
+Ignore failed	Ignora non riuscite
+Skip filenames containing “failed”; keep originals.	Salta i nomi file che contengono “failed”; conserva gli originali.
+Delete originals after verified import	Elimina gli originali dopo l'importazione verificata
+Choose files, targets or sessions.	Scegli file, target o sessioni.
+Opening AstroArchive	Apertura di AstroArchive
+Cancel opening AstroArchive	Annulla l'apertura di AstroArchive
+Your nights under the stars,\ntogether in one place.	Le tue notti sotto le stelle,\nriunite in un unico posto.
+Rosette Nebula · Ari J. Guest	Nebulosa Rosetta · Ari J. Guest
+Application startup progress	Avanzamento dell'avvio dell'applicazione
+Enabled	Attivato
+Accessibility	Accessibilità
+Adjust text and table spacing without scaling images.	Regola il testo e la spaziatura delle tabelle senza ridimensionare le immagini.
+Text size	Dimensioni testo
+Comfortable table rows	Righe di tabella più spaziose
+High contrast surfaces and text	Superfici e testo a contrasto elevato
+Clearer selections	Selezioni più evidenti
+Reduce motion and indeterminate progress animation	Riduci il movimento e l'animazione di avanzamento indeterminato
+Increase text size without scaling images.	Aumenta le dimensioni del testo senza ridimensionare le immagini.
+Use taller table rows.	Usa righe di tabella più alte.
+Use high-contrast colours.	Usa colori a contrasto elevato.
+Add a prominent outline to focused targets, files and sub groups.	Aggiungi un contorno evidente a target, file e gruppi di pose con lo stato attivo.
+Disable progress animation.	Disattiva l'animazione di avanzamento.
+Keyboard shortcuts	Tasti di scelta rapida
+Alt reveals menu access keys. Arrow keys move through dropdowns; Escape closes them. Tab follows the visible controls, with clear focus outlines. The purple page selector switches pages; Ctrl+1–3 selects Repository, Edited or Import, and Ctrl+Tab cycles pages. Ctrl+F focuses search, Ctrl+I opens Import, Ctrl+E opens Export, and F1 opens help for the current page.	Alt mostra i tasti di accesso dei menu. I tasti di direzione consentono di spostarsi negli elenchi a discesa; Esc li chiude. Tab segue i controlli visibili, con contorni dello stato attivo ben visibili. Il selettore di pagina viola cambia pagina; Ctrl+1–3 seleziona Archivio, Edited o Importa e Ctrl+Tab scorre le pagine. Ctrl+F sposta lo stato attivo sulla ricerca, Ctrl+I apre Importa, Ctrl+E apre Esporta e F1 apre la guida della pagina corrente.
+Table sorting uses ▲ for ascending and ▼ for descending. Numbers show the order of multi-column sorting. Shift-click a heading adds it to the sort.	L'ordinamento delle tabelle usa ▲ per l'ordine crescente e ▼ per quello decrescente. I numeri indicano la sequenza dell'ordinamento su più colonne. Shift+clic su un'intestazione la aggiunge all'ordinamento.
+Activity and notifications	Attività e notifiche
+Activity and notifications (Ctrl+Shift+N)	Attività e notifiche (Ctrl+Shift+N)
+Close	Chiudi
+Activity	Attività
+Clear completed	Cancella completate
+View	Visualizza
+Loading image preview	Caricamento dell'anteprima dell'immagine
+Preparing…	Preparazione…
+No recent activity. Long-running work and release notifications appear here.	Nessuna attività recente. Qui vengono visualizzate le operazioni di lunga durata e le notifiche sulle nuove versioni.
+Details	Dettagli
+Cloud availability	Disponibilità nel cloud
+Waiting for cloud provider	In attesa del provider cloud
+Waiting for filesystem	In attesa del file system
+A report is available below.	Di seguito è disponibile un report.
+Canceling…	Annullamento…
+Pause	Sospendi
+Resume	Riprendi
+Verify completed copies and continue this import.	Verifica le copie completate e continua questa importazione.
+Finish the conflicting operation or open this import's repository first.	Completa prima l'operazione in conflitto o apri l'archivio di questa importazione.
+Cancel import	Annulla importazione
+Review results	Verifica risultati
+View release	Visualizza versione
+Available when the current operation finishes.	Disponibile al termine dell'operazione corrente.
+View report	Visualizza report
+Open folder	Apri cartella
+Canceling after the current operation…	Annullamento dopo l'operazione corrente…
+Completed with results to review.	Completato con risultati da verificare.
+Ready to review	Pronto per la verifica
+Scan	Scansiona
+Scanning source folder	Scansione della cartella di origine
+Importing files	Importazione dei file
+Processing Dump folder	Elaborazione della cartella Dump
+Importing telescope files	Importazione dei file del telescopio
+Scanning edited images	Scansione delle immagini elaborate
+Importing edited images	Importazione delle immagini elaborate
+Identifying targets	Identificazione dei target
+Applying target metadata	Applicazione dei metadati dei target
+Analyze	Analizza
+Analysing rotation	Analisi della rotazione
+Screening captures	Controllo delle acquisizioni
+Backing up archive	Backup dell'archivio
+Changing originals protection	Modifica della protezione degli originali
+Exporting files	Esportazione dei file
+Clearing archive	Svuotamento dell'archivio
+Deleting selected files	Eliminazione dei file selezionati
+Renaming telescope	Ridenominazione del telescopio
+Identify	Identifica
+Identifying targets from filenames	Identificazione dei target dai nomi file
+Creating edited working copies	Creazione delle copie di lavoro elaborate
+Edit	Modifica
+Saving metadata	Salvataggio dei metadati
+Analytics	Statistiche
+Export all…	Esporta tutto…
+Explore six branded charts; export PNG, JPEG, PDF, SVG or animated MP4/GIF stories.	Esplora sei grafici personalizzati; esporta storie in PNG, JPEG, PDF, SVG o MP4/GIF animate.
+Deleted	Eliminati
+Analytics · AstroArchive	Statistiche · AstroArchive
+Archive analytics	Statistiche dell'archivio
+Preparing your observatory notes…	Preparazione delle note dell'osservatorio…
+Scope · Entire repository	Ambito · Intero archivio
+All telescopes	Tutti i telescopi
+Unknown telescope	Telescopio sconosciuto
+Telescope	Telescopio
+From (inclusive)	Da (incluso)
+To (inclusive)	A (incluso)
+Document label	Etichetta documento
+Include rejected light frames	Includi i light scartati
+Start acquisition date, inclusive. Undated captures are excluded when a date range is set.	Data di inizio dell'acquisizione, inclusa. Le acquisizioni senza data vengono escluse quando è impostato un intervallo di date.
+End acquisition date, inclusive. Clear both dates to include undated captures.	Data di fine dell'acquisizione, inclusa. Cancella entrambe le date per includere le acquisizioni senza data.
+Off excludes rejected light frames and stacks from charts. Headline cards always show the whole-repository integration, including rejected and undated images. Stacks with matching light subframes are counted only once.	Se disattivata, i light e gli stack scartati vengono esclusi dai grafici. Le schede principali mostrano sempre l'integrazione dell'intero archivio, incluse le immagini scartate e senza data. Gli stack con pose light corrispondenti vengono conteggiati una sola volta.
+Reset scope	Reimposta ambito
+Analytics charts	Grafici statistici
+Share of light frames	Ripartizione dei light
+Integration through time	Integrazione nel tempo
+Your most imaged objects	Gli oggetti che hai ripreso di più
+Physical instrument totals	Totali per strumento fisico
+Integration by filter	Integrazione per filtro
+Distribution of sub lengths	Distribuzione della durata delle pose
+One document · six graphics	Un documento · sei grafici
+All six charts	Tutti e sei i grafici
+Preview page	Pagina di anteprima
+Inspect an individual print page or the combined sheet. Exports include every page in the chosen chart.	Esamina una singola pagina di stampa o il foglio combinato. Le esportazioni includono tutte le pagine del grafico scelto.
+Branded analytics export preview	Anteprima dell'esportazione delle statistiche personalizzate
+300 dpi · Print	300 dpi · Stampa
+150 dpi · Screen	150 dpi · Schermo
+Landscape · Current	Orizzontale · Attuale
+Vertical · 9:16	Verticale · 9:16
+Portrait · 4:5	Ritratto · 4:5
+Square · 1:1	Quadrato · 1:1
+Widescreen · 16:9	Panoramico · 16:9
+Document layout	Layout documento
+Document theme	Tema documento
+Export format	Formato di esportazione
+Image resolution	Risoluzione immagine
+Landscape keeps the current document layout. Social layouts cover TikTok/Reels/Stories (9:16), Instagram feed (4:5), square posts (1:1), video (16:9) and Pinterest (2:3), in every export format.	Orizzontale mantiene il layout attuale del documento. I layout social coprono TikTok/Reels/Storie (9:16), il feed di Instagram (4:5), i post quadrati (1:1), i video (16:9) e Pinterest (2:3), in tutti i formati di esportazione.
+Social exports each page at the pixel dimensions shown. Tall pages stack vertically; square and wide pages use a grid. Print and Screen use the selected dpi.	I layout social esportano ogni pagina con le dimensioni in pixel indicate. Le pagine verticali vengono impilate in verticale; quelle quadrate e larghe usano una griglia. Stampa e Schermo usano i dpi selezionati.
+Dark uses AstroArchive's midnight, blue and cyan palette. Choose Light for white-paper documents. Preview and all export formats use this choice.	Scuro usa la tavolozza blu notte, blu e ciano di AstroArchive. Scegli Chiaro per documenti su carta bianca. L'anteprima e tutti i formati di esportazione usano questa scelta.
+Export chart…	Esporta grafico…
+Save the previewed chart in the chosen format. Long rankings include continuation pages.	Salva il grafico in anteprima nel formato scelto. Le classifiche lunghe includono pagine di continuazione.
+Save all six charts in one document, using the same telescope and date scope.	Salva tutti e sei i grafici in un unico documento, con lo stesso ambito di telescopio e date.
+4 s · Brisk	4 s · Veloce
+6 s · Balanced	6 s · Bilanciato
+8 s · Relaxed	8 s · Rilassato
+Glide	Scorrimento
+Dissolve	Dissolvenza
+Original pixels	Pixel originali
+1280 px · Longest edge	1280 px · Lato lungo
+720 px · Longest edge	720 px · Lato lungo
+Time per chart	Tempo per grafico
+Transition	Transizione
+Video size	Dimensioni video
+Play animation preview	Riproduci anteprima animazione
+Includes a smooth chart reveal and a readable hold. Every continuation page receives the same time.	Include una comparsa fluida del grafico e una pausa per la lettura. Ogni pagina di continuazione riceve lo stesso tempo.
+Original pixels follows the selected layout. Smaller sizes preserve its ratio. MP4 uses H.264 at 24 fps; GIF loops at 12 fps with a shared palette.	Pixel originali segue il layout selezionato. Le dimensioni più piccole ne mantengono le proporzioni. MP4 usa H.264 a 24 fps; la GIF si ripete in loop a 12 fps con una tavolozza condivisa.
+Video export progress	Avanzamento esportazione video
+Integration includes standalone stacks; stacks with matching subframes, videos and calibrations are excluded.	L'integrazione include gli stack autonomi; sono esclusi gli stack con pose corrispondenti, i video e i frame di calibrazione.
+Analytics status	Stato delle statistiche
+Open export folder	Apri cartella di esportazione
+Ⅱ Pause preview	Ⅱ Sospendi anteprima
+Stopping export…	Interruzione dell'esportazione…
+Finishing your export…	Completamento dell'esportazione…
+Updating analytics…	Aggiornamento delle statistiche…
+Enter a valid date or clear the date field.	Immetti una data valida o cancella il campo della data.
+No light frames match this scope; standalone stack integration is included.	Nessun light corrisponde a questo ambito; è inclusa l'integrazione degli stack autonomi.
+No light frames match this scope. Adjust the telescope or date range.	Nessun light corrisponde a questo ambito. Modifica il telescopio o l'intervallo di date.
+All pages	Tutte le pagine
+All six charts · Social pages	Tutti e sei i grafici · Pagine social
+All six charts · Combined preview	Tutti e sei i grafici · Anteprima combinata
+Looping GIF · 12 fps	GIF in loop · 12 fps
+Multiple pages stack vertically in one sheet.	Più pagine vengono impilate in verticale in un unico foglio.
+Multiple pages combine into one sheet.	Più pagine vengono combinate in un unico foglio.
+Export all analytics	Esporta tutte le statistiche
+Export analytics chart	Esporta grafico statistico
+Cancel export	Annulla esportazione
+Export stopped. Your previous file is preserved.	Esportazione interrotta. Il file precedente è stato conservato.
+Unstar	Rimuovi dai preferiti
+Star	Aggiungi ai preferiti
+Starred files are tinted and marked with ★. Search “starred” or use Filters to find them.	I file preferiti sono evidenziati e contrassegnati con ★. Cerca “starred” o usa Filtri per trovarli.
+Tags and note…	Tag e nota…
+Tags and notes…	Tag e note…
+Tags and note	Tag e nota
+Tags and notes	Tag e note
+Saved with this repository; the files themselves never change.	Salvato con questo archivio; i file stessi non vengono mai modificati.
+Tags (separate with commas)	Tag (separati da virgole)
+Only tags shared by every selected file are shown. Others stay unless you remove them here.	Vengono mostrati solo i tag comuni a tutti i file selezionati. Gli altri restano, a meno che non li rimuovi qui.
+Add this tag	Aggiungi questo tag
+Note	Nota
+Note for every selected file	Nota per tutti i file selezionati
+These files have different notes. Leave this blank to keep each note, or type to replace them all.	Questi file hanno note diverse. Lascia vuoto per mantenere ogni nota oppure digita per sostituirle tutte.
+Save	Salva
+No changes to tags or notes.	Nessuna modifica a tag o note.
+★ Starred	★ Preferiti
+Tags	Tag
+Notes	Note
+Initializing application	Inizializzazione dell'applicazione
+Restoring your window and preparing the first view…	Ripristino della finestra e preparazione della prima visualizzazione…
+Unhandled application error	Errore dell'applicazione non gestito
+Startup error	Errore di avvio
+AstroArchive could not start.\n\n	Impossibile avviare AstroArchive.\n\n
+Building your workspace…	Creazione dell'area di lavoro…
+Loading your preferences…	Caricamento delle preferenze…
+Telephoto	Teleobiettivo
+Wide	Grandangolo
+Off	Disattivato
+Ambiguous only	Solo ambigui
+All light/stack files	Tutti i file light/stack
+Ambiguous mounts	Montature ambigue
+All light sessions	Tutte le sessioni light
+Preparing browsing and capture tools…	Preparazione degli strumenti di navigazione e acquisizione…
+Choose a mirrored telescope folder	Scegli una copia della cartella del telescopio
+Canceled	Annullato
+Canceling after the current operation...	Annullamento dopo l'operazione corrente...
+Preparing telescope connections…	Preparazione delle connessioni ai telescopi…
+Opening your archive…	Apertura dell'archivio…
+Preparing your targets and sessions…	Preparazione di target e sessioni…
+Import performance and errors	Prestazioni ed errori di importazione
+Choose a repository first.	Scegli prima un archivio.
+All targets	Tutti i target
+Group	Gruppo
+Choose a repository folder in Settings to begin.	Per iniziare, scegli una cartella per l'archivio in Impostazioni.
+Nights	Notti
+Night	Notte
+Captures	Acquisizioni
+Total exposure	Esposizione totale
+Type	Tipo
+Filter	Filtro
+Temperature	Temperatura
+Mount	Montatura
+Calibration	Calibrazione
+Unknown	Sconosciuto
+Elapsed 00:00:00 · ETA estimating	Trascorso 00:00:00 · Tempo rimanente: stima in corso
+Finalising	Finalizzazione
+ETA ~	Tempo rimanente ~
+ETA estimating	Stima del tempo rimanente
+Imported	Importato
+Running	In esecuzione
+Import could not start	Impossibile avviare l'importazione
+Could not save import recovery information. No files were copied.	Impossibile salvare le informazioni di ripristino dell'importazione. Nessun file è stato copiato.
+Interrupted	Interrotto
+Preparing	Preparazione
+Checking folders and availability	Verifica di cartelle e disponibilità
+Canceled. Completed changes are retained.	Annullato. Le modifiche completate sono state mantenute.
+Operation complete	Operazione completata
+Completed.	Completato.
+Operation could not finish	Impossibile completare l'operazione
+Results could not be displayed.	Impossibile visualizzare i risultati.
+Give this physical telescope a unique ID.	Assegna un ID univoco a questo telescopio fisico.
+Telescope ID required	ID telescopio obbligatorio
+User-selected camera	Camera selezionata dall'utente
+New	Nuovo
+Scan complete. Import the ready files shown above, or screen captures for telescope failures.	Scansione completata. Importa i file pronti mostrati sopra o controlla le acquisizioni per individuare errori del telescopio.
+User	Utente
+Saving final archive index and report	Salvataggio dell'indice finale dell'archivio e del report
+Import report	Report di importazione
+Explicit	Esplicito
+Choose a target with individual light frames. Stacks cannot establish acquisition rotation.	Scegli un target con singoli light. Gli stack non consentono di determinare la rotazione di acquisizione.
+Individual subs required	Pose singole obbligatorie
+Rotation analysis complete.	Analisi della rotazione completata.
+Rotation analysis	Analisi della rotazione
+Restore	Ripristina
+Duplicate in source	Duplicato nell'origine
+Failed	Non riuscito
+Unreadable	Illeggibile
+Select a light exposure or telescope stack to identify.	Seleziona un light o uno stack del telescopio da identificare.
+A plate solution locates the field. Select the intended target from nearby candidates or search the catalogue.	Il plate solving individua il campo. Seleziona il target desiderato tra i candidati vicini o cerca nel catalogo.
+Search catalogue or enter a custom target	Cerca nel catalogo o immetti un target personalizzato
+Name	Nome
+Use target	Usa target
+Delete all archive data	Elimina tutti i dati dell'archivio
+Permanently delete this archive	Elimina definitivamente questo archivio
+Drag the slider fully right, then press Delete permanently.	Trascina il dispositivo di scorrimento completamente a destra, quindi premi Elimina definitivamente.
+Drag fully right to confirm deletion.	Trascina completamente a destra per confermare l'eliminazione.
+Delete permanently	Elimina definitivamente
+Archive cleared. Source folders and unindexed files retained.	Archivio svuotato. Le cartelle di origine e i file non indicizzati sono stati mantenuti.
+Some files were retained:\n	Alcuni file sono stati mantenuti:\n
+Some	Alcuni
+Archive reset	Archivio reimpostato
+Delete failed…	Elimina non riusciti…
+Purge non-raw files…	Elimina file non raw…
+Deletion history…	Cronologia eliminazioni…
+Fill missing metadata…	Completa metadati mancanti…
+Verify repository checksums	Verifica checksum dell'archivio
+Verifying repository	Verifica dell'archivio
+Repository verification	Verifica archivio
+All files match their recorded checksums.	Tutti i file corrispondono ai checksum registrati.
+Index an existing repository	Indicizza un archivio esistente
+Index supported image files in this repository without copying or moving them?\n\nUnknown telescope identities may need metadata corrections afterwards.	Indicizzare i file immagine supportati in questo archivio senza copiarli né spostarli?\n\nPer i telescopi non identificati potrebbe essere necessario correggere i metadati in seguito.
+Index existing files	Indicizza file esistenti
+Indexing report	Report di indicizzazione
+Indexing repository	Indicizzazione dell'archivio
+Export searchable catalogue CSV	Esporta catalogo CSV ricercabile
+Catalogue CSV exported.	Catalogo CSV esportato.
+Show selected file location	Mostra il percorso del file selezionato
+Save report	Salva report
+Importing	Importazione
+Elapsed	Trascorso
+Saving index	Salvataggio dell'indice
+Complete	Completato
+Elapsed time and ETA appear during processing.	Il tempo trascorso e il tempo rimanente vengono visualizzati durante l'elaborazione.
+EQ (likely)	EQ (probabile)
+Broadband	Banda larga
+Calibrated	Calibrato
+Stable field orientation; tested against the Alt/Az model.	Orientamento del campo stabile; verificato rispetto al modello Alt/Az.
+Device stack	Stack del dispositivo
+Alt/Az (likely)	Alt/Az (probabile)
+Uncalibrated	Non calibrato
+Export	Esporta
+Preferences sections	Sezioni delle preferenze
+All backups	Tutti i backup
+Last 5	Ultimi 5
+Last 10	Ultimi 10
+Last 30	Ultimi 30
+No backup recorded on this PC yet.	Nessun backup ancora registrato su questo PC.
+Backups	Backup
+Create a verified copy of the whole archive, including originals, Edited files and the current database. Choose a normal folder or lossless ZIP in the backup dialog.	Crea una copia verificata dell'intero archivio, inclusi gli originali, i file di Edited e il database corrente. Nella finestra di backup scegli una cartella normale o un file ZIP senza perdita di dati.
+Back up archive…	Esegui backup dell'archivio…
+Choose a repository in General to enable backups.	Scegli un archivio in Generale per attivare i backup.
+Automatic backups	Backup automatici
+While AstroArchive is open and idle, it repeats your backup on this schedule. If the backup drive is not connected, Activity reminds you instead.	Quando AstroArchive è aperto e inattivo, ripete il backup secondo questa pianificazione. Se l'unità di backup non è connessa, riceverai invece un promemoria in Attività.
+Back up automatically	Esegui backup automaticamente
+Backup folder	Cartella di backup
+Choose backup folder…	Scegli cartella di backup…
+Choose a backup destination outside the archive	Scegli una destinazione di backup esterna all'archivio
+Compress as ZIP (lossless)	Comprimi come ZIP (senza perdita)
+The first backup in a folder is complete. Later folder backups share unchanged files with the previous backup, so each stays complete on its own; later ZIPs build on the earlier ZIPs in the same folder.	Il primo backup in una cartella è completo. I backup successivi in cartella condividono i file non modificati con il backup precedente, quindi ognuno resta completo di per sé; i file ZIP successivi si basano su quelli precedenti nella stessa cartella.
+Keep	Mantieni
+Older backups of this archive are removed after each backup, except earlier ZIPs that newer ones still need. Other files in the folder are never touched.	Dopo ogni backup, i backup meno recenti di questo archivio vengono rimossi, tranne i file ZIP precedenti ancora necessari a quelli più recenti. Gli altri file nella cartella non vengono mai toccati.
+Restore a backup	Ripristina un backup
+Restore a backup…	Ripristina un backup…
+Originals protection	Protezione degli originali
+Open an archive to protect originals or create a backup.	Apri un archivio per proteggere gli originali o creare un backup.
+Optional Windows protection helps prevent deleting or renaming archived originals in File Explorer. Edited files, Dump and archive metadata remain writable. Protection is separate from a backup.	La protezione facoltativa di Windows aiuta a impedire l'eliminazione o la ridenominazione degli originali archiviati in Esplora file. I file di Edited, Dump e i metadati dell'archivio restano scrivibili. La protezione non sostituisce un backup.
+Turn off protection…	Disattiva protezione…
+Protect originals…	Proteggi originali…
+Choose a backup folder for automatic backups.	Scegli una cartella per i backup automatici.
+Protect archived originals	Proteggi gli originali archiviati
+Turn off archive protection	Disattiva la protezione dell'archivio
+Remove deletion protection	Rimuovi la protezione dall'eliminazione
+Windows will block deletion and renaming of archived originals in File Explorer for this account. AstroArchive can still apply metadata changes and confirmed deletions. Reading, previewing and copying images continue normally.	Windows bloccherà l'eliminazione e la ridenominazione degli originali archiviati in Esplora file per questo account. AstroArchive può comunque applicare modifiche ai metadati ed eliminazioni confermate. La lettura, l'anteprima e la copia delle immagini continuano normalmente.
+Archived originals will use their previous deletion permissions. Existing images and backups are kept.	Gli originali archiviati useranno le autorizzazioni di eliminazione precedenti. Le immagini e i backup esistenti vengono conservati.
+This requires a local NTFS drive. Applying protection to a large archive can take a while; there is no background scan once it is applied. The Windows owner can deliberately change permissions, so keep a backup too.	È necessaria un'unità NTFS locale. L'applicazione della protezione a un archivio di grandi dimensioni può richiedere tempo; una volta applicata, non viene eseguita alcuna scansione in background. Il proprietario di Windows può modificare deliberatamente le autorizzazioni, quindi conserva anche un backup.
+Removing protection may take a while. Once started, it finishes restoring permissions even if Cancel is pressed.	La rimozione della protezione può richiedere tempo. Una volta avviata, il ripristino delle autorizzazioni viene completato anche se premi Annulla.
+Protect originals	Proteggi originali
+Turn off protection	Disattiva protezione
+Protection change canceled. Previous permissions restored.	Modifica della protezione annullata. Autorizzazioni precedenti ripristinate.
+Protecting originals	Protezione degli originali in corso
+Removing protection	Rimozione della protezione
+Archived originals are protected.	Gli originali archiviati sono protetti.
+Archive protection is off.	La protezione dell'archivio è disattivata.
+Backup canceled. Existing backups are kept.	Backup annullato. I backup esistenti vengono conservati.
+Automatic backup	Backup automatico
+Restore this backup	Ripristina questo backup
+Back up archive	Backup dell'archivio
+Create a recoverable backup	Crea un backup ripristinabile
+Copies originals, edited files and the current archive database. Choose a folder outside the archive; a separate drive is best.	Copia gli originali, i file elaborati e il database corrente dell'archivio. Scegli una cartella esterna all'archivio; l'ideale è un'unità separata.
+Large backups can take a long time to create and verify. You can cancel safely.	La creazione e la verifica di backup di grandi dimensioni possono richiedere molto tempo. Puoi annullare in sicurezza.
+Save backup in	Salva backup in
+Without compression, the backup is a normal folder. ZIP compression preserves every image byte, including resolution and metadata.	Senza compressione, il backup è una normale cartella. La compressione ZIP mantiene ogni byte delle immagini, inclusi risoluzione e metadati.
+The first backup in a folder is complete. Later backups copy only what changed since the previous backup there, yet each folder backup stays complete on its own.	Il primo backup in una cartella è completo. I backup successivi copiano solo ciò che è cambiato dal backup precedente in quella cartella, ma ogni backup resta completo di per sé.
+Create backup	Crea backup
+Choose a backup folder first.	Scegli prima una cartella di backup.
+Choose a backup folder	Scegli una cartella di backup
+Keep this backup up to date	Mantieni aggiornato questo backup
+Back up automatically?	Eseguire il backup automaticamente?
+How often	Frequenza
+Daily	Ogni giorno
+Weekly	Ogni settimana
+Monthly	Ogni mese
+Change this any time in Settings > Backups.	Puoi modificare questa opzione in qualsiasi momento in Impostazioni > Backup.
+Turn on	Attiva
+Choose a backup to restore	Scegli un backup da ripristinare
+This backup lists no files.	Questo backup non elenca alcun file.
+Choose folder…	Scegli cartella…
+Choose where to create the restored archive	Scegli dove creare l'archivio ripristinato
+New folder name	Nome della nuova cartella
+Choose an existing folder to restore into.	Scegli una cartella esistente in cui eseguire il ripristino.
+Restore outside the backup folder.	Esegui il ripristino all'esterno della cartella di backup.
+Restore canceled. The backup is unchanged and the incomplete restore was removed.	Ripristino annullato. Il backup non è stato modificato e il ripristino incompleto è stato rimosso.
+Restoring backup	Ripristino del backup
+Backup restored	Backup ripristinato
+Restored archive could not open	Impossibile aprire l'archivio ripristinato
+Choose a backup folder in Settings > Backups.	Scegli una cartella di backup in Impostazioni > Backup.
+Backup due	Backup da eseguire
+Backup settings	Impostazioni di backup
+Kind	Categoria
+CAPABILITIES	FUNZIONALITÀ
+CAMERA MODEL	MODELLO CAMERA
+CAMERA ID	ID CAMERA
+TELESCOPE MODEL	MODELLO TELESCOPIO
+READOUT MODE	MODALITÀ DI LETTURA
+OPTICAL CONFIGURATION	CONFIGURAZIONE OTTICA
+UTC CAPTURE TIME	ORA ACQUISIZIONE UTC
+TIMEZONE	FUSO ORARIO
+OBJECT	OGGETTO
+STATUS	STATO
+REVIEW	VERIFICA
+TELESCOPE	TELESCOPIO
+TYPE	TIPO
+DATE	DATA
+RECORDED CAPTURE TIME	ORA ACQUISIZIONE REGISTRATA
+EXPOSURE	ESPOSIZIONE
+TEMPERATURE	TEMPERATURA
+FILTER	FILTRO
+CALIBRATION	CALIBRAZIONE
+DIMENSIONS	DIMENSIONI
+BAYER PATTERN	MATRICE BAYER
+MOUNT	MONTATURA
+SESSION	SESSIONE
+SIZE (BYTES)	DIMENSIONI (BYTE)
+SCREENING ISSUE	PROBLEMA RILEVATO
+SOURCE ACTION	AZIONE SULL'ORIGINE
+REPOSITORY PATH	PERCORSO ARCHIVIO
+NOTES	NOTE
+STARRED	PREFERITO
+TAGS	TAG
+NOTE	NOTA
+Choose columns; drag headers to reorder.	Scegli le colonne; trascina le intestazioni per riordinarle.
+Drag headings to rearrange	Trascina le intestazioni per riordinarle
+Move heading left	Sposta intestazione a sinistra
+Move heading right	Sposta intestazione a destra
+More headings	Altre intestazioni
+Restore default columns	Ripristina colonne predefinite
+Clear filters	Cancella filtri
+Done	Fatto
+Advanced capture settings	Impostazioni di acquisizione avanzate
+Read missing dates from FITS	Leggi le date mancanti dai FITS
+Fields shared by every capture are hidden. Search and other filters stay in effect.	I campi comuni a tutte le acquisizioni sono nascosti. La ricerca e gli altri filtri restano attivi.
+Image size	Dimensioni immagine
+All	Tutti
+Session	Sessione
+Review	Verifica
+No issues flagged	Nessun problema segnalato
+May include unscreened captures.	Può includere acquisizioni non controllate.
+Selected session unavailable	Sessione selezionata non disponibile
+No matching captures. Clear this filter to show others.	Nessuna acquisizione corrispondente. Cancella questo filtro per mostrarne altre.
+Label	Etichetta
+Description	Descrizione
+Exposure (seconds)	Esposizione (secondi)
+Any value	Qualsiasi valore
+Known values only	Solo valori noti
+Between limits	Tra i limiti
+Unknown only	Solo sconosciuti
+Include unknown values	Includi valori sconosciuti
+No known values	Nessun valore noto
+Choose image / frame	Scegli immagine / frame
+Preview unavailable	Anteprima non disponibile
+File metadata	Metadati del file
+Frame / slice number (1-based)	Numero frame / sezione (a partire da 1)
+Load preview	Carica anteprima
+Reading image…	Lettura dell'immagine…
+View metadata and evidence	Visualizza metadati e prove
+Metadata and evidence	Metadati e prove
+Use previewed image for analysis and export	Usa l'immagine in anteprima per analisi ed esportazione
+Load an image first.	Carica prima un'immagine.
+Image selection saved.	Selezione dell'immagine salvata.
+Only accepted candidates are supplied automatically. Missing settings require metadata review.	Solo i candidati accettati vengono forniti automaticamente. Le impostazioni mancanti richiedono una verifica dei metadati.
+Dark flats are evaluated against raw flats after matching those flats to lights.	I dark flat vengono valutati rispetto ai flat non elaborati dopo l'abbinamento di tali flat ai light.
+No calibration files for this physical device and camera channel.	Nessun file di calibrazione per questo dispositivo fisico e canale della camera.
+Review shows up to 20 input groups and 200 candidates per group. Export evaluates every candidate.	La verifica mostra fino a 20 gruppi di input e 200 candidati per gruppo. L'esportazione valuta tutti i candidati.
+Legacy record; re-detect metadata to populate evidence.	Record legacy; rileva di nuovo i metadati per compilare le prove.
+Review detected metadata	Verifica metadati rilevati
+Recorded user overrides stay in place. Unchecked fields keep indexed values. Older, unattributed settings are kept by default and flagged for review. Image geometry follows the decoded container.	Le modifiche manuali registrate restano invariate. I campi non selezionati mantengono i valori indicizzati. Le impostazioni meno recenti e non attribuite vengono mantenute per impostazione predefinita e segnalate per la verifica. La geometria dell'immagine segue il contenitore decodificato.
+Apply	Applica
+Field	Campo
+Before	Prima
+After	Dopo
+Apply reviewed metadata	Applica metadati verificati
+Dump folder import	Importazione della cartella Dump
+Dump folder: files retained for review	Cartella Dump: file mantenuti per la verifica
+Enter positive exposure seconds using a decimal point.	Immetti un numero positivo di secondi di esposizione usando il punto come separatore decimale.
+Enter a positive whole-number sub count.	Immetti un numero intero positivo di pose.
+Keep existing	Mantieni esistenti
+Target (object ID or common name)	Target (ID oggetto o nome comune)
+Filters / channels	Filtri / canali
+Image class	Classe immagine
+Edited image	Immagine elaborata
+Stars only	Solo stelle
+Meteor	Meteora
+Unknown (conflicting labels)	Sconosciuto (etichette in conflitto)
+Total exposure seconds (optional)	Secondi di esposizione totale (facoltativo)
+Sub count (optional)	Numero di pose (facoltativo)
+Exposure per sub in seconds (optional)	Esposizione per posa in secondi (facoltativo)
+RA (as recorded, optional)	AR (come registrata, facoltativo)
+Dec (as recorded, optional)	Dec (come registrata, facoltativo)
+Save metadata	Salva metadati
+Edited metadata saved.	Metadati delle immagini elaborate salvati.
+Export files…	Esporta file…
+Delete files…	Elimina file…
+Delete selected Edited copies; keep source originals and archived captures.	Elimina le copie selezionate in Edited; mantieni gli originali di origine e le acquisizioni archiviate.
+Export files	Esporta file
+Delete selected Edited files	Elimina i file di Edited selezionati
+This permanently removes the selected Edited copies. Source copies, archived originals, other Edited files and project source metadata stay. Cloud-synced deletions propagate to the cloud.	Questa operazione rimuove definitivamente le copie selezionate in Edited. Le copie di origine, gli originali archiviati, gli altri file di Edited e i metadati di origine del progetto restano. Le eliminazioni sincronizzate con il cloud vengono propagate al cloud.
+Delete selected files	Elimina file selezionati
+Edited file deletion report	Report di eliminazione dei file di Edited
+Deleting Edited files	Eliminazione dei file di Edited
+Select an edited image.	Seleziona un'immagine elaborata.
+Loading image…	Caricamento dell'immagine…
+Auto per channel	Automatico per canale
+Linear	Lineare
+Preview unavailable\n\n	Anteprima non disponibile\n\n
+All images	Tutte le immagini
+Add images to Edited.	Aggiungi immagini a Edited.
+Open image folder.	Apri la cartella delle immagini.
+Clear search, image-class filter and target selection.	Cancella la ricerca, il filtro per classe di immagine e la selezione del target.
+Add edited images	Aggiungi immagini elaborate
+Edited image import	Importazione di immagini elaborate
+Import edited images	Importa immagini elaborate
+Import files from a folder	Importa file da una cartella
+Choose a folder of existing edited images	Scegli una cartella di immagini elaborate esistenti
+Include subfolders	Includi sottocartelle
+Scan first, then review images before copying. Repository/database folders and files already archived are skipped. Source files are retained.	Esegui prima la scansione, quindi verifica le immagini prima di copiarle. Le cartelle dell'archivio/database e i file già archiviati vengono ignorati. I file di origine vengono mantenuti.
+Choose an existing source folder.	Scegli una cartella di origine esistente.
+Edited images ready to review	Immagini elaborate pronte per la verifica
+Import existing edited images	Importa immagini elaborate esistenti
+Import selected images	Importa immagini selezionate
+Select readable images to add.	Seleziona le immagini leggibili da aggiungere.
+Exclude duplicates and images with a reported problem before importing.	Escludi i duplicati e le immagini con un problema segnalato prima dell'importazione.
+Results kept for later review.	Risultati mantenuti per una verifica successiva.
+Edited folder import	Importazione di una cartella in Edited
+Include	Includi
+Filename	Nome file
+Status	Stato
+Object	Oggetto
+Edited duplicate checks	Controlli dei duplicati in Edited
+Create Edited working copies	Crea copie di lavoro in Edited
+Create working copies for your editor	Crea copie di lavoro per il tuo editor
+Copy and verify the selected archived images into Edited, then open their folder. Load these copies in your preferred editor and save outputs alongside them.	Copia e verifica le immagini archiviate selezionate in Edited, quindi apri la relativa cartella. Carica queste copie nel tuo editor preferito e salva i risultati accanto a esse.
+Create working copies	Crea copie di lavoro
+Edited working copies	Copie di lavoro in Edited
+Other editor	Altro editor
+Edited working copies are ready.	Le copie di lavoro in Edited sono pronte.
+Operation diagnostics	Diagnostica operazioni
+Last operation	Ultima operazione
+Report a problem	Segnala un problema
+Review the diagnostic report before opening GitHub. No images, repository files, or repository paths are included; exception text may still contain sensitive values. Opening the draft sends the displayed details to GitHub. You can edit the issue before submitting it, or cancel now.	Controlla il report diagnostico prima di aprire GitHub. Non sono inclusi immagini, file o percorsi dell'archivio; il testo delle eccezioni potrebbe comunque contenere valori sensibili. L'apertura della bozza invia a GitHub i dettagli visualizzati. Puoi modificare la segnalazione prima di inviarla oppure annullare ora.
+Open GitHub draft	Apri bozza su GitHub
+Open a prefilled GitHub issue draft with the displayed diagnostic report	Apri una bozza di segnalazione GitHub precompilata con il report diagnostico visualizzato
+Could not open GitHub. The report has not been sent.\n\n	Impossibile aprire GitHub. Il report non è stato inviato.\n\n
+Application location	Percorso dell'applicazione
+Opens the selected Edited images in your chosen app. Save results in their image folders.	Apre le immagini selezionate di Edited nell'app scelta. Salva i risultati nelle rispettive cartelle delle immagini.
+Creates verified working copies in Edited, then opens them in your chosen app. Save processed results alongside the copies.	Crea copie di lavoro verificate in Edited, quindi le apre nell'app scelta. Salva i risultati elaborati accanto alle copie.
+Choose an application…	Scegli un'applicazione…
+Choose a compatible destination. Unavailable destinations below explain their restrictions.	Scegli una destinazione compatibile. Le destinazioni non disponibili riportate sotto ne spiegano le restrizioni.
+Unavailable destinations (	Destinazioni non disponibili (
+Use this as my default for subframe folders	Usa come predefinita per le cartelle di pose
+Use this as my default for these file types	Usa come predefinita per questi tipi di file
+Include matching calibration files	Includi i file di calibrazione corrispondenti
+More options	Altre opzioni
+Include calibrations when the subframe calibration state is unknown	Includi i frame di calibrazione quando lo stato di calibrazione delle pose è sconosciuto
+Export preferences…	Preferenze di esportazione…
+Choose an application.	Scegli un'applicazione.
+Subframe folders	Cartelle di pose
+Files	File
+DSS capture groups are ready	I gruppi di acquisizione DSS sono pronti
+Processor handoff	Passaggio al software di elaborazione
+Using the exported inputs	Uso degli input esportati
+Each group has its own DSS file list and matching calibrations. Open a group to register and stack it separately. All lists are kept in the exported folder.	Ogni gruppo ha il proprio elenco di file DSS e i frame di calibrazione corrispondenti. Apri un gruppo per registrarlo e sommarlo separatamente. Tutti gli elenchi vengono mantenuti nella cartella esportata.
+Capture group	Gruppo di acquisizione
+Open selected group in DSS	Apri il gruppo selezionato in DSS
+DSS unavailable	DSS non disponibile
+Open exported folder	Apri la cartella esportata
+Default applications	Applicazioni predefinite
+Choose an app by file type. Mixed selections ask unless they share a compatible default.	Scegli un'app per tipo di file. Per le selezioni miste viene chiesto ogni volta, a meno che non condividano un'app predefinita compatibile.
+Ask each time	Chiedi ogni volta
+Application locations	Percorsi delle applicazioni
+Leave the path empty for automatic detection. Export asks you to locate an app if it cannot be found.	Lascia vuoto il percorso per il rilevamento automatico. Se un'app non viene trovata, l'esportazione ti chiede di individuarla.
+Application	Applicazione
+Executable path (optional)	Percorso dell'eseguibile (facoltativo)
+Automatic detection.	Rilevamento automatico.
+Configured location.	Percorso configurato.
+Unavailable. Export will ask you to locate the app.	Non disponibile. L'esportazione ti chiederà di individuare l'app.
+Browse…	Sfoglia…
+Find automatically	Trova automaticamente
+Not found. Browse to the application's GUI executable.	Non trovata. Individua l'eseguibile con interfaccia grafica dell'applicazione.
+Use automatic detection	Usa il rilevamento automatico
+Automatic detection will be used when exporting.	Durante l'esportazione verrà usato il rilevamento automatico.
+Preview…	Anteprima…
+Create Edited copies…	Crea copie in Edited…
+Open file location	Apri percorso file
+More actions	Altre azioni
+Copy file paths	Copia percorsi file
+Identify target…	Identifica target…
+Review detected metadata…	Verifica metadati rilevati…
+Choose HDU / page / frame…	Scegli HDU / pagina / frame…
+Exporting catalogue CSV	Esportazione del catalogo CSV
+This file is missing from the repository.	Questo file non è presente nell'archivio.
+File unavailable	File non disponibile
+Destination folder	Cartella di destinazione
+Choose an export destination	Scegli una destinazione di esportazione
+Add Metadata	Aggiungi metadati
+Include a manifest, companion metadata and workflow notes.	Includi un manifesto, i metadati associati e le note sul flusso di lavoro.
+Open with… after export	Apri con… dopo l'esportazione
+None	Nessuno
+Open one exported FITS stack in Siril. Multiple stacks and subs-only exports cannot open a single image.	Apri uno stack FITS esportato in Siril. Le esportazioni con più stack o con sole pose non possono aprire una singola immagine.
+Siril did not start.	Siril non si è avviato.
+Siril handoff	Passaggio a Siril
+Export stacking folder	Esporta cartella di stacking
+Multiple targets	Più target
+Inputs	Input
+Subs	Pose
+Stacks	Stack
+Both	Entrambi
+Stacks and subs are exported separately. Do not combine stacks with their constituent subs or overlapping live-stack snapshots.	Stack e pose vengono esportati separatamente. Non combinare gli stack con le pose che li compongono o con snapshot sovrapposti del live stacking.
+Include matching calibrations	Includi frame di calibrazione corrispondenti
+Convert supported images to FITS	Converti le immagini supportate in FITS
+Creates derived FITS from linear, decodable inputs. Archived originals stay unchanged.	Crea FITS derivati da input lineari e decodificabili. Gli originali archiviati restano invariati.
+Confirm unknown-state subs are uncalibrated	Conferma che le pose con stato sconosciuto non sono calibrate
+Enable only if these subs have not already been calibrated.	Attiva solo se queste pose non sono già state calibrate.
+Separate sessions into folders	Separa le sessioni in cartelle
+Include rejected/reference files	Includi file scartati/di riferimento
+Review calibration matches…	Verifica abbinamenti di calibrazione…
+Calibration matching	Abbinamento della calibrazione
+Stacks receive no additional calibration.	Gli stack non ricevono alcuna calibrazione aggiuntiva.
+No calibration files available.	Nessun file di calibrazione disponibile.
+Calibration files omitted.	File di calibrazione omessi.
+No matching calibration files. Review calibration matches for the reason.	Nessun file di calibrazione corrispondente. Verifica gli abbinamenti di calibrazione per conoscerne il motivo.
+This input choice has no eligible files.	Questa scelta di input non ha file idonei.
+Stacking folder is ready. Files copied and verified.	La cartella di stacking è pronta. File copiati e verificati.
+Files exported and verified.	File esportati e verificati.
+Export complete	Esportazione completata
+Stacking folder ready	Cartella di stacking pronta
+Files exported	File esportati
+Copied and verified.	Copiati e verificati.
+Folder unavailable	Cartella non disponibile
+No repository filenames contain 'failed'.	Nessun nome file dell'archivio contiene 'failed'.
+No PNG/JPG/JPEG/MP4 files are indexed in this repository.	In questo archivio non sono indicizzati file PNG/JPG/JPEG/MP4.
+Purge non-raw files	Elimina file non raw
+Delete failed	Elimina non riusciti
+Searches the entire active repository for filenames containing 'failed', regardless of case. Current filters and telescope selection do not limit this action.	Cerca in tutto l'archivio attivo i nomi file che contengono 'failed', senza distinzione tra maiuscole e minuscole. I filtri correnti e la selezione del telescopio non limitano questa azione.
+Finds indexed PNG/JPG/JPEG/MP4 files in the entire active repository, regardless of case or current filters. Edited images, FITS, TIFF, XISF, SER and camera RAW files are excluded from this purge.	Trova i file PNG/JPG/JPEG/MP4 indicizzati in tutto l'archivio attivo, indipendentemente da maiuscole/minuscole e dai filtri correnti. Le immagini elaborate e i file FITS, TIFF, XISF, SER e RAW della fotocamera sono esclusi da questa eliminazione.
+This permanently removes the selected repository copies. Deletion history is retained so future telescope imports skip the same captures. Source copies, other archive files and shared session metadata stay. Cloud-synced deletions propagate to the cloud.	Questa operazione rimuove definitivamente le copie selezionate dall'archivio. La cronologia delle eliminazioni viene mantenuta, così le future importazioni dal telescopio ignorano le stesse acquisizioni. Le copie di origine, gli altri file dell'archivio e i metadati condivisi delle sessioni restano. Le eliminazioni sincronizzate con il cloud vengono propagate al cloud.
+Delete failed files	Elimina file non riusciti
+File deletion report	Report di eliminazione dei file
+Import option saved. Scan the source folder again to apply it.	Opzione di importazione salvata. Esegui di nuovo la scansione della cartella di origine per applicarla.
+Search import results...	Cerca nei risultati dell'importazione...
+Select a capture to see screening or import details.	Seleziona un'acquisizione per visualizzare i dettagli del controllo o dell'importazione.
+Row selection does not limit imports. Search and filters choose the ready files.	La selezione delle righe non limita le importazioni. La ricerca e i filtri scelgono i file pronti.
+Edit selected metadata…	Modifica metadati selezionati…
+Identify selected targets…	Identifica target selezionati…
+Scan report…	Report di scansione…
+Scan report	Report di scansione
+Scan a folder first.	Esegui prima la scansione di una cartella.
+All supported files were read successfully.	Tutti i file supportati sono stati letti correttamente.
+Help article	Articolo della guida
+Search the guide…	Cerca nella guida…
+Help for this page (F1)	Guida per questa pagina (F1)
+Report a problem…	Segnala un problema…
+User-submitted problem	Problema segnalato dall'utente
+Getting started	Introduzione
+START HERE	INIZIA DA QUI
+USB and saved telescopes	USB e telescopi salvati
+USB TRANSFER AND SAVED TELESCOPES	TRASFERIMENTO USB E TELESCOPI SALVATI
+Image preview and tables	Anteprima immagini e tabelle
+IMAGE PREVIEW AND TABLES	ANTEPRIMA IMMAGINI E TABELLE
+Stacking projects	Progetti di stacking
+STACKING PROJECTS AND SESSIONS	PROGETTI DI STACKING E SESSIONI
+Troubleshooting	Risoluzione dei problemi
+KEYBOARD SHORTCUTS	TASTI DI SCELTA RAPIDA
+Frame types and glossary	Tipi di frame e glossario
+FRAME TYPES AND GLOSSARY	TIPI DI FRAME E GLOSSARIO
+EDITED IMAGES AND WORKING COPIES	IMMAGINI ELABORATE E COPIE DI LAVORO
+IMPORT WORKFLOW	FLUSSO DI IMPORTAZIONE
+LIBRARY WORKFLOW	FLUSSO DELLA LIBRERIA
+No topics match	Nessun argomento corrispondente
+AstroArchive Guide / Help	Guida di AstroArchive
+Search help	Cerca nella guida
+Search the guide (Ctrl+F).	Cerca nella guida (Ctrl+F).
+Show all topics.	Mostra tutti gli argomenti.
+Choose a topic.	Scegli un argomento.
+Copy selected text with Ctrl+C.	Copia il testo selezionato con Ctrl+C.
+Save guide…	Salva guida…
+Save the complete guide.	Salva la guida completa.
+Close help (Esc).	Chiudi la guida (Esc).
+Title	Titolo
+No matching topics	Nessun argomento corrispondente
+No topics match your search. Try fewer words, or **Clear** to browse the guide.	Nessun argomento corrisponde alla ricerca. Prova con meno parole oppure usa **Cancella** per sfogliare la guida.
+Guide could not be saved	Impossibile salvare la guida
+Loading preview…	Caricamento dell'anteprima…
+Confirm source removal	Conferma la rimozione dall'origine
+Delete after import is ON	Eliminazione dopo l'importazione ATTIVA
+Eligible source originals will be deleted after their archive copies are saved and verified. The archive copies will remain.	Gli originali idonei nell'origine verranno eliminati dopo il salvataggio e la verifica delle relative copie nell'archivio. Le copie nell'archivio verranno mantenute.
+Calibration originals always stay on the source/telescope. Changed or failed files also stay.	Gli originali di calibrazione restano sempre nell'origine/nel telescopio. Restano anche i file modificati o non riusciti.
+Dump processing also removes verified duplicate science files from Dump.	L'elaborazione di Dump rimuove anche da Dump i file scientifici duplicati verificati.
+Existing duplicates are kept on the source.	I duplicati esistenti vengono mantenuti nell'origine.
+Deletion in a cloud-synced source folder propagates to the cloud and other devices.	L'eliminazione in una cartella di origine sincronizzata con il cloud viene propagata al cloud e agli altri dispositivi.
+Import and delete eligible originals	Importa ed elimina originali idonei
+Target for Unknown light/stack captures	Target per le acquisizioni light/stack sconosciute
+Enter an object ID or name. Blank keeps Unknown.	Immetti un ID o un nome di oggetto. Se vuoto, resta Sconosciuto.
+Assign Unknown targets	Assegna target sconosciuti
+Apply to selected Unknown lights and stacks. Known targets and calibrations keep their labels.	Applica ai light e agli stack sconosciuti selezionati. I target noti e i frame di calibrazione mantengono le proprie etichette.
+Apply to the visible Unknown lights and stacks. Filter or select files first when they contain different targets.	Applica ai light e agli stack sconosciuti visibili. Se contengono target diversi, filtra o seleziona prima i file.
+Assign target	Assegna target
+Robust file matching (slower)	Confronto file approfondito (più lento)
+Check file/metadata changes and missing copies; off skips known names/DWARF sessions.	Controlla le modifiche a file/metadati e le copie mancanti; se disattivato, ignora i nomi noti e le sessioni DWARF.
+Import recovery needs attention	Il ripristino dell'importazione richiede attenzione
+Some import records could not be read. The records were retained.	Impossibile leggere alcuni record di importazione. I record sono stati mantenuti.
+Import recovery could not load	Impossibile caricare il ripristino dell'importazione
+Open Activity for recovery details.	Apri Attività per i dettagli sul ripristino.
+Remote	Remoto
+Paused	Sospeso
+Canceled. Completed archive copies and original source files are retained.	Annullato. Le copie completate nell'archivio e i file originali di origine sono stati mantenuti.
+Source	Origine
+Pausing	Sospensione
+Pausing safely; verified copies are retained…	Sospensione sicura; le copie verificate vengono mantenute…
+Pausing safely; verified downloads are retained…	Sospensione sicura; i download verificati vengono mantenuti…
+Configure the saved import's plate solver in Settings before resuming.	Prima di riprendere, configura in Impostazioni il software di plate solving dell'importazione salvata.
+Session summaries	Riepiloghi delle sessioni
+Show all files	Mostra tutti i file
+By target	Per target
+By target and session	Per target e sessione
+Videos	Video
+Subframes	Pose
+Other files	Altri file
+2 seconds	2 secondi
+5 seconds	5 secondi
+10 seconds	10 secondi
+30 seconds	30 secondi
+1 minute	1 minuto
+Choose the folder your capture software saves to.	Scegli la cartella in cui salva il tuo software di acquisizione.
+Choose a complete folder path, such as D:\\Astrophotography\\Captures.	Scegli un percorso di cartella completo, ad esempio D:\\Astrofotografia\\Acquisizioni.
+This folder path is not valid.	Questo percorso di cartella non è valido.
+This folder does not exist or is not available.	Questa cartella non esiste o non è disponibile.
+Choose a dedicated capture folder rather than a whole drive.	Scegli una cartella di acquisizione dedicata anziché un'intera unità.
+Choose a capture folder outside the repository. AstroArchive cannot watch its own archive or a folder that contains it.	Scegli una cartella di acquisizione esterna all'archivio. AstroArchive non può monitorare il proprio archivio o una cartella che lo contiene.
+Watch a capture folder	Monitora una cartella di acquisizione
+AstroArchive checks this folder and its subfolders, and imports each capture once it has stopped changing. Keep N.I.N.A., SharpCap, ASIAIR, Ekos or your other capture software saving here. Originals stay where they are.	AstroArchive controlla questa cartella e le sue sottocartelle e importa ogni acquisizione quando smette di cambiare. Lascia che N.I.N.A., SharpCap, ASIAIR, Ekos o un altro software di acquisizione continui a salvare qui. Gli originali restano dove sono.
+Capture folder	Cartella di acquisizione
+Capture folder to watch	Cartella di acquisizione da monitorare
+Choose the folder your capture software saves to	Scegli la cartella in cui salva il tuo software di acquisizione
+Save imports as (physical telescope ID)	Salva le importazioni come (ID telescopio fisico)
+Physical telescope ID for watched captures	ID telescopio fisico per le acquisizioni monitorate
+Also import captures already in this folder	Importa anche le acquisizioni già presenti in questa cartella
+Off: only captures saved after watching starts are imported. Scan folder imports earlier captures.	Disattivato: vengono importate solo le acquisizioni salvate dopo l'avvio del monitoraggio. Scansiona cartella importa le acquisizioni precedenti.
+Skip “failed” files	Salta i file “failed”
+Skip PNG/JPG/MP4	Salta PNG/JPG/MP4
+Saved import preference. Also applies to folder, USB, network and Dump imports.	Preferenza di importazione salvata. Si applica anche alle importazioni da cartella, USB, rete e Dump.
+Keep AstroArchive open and this PC awake while capturing. Stop watching from Activity at any time; completed imports are kept.	Durante le riprese tieni aperto AstroArchive e impedisci la sospensione del PC. Puoi interrompere il monitoraggio da Attività in qualsiasi momento; le importazioni completate vengono mantenute.
+AstroArchive checks this telescope folder and its subfolders, and imports each new capture once the telescope has finished saving it. Capture continues in the telescope app; originals stay on the telescope.	AstroArchive controlla questa cartella del telescopio e le sue sottocartelle e importa ogni nuova acquisizione non appena il telescopio ha finito di salvarla. L'acquisizione prosegue nell'app del telescopio; gli originali restano sul telescopio.
+Telescope folder	Cartella del telescopio
+Check for new captures every	Cerca nuove acquisizioni ogni
+Off: only captures saved after live import starts are imported. Select earlier captures and choose Import selected.	Disattivato: vengono importate solo le acquisizioni salvate dopo l'avvio dell'importazione in tempo reale. Seleziona le acquisizioni precedenti e scegli Importa selezionati.
+Keep AstroArchive open and this PC awake while capturing. Stop live import from Activity at any time; completed imports are kept.	Durante le riprese tieni aperto AstroArchive e impedisci la sospensione del PC. Puoi interrompere l'importazione in tempo reale da Attività in qualsiasi momento; le importazioni completate vengono mantenute.
+Start watching	Avvia monitoraggio
+Local folder	Cartella locale
+Folder watch could not start	Impossibile avviare il monitoraggio della cartella
+Windows language	Lingua di Windows
+Language	Lingua
+Applies after AstroArchive restarts. The offline guide stays in English.	Viene applicata al riavvio di AstroArchive. La guida offline resta in inglese.
+Observing town / city	Località di osservazione
+Select your nearest town or city. Its centre is used for rotation analysis; without a selection, capture location metadata is used when available.	Seleziona la località più vicina. Il suo centro viene usato per l'analisi della rotazione; in assenza di una selezione, vengono usati i metadati di posizione dell'acquisizione, se disponibili.
+Town / city	Località
+Saved location used for sky views and mount analysis.	Posizione salvata usata per le viste del cielo e l'analisi della montatura.
+Choose town / city…	Scegli località…
+Clear observing location	Cancella località di osservazione
+Choose observing town / city	Scegli la località di osservazione
+Search by name, region or country, then select the matching place. The list is available offline.	Cerca per nome, regione o paese, quindi seleziona la località corrispondente. L'elenco è disponibile offline.
+Find a town or city	Trova una località
+Enter a city and country or region.	Immetti una città e un paese o una regione.
+Double-click a place to use it.	Fai doppio clic su una località per usarla.
+Type at least two characters to find a place.	Digita almeno due caratteri per trovare una località.
+Place names and coordinates: GeoNames · CC BY 4.0. Covers towns/cities with at least 500 inhabitants and administrative seats worldwide.	Nomi e coordinate delle località: GeoNames · CC BY 4.0. Include città e paesi con almeno 500 abitanti e capoluoghi amministrativi di tutto il mondo.
+Use town / city	Usa località
+Select a town or city from the results first.	Seleziona prima una località dai risultati.
+Searching…	Ricerca in corso…
+No matches. Try a nearby town/city or a different spelling.	Nessuna corrispondenza. Prova con una località vicina o un'ortografia diversa.
+Showing the first 80 matches. Add a region or country to narrow the search.	Sono visualizzate le prime 80 corrispondenze. Aggiungi una regione o un paese per restringere la ricerca.
+Fill missing metadata	Completa metadati mancanti
+Find missing values in original file headers, recognised filenames and preserved session metadata. Known values and user edits stay in place; conflicts remain unknown. DSO and solar-system targets default to Tele when their camera is unknown.	Trova i valori mancanti nelle intestazioni dei file originali, nei nomi file riconosciuti e nei metadati di sessione conservati. I valori noti e le modifiche dell'utente restano invariati; i conflitti restano sconosciuti. Per i target del profondo cielo (DSO) e del sistema solare con camera sconosciuta viene usata per impostazione predefinita Tele.
+Files to check	File da controllare
+Entire repository	Intero archivio
+Preview the proposed additions before saving. This updates the catalogue and leaves the original files in place.	Visualizza in anteprima le aggiunte proposte prima di salvare. Questa operazione aggiorna il catalogo e lascia invariati i file originali.
+Preview missing metadata	Anteprima metadati mancanti
+Reading missing metadata	Lettura dei metadati mancanti
+Finding missing metadata	Ricerca dei metadati mancanti
+Review missing metadata	Verifica metadati mancanti
+Only these additions will be saved. Existing values and original files are preserved.	Verranno salvate solo queste aggiunte. I valori esistenti e i file originali vengono conservati.
+Value	Valore
+Saving missing metadata	Salvataggio dei metadati mancanti
+Missing metadata report	Report dei metadati mancanti
+Filling missing metadata	Completamento dei metadati mancanti
+Unique ID for this physical telescope, separate from its model.	ID univoco di questo telescopio fisico, distinto dal modello.
+Serial or unique ID for the physical camera; used for calibration matching.	Numero di serie o ID univoco della camera fisica; usato per l'abbinamento della calibrazione.
+Identify the optical setup, including reducers or adapters, to match flats.	Identifica la configurazione ottica, inclusi riduttori o adattatori, per abbinare i flat.
+Sensor crop and origin: x,y,width,height. Used for calibration matching.	Ritaglio e origine del sensore: x,y,larghezza,altezza. Usati per l'abbinamento della calibrazione.
+Sensor readout setting, such as high conversion gain.	Impostazione di lettura del sensore, ad esempio high conversion gain.
+Only confirmed linear acquisition data can be exported for stacking.	Per lo stacking è possibile esportare solo dati di acquisizione lineari confermati.
+Windows timezone ID, such as UTC or Eastern Standard Time. Converts recorded local capture times to UTC.	ID del fuso orario di Windows, ad esempio UTC o W. Europe Standard Time. Converte in UTC gli orari di acquisizione locali registrati.
+Calibrated or registered lights receive no additional calibration files.	I light calibrati o registrati non ricevono file di calibrazione aggiuntivi.
+Sensor colour-filter pattern, such as RGGB. Leave unknown patterns unassigned.	Matrice dei filtri colore del sensore, ad esempio RGGB. Non assegnare le matrici sconosciute.
+Unit of the recorded gain, such as dB or camera units.	Unità del gain registrato, ad esempio dB o unità della camera.
+Existing values are filled in. Mixed fields keep each file’s value until you enter a replacement. Blank fields keep existing values.	I valori esistenti sono già compilati. I campi misti mantengono il valore di ciascun file finché non immetti un valore sostitutivo. I campi vuoti mantengono i valori esistenti.
+Apply changes to entire selected sessions	Applica le modifiche a tutte le sessioni selezionate
+Reset changes	Reimposta modifiche
+Capture	Acquisizione
+Equipment	Attrezzatura
+Processing	Elaborazione
+Current metadata	Metadati correnti
+Inspect the recorded values and their sources for any selected file. This view does not change the batch edit fields.	Esamina i valori registrati e le relative origini per qualsiasi file selezionato. Questa visualizzazione non modifica i campi della modifica in batch.
+Check metadata	Controlla metadati
+Metadata	Metadati
+Not recorded	Non registrato
+Suggested / inferred · select EQ or Alt-Az to confirm	Suggerito / dedotto · seleziona EQ o Alt-Az per confermare
+Mixed values stay unchanged until replaced.	I valori misti restano invariati finché non vengono sostituiti.
+Blank keeps existing values.	Se vuoto, mantiene i valori esistenti.
+No changes yet	Nessuna modifica
+Preview paused while editing metadata.	Anteprima sospesa durante la modifica dei metadati.
+No metadata changes.	Nessuna modifica ai metadati.
+New Moon	Luna nuova
+Full Moon	Luna piena
+First quarter	Primo quarto
+Last quarter	Ultimo quarto
+Illumination	Illuminazione
+Waxing	Crescente
+Southern	Australe
+Target elevation	Altezza del target
+Moon elevation	Altezza della Luna
+Moon to target	Distanza Luna-target
+Choose an observing town / city in Settings > Sky & solving for elevations.	Per le altezze, scegli una località di osservazione in Impostazioni > Cielo e plate solving.
+Geometric elevations at the capture time; refraction excluded.	Altezze geometriche al momento dell'acquisizione; rifrazione esclusa.
+GIF exceeds the 4,096-frame preview limit.	La GIF supera il limite di anteprima di 4.096 frame.
+GIF frame lies outside its canvas.	Il frame della GIF si trova all'esterno dell'area di disegno.
+Switch page (Ctrl+1–3).	Cambia pagina (Ctrl+1–3).
+Open Preferences.	Apri Preferenze.
+Support AstroArchive on Ko-fi.	Sostieni AstroArchive su Ko-fi.
+Choose a source and review imports.	Scegli un'origine e verifica le importazioni.
+Export archived files; import scanned files first.	Esporta i file archiviati; importa prima i file scansionati.
+Robust scan checks file changes and missing archive copies.	La scansione approfondita controlla le modifiche ai file e le copie mancanti nell'archivio.
+Quick scan skips archived filenames and known DWARF sessions. Use Full rescan to check changes.	La scansione rapida ignora i nomi file archiviati e le sessioni DWARF note. Usa Nuova scansione completa per controllare le modifiche.
+Wait for the current operation to finish.	Attendi il completamento dell'operazione corrente.
+Open repository folder\n	Apri la cartella dell'archivio\n
+Delete after import ON · Calibration kept	Eliminazione dopo importazione ATTIVA · Calibrazione conservata
+Originals kept	Originali conservati
+Flagged captures excluded	Acquisizioni segnalate escluse
+Flagged captures included	Acquisizioni segnalate incluse
+Failed filenames ignored	File “failed” ignorati
+Failed filenames included	File “failed” inclusi
+Robust matching	Confronto approfondito
+Filename matching	Confronto per nome file
+Connect telescope over network…	Connetti telescopio in rete…
+Watch a capture folder…	Monitora una cartella di acquisizione…
+Telescope import progress…	Avanzamento importazione dal telescopio…
+Scan source	Scansiona origine
+Import ready files	Importa file pronti
+Connected telescopes	Telescopi connessi
+Refresh devices	Aggiorna dispositivi
+No telescope storage detected	Nessuna memoria del telescopio rilevata
+Saved telescopes	Telescopi salvati
+Save current telescope…	Salva telescopio corrente…
+Rename telescope…	Rinomina telescopio…
+Review and repair	Verifica e riparazione
+Review flagged files…	Verifica file segnalati…
+Screen files	Controlla file
+Full rescan	Nuova scansione completa
+Dump folder	Cartella Dump
+Process files	Elabora file
+Catalogue CSV	Catalogo CSV
+Selected / visible files…	File selezionati / visibili…
+Entire repository…	Intero archivio…
+Group subs by session	Raggruppa pose per sessione
+Filters…	Filtri…
+Review and analysis	Verifica e analisi
+Identify targets…	Identifica target…
+Analyse rotation…	Analizza rotazione…
+Maintenance	Manutenzione
+Delete archive data…	Elimina dati dell'archivio…
+Diagnostics	Diagnostica
+Last operation…	Ultima operazione…
+Last import report…	Ultimo report di importazione…
+Help…	Guida…
+Interactive walkthrough…	Tour guidato interattivo…
+About AstroArchive…	Informazioni su AstroArchive…
+Folder could not be opened	Impossibile aprire la cartella
+Browser could not be opened	Impossibile aprire il browser
+Left/Right switches panes at table edges. Ctrl+Left/Right or Up/Down pans; F fits; plus/minus zooms. Drag to pan; scroll or pinch to zoom.	Sinistra/Destra cambia riquadro ai bordi della tabella. Ctrl+Sinistra/Destra o Su/Giù sposta la vista; F adatta; più/meno esegue lo zoom. Trascina per spostare la vista; scorri o avvicina le dita per lo zoom.
+Ignore failed filenames	Ignora i file “failed”
+Ignore PNG/JPG/JPEG/MP4 files	Ignora i file PNG/JPG/JPEG/MP4
+Copy workers	Processi di copia
+Auto benchmarks parallel copies and remembers the fastest setting for compatible storage.	Automatico misura le prestazioni delle copie parallele e memorizza l'impostazione più veloce per le unità compatibili.
+Running telescope imports keep their current settings. New defaults apply to imports started after you save.	Le importazioni dal telescopio in corso mantengono le impostazioni attuali. Le nuove impostazioni predefinite si applicano alle importazioni avviate dopo il salvataggio.
+Current import options	Opzioni di importazione correnti
+Applies to the current source and next manual import.	Si applica all'origine corrente e alla prossima importazione manuale.
+Instrument model	Modello dello strumento
+Camera channel	Canale della camera
+Fill Unknown lights/stacks only. Leave blank for mixed-target scans.	Compila solo i light/stack sconosciuti. Lascia vuoto per le scansioni con target misti.
+Target analysis	Analisi dei target
+Edited imports always keep source files. Delete after import does not apply to Edited.	Le importazioni in Edited mantengono sempre i file di origine. L'eliminazione dopo l'importazione non si applica a Edited.
+Originals are kept by default. Removal affects newly imported, verified files only; calibration originals are always kept. The option resets when the source changes. You will confirm source removal before the import starts. Cloud-synced deletions propagate.	Per impostazione predefinita gli originali vengono conservati. La rimozione riguarda solo i file appena importati e verificati; gli originali di calibrazione vengono sempre conservati. L'opzione viene reimpostata quando cambia l'origine. Dovrai confermare la rimozione dall'origine prima dell'avvio dell'importazione. Le eliminazioni sincronizzate con il cloud vengono propagate.
+On — verified source originals will be deleted; calibration originals stay.	Attivato — gli originali verificati nell'origine verranno eliminati; gli originali di calibrazione restano.
+Off — source originals will be kept.	Disattivato — gli originali nell'origine verranno conservati.
+Preferences	Preferenze
+General	Generale
+Sky & solving	Cielo e plate solving
+Updates	Aggiornamenti
+Theme	Tema
+Show image preview	Mostra anteprima immagine
+Repository folder	Cartella dell'archivio
+Choose repository…	Scegli archivio…
+Choose your repository	Scegli l'archivio
+Stop all imports before switching repositories.	Interrompi tutte le importazioni prima di cambiare archivio.
+Close the current dialog before changing repositories.	Chiudi la finestra di dialogo corrente prima di cambiare archivio.
+Changes take effect when you save preferences. Click the path on the main page to open the folder.	Le modifiche diventano effettive quando salvi le preferenze. Fai clic sul percorso nella pagina principale per aprire la cartella.
+Image compatibility	Compatibilità immagini
+Supported formats…	Formati supportati…
+Open codec folder	Apri cartella dei codec
+Default export folder	Cartella di esportazione predefinita
+Choose export folder…	Scegli cartella di esportazione…
+Choose the default export folder	Scegli la cartella di esportazione predefinita
+Choose Siril in the export popup to open one exported stack. Application locations and defaults are optional.	Scegli Siril nel popup di esportazione per aprire uno stack esportato. I percorsi e le impostazioni predefinite delle applicazioni sono facoltativi.
+Use Astrometry.net instead of ASTAP	Usa Astrometry.net anziché ASTAP
+Plate solver setup	Configurazione del plate solving
+Choose ASTAP…	Scegli ASTAP…
+Locate ASTAP	Individua ASTAP
+ASTAP star database folder	Cartella del database stellare di ASTAP
+Choose star database…	Scegli database stellare…
+Choose the ASTAP star database	Scegli il database stellare di ASTAP
+Image height in degrees (blank: automatic)	Altezza immagine in gradi (vuoto: automatica)
+Astrometry.net API key	Chiave API di Astrometry.net
+Saved with Windows user encryption. Online solving sends star coordinates, never the full image.	Salvata con la crittografia utente di Windows. Il plate solving online invia le coordinate delle stelle, mai l'immagine completa.
+ASTAP needs a local star database. Online solving needs your API key and internet access. Analysis stays off until selected for an import.	ASTAP richiede un database stellare locale. Il plate solving online richiede la tua chiave API e l'accesso a Internet. L'analisi resta disattivata finché non viene selezionata per un'importazione.
+Check for releases automatically while AstroArchive is open	Cerca automaticamente nuove versioni mentre AstroArchive è aperto
+Checks after startup and every six hours. Downloads and installation begin only when you request them.	Controlla dopo l'avvio e ogni sei ore. Il download e l'installazione iniziano solo su tua richiesta.
+Save preferences	Salva preferenze
+Image height must be greater than 0 and no more than 180 degrees.	L'altezza dell'immagine deve essere maggiore di 0 e non superiore a 180 gradi.
+Enter your Astrometry.net API key to enable online solving.	Immetti la chiave API di Astrometry.net per attivare il plate solving online.
+Choose an existing export folder.	Scegli una cartella di esportazione esistente.
+Choose an export folder outside the repository.	Scegli una cartella di esportazione esterna all'archivio.
+Preferences saved. Scan the source again to apply import changes.	Preferenze salvate. Esegui di nuovo la scansione dell'origine per applicare le modifiche all'importazione.
+Preferences saved.	Preferenze salvate.
+Preferences could not be saved	Impossibile salvare le preferenze
+Set an archive folder in Settings	Imposta una cartella per l'archivio in Impostazioni
+Hide preview	Nascondi anteprima
+FITS / XISF preview	Anteprima FITS / XISF
+RAW formats require a compatible Windows image codec.	I formati RAW richiedono un codec immagine di Windows compatibile.
+Generated colour preview	Anteprima a colori generata
+Image exceeds the preview size limit.	L'immagine supera il limite di dimensioni dell'anteprima.
+Zoom out	Riduci
+Fit	Adatta
+Recenter image	Ricentra immagine
+Zoom in	Ingrandisci
+View left	Sposta a sinistra
+View up	Sposta in alto
+View down	Sposta in basso
+View right	Sposta a destra
+Rotate left 90°	Ruota a sinistra di 90°
+Rotate right 90°	Ruota a destra di 90°
+Pause playback	Sospendi riproduzione
+Scroll or pinch to zoom; drag to pan. F fits the image; arrow keys pan.	Scorri o avvicina le dita per lo zoom; trascina per spostare la vista. F adatta l'immagine; i tasti di direzione spostano la vista.
+Fit image (F).	Adatta immagine (F).
+Play playback	Avvia riproduzione
+Process summaries	Riepiloghi dei processi
+Live import underway	Importazione in tempo reale in corso
+In progress	In corso
+Paused / interrupted	Sospeso / interrotto
+Needs attention	Richiede attenzione
+Stopped	Arrestato
+Completed · review results	Completato · verifica i risultati
+Completed	Completato
+No newer release is available.	Non è disponibile alcuna versione più recente.
+Release information has not been checked yet.	Le informazioni sulle versioni non sono ancora state controllate.
+No newer release was found at the last successful check.	Nessuna versione più recente trovata durante l'ultimo controllo riuscito.
+App releases	Versioni dell'app
+Check now	Controlla ora
+Release notes	Note sulla versione
+Install and restart	Installa e riavvia
+Install AstroArchive release	Installa la versione di AstroArchive
+The release will download and be verified in the background. AstroArchive will then close, install it and restart. Repositories, images and settings are retained.	La versione verrà scaricata e verificata in background. AstroArchive verrà quindi chiuso, la installerà e si riavvierà. Archivi, immagini e impostazioni vengono mantenuti.
+Read release notes	Leggi le note sulla versione
+Downloading and verifying the release…	Download e verifica della versione in corso…
+Downloading	Download in corso
+Verifying installation and saving the archive…	Verifica dell'installazione e salvataggio dell'archivio…
+The release installer could not start.	Impossibile avviare il programma di installazione della versione.
+Installer started. AstroArchive is restarting…	Programma di installazione avviato. Riavvio di AstroArchive in corso…
+Update canceled. The current version remains installed.	Aggiornamento annullato. La versione corrente resta installata.
+The release could not be installed. AstroArchive remains open.	Impossibile installare la versione. AstroArchive resta aperto.
+Release installation failed	Installazione della versione non riuscita
+Check for releases	Cerca nuove versioni
+View release on GitHub	Visualizza la versione su GitHub
+Use View release on GitHub to read release notes.	Usa Visualizza la versione su GitHub per leggere le note sulla versione.
+Installation saves your settings, downloads and verifies the release, then restarts AstroArchive. Your repositories and images are kept.	L'installazione salva le impostazioni, scarica e verifica la versione, quindi riavvia AstroArchive. Gli archivi e le immagini vengono mantenuti.
+Save the current settings, install the verified release and restart AstroArchive.	Salva le impostazioni correnti, installa la versione verificata e riavvia AstroArchive.
+Release download progress	Avanzamento del download della versione
+Checking the latest stable release…	Controllo dell'ultima versione stabile…
+Loading release notes…	Caricamento delle note sulla versione…
+No release notes were provided.	Non sono state fornite note sulla versione.
+Release notes could not be loaded. View the release on GitHub below.	Impossibile caricare le note sulla versione. Visualizza la versione su GitHub qui sotto.
+Installing the release. AstroArchive will restart automatically.	Installazione della versione in corso. AstroArchive si riavvierà automaticamente.
+The release could not be installed. AstroArchive remains open.\n	Impossibile installare la versione. AstroArchive resta aperto.\n
+Folder	Cartella
+Size	Dimensioni
+Import from telescope	Importa dal telescopio
+Import over your network	Importa tramite la rete
+Keep AstroArchive and the telescope on the same Wi-Fi or LAN. Capture continues in the telescope app.	Mantieni AstroArchive e il telescopio sulla stessa rete Wi-Fi o LAN. L'acquisizione continua nell'app del telescopio.
+Finding Seestar, DWARF and Celestron Origin telescopes…	Ricerca dei telescopi Seestar, DWARF e Celestron Origin…
+Turn on Save Raw Images under Menu > Settings > Advanced in the Origin app to keep individual exposures.	Attiva Save Raw Images in Menu > Impostazioni > Avanzate nell'app Origin per conservare le singole esposizioni.
+Telescopes found on the network	Telescopi trovati nella rete
+Address	Indirizzo
+Search again	Cerca di nuovo
+Connect	Connetti
+Change telescope	Cambia telescopio
+Save imports as	Salva le importazioni come
+Saved telescope for network import	Telescopio salvato per l'importazione in rete
+Browse files	Sfoglia file
+Search all	Cerca ovunque
+Up	Su
+All captures	Tutte le acquisizioni
+Telescope capture files	File di acquisizione del telescopio
+Telescope captures. Click to select, Ctrl or Shift to add, double-click a folder to open it, Esc to clear	Acquisizioni del telescopio. Fai clic per selezionare, Ctrl o Shift per aggiungere, doppio clic su una cartella per aprirla, Esc per cancellare
+File / folder	File / cartella
+Location	Posizione
+Clear selection	Cancella selezione
+Live import watches the folder shown above and its subfolders. You can reconnect to select more files or add another telescope while it runs. Originals stay on the telescope.	L'importazione in tempo reale monitora la cartella indicata sopra e le sue sottocartelle. Mentre è in esecuzione, puoi riconnetterti per selezionare altri file o aggiungere un altro telescopio. Gli originali restano sul telescopio.
+Advanced…	Avanzate…
+Cancel search	Annulla ricerca
+Start live import	Avvia importazione in tempo reale
+Import selected	Importa selezionati
+Saved import preference. Also applies to folder, USB and Dump imports; running imports keep their settings.	Preferenza di importazione salvata. Si applica anche alle importazioni da cartella, USB e Dump; le importazioni in corso mantengono le proprie impostazioni.
+Connect this PC to the telescope's Wi-Fi or your shared LAN, then search again.	Connetti questo PC alla rete Wi-Fi del telescopio o alla LAN condivisa, quindi cerca di nuovo.
+Cancelled. You can search or connect again.	Annullato. Puoi cercare o connetterti di nuovo.
+Could not complete this step.	Impossibile completare questo passaggio.
+No telescopes replied. Check that both devices share the same network. Search again, or open Advanced for manual access.	Nessun telescopio ha risposto. Verifica che entrambi i dispositivi siano sulla stessa rete. Cerca di nuovo oppure apri Avanzate per l'accesso manuale.
+Finding telescopes on your networks… (about 8 seconds)	Ricerca dei telescopi nelle tue reti… (circa 8 secondi)
+Choose files, search all captures, or start live import.	Scegli i file, cerca in tutte le acquisizioni o avvia l'importazione in tempo reale.
+Live folder: All captures	Cartella in tempo reale: Tutte le acquisizioni
+Selections are kept as you move between folders.	Le selezioni vengono mantenute quando ti sposti tra le cartelle.
+Reading capture folders…	Lettura delle cartelle di acquisizione…
+No supported captures were found. Open Advanced to check the storage location.	Non sono state trovate acquisizioni supportate. Apri Avanzate per controllare il percorso di archiviazione.
+Searching all capture folders…	Ricerca in tutte le cartelle di acquisizione…
+Couldn't read	Lettura non riuscita
+Counting…	Conteggio…
+Cancel search / connection	Annulla ricerca / connessione
+Counting files…	Conteggio dei file…
+Live import is underway for this telescope. Select files to download alongside it; manage the watcher in Activity.	È in corso un'importazione in tempo reale per questo telescopio. Seleziona i file da scaricare in parallelo; gestisci il monitoraggio in Attività.
+New captures only	Solo nuove acquisizioni
+Nothing selected	Nessuna selezione
+Click a file or folder to select it · Ctrl or Shift to add more · Double-click a folder to open it · Esc clears	Fai clic su un file o una cartella per selezionarli · Ctrl o Shift per aggiungerne altri · Doppio clic su una cartella per aprirla · Esc per cancellare
+Enter a name for this physical telescope.	Immetti un nome per questo telescopio fisico.
+That telescope is already saved. Select it above or choose another name.	Questo telescopio è già salvato. Selezionalo sopra o scegli un altro nome.
+Other	Altro
+Network import	Importazione in rete
+Import over the network?	Importare tramite la rete?
+Network imports take longer than a wired connection. For large numbers of files, a wired USB connection is highly recommended.	Le importazioni in rete richiedono più tempo rispetto a una connessione cablata. Per un numero elevato di file è vivamente consigliata una connessione USB cablata.
+Import over network	Importa tramite la rete
+Advanced telescope access	Accesso avanzato al telescopio
+Manual access and network options	Accesso manuale e opzioni di rete
+Automatic discovery needs no configuration. Use these options for a hidden network, unusual firmware or a custom capture location.	Il rilevamento automatico non richiede alcuna configurazione. Usa queste opzioni per una rete nascosta, un firmware insolito o un percorso di acquisizione personalizzato.
+Telescope IPv4 address	Indirizzo IPv4 del telescopio
+Storage path (leave blank for default)	Percorso di archiviazione (lascia vuoto per il valore predefinito)
+Discovery network	Rete di rilevamento
+All active networks	Tutte le reti attive
+DWARF FTP port	Porta FTP DWARF
+DWARF FTP username	Nome utente FTP DWARF
+DWARF FTP password (saved securely for import recovery)	Password FTP DWARF (salvata in modo sicuro per il ripristino delle importazioni)
+Live polling interval (seconds)	Intervallo di polling in tempo reale (secondi)
+Transfer limit	Limite di trasferimento
+Unlimited	Illimitato
+Also import existing captures when live import starts	Importa anche le acquisizioni esistenti all'avvio dell'importazione in tempo reale
+Seestar uses direct, read-only file access. No Windows guest-access or signing-policy changes are required.	Seestar usa l'accesso diretto ai file in sola lettura. Non è necessario modificare l'accesso guest o i criteri di firma di Windows.
+Enter whole numbers for port and polling interval.	Immetti numeri interi per la porta e l'intervallo di polling.
+Use port 1–65535 and a polling interval of 2–120 seconds.	Usa una porta compresa tra 1 e 65535 e un intervallo di polling di 2–120 secondi.
+This folder is already being watched. Stop its watcher in Activity first.	Questa cartella è già monitorata. Interrompi prima il monitoraggio in Attività.
+Live import is already underway for this telescope. Select files to import alongside it, or stop its watcher in Activity first.	È già in corso un'importazione in tempo reale per questo telescopio. Seleziona i file da importare in parallelo oppure interrompi prima il monitoraggio in Attività.
+Another watcher already covers part of this folder. Stop it in Activity, or choose a separate folder.	Un altro monitoraggio copre già parte di questa cartella. Interrompilo in Attività o scegli una cartella diversa.
+This saved telescope is importing from another device. Choose a different saved telescope or give this device its own name.	Questo telescopio salvato sta importando da un altro dispositivo. Scegli un altro telescopio salvato o assegna a questo dispositivo un nome proprio.
+This device is already importing as another saved telescope. Use the same saved telescope shown in Activity.	Questo dispositivo sta già importando come un altro telescopio salvato. Usa lo stesso telescopio salvato indicato in Attività.
+Telescope import could not start	Impossibile avviare l'importazione dal telescopio
+Stop watching	Interrompi monitoraggio
+Stop live import	Interrompi importazione in tempo reale
+Cancel download	Annulla download
+Stopping this telescope import; completed copies are retained…	Interruzione di questa importazione dal telescopio; le copie completate vengono mantenute…
+Stopped watching the folder.	Monitoraggio della cartella interrotto.
+Live import stopped.	Importazione in tempo reale interrotta.
+Stop all telescope imports	Interrompi tutte le importazioni dal telescopio
+Pause all imports	Sospendi tutte le importazioni
+Pause import	Sospendi importazione
+Stopping this telescope import…	Interruzione di questa importazione dal telescopio…
+Live import	Importazione in tempo reale
+Preparing telescope imports…	Preparazione delle importazioni dal telescopio…
+Watching for captures	In attesa di acquisizioni
+Scanning folder	Scansione della cartella
+Checking folder	Controllo della cartella
+Downloading from telescope	Download dal telescopio
+Starting transfer	Avvio del trasferimento
+Telescope rejection, file integrity and transfer failures are shown separately. Screening checks FITS structure and rejection markers; it does not assess image quality. Unscreened captures remain labelled Not screened.	Gli scarti del telescopio, i problemi di integrità dei file e gli errori di trasferimento vengono mostrati separatamente. Il controllo verifica la struttura FITS e gli indicatori di scarto; non valuta la qualità dell'immagine. Le acquisizioni non controllate restano contrassegnate come Non controllato.
+Problem type	Tipo di problema
+Select a capture to read its full reason.	Seleziona un'acquisizione per leggere il motivo completo.
+Show flagged captures in the main view	Mostra le acquisizioni segnalate nella visualizzazione principale
+Needs review	Da verificare
+Screen selected captures again	Controlla di nuovo le acquisizioni selezionate
+Capture screening	Controllo delle acquisizioni
+Deletion history	Cronologia eliminazioni
+Deleted captures and import exclusions	Acquisizioni eliminate ed esclusioni dall'importazione
+Allowing reimport lifts the checksum exclusion. It does not restore a deleted file; a source copy must still be available. The deletion and the decision to allow reimport stay in this log.	Consentire la reimportazione rimuove l'esclusione basata sul checksum. Non ripristina un file eliminato; deve essere ancora disponibile una copia di origine. L'eliminazione e la decisione di consentire la reimportazione restano in questo registro.
+State	Stato
+Deleted (UTC)	Eliminato (UTC)
+Reimport allowed (UTC)	Reimportazione consentita (UTC)
+Select a capture to see its deletion and reimport history.	Seleziona un'acquisizione per visualizzarne la cronologia di eliminazione e reimportazione.
+Allow selected captures to be imported again	Consenti di importare di nuovo le acquisizioni selezionate
+Search files and metadata. Combine a target, device and file type, for example M45 S50 Pro stack.	Cerca in file e metadati. Combina target, dispositivo e tipo di file, ad esempio M45 S50 Pro stack.
+Find files	Trova file
+Check your search	Controlla la ricerca
+Search across your files	Cerca in tutti i file
+Results update after a short typing pause. Enter searches immediately; Escape clears the search while keeping table filters. Words combine to narrow results. Catalogue IDs and common names resolve to the same target, including spaced IDs such as NGC 6888. Case, accents and filename separators are handled consistently.	I risultati si aggiornano dopo una breve pausa di digitazione. Enter avvia subito la ricerca; Esc cancella la ricerca mantenendo i filtri della tabella. Più parole si combinano per restringere i risultati. Gli ID di catalogo e i nomi comuni corrispondono allo stesso target, inclusi gli ID con spazi come NGC 6888. Maiuscole/minuscole, accenti e separatori nei nomi file vengono gestiti in modo coerente.
+Examples	Esempi
+Crescent Nebula filter:dual\ntarget:M45 -type:Stack\nfile:*.fits OR file:*.fit\n"wide field" -failed\nexposure:>=20 gain:80\ndate:2026-10 device:Seestar\ntype:Starless source:*.fits (Edited)	Crescent Nebula filter:dual\ntarget:M45 -type:Stack\nfile:*.fits OR file:*.fit\n"campo largo" -failed\nexposure:>=20 gain:80\ndate:2026-10 device:Seestar\ntype:Starless source:*.fits (Edited)
+Search fields	Campi di ricerca
+Capture time (timezone unknown)	Ora di acquisizione (fuso orario sconosciuto)
+Session folder	Cartella della sessione
+Capture position	Posizione dell'acquisizione
+Frame pointing	Puntamento del frame
+Approximate target centre from the catalogue	Centro approssimativo del target dal catalogo
+Capture location	Luogo di acquisizione
+Saved observing location	Località di osservazione salvata
+Capture time unknown	Ora di acquisizione sconosciuta
+Northern celestial sky	Cielo boreale
+Southern celestial sky	Cielo australe
+Celestial equator	Equatore celeste
+Pointing unavailable	Puntamento non disponibile
+Celestial view · set an observing location	Vista celeste · imposta una località di osservazione
+Celestial view · capture time unknown	Vista celeste · ora di acquisizione sconosciuta
+Choose your observing town / city in Settings for the local horizon.	Scegli la località di osservazione in Impostazioni per visualizzare l'orizzonte locale.
+Sky at the recorded capture time. Solid horizon; faint figures lie below it. Geometric altitude excludes atmospheric refraction.	Cielo all'ora di acquisizione registrata. Orizzonte pieno; le figure tenui si trovano sotto di esso. L'altezza geometrica esclude la rifrazione atmosferica.
+Celestial coordinates only. No compass horizon is inferred without a known capture time and observing location.	Solo coordinate celesti. Senza ora di acquisizione e località di osservazione note, non viene dedotto alcun orizzonte con punti cardinali.
+Drag to rotate; scroll or pinch to zoom.	Trascina per ruotare; scorri o avvicina le dita per lo zoom.
+Reset sky view.	Reimposta la vista del cielo.
+Preparing your workspace…	Preparazione dell'area di lavoro…
+Wishing you a clear night	Ti auguriamo cieli sereni
+A LITTLE COSMIC PERSPECTIVE	UN PIZZICO DI PROSPETTIVA COSMICA
+MAKE THE MOST OF ASTROARCHIVE	SFRUTTA AL MEGLIO ASTROARCHIVE
+AstroArchive startup window	Finestra di avvio di AstroArchive
+Opening AstroArchive was cancelled.	L'apertura di AstroArchive è stata annullata.
+Your workspace is ready.	L'area di lavoro è pronta.
+Annihilating clouds…	Disintegro le nuvole…
+Negotiating with the weather forecast…	Tratto con le previsioni del tempo…
+Politely asking the Moon to dim…	Chiedo gentilmente alla Luna di abbassare le luci…
+Herding photons into tidy folders…	Raduno i fotoni in cartelle ordinate…
+Looking for the galaxy you saved as ‘test.fit’…	Cerco la galassia che hai salvato come ‘test.fit’…
+Aligning the stars. And the filenames…	Allineo le stelle. E i nomi dei file…
+Framing Orion without cutting off his belt…	Inquadro Orione senza tagliargli la cintura…
+Finding the Rosette among fifty ‘untitled’ stacks…	Cerco la Rosetta tra cinquanta stack ‘senza titolo’…
+Making room for just one more telescope…	Faccio spazio per un altro telescopio. L'ultimo, giuro…
+Keeping Saturn’s rings inside the frame…	Tengo gli anelli di Saturno dentro l'inquadratura…
+Telling the dew to take the night off…	Chiedo alla rugiada di prendersi una notte di ferie…
+Finding the bright side of your dark frames…	Cerco il lato luminoso dei tuoi dark…
+Reminding the tripod to stand still…	Ricordo al treppiede di stare fermo…
+Untangling cables across the cosmos…	Districo i cavi in tutto il cosmo…
+Helping your subs find their stackmates…	Aiuto le tue pose a trovare i compagni di stack…
+Teaching the shutter the meaning of ‘bulb’…	Spiego all'otturatore cos'è la ‘posa B’…
+Rescuing the Horsehead from ‘New folder (7)’…	Salvo la Testa di Cavallo da ‘Nuova cartella (7)’…
+Resisting the urge to buy another filter…	Resisto alla tentazione di comprare un altro filtro…
+Matching stars. Ignoring the hot pixels…	Abbino le stelle. Ignoro i pixel caldi…
+Trying to fit Andromeda into one more mosaic panel…	Provo a far stare Andromeda in un altro pannello del mosaico…
+Finding the flats you took ‘somewhere sensible’…	Cerco i flat che hai messo ‘in un posto sicuro’…
+Persuading the neighbours to switch off their lights…	Convinco i vicini a spegnere le luci…
+Checking the focus. Just one more time…	Controllo la messa a fuoco. Un'ultima volta…
+Explaining to the dark frames why the lens cap stays on…	Spiego ai dark perché il tappo resta sull'obiettivo…
+Converting ‘one more exposure’ into lost sleep…	Converto ‘un'ultima posa’ in ore di sonno perse…
+Fitting all the Pleiades into the same frame…	Faccio entrare tutte le Pleiadi nella stessa inquadratura…
+Sorting FITS files before they form their own constellation…	Riordino i file FITS prima che formino una costellazione tutta loro…
+Bringing wandering subframes back to their session…	Riporto le pose vaganti alla loro sessione…
+Hmm, where did I put that one?	Mmm, dove l'avevo messa?
+Opening final_final_really_final.fit…	Apro finale_finale_davvero_finale.fit…
+Looking for M31 under ‘miscellaneous’…	Cerco M31 nella cartella ‘varie’…
+Moving ‘sort these subs later’ slightly closer to later…	Avvicino un po' il ‘dopo’ di ‘sistemo le pose dopo’…
+Searching for the lens cap. It’s on the lens…	Cerco il tappo dell'obiettivo. È sull'obiettivo…
+Asking the dew heater to warm the lens, not the cat…	Chiedo alla fascia anticondensa di scaldare l'obiettivo, non il gatto…
+Checking whether ‘just one more sub’ was a promise…	Verifico se ‘solo un'altra posa’ era una promessa…
+Translating ‘five minutes’ from astronomer time…	Traduco ‘cinque minuti’ dal fuso orario degli astrofili…
+Finding a USB port for the guide camera…	Cerco una porta USB per la camera di guida…
+Wondering why the best frame was the test shot…	Mi chiedo perché il frame migliore fosse lo scatto di prova…
+Asking the telescope’s Wi-Fi to stay for one more sub…	Prego il Wi-Fi del telescopio di resistere per un'altra posa…
+Admiring the galaxy behind your satellite trail…	Ammiro la galassia dietro la scia del tuo satellite…
+Reclassifying that meteor as an aeroplane…	Riclassifico quella meteora come aereo…
+Convincing the hard drive that space is infinite…	Convinco il disco rigido che lo spazio è infinito…
+Locating the image you definitely didn’t delete…	Cerco l'immagine che sicuramente non hai eliminato…
+Finding the light frame hiding among the darks…	Stano il light nascosto tra i dark…
+Checking the stars haven’t drifted out of the frame…	Controllo che le stelle non siano uscite dall'inquadratura…
+Wondering if the smudge is dust or a discovery…	Mi chiedo se la macchia sia polvere o una scoperta…
+Negotiating a truce with the background gradient…	Negozio una tregua con il gradiente di fondo…
+Organising the archive before it becomes a black hole…	Riordino l'archivio prima che diventi un buco nero…
+Did you know you can press F1 to open AstroArchive’s offline guide?	Sapevi che puoi premere F1 per aprire la guida offline di AstroArchive?
+Did you know you can import from Seestar, DWARF and Celestron Origin over your local network?	Sapevi che puoi importare da Seestar, DWARF e Celestron Origin tramite la rete locale?
+Did you know you can use live import to bring in completed captures while your telescope keeps shooting?	Sapevi che con l'importazione in tempo reale puoi importare le acquisizioni completate mentre il telescopio continua a riprendere?
+Did you know you can run independent network imports from more than one telescope?	Sapevi che puoi eseguire importazioni in rete indipendenti da più telescopi?
+Did you know you can browse your captures by target and session in Repository?	Sapevi che in Archivio puoi sfogliare le acquisizioni per target e sessione?
+Did you know you can prepare stacking folders with matched calibration frames for your processing software?	Sapevi che puoi preparare cartelle di stacking con i frame di calibrazione corrispondenti per il tuo software di elaborazione?
+Did you know you can keep working copies and processing results together in Edited?	Sapevi che in Edited puoi tenere insieme copie di lavoro e risultati dell'elaborazione?
+Did you know you can compare integration time, targets and telescope usage in Repository → Analytics?	Sapevi che in Archivio → Statistiche puoi confrontare tempo di integrazione, target e uso dei telescopi?
+Did you know you can export your analytics as PNG, JPEG, PDF or SVG?	Sapevi che puoi esportare le statistiche in PNG, JPEG, PDF o SVG?
+Did you know you can export an animated analytics story as MP4 or GIF?	Sapevi che puoi esportare una storia animata delle statistiche in MP4 o GIF?
+Did you know you can create a verified folder or lossless ZIP backup of your archive?	Sapevi che puoi creare un backup verificato dell'archivio come cartella o file ZIP senza perdita di dati?
+Did you know you can change the preview stretch without changing your original image bytes?	Sapevi che puoi modificare lo stretching dell'anteprima senza alterare i byte dell'immagine originale?
+The Rosette Nebula is a stellar nursery roughly 5,000 light-years away in the constellation Monoceros.	La Nebulosa Rosetta è una culla di stelle a circa 5.000 anni luce di distanza, nella costellazione dell'Unicorno.
+Light from the Andromeda Galaxy has travelled for about 2.5 million years before reaching your camera.	La luce della Galassia di Andromeda ha viaggiato per circa 2,5 milioni di anni prima di raggiungere la tua camera.
+Doubling your signal-to-noise ratio generally takes four times the total exposure, under similar conditions.	A parità di condizioni, raddoppiare il rapporto segnale/rumore richiede in genere un'esposizione totale quattro volte maggiore.
+Hydrogen-alpha light has a wavelength of about 656.3 nanometres, in the red part of the visible spectrum.	La luce H-alfa ha una lunghezza d'onda di circa 656,3 nanometri, nella parte rossa dello spettro visibile.
+The Pleiades are an open star cluster. Their blue nebulosity comes from dust reflecting starlight.	Le Pleiadi sono un ammasso aperto. La loro nebulosità blu è prodotta dalla polvere che riflette la luce delle stelle.
+A light-year measures distance: the distance light travels in one year, about 9.46 trillion kilometres.	L'anno luce è una misura di distanza: la distanza percorsa dalla luce in un anno, circa 9.460 miliardi di chilometri.
+Dark frames record a sensor’s dark current and fixed-pattern signals at a matched exposure and temperature.	I dark registrano la corrente di buio e i segnali a pattern fisso del sensore, con esposizione e temperatura corrispondenti.
+Flat frames help correct vignetting and dust shadows when captured with the same optical setup.	I flat aiutano a correggere la vignettatura e le ombre della polvere, se acquisiti con la stessa configurazione ottica.
+Dithering shifts the framing between exposures, helping stacking reject hot pixels and reduce pattern noise.	Il dithering sposta l'inquadratura tra un'esposizione e l'altra, aiutando lo stacking a eliminare i pixel caldi e a ridurre il rumore a pattern.
+The Moon’s apparent width is about half a degree. Many deep-sky targets cover much more sky.	Il diametro apparente della Luna è di circa mezzo grado. Molti oggetti del profondo cielo coprono un'area di cielo molto più ampia.
+The stars in a constellation can be at very different distances, even when they look like neighbours.	Le stelle di una costellazione possono trovarsi a distanze molto diverse, anche quando sembrano vicine.
+The Crab Nebula, M1, is the aftermath of a supernova recorded by astronomers in 1054.	La Nebulosa Granchio, M1, è il residuo di una supernova registrata dagli astronomi nel 1054.
+The Ring Nebula, M57, has a three-dimensional structure: a football-shaped cloud piercing a doughnut of gas.	La Nebulosa Anello, M57, ha una struttura tridimensionale: una nube a forma di pallone da rugby che attraversa una ciambella di gas.
+The Dumbbell Nebula, M27, was the first planetary nebula discovered, spotted by Charles Messier in 1764.	La Nebulosa Manubrio, M27, è stata la prima nebulosa planetaria scoperta, individuata da Charles Messier nel 1764.
+The Veil Nebula’s delicate filaments are debris from a massive star that exploded thousands of years ago.	I delicati filamenti della Nebulosa Velo sono i detriti di una stella massiccia esplosa migliaia di anni fa.
+The Horsehead Nebula is a dark cloud silhouetted against brighter, glowing gas behind it.	La Nebulosa Testa di Cavallo è una nube oscura che si staglia contro il gas luminoso alle sue spalle.
+The Sombrero Galaxy, M104, gets its hat-like appearance from a bright central bulge and a dark dust lane.	La Galassia Sombrero, M104, deve il suo aspetto a cappello a un brillante rigonfiamento centrale e a una banda di polvere scura.
+The Hercules Cluster, M13, packs hundreds of thousands of stars into a ball held together by gravity.	L'Ammasso di Ercole, M13, racchiude centinaia di migliaia di stelle in una sfera tenuta insieme dalla gravità.
+Omega Centauri looks like a fuzzy star to the naked eye, but contains millions of stars.	A occhio nudo Omega Centauri sembra una stella sfocata, ma contiene milioni di stelle.
+The Cigar Galaxy, M82, is a starburst galaxy: interactions with nearby M81 fuel unusually rapid star formation.	La Galassia Sigaro, M82, è una galassia starburst: le interazioni con la vicina M81 alimentano una formazione stellare insolitamente rapida.
+The Triangulum Galaxy, M33, is the Local Group’s third-largest galaxy, after Andromeda and the Milky Way.	La Galassia del Triangolo, M33, è la terza galassia più grande del Gruppo Locale, dopo Andromeda e la Via Lattea.
+Sirius has a tiny companion, Sirius B, a white dwarf roughly the size of Earth.	Sirio ha una piccola compagna, Sirio B, una nana bianca grande all'incirca come la Terra.
+Polaris, our North Star, belongs to a triple-star system. Its brightest member is also a variable star.	La Stella Polare fa parte di un sistema triplo. La sua componente più luminosa è anche una stella variabile.
+Betelgeuse is a red supergiant so large that, in the Sun’s place, it would extend beyond the orbit of Mars.	Betelgeuse è una supergigante rossa così grande che, al posto del Sole, si estenderebbe oltre l'orbita di Marte.
+The Double Cluster in Perseus is two neighbouring open star clusters, NGC 869 and NGC 884.	Il Doppio Ammasso del Perseo è formato da due ammassi aperti vicini, NGC 869 e NGC 884.
+Jupiter spins once in about ten hours, giving the Solar System’s biggest planet its shortest day.	Giove compie una rotazione in circa dieci ore: il pianeta più grande del Sistema Solare ha così il giorno più breve.
+Saturn’s rings are made mostly of water ice, with pieces ranging from tiny grains to enormous chunks.	Gli anelli di Saturno sono composti principalmente da ghiaccio d'acqua, con frammenti che vanno da granelli minuscoli a blocchi enormi.
+Venus takes about 243 Earth days to spin once, longer than its 225-day journey around the Sun.	Venere impiega circa 243 giorni terrestri per compiere una rotazione, più del suo viaggio di 225 giorni intorno al Sole.
+Uranus is tipped almost onto its side, with an axial tilt of about 98 degrees.	Urano è inclinato quasi su un fianco, con un'inclinazione assiale di circa 98 gradi.
+Click to sort; Shift-click adds a sort column.	Fai clic per ordinare; Shift+clic aggiunge una colonna di ordinamento.
+A ? marks an inference.	Un ? indica un valore dedotto.
+Sorted by pixel count.	Ordinato per numero di pixel.
+Seconds	Secondi
+Light frames	Light
+Integration	Integrazione
+Made with AstroArchive	Creato con AstroArchive
+Target card	Scheda target
+A card for social posts and messages with your best image of this target and its integration, frames, nights and filters. Integration counts light frames, plus standalone stacks without their subs.	Una scheda per post social e messaggi con la tua immagine migliore di questo target, con integrazione, frame, notti e filtri. L'integrazione conta i light e gli stack autonomi senza le relative pose.
+Target card preview	Anteprima scheda target
+No image (star field)	Nessuna immagine (campo stellare)
+Image	Immagine
+Fill the frame (crop edges)	Riempi il riquadro (ritaglia i bordi)
+Fill the frame	Riempi il riquadro
+Credit line (optional)	Riga dei crediti (facoltativa)
+For example, your name or handle. Leave blank for “Made with AstroArchive”.	Ad esempio, il tuo nome o nickname. Lascia vuoto per “Creato con AstroArchive”.
+Format	Formato
+This image could not be read (	Impossibile leggere questa immagine (
+Save card…	Salva scheda…
+Save card	Salva scheda
+Copy image	Copia immagine
+Copied. Paste it into a post or message.	Copiata. Incollala in un post o in un messaggio.
+The clipboard is busy. Try again.	Gli Appunti sono occupati. Riprova.
+No filter recorded	Nessun filtro registrato
+Target identification results	Risultati dell'identificazione dei target
+Source changed since scanning; scan again.	L'origine è cambiata dopo la scansione; esegui di nuovo la scansione.
+Source changed while solving; scan again.	L'origine è cambiata durante il plate solving; esegui di nuovo la scansione.
+No fields solved. Capture metadata was retained.	Nessun campo risolto. I metadati di acquisizione sono stati mantenuti.
+Target identification	Identificazione dei target
+Solved fields kept for later review.	Campi risolti mantenuti per una verifica successiva.
+Identification canceled. Metadata already applied is retained.	Identificazione annullata. I metadati già applicati vengono mantenuti.
+Source changed since identification. Scan again.	L'origine è cambiata dopo l'identificazione. Esegui di nuovo la scansione.
+Saving archive index	Salvataggio dell'indice dell'archivio
+Target identification report	Report di identificazione dei target
+Review solved targets	Verifica target risolti
+Nearest major targets are selected. Change a target or uncheck a row to keep its metadata. One Light row applies to its entire selected session group.	Sono selezionati i target principali più vicini. Cambia un target o deseleziona una riga per mantenerne i metadati. Una riga Light si applica all'intero gruppo di sessioni selezionato.
+Solved	Risolto
+Representative / stack	Rappresentativo / stack
+Scope	Ambito
+Choices	Opzioni
+Choose a target; use Search for another name or ID.	Scegli un target; usa Cerca per un altro nome o ID.
+Match / failure	Corrispondenza / errore
+Match	Corrispondenza
+Centre	Centro
+Search target for selected row…	Cerca target per la riga selezionata…
+Apply matches	Applica corrispondenze
+Choose a target for each checked, successfully solved row. Failed rows must remain unchecked.	Scegli un target per ogni riga selezionata e risolta correttamente. Le righe non riuscite devono restare deselezionate.
+Target identification complete	Identificazione dei target completata
+Create target card…	Crea scheda target…
+Edit name and aliases…	Modifica nome e alias…
+Target name and aliases	Nome e alias del target
+Names for this object	Nomi di questo oggetto
+Save a name once to use it across Repository, Import and Edited. Catalogue IDs stay unchanged.	Salva un nome una sola volta per usarlo in Archivio, Importa ed Edited. Gli ID di catalogo restano invariati.
+Object ID	ID oggetto
+Other names (one per line)	Altri nomi (uno per riga)
+Use built-in names	Usa nomi predefiniti
+Save names	Salva nomi
+Check target names	Controlla nomi dei target
+Target names saved.	Nomi dei target salvati.
+Names could not be saved	Impossibile salvare i nomi
+Choose folders or files on your telescope	Scegli cartelle o file sul telescopio
+Choose the captures you need; folders include subfolders. Originals stay on the telescope.	Scegli le acquisizioni che ti servono; le cartelle includono le sottocartelle. Gli originali restano sul telescopio.
+Telescope for this import	Telescopio per questa importazione
+Physical telescope name	Nome del telescopio fisico
+Telescope model	Modello del telescopio
+Selected telescope folders and files	Cartelle e file del telescopio selezionati
+Add folder…	Aggiungi cartella…
+Add files…	Aggiungi file…
+Remove selected	Rimuovi selezionati
+Entire telescope drive	Intera unità del telescopio
+Some previously selected items are unavailable. Review the selection before importing.	Alcuni elementi selezionati in precedenza non sono disponibili. Verifica la selezione prima di importare.
+Give this physical telescope a name before importing.	Assegna un nome a questo telescopio fisico prima di importare.
+That telescope name is already saved. Choose its profile or enter a different name.	Questo nome di telescopio è già salvato. Scegli il relativo profilo o immetti un nome diverso.
+Large telescope import	Importazione di grandi dimensioni dal telescopio
+A large number of files is selected, so this import may take a while. You can cancel at any time; completed copies are kept.	È selezionato un numero elevato di file, quindi l'importazione potrebbe richiedere tempo. Puoi annullare in qualsiasi momento; le copie completate vengono mantenute.
+Telescope could not be saved	Impossibile salvare il telescopio
+Import connected telescope…	Importa dal telescopio connesso…
+Choose folders or files to scan and import. Large selections ask for confirmation; originals stay on the telescope.	Scegli le cartelle o i file da scansionare e importare. Per le selezioni di grandi dimensioni viene chiesta una conferma; gli originali restano sul telescopio.
+USB telescope disconnected. Completed imports are retained; reconnect and resume.	Telescopio USB disconnesso. Le importazioni completate vengono mantenute; riconnettilo e riprendi.
+USB telescope disconnected. Canceling; completed imports are retained.	Telescopio USB disconnesso. Annullamento in corso; le importazioni completate vengono mantenute.
+The telescope drive is unavailable. Reconnect it and refresh connected telescopes.	L'unità del telescopio non è disponibile. Riconnettila e aggiorna i telescopi connessi.
+The telescope disconnected before import. Reconnect it and choose the selection again.	Il telescopio si è disconnesso prima dell'importazione. Riconnettilo e scegli di nuovo la selezione.
+USB import report	Report di importazione USB
+Rename telescope	Rinomina telescopio
+Update this saved telescope and all its indexed captures and archive paths in the selected repository. FITS bytes and acquisition sessions are preserved.	Aggiorna questo telescopio salvato e tutte le relative acquisizioni indicizzate e i percorsi nell'archivio selezionato. I byte FITS e le sessioni di acquisizione vengono conservati.
+New telescope name	Nuovo nome del telescopio
+Enter a telescope name.	Immetti un nome per il telescopio.
+That name is already saved. Choose a unique name.	Questo nome è già salvato. Scegli un nome univoco.
+Canceled. The telescope name and repository records are unchanged.	Operazione annullata. Il nome del telescopio e i record dell'archivio sono invariati.
+Telescope rename	Ridenominazione del telescopio
+Edited scope	Ambito di Edited
+Selection	Selezione
+Recover saved telescopes from archive metadata.	Recupera i telescopi salvati dai metadati dell'archivio.
+Create target card	Crea scheda target
+Make a shareable image of this target with its integration, frames, nights and filters.	Crea un'immagine condivisibile di questo target con integrazione, frame, notti e filtri.
+Read and hash every source file again.	Rileggi ogni file di origine e ricalcolane l'hash.
+Inspect flagged captures and retry failed transfers.	Esamina le acquisizioni segnalate e riprova i trasferimenti non riusciti.
+Review flagged files	Verifica file segnalati
+Check rejection labels and file integrity.	Controlla le etichette di scarto e l'integrità dei file.
+Retry failed transfers from unchanged source files.	Riprova i trasferimenti non riusciti dai file di origine non modificati.
+Edit selected metadata	Modifica metadati selezionati
+Identify selected targets	Identifica target selezionati
+Solve selected lights and stacks to identify objects.	Esegui il plate solving dei light e degli stack selezionati per identificare gli oggetti.
+Set Unknown targets	Imposta target sconosciuti
+Assign an object to unidentified lights and stacks.	Assegna un oggetto ai light e agli stack non identificati.
+Show scan results, skipped files and errors.	Mostra i risultati della scansione, i file saltati e gli errori.
+Inbox for captures waiting to be imported.	Cartella di arrivo per le acquisizioni in attesa di importazione.
+Import inbox captures; delete verified science originals and keep calibration frames.	Importa le acquisizioni in arrivo; elimina gli originali scientifici verificati e mantieni i frame di calibrazione.
+Condense acquisition subs into session rows.	Raggruppa le pose di acquisizione in righe di sessione.
+Create a verified copy of the archive.	Crea una copia verificata dell'archivio.
+Review captures, identify objects and assess mount rotation.	Verifica le acquisizioni, identifica gli oggetti e valuta la rotazione della montatura.
+Identify targets	Identifica target
+Solve light groups and stacks to identify objects.	Esegui il plate solving di gruppi di light e stack per identificare gli oggetti.
+Analyse rotation	Analizza rotazione
+Estimate EQ or Alt-Az from acquisition subs.	Stima EQ o Alt-Az dalle pose di acquisizione.
+Verify, reindex or remove archive files.	Verifica, reindicizza o rimuovi i file dell'archivio.
+Delete archive files with 'failed' in their filenames.	Elimina i file dell'archivio con 'failed' nel nome file.
+Delete indexed PNG/JPG/JPEG/MP4 copies; keep source originals.	Elimina le copie PNG/JPG/JPEG/MP4 indicizzate; mantieni gli originali di origine.
+Review archive deletions and reimport choices.	Verifica le eliminazioni dall'archivio e le scelte di reimportazione.
+Delete archive data	Elimina dati dell'archivio
+Permanently clear indexed archive data; keep source originals.	Cancella definitivamente i dati indicizzati dell'archivio; mantieni gli originali di origine.
+View operation timings and import reports.	Visualizza i tempi delle operazioni e i report di importazione.
+Last import report	Ultimo report di importazione
+Export capture metadata for spreadsheets.	Esporta i metadati delle acquisizioni per i fogli di calcolo.
+Selected / visible files	File selezionati / visibili
+Choose HDU / page / frame	Scegli HDU / pagina / frame
+Choose the image or frame used for preview and export.	Scegli l'immagine o il frame da usare per l'anteprima e l'esportazione.
+Re-detect metadata and review	Rileva di nuovo i metadati e verifica
+Review detected values before applying changes.	Verifica i valori rilevati prima di applicare le modifiche.
+Convert supported images to FITS (keeps archived originals)	Converti le immagini supportate in FITS (mantiene gli originali archiviati)
+Export linear images as FITS; keep archived originals.	Esporta le immagini lineari come FITS; mantieni gli originali archiviati.
+Telescope model name (optional)	Nome del modello di telescopio (facoltativo)
+Model name, separate from the physical telescope ID.	Nome del modello, distinto dall'ID del telescopio fisico.
+Camera model (optional)	Modello della camera (facoltativo)
+Used to match calibration files.	Usato per abbinare i file di calibrazione.
+Physical camera ID / serial (optional)	ID / numero di serie della camera fisica (facoltativo)
+Identify the physical camera for calibration matching.	Identifica la camera fisica per l'abbinamento della calibrazione.
+Camera offset (optional)	Offset della camera (facoltativo)
+Offset setting. Blank keeps existing values.	Impostazione dell'offset. Se vuoto, mantiene i valori esistenti.
+Readout mode (optional)	Modalità di lettura (facoltativo)
+Sensor readout mode, such as high conversion gain.	Modalità di lettura del sensore, ad esempio high conversion gain.
+ROI identifier / x,y,width,height (optional)	Identificatore ROI / x,y,larghezza,altezza (facoltativo)
+Sensor crop and origin used for calibration matching.	Ritaglio e origine del sensore usati per l'abbinamento della calibrazione.
+Optical configuration ID (optional)	ID configurazione ottica (facoltativo)
+Optical setup used to match flats.	Configurazione ottica usata per abbinare i flat.
+Capture timezone ID (optional; e.g. UTC or Eastern Standard Time)	ID fuso orario di acquisizione (facoltativo; ad es. UTC o W. Europe Standard Time)
+Timezone of the recorded capture times.	Fuso orario degli orari di acquisizione registrati.
+Image data	Dati immagine
+Only confirmed linear data can be exported for stacking.	Per lo stacking è possibile esportare solo dati lineari confermati.
+Physical telescope ID	ID telescopio fisico
+Unique name for this physical telescope.	Nome univoco di questo telescopio fisico.
+Frame type	Tipo di frame
+Master calibration frames remain separate.	I master di calibrazione restano separati.
+Mount mode	Modalità montatura
+Choose EQ or Alt-Az. A ? marks an inference.	Scegli EQ o Alt-Az. Un ? indica un valore dedotto.
+Calibration state	Stato di calibrazione
+Calibrated or registered lights receive no extra calibration.	I light calibrati o registrati non ricevono ulteriore calibrazione.
+Exposure seconds (optional)	Secondi di esposizione (facoltativo)
+Seconds; use a decimal dot. Blank keeps existing values.	Secondi; usa il punto come separatore decimale. Se vuoto, mantiene i valori esistenti.
+Gain (optional)	Gain (facoltativo)
+Use a decimal dot. Blank keeps existing values.	Usa il punto come separatore decimale. Se vuoto, mantiene i valori esistenti.
+Sensor temperature °C (optional)	Temperatura sensore °C (facoltativo)
+Celsius; use a decimal dot. Blank keeps existing values.	Gradi Celsius; usa il punto come separatore decimale. Se vuoto, mantiene i valori esistenti.
+Binning x × y (optional, e.g. 1x1)	Binning x × y (facoltativo, ad es. 1x1)
+Horizontal × vertical binning. Blank keeps existing values.	Binning orizzontale × verticale. Se vuoto, mantiene i valori esistenti.
+Local solving also requires an ASTAP star database.	Il plate solving locale richiede anche un database stellare ASTAP.
+ASTAP image height in degrees (blank: automatic; useful for wide cameras)	Altezza immagine ASTAP in gradi (vuoto: automatica; utile per camere grandangolari)
+Greater than 0° and at most 180°; blank is automatic.	Maggiore di 0° e al massimo 180°; se vuoto, è automatica.
+Requires internet and your Astrometry.net API key.	Richiede l'accesso a Internet e la tua chiave API di Astrometry.net.
+Permanently delete indexed archive data; keep sources and unindexed files.	Elimina definitivamente i dati indicizzati dell'archivio; mantieni le origini e i file non indicizzati.
+Use a location outside the repository.	Usa un percorso esterno all'archivio.
+Existing folders are not overwritten.	Le cartelle esistenti non vengono sovrascritte.
+Separate sessions into their own folders	Separa le sessioni in cartelle distinte
+Off combines compatible sessions.	Se disattivata, le sessioni compatibili vengono combinate.
+Add compatible darks, flats and biases.	Aggiungi dark, flat e bias compatibili.
+Include calibrations for subs with unknown calibration state	Includi i frame di calibrazione per le pose con stato di calibrazione sconosciuto
+Review unknown processing states before calibrating.	Verifica gli stati di elaborazione sconosciuti prima della calibrazione.
+Include files marked rejected/reference	Includi file contrassegnati come scartati/di riferimento
+Renames this device and its archived captures.	Rinomina questo dispositivo e le relative acquisizioni archiviate.
+Export to	Esporta in
+Open verified working copies or stacking inputs in a compatible app.	Apri copie di lavoro verificate o input di stacking in un'app compatibile.
+Copy selected files; metadata is optional.	Copia i file selezionati; i metadati sono facoltativi.
+Stacking folder	Cartella di stacking
+Group selected lights or stacks by compatible settings.	Raggruppa i light o gli stack selezionati in base a impostazioni compatibili.
+Export destinations	Destinazioni di esportazione
+Choose application locations and defaults by file type.	Scegli i percorsi delle applicazioni e le impostazioni predefinite per tipo di file.
+Ready-to-stack folder	Cartella pronta per lo stacking
+Ready-to-stack with calibrations	Pronta per lo stacking con calibrazione
+Delete selected archive copies; keep source originals.	Elimina le copie selezionate nell'archivio; mantieni gli originali di origine.
+Solve once per Light session/target group; stacks solve individually.	Un plate solving per ogni gruppo di sessione/target Light; gli stack vengono risolti singolarmente.
+Report missing or changed archive files.	Segnala i file dell'archivio mancanti o modificati.
+Index existing images without copying or moving them.	Indicizza le immagini esistenti senza copiarle né spostarle.
+One sampled preview pixel per screen pixel.	Un pixel campionato dell'anteprima per ogni pixel dello schermo.
+Retry visible failed transfers; rescan changed sources.	Riprova i trasferimenti non riusciti visibili; esegui di nuovo la scansione delle origini modificate.
+Exclude rejected or damaged captures.	Escludi le acquisizioni scartate o danneggiate.
+Open Import preferences and options for the current source.	Apri le preferenze e le opzioni di importazione per l'origine corrente.
+Assign selected Unknown lights/stacks, or visible ones if none selected.	Assegna i light/stack sconosciuti selezionati o, se non ce ne sono, quelli visibili.
+Clear import search and filters.	Cancella la ricerca e i filtri dell'importazione.
+Check selected captures, or visible ones, for rejection or damaged FITS data.	Controlla se le acquisizioni selezionate, o quelle visibili, sono state scartate o hanno dati FITS danneggiati.
+Show this file in File Explorer, in the repository.	Mostra questo file dell'archivio in Esplora file.
+Display stretch; image data stays unchanged.	Stretching di visualizzazione; i dati dell'immagine restano invariati.
+Switch light/dark theme.	Passa al tema chiaro/scuro.
+Metadata, target identification and scan report.	Metadati, identificazione dei target e report di scansione.
+Open the guide (F1).	Apri la guida (F1).
+Choose telescope folders or files, then confirm a full scan and import. Keep originals.	Scegli cartelle o file del telescopio, quindi conferma una scansione completa e l'importazione. Gli originali vengono mantenuti.
+Clear search, filters and target selection.	Cancella ricerca, filtri e selezione del target.
+Assess mount mode from rotation in acquisition subs.	Valuta la modalità della montatura dalla rotazione nelle pose di acquisizione.
+Solve selected Light groups and stacks; review batch target matches.	Esegui il plate solving dei gruppi Light e degli stack selezionati; verifica in blocco le corrispondenze dei target.
+Edit selected files, or all visible files if none selected.	Modifica i file selezionati o, se non ce ne sono, tutti i file visibili.
+Archive tools.	Strumenti dell'archivio.
+Reuse a saved telescope and source.	Riutilizza un telescopio e un'origine salvati.
+Save this device, model and source folder.	Salva questo dispositivo, il modello e la cartella di origine.
+Rename this device and its archived captures.	Rinomina questo dispositivo e le relative acquisizioni archiviate.
+Recover missing saved devices from archive metadata.	Recupera i dispositivi salvati mancanti dai metadati dell'archivio.
+Use a unique name for each physical telescope.	Usa un nome univoco per ogni telescopio fisico.
+Auto detects each capture’s model.	Automatico rileva il modello di ogni acquisizione.
+Overrides apply to every scanned capture.	Le impostazioni manuali si applicano a ogni acquisizione scansionata.
+Choose which targets to solve; requires a configured solver.	Scegli i target da risolvere; richiede un software di plate solving configurato.
+Choose which acquisition sessions to analyse.	Scegli le sessioni di acquisizione da analizzare.
+Measured work by stage; concurrent times can overlap.	Lavoro misurato per fase; i tempi delle attività simultanee possono sovrapporsi.
+Import timings and error diagnostics.	Tempi di importazione e diagnostica degli errori.
+Stop safely; completed imports remain.	Interrompi in sicurezza; le importazioni completate restano.
+Ctrl/Shift selects files; right-click opens file actions.	Ctrl/Shift seleziona i file; il clic destro apre le azioni sui file.
+Review scan results. Row selection does not limit imports; search and filters do.	Verifica i risultati della scansione. La selezione delle righe non limita le importazioni; la ricerca e i filtri sì.
+Capture source folder. Scan before importing.	Cartella di origine delle acquisizioni. Esegui la scansione prima di importare.
+Edit metadata for these files.	Modifica i metadati di questi file.
+Check rejection markers and file integrity.	Controlla gli indicatori di scarto e l'integrità dei file.
+Back	Indietro
+Next	Avanti
+AstroArchive: first import	AstroArchive: prima importazione
+AstroArchive walkthrough	Tour guidato di AstroArchive
+Walkthrough instructions	Istruzioni del tour guidato
+Previous step.	Passaggio precedente.
+Next step (Enter).	Passaggio successivo (Enter).
+Open this step’s menu or settings.	Apri il menu o le impostazioni di questo passaggio.
+Close walkthrough.	Chiudi il tour guidato.
+Finish	Fine
+Switch pages from the toolbar	Cambia pagina dalla barra degli strumenti
+Try the page selector	Prova il selettore di pagina
+Use the purple **PAGE** selector to move around AstroArchive. It sits beside the toolbar, or below it in smaller windows.\\\n\\\n- Choose **Repository**, **Edited** or **Import**.\\\n- Search, filters, selections and import progress stay in place.\\\n- Use `Ctrl+1–3` to select a page or `Ctrl+Tab` to cycle pages.	Usa il selettore viola **PAGINA** per spostarti in AstroArchive. Si trova accanto alla barra degli strumenti o, nelle finestre più piccole, sotto di essa.\\\n\\\n- Scegli **Archivio**, **Edited** o **Importa**.\\\n- Ricerca, filtri, selezioni e avanzamento delle importazioni restano invariati.\\\n- Usa `Ctrl+1–3` per selezionare una pagina o `Ctrl+Tab` per scorrere le pagine.
+Open Preferences	Apri Preferenze
+Your repository holds verified capture copies and the archive index.\\\n\\\n1. Open **Settings → General**.\\\n2. Choose your archive folder.\\\n\\\nClick the repository path on the main page to open it in Explorer.	Il tuo archivio contiene le copie verificate delle acquisizioni e il relativo indice.\\\n\\\n1. Apri **Impostazioni → Generale**.\\\n2. Scegli la cartella dell'archivio.\\\n\\\nFai clic sul percorso dell'archivio nella pagina principale per aprirlo in Esplora file.
+Select a telescope or source folder	Seleziona un telescopio o una cartella di origine
+Open Import menu	Apri il menu Importa
+Review before importing	Verifica prima di importare
+Open review and import options	Apri le opzioni di verifica e importazione
+Check each file’s **status** and **review reason** in the scan table.\\\n\\\n- **Review and repair** opens flagged captures and transfer retries.\\\n- **Import options** controls analysis and original removal.\\\n- The policy summary stays visible. **Originals are kept by default.**	Controlla lo **stato** e il **motivo della verifica** di ogni file nella tabella di scansione.\\\n\\\n- **Verifica e riparazione** apre le acquisizioni segnalate e i nuovi tentativi di trasferimento.\\\n- **Opzioni di importazione** controlla l'analisi e la rimozione degli originali.\\\n- Il riepilogo dei criteri resta visibile. **Per impostazione predefinita gli originali vengono conservati.**
+Import verified copies	Importa copie verificate
+Show import actions	Mostra le azioni di importazione
+Import copies ready files from the **filtered scan** and verifies their checksums.\n\n- Already archived content is skipped.\n- Progress and timing appear during the job.\n- **Cancel** stops safely after the current operation.\n\nThis walkthrough never starts an import for you.	Con Importa, i file pronti della **scansione filtrata** vengono copiati e ne vengono verificati i checksum.\n\n- I contenuti già archiviati vengono saltati.\n- Avanzamento e tempi vengono mostrati durante l'operazione.\n- **Annulla** interrompe in sicurezza dopo l'operazione corrente.\n\nQuesto tour guidato non avvia mai un'importazione al posto tuo.
+Browse, preview and sort	Sfoglia, visualizza in anteprima e ordina
+Open Repository view options	Apri le opzioni di visualizzazione di Archivio
+Export a stacking project	Esporta un progetto di stacking
+Open Export menu	Apri il menu Esporta
+Make AstroArchive comfortable	Rendi AstroArchive più comodo
+Open accessibility preferences	Apri le preferenze di accessibilità
+Open **Settings** for Preferences.\n\n- **General** sets appearance and the repository.\n- **Accessibility** adjusts text, rows, contrast and motion.\n- **Guide** opens searchable help, this walkthrough and About AstroArchive.\n- Press `F1` for help on the current page.	Apri **Impostazioni** per le preferenze.\n\n- **Generale** imposta l'aspetto e l'archivio.\n- **Accessibilità** regola testo, righe, contrasto e movimento.\n- **Guida** apre la guida con ricerca, questo tour guidato e Informazioni su AstroArchive.\n- Premi `F1` per la guida della pagina corrente.
+About AstroArchive	Informazioni su AstroArchive
+A desktop archive for astronomical images: verified imports, searchable capture metadata, image previews and export projects for your processing tools.	Un archivio desktop per immagini astronomiche: importazioni verificate, metadati di acquisizione ricercabili, anteprime delle immagini e progetti di esportazione per i tuoi strumenti di elaborazione.
+Created by Ari J. Guest. Learn more about the author and their work at arijguest.com.	Creato da Ari J. Guest. Scopri di più sull'autore e sul suo lavoro su arijguest.com.
+Visit arijguest.com	Visita arijguest.com
+Source code and releases	Codice sorgente e versioni
+Software licence	Licenza software
+Copyright 2026 Ari J. Guest. AstroArchive is source-available under the PolyForm Noncommercial License 1.0.0. Noncommercial use, modification and sharing are permitted under its terms. Commercial use, including resale outside the permitted purposes, requires separate permission.	Copyright 2026 Ari J. Guest. AstroArchive è distribuito con codice sorgente disponibile in base alla PolyForm Noncommercial License 1.0.0. L'uso non commerciale, la modifica e la condivisione sono consentiti secondo i relativi termini. L'uso commerciale, inclusa la rivendita al di fuori degli scopi consentiti, richiede un'autorizzazione separata.
+Read software licence (offline)	Leggi la licenza software (offline)
+Commercial licensing enquiries	Richieste di licenze commerciali
+Catalogue acknowledgements	Riconoscimenti per i cataloghi
+Target names and positions use OpenNGC (CC BY-SA 4.0); observing towns and cities use GeoNames (CC BY 4.0); constellation figures use D3-Celestial (BSD 3-clause). These datasets retain their own licences; their notices are included with the installation. Original image data remains in your repository; derived exports are identified separately.	I nomi e le posizioni dei target usano OpenNGC (CC BY-SA 4.0); le località di osservazione usano GeoNames (CC BY 4.0); le figure delle costellazioni usano D3-Celestial (BSD 3-clause). Questi set di dati mantengono le proprie licenze; le relative note sono incluse nell'installazione. I dati originali delle immagini restano nel tuo archivio; le esportazioni derivate sono identificate separatamente.
+AstroArchive software licence	Licenza software di AstroArchive
+Third-party data keeps its separate licences. Your images and processing outputs are not relicensed by using AstroArchive.	I dati di terze parti mantengono le proprie licenze. L'uso di AstroArchive non modifica la licenza delle tue immagini e dei risultati delle tue elaborazioni.
+Licensing summary and third-party notices	Riepilogo delle licenze e note di terze parti
+Waxing crescent	Falce crescente
+Waxing gibbous	Gibbosa crescente
+Waning crescent	Falce calante
+Waning gibbous	Gibbosa calante
+FILTERS	FILTRI
+Moon	Luna
+below horizon	sotto l'orizzonte
+{#0} subs	{0} pose
+{#0} sub	{0} posa
+{#0} stacks	{0} stack
+{#0} stack	{0} stack
+{#0} videos	{0} video
+{#0} video	{0} video
+{#0} sessions	{0} sessioni
+{#0} session	{0} sessione
+{#0} captures	{0} acquisizioni
+{#0} capture	{0} acquisizione
+{#0} files	{0} file
+{#0} file	{0} file
+{#0} nights	{0} notti
+{#0} night	{0} notte
+{#0} selected	{0} selezionati
+{#0} files selected	{0} file selezionati
+{#0} files in view	{0} file visualizzati
+{#0} dates unknown	{0} date sconosciute
+{#0} targets	{0} target
+Import {#0} files	Importa {0} file
+Import {#0} file	Importa {0} file
+Review {#0} files	Verifica {0} file
+Retry {#0} failed imports	Riprova {0} importazioni non riuscite
+Retry {#0} failed import	Riprova {0} importazione non riuscita
+{0} illuminated	{0} illuminata
+{0} apart	{0} di distanza
+Moon: {0}	Luna: {0}
+Alt {#0}°	Alt {0}°
+Repository size {#0} {1}	Dimensioni archivio {0} {1}
+Captures {#0} {1}	Acquisizioni {0} {1}
+Edited {#0} {1}	Edited {0} {1}
+Dump {#0} {1}	Dump {0} {1}
+Archive data {#0} {1}	Dati archivio {0} {1}
+Elapsed {0}	Trascorso {0}
+ETA ~{0}	Tempo rimanente ~{0}
+Backup verified: {#0} files	Backup verificato: {0} file
+Verified {#0} files	{0} file verificati
+Restored and verified {#0} files into {1}.	{0} file ripristinati e verificati in {1}.
+{#0} / {#1} files	{0} / {1} file
+{#0} inspected	{0} esaminati
+{#0} missing values found in {#1} files	{0} valori mancanti trovati in {1} file
+Tags and notes saved for {#0} files	Tag e note salvati per {0} file
+Tags and notes saved for {#0} file	Tag e note salvati per {0} file
+Automatic daily backups are on.	I backup automatici giornalieri sono attivi.
+Automatic weekly backups are on.	I backup automatici settimanali sono attivi.
+Automatic monthly backups are on.	I backup automatici mensili sono attivi.
+Connect the backup drive for {0}, or choose another folder in Settings > Backups.	Connetti l'unità di backup per {0} oppure scegli un'altra cartella in Impostazioni > Backup.
+A folder named {0} already exists there. Choose another name.	In questa posizione esiste già una cartella denominata {0}. Scegli un altro nome.
+This archive uses {0}.	Questo archivio usa {0}.
+Saved {0}.	Salvato: {0}.
+This image could not be read ({0}). The card uses a star field instead.	Impossibile leggere questa immagine ({0}). La scheda usa invece un campo stellare.
+{#0} archived files skipped in {#1} folders	{0} file archiviati saltati in {1} cartelle
+Device	Dispositivo
+Dimensions	Dimensioni
+Optical filter	Filtro ottico
+Review type	Tipo di verifica
+Not starred	Non preferito
+No tags	Nessun tag
+Passed	Superato
+Not screened	Non controllato
+Screened	Controllato
+Rejected / reference	Scartato / di riferimento
+File integrity problem	Problema di integrità del file
+Telescope rejected / reference	Scartato dal telescopio / di riferimento
+Transfer failure	Errore di trasferimento
+Capabilities	Funzionalità
+Backup complete	Backup completato
+Creating backup	Creazione del backup
+Full	Completo
+Incremental	Incrementale
+Preparing backup	Preparazione del backup
+Saving current archive database	Salvataggio del database corrente dell'archivio
+Verifying backup	Verifica del backup
+Disabling	Disattivazione
+Enabling	Attivazione
+Discovery	Rilevamento
+Duplicate checking	Controllo dei duplicati
+Hashing	Calcolo degli hash
+Header open/read	Apertura/lettura intestazione
+Reading	Lettura
+Starting	Avvio
+Verification	Verifica
+Copying	Copia
+Index loading	Caricamento dell'indice
+Indexed	Indicizzato
+Scanning	Scansione
+Changed	Modificato
+Missing	Mancante
+Verified	Verificato
+Duplicate	Duplicato
+Duplicate (cached)	Duplicato (in cache)
+New version (same name)	Nuova versione (stesso nome)
+Loading previous imports for this source	Caricamento delle importazioni precedenti per questa origine
+Saving scan metadata cache	Salvataggio della cache dei metadati di scansione
+Saving final portable index	Salvataggio dell'indice portabile finale
+Saving final portable index and report	Salvataggio dell'indice portabile finale e del report
+Saving portable index	Salvataggio dell'indice portabile
+Source cleanup	Pulizia dell'origine
+Screening files	Controllo dei file
+Reviewing edited images	Verifica delle immagini elaborate
+Checking Edited duplicates	Controllo dei duplicati in Edited
+Exporting Edited files	Esportazione dei file di Edited
+Deleting files	Eliminazione dei file
+Creating edited working copy	Creazione della copia di lavoro elaborata
+Building file list	Creazione dell'elenco dei file
+Copying project	Copia del progetto
+Finishing verified export	Completamento dell'esportazione verificata
+Preparing export	Preparazione dell'esportazione
+Reading acquisition dates	Lettura delle date di acquisizione
+Preparing animation palette	Preparazione della tavolozza dell'animazione
+Download failed	Download non riuscito
+Download stopped	Download interrotto
+Downloaded	Scaricato
+Reconnecting to telescope	Riconnessione al telescopio
+Scanning telescope	Scansione del telescopio
+Waiting for folder	In attesa della cartella
+Waiting for telescope download	In attesa del download dal telescopio
+Waiting to archive	In attesa di archiviazione
+Decoding representative image for the solver	Decodifica dell'immagine rappresentativa per il plate solving
+Matching major catalogue targets	Abbinamento dei principali target del catalogo
+Preparing temporary FITS copy	Preparazione della copia FITS temporanea
+Reading ASTAP solution	Lettura della soluzione ASTAP
+Reading image size and scale	Lettura di dimensioni e scala dell'immagine
+Reading solved coordinates and field geometry	Lettura delle coordinate risolte e della geometria del campo
+Preparing representative image	Preparazione dell'immagine rappresentativa
+Field solved	Campo risolto
+Pending	In sospeso
+Choose a target	Scegli un target
+Original deleted after verified import	Originale eliminato dopo l'importazione verificata
+Original retained	Originale mantenuto
+Original retained (calibration frame)	Originale mantenuto (frame di calibrazione)
+Original retained (verified duplicate)	Originale mantenuto (duplicato verificato)
+User assigned during import	Assegnato dall'utente durante l'importazione
+Solar system	Sistema solare
+Nebulae	Nebulose
+Galaxies	Galassie
+Star clusters	Ammassi stellari
+Stars	Stelle
+Meteors	Meteore
+Other targets	Altri target
+Unidentified	Non identificato
+All Targets	Tutti i target
+Not selected	Non selezionato
+Previously saved location	Località salvata in precedenza
+Unknown date	Data sconosciuta
+Dates unknown	Date sconosciute
+Unknown camera	Camera sconosciuta
+Unknown device	Dispositivo sconosciuto
+Unknown filter	Filtro sconosciuto
+Other / unknown	Altro / sconosciuto
+Select folder	Seleziona cartella
+No diagnostics available	Nessuna diagnostica disponibile
+Video duration unavailable	Durata del video non disponibile
+Acquisition dates unavailable	Date di acquisizione non disponibili
+Open the restored archive now?	Aprire ora l'archivio ripristinato?
+Excluded	Escluso
+Reimport allowed	Reimportazione consentita
+Reimport explicitly allowed	Reimportazione consentita esplicitamente
+Accepted	Accettato
+Partial match	Corrispondenza parziale
+Rejected	Scartato
+Registered	Registrato
+Starred files	File preferiti
+Open in app	Apri in un'app
+AstroBin CSV	CSV AstroBin
+Files…	File…
+Open in app…	Apri in un'app…
+Export options	Opzioni di esportazione
+Choose folder	Scegli cartella
+Create new folder	Crea nuova cartella
+Select files to export.	Seleziona i file da esportare.
+Copies the original files byte for byte and verifies every copy. Existing files are kept; duplicate names receive a numbered suffix.	Copia i file originali byte per byte e verifica ogni copia. I file esistenti vengono mantenuti; ai nomi duplicati viene aggiunto un suffisso numerico.
+Add metadata	Aggiungi metadati
+Groups lights by compatible capture settings, adds matching calibration files when chosen, and verifies every copy. Stacking happens in your processing software.	Raggruppa i light in base a impostazioni di acquisizione compatibili, aggiunge i file di calibrazione corrispondenti se scelto e verifica ogni copia. Lo stacking avviene nel tuo software di elaborazione.
+Select lights or stacks to prepare a stacking folder.	Seleziona light o stack per preparare una cartella di stacking.
+Add AstroBin acquisition CSV	Aggiungi CSV di acquisizione AstroBin
+Writes astrobin_acquisition.csv and notes from the original metadata of the exported lights, stacks and calibration frames.	Scrive astrobin_acquisition.csv e le note a partire dai metadati originali dei light, degli stack e dei frame di calibrazione esportati.
+AstroBin acquisition notes	Note di acquisizione AstroBin
+Opens verified copies in PixInsight, Siril, DSS and other processing apps.	Apre copie verificate in PixInsight, Siril, DSS e altre app di elaborazione.
+Copies and verifies the original files, then opens your chosen app.	Copia e verifica i file originali, quindi apre l'app scelta.
+No destination supports this selection. Files can copy the originals; convert to a supported format or select fewer images to open them in an app.	Nessuna destinazione supporta questa selezione. L'opzione File può copiare gli originali; converti in un formato supportato o seleziona meno immagini per aprirle in un'app.
+Application settings…	Impostazioni delle applicazioni…
+Select Edited files to export.	Seleziona i file di Edited da esportare.
+Copies the selected images in their original format and verifies every copy. Existing files are kept; duplicate names receive a numbered suffix.	Copia le immagini selezionate nel formato originale e verifica ogni copia. I file esistenti vengono mantenuti; ai nomi duplicati viene aggiunto un suffisso numerico.
+Save CSV…	Salva CSV…
+Builds AstroBin's acquisition table from the original archive metadata, keeping details that processing can lose. No image files are exported.	Crea la tabella di acquisizione di AstroBin dai metadati originali dell'archivio, mantenendo i dettagli che l'elaborazione può perdere. Non viene esportato alcun file immagine.
+Select lights, stacks or recordings to describe their acquisition.	Seleziona light, stack o registrazioni per descriverne l'acquisizione.
+Count matching calibration frames	Conta i frame di calibrazione corrispondenti
+Counts archived darks, flats, flat darks and bias frames that match the selected subs. Each frame is counted once.	Conta i dark, i flat, i dark flat e i bias archiviati che corrispondono alle pose selezionate. Ogni frame viene contato una sola volta.
+Each target needs its own AstroBin image. Planetary recordings use AstroBin's video columns.	Ogni target richiede una propria immagine AstroBin. Le registrazioni planetarie usano le colonne video di AstroBin.
+AstroBin CSV preview	Anteprima CSV AstroBin
+Copy CSV	Copia CSV
+Copy the CSV to paste into AstroBin's acquisition import.	Copia il CSV da incollare nell'importazione delle acquisizioni di AstroBin.
+Copy notes	Copia note
+Copy the notes about blank or uncertain values.	Copia le note sui valori vuoti o incerti.
+No acquisition rows.	Nessuna riga di acquisizione.
+No blank or uncertain values.	Nessun valore vuoto o incerto.
+CSV copied. Paste it into AstroBin's acquisition CSV import.	CSV copiato. Incollalo nell'importazione CSV delle acquisizioni di AstroBin.
+Notes copied.	Note copiate.
+AstroBin filter IDs	ID dei filtri AstroBin
+AstroBin identifies filters by number. Paste the filter's AstroBin page address or its number. IDs are remembered.	AstroBin identifica i filtri tramite un numero. Incolla l'indirizzo della pagina AstroBin del filtro o il suo numero. Gli ID vengono memorizzati.
+No acquisition rows can be written. See the notes above.	Non è possibile scrivere alcuna riga di acquisizione. Consulta le note sopra.
+A spreadsheet of archive metadata: targets, equipment, exposures, dates, checksums and paths, for searching or record keeping. No image files are exported.	Un foglio di calcolo con i metadati dell'archivio: target, attrezzatura, esposizioni, date, checksum e percorsi, per la ricerca o la documentazione. Non viene esportato alcun file immagine.
+Selected files	File selezionati
+Files in view	File visualizzati
+Rows	Righe
+Export…	Esporta…
+Copy and verify grouped inputs into a ready-to-stack folder.	Copia e verifica gli input raggruppati in una cartella pronta per lo stacking.
+Build AstroBin's acquisition CSV from archived metadata; no images are copied.	Crea il CSV di acquisizione di AstroBin dai metadati archiviati; non viene copiata alcuna immagine.
+Save CSV	Salva CSV
+Export preferences	Preferenze di esportazione
+Default export folder, Siril and application locations.	Cartella di esportazione predefinita, percorsi di Siril e delle applicazioni.
+Choose an existing folder outside the repository.	Scegli una cartella esistente esterna all'archivio.
+Application settings	Impostazioni delle applicazioni
+Open Export for selected files, or all visible files if none selected.	Apri Esporta per i file selezionati o, se non ce ne sono, per tutti i file visibili.
+Open Export with an option chosen.	Apri Esporta con un'opzione già selezionata.
+Select captures, then choose **Export**: copy originals, prepare a ready-to-stack folder, open them in an app, or create an AstroBin acquisition CSV.	Seleziona le acquisizioni, quindi scegli **Esporta**: copia gli originali, prepara una cartella pronta per lo stacking, aprili in un'app o crea un CSV di acquisizione AstroBin.
+No files selected	Nessun file selezionato
+Inputs with different calibration sets use separate folders.	Gli input con set di calibrazione diversi usano cartelle separate.
+Export selection: {0}	Selezione da esportare: {0}
+{#0} selected files	{0} file selezionati
+{#0} selected file	{0} file selezionato
+{#0} file in view	{0} file visualizzato
+{#0} calibration frames	{0} frame di calibrazione
+{#0} calibration frame	{0} frame di calibrazione
+{#0} other files	{0} altri file
+{#0} other file	{0} altro file
+{#0} recordings	{0} registrazioni
+{#0} recording	{0} registrazione
+{0} and {#1} more targets	{0} e altri {1} target
+Entire repository ({0})	Intero archivio ({0})
+{#0} catalogue rows exported.	{0} righe del catalogo esportate.
+AstroBin CSV saved: {0}	CSV AstroBin salvato: {0}
+Exported to {0}	Esportato in {0}
+{#0} selected Edited files	{0} file di Edited selezionati
+1 selected Edited file	1 file di Edited selezionato
+{#0} matching calibration files.	{0} file di calibrazione corrispondenti.
+{#0} matching calibration file.	{0} file di calibrazione corrispondente.
+{#0} subs have unknown processing state. Confirm they are uncalibrated to include their calibration files.	{0} pose hanno uno stato di elaborazione sconosciuto. Conferma che non sono calibrate per includere i relativi file di calibrazione.
+Theme|Light	Chiaro
+Theme|Dark	Scuro
+Theme|System	Sistema
+PAGE	PAGINA
+PREVIEW	ANTEPRIMA
+TARGETS	TARGET
+FILES	FILE
+BYTES	BYTE
+MODEL	MODELLO
+MODIFIED	MODIFICATO
+ORIGINAL	ORIGINALE
+SECONDS	SECONDI
+STAGE	FASE
+SUBS	POSE
+Astrophotography,	Astrofotografia,
+organised.	organizzata.
+Delete verified new/restored source images; keep calibration originals. Cloud deletions sync.	Elimina le immagini sorgente nuove o ripristinate già verificate; mantiene gli originali di calibrazione. Le eliminazioni nel cloud vengono sincronizzate.
+Import new captures from this folder as your capture software saves them.	Importa le nuove acquisizioni da questa cartella man mano che il software di acquisizione le salva.
+Watch folder for new captures	Monitora la cartella per nuove acquisizioni
+New telescope...	Nuovo telescopio...
+{#0} ready ({1})	{0} pronti ({1})
+{#0} duplicates	{0} duplicati
+{#0} previously deleted	{0} eliminati in precedenza
+{#0} telescope rejected/reference	{0} scartati dal telescopio/di riferimento
+{#0} file problems	{0} problemi dei file
+{#0} transfer failures	{0} errori di trasferimento
+{#0} not screened	{0} non controllati
+Share {0}	Condividi {0}
+
+# Offline target information controls
+TARGET INFO	INFORMAZIONI SULL’OGGETTO
+Target information	Informazioni sull’oggetto
+Show target info	Mostra informazioni sull’oggetto
+LOCATION IN THE SKY	POSIZIONE NEL CIELO
+Reset sky view	Ripristina vista del cielo
+Sources and catalogue details	Fonti e dettagli del catalogo
+Image credit · {0}	Crediti immagine · {0}
+Original image and full credit	Immagine originale e crediti completi
+Object source	Fonte dell’oggetto
+Catalogue names: {0}	Nomi del catalogo: {0}
+Source for: {0}	Fonte per: {0}
+Parent	Corpo principale
+RA (J2000)	AR (J2000)
+Dec (J2000)	Dec (J2000)
+Apparent size	Dimensione apparente
+Magnitude ({0})	Magnitudine ({0})
+Explore your targets	Esplora i tuoi oggetti
+Loading target information…	Caricamento delle informazioni sull’oggetto…
+Select a file to return to its image preview.	Seleziona un file per tornare alla sua anteprima.
+Catalogue position · drag to rotate. Scroll or pinch over the map to zoom.	Posizione del catalogo · Trascina per ruotare. Scorri o pizzica la mappa per ingrandire.
+Catalogue coordinates are not available for this target.	Le coordinate del catalogo non sono disponibili per questo oggetto.
+Catalogue summary only. The extended description is awaiting review.	Solo riepilogo del catalogo. La descrizione estesa è in attesa di verifica.
+Description checked against its cited sources.	Descrizione verificata rispetto alle fonti citate.
+A checked overview is not available for this target yet.	Non è ancora disponibile una panoramica verificata di questo oggetto.
+Historical designation · identity is disputed.	Designazione storica · Identità controversa.
+Choose a target on the left to see its overview and sky location. Select a file to preview your image.	Scegli un oggetto a sinistra per vedere la panoramica e la posizione nel cielo. Seleziona un file per visualizzare l’immagine.
+Calibration frames do not have a celestial target. Select a file to preview it.	Le immagini di calibrazione non hanno un oggetto celeste. Seleziona un file per visualizzarlo.
+Identify this target to see its catalogue information. Select a file to preview it.	Identifica questo oggetto per vedere le informazioni del catalogo. Seleziona un file per visualizzarlo.
+Target information is unavailable. You can still select and preview your files.	Le informazioni sull’oggetto non sono disponibili. Puoi comunque selezionare e visualizzare i file.
+
+# Target details and analytics output modes
+No information is available for this target.	Non sono disponibili informazioni per questo oggetto.
+Full image credit	Crediti completi dell’immagine
+Images & documents	Immagini e documenti
+Video & GIF	Video e GIF
+Not out (below the horizon)	Non visibile (sotto l’orizzonte)
+Output	Output
+Export as	Esporta come
+Chart type	Tipo di grafico
+Donut	Anello
+Bars	Barre
+Columns	Colonne
+Recommended	Consigliato
+Target cards	Schede degli oggetti
+Share your imaged targets	Condividi gli oggetti fotografati
+Card layout	Layout della scheda
+Card resolution	Risoluzione della scheda
+Card credit (optional)	Crediti della scheda (facoltativo)
+Resolution	Risoluzione
+Standard	Standard
+Adjust image…	Regola immagine…
+Adjust image position	Regola la posizione dell’immagine
+Adjust target card	Regola la scheda dell’oggetto
+Zoom	Zoom
+Horizontal position	Posizione orizzontale
+Vertical position	Posizione verticale
+Reset position	Reimposta posizione
+Use this image	Usa questa immagine
+More cards & video…	Altre schede e video…
+Choose target cards	Scegli le schede degli oggetti
+Make cards for	Crea schede per
+My top targets	I miei oggetti principali
+Targets I choose	Oggetti che scelgo
+How many	Quanti
+Rank by	Ordina per
+Integration time	Tempo di integrazione
+Find a target	Cerca un oggetto
+Use these targets	Usa questi oggetti
+Time per scene	Tempo per scena
+Export cards…	Esporta schede…
+Export card video…	Esporta video delle schede…
+All cards	Tutte le schede
+ASTAP is much quicker and highly recommended. Astrometry.net solves can wait minutes in a shared online queue.	ASTAP è molto più veloce ed è vivamente consigliato. Le risoluzioni di Astrometry.net possono attendere minuti in una coda online condivisa.
+Choose card targets	Scegli gli oggetti delle schede
+QUALITY	QUALITÀ
+EXPOSURE FIT	ADEGUATEZZA ESPOSIZIONE
+Analyse image quality…	Analizza la qualità dell'immagine…
+Re-measure image quality…	Misura di nuovo la qualità dell'immagine…
+Analyse image quality	Analizza la qualità dell'immagine
+Quality rank	Posizione di qualità
+Exposure fit	Adeguatezza esposizione
+Quality score (0 to 100)	Punteggio di qualità (da 0 a 100)
+Top 10%	Migliori 10%
+Top 25%	Migliori 25%
+Top half	Metà superiore
+Bottom half	Metà inferiore
+Weakest 25%	25% più deboli
+Has quality flags	Con segnalazioni di qualità
+Not scored	Non valutato
+Under	Sottoesposta
+Good	Buona
+Over	Sovraesposta
+Image quality	Qualità dell'immagine
+Measure image quality after each import	Misura la qualità dell'immagine dopo ogni importazione
+Compare deep-sky frames across the whole target instead of each session	Confronta i fotogrammi deep-sky sull'intero oggetto invece che per sessione
+Nothing to measure	Niente da misurare
+OVERVIEW	PANORAMICA
+IMAGING NOTES	NOTE DI RIPRESA
+PARAMETERS	PARAMETRI
+Orbit	Orbita
+Diameter	Diametro
+Mass	Massa
+Major moons	Lune principali
+{0} AU from the Sun · {1} days	{0} UA dal Sole · {1} giorni
+{0} AU from the Sun · {1} years	{0} UA dal Sole · {1} anni
+SOURCES	FONTI
+Solar eclipse	Eclissi solare
+Lunar eclipse	Eclissi lunare
+Solar Eclipse	Eclissi solare
+Lunar Eclipse	Eclissi lunare
+Orbit type	Tipo di orbita
+Perihelion	Perielio
+Perihelion date	Data del perielio
+Orbital period	Periodo orbitale
+Eccentricity	Eccentricità
+{0} AU from the Sun	{0} UA dal Sole
+{0} years per orbit	{0} anni per orbita
+Halley-type	Tipo Halley
+Jupiter-family	Famiglia di Giove
+Encke-type	Tipo Encke
+Long-period	Lungo periodo
+Near-parabolic	Quasi parabolica
+Hyperbolic (interstellar)	Iperbolica (interstellare)
+Aphelion	Afelio
+Show targets in frame	Mostra i target nell’inquadratura
+Hide targets in frame	Nascondi i target nell’inquadratura
+Field geometry is unusable for marking targets	La geometria del campo non consente di segnare i target
+This capture has no plate solution	Questa ripresa non ha una soluzione astrometrica
+This capture has only approximate pointing	Questa ripresa ha solo un puntamento approssimativo
+This image has no plate solution	Questa immagine non ha una soluzione astrometrica
+This image has no plate solution in its header	L’intestazione di questa immagine non contiene una soluzione astrometrica
+No catalogue objects in this field	Nessun oggetto del catalogo in questo campo
+Plate solve…	Risolvi astrometria…
+Reading the image header…	Lettura dell’intestazione dell’immagine…
+On	Attivo
+Telescopes	Telescopi
+Reports	Report
+Clean up	Pulizia
+Refresh USB devices	Aggiorna dispositivi USB
+Live import underway…	Importazione in tempo reale in corso…
+Catalogue CSV…	Catalogo CSV…
+Stacking folder…	Cartella di stacking…
+AstroBin CSV…	CSV AstroBin…
+Save, rename or recover telescope profiles, or look for USB telescopes.	Salva, rinomina o recupera i profili dei telescopi, oppure cerca telescopi USB.
+Look for telescopes connected by USB.	Cerca i telescopi collegati tramite USB.
+Show the latest scan and import reports.	Mostra gli ultimi report di scansione e importazione.
+Complete metadata, verify checksums, reindex and review deletions.	Completa i metadati, verifica i checksum, reindicizza e rivedi le eliminazioni.
+Permanently delete failed, non-raw or all archive files.	Elimina definitivamente i file non riusciti, non raw o tutti i file dell'archivio.
+Show timings and status for the last operation.	Mostra durata e stato dell'ultima operazione.
+# Analytics options panel, remembered choices and chart customisation
+Combined document	Documento combinato
+All six charts in one document	Tutti e sei i grafici in un documento
+{#0} of 6 charts in one document	{0} grafici su 6 in un documento
+{#0} of 6 charts	{0} grafici su 6
+{#0} of 6 charts · Combined preview	{0} grafici su 6 · Anteprima combinata
+{#0} of 6 charts · Social pages	{0} grafici su 6 · Pagine social
+Combined preview	Anteprima combinata
+Social pages	Pagine social
+Export preview	Anteprima di esportazione
+Customised	Personalizzato
+This chart	Questo grafico
+Charts in the document	Grafici nel documento
+Document	Documento
+Your choices	Le tue scelte
+Order	Ordine
+Largest first	Prima i più grandi
+Smallest first	Prima i più piccoli
+A–Z	A–Z
+Chart title	Titolo del grafico
+Chart subtitle	Sottotitolo del grafico
+Reset this chart	Reimposta questo grafico
+Colour palette	Tavolozza colori
+Nebula	Nebulosa
+Aurora	Aurora
+Colour-blind safe	Adatta al daltonismo
+Hide options	Nascondi opzioni
+Show options	Mostra opzioni
+Reset all options…	Reimposta tutte le opzioni…
+Reset all options	Reimposta tutte le opzioni
+Keep at least one chart in the combined document.	Lascia almeno un grafico nel documento combinato.
+Options reset to their defaults.	Opzioni riportate ai valori predefiniti.
+Exported all six charts	Esportati tutti e sei i grafici
+Exported {#0} of 6 charts	Esportati {0} grafici su 6
+Exported chart	Grafico esportato
+Rank groups by size or alphabetically. Donuts and columns keep the largest groups and gather the rest into Other.	Ordina i gruppi per dimensione o alfabeticamente. Anelli e colonne mantengono i gruppi più grandi e raggruppano il resto.
+Leave blank to use the standard title.	Lascia vuoto per usare il titolo standard.
+Leave blank to use the standard description.	Lascia vuoto per usare la descrizione standard.
+Return this chart's type, order, title and subtitle to their defaults.	Riporta tipo, ordine, titolo e sottotitolo di questo grafico ai valori predefiniti.
+Choose the charts that go into the combined document and Export all. At least one chart stays included.	Scegli i grafici da includere nel documento combinato e in Esporta tutto. Almeno un grafico resta incluso.
+Shown in each chart's footer and in exported file details. It starts as the repository folder name.	Appare nel piè di pagina di ogni grafico e nei dettagli dei file esportati. All'inizio è il nome della cartella dell'archivio.
+Colours for chart series in the preview and every export. Colour-blind safe uses the Okabe–Ito hues. Lettering keeps the document theme's colours.	Colori delle serie nell'anteprima e in ogni esportazione. Adatta al daltonismo usa le tonalità di Okabe–Ito. Il testo mantiene i colori del tema del documento.
+Give the preview the whole width, or bring back the chart, document and export options.	Dai all'anteprima tutta la larghezza o mostra di nuovo le opzioni di grafico, documento ed esportazione.
+Save the charts chosen for the combined document in one file, using the same telescope and date scope.	Salva in un file i grafici scelti per il documento combinato, con lo stesso telescopio e intervallo di date.
+Return every chart, document and export choice to its default. The telescope and date scope are not changed.	Riporta tutte le scelte di grafico, documento ed esportazione ai valori predefiniti. Telescopio e intervallo di date non cambiano.
+Return every chart, document and export choice to its default? The telescope and date scope are not changed.	Riportare tutte le scelte di grafico, documento ed esportazione ai valori predefiniti? Telescopio e intervallo di date non cambiano.
+Chart types, titles, order, palette, document and export choices are remembered for next time. Ctrl+E exports; Ctrl+Shift+E exports the combined document.	Tipi di grafico, titoli, ordine, tavolozza e scelte di documento ed esportazione vengono ricordati per la prossima volta. Ctrl+E esporta; Ctrl+Shift+E esporta il documento combinato.
+Choose targets in the options panel; adjust any card's image above the preview.	Scegli gli oggetti nel pannello delle opzioni; regola l'immagine di qualsiasi scheda sopra l'anteprima.
+Export options · Resolution	Opzioni di esportazione · Risoluzione
+Export options · Timing and video size	Opzioni di esportazione · Tempi e dimensione del video
+# Sky map clicks and eclipse details
+Total solar eclipse	Eclissi solare totale
+Annular solar eclipse	Eclissi solare anulare
+Partial solar eclipse	Eclissi solare parziale
+Total lunar eclipse	Eclissi lunare totale
+Partial lunar eclipse	Eclissi lunare parziale
+Penumbral lunar eclipse	Eclissi lunare di penombra
+Sun covered at capture	Sole coperto al momento della ripresa
+Moon in Earth's shadow at capture	Luna nell’ombra della Terra al momento della ripresa
+Moon in Earth's outer shadow at capture	Luna nella penombra della Terra al momento della ripresa
+Maximum	Massimo
+Began	Inizio
+Ended	Fine
+Duration	Durata
+Partial phase	Fase parziale
+Totality	Totalità
+Annularity	Fase anulare
+{#0}% at {1}	{0}% alle {1}
+Click a constellation to name it, or the Moon, Sun or target for capture details.	Fai clic su una costellazione per vederne il nome, oppure sulla Luna, sul Sole o sul soggetto per i dettagli della ripresa.
+Coverage from first to last contact.	Copertura dal primo all’ultimo contatto.
+The marker shows the capture.	Il segno indica la ripresa.
+Eclipse coverage over time	Copertura dell’eclissi nel tempo
+Eclipse times are for the observing location.	Gli orari dell’eclissi si riferiscono al luogo di osservazione.
+Eclipse times run from the Moon entering Earth's outer shadow to leaving it.	Gli orari dell’eclissi vanno dall’ingresso della Luna nella penombra della Terra alla sua uscita.
+Eclipse coverage comes from the bundled Moon and Sun models at the recorded time; check the capture clock if it looks wrong.	La copertura deriva dai modelli lunare e solare inclusi all’ora registrata; controlla l’orologio della ripresa se sembra errata.
+# Target card descriptions, drag and zoom, and the preview loading pane
+Preparing preview…	Preparazione dell’anteprima…
+Preparing preview	Preparazione dell’anteprima
+Preparing target cards…	Preparazione delle schede degli oggetti…
+Adjust card…	Regola scheda…
+Choose another image of this target, including any Edited image, adjust its zoom and position, and add a short description.	Scegli un’altra immagine di questo oggetto, comprese le immagini modificate, regola zoom e posizione e aggiungi una breve descrizione.
+Drag the preview to move the image, and hold Ctrl while scrolling to zoom.	Trascina l’anteprima per spostare l’immagine e tieni premuto Ctrl mentre scorri per lo zoom.
+Short description (optional)	Breve descrizione (facoltativa)
+A line or two under the target name, in card images and videos. Leave blank for none.	Una o due righe sotto il nome dell’oggetto, nelle immagini e nei video delle schede. Lascia vuoto per non mostrarla.
+↺ Rotate left	↺ Ruota a sinistra
+Rotate right ↻	Ruota a destra ↻
+Rotate left	Ruota a sinistra
+Rotate right	Ruota a destra
+Turn the image a quarter turn anticlockwise.	Ruota l’immagine di un quarto di giro in senso antiorario.
+Turn the image a quarter turn clockwise.	Ruota l’immagine di un quarto di giro in senso orario.
+Set capture town / city…	Imposta località di ripresa…
+Capture town / city	Località di ripresa
+Choose where these files were captured. A chosen town or city replaces any capture location recorded in the files. Without a choice, the recorded location is used, then your observing town / city from Settings.	Scegli dove sono stati ripresi questi file. Una località scelta sostituisce qualsiasi posizione di ripresa registrata nei file. Senza scelta si usa la posizione registrata, poi la località di osservazione delle Impostazioni.
+Location used for sky views, Stellarium and eclipse times.	Posizione usata per viste del cielo, Stellarium e orari delle eclissi.
+Use default location	Usa posizione predefinita
+Default location	Posizione predefinita
+Save location	Salva posizione
+Mixed	Misto
+Not set	Non impostata
+Recorded in file metadata	Registrata nei metadati del file
+Settings default	Predefinita dalle Impostazioni
+Chosen capture town / city	Località di ripresa scelta
+Target below horizon	Obiettivo sotto l'orizzonte
+Set the capture town / city for this file (right-click › Set capture town / city…), or correct the capture timezone in metadata.	Imposta la località di ripresa per questo file (clic destro › Imposta località di ripresa…) o correggi il fuso orario di ripresa nei metadati.
+Set capture town / city for selected…	Imposta località di ripresa per la selezione…
+Targets below the horizon at the predicted capture time usually need the capture town / city or timezone set.	Gli obiettivi sotto l'orizzonte all'ora di ripresa stimata di solito richiedono la località o il fuso orario di ripresa.
+
+# Information pane, 3.2.6
+Credits	Crediti
+FUN FACT	CURIOSITÀ
+
+# Capture checks, 3.2.6
+Sun obscured	Sole oscurato
+Check capture metadata	Controllare i metadati di acquisizione
+Suspected obstruction	Possibile ostruzione

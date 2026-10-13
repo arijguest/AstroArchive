@@ -119,6 +119,8 @@ namespace AstroArchive {
         public FitsHeader Header=new FitsHeader();
         public List<ImageDescriptor> Images=new List<ImageDescriptor>();
         public string Note;
+        // Set when the header is readable but the pixel data is damaged.
+        public string DataIssue;
     }
     public class PixelImage {
         public int Width,Height,Channels;
@@ -175,7 +177,7 @@ namespace AstroArchive {
             };
         }
         public static ImageDescriptor Selected(Frame f) {
-            return f.Images==null?null:f.Images.FirstOrDefault(i=>i.Key==f.ImageKey)??f.Images.FirstOrDefault();
+            return f==null||f.Images==null?null:f.Images.FirstOrDefault(i=>i!=null&&i.Key==f.ImageKey)??f.Images.FirstOrDefault(i=>i!=null);
         }
         public static bool IsCalibration(string kind) {
             return new[] {
@@ -239,12 +241,21 @@ namespace AstroArchive {
             };
         }
         public static PreviewData Display(Frame frame,string path,int index,CancellationToken ct,bool fullResolution=false) {
+            if(frame==null)throw new ArgumentNullException("frame");
+            // Older archive records can lack an image descriptor or its cached
+            // header. Recover it from the original file without changing metadata.
+            var descriptor=Selected(frame);
+            if(descriptor==null||frame.Format=="FITS"&&descriptor.Headers==null){
+                var info=Inspect(path);var images=(info.Images??new List<ImageDescriptor>()).Where(i=>i!=null).ToList();
+                descriptor=images.FirstOrDefault(i=>i.Key==frame.ImageKey)??images.FirstOrDefault();
+                if(descriptor==null)throw new NotSupportedException("No decodable image is available.");
+                frame=frame.Clone();frame.Format=info.Format;frame.Images=images;frame.ImageKey=descriptor.Key;
+            }
             if(fullResolution){var selected=Selected(frame)??Inspect(path).Images.FirstOrDefault();if(selected==null)throw new NotSupportedException("No decodable image is available.");return FullResolutionPreview.Create(frame,Read(frame,path,index,ct),selected,path,ct);}
             if(string.IsNullOrEmpty(frame.Format))return Fits.Preview(path,ct);
             if(frame.Format=="FITS"&&Selected(frame)!=null&&Selected(frame).Compression!="cfitsio")return Fits.Preview(path,ct,Selected(frame),index);
             var sampled=Reader(path) as ISampledAssetReader;if(sampled!=null)return sampled.Preview(frame,path,Selected(frame)??Inspect(path).Images.First(),index,ct);
             PixelImage image=Read(frame,path,index,ct);
-            var descriptor=Selected(frame);
             string bayer=(frame.Bayer??"").ToUpperInvariant();
             bool cfa=image.Channels==1&&new[] {
                 "RGGB","BGGR","GRBG","GBRG"

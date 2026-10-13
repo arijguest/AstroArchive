@@ -26,7 +26,7 @@ namespace AstroArchive {
                 }
             }
             catch(Exception ex) {
-                MessageBox.Show(Window,ex.Message,"Preview unavailable");
+                LocalizedMessage.Show(Window,ex.Message,"Preview unavailable");
                 return;
             }
             var images=inspected.Images??new List<ImageDescriptor>();

@@ -16,6 +16,7 @@ namespace AstroArchive {
    dialog.Button("Choose town / city…",()=>{var picker=new CityPicker(dialog.Window,choice.CityLabel);try{if(picker.Show()){choice.Select(picker.SelectedCity);label.Text=choice.Label;}}finally{picker.Dispose();}});
    dialog.Button("Clear observing location",()=>{choice.Clear();label.Text=choice.Label;});return choice;
   }
+
  }
  public sealed class CityPicker:IDisposable {
   readonly FormWindow dialog;readonly DispatcherTimer debounce;int generation;bool closed;

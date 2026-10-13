@@ -4,7 +4,7 @@ User guide: Quick_Start.txt, or Guide in the application.
 Report an issue: https://github.com/arijguest/AstroArchive/issues
 
 Include the app/package version, exact error and relevant filename.
-Repository > Diagnostics shows the last import report and performance details.
+Import > Reports shows the last import report; Repository > Last operation… shows performance details.
 For network/live imports, include the telescope model and firmware, connection
 method (automatic/manual; Seestar SMB or DWARF FTP), whether discovery succeeded,
 and whether failure occurred during connection, listing, download or archive import.

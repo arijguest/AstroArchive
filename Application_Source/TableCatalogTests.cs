@@ -4,6 +4,39 @@ using System.Linq;
 namespace AstroArchive {
  public partial class Tests {
   static void TableCatalogTests(){
+   Test("Stacks recover combined counts and prefer explicit total exposure",()=>{
+    var frame=new Frame{Kind="Stack",Make="DWARFLAB",OriginalName="stacked-16_HD 237015_Astro_20260910-214058719.fits",Exposure=10,Images=new System.Collections.Generic.List<ImageDescriptor>{new ImageDescriptor{Headers=new System.Collections.Generic.Dictionary<string,string>{{"EXPTIME","10"},{"SUBEXP","10"},{"NFRAMES","236"}}}}};
+    Check(Classifier.ApplyStackMetadata(frame)&&frame.StackCount==236&&frame.KindLabel=="Stack (236)"&&frame.Exposure==2360,"Recorded combined count did not give total integration");
+    frame.StackCount=0;frame.Exposure=10;frame.Images[0].Headers.Remove("NFRAMES");frame.Images[0].Headers["TOTALEXP"]="2360";
+    Check(Classifier.ApplyStackMetadata(frame)&&frame.StackCount==236&&frame.Exposure==2360,"Explicit total was used for the count but not the displayed exposure");
+    frame.Exposure=123;Assets.UserFact(frame,"Exposure");Classifier.ApplyStackMetadata(frame);Check(frame.Exposure==123,"User total exposure was overwritten");
+   });
+   Test("DWARF stacks without exposure in their name use saved session durations",()=>{
+    string folder=Path.Combine(root,"stack-with-session");Directory.CreateDirectory(folder);string file=Path.Combine(folder,"stacked-16_HD 237015_Astro_20260910-214058719.fits");
+    Write(file,64,48,(x,y)=>1000,new System.Collections.Generic.Dictionary<string,string>{{"EXPTIME","2360"},{"INSTRUME","'DWARF 3'"}});
+    File.WriteAllText(Path.Combine(folder,"shotsInfo.json"),"{\"capture\":{\"exposureSeconds\":10}}");
+    var frame=Classifier.Read(file,folder,"Dwarf-03","Auto");Check(frame.StackCount==236&&frame.Exposure==2360&&frame.Facts["SubExposure"].Source.Contains("exposureSeconds"),"Session duration was ignored when the FITS total was already present");
+    using(var repo=new Repository(Path.Combine(root,"stack-session-copies"))){repo.Import(repo.Scan(folder,"Dwarf-03","Auto",ct,NoProgress).Frames,ct,NoProgress);var project=repo.CreateEditedWorkingCopies(repo.All(),"Recovered stack","Other editor",ct,NoProgress);var metadata=project.Sources.Single().Metadata;Check(metadata.Subs==236&&metadata.SubExposure==10&&metadata.TotalExposure==2360,"Working copy lost recovered session count or integration");}
+    File.Delete(Path.Combine(folder,"shotsInfo.json"));frame=Classifier.Read(file,folder,"Dwarf-03","Auto");Check(frame.StackCount==0&&frame.Exposure==2360,"16-bit filename or an assumed duration was treated as a count");
+   });
+   Test("Existing stacks recover from archived sidecars without reading capture pixels",()=>{
+    string folder=Path.Combine(root,"stack-saved-session"),meta=Path.Combine(folder,".astroarchive");Directory.CreateDirectory(Path.Combine(meta,"session-metadata"));
+    string sidecar=Path.Combine(meta,"session-metadata","saved.json");File.WriteAllText(sidecar,"{\"exposureSeconds\":10}");string before=File.ReadAllText(sidecar);string savedName=Util.Hash(sidecar,ct)+".json";File.Move(sidecar,Path.Combine(Path.GetDirectoryName(sidecar),savedName));sidecar=Path.Combine(Path.GetDirectoryName(sidecar),savedName);
+    var frame=new Frame{Hash="saved-stack",Kind="Stack",Make="DWARFLAB",OriginalName="stacked-16_HD 237015_Astro_20260910-214058719.fits",Exposure=2360,RelativePath="missing.fits",SidecarRelativePath=Path.Combine(".astroarchive","session-metadata",savedName),Images=new System.Collections.Generic.List<ImageDescriptor>{new ImageDescriptor{Headers=new System.Collections.Generic.Dictionary<string,string>{{"EXPTIME","2360"}}}}};
+    var counted=frame.Clone();counted.Hash="recorded-count";counted.StackCount=236;counted.Exposure=10;counted.Images[0].Headers["EXPTIME"]="10";
+    using(var repo=new Repository(folder)){repo.Save(frame);repo.Save(counted);}
+    using(var repo=new Repository(folder)){var repaired=repo.Find(frame.Hash);Check(repaired.StackCount==236&&repaired.Exposure==2360&&!File.Exists(repo.FilePath(repaired)),"Archived acquisition data was not recovered without the original FITS");Check(repo.Find(counted.Hash).Exposure==2360,"Known-count stack retained per-frame exposure despite its saved session duration");}
+    Check(File.ReadAllText(sidecar)==before,"Stack recovery modified the archived sidecar");
+    File.WriteAllText(sidecar,"{\"exposureSeconds\":20}");frame.StackCount=0;frame.Facts=null;using(var repo=new Repository(folder))repo.Save(frame);
+    using(var repo=new Repository(folder))Check(repo.Find(frame.Hash).StackCount==0,"Altered archived metadata was trusted for stack recovery");
+   });
+   Test("Stack durations respect milliseconds and conflicting session values",()=>{
+    var frame=new Frame{Kind="Stack",Exposure=0.1,Images=new System.Collections.Generic.List<ImageDescriptor>{new ImageDescriptor{Headers=new System.Collections.Generic.Dictionary<string,string>{{"EXPTIME","100"},{"NCOMBINE","20"}},Comments=new System.Collections.Generic.Dictionary<string,string>{{"EXPTIME","Per frame exposure [ms]"}}}}};
+    Check(!Classifier.ApplyStackSessionMetadata(frame,new System.Collections.Generic.Dictionary<string,string>{{"exposureSeconds","10"}}),"Session duration displaced an explicitly labelled header duration");
+    Classifier.ApplyStackMetadata(frame);Check(frame.Exposure==2&&frame.StackCount==20,"Per-frame milliseconds were multiplied as seconds");
+    var unknown=new Frame{Kind="Stack",Exposure=2360};Check(!Classifier.ApplyStackSessionMetadata(unknown,new System.Collections.Generic.Dictionary<string,string>{{"exposure_s","10"},{"exposureSeconds","20"}})&&unknown.StackCount==0,"Conflicting session durations supplied a fabricated count");
+   });
+
    Test("Responsive table widths use available space while preserving limits and relative preferences",()=>{
     var preferred=new double[]{360,60,160};var min=new double[]{120,40,70};var max=new double[]{double.PositiveInfinity,double.PositiveInfinity,double.PositiveInfinity};var all=new[]{true,true,true};
     var narrow=ColumnWidths.Fit(preferred,min,max,all,400);var wide=ColumnWidths.Fit(preferred,min,max,all,900);
@@ -52,6 +85,13 @@ namespace AstroArchive {
     using(var repo=new Repository(Path.Combine(root,"seestar-counted-repo"))){repo.Import(repo.Scan(source,"Seestar-01","Auto",ct,NoProgress).Frames,ct,NoProgress);var saved=repo.All().Single();Check(saved.StackCount==36&&saved.Exposure==180&&Util.Hash(repo.FilePath(saved),ct)==Util.Hash(file,ct),"Repository metadata or capture bytes changed incorrectly");var project=repo.CreateEditedWorkingCopies(new[]{saved},"Manual editor","Other editor",ct,NoProgress);Check(project.Sources.Single().Metadata.Subs==36&&project.Sources.Single().Metadata.SubExposure==5&&project.Sources.Single().Metadata.TotalExposure==180,"Edited working copy lost Seestar integration");}
     var edited=EditedMetadata.Read("Stacked_36_NGC 7000_5.0s_LP_20260906-214231776.fits.gz",null);Check(edited.Subs==36&&edited.SubExposure==5&&edited.TotalExposure==180,"Compressed filename did not recover exposure");
    });
+   Test("Mode-prefixed Seestar stacks multiply the recorded count by the sub duration",()=>{
+    foreach(bool seestarFolder in new[]{true,false}){
+     string source=Path.Combine(root,seestarFolder?"seestar-dso-prefix":"generic-dso-prefix",seestarFolder?"MyWorks":"Stacks");Directory.CreateDirectory(source);string file=Path.Combine(source,"DSO_Stacked_194_HIP 106890_60.0s_20260912_112545.fit");
+     Write(file,64,48,(x,y)=>1800,new System.Collections.Generic.Dictionary<string,string>{{"EXPTIME","60.0"},{"STACKCNT","194"}});var frame=Classifier.Read(file,source,"Seestar-01","Auto");
+     Check(frame.Kind=="Stack"&&frame.StackCount==194&&frame.Exposure==11640,"DSO_Stacked name did not give 194 × 60 s ("+seestarFolder+"): "+frame.Exposure);
+    }
+   });
    Test("Seestar stack totals respect explicit totals and user metadata without double multiplication",()=>{
     string source=Path.Combine(root,"seestar-stack-precedence");Directory.CreateDirectory(source);string file=Path.Combine(source,"Stacked_36_NGC 7000_5.0s_LP_20260906-214231776.fit");
     Write(file,64,48,(x,y)=>1800,new System.Collections.Generic.Dictionary<string,string>{{"EXPTIME","180"}});var frame=Classifier.Read(file,source,"Seestar-01","Seestar S50");Check(frame.Exposure==180&&frame.StackCount==36,"Integrated EXPTIME was multiplied again");
@@ -61,6 +101,7 @@ namespace AstroArchive {
     frame.Exposure=180;frame.Facts.Remove("Exposure");Classifier.ApplySeestarStackExposure(frame);Check(!Classifier.ApplySeestarStackExposure(frame),"Repeated correction changed metadata");
    });
    Test("Seestar stacked count parsing rejects invalid numbers and leaves other captures unchanged",()=>{
+    int msCount;double msSeconds;Check(Classifier.SeestarStackFilename("Stacked_48_Moon_12ms_IRCUT_20261001-210000.fit",out msCount,out msSeconds)&&msCount==48&&Math.Abs(msSeconds-0.012)<1e-9,"Millisecond lunar stack name not read");
     int count;double seconds;foreach(string name in new[]{"Stacked_0_M31_5s.fit","Stacked_-36_M31_5s.fit","Stacked_36.5_M31_5s.fit","Stacked_2147483648_M31_5s.fit","Stacked_36_M31_0s.fit","Light_36_M31_5s.fit","Stacked_M31_5s.fit","Stacked_36_M31_5s40.fit"})Check(!Classifier.SeestarStackFilename(name,out count,out seconds),"Invalid count/duration accepted: "+name);
     Check(Classifier.SeestarStackFilename("stacked_1_Heart_Nebula_0.5s_20260906.fit",out count,out seconds)&&count==1&&seconds==0.5,"Case or decimal/single-sub stack lost");
     var dwarf=new Frame{Make="DWARFLAB",Kind="Stack",OriginalName="Stacked_36_NGC 7000_5.0s_LP.fit",Exposure=123};Check(!Classifier.ApplySeestarStackExposure(dwarf)&&dwarf.Exposure==123&&dwarf.StackCount==0,"Other device exposure changed");var light=new Frame{Make="Seestar",Kind="Light",OriginalName=dwarf.OriginalName,Exposure=5};Check(!Classifier.ApplySeestarStackExposure(light)&&light.Exposure==5,"Individual sub exposure changed");

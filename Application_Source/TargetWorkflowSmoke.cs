@@ -47,7 +47,7 @@ namespace AstroArchive {
    T("EditedSearchBox").Text="M45";WaitForSearches();TargetWorkflowCheck(G("EditedGrid").Items.Count==1&&SelectedEditedImages().Count==2,"Edited search lost a hidden target selection.");
    SortTable("EditedGrid",G("EditedGrid").Columns.First(c=>c.SortMemberPath=="Filename"),false);WaitForSearches();TargetWorkflowCheck(SelectedEditedImages().Count==2&&G("EditedGrid").SelectedItems.Count==1,"Edited background sorting lost the cross-target batch.");
    T("EditedSearchBox").Clear();WaitForSearches();tabs.SelectedIndex=0;tabs.SelectedIndex=2;WaitForSearches();TargetWorkflowCheck(SelectedEditedImages().Count==2,"Changing pages lost the Edited batch.");
-   BuildEditedFileMenu(G("EditedGrid").ContextMenu,SelectedEditedImages());TargetWorkflowCheck(G("EditedGrid").ContextMenu.Items.OfType<MenuItem>().Any(i=>Convert.ToString(i.Header)=="Export files…"&&i.IsEnabled),"Edited menu lacks file export.");
+   BuildEditedFileMenu(G("EditedGrid").ContextMenu,SelectedEditedImages());TargetWorkflowCheck(G("EditedGrid").ContextMenu.Items.OfType<MenuItem>().Where(i=>Convert.ToString(i.Header)=="Export").SelectMany(i=>i.Items.OfType<MenuItem>()).Any(i=>Convert.ToString(i.Header)=="Files…"&&i.IsEnabled),"Edited menu lacks file export.");
    string destination=Path.Combine(fixture,"export");Directory.CreateDirectory(destination);Exporter.CreateEdited(repo,SelectedEditedImages(),new ExportOptions{Parent=destination},CancellationToken.None,null);
    TargetWorkflowCheck(Directory.GetFiles(destination).Select(Path.GetFileName).OrderBy(n=>n).SequenceEqual(new[]{"M31.png","M45.png"})&&Directory.GetFiles(destination).All(p=>Util.Hash(p,CancellationToken.None)==Util.Hash(Path.Combine(source,Path.GetFileName(p)),CancellationToken.None)),"Export ignored the cross-target batch or changed image bytes.");
    RefreshEdited();WaitForSearches();TargetWorkflowCheck(SelectedEditedImages().Count==2&&G("EditedGrid").SelectedItems.Count==1,"Edited refresh lost selections.");
@@ -59,7 +59,8 @@ namespace AstroArchive {
    SmokeSelectionEscape(T("EditedSearchBox"));TargetWorkflowCheck(SelectedEditedImages().Count==0&&G("EditedGrid").SelectedItems.Count==0&&B("EditedSelectionCounter").Visibility==Visibility.Collapsed,"Escape from search left a hidden Edited selection.");
    tabs.SelectedIndex=1;SetRows("ImportGrid",all.Take(2).ToList());WaitForSearches();foreach(var frame in G("ImportGrid").Items.OfType<Frame>())G("ImportGrid").SelectedItems.Add(frame);
    SmokeSelectionEscape(T("ImportSearchBox"));TargetWorkflowCheck(G("ImportGrid").SelectedItems.Count==0,"Escape from search retained Import selections.");
-   File.WriteAllText(Path.Combine(output,"target-workflow-smoke.txt"),"PASS: Repository and Edited retain additive batches across targets, searches, sorting and refresh; plain clicks replace visible and hidden selections; right-click preserves selected batches; counters and Escape clear all files; comet grouping, device search, menu and verified export work together.");
+   SmokeAnnotations(output);
+   File.WriteAllText(Path.Combine(output,"target-workflow-smoke.txt"),"PASS: Stars, tags and notes on Repository and Edited files; Repository and Edited retain additive batches across targets, searches, sorting and refresh; plain clicks replace visible and hidden selections; right-click preserves selected batches; counters and Escape clear all files; comet grouping, device search, menu and verified export work together.");
   }
  }
 }

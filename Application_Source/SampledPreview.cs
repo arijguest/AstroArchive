@@ -12,7 +12,7 @@ namespace AstroArchive {
    Assets.Dimensions(image.Width,image.Height,image.Channels);bayer=(frame.Bayer??"").ToUpperInvariant();cfa=image.Channels==1&&new[]{"RGGB","BGGR","GRBG","GBRG"}.Contains(bayer);
    step=Math.Max(cfa?2:1,(int)Math.Ceiling(Math.Max(image.Width,image.Height)/1400.0));if(cfa&&step%2!=0)step++;
    int width=(image.Width+step-1)/step,height=(image.Height+step-1)/step,channels=cfa||image.Channels>=3?3:1;
-   data=new PreviewData{Width=width,Height=height,SourceWidth=image.Width,SourceHeight=image.Height,Channels=channels,Pixels=new double[checked(width*height*channels)],Description=frame.Format+" · "+(cfa?bayer+" colour":channels==3?"RGB":"mono")+" · "+image.Label};counts=new int[data.Pixels.Length];
+   data=new PreviewData{Width=width,Height=height,SourceWidth=image.Width,SourceHeight=image.Height,Channels=channels,Mosaic=cfa,Pixels=new double[checked(width*height*channels)],Description=frame.Format+" · "+(cfa?bayer+" colour":channels==3?"RGB":"mono")+" · "+image.Label};counts=new int[data.Pixels.Length];
    var header=new FitsHeader{Values=image.Headers??new System.Collections.Generic.Dictionary<string,string>()};offsetX=(int)(header.Number("XBAYROFF")??0);offsetY=(int)(header.Number("YBAYROFF")??0);
    if(image.Bitpix>0){data.Minimum=0;data.Maximum=Math.Pow(2,image.Bitpix)-1;}
   }

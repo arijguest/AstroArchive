@@ -17,17 +17,17 @@ namespace AstroArchive {
      settings.ThemeMode=mode;settings.TextScalePercent=textScale;ApplyAppearance();var dialog=IdentificationDialog(jobs);
      try{dialog.Window.Show();PumpPopupLayout();var table=PopupChildren<DataGrid>(dialog.Window).Single();var boxes=PopupChildren<ComboBox>(table).ToList();if(table.Items.Count!=3||boxes.Count!=3||boxes.Count(c=>!c.IsEnabled)!=1)throw new Exception("Batch review lost independent stacks or enabled a failed solve");
       var combo=boxes.Single(c=>c.DataContext==jobs[0]);
-      if(Convert.ToString(combo.SelectedValue)!=jobs[0].Result.Suggested||!PopupChildren<TextBlock>(combo).Any(t=>t.Text.Contains("M45")))throw new Exception("Nearest major target is not selected and visibly displayed");
+      if(Convert.ToString(combo.SelectedValue)!=jobs[0].Result.Suggested||!PopupChildren<TextBlock>(combo).Any(t=>t.Text.Contains("M 45")))throw new Exception("Nearest major target is not selected and visibly displayed");
       jobs[0].Target=Catalog.Normalize("Whirlpool Galaxy");table.Items.Refresh();PumpPopupLayout();combo=PopupChildren<ComboBox>(table).Single(c=>c.DataContext==jobs[0]);
-      if(Convert.ToString(combo.SelectedValue)!="M51"||!PopupChildren<TextBlock>(combo).Any(t=>t.Text.Contains("M51")&&t.Text.Contains("Whirlpool Galaxy"))||jobs[1].Target!="M45")throw new Exception("Search target does not display both ID/common name or changed another row");
-      combo.SelectedValue="M45";PumpPopupLayout();if(jobs[0].Target!="M45"||!PopupChildren<TextBlock>(combo).Any(t=>t.Text.Contains("M45")))throw new Exception("Selecting a nearby candidate did not bind/display the target");
+      if(Convert.ToString(combo.SelectedValue)!="M51"||!PopupChildren<TextBlock>(combo).Any(t=>t.Text.Contains("M 51")&&t.Text.Contains("Whirlpool Galaxy"))||jobs[1].Target!="M45")throw new Exception("Search target does not display both ID/common name or changed another row");
+      combo.SelectedValue="M45";PumpPopupLayout();if(jobs[0].Target!="M45"||!PopupChildren<TextBlock>(combo).Any(t=>t.Text.Contains("M 45")))throw new Exception("Selecting a nearby candidate did not bind/display the target");
       if(PopupChildren<CheckBox>(table).Single(c=>c.DataContext==jobs[2]).IsEnabled)throw new Exception("Failed solve can be applied");CapturePopup(dialog.Window,Path.Combine(output,"AstroArchive_Target_Review_"+mode+textScale+".png"));
      }finally{dialog.Window.Close();}
     }
     File.WriteAllText(Path.Combine(output,"target-solving-stage.txt"),"Progress window closure");
     foreach(WindowState ownerState in new[]{WindowState.Normal,WindowState.Maximized}){
      Window.WindowState=ownerState;cancel=new CancellationTokenSource();SetBusy(true);activeMetrics=new PipelineMetrics(null);operationClock=System.Diagnostics.Stopwatch.StartNew();IdentificationStage(new IdentificationProgress{Completed=1,Total=3,Stage="ASTAP solving · 00:04 elapsed · 5 minute limit",Detail="Job 2 of 3 · Second stack.fit\n1 Stack · Scope / Telephoto"});LiveTick();PumpPopupLayout();
-     if(L("OperationHeading").Text!="Identifying targets"||!L("OperationDetail").Text.Contains("Job 2 of 3")||!L("StatusLabel").Text.Contains("ASTAP solving")||L("RateLabel").Text.Contains("filesystem"))throw new Exception("Solver progress hides its current job or reports a filesystem stall");
+     if(L("OperationHeading").Text!="Identifying targets"||!L("OperationDetail").Text.Contains("Job 2 of 3")||!L("StatusLabel").Text.Contains("ASTAP solving")||L("RateLabel").Text.Contains("filesystem")||!L("RateLabel").Text.Contains("ETA ~"))throw new Exception("Solver progress hides its current job or ETA, or reports a filesystem stall");
      if(OperationProgressVisible)throw new Exception("Target solving opened an automatic window.");cancel.Dispose();cancel=null;identificationProgress=null;activeMetrics=null;operationClock.Stop();operationClock=null;SetBusy(false);PumpPopupLayout();if(Window.WindowState!=ownerState)throw new Exception("Completing background solving changed the owner's state.");
     }
     File.WriteAllText(Path.Combine(output,"target-solving-stage.txt"),"Deferred target review");

@@ -18,6 +18,8 @@ namespace AstroArchive {
   internal int StatisticsBuilds{get{lock(statistics.Gate)return statistics.Builds;}}
   public double Minimum=0,Maximum=1;
   public bool FlipY;
+  // Raw colour mosaic binned into red, green and blue; its channels carry sensor response, not scene colour.
+  public bool Mosaic;
   public string Description;
   public string Target,ObservationMode,Filter,DisplayMode;
   public bool SkipStretch {get{return ObservationTargets.Unstretched(Target,ObservationMode);}}
@@ -56,6 +58,16 @@ namespace AstroArchive {
    if(linear){
     DisplayMode="Linear"+(SkipStretch?" · solar / planetary":"");
     for(int c=0;c<Channels;c++){black[c]=Minimum;white[c]=Maximum;mid[c]=0.5;if(!(white[c]>black[c]))white[c]=black[c]+Math.Max(1,Math.Abs(black[c])*0.001);}
+    // Rescue only severely dark linear previews. A robust bright-end estimate
+    // ignores isolated hot pixels, and one bounded gain preserves RGB ratios.
+    var displayStats=GetStatistics(ct);var highs=displayStats.Colours.Select(s=>s.Count>0?s.High-Minimum:0).ToArray();double top=highs.Max(),range=Maximum-Minimum;
+    if(top>0&&range>0&&top/range<0.18&&displayStats.Linked.High>displayStats.Linked.Low){
+     double gain=Math.Min(16,0.92*range/top);for(int c=0;c<Channels;c++)white[c]=black[c]+range/gain;DisplayMode+=" · dark preview brightened";
+    }
+    if(SkipStretch&&Mosaic&&Channels==3&&top>0&&highs.All(h=>h>0)){
+     // Preserve the existing Bayer response correction for solar/lunar mosaics.
+     for(int c=0;c<3;c++)white[c]=black[c]+(white[c]-black[c])*highs[c]/top;DisplayMode+=" · mosaic balanced";
+    }
     return RenderPixels(black,white,mid,true,ct);
    }
    // Cache sample statistics only; current display context still chooses the stretch.

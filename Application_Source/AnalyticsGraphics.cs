@@ -9,6 +9,8 @@ namespace AstroArchive {
  public sealed class AnalyticsMark {
   public string Kind,Fill,FillEnd,Text,Detail,Role,Animation;public double X,Y,Width,Height,Size,Radius;public bool Bold,VerticalGradient,Centered;
   public double[] Points;
+  // A frozen WPF ImageSource for Kind "image" (target cards); raster and video outputs only.
+  public object Image;
  }
  public sealed class AnalyticsPage {
   public const double Width=1200,Height=800;
@@ -20,6 +22,7 @@ namespace AstroArchive {
  public static partial class AnalyticsGraphics {
   public const string Ink="#202B43",Muted="#5F6D86",Accent="#5951D6";
   static readonly string[] Colours={"#5951D6","#008477","#CB5078","#B37608","#427AB5","#8756A5","#6B813A","#64748B"};
+  static readonly string[] DarkColours={"#90B8FF","#55DFEA","#C19AFF","#F0C36A","#4F9BFA","#ED9ACB","#9DD7B0","#A6B4CC"};
   static void Box(AnalyticsPage p,double x,double y,double w,double h,string colour){p.Marks.Add(new AnalyticsMark{Kind="rect",X=x,Y=y,Width=w,Height=h,Fill=colour,Role=p.Role});}
   static void Text(AnalyticsPage p,string text,double x,double y,double size,string colour,bool bold=false,string detail=null){p.Marks.Add(new AnalyticsMark{Kind="text",Text=text,X=x,Y=y,Size=size,Fill=colour,Bold=bold,Detail=detail,Role=p.Role});}
   static void CenteredText(AnalyticsPage p,string text,double center,double y,double size,string colour,bool bold=false){p.Marks.Add(new AnalyticsMark{Kind="text",Text=text,X=center,Y=y,Size=size,Fill=colour,Bold=bold,Centered=true,Role=p.Role});}
@@ -32,6 +35,23 @@ namespace AstroArchive {
   public static AnalyticsPage Page(AnalyticsSnapshot data,int index,bool dark=true,AnalyticsLayout layout=AnalyticsLayout.Landscape){
    return Page(data,index,0,1,data.Reports[index].Style=="bars"?data.Reports[index].Values.Take(8).ToList():ArchiveAnalytics.Compact(data.Reports[index].Values,8),dark,layout);
   }
+  // Presentation choices restyle a copy, so the source report and every group are preserved.
+  public static readonly string[] ChartStyles={"donut","bars","columns"};
+  public static string StyleLabel(string style){return style=="donut"?"Donut":style=="bars"?"Bars":"Columns";}
+  // Matches the styles ArchiveAnalytics.Build assigns. The timeline stays in date order as columns.
+  public static readonly string[] NaturalStyles={"donut","columns","bars","bars","donut","columns"};
+  public static string[] StylesFor(int index){
+   string natural=NaturalStyles[index];if(index==1)return new[]{natural};
+   return new[]{natural}.Concat(ChartStyles.Where(s=>s!=natural)).ToArray();
+  }
+  public static List<AnalyticsPage> Pages(AnalyticsSnapshot data,int index,bool dark,AnalyticsLayout layout,string style){
+   var report=data.Reports[index];if(string.IsNullOrEmpty(style)||style==report.Style||!StylesFor(index).Contains(style))return Pages(data,index,dark,layout);
+   var copy=data.Copy();var restyled=copy.Reports[index];
+   // Donuts and columns read best by size; ordered lengths keep their order as bars.
+   if(style!="bars"&&report.Style=="columns")restyled.Values=restyled.Values.OrderByDescending(v=>v.Value).ThenBy(v=>v.Label,StringComparer.OrdinalIgnoreCase).ToList();
+   if(style=="columns")restyled.Values=ArchiveAnalytics.Compact(restyled.Values.OrderByDescending(v=>v.Value),12);
+   restyled.Style=style;return Pages(copy,index,dark,layout);
+  }
   public static List<AnalyticsPage> Pages(AnalyticsSnapshot data,int index,bool dark=true,AnalyticsLayout layout=AnalyticsLayout.Landscape){
    var report=data.Reports[index];int count=report.Style=="bars"?Math.Max(1,(int)Math.Ceiling(report.Values.Count/8.0)):1;
    return Enumerable.Range(0,count).Select(part=>Page(data,index,part,count,report.Style=="bars"?report.Values.Skip(part*8).Take(8).ToList():ArchiveAnalytics.Compact(report.Values,8),dark,layout)).ToList();
@@ -40,10 +60,10 @@ namespace AstroArchive {
    if(layout!=AnalyticsLayout.Landscape)return SocialPage(data,index,part,parts,values,dark,layout);
    var report=data.Reports[index];var p=new AnalyticsPage{Title=report.Title,Background=dark?"#0C1220":"#FFFFFF"};
    Box(p,0,0,1200,800,"#FFFFFF");Box(p,0,0,1200,8,Accent);
-   p.Marks.Add(new AnalyticsMark{Kind="logo",X=56,Y=24,Width=70,Height=70});
+   p.Marks.Add(new AnalyticsMark{Kind="logo",X=56,Y=31,Width=56,Height=56});
    Text(p,"AstroArchive",142,46,24,Ink,true);
    Text(p,(index+1).ToString("00",CultureInfo.InvariantCulture)+" / 06"+(parts>1?" · "+(part+1)+"/"+parts:""),parts>1?980:1060,47,17,Accent,true);
-   Text(p,report.Title,60,112,42,Ink,true);Text(p,report.Description+(parts>1?" · Groups "+(part*8+1)+"–"+Math.Min((part+1)*8,report.Values.Count)+" of "+report.Values.Count:""),60,165,17,Muted);
+   Text(p,Fit(report.Title,1080,42),60,112,42,Ink,true,report.Title);Text(p,Fit(report.Description+(parts>1?" · Groups "+(part*8+1)+"–"+Math.Min((part+1)*8,report.Values.Count)+" of "+report.Values.Count:""),1080,17),60,165,17,Muted);
    Box(p,60,210,1080,78,"#F5F7FC");
    string[] metrics={ArchiveAnalytics.Number(data.RepositorySeconds/3600)+" h",data.RepositoryCaptures.ToString("N0",CultureInfo.InvariantCulture),data.RepositoryTargets.ToString("N0",CultureInfo.InvariantCulture)};
    string[] captions={"REPOSITORY INTEGRATION","LIGHT FRAMES IN REPOSITORY","TARGETS IN REPOSITORY"};
@@ -65,8 +85,7 @@ namespace AstroArchive {
   static void ApplyTheme(AnalyticsPage p,bool dark){
    if(dark){
     var colours=new Dictionary<string,string>{{"#FFFFFF",p.Background},{Ink,"#E9EEF8"},{Muted,"#A6B4CC"},{"#F5F7FC","#151E2E"},{"#DCE2EF","#34415A"},{"#E8ECF4","#28354B"}};
-    string[] branded={"#90B8FF","#55DFEA","#C19AFF","#F0C36A","#4F9BFA","#ED9ACB","#9DD7B0","#A6B4CC"};
-    for(int i=0;i<Colours.Length;i++)colours[Colours[i]]=branded[i];
+    for(int i=0;i<Colours.Length;i++)colours[Colours[i]]=DarkColours[i];
     foreach(var mark in p.Marks){string replacement;if(mark.Fill!=null&&colours.TryGetValue(mark.Fill,out replacement))mark.Fill=replacement;}
    }
   }
@@ -97,7 +116,7 @@ namespace AstroArchive {
     p.Marks.Last().Animation="bar";
     Text(p,ArchiveAnalytics.Number(value.Value)+" "+unit,1050,y+barHeight/2-8,15,Ink,true);
    }
-   Text(p,"Integration (hours)",60,658,12,Muted);
+   Text(p,unit=="h"?"Integration (hours)":"Light frames",60,658,12,Muted);
   }
   static void Columns(AnalyticsPage p,List<AnalyticsValue> source,string unit){
    var values=source.ToList();if(values.Count>18){int chunk=(int)Math.Ceiling(values.Count/18.0);values=Enumerable.Range(0,(int)Math.Ceiling(values.Count/(double)chunk)).Select(i=>{var bucket=source.Skip(i*chunk).Take(chunk).ToList();return new AnalyticsValue(bucket[0].Label+"–"+bucket.Last().Label,bucket.Sum(v=>v.Value));}).ToList();}

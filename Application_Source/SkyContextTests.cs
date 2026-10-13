@@ -4,6 +4,23 @@ namespace AstroArchive {
  public partial class Tests {
   static Frame SkyFrame(double ra,double dec,double latitude,double longitude){return new Frame{Target="Unknown",RA=SkyOrientation.Wrap(ra),Dec=dec,Latitude=latitude,Longitude=longitude,ObservedUtc="2000-01-01T12:00:00Z"};}
   static void SkyContextTests(){
+   Test("A chosen capture town beats recorded coordinates and Settings, and a below-horizon target is flagged",()=>{
+    var london=ObservingCities.Search("London UK").First();var sydney=ObservingCities.Search("Sydney Australia").First();
+    var settings=new Settings();new ObservingSiteChoice(settings).Save(settings);var choice=new ObservingSiteChoice(settings);choice.Select(london);choice.Save(settings);
+    var frame=new Frame{Target="Sun",Kind="Light",Status="Imported",ObservedUtc="2026-06-21T00:00:00",Latitude=40.7,Longitude=-74};
+    Check(CaptureSite.For(frame,settings).Recorded&&CaptureSite.For(frame,settings).Latitude==40.7&&CaptureSite.ZoneCity(frame,settings)==london.Id,"Recorded coordinates should beat Settings");
+    CaptureSite.Apply(frame,sydney);var site=CaptureSite.For(frame,settings);
+    Check(site.Chosen&&site.Latitude==sydney.Latitude&&site.CityId==sydney.Id&&CaptureSite.ZoneCity(frame,settings)==sydney.Id&&CaptureSky.Resolve(frame,settings).Latitude==sydney.Latitude,"Chosen town did not win for sky, Stellarium and timezone");
+    var copy=frame.Clone();CaptureSite.Apply(copy,null);Check(CaptureSite.HasChoice(frame)&&!CaptureSite.HasChoice(copy)&&CaptureSite.For(copy,settings).Recorded,"Clearing a choice should return to recorded coordinates");
+    copy.Latitude=null;copy.Longitude=null;Check(CaptureSite.For(copy,settings).Latitude==london.Latitude&&CaptureSite.Describe(copy,settings).EndsWith("Settings default"),"Settings should be the fallback");
+    copy=Util.Deserialize<Frame>(Util.Serialize(frame));Check(copy.CaptureCityId==sydney.Id&&copy.CaptureLatitude==sydney.Latitude&&copy.CaptureCity==sydney.Label,"Chosen town was not saved with the file");
+    var previous=CaptureScreening.Site;try{CaptureScreening.Site=()=>settings;
+     var night=new Frame{Target="Sun",Kind="Light",Status="Imported",ObservedUtc="2026-06-21T00:00:00"};
+     Check(CaptureScreening.HorizonIssue(night)!=null&&CaptureScreening.NeedsReview(night)&&night.ReviewCategory.Contains("Target below horizon")&&night.ReviewReason.Contains("Edit metadata"),"Midnight Sun in London was not flagged");
+     Check(CaptureScreening.HorizonIssue(frame)==null,"Daytime Sun in the chosen town was flagged");
+     night.Status="New";Check(CaptureScreening.HorizonIssue(night)==null,"Pending imports must not be flagged, or Skip flagged drops them");
+    }finally{CaptureScreening.Site=previous;}
+   });
    Test("Sky WCS centre survives feature removal and rejects unsupported coordinate systems",()=>{
     var header=new FitsHeader();foreach(var pair in new System.Collections.Generic.Dictionary<string,string>{{"CTYPE1","RA---TAN"},{"CTYPE2","DEC--TAN"},{"CRVAL1","359.9"},{"CRVAL2","15"},{"CRPIX1","50.5"},{"CRPIX2","40.5"},{"CDELT1","-0.001"},{"CDELT2","0.001"},{"CROTA2","30"}})header.Values[pair.Key]=pair.Value;
     var sky=SkyWcs.FromHeader(header,100,80);Check(sky!=null&&Catalog.Distance(sky.RA,sky.Dec,359.9,15)<1e-8&&sky.Corners.Count==4,"WCS centre/rotation lost");header.Values["EQUINOX"]="1950";Check(SkyWcs.FromHeader(header,100,80)==null,"Unsupported equinox accepted");header.Values.Remove("EQUINOX");header.Values["A_ORDER"]="2";Check(SkyWcs.FromHeader(header,100,80)==null,"Distorted geometry treated as simple TAN");

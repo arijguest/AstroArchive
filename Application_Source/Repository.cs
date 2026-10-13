@@ -50,7 +50,7 @@ namespace AstroArchive {
   }
   public void Checkpoint(CancellationToken ct){ct.ThrowIfCancellationRequested();if(db.Generation==checkpointGeneration&&File.Exists(Path.Combine(Meta,"index.sqlite"))&&FileStamp.Read(Path.Combine(Meta,"index.sqlite")).VerifiedUnchanged(checkpointStamp)){return;}long snapshotGeneration=db.Generation;string local=WorkingIndex+"."+Guid.NewGuid().ToString("N")+".snapshot",target=Path.Combine(Meta,"index.sqlite"),temp=target+"."+Guid.NewGuid().ToString("N")+".partial";try{db.BackupTo(local,ct);string hash=Util.Hash(local,ct);CopyVerified(local,temp,hash,ct);CommitTemporary(temp,target,ct);checkpoint=DateTime.UtcNow;checkpointGeneration=snapshotGeneration;checkpointStamp=FileStamp.Read(target);}finally{TryRemove(local);TryRemove(local+"-wal");TryRemove(local+"-shm");TryRemove(temp);}}
   public void Dispose(){editedHeaders.Clear();if(db!=null){try{Checkpoint(CancellationToken.None);}catch{}db.Dispose();db=null;}if(held){mutex.ReleaseMutex();held=false;}if(mutex!=null)mutex.Dispose();}
-  public List<Frame> All(){var frames=db.Query("SELECT data FROM files").Select(Util.Deserialize<Frame>).ToList();return frames;}
+  public List<Frame> All(){var frames=db.Query("SELECT data FROM files").Select(Util.Deserialize<Frame>).ToList();QualityAnnotator.Apply(frames,QualityMeasurements(),QualityCompareTarget);return frames;}
   public Frame Find(string hash){string data=db.Query("SELECT data FROM files WHERE hash=?",hash).FirstOrDefault();return data==null?null:Util.Deserialize<Frame>(data);}
   public void Save(Frame f){f.Target=ObservationTargets.CanonicalSolar(f.Target);db.Exec("INSERT OR REPLACE INTO files(hash,data) VALUES(?,?)",f.Hash,Util.Serialize(f));RememberImportName(f);}
   public void Refile(Frame f,CancellationToken ct){string old=FilePath(f),rel=Destination(f),dest=Path.Combine(Root,rel);if(string.Equals(old,dest,StringComparison.OrdinalIgnoreCase)){Save(f);return;}if(!File.Exists(old))throw new IOException("Repository file missing: "+old);if(Util.Hash(old,ct)!=f.Hash)throw new IOException("Repository file has changed; metadata was not applied: "+old);CheckManagedPath(dest,Root);Directory.CreateDirectory(Path.GetDirectoryName(dest));CheckManagedPath(dest,Root);bool moved=false;string previous=f.RelativePath;
@@ -71,7 +71,7 @@ namespace AstroArchive {
     }
     if(f==null){
      using(var metadata=metrics.Begin("Metadata",name)){
-      f=FileRetry.Run(()=>{
+      string dataIssue=null;f=FileRetry.Run(()=>{
        AssetInfo asset=fullScan?null:headers.GetAsset(entry.Path,stamp);FitsHeader header=asset==null?null:asset.Header;FileStamp captured=stamp;bool hit=asset!=null;
        if(!hit){using(var availability=(cloudSource||stamp.Cloud)?metrics.Begin("Cloud availability",name):null)using(var read=metrics.Begin("Header open/read",name)){
         using(var locked=new FileStream(entry.Path,FileMode.Open,FileAccess.Read,FileShare.Read)){captured=FileStamp.Read(entry.Path);asset=Assets.Inspect(entry.Path,n=>{ct.ThrowIfCancellationRequested();read.Bytes(n);metadata.Bytes(n);});header=asset.Header;}read.Complete();if(availability!=null)availability.Complete();
@@ -79,8 +79,11 @@ namespace AstroArchive {
        Frame parsed=Classifier.Read(entry.Path,source,telescopeIdentity??telescope,model,stamp.Size,n=>metadata.Bytes(n),shots,header,captured,ct,metrics,asset);
        parsed.Telescope=telescope;
        if(!stamp.ContentSame(parsed.SourceStamp)||(hit&&!stamp.ContentSame(FileStamp.Read(entry.Path))))throw new InvalidDataException("Source changed while reading metadata. Scan again.");
-       if(!hit)headers.PutAsset(entry.Path,parsed.SourceStamp,asset);item.HeaderHit=hit;return parsed;
+       // Damaged pixel data is re-read on the next scan rather than cached.
+       dataIssue=asset.DataIssue;if(!hit&&dataIssue==null)headers.PutAsset(entry.Path,parsed.SourceStamp,asset);item.HeaderHit=hit;return parsed;
       },ct,message=>{metrics.Current=message;metrics.Pulse(true);});stamp=f.SourceStamp;f.Hash="";f.Status="New";metadata.Complete();
+      // Keep readable header metadata, but leave the file flagged and out of stacking.
+      if(dataIssue!=null){item.Error=FileRetry.Detail(entry.Path,new InvalidDataException(dataIssue));f.Status="Unreadable";f.IntegrityIssue=dataIssue;f.Rejected=true;f.RejectionReason="Pixel data unreadable.";f.Notes+=dataIssue+" ";}
      }
      // Fast candidates are provisional; Import checks the copy hash against deletion history before committing.
      if(deferHash&&scopedArchive&&deleted.Count>0)f.SourceDisposition="Deletion exclusions will be checked during verified import. Original retained.";

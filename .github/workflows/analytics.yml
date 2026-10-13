@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - 'Application_Source/Analytics*.cs'
+      - 'Application_Source/TargetCard*.cs'
       - 'Application_Source/NavigationUi.cs'
       - 'Application_Source/test.ps1'
       - '.github/workflows/analytics.yml'
@@ -30,6 +31,10 @@ jobs:
           $output = Join-Path $PWD 'Application_Source\test-data\analytics-ui'
           $process = Start-Process -FilePath '.\Application_Source\dist\AstroArchive.exe' -ArgumentList @('--ui-test', $output, '--analytics-only', '--no-updates') -Wait -PassThru
           if ($process.ExitCode -ne 0) { throw "Analytics UI checks failed with exit code $($process.ExitCode)." }
+      - name: Show UI check failure
+        if: failure()
+        shell: powershell
+        run: Get-ChildItem Application_Source\test-data -Recurse -Filter ui-smoke-error.txt | ForEach-Object { Get-Content $_.FullName }
       - uses: actions/setup-python@v6
         with:
           python-version: '3.12'

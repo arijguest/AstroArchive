@@ -61,7 +61,7 @@ namespace AstroArchive {
     foreach(string theme in new[]{"Dark","Light"}){Targets.ScrollIntoView(Targets.Items[0]);Theme.Apply(Window,theme);PumpPopupLayout();
      if(!PopupChildren<TextBlock>(Targets).Any(t=>t.Text=="Solar system")||!PopupChildren<TextBlock>(Targets).Any(t=>t.Text=="Nebulae"))throw new Exception("Inline type headings did not render.");
      var target=Targets.Items.Cast<TargetSummary>().Single(t=>t.Name=="M42");Targets.ScrollIntoView(target);PumpPopupLayout();var container=Targets.ItemContainerGenerator.ContainerFromItem(target) as ListBoxItem;
-     if(container==null||!Convert.ToString(container.ToolTip).StartsWith("M42\n1 sub · 1 stack")||Convert.ToString(container.ToolTip).Contains("files")||!PopupChildren<TargetTitle>(container).Any(t=>t.FullTitle=="M42 - Orion Nebula"&&t.TextWrapping==TextWrapping.Wrap))throw new Exception("Concise row or ID/counts tooltip did not render.");
+     if(container==null||!Convert.ToString(container.ToolTip).StartsWith("M 42\n1 sub · 1 stack")||Convert.ToString(container.ToolTip).Contains("files")||!PopupChildren<TargetTitle>(container).Any(t=>t.FullTitle=="M 42 - Orion Nebula"&&t.TextWrapping==TextWrapping.Wrap))throw new Exception("Concise row or ID/counts tooltip did not render.");
      Capture(System.IO.Path.Combine(output,"AstroArchive_Targets_"+theme+".png"));
      var source=Targets.ItemsSource;var selection=Targets.SelectedItem;Targets.IsEnabled=false;
      try{VerifyTargetListAppearance(Targets,theme+" pending targets");if(Targets.ItemsSource!=source||Targets.SelectedItem!=selection)throw new Exception("Pending targets lost entries or selection.");Capture(System.IO.Path.Combine(output,"AstroArchive_Targets_Pending_"+theme+".png"));}

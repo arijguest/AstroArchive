@@ -29,11 +29,12 @@ Windows 10 / 11 x64 &nbsp; · &nbsp; .NET Framework 4.8 &nbsp; · &nbsp; Archive
 ## Bring the night straight into your archive
 
 Keep capturing while AstroArchive brings new files into your collection. Import
-from a folder or USB, or connect to **Seestar and DWARF over your local network**.
+from a folder or USB, or connect to **Seestar, DWARF and Celestron Origin over your local network**.
 
 [![Network import showing three real Orion Nebula subframes selected from a Seestar S50 Pro](docs/images/network-import.png)](docs/images/network-import.png)
 
 - **Let captures come to you.** Live import watches for completed files while the telescope app keeps shooting.
+- **Watch your capture folder.** Point AstroArchive at the folder N.I.N.A., SharpCap or ASIAIR saves to, and each finished capture is archived as it lands.
 - **Run more than one telescope.** Each device has its own progress and controls; select extra files while live imports continue.
 - **Pick up where you left off.** Pause and resume imports, including unfinished queues after a restart or update.
 - **Keep track of the night.** Compact process summaries show progress, transfer speeds and results without interrupting your work.
@@ -52,12 +53,17 @@ your captures, then prepare files for the processing software you already use.
 
 | Find the right captures | Prepare the handoff | Keep the results together |
 | :--- | :--- | :--- |
-| Search targets and devices, expand grouped subs, and compare stills or recordings. | Export verified originals or compatible stacking folders with optional calibrations. | Keep working copies and returned outputs in **Edited**, alongside your archive. |
+| Search targets and devices, expand grouped subs, and compare stills or recordings. | Export verified originals or compatible stacking folders with optional calibrations and an AstroBin acquisition CSV. | Keep working copies and returned outputs in **Edited**, alongside your archive. |
 
 **Works with your workflow:** PixInsight · Siril · DeepSkyStacker · GIMP · Photoshop · AS!4 · AstroWizard · Stacking Wizard
 
 Stacking and calibration run in your processing software.
 [Explore processing handoffs →](docs/PROCESSOR_HANDOFFS.md)
+
+**Star the keepers.** Star files, sessions or Edited images, and add your own tags
+and notes; starred rows carry a subtle tint in every theme, and search and filters
+find them again. Capture details show the Moon’s phase, illumination and elevation
+at capture time, and how far it sat from your target.
 
 ## See the bigger picture
 
@@ -78,11 +84,20 @@ Filter by acquisition dates or telescope, add a document label, and choose a
 one document, with 150 or 300 DPI for raster images. Choose Landscape or a social
 layout: **9:16**, **4:5**, **1:1**, **16:9** or **2:3**, with matching pixel presets.
 
+Make each chart your own: show it as a donut, bars or columns, reorder rankings,
+give it your own title and subtitle, and pick a colour palette, including a
+colour-blind safe one. Choose which charts go into the combined document.
+Analytics remembers these choices for next time.
+
 Choose **MP4** or **GIF** to share an animated chart or an **Export all** story.
 Preview the chart reveals and Glide, Zoom or Dissolve transitions; set 4, 6 or 8
 seconds per page and choose original or smaller dimensions. MP4 uses Windows’
 built-in H.264 encoder at 24 fps; GIF loops at 12 fps. Exports show progress and
 remaining time, and cancellation preserves any previous output.
+
+**Share a target.** Right-click any target to create a card with your best image
+of it and its integration, light frames, nights and filters, sized for posts,
+stories or video, in Dark or Light.
 
 <details>
 <summary><strong>What the analytics measure</strong></summary>
@@ -99,13 +114,24 @@ use a grid for square and wide pages.
 
 </details>
 
+## Find your sharpest subs
+
+**Repository → Review and analysis → Analyse image quality** scores each light frame from 0 to 100 against
+similar frames in its session: star size, roundness, star count and noise for deep-sky subs, and
+edge sharpness and detail for planetary, lunar and solar stills. Sort by **QUALITY**, or use
+**Filters → Quality rank** to keep the top or weakest frames, flagged frames or unscored ones.
+Subs inside each session list best first. Flags such as Soft, Clouded or Trailed explain themselves
+in a tooltip, and scores only suggest: nothing is rejected for you. Linear stacks are scored against
+other stacks of the same target. Calibration frames, recordings and non-linear images are never graded. [How scoring works](docs/IMAGE_QUALITY.md)
+
 ## Built around the captures you want to keep
 
 **Verified copies. Original bytes. A collection you can return to.**
 
 - Ordinary imports and exports preserve image bytes; source originals are kept by default.
 - Preview stretches affect the display. Metadata edits update indexed labels, while **Fill missing metadata** previews supported additions without replacing existing values or user edits.
-- Verified folder or lossless ZIP backups include images, Edited files and the database.
+- Verified folder or lossless ZIP backups include images, Edited files and the database. Later backups copy only what changed, can repeat daily, weekly or monthly, and restore with every file verified.
+- The repository path shows your archive’s total size, with a breakdown on hover.
 
 <details>
 <summary><strong>Formats and archive care</strong></summary>
@@ -134,9 +160,26 @@ where possible; optional NTFS **Protect originals** is not a substitute for back
 3. **Bring in your captures:** choose a folder and saved physical telescope on **Import**, then scan and review; or choose **Connect over network…**.
 4. **Make it yours:** browse **Repository**, prepare an export, or open **Analytics**.
 
+AstroArchive speaks English, Deutsch, Español, Français, Italiano, 日本語 and 简体中文.
+It follows your Windows language, or choose one in **Settings → General → Language**.
+
 **Need a hand?** Press **F1** in the app, follow the [offline guide](Application_Source/Quick_Start.txt), or [report an issue](https://github.com/arijguest/AstroArchive/issues).
 
 ### Fresh from the latest releases
+
+**[3.2.7](https://github.com/arijguest/AstroArchive/releases/tag/v3.2.7.2)** retains the 3.2.6 application improvements and makes publisher signing optional. Unsigned publication keeps checksum and update-feed validation; Windows may still block unsigned packages.
+
+**[3.2.6](https://github.com/arijguest/AstroArchive/releases/tag/v3.2.6.1)** reorganises the information pane with the overview before the image, a highlighted fun fact, compact or expandable image credits, and a single expandable Sources heading. It also simplifies solar eclipse displays, moves capture town/city editing into Edit metadata, improves DSO obstruction scoring, and hardens FITS and very dark previews.
+
+**[3.2.5 prerelease](https://github.com/arijguest/AstroArchive/releases/tag/v3.2.5.1)** adds Celestron Origin network import, an ETA on every running process, steadier quality ranking with scored stacks, a clearer target overlay with spaced catalogue IDs, per-file capture towns and below-horizon flags, Stellarium Web when Stellarium is not installed, and sturdier FITS/XISF parsing.
+
+**[3.2.4 prerelease](https://github.com/arijguest/AstroArchive/releases/tag/v3.2.4.1)** overhauls Analytics, adds Open in Stellarium and a target overlay to the preview, eclipse timing in Capture details, reorganised menus, a PARAMETERS section with orbits, sizes, masses and moons for solar-system bodies, comet information pages, a backup-in-progress indicator, and fixes for green lunar stacks and Moon sky maps.
+
+**[3.2.3 prerelease](https://github.com/arijguest/AstroArchive/releases/tag/v3.2.3.1)** detects solar and lunar eclipses in your Sun and Moon captures, adds daytime sky maps, in-depth overviews for 170 popular targets and image-quality scoring.
+
+**[3.2.2 prerelease](https://github.com/arijguest/AstroArchive/releases/tag/v3.2.2.1)** adds chart types, target cards for your top or chosen targets as images or video, adjustable card images, and centred folder bars under each table.
+
+**[3.2.1 prerelease](https://github.com/arijguest/AstroArchive/releases/tag/v3.2.1.1)** adds offline target information and thumbnails, seven interface languages, and corrected planetary sky positions from capture times.
 
 **[3.1.9](https://github.com/arijguest/AstroArchive/releases/tag/v3.1.9.1)** opens
 where you left it, remembering window position, size and monitor, and greets you with a

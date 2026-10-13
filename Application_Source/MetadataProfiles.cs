@@ -25,10 +25,12 @@ namespace AstroArchive {
                 lines.Add(key+" = "+value);
             }
             if(frame.StackCount>0)lines.Add("Combined frames: "+frame.StackCount);
+            if(frame.Facts!=null&&frame.Facts.TryGetValue("SubExposure",out fact)&&fact!=null)lines.Add("Sub exposure: "+fact.Value+" s · "+fact.Source);
             double? sub,gain;if(Classifier.FilenameExposureGain(frame.OriginalName,out sub,out gain))lines.Add("Filename: "+Util.Num(sub)+" s per sub; gain "+Util.Num(gain));
             int seestarCount;double seestarSeconds;
             if(frame.Kind=="Stack"&&frame.MakeText=="Seestar"&&Classifier.SeestarStackFilename(frame.OriginalName,out seestarCount,out seestarSeconds))lines.Add("Seestar filename: "+seestarCount+" subs × "+Util.Num(seestarSeconds)+" s = "+Util.Num(seestarCount*seestarSeconds)+" s total.");
             else if(frame.Kind=="Stack"&&frame.Facts!=null&&frame.Facts.TryGetValue("StackCount",out fact)&&fact!=null&&(fact.Source??"").StartsWith("DWARF stack integration:"))lines.Add(fact.Source);
+            else if(frame.Kind=="Stack"&&frame.Facts!=null&&frame.Facts.TryGetValue("Exposure",out fact)&&fact!=null&&(fact.Source=="Header: explicit total exposure"||(fact.Source??"").StartsWith("Stack integration:")))lines.Add("Total stack integration: "+frame.ExposureText);
             else if(frame.Kind=="Stack")lines.Add("Stack exposure may be per-sub or total.");
             if(lines.Count==1)lines.Add("Exposure source unknown.");
             return string.Join("\n",lines);
@@ -161,7 +163,7 @@ namespace AstroArchive {
             f.CalibrationSteps=h.Get("CALSTAT");
             string obs=h.Get("DATE-OBS","DATEOBS","DATE_OBS"),timeSystem=h.Get("TIMESYS");
             DateTimeOffset utc;
-            bool eligible=obs.Length>10&&(timeSystem.Length==0||timeSystem.Equals("UTC",StringComparison.OrdinalIgnoreCase))&&(f.Format=="FITS"||Regex.IsMatch(obs,@"(Z|[+-]\d\d:\d\d)$"));
+            bool eligible=obs.Length>10&&(timeSystem.Length==0||timeSystem.Equals("UTC",StringComparison.OrdinalIgnoreCase))&&(f.Format=="FITS"||timeSystem.Equals("UTC",StringComparison.OrdinalIgnoreCase)||Regex.IsMatch(obs,@"(Z|[+-]\d\d:\d\d)$"));
             if(eligible&&DateTimeOffset.TryParse(obs,CultureInfo.InvariantCulture,DateTimeStyles.AssumeUniversal|DateTimeStyles.AdjustToUniversal,out utc)) {
                 f.ObservedUtc=utc.UtcDateTime.ToString("o");
                 f.TimeZoneId="UTC";

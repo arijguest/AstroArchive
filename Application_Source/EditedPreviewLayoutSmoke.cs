@@ -13,13 +13,15 @@ namespace AstroArchive {
    var colours=new[]{new byte[]{220,40,40},new byte[]{40,220,40},new byte[]{40,40,220},new byte[]{220,220,40}};var rgb=new byte[720*960*3];
    for(int y=0;y<960;y++)for(int x=0;x<720;x++)Array.Copy(colours[(y<480?0:2)+(x<360?0:1)],0,rgb,(y*720+x)*3,3);
    var bitmap=BitmapSource.Create(720,960,96,96,PixelFormats.Rgb24,null,rgb,720*3);bitmap.Freeze();
+   Func<int,int,BitmapSource> plain=(w,h)=>{var image=BitmapSource.Create(w,h,96,96,PixelFormats.Gray8,null,new byte[w*h],w);image.Freeze();return image;};
    try{
-    CancelEditedPreview();GoToPage(2);CancelAutomaticEditedRefresh();editedPreviewManualWidth=null;L("EditedPreviewMessage").Visibility=Visibility.Collapsed;
+    CancelEditedPreview();GoToPage(2);CancelAutomaticEditedRefresh();HideTargetInformation("Edited");editedPreviewManualWidth=null;L("EditedPreviewMessage").Visibility=Visibility.Collapsed;
     foreach(string removed in new[]{"EditedPreviewSkyPanel","EditedPreviewSky","EditedPreviewSkyResetButton","EditedStretchMode","EditedPreviewDetailsButton","EditedPreviewDetailsPopup"})if(Window.FindName(removed)!=null)throw new Exception("Edited preview retains removed control: "+removed);
     foreach(string mode in new[]{"Dark","Light"})foreach(int textScale in new[]{100,150})foreach(var size in new[]{new[]{1180.0,850},new[]{1060.0,650},new[]{1180.0,1000}}){
-     settings.ThemeMode=mode;settings.TextScalePercent=textScale;ApplyAppearance();Window.Width=size[0];Window.Height=size[1];editedPreviewViewport.SetImage(bitmap,true);PumpPopupLayout();SizeEditedPreview();PumpPopupLayout();editedPreviewViewport.Resize();PumpPopupLayout();
+     settings.ThemeMode=mode;settings.TextScalePercent=textScale;ApplyAppearance();Window.Width=size[0];Window.Height=size[1];HideTargetInformation("Edited");editedPreviewViewport.SetImage(bitmap,true);PumpPopupLayout();SizeEditedPreview();PumpPopupLayout();editedPreviewViewport.Resize();PumpPopupLayout();
      double availableHeight=Math.Max(0,host.ActualHeight-PreviewViewport.ToolbarSpace),chrome=pane.Padding.Left+pane.Padding.Right+pane.BorderThickness.Left+pane.BorderThickness.Right;
-     double availableWidth=body.ActualWidth-body.ColumnDefinitions[0].ActualWidth-body.ColumnDefinitions[2].ActualWidth-body.ColumnDefinitions[1].MinWidth;
+     double availableWidth=EditedPreviewAvailableWidth();
+     if(column.ActualWidth>EditedPreviewMinimumWidth+1&&body.ColumnDefinitions[1].ActualWidth<EditedTableComfortWidth-1)throw new Exception("Automatic Edited preview width squeezed the table: table "+body.ColumnDefinitions[1].ActualWidth+", preview "+column.ActualWidth);
      if(availableHeight*0.75+chrome<=availableWidth&&Math.Abs(stage.ActualHeight-availableHeight)>2)throw new Exception("3:4 Edited portrait is width-limited: "+stage.RenderSize+", available height "+availableHeight+", column "+column.ActualWidth);
      if(Math.Abs(stage.ActualWidth-stage.ActualHeight*0.75)>1||body.ColumnDefinitions[1].ActualWidth<body.ColumnDefinitions[1].MinWidth-1||pane.TranslatePoint(new Point(pane.ActualWidth,0),body).X>body.ActualWidth+1)throw new Exception("Edited preview distorted the image or overflowed the table/window: "+mode+textScale+", requested "+size[0]+"x"+size[1]+", body "+body.RenderSize+", stage "+stage.RenderSize+", table "+body.ColumnDefinitions[1].ActualWidth+", pane right "+pane.TranslatePoint(new Point(pane.ActualWidth,0),body).X);
      var enlarge=B("EditedOpenPreviewButton");var buttonBounds=enlarge.TransformToAncestor(header).TransformBounds(new Rect(enlarge.RenderSize));if(buttonBounds.Right>header.ActualWidth+1||buttonBounds.Left<0||header.ActualHeight>enlarge.ActualHeight+1)throw new Exception("Edited filename/enlarge header clips or adds an extra row");
@@ -27,12 +29,37 @@ namespace AstroArchive {
      for(int quadrant=0;quadrant<4;quadrant++){int x=(int)(hostOrigin.X+imageArea.X+imageArea.Width*(quadrant%2==0?0.2:0.8)),y=(int)(hostOrigin.Y+imageArea.Y+imageArea.Height*(quadrant<2?0.2:0.8)),offset=(y*capture.PixelWidth+x)*4;var expected=colours[quadrant];if(Math.Abs(pixels[offset+2]-expected[0])>12||Math.Abs(pixels[offset+1]-expected[1])>12||Math.Abs(pixels[offset]-expected[2])>12||pixels[offset+3]<250)throw new Exception("Edited portrait pixels are clipped or blank: quadrant "+quadrant);}
      editedPreviewViewport.SmokeGestures();double fittedWidth=column.ActualWidth;editedPreviewViewport.BeginLoading();PumpPopupLayout();if(Math.Abs(column.ActualWidth-fittedWidth)>1||stage.RenderSize.Width<1||((Image)Window.FindName("EditedPreviewImage")).Source!=null)throw new Exception("Edited loading changed its panel or retained old pixels");cases++;
     }
-    settings.TextScalePercent=100;ApplyAppearance();Window.Width=1180;Window.Height=850;editedPreviewViewport.SetImage(bitmap,true);PumpPopupLayout();SizeEditedPreview();PumpPopupLayout();
+    settings.TextScalePercent=100;ApplyAppearance();Window.Width=1400;Window.Height=850;HideTargetInformation("Edited");
+    // The column follows each image's shape, never past the table's comfortable width.
+    double chrome0=pane.Padding.Left+pane.Padding.Right+pane.BorderThickness.Left+pane.BorderThickness.Right;var widths=new System.Collections.Generic.List<double>();
+    foreach(var shape in new[]{new[]{600,1000},new[]{720,960},new[]{900,900}}){
+     editedPreviewViewport.SetImage(plain(shape[0],shape[1]),true);PumpPopupLayout();editedPreviewViewport.Resize();PumpPopupLayout();widths.Add(column.ActualWidth);
+     double expected=Math.Min(EditedPreviewAvailableWidth(),Math.Max(EditedPreviewMinimumWidth,Math.Max(0,host.ActualHeight-PreviewViewport.ToolbarSpace)*shape[0]/shape[1]+chrome0));
+     if(Math.Abs(column.ActualWidth-expected)>2)throw new Exception("Edited preview did not fit the "+shape[0]+"x"+shape[1]+" image: column "+column.ActualWidth+", expected "+expected);
+     if(column.ActualWidth<EditedPreviewAvailableWidth()-1&&column.ActualWidth>EditedPreviewMinimumWidth+1&&Math.Abs(stage.ActualWidth+chrome0-column.ActualWidth)>3)throw new Exception("Edited preview left empty space beside a "+shape[0]+"x"+shape[1]+" image: stage "+stage.RenderSize+", column "+column.ActualWidth);
+     if(body.ColumnDefinitions[1].ActualWidth<EditedTableComfortWidth-1)throw new Exception("Fitting a "+shape[0]+"x"+shape[1]+" image squeezed the table to "+body.ColumnDefinitions[1].ActualWidth);
+    }
+    if(widths[0]>widths[1]+1||widths[1]>widths[2]+1)throw new Exception("Edited preview width did not follow image shape: "+string.Join(", ",widths));
+    editedPreviewViewport.BeginLoading();PumpPopupLayout();if(Math.Abs(column.ActualWidth-widths[2])>1)throw new Exception("Edited loading resized the preview column");
+    CancelEditedPreview();PumpPopupLayout();if(Math.Abs(column.ActualWidth-widths[2])>1)throw new Exception("Clearing the Edited preview resized its column");
+    Window.Width=1180;editedPreviewViewport.SetImage(bitmap,true);PumpPopupLayout();SizeEditedPreview();PumpPopupLayout();
     var divider=(GridSplitter)Window.FindName("EditedPreviewDivider");double before=column.ActualWidth;
     divider.RaiseEvent(new DragStartedEventArgs(0,0){RoutedEvent=Thumb.DragStartedEvent});divider.RaiseEvent(new DragDeltaEventArgs(-40,0){RoutedEvent=Thumb.DragDeltaEvent});PumpPopupLayout();divider.RaiseEvent(new DragCompletedEventArgs(-40,0,false){RoutedEvent=Thumb.DragCompletedEvent});PumpPopupLayout();
     if(column.ActualWidth<=before+20||!editedPreviewManualWidth.HasValue)throw new Exception("Edited divider cannot widen the preview manually");double chosen=column.ActualWidth;Window.Height=700;PumpPopupLayout();if(Math.Abs(column.ActualWidth-chosen)>1)throw new Exception("Window resize discarded the manually chosen preview width");
-    File.WriteAllText(Path.Combine(output,"edited-preview-layout-smoke.txt"),"PASS "+cases+" native Edited layouts: no sky/stretch/details controls; full-height 3:4 portrait fit; all four rendered image quadrants; compact filename/enlarge header; below-image zoom/pan/Fit; light/dark and 100/150% text; small/tall windows; stable loading frame; adjustable divider with retained manual width.");
+    editedPreviewViewport.SetImage(plain(900,900),true);PumpPopupLayout();if(Math.Abs(column.ActualWidth-chosen)>1)throw new Exception("A new image discarded the manually chosen preview width");
+    SmokeEditedToolbar();
+    File.WriteAllText(Path.Combine(output,"edited-preview-layout-smoke.txt"),"PASS "+cases+" native Edited layouts: no sky/stretch/details controls; full-height 3:4 portrait fit; column follows narrow/3:4/square image shapes without squeezing the table; stable while loading or cleared; tidy six-button toolbar; all four rendered image quadrants; compact filename/enlarge header; below-image zoom/pan/Fit; light/dark and 100/150% text; small/tall windows; stable loading frame; adjustable divider with retained manual width.");
    }finally{editedPreviewDragging=false;editedPreviewManualWidth=manual;settings.ThemeMode=theme;settings.TextScalePercent=scale;ApplyAppearance();Window.Width=width;Window.Height=height;editedPreviewViewport.SetImage(original,true);L("EditedPreviewMessage").Visibility=message;GoToPage(page);PumpPopupLayout();SizeEditedPreview();}
+  }
+  void SmokeEditedToolbar(){
+   var panel=(System.Windows.Controls.Primitives.UniformGrid)Window.FindName("EditedToolbarActions");var names=new[]{"EditedFiltersButton","EditedClearButton","EditedRefreshButton","EditedAddButton","EditedImportFolderButton","EditedEditorButton"};
+   foreach(string hidden in new[]{"EditedEditButton","EditedDetailsButton","EditedPreviewButton","EditedFolderButton"})if(B(hidden).IsVisible)throw new Exception("Edited command target is shown on the page: "+hidden);
+   double width=-1,height=-1;foreach(string name in names){var button=B(name);if(button.Parent!=panel||button.Visibility!=Visibility.Visible)throw new Exception("Edited action is not in the toolbar: "+name);
+    var bounds=button.TransformToAncestor(panel).TransformBounds(new Rect(button.RenderSize));if(bounds.Left<-1||bounds.Right>panel.ActualWidth+1)throw new Exception("Edited toolbar clips "+name);
+    if(width>=0&&(Math.Abs(button.ActualWidth-width)>1||Math.Abs(button.ActualHeight-height)>1))throw new Exception("Edited toolbar buttons are uneven: "+name);width=button.ActualWidth;height=button.ActualHeight;
+    var label=new FormattedText(Localization.T((string)button.Content),System.Globalization.CultureInfo.CurrentUICulture,FlowDirection.LeftToRight,new Typeface(button.FontFamily,button.FontStyle,button.FontWeight,button.FontStretch),button.FontSize,Brushes.Black,VisualTreeHelper.GetDpi(button).PixelsPerDip);
+    if(label.WidthIncludingTrailingWhitespace>button.ActualWidth-button.Padding.Left-button.Padding.Right-button.BorderThickness.Left-button.BorderThickness.Right+0.5)throw new Exception("Edited toolbar truncates "+name);}
+   if(panel.Children.Count%Math.Max(1,panel.Columns)!=0)throw new Exception("Edited toolbar leaves an incomplete row");
   }
  }
 }

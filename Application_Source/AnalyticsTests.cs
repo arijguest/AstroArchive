@@ -11,6 +11,86 @@ namespace AstroArchive {
    return new Frame{Target=target,Kind="Light",Exposure=seconds,AcquisitionDate=date,Telescope=telescope,Filter="L",Session=session};
   }
   static void AnalyticsTests(){
+   Test("Chart types restyle a copy and keep every group and headline",()=>{
+    var source=Enumerable.Range(0,20).Select(i=>AnalyticsLight("Target "+i,60*(i+1),"2026-10-"+(i%9+1).ToString("00"),"Scope "+(i%3))).ToList();var data=ArchiveAnalytics.Build(source,new AnalyticsOptions());
+    for(int index=0;index<6;index++){
+     Check(AnalyticsGraphics.NaturalStyles[index]==data.Reports[index].Style,"Natural chart style differs from the report: "+index);
+     var styles=AnalyticsGraphics.StylesFor(index);Check(styles[0]==data.Reports[index].Style&&styles.Distinct().Count()==styles.Length&&(index==1?styles.Length==1:styles.Length==3),"Chart type choices are wrong: "+index);
+     foreach(string style in styles)foreach(AnalyticsLayout layout in Enum.GetValues(typeof(AnalyticsLayout))){
+      var pages=AnalyticsGraphics.Pages(data,index,true,layout,style);Check(pages.Count>0&&pages.All(p=>p.Marks.Any(m=>m.Role=="header"&&m.Text==ArchiveAnalytics.Number(data.RepositorySeconds/3600)+" h")),"Chart type lost the repository headline: "+index+" "+style);
+      Check(pages.All(p=>p.Marks.Any(m=>m.Role=="chart")),"Chart type drew no chart: "+index+" "+style+" "+layout);
+      if(style=="bars"&&index!=1)foreach(var value in data.Reports[index].Values)Check(pages.SelectMany(p=>p.Marks).Any(m=>m.Detail==value.Label||m.Text==value.Label),"Bars lost a group: "+index+" "+value.Label);
+      if(style=="bars"&&data.Reports[index].Unit=="frames")Check(pages.SelectMany(p=>p.Marks).Any(m=>m.Text=="Light frames")&&!pages.SelectMany(p=>p.Marks).Any(m=>m.Text=="Integration (hours)"),"Frame bars are labelled as hours: "+index);
+     }
+    }
+    Check(data.Reports[0].Style=="donut"&&data.Reports[2].Style=="bars"&&data.Reports[0].Values.Count==20,"Restyling changed the source report");
+    var natural=AnalyticsGraphics.Pages(data,2,true,AnalyticsLayout.Landscape,null);Check(natural.Count==AnalyticsGraphics.Pages(data,2).Count,"Default chart type changed the pages");
+    var invalid=AnalyticsGraphics.Pages(data,1,true,AnalyticsLayout.Landscape,"donut");Check(invalid.Count==AnalyticsGraphics.Pages(data,1).Count&&!invalid.SelectMany(p=>p.Marks).Any(m=>m.Kind=="polygon"&&m.Role=="chart"),"The timeline accepted an unordered chart type");
+   });
+   Test("Target card choices survive saving and are repaired when out of range",()=>{
+    var saved=Util.Deserialize<Settings>(Util.Serialize(new Settings{CardChoices=new Dictionary<string,TargetCardMemory>{{"M31",new TargetCardMemory{Path="",Fill=true,Zoom=9,PanX=.5,PanY=-3,Rotation=-90,Description="First light"}}}}));
+    var memory=saved.CardChoices["M31"];var placement=memory.Placement();
+    Check(memory.Path==""&&memory.Fill&&memory.Description=="First light","Target card image, fill or description was not remembered");
+    Check(placement.Zoom==4&&placement.PanX==.5&&placement.PanY==-1&&placement.Rotation==270,"Remembered framing was not repaired");
+    Check(TargetCards.QuarterTurn(450)==90&&TargetCards.QuarterTurn(-180)==180&&TargetCards.QuarterTurn(0)==0,"Rotation is not kept to quarter turns");
+    Check(Util.Deserialize<Settings>(Util.Serialize(new Settings())).CardChoices==null,"Settings without card choices gained some");
+   });
+   Test("Analytics preferences repair saved values and migrate 3.1.5 chart choices",()=>{
+    var fresh=AnalyticsPreferences.Load(Util.Deserialize<Settings>("{}").Analytics,null);
+    Check(fresh.ImageFormat=="PDF"&&fresh.CardFormat=="PNG"&&fresh.VideoFormat=="MP4"&&fresh.Layout==0&&!fresh.LightDocument&&!fresh.Video&&fresh.Palette==null&&fresh.Item==null&&fresh.Charts.Count==0&&fresh.IncludedCharts().Count==6,"Old settings did not start from the familiar defaults");
+    var legacy=Util.Deserialize<Settings>("{\"AnalyticsCharts\":{\"targets\":{\"Title\":\" My targets \",\"Subtitle\":\"\",\"Style\":\"Bars\",\"Order\":\"Lowest first\",\"Palette\":\"Nebula\",\"Categories\":6},\"timeline\":{\"Title\":\"\",\"Style\":\"Donut\",\"Order\":\"Alphabetical\",\"Palette\":\"AstroArchive\"},\"filters\":{\"Style\":\"Automatic\",\"Order\":\"Alphabetical\"},\"unknown\":{\"Title\":\"Kept?\"}}}");
+    var migrated=AnalyticsPreferences.Load(legacy.Analytics,legacy.AnalyticsCharts);var targets=migrated.Chart(0);
+    Check(targets.Title=="My targets"&&targets.Style=="bars"&&targets.Order=="Smallest first"&&targets.Palette==null&&migrated.Palette=="Nebula","3.1.5 chart choices were not carried over");
+    Check(migrated.Chart(4).Order=="A–Z"&&migrated.Chart(4).Style==null,"Alphabetical order or automatic style was not migrated");
+    migrated.Normalise();Check(!migrated.Charts.ContainsKey("timeline")&&!migrated.Charts.ContainsKey("unknown"),"The timeline accepted a reordering or an unknown chart was kept");
+    var broken=new AnalyticsPreferences{Item="nowhere",Layout=42,Pace=-4,Transition=9,VideoSize=7,CardResolution=-1,Palette="Rainbow",ImageFormat="TIFF",CardFormat="PDF",VideoFormat="AVI",Combined=new List<string>{"filters","nope","targets"},Charts=new Dictionary<string,AnalyticsChartOptions>{{"targets",new AnalyticsChartOptions{Title=new string('x',90),Style="columns",Order="Largest first"}},{"exposures",new AnalyticsChartOptions{Style="columns",Order="A–Z"}}}};
+    broken.Normalise();
+    Check(broken.Item==null&&broken.Layout==5&&broken.Pace==0&&broken.Transition==2&&broken.VideoSize==2&&broken.CardResolution==0&&broken.Palette==null&&broken.ImageFormat=="PDF"&&broken.CardFormat=="PNG"&&broken.VideoFormat=="MP4","Out of range preferences were not repaired");
+    Check(broken.IncludedCharts().SequenceEqual(new[]{0,4})&&broken.Chart(0).Title.Length==AnalyticsPreferences.TitleLength&&broken.Chart(0).Style=="columns"&&broken.Chart(0).Order==null,"Combined charts or chart titles were not repaired");
+    broken.Normalise();Check(!broken.Charts.ContainsKey("exposures"),"A chart left at its defaults was saved");
+    Check(!broken.Include(0,false)||broken.IncludedCharts().Count>0,"Combined document lost its last chart");Check(!broken.Include(4,false)&&broken.IncludedCharts().SequenceEqual(new[]{4}),"The last combined chart was removed");
+    foreach(int i in new[]{0,1,2,3,5})broken.Include(i,true);Check(broken.Combined==null&&broken.IncludedCharts().Count==6,"Including every chart did not return to the default");
+    var saved=new Settings{Analytics=new AnalyticsPreferences{Item="cards",LightDocument=true,Layout=2,Palette="Aurora",Video=true,VideoFormat="GIF",ScreenResolution=true,Pace=2,Transition=1,OptionsHidden=true,Combined=new List<string>{"targets","filters"}}};saved.Analytics.Chart(2).Order="A–Z";saved.Analytics.Chart(2).Subtitle="Hours per object";
+    var restored=AnalyticsPreferences.Load(Util.Deserialize<Settings>(Util.Serialize(saved)).Analytics,null);
+    Check(restored.ItemIndex()==7&&restored.LightDocument&&restored.Layout==2&&restored.Palette=="Aurora"&&restored.Video&&restored.VideoFormat=="GIF"&&restored.ScreenResolution&&restored.Pace==2&&restored.Transition==1&&restored.OptionsHidden,"Analytics choices were not saved");
+    Check(restored.IncludedCharts().SequenceEqual(new[]{0,4})&&restored.Chart(2).Order=="A–Z"&&restored.Chart(2).Subtitle=="Hours per object","Combined charts or chart customisation were not saved");
+    restored.Reset();Check(restored.ItemIndex()==7&&restored.OptionsHidden&&!restored.LightDocument&&restored.Layout==0&&restored.Palette==null&&!restored.Video&&restored.VideoFormat=="MP4"&&restored.Pace==0&&restored.Combined==null&&restored.Charts.Count==0,"Resetting analytics options missed a choice or moved the viewer");
+   });
+   Test("Customised charts keep every group, reorder rankings and recolour only the series",()=>{
+    var source=Enumerable.Range(0,20).SelectMany(i=>Enumerable.Range(0,i+1).Select(j=>AnalyticsLight("Target "+(char)('A'+i),60,"2026-10-0"+(i%9+1),"Scope "+(i%4)))).ToList();var data=ArchiveAnalytics.Build(source,new AnalyticsOptions());
+    var plain=AnalyticsGraphics.Pages(data,2,true,AnalyticsLayout.Landscape);Check(AnalyticsGraphics.Pages(data,2,true,AnalyticsLayout.Landscape,new AnalyticsChartOptions(),null).Select(p=>p.Marks.Count).SequenceEqual(plain.Select(p=>p.Marks.Count)),"Unchanged options changed the chart");
+    foreach(AnalyticsLayout layout in Enum.GetValues(typeof(AnalyticsLayout))){
+     var smallest=AnalyticsGraphics.Pages(data,2,false,layout,new AnalyticsChartOptions{Order="Smallest first",Title="Nights on each object",Subtitle="Every target, smallest first"},null);
+     var labels=smallest.SelectMany(p=>p.Marks).Where(m=>m.Detail!=null&&m.Detail.StartsWith("Target ")).Select(m=>m.Detail).Distinct().ToList();
+     Check(labels.Count==20&&labels[0]=="Target A"&&labels[19]=="Target T","Smallest first lost or misordered a target: "+layout+" "+string.Join(",",labels));
+     Check(smallest.All(p=>p.Title=="Nights on each object")&&smallest.SelectMany(p=>p.Marks).Any(m=>m.Detail=="Nights on each object"||m.Text=="Nights on each object")&&smallest.SelectMany(p=>p.Marks).Any(m=>m.Text!=null&&m.Text.StartsWith("Every target")),"Custom title or subtitle missing: "+layout);
+    }
+    var donut=AnalyticsGraphics.Pages(data,0,true,AnalyticsLayout.Landscape,new AnalyticsChartOptions{Order="A–Z"},null).Single();var slices=donut.Marks.Where(m=>m.Role=="chart"&&m.Kind=="text"&&m.Detail!=null).Select(m=>m.Detail).ToList();
+    Check(slices.Count==8&&slices.Take(7).SequenceEqual(new[]{"Target N","Target O","Target P","Target Q","Target R","Target S","Target T"})&&slices[7].StartsWith("Other (13"),"A–Z donut did not keep the largest groups with Other last: "+string.Join(",",slices));
+    var timeline=AnalyticsGraphics.Pages(data,1,true,AnalyticsLayout.Landscape,new AnalyticsChartOptions{Order="A–Z",Style="donut"},null);Check(timeline.Select(p=>p.Marks.Count).SequenceEqual(AnalyticsGraphics.Pages(data,1,true,AnalyticsLayout.Landscape).Select(p=>p.Marks.Count)),"The timeline accepted a new order or type");
+    foreach(bool dark in new[]{true,false})foreach(string palette in AnalyticsPreferences.Palettes.Skip(1)){
+     var natural=AnalyticsGraphics.Pages(data,4,dark,AnalyticsLayout.Square);var coloured=AnalyticsGraphics.Pages(data,4,dark,AnalyticsLayout.Square,null,palette);
+     var before=natural.SelectMany(p=>p.Marks).ToList();var after=coloured.SelectMany(p=>p.Marks).ToList();Check(before.Count==after.Count,"Palette changed the chart structure");
+     Check(Enumerable.Range(0,before.Count).All(i=>before[i].Kind!="text"||before[i].Fill==after[i].Fill),"Palette recoloured lettering: "+palette);
+     Check(Enumerable.Range(0,before.Count).Any(i=>before[i].Fill!=after[i].Fill),"Palette left the chart unchanged: "+palette+" "+dark);
+    }
+   });
+   Test("The AstroArchive wordmark matches the logo height and centre in every layout",()=>{
+    var data=ArchiveAnalytics.Build(new[]{AnalyticsLight("M31",600)},new AnalyticsOptions());
+    foreach(AnalyticsLayout layout in Enum.GetValues(typeof(AnalyticsLayout)))foreach(int index in Enumerable.Range(0,6))foreach(var page in AnalyticsGraphics.Pages(data,index,index%2==0,layout)){
+     var logo=page.Marks.Single(m=>m.Kind=="logo");var brand=page.Marks.Single(m=>m.Text=="AstroArchive");double capitals=brand.Size*AnalyticsGraphics.BrandCapHeight;
+     Check(capitals<=logo.Height+.01&&capitals>=logo.Height*.7,"Wordmark is not similar in height to the logo: "+layout+" "+capitals+" / "+logo.Height);
+     Check(Math.Abs(brand.Y+brand.Size*AnalyticsGraphics.BrandCapCentre-(logo.Y+logo.Height/2))<.01,"Wordmark is not centred on the logo: "+layout);
+     Check(brand.X>logo.X+logo.Width&&page.Marks.Where(m=>m.Kind=="text"&&m!=brand&&m.Role=="header"&&m.Y<logo.Y+logo.Height&&m.Y+m.Size>logo.Y).All(m=>m.X>brand.X+brand.Size*6.4||m.Centered),"Wordmark overlaps header text: "+layout);
+    }
+   });
+   Test("Top target cards rank by integration or light frames without double counting stacks",()=>{
+    var rows=new List<Frame>{AnalyticsLight("M31",60,"2026-10-01","Scope","night"),new Frame{Target="M31",Kind="Stack",Exposure=99999,Session="night",Telescope="Scope",AcquisitionDate="2026-10-01"},AnalyticsLight("M45",300),AnalyticsLight("M45",300),AnalyticsLight("M42",30),AnalyticsLight("M42",30),AnalyticsLight("M42",30),new Frame{Target="Calibration",Kind="Light",Exposure=99999},new Frame{Target="Unknown",Kind="Light",Exposure=99999}};
+    var rejected=AnalyticsLight("M42",9000);rejected.Rejected=true;rows.Add(rejected);
+    var byTime=TargetCards.Rank(rows);var byFrames=TargetCards.Rank(rows,true);var withRejected=TargetCards.Rank(rows,false,true);
+    Check(byTime.Count==3&&byTime[0].Target=="M45"&&byTime[0].Seconds==600&&byFrames[0].Target=="M42"&&byFrames[0].Lights==3,"Top target ranking is wrong: "+string.Join(", ",byTime.Select(c=>c.Target+" "+c.Seconds)));
+    Check(byTime.Single(c=>c.Target=="M31").Seconds==60&&withRejected[0].Target=="M42","Matching stacks were double counted or rejected frames ignored");
+   });
    Test("Repository headline totals survive every chart scope and missing date",()=>{
     var rejected=AnalyticsLight("M45",3600,"2025-01-01","Scope B");rejected.Rejected=true;
     var deleted=AnalyticsLight("M51",7200);deleted.Status="Deleted";
@@ -55,13 +135,15 @@ namespace AstroArchive {
      Check(svg.Descendants(ns+"text").Single(e=>e.Value=="REPOSITORY INTEGRATION").Attribute("text-anchor").Value=="middle","SVG text is not centered for "+layout);
     }
    });
-   Test("Standalone stack integration is counted unless two light subframes share its session and target",()=>{
+   Test("Stack integration is counted only when no sub of its target shares its session or date",()=>{
     var rows=new List<Frame>{AnalyticsLight("M31",600,"2026-10-01","Scope A","shared"),AnalyticsLight("M31",900,"2026-10-01","Scope A","shared"),new Frame{Target="M31",Kind="Stack",Exposure=1500,Session="shared"},AnalyticsLight("M42",120,"2026-10-02","Scope A","single"),new Frame{Target="M42",Kind="Stack",Exposure=1200,Session="single",AcquisitionDate="2026-10-02"},new Frame{Target="M42",Kind="Stack",Exposure=1800,Session="other",AcquisitionDate="2026-10-02"},new Frame{Target="M31",Kind="Stack",Exposure=2400,AcquisitionDate="2026-10-02"}};
-    var data=ArchiveAnalytics.Build(rows,new AnalyticsOptions());Check(data.RepositorySeconds==7020&&data.Seconds==7020,"Matched stack was double-counted or standalone stack exposure was omitted");
+    var data=ArchiveAnalytics.Build(rows,new AnalyticsOptions());Check(data.RepositorySeconds==4020&&data.Seconds==4020,"Stack with same-session or same-date subs was double-counted, or a standalone stack was omitted");
     foreach(int index in new[]{1,2,3,4})Check(Math.Abs(data.Reports[index].Values.Sum(v=>v.Value)-data.Seconds/3600)<1e-10,"An integration chart disagrees with the total at index "+index);
     Check(data.Reports[5].Values.Sum(v=>v.Value)==3,"Stack images were counted as individual light frames in the exposure-length histogram");
     var oneSub=new[]{AnalyticsLight("M31",600,"2026-10-01","Scope A","one"),new Frame{Target="M31",Kind="Stack",Exposure=900,Session="one"}};
-    Check(CaptureGroups.ExposureFrames(oneSub).Count==2,"One light frame incorrectly suppressed its stack");
+    Check(CaptureGroups.ExposureFrames(oneSub).Count==1,"A single saved sub did not suppress its session's stack");
+    var otherDate=new[]{AnalyticsLight("M31",600,"2026-10-01","Scope A","a"),new Frame{Target="Andromeda Galaxy",Kind="Stack",Exposure=900,Session="b",AcquisitionDate="2026-10-01"},new Frame{Target="M31",Kind="Stack",Exposure=900,Session="c",AcquisitionDate="2026-10-03"}};
+    var kept=CaptureGroups.ExposureFrames(otherDate);Check(kept.Count==2&&kept.Any(f=>f.Kind=="Stack"&&f.AcquisitionDate=="2026-10-03"),"Same-date stack (alias target) was counted or another date's stack was dropped");
     var differentTarget=new[]{AnalyticsLight("M31",600,"2026-10-01","Scope A","same"),AnalyticsLight("M31",900,"2026-10-01","Scope A","same"),new Frame{Target="M42",Kind="Stack",Exposure=1800,Session="same"}};
     Check(CaptureGroups.ExposureFrames(differentTarget).Count==3,"Subframes for a different target incorrectly suppressed a stack");
    });
@@ -115,7 +197,7 @@ namespace AstroArchive {
    });
    Test("Analytics uses branded dark documents by default and clean light alternatives",()=>{
     var data=ArchiveAnalytics.Build(new[]{AnalyticsLight("M31",3600)},new AnalyticsOptions{Caption="Observatory"});
-    for(int i=0;i<6;i++){var dark=AnalyticsGraphics.Page(data,i);var light=AnalyticsGraphics.Page(data,i,false);Check(dark.Background=="#0C1220"&&dark.Marks[0].Fill==dark.Background&&light.Background=="#FFFFFF"&&light.Marks[0].Fill==light.Background,"Theme background does not match page scene");Check(dark.Marks.Any(m=>m.Fill=="#90B8FF")&&dark.Marks.Any(m=>m.Fill=="#E9EEF8"),"Dark chart does not use AstroArchive brand colours");Check(dark.Marks.Single(m=>m.Kind=="logo").Width==70,"Publication logo was not enlarged");Check(dark.Marks.Count(m=>m.Text=="AstroArchive")==1&&!dark.Marks.Any(m=>m.Text!=null&&(m.Text.Contains("OBSERVATORY NOTES")||m.Text.Contains("known exposure")||m.Text.Contains(" · UTC"))),"Header and footer retain redundant text");var svg=XDocument.Parse(AnalyticsGraphics.Svg(new[]{dark},""));XNamespace ns="http://www.w3.org/2000/svg";Check(svg.Root.Elements(ns+"rect").First().Attribute("fill").Value==dark.Background,"SVG sheet has a white surround on dark documents");}
+    for(int i=0;i<6;i++){var dark=AnalyticsGraphics.Page(data,i);var light=AnalyticsGraphics.Page(data,i,false);Check(dark.Background=="#0C1220"&&dark.Marks[0].Fill==dark.Background&&light.Background=="#FFFFFF"&&light.Marks[0].Fill==light.Background,"Theme background does not match page scene");Check(dark.Marks.Any(m=>m.Fill=="#90B8FF")&&dark.Marks.Any(m=>m.Fill=="#E9EEF8"),"Dark chart does not use AstroArchive brand colours");Check(dark.Marks.Single(m=>m.Kind=="logo").Width==56,"Publication logo is not the agreed size");Check(dark.Marks.Count(m=>m.Text=="AstroArchive")==1&&!dark.Marks.Any(m=>m.Text!=null&&(m.Text.Contains("OBSERVATORY NOTES")||m.Text.Contains("known exposure")||m.Text.Contains(" · UTC"))),"Header and footer retain redundant text");var svg=XDocument.Parse(AnalyticsGraphics.Svg(new[]{dark},""));XNamespace ns="http://www.w3.org/2000/svg";Check(svg.Root.Elements(ns+"rect").First().Attribute("fill").Value==dark.Background,"SVG sheet has a white surround on dark documents");}
    });
    Test("Empty analytics produces informative charts with finite coordinates",()=>{
     var data=ArchiveAnalytics.Build(new Frame[0],new AnalyticsOptions());Check(data.Captures==0&&data.Seconds==0&&data.UnknownExposure==0,"Empty totals incorrect");
@@ -128,7 +210,7 @@ namespace AstroArchive {
      var pages=AnalyticsGraphics.Pages(data,index,dark,AnalyticsLayout.Vertical);
      foreach(var page in pages){
       Check(page.CanvasWidth==1080&&page.CanvasHeight==1920&&page.Portrait,"Portrait dimensions are not 9:16");
-      Check(page.Marks[0].Fill==(dark?"#0C1220":"#FFFFFF")&&page.Marks.Single(m=>m.Kind=="logo").Width==88,"Portrait branding or document theme lost");
+      Check(page.Marks[0].Fill==(dark?"#0C1220":"#FFFFFF")&&page.Marks.Single(m=>m.Kind=="logo").Width==70.4,"Portrait branding or document theme lost");
       Check(page.Marks.All(m=>m.Kind=="polygon"?Enumerable.Range(0,m.Points.Length/2).All(i=>m.Points[i*2]>=0&&m.Points[i*2]<1080&&m.Points[i*2+1]>=0&&m.Points[i*2+1]<1920):m.X>=0&&m.Y>=0&&m.X+m.Width<=1080&&m.Y+m.Height<=1920),"Portrait chart geometry escaped its page");
      }
      if(index==2||index==3){Check(pages.Count==4,"Portrait ranking dropped continuation pages");foreach(var value in data.Reports[index].Values)Check(pages.SelectMany(p=>p.Marks).Any(m=>m.Detail==value.Label),"Portrait ranking lost a category");Check(pages.Select(p=>p.Marks.Where(m=>m.Kind=="text"&&m.Y==1480).Last().Text).Distinct().Count()==1,"Portrait ranking scales differ across pages");}

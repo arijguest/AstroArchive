@@ -134,7 +134,7 @@ namespace AstroArchive {
    foreach(var planned in Exporter.StackingGroups(selected,cals,false,unknown,calibrations)){var group=planned.Inputs;
     ct.ThrowIfCancellationRequested();var inputs=group.ToList();inputs.AddRange(planned.Calibrations);
     var rows=new List<string>{"DSS file list","CHECKED\tTYPE\tFILE"};foreach(var frame in inputs.GroupBy(f=>f.Hash).Select(g=>g.First())){var file=exported.FirstOrDefault(f=>f.Frame.Hash==frame.Hash);string type=DssType(frame);if(file==null||type==null)throw new IOException("DSS file list cannot map an exported input: "+frame.OriginalName);if(file.Path.IndexOfAny(new[]{'\r','\n','\t'})>=0)throw new IOException("DSS cannot represent a filename containing a tab or newline.");rows.Add("1\t"+type+"\t"+file.Path);}
-    string name=(++index).ToString("00")+"_"+Util.Safe(group.First().TargetLabel)+"_"+Util.Safe(group.First().Filter);string path=Exporter.WriteMetadataText(System.IO.Path.Combine(folder,name+".txt"),string.Join("\r\n",rows)+"\r\n",ct);jobs.Add(new DssJob{Name=name+" · "+group.Count()+" subframes",Path=path});
+    string name=(++index).ToString("00")+"_"+Util.Safe(Catalog.RecordLabel(group.First().Target))+"_"+Util.Safe(group.First().Filter);string path=Exporter.WriteMetadataText(System.IO.Path.Combine(folder,name+".txt"),string.Join("\r\n",rows)+"\r\n",ct);jobs.Add(new DssJob{Name=name+" · "+group.Count()+" subframes",Path=path});
    }return jobs;
   }
  }

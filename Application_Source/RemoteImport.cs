@@ -13,14 +13,24 @@ using RemoteConnection = AstroArchive.Remote.Connection;
 
 namespace AstroArchive {
  public static class RemoteCapturePaths {
+  // Windows paths (Seestar shares and watched local folders) use backslashes and ignore case.
+  public static bool WindowsPaths(RemoteConnection c){return c.Kind=="Seestar SMB"||c.Kind=="Local folder";}
+  public static bool LocalFolder(RemoteConnection c){return c!=null&&c.Kind=="Local folder";}
+  // Watching the archive itself, or a folder that contains it, would re-import archived copies.
+  public static void CheckWatchedFolder(RemoteConnection c,string repositoryRoot){
+   if(!LocalFolder(c)||string.IsNullOrEmpty(repositoryRoot))return;string folder=Path.GetFullPath(c.Folder);
+   if(Util.Within(folder,repositoryRoot)||Util.Within(repositoryRoot,folder))throw new IOException("Choose a capture folder outside the repository. AstroArchive cannot watch its own archive or a folder that contains it.");
+  }
+  public static string SourceLabel(RemoteConnection c){return LocalFolder(c)?c.Folder:c.Host;}
   public static string Relative(RemoteConnection c,string path){
-   string root=c.Folder.TrimEnd('\\','/'),prefix=root+(c.Kind=="Seestar SMB"?"\\":"/");
-   if(!path.StartsWith(prefix,c.Kind=="Seestar SMB"?StringComparison.OrdinalIgnoreCase:StringComparison.Ordinal))throw new IOException("The telescope returned a path outside its selected storage.");
+   string root=c.Folder.TrimEnd('\\','/'),prefix=root+(WindowsPaths(c)?"\\":"/");
+   if(!path.StartsWith(prefix,WindowsPaths(c)?StringComparison.OrdinalIgnoreCase:StringComparison.Ordinal))throw new IOException(LocalFolder(c)?"A capture was found outside the watched folder.":"The telescope returned a path outside its selected storage.");
    return Paths.SafeRelative(path.Substring(prefix.Length));
   }
   public static string Parent(RemoteConnection c,string path){string relative=Relative(c,path);string parent=Path.GetDirectoryName(relative);return string.IsNullOrEmpty(parent)?c.Folder:Join(c,c.Folder,parent);}
-  public static string Join(RemoteConnection c,string folder,string name){return folder.TrimEnd('\\','/')+(c.Kind=="Seestar SMB"?"\\":"/")+name.Replace('\\',c.Kind=="Seestar SMB"?'\\':'/').Replace('/',c.Kind=="Seestar SMB"?'\\':'/');}
-  public static string LocalRelative(RemoteConnection c,string path){string relative=Relative(c,path),context=c.Kind=="Seestar SMB"?SmbPath.Parse(c.Folder).Relative:c.Folder.Trim('/');return context.Length==0?relative:Paths.SafeRelative(context+"/"+relative);}
+  public static string Join(RemoteConnection c,string folder,string name){char separator=WindowsPaths(c)?'\\':'/';return folder.TrimEnd('\\','/')+separator+name.Replace('\\',separator).Replace('/',separator);}
+  // Watched local folders are archived in place, so their local path is the original path.
+  public static string LocalRelative(RemoteConnection c,string path){string relative=Relative(c,path),context=LocalFolder(c)?"":c.Kind=="Seestar SMB"?SmbPath.Parse(c.Folder).Relative:c.Folder.Trim('/');return context.Length==0?relative:Paths.SafeRelative(context+"/"+relative);}
   public static bool SameVersion(Entry a,Entry b){return a!=null&&b!=null&&!a.Directory&&!b.Directory&&a.Size==b.Size&&a.Modified.ToUniversalTime()==b.Modified.ToUniversalTime();}
  }
  public sealed class RemoteCaptureCatalog {
@@ -35,7 +45,7 @@ namespace AstroArchive {
    }return result.OrderByDescending(e=>e.Directory).ThenBy(e=>e.Name,StringComparer.OrdinalIgnoreCase).ToList();
   }
   public static List<Entry> Search(ISource source,RemoteConnection connection,string folder,CancellationToken ct,Action<int> progress=null){
-   var result=new List<Entry>();var queue=new Queue<string>();var visited=new HashSet<string>(connection.Kind=="Seestar SMB"?StringComparer.OrdinalIgnoreCase:StringComparer.Ordinal);queue.Enqueue(folder);int entries=0;
+   var result=new List<Entry>();var queue=new Queue<string>();var visited=new HashSet<string>(RemoteCapturePaths.WindowsPaths(connection)?StringComparer.OrdinalIgnoreCase:StringComparer.Ordinal);queue.Enqueue(folder);int entries=0;
    while(queue.Count>0){ct.ThrowIfCancellationRequested();string next=queue.Dequeue();if(!visited.Add(next))continue;if(visited.Count>4096)throw new IOException("Too many folders to search. Choose a smaller capture folder under Advanced.");
     foreach(var item in Browse(source,connection,next,ct)){if(++entries>MaxEntries)throw new IOException("Too many captures to search at once. Choose a smaller capture folder.");if(item.Directory)queue.Enqueue(item.Path);else result.Add(item);}
     if(progress!=null)progress(result.Count);
@@ -63,10 +73,10 @@ namespace AstroArchive {
    ct.ThrowIfCancellationRequested();string relative=RemoteCapturePaths.LocalRelative(c,expected.Path),destination=Path.Combine(root,relative),receiptPath=Path.Combine(receipts,Util.HashText(relative)+".json");
    Paths.CheckLinks(destination,root);Paths.CheckLinks(receiptPath,receipts);Entry before=source.Stat(expected.Path);
    // FTP LIST often omits seconds; use fresh MDTM observations for transfer checks.
-   if(expected.Size!=before.Size||(c.Kind!="DWARF FTP"&&!RemoteCapturePaths.SameVersion(expected,before)))throw new IOException("Still being written; try again when this capture is complete.");
+   if(expected.Size!=before.Size||(!RemoteConnection.Ftp(c.Kind)&&!RemoteCapturePaths.SameVersion(expected,before)))throw new IOException("Still being written; try again when this capture is complete.");
    reused=false;
    if(File.Exists(destination)&&File.Exists(receiptPath))try{var saved=Util.Deserialize<RemoteReceipt>(File.ReadAllText(receiptPath));if(saved.Size==before.Size&&saved.Modified==before.Modified.ToUniversalTime().Ticks&&new FileInfo(destination).Length==before.Size&&Util.Hash(destination,ct)==saved.Hash){reused=true;return destination;}}catch(OperationCanceledException){throw;}catch(Exception){}
-   if(c.Kind=="DWARF FTP"){if(ct.WaitHandle.WaitOne(1000))ct.ThrowIfCancellationRequested();if(!RemoteCapturePaths.SameVersion(before,source.Stat(expected.Path)))throw new IOException("Still being written; try again when this capture is complete.");}
+   // No settle delay before FTP transfers: a capture that changes while downloading fails the size, MDTM and FITS checks below and is retried.
    Directory.CreateDirectory(Path.GetDirectoryName(destination));Paths.CheckLinks(destination,root);string temp=destination+"."+Guid.NewGuid().ToString("N")+".partial";long bytes=0;string hash;
    try{
     using(var input=source.Open(expected.Path))using(var output=new FileStream(temp,FileMode.CreateNew,FileAccess.Write,FileShare.None,1048576))using(var sha=SHA256.Create()){
@@ -92,7 +102,7 @@ namespace AstroArchive {
     }
     // Keep recognised adjacent sidecars and ancestor DWARF session metadata.
     var wanted=new Dictionary<string,HashSet<string>>(StringComparer.OrdinalIgnoreCase);
-    foreach(var file in files){string parent=RemoteCapturePaths.Parent(c,file.Path);HashSet<string> names;if(!wanted.TryGetValue(parent,out names))wanted[parent]=names=new HashSet<string>(StringComparer.OrdinalIgnoreCase);foreach(string name in AssociatedMetadata.Names(file.Name))names.Add(name);
+    foreach(var file in files){string parent=RemoteCapturePaths.Parent(c,file.Path);HashSet<string> names;if(!wanted.TryGetValue(parent,out names))wanted[parent]=names=new HashSet<string>(StringComparer.OrdinalIgnoreCase);foreach(string name in AssociatedMetadata.Names(file.Name))names.Add(name);if(c.Kind=="Origin FTP")names.Add(CelestronOrigin.SessionInfo);
      for(string folder=parent;;folder=RemoteCapturePaths.Parent(c,folder)){if(!wanted.TryGetValue(folder,out names))wanted[folder]=names=new HashSet<string>(StringComparer.OrdinalIgnoreCase);names.Add("shotsInfo.json");if(folder.TrimEnd('\\','/')==c.Folder.TrimEnd('\\','/'))break;}
     }
     long metadataBytes=0;foreach(var folder in wanted){ct.ThrowIfCancellationRequested();List<Entry> listed;
@@ -106,15 +116,40 @@ namespace AstroArchive {
    }return result;
   }
  }
- public sealed class RemoteArchiveResult {public RemoteStagingResult Downloads;public AutoUploadResult Archive;public string Report;public string Summary{get{return Archive.Summary+" "+Downloads.Downloaded+" downloaded; "+Downloads.Reused+" verified local downloads reused; "+Downloads.Errors.Count+" network files need retry.";}}}
+ // Captures that exist but are still being written are retried on the next poll.
+ public sealed class CaptureNotReadyException:IOException {public readonly int Count;public CaptureNotReadyException(int count):base("Waiting for "+count+" capture"+(count==1?"":"s")+" to finish writing."){Count=count;}}
+ public sealed class RemoteArchiveResult {public RemoteStagingResult Downloads;public AutoUploadResult Archive;public string Report;public bool LocalFolder;public string Summary{get{return Archive.Summary+(LocalFolder?(Downloads.Errors.Count>0?" "+Downloads.Errors.Count+" captures could not be read and will be retried.":""):" "+Downloads.Downloaded+" downloaded; "+Downloads.Reused+" verified local downloads reused; "+Downloads.Errors.Count+" network files need retry.");}}}
  public static class RemoteArchiveImport {
   // Hold a cache lease through archiving so another request cannot replace the
   // staged bytes/metadata being screened. Different telescope caches transfer in parallel.
   static readonly ConcurrentDictionary<string,SemaphoreSlim> caches=new ConcurrentDictionary<string,SemaphoreSlim>(StringComparer.OrdinalIgnoreCase);
   static readonly ConditionalWeakTable<Repository,SemaphoreSlim> archives=new ConditionalWeakTable<Repository,SemaphoreSlim>();
   public static bool Included(Entry file,bool ignoreFailed,bool ignoreRaster){return (!ignoreFailed||!Util.FailedFilename(file.Name))&&(!ignoreRaster||!ImportPolicy.RasterFilename(file.Name));}
+  // A watched folder is already on this PC: confirm each capture is complete and
+  // unchanged, then archive it directly with the verified connected-import pipeline.
+  static RemoteArchiveResult ArchiveInPlace(Repository repo,TelescopeProfile profile,RemoteConnection c,List<Entry> requested,List<Entry> included,int workers,CancellationToken ct,Action<ProgressInfo> progress,Action<Frame> frame,Action<ImportPlan> plan,bool ignoreFailed,bool ignoreRaster,Func<RemoteConnection,ISource> sourceFactory){
+   RemoteCapturePaths.CheckWatchedFolder(c,repo.Root);
+   var checkedFiles=new RemoteStagingResult{Root=c.Folder.TrimEnd('\\','/')};int writing=0;
+   using(var source=(sourceFactory??Downloader.Source)(c))foreach(var file in included.Where(e=>!e.Directory).GroupBy(e=>e.Path,StringComparer.OrdinalIgnoreCase).Select(g=>g.First())){
+    ct.ThrowIfCancellationRequested();
+    try{
+     var now=source.Stat(file.Path);if(!RemoteCapturePaths.SameVersion(file,now)){writing++;continue;}
+     // Capture programs can create a FITS header before the pixel data is complete.
+     if(Util.IsFits(file.Path)&&!file.Path.EndsWith(".gz",StringComparison.OrdinalIgnoreCase))try{FitsCheck.Validate(file.Path);}catch(InvalidDataException){writing++;continue;}
+     checkedFiles.Files.Add(file.Path);
+    }catch(OperationCanceledException){throw;}catch(Exception e){if(e is IOException||e is UnauthorizedAccessException)checkedFiles.Errors.Add(file.Name+": "+e.Message);else throw;}
+   }
+   // Unfinished captures are not errors: they stay unclaimed and are offered again next poll.
+   if(checkedFiles.Files.Count==0){if(writing>0)throw new CaptureNotReadyException(writing);throw new IOException("No captures could be read. "+string.Join("\n",checkedFiles.Errors));}
+   var archiveGate=archives.GetValue(repo,key=>new SemaphoreSlim(1,1));if(progress!=null)progress(new ProgressInfo{Stage="Waiting to archive",Text="New captures are ready. Waiting for the current archive batch to finish.",TotalKnown=false});archiveGate.Wait(ct);try{
+    var selected=ImportSelection.Create(checkedFiles.Root,checkedFiles.Files);var archived=UsbAutoUpload.Run(repo,profile,checkedFiles.Root,workers,ct,progress,frame,plan,ignoreFailed:ignoreFailed,ignoreRaster:ignoreRaster,robustMatching:true,selection:selected);
+    archived.Import.IgnoredFailed+=requested.Count(e=>ignoreFailed&&Util.FailedFilename(e.Name));archived.Import.IgnoredRaster+=requested.Count(e=>ignoreRaster&&ImportPolicy.RasterFilename(e.Name)&&(!ignoreFailed||!Util.FailedFilename(e.Name)));archived.Import.Warnings.AddRange(checkedFiles.Errors);repo.SaveImportReport(archived.Import);
+    return new RemoteArchiveResult{Downloads=checkedFiles,Archive=archived,Report=repo.LastReport,LocalFolder=true};
+   }finally{archiveGate.Release();}
+  }
   public static RemoteArchiveResult Run(Repository repo,TelescopeProfile profile,RemoteConnection c,IEnumerable<Entry> files,string cache,int workers,CancellationToken ct,Action<ProgressInfo> progress,Action<Frame> frame=null,Action<ImportPlan> plan=null,bool ignoreFailed=false,bool ignoreRaster=false,Func<RemoteConnection,ISource> sourceFactory=null){
    var requested=files.ToList();var included=requested.Where(f=>Included(f,ignoreFailed,ignoreRaster)).ToList();if(included.Count==0)throw new IOException("The selected files are excluded by import preferences. Adjust those preferences or choose other captures.");
+   if(RemoteCapturePaths.LocalFolder(c))return ArchiveInPlace(repo,profile,c,requested,included,workers,ct,progress,frame,plan,ignoreFailed,ignoreRaster,sourceFactory);
    var cacheGate=caches.GetOrAdd(Path.GetFullPath(RemoteCaptureStaging.CacheRoot(cache,c)),key=>new SemaphoreSlim(1,1));
    if(progress!=null)progress(new ProgressInfo{Stage="Waiting for telescope download",Text="Other selections continue; completed captures are checked for duplicates.",TotalKnown=false});cacheGate.Wait(ct);try{
    string root=Path.Combine(RemoteCaptureStaging.CacheRoot(cache,c),"captures");RemoteStagingResult downloaded;using(var source=(sourceFactory??Downloader.Source)(c))downloaded=RemoteCaptureStaging.Download(source,c,included,cache,ct,progress,frame==null?(Action<Entry,string,long>)null:(entry,status,bytes)=>frame(new Frame{SourcePath=Path.Combine(root,RemoteCapturePaths.LocalRelative(c,entry.Path)),OriginalName=entry.Name,Telescope=profile.Id,Model=profile.Model,Kind="Unknown",Status=status,Bytes=entry.Size,SourceDisposition=ImportWorkflow.Size(bytes)+" / "+ImportWorkflow.Size(entry.Size)+" from telescope"}));
@@ -138,16 +173,17 @@ namespace AstroArchive {
  }
  public static class RemoteLiveImport {
   public static void Run(Repository repo,TelescopeProfile profile,RemoteConnection c,string cache,int workers,CancellationToken ct,Action<ProgressInfo> progress,Action<Frame> frame,Action<ImportPlan> plan,bool ignoreFailed,bool ignoreRaster,Func<RemoteConnection,ISource> sourceFactory=null,Action<RemoteArchiveResult> completed=null,RemoteLiveState state=null,Action<RemoteLiveState> checkpoint=null){
-   var tracker=new RemoteLiveTracker(state);bool baselineSaved=state!=null&&state.Initialized;int imported=0,duplicates=0;sourceFactory=sourceFactory??Downloader.Source;
+   RemoteCapturePaths.CheckWatchedFolder(c,repo.Root);var tracker=new RemoteLiveTracker(state);bool baselineSaved=state!=null&&state.Initialized;int imported=0,duplicates=0;sourceFactory=sourceFactory??Downloader.Source;
    while(true){ct.ThrowIfCancellationRequested();try{
-    List<Entry> entries;using(var source=sourceFactory(c))entries=RemoteCaptureCatalog.Search(source,c,c.Folder,ct,n=>{if(progress!=null)progress(new ProgressInfo{Stage="Scanning telescope",Text=n.ToString("N0")+" capture names checked for new files",TotalKnown=false});});
+    bool local=RemoteCapturePaths.LocalFolder(c);
+    List<Entry> entries;using(var source=sourceFactory(c))entries=RemoteCaptureCatalog.Search(source,c,c.Folder,ct,n=>{if(progress!=null)progress(new ProgressInfo{Stage=local?"Scanning folder":"Scanning telescope",Text=n.ToString("N0")+" capture names checked for new files",TotalKnown=false});});
     var ready=tracker.Observe(entries.Where(e=>RemoteArchiveImport.Included(e,ignoreFailed,ignoreRaster)),c.IncludeExisting);if(!baselineSaved){if(checkpoint!=null)checkpoint(tracker.Snapshot());baselineSaved=true;}if(ready.Count>0){var result=RemoteArchiveImport.Run(repo,profile,c,ready,cache,workers,ct,progress,frame,plan,ignoreFailed,ignoreRaster,sourceFactory);imported+=result.Archive.Import.Imported;duplicates+=result.Archive.Import.Duplicates;if(completed!=null)completed(result);
      var finished=new HashSet<string>(result.Archive.Plan.Frames.Where(f=>f.Status=="Imported"||f.Status.StartsWith("Duplicate")||f.Status=="Deleted"||f.Rejected).Select(f=>f.SourcePath),StringComparer.OrdinalIgnoreCase);
      foreach(var entry in ready)if(finished.Contains(Path.Combine(result.Downloads.Root,RemoteCapturePaths.LocalRelative(c,entry.Path))))tracker.Imported(entry.Path);
      if(checkpoint!=null)checkpoint(tracker.Snapshot());
     }
     if(progress!=null)progress(new ProgressInfo{Stage="Live import",Text="Watching for completed captures · "+imported+" imported · "+duplicates+" already present. Stop retains completed imports.",TotalKnown=false});
-   }catch(OperationCanceledException){throw;}catch(Exception e){if(FileRetry.DiskFull(e))throw;if(progress!=null)progress(new ProgressInfo{Stage="Reconnecting to telescope",Text=e.Message+" · Retrying automatically; completed imports are retained.",TotalKnown=false});}
+   }catch(OperationCanceledException){throw;}catch(CaptureNotReadyException e){if(progress!=null)progress(new ProgressInfo{Stage="Live import",Text=e.Message+" · "+imported+" imported · "+duplicates+" already present.",TotalKnown=false});}catch(Exception e){if(FileRetry.DiskFull(e))throw;if(progress!=null)progress(new ProgressInfo{Stage=RemoteCapturePaths.LocalFolder(c)?"Waiting for folder":"Reconnecting to telescope",Text=e.Message+" · Retrying automatically; completed imports are retained.",TotalKnown=false});}
     if(ct.WaitHandle.WaitOne(c.PollSeconds*1000))ct.ThrowIfCancellationRequested();
    }
   }

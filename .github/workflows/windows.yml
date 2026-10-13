@@ -6,6 +6,11 @@ on:
     tags: ['v*']
   pull_request:
   workflow_dispatch:
+    inputs:
+      prerelease:
+        description: 'Publish this branch as a prerelease without changing the stable release'
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -36,12 +41,38 @@ jobs:
         run: |
           $publishRef = $env:GITHUB_REF -eq 'refs/heads/main' -or $env:GITHUB_REF.StartsWith('refs/tags/v')
           $enabled = $env:GITHUB_EVENT_NAME -ne 'pull_request' -and $publishRef -and $env:SIGNING_ENABLED -eq 'true'
+          $release = Get-Content 'Installer/release.json' -Raw | ConvertFrom-Json
+          $requiresSigning = $null -ne $release.PSObject.Properties['require_signing'] -and $release.require_signing -eq $true
+          if ($env:GITHUB_EVENT_NAME -ne 'pull_request' -and $requiresSigning -and -not $enabled) {
+            throw 'This package explicitly requires trusted publisher signing. Configure signing in docs/RELEASING.md, or set require_signing to false if an unsigned release is intended.'
+          }
           "enabled=$($enabled.ToString().ToLowerInvariant())" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
       - name: Test application, installer and updater; prepare Windows payload
         shell: powershell
         run: |
           try { .\scripts\build-release.ps1 -Stage Prepare *>&1 | Tee-Object -FilePath windows-build.log }
           catch { $_ | Out-String | Add-Content windows-build.log; throw }
+      - name: Verify target information in every language and planetary sky rendering
+        shell: powershell
+        run: |
+          foreach ($language in @('en','de','es','fr','it','ja','zh-Hans')) {
+            $output = Join-Path $pwd ('release-artifacts\target-info-ui\' + $language)
+            $process = Start-Process '.\Application_Source\dist\AstroArchive.exe' -ArgumentList @('--ui-test', $output, '--info-only', '--no-updates', '--language', $language) -PassThru
+            if (-not $process.WaitForExit(180000)) { $process.Kill(); throw "Target info UI check timed out ($language)." }
+            if ($process.ExitCode -ne 0) {
+              if (Test-Path (Join-Path $output 'ui-smoke-error.txt')) { Get-Content (Join-Path $output 'ui-smoke-error.txt') }
+              throw "Target info UI check failed ($language)."
+            }
+            Get-Content (Join-Path $output 'target-info-smoke.txt')
+          }
+          $output = Join-Path $pwd 'release-artifacts\planetary-sky-ui'
+          $process = Start-Process '.\Application_Source\dist\AstroArchive.exe' -ArgumentList @('--ui-test', $output, '--sky-only', '--no-updates') -PassThru
+          if (-not $process.WaitForExit(120000)) { $process.Kill(); throw 'Planetary sky UI check timed out.' }
+          if ($process.ExitCode -ne 0) {
+            if (Test-Path (Join-Path $output 'ui-smoke-error.txt')) { Get-Content (Join-Path $output 'ui-smoke-error.txt') }
+            throw 'Planetary sky UI check failed.'
+          }
+          Get-Content (Join-Path $output 'planetary-sky-smoke.txt')
       - name: Authenticate signing identity with OIDC
         if: steps.signing.outputs.enabled == 'true'
         uses: azure/login@a641126d1b8aa4d1fa005f4f92df94a3a4c4c906 # v3
@@ -123,7 +154,7 @@ jobs:
 
   release:
     needs: build
-    if: github.event_name != 'pull_request' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v'))
+    if: github.event_name != 'pull_request' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v') || inputs.prerelease == true)
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:
@@ -140,6 +171,7 @@ jobs:
           GH_REPO: ${{ github.repository }}
           SIGNING_PUBLISHER: ${{ vars.ASTROARCHIVE_SIGNING_PUBLISHER }}
           REQUIRE_SIGNED: ${{ needs.build.outputs.signing_enabled }}
+          PRERELEASE: ${{ inputs.prerelease == true }}
         shell: bash
         run: |
           set -euo pipefail
@@ -178,7 +210,11 @@ jobs:
           if [[ "$REQUIRE_SIGNED" == true ]]; then
             gh release upload "$tag" release-artifacts/signatures.json --clobber
           fi
-          gh release edit "$tag" --draft=false --latest --notes-file release-artifacts/Release_Notes.txt
+          if [[ "$PRERELEASE" == true ]]; then
+            gh release edit "$tag" --draft=false --prerelease --latest=false --notes-file release-artifacts/Release_Notes.txt
+          else
+            gh release edit "$tag" --draft=false --latest --notes-file release-artifacts/Release_Notes.txt
+          fi
           if ! gh release view v1.2.0.1 >/dev/null 2>&1; then
             gh release create v1.2.0.1 releases/offline-1.2.0/*.exe releases/offline-1.2.0/*.sha256 --target "$GITHUB_SHA" --title 'AstroArchive 1.2.0 — original offline installer' --notes-file releases/offline-1.2.0/README.md --latest=false
           fi

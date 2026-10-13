@@ -1,0 +1,2129 @@
+# AstroArchive interface: Simplified Chinese. One "English<TAB>Translation" per line; \n is a line break.
+# {0} and {1} stand for inserted text; {#0} only matches a number. Missing lines show English.
+Starred	已加星标
+Expand/collapse group	展开/折叠组
+Expand or collapse session group	展开或折叠会话组
+Starred session	已加星标的会话
+Choose page	选择页面
+Repository	存储库
+Import	导入
+Dismiss	关闭
+Search captures…	搜索拍摄文件…
+Filters	筛选器
+Clear	清除
+Selected files include other targets. Click to clear the selection.	所选文件包含其他目标。单击以清除所选内容。
+Your sky, organised.	你的星空，井井有条。
+Choose a repository, then import your captures.	选择一个存储库，然后导入你的拍摄文件。
+Open repository folder.	打开存储库文件夹。
+Repository size	存储库大小
+Choose a repository from the Repository menu	从“存储库”菜单中选择一个存储库
+Preview stretch	预览拉伸
+Capture details	拍摄详细信息
+Show in File Explorer	在文件资源管理器中显示
+No capture selected	未选择拍摄文件
+Select a capture to view its details.	选择一个拍摄文件以查看其详细信息。
+SKY AT CAPTURE	拍摄时的天空
+Select a capture	选择拍摄文件
+Select a capture to preview it.	选择一个拍摄文件进行预览。
+Reset capture sky view	重置拍摄天空视图
+SAVED TELESCOPE	已保存的望远镜
+Connect over network…	通过网络连接…
+Find a telescope on your network, choose captures or import live as it shoots.	在网络上查找望远镜，选择拍摄文件，或在拍摄时实时导入。
+● Live import underway	● 正在实时导入
+Live telescope imports; view Activity	望远镜实时导入；在“活动”中查看
+View live telescope imports in Activity.	在“活动”中查看望远镜实时导入。
+Import connected telescope	导入已连接的望远镜
+Connect a telescope by USB, or browse its capture folder and save the telescope.	通过 USB 连接望远镜，或浏览其拍摄文件夹并保存该望远镜。
+SOURCE FOLDER	源文件夹
+Browse	浏览
+DEVICE ID	设备 ID
+Import preferences…	导入首选项…
+Watch folder…	监视文件夹…
+Scan folder	扫描文件夹
+Originals kept · Analysis off	保留原始文件 · 分析已关闭
+Search import results…	搜索导入结果…
+Set Unknown targets…	设置未知目标…
+Choose a source folder and scan to begin.	选择源文件夹并扫描以开始。
+DEVICE / MODEL	设备/型号
+Select a capture to see its review category and reason.	选择一个拍摄文件以查看其审阅类别和原因。
+Import 0 files	导入 0 个文件
+Add images…	添加图像…
+Import folder…	导入文件夹…
+Refresh	刷新
+Edited images	已编辑图像
+Dismiss last Edited import summary	关闭上次 Edited 导入摘要
+Search edited images…	搜索已编辑图像…
+Edit metadata…	编辑元数据…
+Image details…	图像详细信息…
+Preview image…	预览图像…
+Export to…	导出到…
+Open image folder	打开图像文件夹
+FILE TYPE	文件类型
+TOTAL EXPOSURE	总曝光时间
+PER SUB	单帧曝光
+COPY TYPE	副本类型
+FILE PATH	文件路径
+Add edited images, or send a repository stack to an editor to create a working copy.	添加已编辑图像，或将存储库中的叠加图发送到编辑器以创建工作副本。
+Select an edited image	选择已编辑图像
+Enlarge image	放大图像
+Select a capture or open an image.	选择拍摄文件或打开图像。
+Processing files	正在处理文件
+Ready	就绪
+Pause imports	暂停导入
+Cancel	取消
+Performance details	性能详细信息
+FILES/S	文件数/秒
+Ctrl / Shift to select · Right-click for file actions	Ctrl / Shift 选择 · 右键单击执行文件操作
+Settings	设置
+Guide	指南
+Columns ▾	列 ▾
+Preview	预览
+Tools ▾	工具 ▾
+Review flagged	审阅已标记项
+Screen for failures	筛查故障
+Rotation	旋转
+Identify target	识别目标
+Edit metadata	编辑元数据
+Save telescope	保存望远镜
+Rename	重命名
+Recover profiles	恢复配置文件
+Refresh USB	刷新 USB
+Check visible captures for rejection or damaged FITS data.	检查可见的拍摄文件是否被剔除或存在损坏的 FITS 数据。
+Skip flagged captures	跳过已标记的拍摄文件
+Review flagged captures	审阅已标记的拍摄文件
+Retry failed imports	重试失败的导入
+Import tools ▾	导入工具 ▾
+Report	报告
+Import options	导入选项
+TARGET ANALYSIS	目标分析
+ROTATION ANALYSIS	旋转分析
+Ignore failed	忽略失败项
+Skip filenames containing “failed”; keep originals.	跳过文件名包含“failed”的文件；保留原始文件。
+Delete originals after verified import	验证导入后删除原始文件
+Choose files, targets or sessions.	选择文件、目标或会话。
+Opening AstroArchive	正在打开 AstroArchive
+Cancel opening AstroArchive	取消打开 AstroArchive
+Your nights under the stars,\ntogether in one place.	你在星空下的每一个夜晚，\n尽汇于此。
+Rosette Nebula · Ari J. Guest	玫瑰星云 · Ari J. Guest
+Application startup progress	应用程序启动进度
+Enabled	已启用
+Accessibility	辅助功能
+Adjust text and table spacing without scaling images.	调整文本和表格间距，而不缩放图像。
+Text size	文本大小
+Comfortable table rows	宽松的表格行
+High contrast surfaces and text	高对比度界面和文本
+Clearer selections	更清晰的选择
+Reduce motion and indeterminate progress animation	减少动态效果和不确定进度动画
+Increase text size without scaling images.	增大文本大小，而不缩放图像。
+Use taller table rows.	使用更高的表格行。
+Use high-contrast colours.	使用高对比度颜色。
+Add a prominent outline to focused targets, files and sub groups.	为获得焦点的目标、文件和子帧组添加醒目轮廓。
+Disable progress animation.	禁用进度动画。
+Keyboard shortcuts	键盘快捷方式
+Alt reveals menu access keys. Arrow keys move through dropdowns; Escape closes them. Tab follows the visible controls, with clear focus outlines. The purple page selector switches pages; Ctrl+1–3 selects Repository, Edited or Import, and Ctrl+Tab cycles pages. Ctrl+F focuses search, Ctrl+I opens Import, Ctrl+E opens Export, and F1 opens help for the current page.	按 Alt 显示菜单访问键。箭头键在下拉列表中移动；Esc 键将其关闭。Tab 键按可见控件顺序移动，并显示清晰的焦点轮廓。紫色页面选择器用于切换页面；Ctrl+1–3 选择“存储库”“Edited”或“导入”，Ctrl+Tab 循环切换页面。Ctrl+F 聚焦搜索框，Ctrl+I 打开“导入”，Ctrl+E 打开“导出”，F1 打开当前页面的帮助。
+Table sorting uses ▲ for ascending and ▼ for descending. Numbers show the order of multi-column sorting. Shift-click a heading adds it to the sort.	表格排序中，▲ 表示升序，▼ 表示降序。数字表示多列排序的顺序。按住 Shift 单击标题可将其添加到排序中。
+Activity and notifications	活动和通知
+Activity and notifications (Ctrl+Shift+N)	活动和通知 (Ctrl+Shift+N)
+Close	关闭
+Activity	活动
+Clear completed	清除已完成项
+View	查看
+Loading image preview	正在加载图像预览
+Preparing…	正在准备…
+No recent activity. Long-running work and release notifications appear here.	没有最近活动。长时间运行的任务和版本发布通知将显示在此处。
+Details	详细信息
+Cloud availability	云可用性
+Waiting for cloud provider	正在等待云提供商
+Waiting for filesystem	正在等待文件系统
+A report is available below.	下方提供了一份报告。
+Canceling…	正在取消…
+Pause	暂停
+Resume	继续
+Verify completed copies and continue this import.	验证已完成的副本并继续此导入。
+Finish the conflicting operation or open this import's repository first.	请先完成冲突的操作，或打开此导入的存储库。
+Cancel import	取消导入
+Review results	审阅结果
+View release	查看版本
+Available when the current operation finishes.	当前操作完成后可用。
+View report	查看报告
+Open folder	打开文件夹
+Canceling after the current operation…	将在当前操作完成后取消…
+Completed with results to review.	已完成，有结果需要审阅。
+Ready to review	可以审阅
+Scan	扫描
+Scanning source folder	正在扫描源文件夹
+Importing files	正在导入文件
+Processing Dump folder	正在处理 Dump 文件夹
+Importing telescope files	正在导入望远镜文件
+Scanning edited images	正在扫描已编辑图像
+Importing edited images	正在导入已编辑图像
+Identifying targets	正在识别目标
+Applying target metadata	正在应用目标元数据
+Analyze	分析
+Analysing rotation	正在分析旋转
+Screening captures	正在筛查拍摄文件
+Backing up archive	正在备份存档
+Changing originals protection	正在更改原始文件保护
+Exporting files	正在导出文件
+Clearing archive	正在清除存档
+Deleting selected files	正在删除所选文件
+Renaming telescope	正在重命名望远镜
+Identify	识别
+Identifying targets from filenames	正在根据文件名识别目标
+Creating edited working copies	正在创建 Edited 工作副本
+Edit	编辑
+Saving metadata	正在保存元数据
+Analytics	统计分析
+Export all…	全部导出…
+Explore six branded charts; export PNG, JPEG, PDF, SVG or animated MP4/GIF stories.	浏览六张品牌图表；导出为 PNG、JPEG、PDF、SVG 或 MP4/GIF 动画故事。
+Deleted	已删除
+Analytics · AstroArchive	统计分析 · AstroArchive
+Archive analytics	存档统计分析
+Preparing your observatory notes…	正在准备你的观测笔记…
+Scope · Entire repository	范围 · 整个存储库
+All telescopes	所有望远镜
+Unknown telescope	未知望远镜
+Telescope	望远镜
+From (inclusive)	起始日期（含）
+To (inclusive)	结束日期（含）
+Document label	文档标签
+Include rejected light frames	包括被剔除的亮场帧
+Start acquisition date, inclusive. Undated captures are excluded when a date range is set.	采集开始日期（含）。设置日期范围后，将排除无日期的拍摄文件。
+End acquisition date, inclusive. Clear both dates to include undated captures.	采集结束日期（含）。清除两个日期即可包括无日期的拍摄文件。
+Off excludes rejected light frames and stacks from charts. Headline cards always show the whole-repository integration, including rejected and undated images. Stacks with matching light subframes are counted only once.	关闭时，图表中将排除被剔除的亮场帧和叠加图。摘要卡片始终显示整个存储库的积分时间，包括被剔除和无日期的图像。具有匹配亮场子帧的叠加图仅计算一次。
+Reset scope	重置范围
+Analytics charts	统计分析图表
+Share of light frames	亮场帧占比
+Integration through time	积分时间变化趋势
+Your most imaged objects	你最常拍摄的天体
+Physical instrument totals	各实体设备总计
+Integration by filter	按滤镜统计积分时间
+Distribution of sub lengths	子帧时长分布
+One document · six graphics	一份文档 · 六张图表
+All six charts	全部六张图表
+Preview page	预览页面
+Inspect an individual print page or the combined sheet. Exports include every page in the chosen chart.	检查单个打印页面或合并后的整页。导出内容包括所选图表的每一页。
+Branded analytics export preview	品牌统计分析导出预览
+300 dpi · Print	300 dpi · 打印
+150 dpi · Screen	150 dpi · 屏幕
+Landscape · Current	横向 · 当前
+Vertical · 9:16	竖版 · 9:16
+Portrait · 4:5	纵向 · 4:5
+Square · 1:1	方形 · 1:1
+Widescreen · 16:9	宽屏 · 16:9
+Document layout	文档布局
+Document theme	文档主题
+Export format	导出格式
+Image resolution	图像分辨率
+Landscape keeps the current document layout. Social layouts cover TikTok/Reels/Stories (9:16), Instagram feed (4:5), square posts (1:1), video (16:9) and Pinterest (2:3), in every export format.	“横向”保留当前文档布局。社交媒体布局适用于 TikTok/Reels/Stories（9:16）、Instagram 动态（4:5）、方形帖子（1:1）、视频（16:9）和 Pinterest（2:3），支持所有导出格式。
+Social exports each page at the pixel dimensions shown. Tall pages stack vertically; square and wide pages use a grid. Print and Screen use the selected dpi.	社交媒体布局按所示像素尺寸导出每一页。竖长页面垂直堆叠；方形和宽幅页面使用网格排列。“打印”和“屏幕”使用所选 dpi。
+Dark uses AstroArchive's midnight, blue and cyan palette. Choose Light for white-paper documents. Preview and all export formats use this choice.	“深色”使用 AstroArchive 的午夜色、蓝色和青色配色。选择“浅色”可生成白底文档。预览和所有导出格式均使用此选项。
+Export chart…	导出图表…
+Save the previewed chart in the chosen format. Long rankings include continuation pages.	以所选格式保存预览中的图表。较长的排行榜包含续页。
+Save all six charts in one document, using the same telescope and date scope.	使用相同的望远镜和日期范围，将全部六张图表保存在一份文档中。
+4 s · Brisk	4 s · 轻快
+6 s · Balanced	6 s · 均衡
+8 s · Relaxed	8 s · 舒缓
+Glide	滑动
+Zoom	缩放
+Dissolve	溶解
+Original pixels	原始像素
+1280 px · Longest edge	1280 px · 长边
+720 px · Longest edge	720 px · 长边
+Time per chart	每张图表时长
+Transition	过渡效果
+Video size	视频尺寸
+Play animation preview	播放动画预览
+Includes a smooth chart reveal and a readable hold. Every continuation page receives the same time.	包含平滑的图表展开动画和便于阅读的停留时间。每个续页的时长相同。
+Original pixels follows the selected layout. Smaller sizes preserve its ratio. MP4 uses H.264 at 24 fps; GIF loops at 12 fps with a shared palette.	“原始像素”遵循所选布局。较小尺寸会保持其宽高比。MP4 使用 H.264，24 fps；GIF 以 12 fps 循环播放，并使用共享调色板。
+Video export progress	视频导出进度
+Integration includes standalone stacks; stacks with matching subframes, videos and calibrations are excluded.	积分时间包括独立叠加图；不包括具有匹配子帧的叠加图、视频和校准文件。
+Analytics status	统计分析状态
+Open export folder	打开导出文件夹
+Ⅱ Pause preview	Ⅱ 暂停预览
+Stopping export…	正在停止导出…
+Finishing your export…	正在完成导出…
+Updating analytics…	正在更新统计分析…
+Enter a valid date or clear the date field.	请输入有效日期或清除日期字段。
+No light frames match this scope; standalone stack integration is included.	没有与此范围匹配的亮场帧；已包括独立叠加图的积分时间。
+No light frames match this scope. Adjust the telescope or date range.	没有与此范围匹配的亮场帧。请调整望远镜或日期范围。
+All pages	所有页面
+All six charts · Social pages	全部六张图表 · 社交媒体页面
+All six charts · Combined preview	全部六张图表 · 合并预览
+Looping GIF · 12 fps	循环 GIF · 12 fps
+Multiple pages stack vertically in one sheet.	多个页面在一张整页中垂直排列。
+Multiple pages combine into one sheet.	多个页面合并为一张整页。
+Export all analytics	导出所有统计分析
+Export analytics chart	导出统计分析图表
+Cancel export	取消导出
+Export stopped. Your previous file is preserved.	导出已停止。之前的文件已保留。
+Unstar	取消星标
+Star	加星标
+Starred files are tinted and marked with ★. Search “starred” or use Filters to find them.	已加星标的文件会着色并标有 ★。搜索“starred”或使用筛选器即可找到它们。
+Tags and note…	标签和备注…
+Tags and notes…	标签和备注…
+Tags and note	标签和备注
+Tags and notes	标签和备注
+Saved with this repository; the files themselves never change.	随此存储库保存，绝不会更改文件本身。
+Tags (separate with commas)	标签（用逗号分隔）
+Only tags shared by every selected file are shown. Others stay unless you remove them here.	仅显示所有所选文件共有的标签。其他标签将保留，除非你在此处将其删除。
+Add this tag	添加此标签
+Note	备注
+Note for every selected file	所有所选文件的备注
+These files have different notes. Leave this blank to keep each note, or type to replace them all.	这些文件的备注各不相同。留空可保留各自的备注，或输入内容以替换全部备注。
+Save	保存
+No changes to tags or notes.	标签或备注没有更改。
+★ Starred	★ 已加星标
+Tags	标签
+Notes	备注
+Initializing application	正在初始化应用程序
+Restoring your window and preparing the first view…	正在还原窗口并准备首个视图…
+Unhandled application error	未处理的应用程序错误
+Startup error	启动错误
+AstroArchive could not start.\n\n	AstroArchive 无法启动。\n\n
+Building your workspace…	正在构建你的工作区…
+Loading your preferences…	正在加载你的首选项…
+Telephoto	长焦
+Wide	广角
+Off	关闭
+Ambiguous only	仅限不明确项
+All light/stack files	所有亮场/叠加图文件
+Ambiguous mounts	支架模式不明确
+All light sessions	所有亮场会话
+Preparing browsing and capture tools…	正在准备浏览和拍摄工具…
+Choose a mirrored telescope folder	选择镜像的望远镜文件夹
+Canceled	已取消
+Canceling after the current operation...	将在当前操作完成后取消…
+Preparing telescope connections…	正在准备望远镜连接…
+Opening your archive…	正在打开你的存档…
+Preparing your targets and sessions…	正在准备你的目标和会话…
+Import performance and errors	导入性能和错误
+Choose a repository first.	请先选择存储库。
+All targets	所有目标
+Group	分组
+Choose a repository folder in Settings to begin.	请在“设置”中选择存储库文件夹以开始。
+Nights	夜数
+Night	夜晚
+Captures	拍摄文件
+Total exposure	总曝光时间
+Type	类型
+Filter	滤镜
+Gain	增益
+Temperature	温度
+Camera	相机
+Mount	支架
+Calibration	校准
+Unknown	未知
+Elapsed 00:00:00 · ETA estimating	已用时间 00:00:00 · 正在估算剩余时间
+Finalising	正在完成
+ETA ~	预计剩余 ~
+ETA estimating	正在估算剩余时间
+Imported	已导入
+Running	正在运行
+Import could not start	导入无法启动
+Could not save import recovery information. No files were copied.	无法保存导入恢复信息。未复制任何文件。
+Interrupted	已中断
+Preparing	正在准备
+Checking folders and availability	正在检查文件夹和可用性
+Canceled. Completed changes are retained.	已取消。已完成的更改已保留。
+Operation complete	操作已完成
+Completed.	已完成。
+Operation could not finish	操作无法完成
+Results could not be displayed.	无法显示结果。
+Give this physical telescope a unique ID.	为此实体望远镜指定唯一 ID。
+Telescope ID required	需要望远镜 ID
+User-selected camera	用户选择的相机
+New	新
+Scan complete. Import the ready files shown above, or screen captures for telescope failures.	扫描完成。请导入上方显示的就绪文件，或筛查拍摄文件中的望远镜故障。
+User	用户
+Saving final archive index and report	正在保存最终存档索引和报告
+Import report	导入报告
+Explicit	明确指定
+Choose a target with individual light frames. Stacks cannot establish acquisition rotation.	请选择包含单独亮场帧的目标。叠加图无法确定采集时的旋转。
+Individual subs required	需要单独的子帧
+Rotation analysis complete.	旋转分析已完成。
+Rotation analysis	旋转分析
+Restore	还原
+Duplicate in source	源中重复
+Failed	失败
+Unreadable	无法读取
+Select a light exposure or telescope stack to identify.	选择要识别的亮场曝光或望远镜叠加图。
+A plate solution locates the field. Select the intended target from nearby candidates or search the catalogue.	解析结果可确定视场位置。请从附近的候选目标中选择预期目标，或搜索星表。
+Search catalogue or enter a custom target	搜索星表或输入自定义目标
+Name	名称
+Use target	使用目标
+Delete all archive data	删除所有存档数据
+Permanently delete this archive	永久删除此存档
+Drag the slider fully right, then press Delete permanently.	将滑块完全拖到右侧，然后按“永久删除”。
+Drag fully right to confirm deletion.	完全拖到右侧以确认删除。
+Delete permanently	永久删除
+Archive cleared. Source folders and unindexed files retained.	存档已清除。源文件夹和未编入索引的文件已保留。
+Some files were retained:\n	部分文件已保留：\n
+Some	部分
+Archive reset	存档已重置
+Delete failed…	删除失败项…
+Purge non-raw files…	清除非原始格式文件…
+Deletion history…	删除历史记录…
+Fill missing metadata…	填充缺失的元数据…
+Verify repository checksums	验证存储库校验和
+Verifying repository	正在验证存储库
+Repository verification	存储库验证
+All files match their recorded checksums.	所有文件均与记录的校验和匹配。
+Index an existing repository	为现有存储库编制索引
+Index supported image files in this repository without copying or moving them?\n\nUnknown telescope identities may need metadata corrections afterwards.	要为此存储库中受支持的图像文件编制索引，而不复制或移动它们吗？\n\n之后可能需要更正未知望远镜身份的元数据。
+Index existing files	为现有文件编制索引
+Indexing report	索引报告
+Indexing repository	正在为存储库编制索引
+Export searchable catalogue CSV	导出可搜索的目录 CSV
+Catalogue CSV exported.	目录 CSV 已导出。
+Show selected file location	显示所选文件位置
+Save report	保存报告
+Importing	正在导入
+Elapsed	已用时间
+Saving index	正在保存索引
+Complete	完成
+Elapsed time and ETA appear during processing.	处理期间将显示已用时间和预计剩余时间。
+EQ (likely)	EQ（可能）
+Broadband	宽带
+Calibrated	已校准
+Stable field orientation; tested against the Alt/Az model.	视场方向稳定；已按 Alt/Az 模型检验。
+Device stack	设备叠加图
+Alt/Az (likely)	Alt/Az（可能）
+Dual band	双波段
+Uncalibrated	未校准
+Export	导出
+Preferences sections	首选项分区
+All backups	所有备份
+Last 5	最近 5 个
+Last 10	最近 10 个
+Last 30	最近 30 个
+No backup recorded on this PC yet.	此电脑上尚无备份记录。
+Backups	备份
+Create a verified copy of the whole archive, including originals, Edited files and the current database. Choose a normal folder or lossless ZIP in the backup dialog.	创建整个存档的已验证副本，包括原始文件、Edited 文件和当前数据库。可在备份对话框中选择普通文件夹或无损 ZIP。
+Back up archive…	备份存档…
+Choose a repository in General to enable backups.	请在“常规”中选择存储库以启用备份。
+Automatic backups	自动备份
+While AstroArchive is open and idle, it repeats your backup on this schedule. If the backup drive is not connected, Activity reminds you instead.	AstroArchive 处于打开且空闲状态时，会按此计划重复执行备份。如果备份驱动器未连接，“活动”会改为提醒你。
+Back up automatically	自动备份
+Backup folder	备份文件夹
+Choose backup folder…	选择备份文件夹…
+Choose a backup destination outside the archive	选择存档以外的备份目标位置
+Compress as ZIP (lossless)	压缩为 ZIP（无损）
+The first backup in a folder is complete. Later folder backups share unchanged files with the previous backup, so each stays complete on its own; later ZIPs build on the earlier ZIPs in the same folder.	文件夹中的首个备份为完整备份。之后的文件夹备份会与上一次备份共享未更改的文件，因此每个备份本身都保持完整；之后的 ZIP 备份基于同一文件夹中较早的 ZIP 构建。
+Keep	保留
+Older backups of this archive are removed after each backup, except earlier ZIPs that newer ones still need. Other files in the folder are never touched.	每次备份后，将删除此存档的较旧备份，但较新备份仍需要的早期 ZIP 除外。文件夹中的其他文件绝不会受到影响。
+Restore a backup	还原备份
+Restore a backup…	还原备份…
+Originals protection	原始文件保护
+Open an archive to protect originals or create a backup.	打开存档以保护原始文件或创建备份。
+Optional Windows protection helps prevent deleting or renaming archived originals in File Explorer. Edited files, Dump and archive metadata remain writable. Protection is separate from a backup.	可选的 Windows 保护有助于防止在文件资源管理器中删除或重命名已归档的原始文件。Edited 文件、Dump 和存档元数据仍可写入。保护与备份相互独立。
+Turn off protection…	关闭保护…
+Protect originals…	保护原始文件…
+Choose a backup folder for automatic backups.	为自动备份选择备份文件夹。
+Protect archived originals	保护已归档的原始文件
+Turn off archive protection	关闭存档保护
+Remove deletion protection	移除删除保护
+Windows will block deletion and renaming of archived originals in File Explorer for this account. AstroArchive can still apply metadata changes and confirmed deletions. Reading, previewing and copying images continue normally.	Windows 将阻止此帐户在文件资源管理器中删除和重命名已归档的原始文件。AstroArchive 仍可应用元数据更改和已确认的删除操作。读取、预览和复制图像不受影响。
+Archived originals will use their previous deletion permissions. Existing images and backups are kept.	已归档的原始文件将恢复使用之前的删除权限。现有图像和备份将保留。
+This requires a local NTFS drive. Applying protection to a large archive can take a while; there is no background scan once it is applied. The Windows owner can deliberately change permissions, so keep a backup too.	这需要本地 NTFS 驱动器。对大型存档应用保护可能需要一段时间；应用后不会进行后台扫描。Windows 所有者可以有意更改权限，因此也请保留备份。
+Removing protection may take a while. Once started, it finishes restoring permissions even if Cancel is pressed.	移除保护可能需要一段时间。一旦开始，即使按下“取消”，也会完成权限还原。
+Protect originals	保护原始文件
+Turn off protection	关闭保护
+Protection change canceled. Previous permissions restored.	保护更改已取消。已还原之前的权限。
+Protecting originals	正在保护原始文件
+Removing protection	正在移除保护
+Archived originals are protected.	已归档的原始文件已受保护。
+Archive protection is off.	存档保护已关闭。
+Backup canceled. Existing backups are kept.	备份已取消。现有备份已保留。
+Automatic backup	自动备份
+Restore this backup	还原此备份
+Back up archive	备份存档
+Create a recoverable backup	创建可恢复的备份
+Copies originals, edited files and the current archive database. Choose a folder outside the archive; a separate drive is best.	复制原始文件、已编辑文件和当前存档数据库。请选择存档以外的文件夹；最好使用单独的驱动器。
+Large backups can take a long time to create and verify. You can cancel safely.	大型备份的创建和验证可能需要很长时间。你可以安全地取消。
+Save backup in	备份保存位置
+Without compression, the backup is a normal folder. ZIP compression preserves every image byte, including resolution and metadata.	不压缩时，备份为普通文件夹。ZIP 压缩会保留图像的每个字节，包括分辨率和元数据。
+The first backup in a folder is complete. Later backups copy only what changed since the previous backup there, yet each folder backup stays complete on its own.	文件夹中的首个备份为完整备份。之后的备份仅复制自该位置上次备份以来更改的内容，但每个文件夹备份本身仍保持完整。
+Create backup	创建备份
+Choose a backup folder first.	请先选择备份文件夹。
+Choose a backup folder	选择备份文件夹
+Keep this backup up to date	使此备份保持最新
+Back up automatically?	要自动备份吗？
+How often	频率
+Daily	每天
+Weekly	每周
+Monthly	每月
+Change this any time in Settings > Backups.	可随时在“设置 > 备份”中更改此选项。
+Turn on	开启
+Choose a backup to restore	选择要还原的备份
+This backup lists no files.	此备份未列出任何文件。
+Choose folder…	选择文件夹…
+Choose where to create the restored archive	选择创建还原存档的位置
+New folder name	新文件夹名称
+Choose an existing folder to restore into.	选择要还原到的现有文件夹。
+Restore outside the backup folder.	请还原到备份文件夹以外的位置。
+Restore canceled. The backup is unchanged and the incomplete restore was removed.	还原已取消。备份未更改，未完成的还原内容已删除。
+Restoring backup	正在还原备份
+Backup restored	备份已还原
+Restored archive could not open	无法打开还原的存档
+Choose a backup folder in Settings > Backups.	请在“设置 > 备份”中选择备份文件夹。
+Backup due	备份到期
+Backup settings	备份设置
+Kind	种类
+CAPABILITIES	功能
+CAMERA MODEL	相机型号
+CAMERA ID	相机 ID
+TELESCOPE MODEL	望远镜型号
+OFFSET	偏移
+READOUT MODE	读出模式
+OPTICAL CONFIGURATION	光学配置
+UTC CAPTURE TIME	UTC 拍摄时间
+TIMEZONE	时区
+FILE	文件
+OBJECT	天体
+STATUS	状态
+REVIEW	审阅
+TELESCOPE	望远镜
+CAMERA	相机
+TYPE	类型
+DATE	日期
+RECORDED CAPTURE TIME	记录的拍摄时间
+EXPOSURE	曝光时间
+GAIN	增益
+TEMPERATURE	温度
+FILTER	滤镜
+CALIBRATION	校准
+DIMENSIONS	尺寸
+BIN X	像素合并 X
+BIN Y	像素合并 Y
+BAYER PATTERN	拜耳阵列
+MOUNT	支架
+SESSION	会话
+SIZE (BYTES)	大小（字节）
+SCREENING ISSUE	筛查问题
+SOURCE ACTION	源文件处理
+REPOSITORY PATH	存储库路径
+NOTES	备注
+STARRED	已加星标
+TAGS	标签
+NOTE	备注
+Choose columns; drag headers to reorder.	选择列；拖动标题可调整顺序。
+Drag headings to rearrange	拖动标题以重新排列
+Move heading left	将标题左移
+Move heading right	将标题右移
+More headings	更多标题
+Restore default columns	还原默认列
+Clear filters	清除筛选器
+Done	完成
+Advanced capture settings	高级拍摄设置
+Read missing dates from FITS	从 FITS 读取缺失的日期
+Fields shared by every capture are hidden. Search and other filters stay in effect.	已隐藏所有拍摄文件共有的字段。搜索和其他筛选器仍然有效。
+Image size	图像尺寸
+All	全部
+Session	会话
+Review	审阅
+No issues flagged	未标记任何问题
+May include unscreened captures.	可能包括未筛查的拍摄文件。
+Target	目标
+Selected session unavailable	所选会话不可用
+No matching captures. Clear this filter to show others.	没有匹配的拍摄文件。清除此筛选器以显示其他文件。
+Label	名称
+Description	说明
+Exposure (seconds)	曝光时间（秒）
+Any value	任意值
+Known values only	仅已知值
+Between limits	介于上下限之间
+Unknown only	仅未知值
+Include unknown values	包括未知值
+No known values	无已知值
+Choose image / frame	选择图像/帧
+Preview unavailable	预览不可用
+File metadata	文件元数据
+Frame / slice number (1-based)	帧/切片编号（从 1 开始）
+Load preview	加载预览
+Reading image…	正在读取图像…
+View metadata and evidence	查看元数据和依据
+Metadata and evidence	元数据和依据
+Use previewed image for analysis and export	将预览的图像用于分析和导出
+Load an image first.	请先加载图像。
+Image selection saved.	图像选择已保存。
+Only accepted candidates are supplied automatically. Missing settings require metadata review.	仅自动提供已接受的候选项。缺失的设置需要审阅元数据。
+Dark flats are evaluated against raw flats after matching those flats to lights.	将平场与亮场匹配后，会根据原始平场评估暗平场。
+No calibration files for this physical device and camera channel.	此实体设备和相机通道没有校准文件。
+Review shows up to 20 input groups and 200 candidates per group. Export evaluates every candidate.	审阅最多显示 20 个输入组，每组最多 200 个候选项。导出时会评估所有候选项。
+Legacy record; re-detect metadata to populate evidence.	旧版记录；请重新检测元数据以填充依据。
+Review detected metadata	审阅检测到的元数据
+Recorded user overrides stay in place. Unchecked fields keep indexed values. Older, unattributed settings are kept by default and flagged for review. Image geometry follows the decoded container.	已记录的用户覆盖值将保持不变。未选中的字段保留已编入索引的值。较早的、来源不明的设置默认保留，并标记为待审阅。图像几何信息以解码后的容器为准。
+Apply	应用
+File	文件
+Field	字段
+Before	之前
+After	之后
+Apply reviewed metadata	应用已审阅的元数据
+Dump folder import	Dump 文件夹导入
+Dump folder: files retained for review	Dump 文件夹：保留待审阅的文件
+Enter positive exposure seconds using a decimal point.	请使用小数点输入正的曝光秒数。
+Enter a positive whole-number sub count.	请输入正整数的子帧数。
+Keep existing	保留现有值
+Target (object ID or common name)	目标（天体编号或常用名称）
+Filters / channels	滤镜/通道
+Image class	图像类别
+Edited image	已编辑图像
+Starless	无星
+Stars only	仅星点
+Meteor	流星
+Unknown (conflicting labels)	未知（标签冲突）
+Total exposure seconds (optional)	总曝光秒数（可选）
+Sub count (optional)	子帧数（可选）
+Exposure per sub in seconds (optional)	单个子帧曝光秒数（可选）
+RA (as recorded, optional)	赤经（按记录，可选）
+Dec (as recorded, optional)	赤纬（按记录，可选）
+Save metadata	保存元数据
+Edited metadata saved.	Edited 元数据已保存。
+Export files…	导出文件…
+Delete files…	删除文件…
+Delete selected Edited copies; keep source originals and archived captures.	删除所选的 Edited 副本；保留源原始文件和已归档的拍摄文件。
+Export files	导出文件
+Delete selected Edited files	删除所选的 Edited 文件
+This permanently removes the selected Edited copies. Source copies, archived originals, other Edited files and project source metadata stay. Cloud-synced deletions propagate to the cloud.	此操作将永久删除所选的 Edited 副本。源副本、已归档的原始文件、其他 Edited 文件和项目源元数据将保留。云同步位置中的删除将同步到云端。
+Delete selected files	删除所选文件
+Edited file deletion report	Edited 文件删除报告
+Deleting Edited files	正在删除 Edited 文件
+Select an edited image.	请选择已编辑图像。
+Loading image…	正在加载图像…
+Auto per channel	按通道自动
+Linear	线性
+Preview unavailable\n\n	预览不可用\n\n
+All images	所有图像
+Add images to Edited.	将图像添加到 Edited。
+Open image folder.	打开图像文件夹。
+Clear search, image-class filter and target selection.	清除搜索、图像类别筛选器和目标选择。
+Add edited images	添加已编辑图像
+Edited image import	已编辑图像导入
+Import edited images	导入已编辑图像
+Import files from a folder	从文件夹导入文件
+Choose a folder of existing edited images	选择包含现有已编辑图像的文件夹
+Include subfolders	包括子文件夹
+Scan first, then review images before copying. Repository/database folders and files already archived are skipped. Source files are retained.	先扫描，然后在复制前审阅图像。将跳过存储库/数据库文件夹和已归档的文件。源文件将保留。
+Choose an existing source folder.	请选择现有的源文件夹。
+Edited images ready to review	已编辑图像可供审阅
+Import existing edited images	导入现有的已编辑图像
+Import selected images	导入所选图像
+Select readable images to add.	选择要添加的可读图像。
+Exclude duplicates and images with a reported problem before importing.	导入前请排除重复项和报告有问题的图像。
+Results kept for later review.	结果已保留，供稍后审阅。
+Edited folder import	Edited 文件夹导入
+Include	包括
+Filename	文件名
+Status	状态
+Object	天体
+Edited duplicate checks	Edited 重复项检查
+Create Edited working copies	创建 Edited 工作副本
+Create working copies for your editor	为编辑器创建工作副本
+Copy and verify the selected archived images into Edited, then open their folder. Load these copies in your preferred editor and save outputs alongside them.	将所选的已归档图像复制到 Edited 并进行验证，然后打开其所在文件夹。在你常用的编辑器中加载这些副本，并将输出保存在副本旁边。
+Create working copies	创建工作副本
+Edited working copies	Edited 工作副本
+Other editor	其他编辑器
+Edited working copies are ready.	Edited 工作副本已就绪。
+Operation diagnostics	操作诊断
+Last operation	上次操作
+Report a problem	报告问题
+Review the diagnostic report before opening GitHub. No images, repository files, or repository paths are included; exception text may still contain sensitive values. Opening the draft sends the displayed details to GitHub. You can edit the issue before submitting it, or cancel now.	打开 GitHub 前，请先查看诊断报告。报告不包含任何图像、存储库文件或存储库路径，但异常文本仍可能包含敏感值。打开草稿会将显示的详细信息发送到 GitHub。你可以在提交前编辑该问题，也可以现在取消。
+Open GitHub draft	打开 GitHub 草稿
+Open a prefilled GitHub issue draft with the displayed diagnostic report	打开包含所示诊断报告的预填 GitHub 问题草稿
+Could not open GitHub. The report has not been sent.\n\n	无法打开 GitHub。报告尚未发送。\n\n
+Application location	应用程序位置
+Opens the selected Edited images in your chosen app. Save results in their image folders.	在你选择的应用中打开所选的 Edited 图像。请将结果保存在其图像文件夹中。
+Creates verified working copies in Edited, then opens them in your chosen app. Save processed results alongside the copies.	在 Edited 中创建已验证的工作副本，然后在你选择的应用中打开它们。请将处理结果保存在副本旁边。
+Choose an application…	选择应用程序…
+Choose a compatible destination. Unavailable destinations below explain their restrictions.	请选择兼容的目标位置。下方不可用的目标位置会说明其限制。
+Unavailable destinations (	不可用的目标位置 (
+Use this as my default for subframe folders	将此设为子帧文件夹的默认选项
+Use this as my default for these file types	将此设为这些文件类型的默认选项
+Include matching calibration files	包括匹配的校准文件
+More options	更多选项
+Include calibrations when the subframe calibration state is unknown	子帧校准状态未知时包括校准文件
+Export preferences…	导出首选项…
+Choose an application.	请选择应用程序。
+Subframe folders	子帧文件夹
+Files	文件
+DSS capture groups are ready	DSS 拍摄组已就绪
+Processor handoff	移交给处理软件
+Using the exported inputs	使用导出的输入文件
+Each group has its own DSS file list and matching calibrations. Open a group to register and stack it separately. All lists are kept in the exported folder.	每个组都有自己的 DSS 文件列表和匹配的校准文件。打开一个组即可单独对其进行配准和叠加。所有列表均保存在导出的文件夹中。
+Capture group	拍摄组
+Open selected group in DSS	在 DSS 中打开所选组
+DSS unavailable	DSS 不可用
+Open exported folder	打开导出的文件夹
+Default applications	默认应用程序
+Choose an app by file type. Mixed selections ask unless they share a compatible default.	按文件类型选择应用。混合选择时会询问，除非它们有共同的兼容默认应用。
+Ask each time	每次询问
+Application locations	应用程序位置
+Leave the path empty for automatic detection. Export asks you to locate an app if it cannot be found.	将路径留空可自动检测。如果找不到应用，导出时会要求你指定其位置。
+Application	应用程序
+Executable path (optional)	可执行文件路径（可选）
+Automatic detection.	自动检测。
+Configured location.	已配置的位置。
+Unavailable. Export will ask you to locate the app.	不可用。导出时将要求你指定应用的位置。
+Browse…	浏览…
+Find automatically	自动查找
+Not found. Browse to the application's GUI executable.	未找到。请浏览到该应用程序的 GUI 可执行文件。
+Use automatic detection	使用自动检测
+Automatic detection will be used when exporting.	导出时将使用自动检测。
+Preview…	预览…
+Create Edited copies…	创建 Edited 副本…
+Open file location	打开文件所在的位置
+More actions	更多操作
+Copy file paths	复制文件路径
+Identify target…	识别目标…
+Review detected metadata…	审阅检测到的元数据…
+Choose HDU / page / frame…	选择 HDU/页面/帧…
+Exporting catalogue CSV	正在导出目录 CSV
+This file is missing from the repository.	存储库中缺少此文件。
+File unavailable	文件不可用
+Destination folder	目标文件夹
+Choose an export destination	选择导出目标位置
+Add Metadata	添加元数据
+Include a manifest, companion metadata and workflow notes.	包括清单、配套元数据和工作流说明。
+Open with… after export	导出后打开方式…
+None	无
+Open one exported FITS stack in Siril. Multiple stacks and subs-only exports cannot open a single image.	在 Siril 中打开一个导出的 FITS 叠加图。导出多个叠加图或仅导出子帧时无法打开单个图像。
+Siril did not start.	Siril 未启动。
+Siril handoff	移交给 Siril
+Export stacking folder	导出叠加文件夹
+Multiple targets	多个目标
+Inputs	输入
+Subs	子帧
+Stacks	叠加图
+Both	两者
+Stacks and subs are exported separately. Do not combine stacks with their constituent subs or overlapping live-stack snapshots.	叠加图和子帧将分别导出。请勿将叠加图与其组成子帧或重叠的实时叠加快照合并。
+Include matching calibrations	包括匹配的校准文件
+Convert supported images to FITS	将受支持的图像转换为 FITS
+Creates derived FITS from linear, decodable inputs. Archived originals stay unchanged.	从可解码的线性输入创建派生 FITS。已归档的原始文件保持不变。
+Confirm unknown-state subs are uncalibrated	确认状态未知的子帧未经校准
+Enable only if these subs have not already been calibrated.	仅当这些子帧尚未校准时才启用。
+Separate sessions into folders	按会话分文件夹
+Include rejected/reference files	包括剔除/参考文件
+Review calibration matches…	审阅校准匹配…
+Calibration matching	校准匹配
+Stacks receive no additional calibration.	叠加图不会额外校准。
+No calibration files available.	没有可用的校准文件。
+Calibration files omitted.	已省略校准文件。
+No matching calibration files. Review calibration matches for the reason.	没有匹配的校准文件。请审阅校准匹配以了解原因。
+This input choice has no eligible files.	此输入选项没有符合条件的文件。
+Stacking folder is ready. Files copied and verified.	叠加文件夹已就绪。文件已复制并验证。
+Files exported and verified.	文件已导出并验证。
+Export complete	导出完成
+Stacking folder ready	叠加文件夹已就绪
+Files exported	文件已导出
+Copied and verified.	已复制并验证。
+Folder unavailable	文件夹不可用
+No repository filenames contain 'failed'.	存储库中没有文件名包含 'failed' 的文件。
+No PNG/JPG/JPEG/MP4 files are indexed in this repository.	此存储库中没有已编入索引的 PNG/JPG/JPEG/MP4 文件。
+Purge non-raw files	清除非原始格式文件
+Delete failed	删除失败项
+Searches the entire active repository for filenames containing 'failed', regardless of case. Current filters and telescope selection do not limit this action.	在整个当前存储库中搜索文件名包含 'failed' 的文件（不区分大小写）。当前筛选器和望远镜选择不会限制此操作。
+Finds indexed PNG/JPG/JPEG/MP4 files in the entire active repository, regardless of case or current filters. Edited images, FITS, TIFF, XISF, SER and camera RAW files are excluded from this purge.	在整个当前存储库中查找已编入索引的 PNG/JPG/JPEG/MP4 文件，不区分大小写，也不受当前筛选器限制。Edited 图像、FITS、TIFF、XISF、SER 和相机 RAW 文件不在此次清除范围内。
+This permanently removes the selected repository copies. Deletion history is retained so future telescope imports skip the same captures. Source copies, other archive files and shared session metadata stay. Cloud-synced deletions propagate to the cloud.	此操作将永久删除所选的存储库副本。删除历史记录将保留，以便今后从望远镜导入时跳过相同的拍摄文件。源副本、其他存档文件和共享的会话元数据将保留。云同步位置中的删除将同步到云端。
+Delete failed files	删除失败的文件
+File deletion report	文件删除报告
+Import option saved. Scan the source folder again to apply it.	导入选项已保存。请重新扫描源文件夹以应用该选项。
+Search import results...	搜索导入结果…
+Select a capture to see screening or import details.	选择一个拍摄文件以查看筛查或导入详细信息。
+Row selection does not limit imports. Search and filters choose the ready files.	选择行不会限制导入。就绪文件由搜索和筛选器决定。
+Edit selected metadata…	编辑所选元数据…
+Identify selected targets…	识别所选目标…
+Scan report…	扫描报告…
+Scan report	扫描报告
+Scan a folder first.	请先扫描文件夹。
+All supported files were read successfully.	已成功读取所有受支持的文件。
+Help article	帮助文章
+Search the guide…	搜索指南…
+Help for this page (F1)	此页面的帮助 (F1)
+Report a problem…	报告问题…
+User-submitted problem	用户提交的问题
+Getting started	入门
+START HERE	从这里开始
+USB and saved telescopes	USB 和已保存的望远镜
+USB TRANSFER AND SAVED TELESCOPES	USB 传输和已保存的望远镜
+Image preview and tables	图像预览和表格
+IMAGE PREVIEW AND TABLES	图像预览和表格
+Stacking projects	叠加项目
+STACKING PROJECTS AND SESSIONS	叠加项目和会话
+Troubleshooting	疑难解答
+KEYBOARD SHORTCUTS	键盘快捷方式
+Frame types and glossary	帧类型和术语表
+FRAME TYPES AND GLOSSARY	帧类型和术语表
+EDITED IMAGES AND WORKING COPIES	已编辑图像和工作副本
+IMPORT WORKFLOW	导入工作流
+LIBRARY WORKFLOW	图库工作流
+No topics match	没有匹配的主题
+AstroArchive Guide / Help	AstroArchive 指南/帮助
+Search help	搜索帮助
+Search the guide (Ctrl+F).	搜索指南 (Ctrl+F)。
+Show all topics.	显示所有主题。
+Choose a topic.	选择一个主题。
+Copy selected text with Ctrl+C.	按 Ctrl+C 复制所选文本。
+Save guide…	保存指南…
+Save the complete guide.	保存完整指南。
+Close help (Esc).	关闭帮助 (Esc)。
+Title	标题
+No matching topics	没有匹配的主题
+No topics match your search. Try fewer words, or **Clear** to browse the guide.	没有与你的搜索匹配的主题。请尝试减少字词，或单击**清除**以浏览指南。
+Guide could not be saved	无法保存指南
+Loading preview…	正在加载预览…
+Confirm source removal	确认删除源文件
+Delete after import is ON	“导入后删除”已开启
+Eligible source originals will be deleted after their archive copies are saved and verified. The archive copies will remain.	符合条件的源原始文件将在其存档副本保存并验证后删除。存档副本将保留。
+Calibration originals always stay on the source/telescope. Changed or failed files also stay.	校准原始文件始终保留在源/望远镜上。已更改或失败的文件也会保留。
+Dump processing also removes verified duplicate science files from Dump.	Dump 处理还会从 Dump 中删除已验证的重复科学文件。
+Existing duplicates are kept on the source.	现有重复项将保留在源上。
+Deletion in a cloud-synced source folder propagates to the cloud and other devices.	在云同步源文件夹中删除的内容将同步到云端和其他设备。
+Import and delete eligible originals	导入并删除符合条件的原始文件
+Target for Unknown light/stack captures	未知亮场/叠加图拍摄文件的目标
+Enter an object ID or name. Blank keeps Unknown.	输入天体编号或名称。留空则保持“未知”。
+Assign Unknown targets	指定未知目标
+Apply to selected Unknown lights and stacks. Known targets and calibrations keep their labels.	应用于所选的未知亮场和叠加图。已知目标和校准文件将保留其标签。
+Apply to the visible Unknown lights and stacks. Filter or select files first when they contain different targets.	应用于可见的未知亮场和叠加图。如果文件包含不同目标，请先筛选或选择文件。
+Assign target	指定目标
+Robust file matching (slower)	可靠文件匹配（较慢）
+Check file/metadata changes and missing copies; off skips known names/DWARF sessions.	检查文件/元数据更改和缺失的副本；关闭时跳过已知名称/DWARF 会话。
+Import recovery needs attention	导入恢复需要注意
+Some import records could not be read. The records were retained.	无法读取部分导入记录。这些记录已保留。
+Import recovery could not load	无法加载导入恢复
+Open Activity for recovery details.	打开“活动”以查看恢复详细信息。
+Remote	远程
+Paused	已暂停
+Canceled. Completed archive copies and original source files are retained.	已取消。已完成的存档副本和原始源文件已保留。
+Source	源
+Pausing	正在暂停
+Pausing safely; verified copies are retained…	正在安全暂停；已验证的副本将保留…
+Pausing safely; verified downloads are retained…	正在安全暂停；已验证的下载将保留…
+Configure the saved import's plate solver in Settings before resuming.	继续之前，请在“设置”中配置已保存导入的解析器。
+Session summaries	会话摘要
+Show all files	显示所有文件
+By target	按目标
+By target and session	按目标和会话
+Video	视频
+Videos	视频
+Subframes	子帧
+Other files	其他文件
+2 seconds	2 秒
+5 seconds	5 秒
+10 seconds	10 秒
+30 seconds	30 秒
+1 minute	1 分钟
+Choose the folder your capture software saves to.	选择拍摄软件的保存文件夹。
+Choose a complete folder path, such as D:\\Astrophotography\\Captures.	请选择完整的文件夹路径，例如 D:\\Astrophotography\\Captures。
+This folder path is not valid.	此文件夹路径无效。
+This folder does not exist or is not available.	此文件夹不存在或不可用。
+Choose a dedicated capture folder rather than a whole drive.	请选择专用的拍摄文件夹，而不是整个驱动器。
+Choose a capture folder outside the repository. AstroArchive cannot watch its own archive or a folder that contains it.	请选择存储库以外的拍摄文件夹。AstroArchive 无法监视其自身的存档或包含该存档的文件夹。
+Watch a capture folder	监视拍摄文件夹
+AstroArchive checks this folder and its subfolders, and imports each capture once it has stopped changing. Keep N.I.N.A., SharpCap, ASIAIR, Ekos or your other capture software saving here. Originals stay where they are.	AstroArchive 会检查此文件夹及其子文件夹，并在每个拍摄文件停止变化后将其导入。请让 N.I.N.A.、SharpCap、ASIAIR、Ekos 或其他拍摄软件继续保存到此处。原始文件保留在原位置。
+Capture folder	拍摄文件夹
+Capture folder to watch	要监视的拍摄文件夹
+Choose the folder your capture software saves to	选择拍摄软件的保存文件夹
+Save imports as (physical telescope ID)	导入保存为（实体望远镜 ID）
+Physical telescope ID for watched captures	所监视拍摄文件的实体望远镜 ID
+Also import captures already in this folder	同时导入此文件夹中已有的拍摄文件
+Off: only captures saved after watching starts are imported. Scan folder imports earlier captures.	关闭：仅导入开始监视后保存的拍摄文件。“扫描文件夹”可导入较早的拍摄文件。
+Skip “failed” files	跳过“failed”文件
+Skip PNG/JPG/MP4	跳过 PNG/JPG/MP4
+Saved import preference. Also applies to folder, USB, network and Dump imports.	已保存的导入首选项。也适用于文件夹、USB、网络和 Dump 导入。
+Keep AstroArchive open and this PC awake while capturing. Stop watching from Activity at any time; completed imports are kept.	拍摄期间，请保持 AstroArchive 打开并使此电脑保持唤醒状态。可随时在“活动”中停止监视；已完成的导入将保留。
+AstroArchive checks this telescope folder and its subfolders, and imports each new capture once the telescope has finished saving it. Capture continues in the telescope app; originals stay on the telescope.	AstroArchive 会检查此望远镜文件夹及其子文件夹，并在望远镜保存完每个新拍摄文件后将其导入。拍摄在望远镜应用中继续进行；原始文件保留在望远镜上。
+Telescope folder	望远镜文件夹
+Check for new captures every	检查新拍摄文件的间隔
+Off: only captures saved after live import starts are imported. Select earlier captures and choose Import selected.	关闭：仅导入开始实时导入后保存的拍摄文件。如需较早的拍摄文件，请选中它们并选择“导入所选项”。
+Keep AstroArchive open and this PC awake while capturing. Stop live import from Activity at any time; completed imports are kept.	拍摄期间，请保持 AstroArchive 打开并使此电脑保持唤醒状态。可随时在“活动”中停止实时导入；已完成的导入将保留。
+Start watching	开始监视
+Local folder	本地文件夹
+Folder watch could not start	无法开始监视文件夹
+Windows language	Windows 语言
+Language	语言
+Applies after AstroArchive restarts. The offline guide stays in English.	AstroArchive 重启后生效。离线指南仍为英文。
+Observing town / city	观测城镇/城市
+Select your nearest town or city. Its centre is used for rotation analysis; without a selection, capture location metadata is used when available.	选择离你最近的城镇或城市。旋转分析将使用其中心位置；如果未选择，则在可用时使用拍摄位置元数据。
+Town / city	城镇/城市
+Saved location used for sky views and mount analysis.	用于天空视图和支架分析的已保存位置。
+Choose town / city…	选择城镇/城市…
+Clear observing location	清除观测位置
+Choose observing town / city	选择观测城镇/城市
+Search by name, region or country, then select the matching place. The list is available offline.	按名称、地区或国家/地区搜索，然后选择匹配的地点。此列表可离线使用。
+Find a town or city	查找城镇或城市
+Enter a city and country or region.	输入城市和国家或地区。
+Double-click a place to use it.	双击某个地点以使用它。
+Type at least two characters to find a place.	至少键入两个字符以查找地点。
+Place names and coordinates: GeoNames · CC BY 4.0. Covers towns/cities with at least 500 inhabitants and administrative seats worldwide.	地名和坐标：GeoNames · CC BY 4.0。涵盖全球人口至少 500 人的城镇/城市以及行政中心。
+Use town / city	使用城镇/城市
+Select a town or city from the results first.	请先从结果中选择城镇或城市。
+Searching…	正在搜索…
+No matches. Try a nearby town/city or a different spelling.	没有匹配项。请尝试附近的城镇/城市或其他拼写。
+Showing the first 80 matches. Add a region or country to narrow the search.	正在显示前 80 个匹配项。添加地区或国家/地区可缩小搜索范围。
+Fill missing metadata	填充缺失的元数据
+Find missing values in original file headers, recognised filenames and preserved session metadata. Known values and user edits stay in place; conflicts remain unknown. DSO and solar-system targets default to Tele when their camera is unknown.	在原始文件头、可识别的文件名和保留的会话元数据中查找缺失值。已知值和用户编辑将保持不变；存在冲突的值仍为未知。相机未知时，深空天体和太阳系目标默认使用长焦。
+Files to check	要检查的文件
+Entire repository	整个存储库
+Preview the proposed additions before saving. This updates the catalogue and leaves the original files in place.	保存前预览建议添加的内容。此操作会更新目录，原始文件保持不变。
+Preview missing metadata	预览缺失的元数据
+Reading missing metadata	正在读取缺失的元数据
+Finding missing metadata	正在查找缺失的元数据
+Review missing metadata	审阅缺失的元数据
+Only these additions will be saved. Existing values and original files are preserved.	仅保存这些添加内容。现有值和原始文件将保留。
+Value	值
+Saving missing metadata	正在保存缺失的元数据
+Missing metadata report	缺失元数据报告
+Filling missing metadata	正在填充缺失的元数据
+Unique ID for this physical telescope, separate from its model.	此实体望远镜的唯一 ID，与其型号分开。
+Serial or unique ID for the physical camera; used for calibration matching.	实体相机的序列号或唯一 ID；用于校准匹配。
+Identify the optical setup, including reducers or adapters, to match flats.	标识光学配置（包括减焦镜或转接环），用于匹配平场。
+Sensor crop and origin: x,y,width,height. Used for calibration matching.	传感器裁剪区域和原点：x,y,width,height。用于校准匹配。
+Sensor readout setting, such as high conversion gain.	传感器读出设置，例如高转换增益。
+Only confirmed linear acquisition data can be exported for stacking.	只有确认为线性的采集数据才能导出用于叠加。
+Windows timezone ID, such as UTC or Eastern Standard Time. Converts recorded local capture times to UTC.	Windows 时区 ID，例如 UTC 或 Eastern Standard Time。用于将记录的本地拍摄时间转换为 UTC。
+Calibrated or registered lights receive no additional calibration files.	已校准或已配准的亮场不会额外获得校准文件。
+Sensor colour-filter pattern, such as RGGB. Leave unknown patterns unassigned.	传感器彩色滤镜阵列模式，例如 RGGB。未知模式请保持未指定。
+Unit of the recorded gain, such as dB or camera units.	所记录增益的单位，例如 dB 或相机单位。
+Existing values are filled in. Mixed fields keep each file’s value until you enter a replacement. Blank fields keep existing values.	已填入现有值。在你输入替换值之前，混合字段会保留每个文件各自的值。空白字段保留现有值。
+Apply changes to entire selected sessions	将更改应用于整个所选会话
+Reset changes	重置更改
+Capture	拍摄
+Equipment	设备
+Processing	处理
+Current metadata	当前元数据
+Inspect the recorded values and their sources for any selected file. This view does not change the batch edit fields.	检查任一所选文件的记录值及其来源。此视图不会更改批量编辑字段。
+Check metadata	检查元数据
+Metadata	元数据
+Not recorded	未记录
+Suggested / inferred · select EQ or Alt-Az to confirm	建议/推断 · 选择 EQ 或 Alt-Az 以确认
+Mixed values stay unchanged until replaced.	混合值在替换前保持不变。
+Blank keeps existing values.	留空则保留现有值。
+No changes yet	尚无更改
+Preview paused while editing metadata.	编辑元数据时预览已暂停。
+No metadata changes.	没有元数据更改。
+New Moon	新月
+Full Moon	满月
+First quarter	上弦月
+Last quarter	下弦月
+Illumination	照亮比例
+Waxing	渐盈
+Southern	南半球
+Target elevation	目标高度角
+Moon elevation	月球高度角
+Moon to target	月球与目标角距
+Choose an observing town / city in Settings > Sky & solving for elevations.	请在“设置 > 天空和解析”中选择观测城镇/城市以计算高度角。
+Geometric elevations at the capture time; refraction excluded.	拍摄时的几何高度角；未计入大气折射。
+GIF exceeds the 4,096-frame preview limit.	GIF 超出 4096 帧的预览限制。
+GIF frame lies outside its canvas.	GIF 帧超出其画布范围。
+Switch page (Ctrl+1–3).	切换页面 (Ctrl+1–3)。
+Open Preferences.	打开首选项。
+Support AstroArchive on Ko-fi.	在 Ko-fi 上支持 AstroArchive。
+Choose a source and review imports.	选择源并审阅导入。
+Export archived files; import scanned files first.	导出已归档的文件；请先导入已扫描的文件。
+Robust scan checks file changes and missing archive copies.	可靠扫描会检查文件更改和缺失的存档副本。
+Quick scan skips archived filenames and known DWARF sessions. Use Full rescan to check changes.	快速扫描会跳过已归档的文件名和已知的 DWARF 会话。使用“完全重新扫描”可检查更改。
+Wait for the current operation to finish.	请等待当前操作完成。
+Open repository folder\n	打开存储库文件夹\n
+Delete after import ON · Calibration kept	导入后删除：开 · 保留校准文件
+Originals kept	保留原始文件
+Flagged captures excluded	已排除标记的拍摄文件
+Flagged captures included	已包括标记的拍摄文件
+Failed filenames ignored	已忽略失败文件名
+Failed filenames included	已包括失败文件名
+Robust matching	可靠匹配
+Filename matching	文件名匹配
+Connect telescope over network…	通过网络连接望远镜…
+Watch a capture folder…	监视拍摄文件夹…
+Telescope import progress…	望远镜导入进度…
+Scan source	扫描源
+Import ready files	导入就绪文件
+Connected telescopes	已连接的望远镜
+Refresh devices	刷新设备
+No telescope storage detected	未检测到望远镜存储
+Saved telescopes	已保存的望远镜
+Save current telescope…	保存当前望远镜…
+Rename telescope…	重命名望远镜…
+Review and repair	审阅和修复
+Review flagged files…	审阅已标记的文件…
+Screen files	筛查文件
+Full rescan	完全重新扫描
+Dump folder	Dump 文件夹
+Process files	处理文件
+Catalogue CSV	目录 CSV
+Selected / visible files…	所选/可见文件…
+Entire repository…	整个存储库…
+Group subs by session	按会话对子帧分组
+Filters…	筛选器…
+Review and analysis	审阅和分析
+Identify targets…	识别目标…
+Analyse rotation…	分析旋转…
+Maintenance	维护
+Delete archive data…	删除存档数据…
+Diagnostics	诊断
+Last operation…	上次操作…
+Last import report…	上次导入报告…
+Help…	帮助…
+Interactive walkthrough…	交互式引导…
+About AstroArchive…	关于 AstroArchive…
+Folder could not be opened	无法打开文件夹
+Browser could not be opened	无法打开浏览器
+Left/Right switches panes at table edges. Ctrl+Left/Right or Up/Down pans; F fits; plus/minus zooms. Drag to pan; scroll or pinch to zoom.	在表格边缘按 ←/→ 键可切换窗格。按 Ctrl+←/→ 或 ↑/↓ 键可平移；按 F 适应窗口；按加号/减号缩放。拖动可平移；滚动或双指捏合可缩放。
+Ignore failed filenames	忽略失败文件名
+Ignore PNG/JPG/JPEG/MP4 files	忽略 PNG/JPG/JPEG/MP4 文件
+Copy workers	复制线程数
+Auto benchmarks parallel copies and remembers the fastest setting for compatible storage.	“自动”会对并行复制进行基准测试，并为兼容的存储记住最快的设置。
+Running telescope imports keep their current settings. New defaults apply to imports started after you save.	正在运行的望远镜导入将保留其当前设置。新的默认值适用于保存后开始的导入。
+Current import options	当前导入选项
+Applies to the current source and next manual import.	适用于当前源和下一次手动导入。
+Instrument model	设备型号
+Camera channel	相机通道
+Fill Unknown lights/stacks only. Leave blank for mixed-target scans.	仅填充未知亮场/叠加图。若扫描包含多个目标，请留空。
+Target analysis	目标分析
+Edited imports always keep source files. Delete after import does not apply to Edited.	Edited 导入始终保留源文件。“导入后删除”不适用于 Edited。
+Originals are kept by default. Removal affects newly imported, verified files only; calibration originals are always kept. The option resets when the source changes. You will confirm source removal before the import starts. Cloud-synced deletions propagate.	默认保留原始文件。删除仅影响新导入且已验证的文件；校准原始文件始终保留。更改源时此选项会重置。导入开始前，你需要确认删除源文件。云同步位置中的删除将同步到云端。
+On — verified source originals will be deleted; calibration originals stay.	开 — 将删除已验证的源原始文件；校准原始文件将保留。
+Off — source originals will be kept.	关 — 将保留源原始文件。
+Preferences	首选项
+General	常规
+Sky & solving	天空和解析
+Updates	更新
+Theme	主题
+Show image preview	显示图像预览
+Repository folder	存储库文件夹
+Choose repository…	选择存储库…
+Choose your repository	选择你的存储库
+Stop all imports before switching repositories.	切换存储库前，请停止所有导入。
+Close the current dialog before changing repositories.	更改存储库前，请关闭当前对话框。
+Changes take effect when you save preferences. Click the path on the main page to open the folder.	保存首选项后更改生效。单击主页面上的路径可打开该文件夹。
+Image compatibility	图像兼容性
+Supported formats…	支持的格式…
+Open codec folder	打开编解码器文件夹
+Default export folder	默认导出文件夹
+Choose export folder…	选择导出文件夹…
+Choose the default export folder	选择默认导出文件夹
+Choose Siril in the export popup to open one exported stack. Application locations and defaults are optional.	在导出弹出窗口中选择 Siril 即可打开一个导出的叠加图。应用程序位置和默认值为可选项。
+Use Astrometry.net instead of ASTAP	使用 Astrometry.net 代替 ASTAP
+Plate solver setup	解析器设置
+Choose ASTAP…	选择 ASTAP…
+Locate ASTAP	定位 ASTAP
+ASTAP star database folder	ASTAP 星库文件夹
+Choose star database…	选择星库…
+Choose the ASTAP star database	选择 ASTAP 星库
+Image height in degrees (blank: automatic)	图像高度（度；留空：自动）
+Astrometry.net API key	Astrometry.net API 密钥
+Saved with Windows user encryption. Online solving sends star coordinates, never the full image.	使用 Windows 用户加密保存。在线解析仅发送星点坐标，绝不发送完整图像。
+ASTAP needs a local star database. Online solving needs your API key and internet access. Analysis stays off until selected for an import.	ASTAP 需要本地星库。在线解析需要你的 API 密钥和 Internet 连接。在为导入选择分析之前，分析保持关闭。
+Check for releases automatically while AstroArchive is open	AstroArchive 打开时自动检查新版本
+Checks after startup and every six hours. Downloads and installation begin only when you request them.	启动后检查一次，之后每六小时检查一次。仅在你请求时才会开始下载和安装。
+Save preferences	保存首选项
+Image height must be greater than 0 and no more than 180 degrees.	图像高度必须大于 0 度且不超过 180 度。
+Enter your Astrometry.net API key to enable online solving.	输入你的 Astrometry.net API 密钥以启用在线解析。
+Choose an existing export folder.	请选择现有的导出文件夹。
+Choose an export folder outside the repository.	请选择存储库以外的导出文件夹。
+Preferences saved. Scan the source again to apply import changes.	首选项已保存。请重新扫描源以应用导入更改。
+Preferences saved.	首选项已保存。
+Preferences could not be saved	无法保存首选项
+Set an archive folder in Settings	在“设置”中设置存档文件夹
+Hide preview	隐藏预览
+Stretching…	正在拉伸…
+FITS / XISF preview	FITS/XISF 预览
+RAW formats require a compatible Windows image codec.	RAW 格式需要兼容的 Windows 图像编解码器。
+Generated colour preview	生成的彩色预览
+Image exceeds the preview size limit.	图像超出预览大小限制。
+Zoom out	缩小
+Fit	适应窗口
+Recenter image	图像居中
+Zoom in	放大
+View left	向左查看
+View up	向上查看
+View down	向下查看
+View right	向右查看
+Rotate left 90°	向左旋转 90°
+Rotate right 90°	向右旋转 90°
+Pause playback	暂停播放
+Scroll or pinch to zoom; drag to pan. F fits the image; arrow keys pan.	滚动或双指捏合可缩放；拖动可平移。按 F 使图像适应窗口；按箭头键可平移。
+Fit image (F).	适应窗口 (F)。
+Play playback	播放
+Process summaries	处理摘要
+Live import underway	正在实时导入
+In progress	正在进行
+Paused / interrupted	已暂停/已中断
+Needs attention	需要注意
+Stopped	已停止
+Completed · review results	已完成 · 审阅结果
+Completed	已完成
+No newer release is available.	没有可用的新版本。
+Release information has not been checked yet.	尚未检查版本信息。
+No newer release was found at the last successful check.	上次成功检查时未发现新版本。
+App releases	应用版本
+Check now	立即检查
+Release notes	发行说明
+Install and restart	安装并重启
+Install AstroArchive release	安装 AstroArchive 新版本
+The release will download and be verified in the background. AstroArchive will then close, install it and restart. Repositories, images and settings are retained.	新版本将在后台下载并验证。随后 AstroArchive 将关闭、安装新版本并重启。存储库、图像和设置将保留。
+Read release notes	阅读发行说明
+Downloading and verifying the release…	正在下载并验证新版本…
+Downloading	正在下载
+Verifying installation and saving the archive…	正在验证安装并保存存档…
+The release installer could not start.	无法启动版本安装程序。
+Installer started. AstroArchive is restarting…	安装程序已启动。AstroArchive 正在重启…
+Update canceled. The current version remains installed.	更新已取消。仍保留当前已安装的版本。
+The release could not be installed. AstroArchive remains open.	无法安装新版本。AstroArchive 仍保持打开状态。
+Release installation failed	版本安装失败
+Check for releases	检查新版本
+View release on GitHub	在 GitHub 上查看版本
+Use View release on GitHub to read release notes.	使用“在 GitHub 上查看版本”阅读发行说明。
+Installation saves your settings, downloads and verifies the release, then restarts AstroArchive. Your repositories and images are kept.	安装时会保存你的设置，下载并验证新版本，然后重启 AstroArchive。你的存储库和图像将保留。
+Save the current settings, install the verified release and restart AstroArchive.	保存当前设置，安装已验证的新版本并重启 AstroArchive。
+Release download progress	版本下载进度
+Checking the latest stable release…	正在检查最新的稳定版本…
+Loading release notes…	正在加载发行说明…
+No release notes were provided.	未提供发行说明。
+Release notes could not be loaded. View the release on GitHub below.	无法加载发行说明。请通过下方链接在 GitHub 上查看此版本。
+Installing the release. AstroArchive will restart automatically.	正在安装新版本。AstroArchive 将自动重启。
+The release could not be installed. AstroArchive remains open.\n	无法安装新版本。AstroArchive 仍保持打开状态。\n
+Folder	文件夹
+Size	大小
+Import from telescope	从望远镜导入
+Import over your network	通过网络导入
+Keep AstroArchive and the telescope on the same Wi-Fi or LAN. Capture continues in the telescope app.	请让 AstroArchive 和望远镜连接到同一 Wi-Fi 或局域网。拍摄将在望远镜应用中继续进行。
+Finding Seestar, DWARF and Celestron Origin telescopes…	正在查找 Seestar、DWARF 和 Celestron Origin 望远镜…
+Turn on Save Raw Images under Menu > Settings > Advanced in the Origin app to keep individual exposures.	要保留单张曝光，请在 Origin 应用的“菜单 > 设置 > 高级”中打开 Save Raw Images。
+Telescopes found on the network	在网络上找到的望远镜
+Address	地址
+Host	主机
+Search again	重新搜索
+Connect	连接
+Change telescope	更换望远镜
+Save imports as	导入保存为
+Saved telescope for network import	用于网络导入的已保存望远镜
+Browse files	浏览文件
+Search all	全部搜索
+Up	向上
+All captures	所有拍摄文件
+Telescope capture files	望远镜拍摄文件
+Telescope captures. Click to select, Ctrl or Shift to add, double-click a folder to open it, Esc to clear	望远镜拍摄文件。单击可选择，按住 Ctrl 或 Shift 可添加，双击文件夹可将其打开，按 Esc 可清除
+File / folder	文件/文件夹
+Location	位置
+Clear selection	清除所选内容
+Live import watches the folder shown above and its subfolders. You can reconnect to select more files or add another telescope while it runs. Originals stay on the telescope.	实时导入会监视上方显示的文件夹及其子文件夹。运行期间，你可以重新连接以选择更多文件或添加其他望远镜。原始文件保留在望远镜上。
+Advanced…	高级…
+Cancel search	取消搜索
+Start live import	开始实时导入
+Import selected	导入所选项
+Saved import preference. Also applies to folder, USB and Dump imports; running imports keep their settings.	已保存的导入首选项。也适用于文件夹、USB 和 Dump 导入；正在运行的导入将保留其设置。
+Connect this PC to the telescope's Wi-Fi or your shared LAN, then search again.	请将此电脑连接到望远镜的 Wi-Fi 或你的共享局域网，然后重新搜索。
+Cancelled. You can search or connect again.	已取消。你可以重新搜索或连接。
+Could not complete this step.	无法完成此步骤。
+No telescopes replied. Check that both devices share the same network. Search again, or open Advanced for manual access.	没有望远镜响应。请检查两台设备是否连接到同一网络。请重新搜索，或打开“高级”进行手动访问。
+Finding telescopes on your networks… (about 8 seconds)	正在你的网络上查找望远镜…（约 8 秒）
+Choose files, search all captures, or start live import.	选择文件、搜索所有拍摄文件，或开始实时导入。
+Live folder: All captures	实时文件夹：所有拍摄文件
+Selections are kept as you move between folders.	在文件夹之间切换时，所选内容将保留。
+Reading capture folders…	正在读取拍摄文件夹…
+No supported captures were found. Open Advanced to check the storage location.	未找到受支持的拍摄文件。请打开“高级”检查存储位置。
+Searching all capture folders…	正在搜索所有拍摄文件夹…
+Couldn't read	无法读取
+Counting…	正在计数…
+Cancel search / connection	取消搜索/连接
+Counting files…	正在统计文件…
+Live import is underway for this telescope. Select files to download alongside it; manage the watcher in Activity.	此望远镜正在进行实时导入。请选择要同时下载的文件；在“活动”中管理监视。
+New captures only	仅新拍摄文件
+Nothing selected	未选择任何内容
+Click a file or folder to select it · Ctrl or Shift to add more · Double-click a folder to open it · Esc clears	单击文件或文件夹可将其选中 · 按住 Ctrl 或 Shift 可添加更多 · 双击文件夹可将其打开 · 按 Esc 可清除
+Enter a name for this physical telescope.	为此实体望远镜输入名称。
+That telescope is already saved. Select it above or choose another name.	该望远镜已保存。请在上方选择它，或选择其他名称。
+Other	其他
+Network import	网络导入
+Import over the network?	要通过网络导入吗？
+Network imports take longer than a wired connection. For large numbers of files, a wired USB connection is highly recommended.	网络导入比有线连接耗时更长。文件数量较多时，强烈建议使用 USB 有线连接。
+Import over network	通过网络导入
+Advanced telescope access	高级望远镜访问
+Manual access and network options	手动访问和网络选项
+Automatic discovery needs no configuration. Use these options for a hidden network, unusual firmware or a custom capture location.	自动发现无需任何配置。对于隐藏网络、特殊固件或自定义拍摄位置，请使用这些选项。
+Telescope IPv4 address	望远镜 IPv4 地址
+Storage path (leave blank for default)	存储路径（留空则使用默认值）
+Discovery network	发现网络
+All active networks	所有活动网络
+DWARF FTP port	DWARF FTP 端口
+DWARF FTP username	DWARF FTP 用户名
+DWARF FTP password (saved securely for import recovery)	DWARF FTP 密码（安全保存，用于导入恢复）
+Live polling interval (seconds)	实时轮询间隔（秒）
+Transfer limit	传输限制
+Unlimited	无限制
+Also import existing captures when live import starts	开始实时导入时同时导入已有的拍摄文件
+Seestar uses direct, read-only file access. No Windows guest-access or signing-policy changes are required.	Seestar 使用直接的只读文件访问，无需更改 Windows 来宾访问或签名策略。
+Enter whole numbers for port and polling interval.	端口和轮询间隔请输入整数。
+Use port 1–65535 and a polling interval of 2–120 seconds.	端口请使用 1–65535，轮询间隔请使用 2–120 秒。
+This folder is already being watched. Stop its watcher in Activity first.	已在监视此文件夹。请先在“活动”中停止对它的监视。
+Live import is already underway for this telescope. Select files to import alongside it, or stop its watcher in Activity first.	此望远镜正在进行实时导入。请选择要同时导入的文件，或先在“活动”中停止其监视。
+Another watcher already covers part of this folder. Stop it in Activity, or choose a separate folder.	另一个监视已覆盖此文件夹的一部分。请在“活动”中将其停止，或选择其他文件夹。
+This saved telescope is importing from another device. Choose a different saved telescope or give this device its own name.	此已保存的望远镜正在从另一台设备导入。请选择其他已保存的望远镜，或为此设备指定单独的名称。
+This device is already importing as another saved telescope. Use the same saved telescope shown in Activity.	此设备已在以另一个已保存望远镜的身份导入。请使用“活动”中显示的同一已保存望远镜。
+Telescope import could not start	望远镜导入无法启动
+Stop watching	停止监视
+Stop live import	停止实时导入
+Cancel download	取消下载
+Stopping this telescope import; completed copies are retained…	正在停止此望远镜导入；已完成的副本将保留…
+Stopped watching the folder.	已停止监视该文件夹。
+Live import stopped.	实时导入已停止。
+Stop all telescope imports	停止所有望远镜导入
+Pause all imports	暂停所有导入
+Pause import	暂停导入
+Stopping this telescope import…	正在停止此望远镜导入…
+Live import	实时导入
+Preparing telescope imports…	正在准备望远镜导入…
+Watching for captures	正在监视拍摄文件
+Scanning folder	正在扫描文件夹
+Checking folder	正在检查文件夹
+Downloading from telescope	正在从望远镜下载
+Starting transfer	正在开始传输
+Telescope rejection, file integrity and transfer failures are shown separately. Screening checks FITS structure and rejection markers; it does not assess image quality. Unscreened captures remain labelled Not screened.	望远镜剔除、文件完整性问题和传输失败将分别显示。筛查会检查 FITS 结构和剔除标记，不评估图像质量。未筛查的拍摄文件仍标记为“未筛查”。
+Problem type	问题类型
+Select a capture to read its full reason.	选择一个拍摄文件以阅读其完整原因。
+Show flagged captures in the main view	在主视图中显示已标记的拍摄文件
+Needs review	需要审阅
+Screen selected captures again	重新筛查所选拍摄文件
+Capture screening	拍摄文件筛查
+Deletion history	删除历史记录
+Deleted captures and import exclusions	已删除的拍摄文件和导入排除项
+Allowing reimport lifts the checksum exclusion. It does not restore a deleted file; a source copy must still be available. The deletion and the decision to allow reimport stay in this log.	允许重新导入会解除校验和排除，但不会恢复已删除的文件；仍须有可用的源副本。删除记录和允许重新导入的决定将保留在此日志中。
+State	状态
+Deleted (UTC)	删除时间 (UTC)
+Reimport allowed (UTC)	允许重新导入时间 (UTC)
+Select a capture to see its deletion and reimport history.	选择一个拍摄文件以查看其删除和重新导入历史记录。
+Allow selected captures to be imported again	允许再次导入所选拍摄文件
+Search files and metadata. Combine a target, device and file type, for example M45 S50 Pro stack.	搜索文件和元数据。可组合目标、设备和文件类型，例如 M45 S50 Pro stack。
+Find files	查找文件
+Check your search	请检查搜索内容
+Search across your files	在你的文件中搜索
+Results update after a short typing pause. Enter searches immediately; Escape clears the search while keeping table filters. Words combine to narrow results. Catalogue IDs and common names resolve to the same target, including spaced IDs such as NGC 6888. Case, accents and filename separators are handled consistently.	停止输入片刻后，结果即会更新。按 Enter 键可立即搜索；按 Esc 键可清除搜索，同时保留表格筛选器。多个字词组合使用可缩小结果范围。天体编号和常用名称会解析为同一目标，包括带空格的编号，例如 NGC 6888。大小写、重音符号和文件名分隔符的处理方式保持一致。
+Examples	示例
+Search fields	搜索字段
+Capture time (timezone unknown)	拍摄时间（时区未知）
+Session folder	会话文件夹
+Capture position	拍摄坐标
+Frame pointing	画面指向
+Approximate target centre from the catalogue	根据星表得出的目标中心近似位置
+Capture location	拍摄地点
+Saved observing location	已保存的观测地点
+Capture time unknown	拍摄时间未知
+Northern celestial sky	北天
+Southern celestial sky	南天
+Celestial equator	天赤道
+Pointing unavailable	指向不可用
+Celestial view · set an observing location	天球视图 · 请设置观测地点
+Celestial view · capture time unknown	天球视图 · 拍摄时间未知
+Choose your observing town / city in Settings for the local horizon.	请在“设置”中选择你的观测城镇/城市，以显示本地地平线。
+Sky at the recorded capture time. Solid horizon; faint figures lie below it. Geometric altitude excludes atmospheric refraction.	记录的拍摄时间的天空。实线为地平线；暗淡的图形位于地平线以下。几何高度角未计入大气折射。
+Celestial coordinates only. No compass horizon is inferred without a known capture time and observing location.	仅显示天球坐标。在拍摄时间和观测地点未知时，不会推断罗盘地平线。
+Drag to rotate; scroll or pinch to zoom.	拖动可旋转；滚动或双指捏合可缩放。
+Reset sky view.	重置天空视图。
+Preparing your workspace…	正在准备你的工作区…
+Wishing you a clear night	祝你拥有晴朗的夜空
+A LITTLE COSMIC PERSPECTIVE	一点宇宙视角
+MAKE THE MOST OF ASTROARCHIVE	充分利用 AstroArchive
+AstroArchive startup window	AstroArchive 启动窗口
+Opening AstroArchive was cancelled.	已取消打开 AstroArchive。
+Your workspace is ready.	你的工作区已就绪。
+Annihilating clouds…	正在驱散乌云…
+Negotiating with the weather forecast…	正在和天气预报讨价还价…
+Politely asking the Moon to dim…	正在礼貌地请月亮调暗一点…
+Herding photons into tidy folders…	正在把光子赶进整齐的文件夹…
+Looking for the galaxy you saved as ‘test.fit’…	正在寻找你存成“test.fit”的那个星系…
+Aligning the stars. And the filenames…	正在对齐星星，顺便对齐文件名…
+Framing Orion without cutting off his belt…	正在给猎户座构图，可别切掉他的腰带…
+Finding the Rosette among fifty ‘untitled’ stacks…	正在五十个“未命名”叠加图里寻找玫瑰星云…
+Making room for just one more telescope…	正在为再添一台望远镜腾地方…
+Keeping Saturn’s rings inside the frame…	正在把土星环留在画面里…
+Telling the dew to take the night off…	正在劝露水今晚放个假…
+Finding the bright side of your dark frames…	正在寻找暗场帧的光明面…
+Reminding the tripod to stand still…	正在提醒三脚架站稳别动…
+Untangling cables across the cosmos…	正在解开缠绕整个宇宙的线缆…
+Helping your subs find their stackmates…	正在帮子帧找到它们的叠加伙伴…
+Teaching the shutter the meaning of ‘bulb’…	正在教快门理解“B 门”的含义…
+Rescuing the Horsehead from ‘New folder (7)’…	正在从“新建文件夹 (7)”里营救马头星云…
+Resisting the urge to buy another filter…	正在克制再买一块滤镜的冲动…
+Matching stars. Ignoring the hot pixels…	正在匹配星点，无视热像素…
+Trying to fit Andromeda into one more mosaic panel…	正在设法把仙女座星系再塞进一块拼接画面…
+Finding the flats you took ‘somewhere sensible’…	正在寻找你放在“某个合理位置”的平场帧…
+Persuading the neighbours to switch off their lights…	正在说服邻居关掉他们家的灯…
+Checking the focus. Just one more time…	正在检查对焦。就再检查一次…
+Explaining to the dark frames why the lens cap stays on…	正在向暗场帧解释为什么镜头盖不能摘…
+Converting ‘one more exposure’ into lost sleep…	正在把“再拍一张”换算成失去的睡眠…
+Fitting all the Pleiades into the same frame…	正在把整个昴星团装进同一个画面…
+Sorting FITS files before they form their own constellation…	正在整理 FITS 文件，免得它们自成一个星座…
+Bringing wandering subframes back to their session…	正在把四处游荡的子帧带回它们的会话…
+Hmm, where did I put that one?	嗯，我把那个放哪儿了？
+Opening final_final_really_final.fit…	正在打开“最终版_最终版_真·最终版.fit”…
+Looking for M31 under ‘miscellaneous’…	正在“杂项”文件夹里寻找 M31…
+Moving ‘sort these subs later’ slightly closer to later…	正在把“这些子帧以后再整理”的“以后”往前挪一点…
+Searching for the lens cap. It’s on the lens…	正在寻找镜头盖。哦，它就在镜头上…
+Asking the dew heater to warm the lens, not the cat…	正在请加热带给镜头除露，而不是给猫取暖…
+Checking whether ‘just one more sub’ was a promise…	正在核实“就再拍一张”算不算一个承诺…
+Translating ‘five minutes’ from astronomer time…	正在把天文爱好者口中的“五分钟”换算成正常时间…
+Finding a USB port for the guide camera…	正在给导星相机找一个空闲的 USB 接口…
+Wondering why the best frame was the test shot…	正在纳闷为什么最好的一帧偏偏是测试照…
+Asking the telescope’s Wi-Fi to stay for one more sub…	正在请望远镜的 Wi-Fi 再坚持一帧…
+Admiring the galaxy behind your satellite trail…	正在欣赏卫星轨迹背后的星系…
+Reclassifying that meteor as an aeroplane…	正在把那颗流星重新归类为飞机…
+Convincing the hard drive that space is infinite…	正在说服硬盘相信空间是无限的…
+Locating the image you definitely didn’t delete…	正在定位你“绝对没删”的那张图像…
+Finding the light frame hiding among the darks…	正在暗场帧里寻找混进来的亮场帧…
+Checking the stars haven’t drifted out of the frame…	正在确认星星没有漂出画面…
+Wondering if the smudge is dust or a discovery…	正在琢磨这块污渍是灰尘还是新发现…
+Negotiating a truce with the background gradient…	正在和背景渐变谈判停火…
+Organising the archive before it becomes a black hole…	正在整理存档，免得它变成黑洞…
+Did you know you can press F1 to open AstroArchive’s offline guide?	你知道吗？按 F1 可以打开 AstroArchive 的离线指南。
+Did you know you can import from Seestar, DWARF and Celestron Origin over your local network?	你知道吗？你可以通过本地网络从 Seestar、DWARF 和 Celestron Origin 导入。
+Did you know you can use live import to bring in completed captures while your telescope keeps shooting?	你知道吗？你可以使用实时导入，在望远镜继续拍摄的同时导入已完成的拍摄文件。
+Did you know you can run independent network imports from more than one telescope?	你知道吗？你可以从多台望远镜分别运行独立的网络导入。
+Did you know you can browse your captures by target and session in Repository?	你知道吗？你可以在“存储库”中按目标和会话浏览拍摄文件。
+Did you know you can prepare stacking folders with matched calibration frames for your processing software?	你知道吗？你可以为处理软件准备包含匹配校准帧的叠加文件夹。
+Did you know you can keep working copies and processing results together in Edited?	你知道吗？你可以在 Edited 中将工作副本和处理结果放在一起。
+Did you know you can compare integration time, targets and telescope usage in Repository → Analytics?	你知道吗？你可以在“存储库 → 统计分析”中比较积分时间、目标和望远镜使用情况。
+Did you know you can export your analytics as PNG, JPEG, PDF or SVG?	你知道吗？你可以将统计分析导出为 PNG、JPEG、PDF 或 SVG。
+Did you know you can export an animated analytics story as MP4 or GIF?	你知道吗？你可以将统计分析动画故事导出为 MP4 或 GIF。
+Did you know you can create a verified folder or lossless ZIP backup of your archive?	你知道吗？你可以为存档创建已验证的文件夹备份或无损 ZIP 备份。
+Did you know you can change the preview stretch without changing your original image bytes?	你知道吗？你可以更改预览拉伸，而不改变原始图像的任何字节。
+The Rosette Nebula is a stellar nursery roughly 5,000 light-years away in the constellation Monoceros.	玫瑰星云是位于麒麟座的恒星摇篮，距离我们约 5000 光年。
+Light from the Andromeda Galaxy has travelled for about 2.5 million years before reaching your camera.	来自仙女座星系的光要传播约 250 万年，才能到达你的相机。
+Doubling your signal-to-noise ratio generally takes four times the total exposure, under similar conditions.	在相似条件下，信噪比翻倍通常需要四倍的总曝光时间。
+Hydrogen-alpha light has a wavelength of about 656.3 nanometres, in the red part of the visible spectrum.	氢阿尔法（Hα）光的波长约为 656.3 纳米，位于可见光谱的红色部分。
+The Pleiades are an open star cluster. Their blue nebulosity comes from dust reflecting starlight.	昴星团是一个疏散星团。其蓝色星云来自尘埃对星光的反射。
+A light-year measures distance: the distance light travels in one year, about 9.46 trillion kilometres.	光年是距离单位，指光在一年内传播的距离，约为 9.46 万亿千米。
+Dark frames record a sensor’s dark current and fixed-pattern signals at a matched exposure and temperature.	暗场帧在相同的曝光时间和温度下记录传感器的暗电流和固定图案信号。
+Flat frames help correct vignetting and dust shadows when captured with the same optical setup.	使用相同光学配置拍摄的平场帧有助于校正暗角和灰尘阴影。
+Dithering shifts the framing between exposures, helping stacking reject hot pixels and reduce pattern noise.	抖动会在每次曝光之间轻微偏移构图，有助于叠加时剔除热像素并减少图案噪声。
+The Moon’s apparent width is about half a degree. Many deep-sky targets cover much more sky.	月球的视直径约为半度。许多深空目标覆盖的天区要大得多。
+The stars in a constellation can be at very different distances, even when they look like neighbours.	即使看起来彼此相邻，同一星座中的恒星与我们的距离也可能相差悬殊。
+The Crab Nebula, M1, is the aftermath of a supernova recorded by astronomers in 1054.	蟹状星云（M1）是一次超新星爆发的遗迹，天文学家于 1054 年记录了这次爆发。
+The Ring Nebula, M57, has a three-dimensional structure: a football-shaped cloud piercing a doughnut of gas.	环状星云（M57）具有三维结构：一团橄榄球状的云穿过一个甜甜圈状的气体环。
+The Dumbbell Nebula, M27, was the first planetary nebula discovered, spotted by Charles Messier in 1764.	哑铃星云（M27）是人类发现的第一个行星状星云，由查尔斯·梅西耶于 1764 年发现。
+The Veil Nebula’s delicate filaments are debris from a massive star that exploded thousands of years ago.	面纱星云精致的纤维状结构，是一颗大质量恒星在数千年前爆发后留下的碎片。
+The Horsehead Nebula is a dark cloud silhouetted against brighter, glowing gas behind it.	马头星云是一团暗云，在其后方更明亮的发光气体映衬下呈现出剪影。
+The Sombrero Galaxy, M104, gets its hat-like appearance from a bright central bulge and a dark dust lane.	草帽星系（M104）明亮的中央核球和暗尘埃带使它看起来像一顶帽子。
+The Hercules Cluster, M13, packs hundreds of thousands of stars into a ball held together by gravity.	武仙座球状星团（M13）中数十万颗恒星在引力作用下聚集成一个球体。
+Omega Centauri looks like a fuzzy star to the naked eye, but contains millions of stars.	半人马座 ω 星团用肉眼看就像一颗模糊的恒星，但实际上包含数百万颗恒星。
+The Cigar Galaxy, M82, is a starburst galaxy: interactions with nearby M81 fuel unusually rapid star formation.	雪茄星系（M82）是一个星暴星系：与邻近的 M81 相互作用，促使其以异常快的速度形成恒星。
+The Triangulum Galaxy, M33, is the Local Group’s third-largest galaxy, after Andromeda and the Milky Way.	三角座星系（M33）是本星系群中第三大的星系，仅次于仙女座星系和银河系。
+Sirius has a tiny companion, Sirius B, a white dwarf roughly the size of Earth.	天狼星有一颗很小的伴星——天狼星 B，它是一颗大小与地球相近的白矮星。
+Polaris, our North Star, belongs to a triple-star system. Its brightest member is also a variable star.	我们的北极星（勾陈一）属于一个三合星系统，其中最亮的成员也是一颗变星。
+Betelgeuse is a red supergiant so large that, in the Sun’s place, it would extend beyond the orbit of Mars.	参宿四是一颗红超巨星，体积之大，若放在太阳的位置，其范围将超出火星轨道。
+The Double Cluster in Perseus is two neighbouring open star clusters, NGC 869 and NGC 884.	英仙座双星团由两个相邻的疏散星团 NGC 869 和 NGC 884 组成。
+Jupiter spins once in about ten hours, giving the Solar System’s biggest planet its shortest day.	木星约十小时自转一周，因此这颗太阳系最大的行星拥有最短的一天。
+Saturn’s rings are made mostly of water ice, with pieces ranging from tiny grains to enormous chunks.	土星环主要由水冰组成，碎块大小不一，小至微粒，大至巨块。
+Venus takes about 243 Earth days to spin once, longer than its 225-day journey around the Sun.	金星自转一周约需 243 个地球日，比它绕太阳公转一周的 225 天还长。
+Uranus is tipped almost onto its side, with an axial tilt of about 98 degrees.	天王星几乎是“躺着”运行的，其自转轴倾角约为 98 度。
+Click to sort; Shift-click adds a sort column.	单击可排序；按住 Shift 单击可添加排序列。
+A ? marks an inference.	? 表示推断值。
+Sorted by pixel count.	按像素数排序。
+Seconds	秒
+Light frames	亮场帧
+Integration	积分时间
+Made with AstroArchive	由 AstroArchive 制作
+Target card	目标卡片
+A card for social posts and messages with your best image of this target and its integration, frames, nights and filters. Integration counts light frames, plus standalone stacks without their subs.	用于社交媒体帖子和消息的卡片，展示此目标的最佳图像及其积分时间、帧数、夜数和滤镜。积分时间计入亮场帧，以及不含子帧的独立叠加图。
+Target card preview	目标卡片预览
+No image (star field)	无图像（星空背景）
+Image	图像
+Layout	布局
+Fill the frame (crop edges)	填满画面（裁剪边缘）
+Fill the frame	填满画面
+Credit line (optional)	署名（可选）
+For example, your name or handle. Leave blank for “Made with AstroArchive”.	例如你的姓名或用户名。留空则显示“由 AstroArchive 制作”。
+Format	格式
+This image could not be read (	无法读取此图像 (
+Save card…	保存卡片…
+Save card	保存卡片
+Copy image	复制图像
+Copied. Paste it into a post or message.	已复制。可将其粘贴到帖子或消息中。
+The clipboard is busy. Try again.	剪贴板正忙。请重试。
+No filter recorded	未记录滤镜
+Target identification results	目标识别结果
+Source changed since scanning; scan again.	扫描后源已更改；请重新扫描。
+Source changed while solving; scan again.	解析期间源已更改；请重新扫描。
+No fields solved. Capture metadata was retained.	没有成功解析的视场。已保留拍摄元数据。
+Target identification	目标识别
+Solved fields kept for later review.	已解析的视场已保留，供稍后审阅。
+Identification canceled. Metadata already applied is retained.	识别已取消。已应用的元数据将保留。
+Source changed since identification. Scan again.	识别后源已更改。请重新扫描。
+Saving archive index	正在保存存档索引
+Target identification report	目标识别报告
+Review solved targets	审阅已解析的目标
+Nearest major targets are selected. Change a target or uncheck a row to keep its metadata. One Light row applies to its entire selected session group.	已选择最近的主要目标。更改目标或取消选中某行可保留其元数据。一个亮场行将应用于其整个所选会话组。
+Solved	已解析
+Representative / stack	代表帧/叠加图
+Scope	范围
+Choices	选项
+Choose a target; use Search for another name or ID.	选择一个目标；使用“搜索”查找其他名称或编号。
+Match / failure	匹配/失败
+Match	匹配
+Centre	中心
+Search target for selected row…	为所选行搜索目标…
+Apply matches	应用匹配项
+Choose a target for each checked, successfully solved row. Failed rows must remain unchecked.	请为每个已选中且解析成功的行选择目标。失败的行必须保持未选中状态。
+Target identification complete	目标识别完成
+Create target card…	创建目标卡片…
+Edit name and aliases…	编辑名称和别名…
+Target name and aliases	目标名称和别名
+Names for this object	此天体的名称
+Save a name once to use it across Repository, Import and Edited. Catalogue IDs stay unchanged.	名称只需保存一次，即可在“存储库”“导入”和 Edited 中使用。天体编号保持不变。
+Object ID	天体编号
+Other names (one per line)	其他名称（每行一个）
+Use built-in names	使用内置名称
+Save names	保存名称
+Check target names	检查目标名称
+Target names saved.	目标名称已保存。
+Names could not be saved	无法保存名称
+Choose folders or files on your telescope	选择望远镜上的文件夹或文件
+Choose the captures you need; folders include subfolders. Originals stay on the telescope.	选择你需要的拍摄文件；文件夹包括其子文件夹。原始文件保留在望远镜上。
+Telescope for this import	用于此导入的望远镜
+Physical telescope name	实体望远镜名称
+Telescope model	望远镜型号
+Selected telescope folders and files	所选的望远镜文件夹和文件
+Add folder…	添加文件夹…
+Add files…	添加文件…
+Remove selected	移除所选项
+Entire telescope drive	整个望远镜驱动器
+Some previously selected items are unavailable. Review the selection before importing.	之前选择的部分项目不可用。请在导入前检查所选内容。
+Give this physical telescope a name before importing.	请在导入前为此实体望远镜命名。
+That telescope name is already saved. Choose its profile or enter a different name.	该望远镜名称已保存。请选择其配置文件或输入其他名称。
+Large telescope import	大型望远镜导入
+A large number of files is selected, so this import may take a while. You can cancel at any time; completed copies are kept.	已选择大量文件，因此此导入可能需要一段时间。你可以随时取消；已完成的副本将保留。
+Telescope could not be saved	无法保存望远镜
+Import connected telescope…	导入已连接的望远镜…
+Choose folders or files to scan and import. Large selections ask for confirmation; originals stay on the telescope.	选择要扫描和导入的文件夹或文件。所选内容较多时会要求确认；原始文件保留在望远镜上。
+USB telescope disconnected. Completed imports are retained; reconnect and resume.	USB 望远镜已断开连接。已完成的导入将保留；请重新连接并继续。
+USB telescope disconnected. Canceling; completed imports are retained.	USB 望远镜已断开连接。正在取消；已完成的导入将保留。
+The telescope drive is unavailable. Reconnect it and refresh connected telescopes.	望远镜驱动器不可用。请重新连接，然后刷新已连接的望远镜。
+The telescope disconnected before import. Reconnect it and choose the selection again.	望远镜在导入前已断开连接。请重新连接并重新选择要导入的内容。
+USB import report	USB 导入报告
+Rename telescope	重命名望远镜
+Update this saved telescope and all its indexed captures and archive paths in the selected repository. FITS bytes and acquisition sessions are preserved.	更新此已保存的望远镜，以及所选存储库中其所有已编入索引的拍摄文件和存档路径。FITS 字节和采集会话将保留。
+New telescope name	新望远镜名称
+Enter a telescope name.	请输入望远镜名称。
+That name is already saved. Choose a unique name.	该名称已保存。请选择唯一的名称。
+Canceled. The telescope name and repository records are unchanged.	已取消。望远镜名称和存储库记录未更改。
+Telescope rename	望远镜重命名
+Edited scope	Edited 范围
+Selection	所选内容
+Recover saved telescopes from archive metadata.	从存档元数据中恢复已保存的望远镜。
+Create target card	创建目标卡片
+Make a shareable image of this target with its integration, frames, nights and filters.	为此目标制作一张可分享的图像，展示其积分时间、帧数、夜数和滤镜。
+Read and hash every source file again.	重新读取每个源文件并计算哈希值。
+Inspect flagged captures and retry failed transfers.	检查已标记的拍摄文件并重试失败的传输。
+Review flagged files	审阅已标记的文件
+Check rejection labels and file integrity.	检查剔除标签和文件完整性。
+Retry failed transfers from unchanged source files.	从未更改的源文件重试失败的传输。
+Edit selected metadata	编辑所选元数据
+Identify selected targets	识别所选目标
+Solve selected lights and stacks to identify objects.	解析所选亮场和叠加图以识别天体。
+Set Unknown targets	设置未知目标
+Assign an object to unidentified lights and stacks.	为未识别的亮场和叠加图指定天体。
+Show scan results, skipped files and errors.	显示扫描结果、跳过的文件和错误。
+Inbox for captures waiting to be imported.	用于存放待导入拍摄文件的收件箱。
+Import inbox captures; delete verified science originals and keep calibration frames.	导入收件箱中的拍摄文件；删除已验证的科学原始文件，保留校准帧。
+Condense acquisition subs into session rows.	将采集子帧合并为会话行。
+Create a verified copy of the archive.	创建存档的已验证副本。
+Review captures, identify objects and assess mount rotation.	审阅拍摄文件、识别天体并评估支架旋转。
+Identify targets	识别目标
+Solve light groups and stacks to identify objects.	解析亮场组和叠加图以识别天体。
+Analyse rotation	分析旋转
+Estimate EQ or Alt-Az from acquisition subs.	根据采集子帧估算 EQ 或 Alt-Az。
+Verify, reindex or remove archive files.	验证、重新索引或移除存档文件。
+Delete archive files with 'failed' in their filenames.	删除文件名包含 'failed' 的存档文件。
+Delete indexed PNG/JPG/JPEG/MP4 copies; keep source originals.	删除已编入索引的 PNG/JPG/JPEG/MP4 副本；保留源原始文件。
+Review archive deletions and reimport choices.	审阅存档删除记录和重新导入选择。
+Delete archive data	删除存档数据
+Permanently clear indexed archive data; keep source originals.	永久清除已编入索引的存档数据；保留源原始文件。
+View operation timings and import reports.	查看操作耗时和导入报告。
+Last import report	上次导入报告
+Export capture metadata for spreadsheets.	导出拍摄元数据，以用于电子表格。
+Selected / visible files	所选/可见文件
+Choose HDU / page / frame	选择 HDU/页面/帧
+Choose the image or frame used for preview and export.	选择用于预览和导出的图像或帧。
+Re-detect metadata and review	重新检测元数据并审阅
+Review detected values before applying changes.	在应用更改前审阅检测到的值。
+Convert supported images to FITS (keeps archived originals)	将受支持的图像转换为 FITS（保留已归档的原始文件）
+Export linear images as FITS; keep archived originals.	将线性图像导出为 FITS；保留已归档的原始文件。
+Telescope model name (optional)	望远镜型号名称（可选）
+Model name, separate from the physical telescope ID.	型号名称，与实体望远镜 ID 分开。
+Camera model (optional)	相机型号（可选）
+Used to match calibration files.	用于匹配校准文件。
+Physical camera ID / serial (optional)	实体相机 ID/序列号（可选）
+Identify the physical camera for calibration matching.	标识实体相机，用于校准匹配。
+Camera offset (optional)	相机偏移（可选）
+Offset setting. Blank keeps existing values.	偏移设置。留空则保留现有值。
+Readout mode (optional)	读出模式（可选）
+Sensor readout mode, such as high conversion gain.	传感器读出模式，例如高转换增益。
+ROI identifier / x,y,width,height (optional)	ROI 标识符/x,y,width,height（可选）
+Sensor crop and origin used for calibration matching.	用于校准匹配的传感器裁剪区域和原点。
+Optical configuration ID (optional)	光学配置 ID（可选）
+Optical setup used to match flats.	用于匹配平场的光学配置。
+Capture timezone ID (optional; e.g. UTC or Eastern Standard Time)	拍摄时区 ID（可选；例如 UTC 或 Eastern Standard Time）
+Timezone of the recorded capture times.	所记录拍摄时间的时区。
+Image data	图像数据
+Only confirmed linear data can be exported for stacking.	只有确认为线性的数据才能导出用于叠加。
+Physical telescope ID	实体望远镜 ID
+Unique name for this physical telescope.	此实体望远镜的唯一名称。
+Frame type	帧类型
+Master calibration frames remain separate.	主校准帧保持独立。
+Mount mode	支架模式
+Choose EQ or Alt-Az. A ? marks an inference.	选择 EQ 或 Alt-Az。? 表示推断值。
+Calibration state	校准状态
+Calibrated or registered lights receive no extra calibration.	已校准或已配准的亮场不会额外获得校准。
+Exposure seconds (optional)	曝光秒数（可选）
+Seconds; use a decimal dot. Blank keeps existing values.	单位为秒；请使用小数点。留空则保留现有值。
+Gain (optional)	增益（可选）
+Use a decimal dot. Blank keeps existing values.	请使用小数点。留空则保留现有值。
+Sensor temperature °C (optional)	传感器温度 °C（可选）
+Celsius; use a decimal dot. Blank keeps existing values.	摄氏度；请使用小数点。留空则保留现有值。
+Binning x × y (optional, e.g. 1x1)	像素合并 x × y（可选，例如 1x1）
+Horizontal × vertical binning. Blank keeps existing values.	水平 × 垂直像素合并。留空则保留现有值。
+Local solving also requires an ASTAP star database.	本地解析还需要 ASTAP 星库。
+ASTAP image height in degrees (blank: automatic; useful for wide cameras)	ASTAP 图像高度，单位为度（留空：自动；适用于广角相机）
+Greater than 0° and at most 180°; blank is automatic.	大于 0° 且不超过 180°；留空则为自动。
+Requires internet and your Astrometry.net API key.	需要 Internet 连接和你的 Astrometry.net API 密钥。
+Permanently delete indexed archive data; keep sources and unindexed files.	永久删除已编入索引的存档数据；保留源文件和未编入索引的文件。
+Use a location outside the repository.	请使用存储库以外的位置。
+Existing folders are not overwritten.	不会覆盖现有文件夹。
+Separate sessions into their own folders	将各会话分到单独的文件夹
+Off combines compatible sessions.	关闭时会合并兼容的会话。
+Add compatible darks, flats and biases.	添加兼容的暗场、平场和偏置帧。
+Include calibrations for subs with unknown calibration state	子帧校准状态未知时包括校准文件
+Review unknown processing states before calibrating.	请在校准前审阅未知的处理状态。
+Include files marked rejected/reference	包括标记为剔除/参考的文件
+Renames this device and its archived captures.	重命名此设备及其已归档的拍摄文件。
+Export to	导出到
+Open verified working copies or stacking inputs in a compatible app.	在兼容的应用中打开已验证的工作副本或叠加输入文件。
+Copy selected files; metadata is optional.	复制所选文件；元数据为可选项。
+Stacking folder	叠加文件夹
+Group selected lights or stacks by compatible settings.	按兼容的设置对所选亮场或叠加图分组。
+Export destinations	导出目标位置
+Choose application locations and defaults by file type.	按文件类型选择应用程序位置和默认值。
+Ready-to-stack folder	可直接叠加的文件夹
+Ready-to-stack with calibrations	可直接叠加（含校准文件）
+Delete selected archive copies; keep source originals.	删除所选的存档副本；保留源原始文件。
+Solve once per Light session/target group; stacks solve individually.	每个亮场会话/目标组解析一次；叠加图单独解析。
+Report missing or changed archive files.	报告缺失或已更改的存档文件。
+Index existing images without copying or moving them.	为现有图像编制索引，而不复制或移动它们。
+One sampled preview pixel per screen pixel.	每个屏幕像素对应一个采样预览像素。
+Retry visible failed transfers; rescan changed sources.	重试可见的失败传输；重新扫描已更改的源。
+Exclude rejected or damaged captures.	排除被剔除或已损坏的拍摄文件。
+Open Import preferences and options for the current source.	打开导入首选项和当前源的选项。
+Assign selected Unknown lights/stacks, or visible ones if none selected.	为所选的未知亮场/叠加图指定目标；如果未选择任何项，则应用于可见项。
+Clear import search and filters.	清除导入搜索和筛选器。
+Check selected captures, or visible ones, for rejection or damaged FITS data.	检查所选（或可见）拍摄文件是否被剔除或存在损坏的 FITS 数据。
+Show this file in File Explorer, in the repository.	在文件资源管理器中显示此文件在存储库中的位置。
+Display stretch; image data stays unchanged.	显示拉伸；图像数据保持不变。
+Switch light/dark theme.	切换浅色/深色主题。
+Metadata, target identification and scan report.	元数据、目标识别和扫描报告。
+Open the guide (F1).	打开指南 (F1)。
+Choose telescope folders or files, then confirm a full scan and import. Keep originals.	选择望远镜文件夹或文件，然后确认完整扫描并导入。保留原始文件。
+Clear search, filters and target selection.	清除搜索、筛选器和目标选择。
+Assess mount mode from rotation in acquisition subs.	根据采集子帧中的旋转评估支架模式。
+Solve selected Light groups and stacks; review batch target matches.	解析所选亮场组和叠加图；批量审阅目标匹配结果。
+Edit selected files, or all visible files if none selected.	编辑所选文件；如果未选择任何文件，则编辑所有可见文件。
+Archive tools.	存档工具。
+Reuse a saved telescope and source.	重用已保存的望远镜和源。
+Save this device, model and source folder.	保存此设备、型号和源文件夹。
+Rename this device and its archived captures.	重命名此设备及其已归档的拍摄文件。
+Recover missing saved devices from archive metadata.	从存档元数据中恢复缺失的已保存设备。
+Use a unique name for each physical telescope.	请为每台实体望远镜使用唯一的名称。
+Auto detects each capture’s model.	自动检测每个拍摄文件的型号。
+Overrides apply to every scanned capture.	覆盖值将应用于所有已扫描的拍摄文件。
+Choose which targets to solve; requires a configured solver.	选择要解析的目标；需要已配置的解析器。
+Choose which acquisition sessions to analyse.	选择要分析的采集会话。
+Measured work by stage; concurrent times can overlap.	按阶段测量的工作量；并发时间可能重叠。
+Import timings and error diagnostics.	导入耗时和错误诊断。
+Stop safely; completed imports remain.	安全停止；已完成的导入将保留。
+Ctrl/Shift selects files; right-click opens file actions.	按住 Ctrl/Shift 可选择文件；右键单击可执行文件操作。
+Review scan results. Row selection does not limit imports; search and filters do.	审阅扫描结果。选择行不会限制导入；导入范围由搜索和筛选器决定。
+Capture source folder. Scan before importing.	拍摄源文件夹。请在导入前扫描。
+Edit metadata for these files.	编辑这些文件的元数据。
+Check rejection markers and file integrity.	检查剔除标记和文件完整性。
+Back	上一步
+Next	下一步
+AstroArchive: first import	AstroArchive：首次导入
+AstroArchive walkthrough	AstroArchive 交互式引导
+Walkthrough instructions	引导说明
+Previous step.	上一步。
+Next step (Enter).	下一步 (Enter)。
+Open this step’s menu or settings.	打开此步骤的菜单或设置。
+Close walkthrough.	关闭引导。
+Finish	完成
+Switch pages from the toolbar	从工具栏切换页面
+Try the page selector	试试页面选择器
+Use the purple **PAGE** selector to move around AstroArchive. It sits beside the toolbar, or below it in smaller windows.\\\n\\\n- Choose **Repository**, **Edited** or **Import**.\\\n- Search, filters, selections and import progress stay in place.\\\n- Use `Ctrl+1–3` to select a page or `Ctrl+Tab` to cycle pages.	使用紫色的**页面**选择器在 AstroArchive 中切换。它位于工具栏旁边，在较小的窗口中则位于工具栏下方。\\\n\\\n- 选择**存储库**、**Edited** 或**导入**。\\\n- 搜索、筛选器、所选内容和导入进度将保持不变。\\\n- 使用 `Ctrl+1–3` 选择页面，或使用 `Ctrl+Tab` 循环切换页面。
+Open Preferences	打开首选项
+Your repository holds verified capture copies and the archive index.\\\n\\\n1. Open **Settings → General**.\\\n2. Choose your archive folder.\\\n\\\nClick the repository path on the main page to open it in Explorer.	你的存储库保存已验证的拍摄文件副本和存档索引。\\\n\\\n1. 打开**设置 → 常规**。\\\n2. 选择你的存档文件夹。\\\n\\\n单击主页面上的存储库路径，可在文件资源管理器中将其打开。
+Select a telescope or source folder	选择望远镜或源文件夹
+Open Import menu	打开“导入”菜单
+Review before importing	导入前审阅
+Open review and import options	打开审阅和导入选项
+Check each file’s **status** and **review reason** in the scan table.\\\n\\\n- **Review and repair** opens flagged captures and transfer retries.\\\n- **Import options** controls analysis and original removal.\\\n- The policy summary stays visible. **Originals are kept by default.**	在扫描表格中检查每个文件的**状态**和**审阅原因**。\\\n\\\n- **审阅和修复**可打开已标记的拍摄文件和传输重试。\\\n- **导入选项**控制分析和原始文件删除。\\\n- 策略摘要始终可见。**默认保留原始文件。**
+Import verified copies	导入已验证的副本
+Show import actions	显示导入操作
+Import copies ready files from the **filtered scan** and verifies their checksums.\n\n- Already archived content is skipped.\n- Progress and timing appear during the job.\n- **Cancel** stops safely after the current operation.\n\nThis walkthrough never starts an import for you.	导入操作会从**筛选后的扫描结果**中复制就绪文件，并验证其校验和。\n\n- 已归档的内容将被跳过。\n- 作业期间会显示进度和耗时。\n- **取消**会在当前操作完成后安全停止。\n\n此引导绝不会替你开始导入。
+Browse, preview and sort	浏览、预览和排序
+Open Repository view options	打开“存储库”视图选项
+Export a stacking project	导出叠加项目
+Open Export menu	打开“导出”菜单
+Make AstroArchive comfortable	让 AstroArchive 用起来更舒适
+Open accessibility preferences	打开辅助功能首选项
+Open **Settings** for Preferences.\n\n- **General** sets appearance and the repository.\n- **Accessibility** adjusts text, rows, contrast and motion.\n- **Guide** opens searchable help, this walkthrough and About AstroArchive.\n- Press `F1` for help on the current page.	打开**设置**以访问首选项。\n\n- **常规**用于设置外观和存储库。\n- **辅助功能**可调整文本、行、对比度和动态效果。\n- **指南**可打开可搜索的帮助、此引导和“关于 AstroArchive”。\n- 按 `F1` 可获取当前页面的帮助。
+About AstroArchive	关于 AstroArchive
+A desktop archive for astronomical images: verified imports, searchable capture metadata, image previews and export projects for your processing tools.	一款用于天文图像的桌面存档软件：提供经过验证的导入、可搜索的拍摄元数据、图像预览，以及适用于你的处理工具的导出项目。
+Created by Ari J. Guest. Learn more about the author and their work at arijguest.com.	由 Ari J. Guest 创建。访问 arijguest.com，详细了解作者及其作品。
+Visit arijguest.com	访问 arijguest.com
+Source code and releases	源代码和版本发布
+Software licence	软件许可证
+Copyright 2026 Ari J. Guest. AstroArchive is source-available under the PolyForm Noncommercial License 1.0.0. Noncommercial use, modification and sharing are permitted under its terms. Commercial use, including resale outside the permitted purposes, requires separate permission.	版权所有 2026 Ari J. Guest。AstroArchive 依据 PolyForm Noncommercial License 1.0.0 以源代码可用方式提供。在遵守其条款的前提下，允许非商业性使用、修改和分享。商业用途（包括在允许目的之外的转售）需要另行获得许可。
+Read software licence (offline)	阅读软件许可证（离线）
+Commercial licensing enquiries	商业许可咨询
+Catalogue acknowledgements	星表致谢
+Target names and positions use OpenNGC (CC BY-SA 4.0); observing towns and cities use GeoNames (CC BY 4.0); constellation figures use D3-Celestial (BSD 3-clause). These datasets retain their own licences; their notices are included with the installation. Original image data remains in your repository; derived exports are identified separately.	目标名称和位置使用 OpenNGC（CC BY-SA 4.0）；观测城镇和城市使用 GeoNames（CC BY 4.0）；星座图形使用 D3-Celestial（BSD 3-clause）。这些数据集保留各自的许可证，其声明随安装一并提供。原始图像数据保留在你的存储库中；派生导出会单独标识。
+AstroArchive software licence	AstroArchive 软件许可证
+Third-party data keeps its separate licences. Your images and processing outputs are not relicensed by using AstroArchive.	第三方数据保留其各自的许可证。使用 AstroArchive 不会改变你的图像和处理输出的许可。
+Licensing summary and third-party notices	许可摘要和第三方声明
+Waxing crescent	蛾眉月
+Waxing gibbous	盈凸月
+Waning crescent	残月
+Waning gibbous	亏凸月
+FILTERS	滤镜
+Moon	月球
+below horizon	地平线以下
+{#0} subs	{0} 个子帧
+{#0} sub	{0} 个子帧
+{#0} stacks	{0} 个叠加图
+{#0} stack	{0} 个叠加图
+{#0} videos	{0} 个视频
+{#0} video	{0} 个视频
+{#0} sessions	{0} 个会话
+{#0} session	{0} 个会话
+{#0} captures	{0} 个拍摄文件
+{#0} capture	{0} 个拍摄文件
+{#0} files	{0} 个文件
+{#0} file	{0} 个文件
+{#0} nights	{0} 晚
+{#0} night	{0} 晚
+{#0} selected	已选择 {0} 项
+{#0} files selected	已选择 {0} 个文件
+{#0} files in view	视图中有 {0} 个文件
+{#0} dates unknown	{0} 个日期未知
+{#0} targets	{0} 个目标
+Import {#0} files	导入 {0} 个文件
+Import {#0} file	导入 {0} 个文件
+Review {#0} files	审阅 {0} 个文件
+Retry {#0} failed imports	重试 {0} 个失败的导入
+Retry {#0} failed import	重试 {0} 个失败的导入
+{0} illuminated	照亮比例 {0}
+{0} apart	相距 {0}
+Moon: {0}	月球：{0}
+Alt {#0}°	高度角 {0}°
+Repository size {#0} {1}	存储库大小 {0} {1}
+Captures {#0} {1}	拍摄文件 {0} {1}
+Edited {#0} {1}	Edited {0} {1}
+Dump {#0} {1}	Dump {0} {1}
+Archive data {#0} {1}	存档数据 {0} {1}
+Elapsed {0}	已用时间 {0}
+ETA ~{0}	预计剩余 ~{0}
+Backup verified: {#0} files	备份已验证：{0} 个文件
+Verified {#0} files	已验证 {0} 个文件
+Restored and verified {#0} files into {1}.	已将 {0} 个文件还原到 {1} 并完成验证。
+{#0} / {#1} files	{0}/{1} 个文件
+{#0} inspected	已检查 {0} 个
+{#0} missing values found in {#1} files	在 {1} 个文件中发现 {0} 个缺失值
+Tags and notes saved for {#0} files	已保存 {0} 个文件的标签和备注
+Tags and notes saved for {#0} file	已保存 {0} 个文件的标签和备注
+Automatic daily backups are on.	已开启每日自动备份。
+Automatic weekly backups are on.	已开启每周自动备份。
+Automatic monthly backups are on.	已开启每月自动备份。
+Connect the backup drive for {0}, or choose another folder in Settings > Backups.	请连接 {0} 的备份驱动器，或在“设置 > 备份”中选择其他文件夹。
+A folder named {0} already exists there. Choose another name.	该位置已存在名为 {0} 的文件夹。请选择其他名称。
+This archive uses {0}.	此存档使用 {0}。
+Saved {0}.	已保存 {0}。
+This image could not be read ({0}). The card uses a star field instead.	无法读取此图像（{0}）。卡片将改用星空背景。
+{#0} archived files skipped in {#1} folders	已跳过 {1} 个文件夹中的 {0} 个已归档文件
+Device	设备
+Dimensions	尺寸
+Optical filter	光学滤镜
+Review type	审阅类型
+Tag	标签
+Not starred	未加星标
+No tags	无标签
+Passed	通过
+Not screened	未筛查
+Screened	已筛查
+Rejected / reference	剔除/参考
+File integrity problem	文件完整性问题
+Telescope rejected / reference	望远镜剔除/参考
+Transfer failure	传输失败
+Capabilities	功能
+Backup complete	备份完成
+Creating backup	正在创建备份
+Full	完整
+Incremental	增量
+Preparing backup	正在准备备份
+Saving current archive database	正在保存当前存档数据库
+Verifying backup	正在验证备份
+Disabling	正在禁用
+Enabling	正在启用
+Discovery	发现
+Duplicate checking	重复项检查
+Hashing	哈希计算
+Header open/read	文件头打开/读取
+Reading	读取
+Starting	启动
+Verification	验证
+Copying	复制
+Index loading	索引加载
+Indexed	已编入索引
+Scanning	扫描
+Changed	已更改
+Missing	缺失
+Verified	已验证
+Duplicate	重复
+Duplicate (cached)	重复（已缓存）
+New version (same name)	新版本（同名）
+Loading previous imports for this source	正在加载此源之前的导入
+Saving scan metadata cache	正在保存扫描元数据缓存
+Saving final portable index	正在保存最终的便携式索引
+Saving final portable index and report	正在保存最终的便携式索引和报告
+Saving portable index	正在保存便携式索引
+Source cleanup	源清理
+Screening files	正在筛查文件
+Reviewing edited images	正在审阅已编辑图像
+Checking Edited duplicates	正在检查 Edited 重复项
+Exporting Edited files	正在导出 Edited 文件
+Deleting files	正在删除文件
+Creating edited working copy	正在创建 Edited 工作副本
+Building file list	正在生成文件列表
+Copying project	正在复制项目
+Finishing verified export	正在完成已验证的导出
+Preparing export	正在准备导出
+Reading acquisition dates	正在读取采集日期
+Preparing animation palette	正在准备动画调色板
+Download failed	下载失败
+Download stopped	下载已停止
+Downloaded	已下载
+Reconnecting to telescope	正在重新连接望远镜
+Scanning telescope	正在扫描望远镜
+Waiting for folder	正在等待文件夹
+Waiting for telescope download	正在等待望远镜下载
+Waiting to archive	正在等待存档
+Decoding representative image for the solver	正在为解析器解码代表图像
+Matching major catalogue targets	正在匹配主要星表目标
+Preparing temporary FITS copy	正在准备临时 FITS 副本
+Reading ASTAP solution	正在读取 ASTAP 解析结果
+Reading image size and scale	正在读取图像尺寸和像素比例
+Reading solved coordinates and field geometry	正在读取解析坐标和视场几何信息
+Preparing representative image	正在准备代表图像
+Field solved	视场已解析
+Pending	待处理
+Choose a target	选择目标
+Original deleted after verified import	验证导入后已删除原始文件
+Original retained	已保留原始文件
+Original retained (calibration frame)	已保留原始文件（校准帧）
+Original retained (verified duplicate)	已保留原始文件（已验证的重复项）
+User assigned during import	导入时由用户指定
+Solar system	太阳系
+Nebulae	星云
+Galaxies	星系
+Star clusters	星团
+Stars	恒星
+Meteors	流星
+Other targets	其他目标
+Unidentified	未识别
+All Targets	所有目标
+Not selected	未选择
+Previously saved location	之前保存的位置
+Unknown date	日期未知
+Dates unknown	日期未知
+Unknown camera	未知相机
+Unknown device	未知设备
+Unknown filter	未知滤镜
+Other / unknown	其他/未知
+Select folder	选择文件夹
+No diagnostics available	没有可用的诊断信息
+Video duration unavailable	视频时长不可用
+Acquisition dates unavailable	采集日期不可用
+Open the restored archive now?	要立即打开还原的存档吗？
+Excluded	已排除
+Reimport allowed	允许重新导入
+Reimport explicitly allowed	已明确允许重新导入
+Accepted	已接受
+Partial match	部分匹配
+Rejected	已拒绝
+Registered	已配准
+Starred files	已加星标的文件
+Open in app	在应用中打开
+Files…	文件…
+Open in app…	在应用中打开…
+Export options	导出选项
+Choose folder	选择文件夹
+Create new folder	新建文件夹
+Select files to export.	请选择要导出的文件。
+Copies the original files byte for byte and verifies every copy. Existing files are kept; duplicate names receive a numbered suffix.	逐字节复制原始文件，并验证每个副本。现有文件将保留；重名文件将添加数字后缀。
+Add metadata	添加元数据
+Groups lights by compatible capture settings, adds matching calibration files when chosen, and verifies every copy. Stacking happens in your processing software.	按兼容的拍摄设置对亮场分组，在选择时添加匹配的校准文件，并验证每个副本。叠加需在你的处理软件中进行。
+Select lights or stacks to prepare a stacking folder.	请选择亮场或叠加图以准备叠加文件夹。
+Add AstroBin acquisition CSV	添加 AstroBin 采集 CSV
+Writes astrobin_acquisition.csv and notes from the original metadata of the exported lights, stacks and calibration frames.	根据导出的亮场、叠加图和校准帧的原始元数据，写入 astrobin_acquisition.csv 和说明。
+AstroBin acquisition notes	AstroBin 采集说明
+Opens verified copies in PixInsight, Siril, DSS and other processing apps.	在 PixInsight、Siril、DSS 和其他处理应用中打开已验证的副本。
+Copies and verifies the original files, then opens your chosen app.	复制并验证原始文件，然后打开你选择的应用。
+No destination supports this selection. Files can copy the originals; convert to a supported format or select fewer images to open them in an app.	没有目标位置支持此选择。“文件”可以复制原始文件；若要在应用中打开，请转换为受支持的格式或选择较少的图像。
+Application settings…	应用程序设置…
+Select Edited files to export.	请选择要导出的 Edited 文件。
+Copies the selected images in their original format and verifies every copy. Existing files are kept; duplicate names receive a numbered suffix.	以原始格式复制所选图像，并验证每个副本。现有文件将保留；重名文件将添加数字后缀。
+Save CSV…	保存 CSV…
+Builds AstroBin's acquisition table from the original archive metadata, keeping details that processing can lose. No image files are exported.	根据存档的原始元数据生成 AstroBin 采集数据表，保留处理过程中可能丢失的细节。不会导出任何图像文件。
+Select lights, stacks or recordings to describe their acquisition.	请选择亮场、叠加图或录像以描述其采集信息。
+Count matching calibration frames	统计匹配的校准帧
+Counts archived darks, flats, flat darks and bias frames that match the selected subs. Each frame is counted once.	统计与所选子帧匹配的已归档暗场、平场、暗平场和偏置帧。每帧只计一次。
+Each target needs its own AstroBin image. Planetary recordings use AstroBin's video columns.	每个目标都需要单独的 AstroBin 图像。行星录像使用 AstroBin 的视频列。
+AstroBin CSV preview	AstroBin CSV 预览
+Copy CSV	复制 CSV
+Copy the CSV to paste into AstroBin's acquisition import.	复制 CSV，以粘贴到 AstroBin 的采集数据导入中。
+Copy notes	复制说明
+Copy the notes about blank or uncertain values.	复制有关空白值或不确定值的说明。
+No acquisition rows.	没有采集数据行。
+No blank or uncertain values.	没有空白值或不确定值。
+CSV copied. Paste it into AstroBin's acquisition CSV import.	CSV 已复制。请将其粘贴到 AstroBin 的采集 CSV 导入中。
+Notes copied.	说明已复制。
+AstroBin filter IDs	AstroBin 滤镜 ID
+AstroBin identifies filters by number. Paste the filter's AstroBin page address or its number. IDs are remembered.	AstroBin 按编号识别滤镜。请粘贴该滤镜的 AstroBin 页面地址或其编号。系统会记住这些 ID。
+No acquisition rows can be written. See the notes above.	无法写入任何采集数据行。请参阅上方的说明。
+A spreadsheet of archive metadata: targets, equipment, exposures, dates, checksums and paths, for searching or record keeping. No image files are exported.	包含存档元数据（目标、设备、曝光、日期、校验和及路径）的电子表格，可用于搜索或记录保存。不会导出任何图像文件。
+Selected files	所选文件
+Files in view	视图中的文件
+Rows	行
+Export…	导出…
+Copy and verify grouped inputs into a ready-to-stack folder.	将分组的输入文件复制到可直接叠加的文件夹并进行验证。
+Build AstroBin's acquisition CSV from archived metadata; no images are copied.	根据已归档的元数据生成 AstroBin 采集 CSV；不复制任何图像。
+Save CSV	保存 CSV
+Export preferences	导出首选项
+Default export folder, Siril and application locations.	默认导出文件夹、Siril 和应用程序位置。
+Choose an existing folder outside the repository.	请选择存储库以外的现有文件夹。
+Application settings	应用程序设置
+Open Export for selected files, or all visible files if none selected.	为所选文件打开“导出”；如果未选择任何文件，则为所有可见文件打开。
+Open Export with an option chosen.	打开“导出”并预先选定一个选项。
+Select captures, then choose **Export**: copy originals, prepare a ready-to-stack folder, open them in an app, or create an AstroBin acquisition CSV.	选择拍摄文件，然后选择**导出**：复制原始文件、准备可直接叠加的文件夹、在应用中打开，或创建 AstroBin 采集 CSV。
+No files selected	未选择文件
+Inputs with different calibration sets use separate folders.	校准文件组不同的输入文件将使用不同的文件夹。
+Export selection: {0}	导出内容：{0}
+{#0} selected files	{0} 个所选文件
+{#0} selected file	{0} 个所选文件
+{#0} file in view	视图中有 {0} 个文件
+{#0} calibration frames	{0} 个校准帧
+{#0} calibration frame	{0} 个校准帧
+{#0} other files	{0} 个其他文件
+{#0} other file	{0} 个其他文件
+{#0} recordings	{0} 个录像
+{#0} recording	{0} 个录像
+{0} and {#1} more targets	{0} 及另外 {1} 个目标
+Entire repository ({0})	整个存储库（{0}）
+{#0} catalogue rows exported.	已导出 {0} 行目录数据。
+AstroBin CSV saved: {0}	AstroBin CSV 已保存：{0}
+Exported to {0}	已导出到 {0}
+{#0} selected Edited files	{0} 个所选 Edited 文件
+1 selected Edited file	1 个所选 Edited 文件
+{#0} matching calibration files.	{0} 个匹配的校准文件。
+{#0} matching calibration file.	{0} 个匹配的校准文件。
+{#0} subs have unknown processing state. Confirm they are uncalibrated to include their calibration files.	{0} 个子帧的处理状态未知。请确认它们未经校准，以便包括其校准文件。
+Theme|Light	浅色
+Theme|Dark	深色
+Theme|System	跟随系统
+PAGE	页面
+PREVIEW	预览
+TARGETS	目标
+FILES	文件
+BYTES	字节
+MODEL	型号
+MODIFIED	修改时间
+ORIGINAL	原始文件
+SECONDS	秒
+STAGE	阶段
+SUBS	子帧
+Astrophotography,	天体摄影，
+organised.	井井有条。
+Delete verified new/restored source images; keep calibration originals. Cloud deletions sync.	删除已验证的新增或恢复的源图像；保留校准原始文件。云端删除会同步。
+Import new captures from this folder as your capture software saves them.	在采集软件保存新拍摄文件时，从此文件夹导入它们。
+Watch folder for new captures	监视文件夹中的新拍摄文件
+New telescope...	新望远镜...
+{#0} ready ({1})	{0} 个就绪（{1}）
+{#0} duplicates	{0} 个重复
+{#0} previously deleted	{0} 个先前已删除
+{#0} telescope rejected/reference	{0} 个望远镜剔除/参考
+{#0} file problems	{0} 个文件问题
+{#0} transfer failures	{0} 个传输失败
+{#0} not screened	{0} 个未筛查
+Share {0}	分享 {0}
+
+# Offline target information controls
+TARGET INFO	目标信息
+Target information	目标信息
+Show target info	显示目标信息
+LOCATION IN THE SKY	天空位置
+Reset sky view	重置星图
+Sources and catalogue details	来源和星表详情
+Image credit · {0}	图片署名 · {0}
+Original image and full credit	原始图片和完整署名
+Object source	天体来源
+Catalogue names: {0}	星表名称：{0}
+Source for: {0}	来源对应：{0}
+Parent	主天体
+RA (J2000)	赤经 (J2000)
+Dec (J2000)	赤纬 (J2000)
+Apparent size	视大小
+Magnitude ({0})	星等（{0}）
+Explore your targets	探索目标
+Loading target information…	正在加载目标信息…
+Select a file to return to its image preview.	选择文件即可返回图像预览。
+Catalogue position · drag to rotate. Scroll or pinch over the map to zoom.	星表位置 · 拖动可旋转。在星图上滚动或双指缩放。
+Catalogue coordinates are not available for this target.	此目标没有可用的星表坐标。
+Catalogue summary only. The extended description is awaiting review.	仅显示星表概要。详细描述有待审核。
+Description checked against its cited sources.	描述已根据所引来源核验。
+A checked overview is not available for this target yet.	此目标尚无经过核验的概述。
+Historical designation · identity is disputed.	历史名称 · 身份存在争议。
+Choose a target on the left to see its overview and sky location. Select a file to preview your image.	在左侧选择目标以查看概述和天空位置。选择文件以预览图像。
+Calibration frames do not have a celestial target. Select a file to preview it.	校准帧没有天体目标。选择文件以预览。
+Identify this target to see its catalogue information. Select a file to preview it.	识别此目标以查看星表信息。选择文件以预览。
+Target information is unavailable. You can still select and preview your files.	目标信息不可用。你仍可选择和预览文件。
+
+# Target details and analytics output modes
+No information is available for this target.	此目标没有可用信息。
+Full image credit	完整图片署名
+Images & documents	图像和文档
+Video & GIF	视频和 GIF
+Not out (below the horizon)	未升起（在地平线下方）
+Output	输出
+Export as	导出为
+Chart type	图表类型
+Donut	环形
+Bars	条形
+Columns	柱形
+Recommended	推荐
+Target cards	目标卡片
+Share your imaged targets	分享你拍摄的目标
+Card layout	卡片布局
+Card resolution	卡片分辨率
+Card credit (optional)	卡片署名 (可选)
+Resolution	分辨率
+Standard	标准
+Adjust image…	调整图像…
+Adjust image position	调整图像位置
+Adjust target card	调整目标卡片
+Horizontal position	水平位置
+Vertical position	垂直位置
+Reset position	重置位置
+Use this image	使用此图像
+More cards & video…	更多卡片和视频…
+Choose target cards	选择目标卡片
+Make cards for	为以下目标制作卡片
+My top targets	我的热门目标
+Targets I choose	我选择的目标
+How many	数量
+Rank by	排序依据
+Integration time	累计曝光时间
+Find a target	查找目标
+Use these targets	使用这些目标
+Time per scene	每个场景的时长
+Export cards…	导出卡片…
+Export card video…	导出卡片视频…
+All cards	所有卡片
+ASTAP is much quicker and highly recommended. Astrometry.net solves can wait minutes in a shared online queue.	ASTAP 速度快得多，强烈推荐。Astrometry.net 解析可能需要在共享在线队列中等待数分钟。
+Choose card targets	选择卡片目标
+QUALITY	质量
+EXPOSURE FIT	曝光适度
+Analyse image quality…	分析图像质量…
+Re-measure image quality…	重新测量图像质量…
+Analyse image quality	分析图像质量
+Quality rank	质量排名
+Exposure fit	曝光适度
+Quality score (0 to 100)	质量分数（0 至 100）
+Top 10%	前 10%
+Top 25%	前 25%
+Top half	前一半
+Bottom half	后一半
+Weakest 25%	最弱 25%
+Has quality flags	带质量警示
+Not scored	未评分
+Under	曝光不足
+Good	适度
+Over	曝光过度
+Image quality	图像质量
+Measure image quality after each import	每次导入后测量图像质量
+Compare deep-sky frames across the whole target instead of each session	按整个目标而非每个会话比较深空帧
+Nothing to measure	没有可测量的内容
+OVERVIEW	概述
+IMAGING NOTES	拍摄提示
+PARAMETERS	参数
+Orbit	轨道
+Diameter	直径
+Mass	质量
+Major moons	主要卫星
+{0} AU from the Sun · {1} days	距太阳 {0} AU · {1} 天
+{0} AU from the Sun · {1} years	距太阳 {0} AU · {1} 年
+SOURCES	来源
+Solar eclipse	日食
+Lunar eclipse	月食
+Solar Eclipse	日食
+Lunar Eclipse	月食
+Orbit type	轨道类型
+Perihelion	近日点
+Perihelion date	过近日点日期
+Orbital period	公转周期
+Eccentricity	偏心率
+{0} AU from the Sun	距太阳 {0} AU
+{0} years per orbit	{0} 年绕行一周
+Halley-type	哈雷型
+Jupiter-family	木星族
+Encke-type	恩克型
+Long-period	长周期
+Near-parabolic	近抛物线
+Hyperbolic (interstellar)	双曲线（星际）
+Aphelion	远日点
+Show targets in frame	显示画面中的目标
+Hide targets in frame	隐藏画面中的目标
+Field geometry is unusable for marking targets	视场几何无法用于标出目标
+This capture has no plate solution	此拍摄没有天文定位解算结果
+This capture has only approximate pointing	此拍摄只有大致指向
+This image has no plate solution	此图像没有天文定位解算结果
+This image has no plate solution in its header	此图像的文件头中没有天文定位解算结果
+No catalogue objects in this field	此视场中没有星表天体
+Plate solve…	天文定位解算…
+Reading the image header…	正在读取图像文件头…
+On	开
+Telescopes	望远镜
+Reports	报告
+Clean up	清理
+Refresh USB devices	刷新 USB 设备
+Live import underway…	正在实时导入…
+Catalogue CSV…	目录 CSV…
+Stacking folder…	叠加文件夹…
+AstroBin CSV…	AstroBin CSV…
+Save, rename or recover telescope profiles, or look for USB telescopes.	保存、重命名或恢复望远镜配置文件，或查找 USB 望远镜。
+Look for telescopes connected by USB.	查找通过 USB 连接的望远镜。
+Show the latest scan and import reports.	显示最新的扫描和导入报告。
+Complete metadata, verify checksums, reindex and review deletions.	补全元数据、验证校验和、重新索引并查看删除记录。
+Permanently delete failed, non-raw or all archive files.	永久删除失败文件、非原始格式文件或全部存档文件。
+Show timings and status for the last operation.	显示上一次操作的耗时和状态。
+# Analytics options panel, remembered choices and chart customisation
+Combined document	合并文档
+All six charts in one document	全部六张图表合为一个文档
+{#0} of 6 charts in one document	六张中的 {0} 张图表合为一个文档
+{#0} of 6 charts	六张中的 {0} 张图表
+{#0} of 6 charts · Combined preview	六张中的 {0} 张图表 · 合并预览
+{#0} of 6 charts · Social pages	六张中的 {0} 张图表 · 社交媒体页面
+Combined preview	合并预览
+Social pages	社交媒体页面
+Export preview	导出预览
+Customised	已自定义
+This chart	此图表
+Charts in the document	文档中的图表
+Document	文档
+Your choices	你的选择
+Order	排序
+Largest first	从大到小
+Smallest first	从小到大
+A–Z	按名称
+Chart title	图表标题
+Chart subtitle	图表副标题
+Reset this chart	重置此图表
+Colour palette	配色方案
+Nebula	星云
+Aurora	极光
+Colour-blind safe	色盲友好
+Hide options	隐藏选项
+Show options	显示选项
+Reset all options…	重置所有选项…
+Reset all options	重置所有选项
+Keep at least one chart in the combined document.	合并文档中至少要保留一张图表。
+Options reset to their defaults.	选项已恢复为默认值。
+Exported all six charts	已导出全部六张图表
+Exported {#0} of 6 charts	已导出六张中的 {0} 张图表
+Exported chart	已导出图表
+Rank groups by size or alphabetically. Donuts and columns keep the largest groups and gather the rest into Other.	按大小或字母顺序排列分组。环形图和柱形图保留最大的分组，其余合并显示。
+Leave blank to use the standard title.	留空则使用标准标题。
+Leave blank to use the standard description.	留空则使用标准说明。
+Return this chart's type, order, title and subtitle to their defaults.	将此图表的类型、排序、标题和副标题恢复为默认值。
+Choose the charts that go into the combined document and Export all. At least one chart stays included.	选择要放入合并文档和“全部导出”的图表。至少保留一张图表。
+Shown in each chart's footer and in exported file details. It starts as the repository folder name.	显示在每张图表的页脚和导出文件的详细信息中。初始为存储库文件夹名称。
+Colours for chart series in the preview and every export. Colour-blind safe uses the Okabe–Ito hues. Lettering keeps the document theme's colours.	预览和每次导出中数据系列的颜色。色盲友好使用 Okabe–Ito 配色。文字保留文档主题的颜色。
+Give the preview the whole width, or bring back the chart, document and export options.	让预览占满整个宽度，或重新显示图表、文档和导出选项。
+Save the charts chosen for the combined document in one file, using the same telescope and date scope.	将为合并文档选择的图表保存到一个文件中，使用相同的望远镜和日期范围。
+Return every chart, document and export choice to its default. The telescope and date scope are not changed.	将所有图表、文档和导出选择恢复为默认值。望远镜和日期范围不变。
+Return every chart, document and export choice to its default? The telescope and date scope are not changed.	将所有图表、文档和导出选择恢复为默认值吗？望远镜和日期范围不变。
+Chart types, titles, order, palette, document and export choices are remembered for next time. Ctrl+E exports; Ctrl+Shift+E exports the combined document.	图表类型、标题、排序、配色、文档和导出选择会保存到下次使用。Ctrl+E 导出；Ctrl+Shift+E 导出合并文档。
+Choose targets in the options panel; adjust any card's image above the preview.	在选项面板中选择目标；在预览上方调整任意卡片的图像。
+Export options · Resolution	导出选项 · 分辨率
+Export options · Timing and video size	导出选项 · 时长和视频大小
+# Sky map clicks and eclipse details
+Total solar eclipse	日全食
+Annular solar eclipse	日环食
+Partial solar eclipse	日偏食
+Total lunar eclipse	月全食
+Partial lunar eclipse	月偏食
+Penumbral lunar eclipse	半影月食
+Sun covered at capture	拍摄时太阳被遮挡
+Moon in Earth's shadow at capture	拍摄时月球位于地球本影中
+Moon in Earth's outer shadow at capture	拍摄时月球位于地球半影中
+Maximum	最大
+Began	开始
+Ended	结束
+Duration	持续时间
+Partial phase	偏食阶段
+Totality	全食
+Annularity	环食
+{#0}% at {1}	{1} 时 {0}%
+Click a constellation to name it, or the Moon, Sun or target for capture details.	点击星座可显示其名称；点击月球、太阳或目标可打开拍摄详情。
+Coverage from first to last contact.	从初亏到复圆的遮挡程度。
+The marker shows the capture.	标记表示拍摄时刻。
+Eclipse coverage over time	食分随时间变化
+Eclipse times are for the observing location.	食的时间以观测地点为准。
+Eclipse times run from the Moon entering Earth's outer shadow to leaving it.	食的时间从月球进入地球半影开始，到离开半影为止。
+Eclipse coverage comes from the bundled Moon and Sun models at the recorded time; check the capture clock if it looks wrong.	遮挡程度由内置的月球和太阳模型按记录时间计算；如看起来不对，请检查拍摄时间。
+# Target card descriptions, drag and zoom, and the preview loading pane
+Preparing preview…	正在准备预览…
+Preparing preview	正在准备预览
+Preparing target cards…	正在准备目标卡片…
+Adjust card…	调整卡片…
+Choose another image of this target, including any Edited image, adjust its zoom and position, and add a short description.	选择此目标的其他图像 (包括任何已编辑图像)，调整其缩放和位置，并添加简短说明。
+Drag the preview to move the image, and hold Ctrl while scrolling to zoom.	拖动预览可移动图像，按住 Ctrl 滚动可缩放。
+Short description (optional)	简短说明 (可选)
+A line or two under the target name, in card images and videos. Leave blank for none.	在卡片图像和视频中显示于目标名称下方的一两行文字。留空则不显示。
+↺ Rotate left	↺ 向左旋转
+Rotate right ↻	向右旋转 ↻
+Rotate left	向左旋转
+Rotate right	向右旋转
+Turn the image a quarter turn anticlockwise.	将图像逆时针旋转 90°。
+Turn the image a quarter turn clockwise.	将图像顺时针旋转 90°。
+Set capture town / city…	设置拍摄城镇/城市…
+Capture town / city	拍摄城镇/城市
+Choose where these files were captured. A chosen town or city replaces any capture location recorded in the files. Without a choice, the recorded location is used, then your observing town / city from Settings.	选择这些文件的拍摄地点。所选城镇或城市会替代文件中记录的拍摄位置。未选择时，使用记录的位置，然后使用设置中的观测城镇/城市。
+Location used for sky views, Stellarium and eclipse times.	用于星空视图、Stellarium 和食相时间的位置。
+Use default location	使用默认位置
+Default location	默认位置
+Save location	保存位置
+Mixed	混合
+Not set	未设置
+Recorded in file metadata	记录在文件元数据中
+Settings default	设置中的默认值
+Chosen capture town / city	所选拍摄城镇/城市
+Target below horizon	目标位于地平线以下
+Set the capture town / city for this file (right-click › Set capture town / city…), or correct the capture timezone in metadata.	请为此文件设置拍摄城镇/城市（右键 › 设置拍摄城镇/城市…），或在元数据中更正拍摄时区。
+Set capture town / city for selected…	为所选项设置拍摄城镇/城市…
+Targets below the horizon at the predicted capture time usually need the capture town / city or timezone set.	在推测拍摄时间位于地平线以下的目标，通常需要设置拍摄城镇/城市或时区。
+
+# Information pane, 3.2.6
+Credits	图片署名
+FUN FACT	趣闻
+
+# Capture checks, 3.2.6
+Sun obscured	太阳遮蔽率
+Check capture metadata	检查拍摄元数据
+Suspected obstruction	疑似遮挡
