@@ -13,8 +13,10 @@ namespace AstroArchive {
    var button=B("StellariumButton");if(button==null)return;
    var view=repo==null?null:StellariumViewFor(previewFrame);button.IsEnabled=view!=null;button.ToolTip=Localization.T(Stellarium.Tooltip(view));
   }
-  void OpenInStellarium(){
-   var view=StellariumViewFor(previewFrame);if(view==null)return;
+  void OpenInStellarium(){OpenStellariumView(StellariumViewFor(previewFrame));}
+  // Also used by the target information pane, which opens a catalogue position or a Solar System body by name.
+  void OpenStellariumView(StellariumView view){
+   if(view==null)return;
    string script=Stellarium.Script(view);
    if(Stellarium.TrySend(script,Stellarium.RemotePort,700))return;
    string executable=Stellarium.Resolve(settings);

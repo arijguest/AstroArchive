@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
@@ -12,11 +13,18 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 
 namespace AstroArchive {
+ // A target listed inside a section (a comet under Comets), with its file count.
+ public sealed class TargetInfoMember {public string Target,Label,Detail;}
  // One scrolling surface keeps the image, facts, map and references reachable.
  public sealed class TargetInfoView:UserControl {
   readonly StackPanel content=new StackPanel();readonly ScrollViewer scroll;
   Grid body,mapHost;StackPanel article,mapPanel;SkyGlobeView globe;Image photo;Button reset;
   public Action<string> ChooseObject;
+  // A section such as Comets lists the user's targets inside it; choosing one reads that target's page.
+  public Action<string> ChooseMember;
+  public Action GoBack;
+  // Shown only when a card has something Stellarium can point at.
+  public Action<StellariumView> OpenInStellarium;
   public string CurrentId{get;private set;}
   public TargetInfoView(){
    // Always reserve the scrollbar gutter: with Auto, text rewrapping at the narrower width toggled the bar on and off.
@@ -40,12 +48,19 @@ namespace AstroArchive {
    Begin(target);content.Children.Add(Text(result.Message,"Muted"));
    foreach(var card in result.Cards){string id=card.id;var button=new Button{Content=Data(Catalog.DisplayIds(card.name)+" · "+Catalog.DisplayId(card.id)+"\n"+card.type_label),HorizontalContentAlignment=HorizontalAlignment.Stretch,Margin=new Thickness(0,0,0,6),Padding=new Thickness(10,8,10,4)};AutomationProperties.SetName(button,"Read about "+card.name+" "+id);button.Click+=(s,e)=>{if(ChooseObject!=null)ChooseObject(id);};content.Children.Add(button);}
   }
-  public void ShowCard(TargetInfoCard card,string context=null){
+  public void ShowCard(TargetInfoCard card,string context=null){ShowCard(card,context,null,null,null);}
+  // membersTitle heads the list of the user's targets inside a section; back returns from a member to its section.
+  public void ShowCard(TargetInfoCard card,string context,IList<TargetInfoMember> members,string membersTitle,string back){
    Begin(Catalog.DisplayIds(card.name));CurrentId=card.id;
    string constellation=TargetInfoPresentation.Constellation(card.constellation);
    // The ID is shown once: in the heading when the object has no other name, otherwise here.
    var details=Data(TargetInfoPresentation.Tagline(card,constellation),"Muted","UiFontCaption");details.Name="ObjectDetails";content.Children.Add(details);
    if(!string.IsNullOrEmpty(context))content.Children.Add(Data(context,"Muted","UiFontCaption"));
+   var actions=new WrapPanel{Margin=new Thickness(0,0,0,4)};
+   if(!string.IsNullOrEmpty(back)&&GoBack!=null){var up=ActionButton(back,true);up.Name="BackToSection";up.Click+=(s,e)=>GoBack();actions.Children.Add(up);}
+   var stellarium=OpenInStellarium==null?null:Stellarium.ForCard(card);
+   if(stellarium!=null){var open=ActionButton("Open in Stellarium",false);open.Name="OpenInStellarium";UiHelp.Hint(open,Localization.T(Stellarium.CardTooltip(stellarium)));open.Click+=(s,e)=>OpenInStellarium(stellarium);actions.Children.Add(open);}
+   if(actions.Children.Count>0)content.Children.Add(actions);
    var curated=TargetDescriptions.For(card.id);
    if(card.identity_status=="disputed"||card.domain=="historical_designation")content.Children.Add(Text("Historical designation · identity is disputed.","Muted"));
    string summary=TargetInfoPresentation.DisplaySummary(card);string factText=curated!=null&&!string.IsNullOrWhiteSpace(curated.Fact)?curated.Fact:card.fact;
@@ -56,6 +71,10 @@ namespace AstroArchive {
     photo=new Image{Name="ObjectImage",Source=bitmap,Stretch=Stretch.Uniform,HorizontalAlignment=HorizontalAlignment.Center,Margin=new Thickness(0,2,0,6)};RenderOptions.SetBitmapScalingMode(photo,BitmapScalingMode.HighQuality);AutomationProperties.SetName(photo,card.name);content.Children.Add(photo);
     AddImageCredit(card.image);
    }catch(NotSupportedException){}catch(IOException){}catch(ArgumentException){}}
+   if(members!=null&&members.Count>0){
+    var list=Section(membersTitle??"YOUR TARGETS");list.Name="SectionMembers";content.Children.Add(list);
+    foreach(var member in members){string name=member.Target;var button=new Button{Content=Data(member.Label+"\n"+member.Detail),HorizontalContentAlignment=HorizontalAlignment.Stretch,Margin=new Thickness(0,0,0,6),Padding=new Thickness(10,8,10,4)};AutomationProperties.SetName(button,"Read about "+member.Label);button.Click+=(s,e)=>{if(ChooseMember!=null)ChooseMember(name);};content.Children.Add(button);}
+   }
    if(!string.IsNullOrWhiteSpace(factText)){
     var fact=new StackPanel();var caption=Text("FUN FACT","Muted","UiFontCaption");caption.FontWeight=FontWeights.SemiBold;fact.Children.Add(caption);fact.Children.Add(Data(factText));
     var box=Callout(fact);box.Name="FunFact";content.Children.Add(box);
@@ -74,7 +93,8 @@ namespace AstroArchive {
    if(magnitude!=null)AddFact(facts,Localization.F("Magnitude ({0})",magnitude.field.Substring(0,1)),magnitude.value.ToString("0.##",CultureInfo.InvariantCulture),Evidence(card,magnitude));
    AddParameters(facts,card);
    string imaging=TargetInfoPresentation.Imaging(card);
-   if(!string.IsNullOrWhiteSpace(imaging)){var notes=new StackPanel();notes.Children.Add(Data(imaging));article.Children.Add(Disclosure("IMAGING NOTES",notes));}
+   // Imaging notes are always shown in full, not behind a disclosure.
+   if(!string.IsNullOrWhiteSpace(imaging)){var notes=Section("IMAGING NOTES");notes.Name="ImagingNotes";article.Children.Add(notes);var text=Data(imaging);text.Name="ImagingNotesText";article.Children.Add(text);}
    if(card.domain=="deep_sky"){
     mapPanel=new StackPanel{Margin=new Thickness(0,4,0,10)};body.Children.Add(mapPanel);mapPanel.Children.Add(Section("LOCATION IN THE SKY"));
     if(ra!=null&&dec!=null){
@@ -118,7 +138,7 @@ namespace AstroArchive {
    AddFact(facts,"Diameter",TargetParameters.Diameter(set),set.HasOrbit?"Mean or equatorial diameter. NASA Planetary Fact Sheet":"Nominal solar diameter. IAU 2015 Resolution B3");
    AddFact(facts,"Mass",TargetParameters.Mass(set),set.HasOrbit?"NASA Planetary Fact Sheet":"Nominal solar mass. IAU 2015 Resolution B3");
    if(set.PerigeeKm>0)AddFact(facts,"Distance range",TargetParameters.DistanceRange(set),"Closest and farthest distance from Earth. NASA Moon Fact Sheet");
-   if(set.Gravity>0)AddFact(facts,"Surface gravity",TargetParameters.Gravity(set),"NASA Planetary Fact Sheet");
+   if(set.Gravity>0)AddFact(facts,"Surface gravity",TargetParameters.SurfaceGravity(set),"In Earth gravities (1 g = 9.80665 m/s²). NASA Planetary Fact Sheet");
    if(TargetParameters.ShowsMoonCount(set))AddFact(facts,"Known moons",set.MoonCount.ToString(CultureInfo.InvariantCulture),"Confirmed moons. NASA Solar System Exploration");
    if(set.Moons.Length>0)AddFact(facts,"Major moons",TargetParameters.Moons(set),null);
   }
@@ -145,6 +165,12 @@ namespace AstroArchive {
    var panel=new StackPanel{Margin=new Thickness(0,first?6:12,0,6)};
    if(!first){var rule=new Border{Height=1,Margin=new Thickness(0,0,0,8),Opacity=0.7};rule.SetResourceReference(Border.BackgroundProperty,"Border");panel.Children.Add(rule);}
    var caption=Text(title,"Muted","UiFontCaption");caption.FontWeight=FontWeights.SemiBold;caption.Margin=new Thickness(0);panel.Children.Add(caption);return panel;
+  }
+  // The label stays a plain interface string so the interface language translates it; the arrow is separate.
+  static Button ActionButton(string label,bool back){
+   var text=Text(label);text.Margin=new Thickness(0);var face=new StackPanel{Orientation=Orientation.Horizontal};
+   if(back){var arrow=Text("←");arrow.Margin=new Thickness(0,0,6,0);face.Children.Add(arrow);}face.Children.Add(text);
+   return new Button{Content=face,Margin=new Thickness(0,0,6,6),Padding=new Thickness(10,3,10,3),HorizontalAlignment=HorizontalAlignment.Left};
   }
   static Border Callout(UIElement child){var callout=new Border{Padding=new Thickness(10,8,10,2),CornerRadius=new CornerRadius(6),Margin=new Thickness(0,2,0,8),Child=child};callout.SetResourceReference(Border.BackgroundProperty,"SurfaceAlt");return callout;}
   static Grid Facts(){var grid=new Grid{Margin=new Thickness(0,4,0,10)};grid.ColumnDefinitions.Add(new ColumnDefinition{Width=GridLength.Auto,MaxWidth=115});grid.ColumnDefinitions.Add(new ColumnDefinition{Width=new GridLength(1,GridUnitType.Star)});return grid;}

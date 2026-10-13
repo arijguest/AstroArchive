@@ -7,12 +7,10 @@ ambiguity and citation/image metadata are preserved; prose drafts are omitted.
 import argparse
 import hashlib
 import json
-import os
-import tempfile
 from pathlib import Path
 import sqlite3
-import zipfile
 from target_image_credits import repair_image
+import target_info_overrides
 
 
 def build(database):
@@ -84,15 +82,9 @@ if __name__ == '__main__':
     parser.add_argument('database', type=Path)
     parser.add_argument('--output', type=Path, default=Path(__file__).resolve().parents[1] / 'Application_Source/TargetInfo.zip')
     args = parser.parse_args()
-    # Stable entry timestamps/order allow reproducible data-pack hashes.
-    with tempfile.NamedTemporaryFile(dir=args.output.parent, suffix='.zip', delete=False) as temporary:
-        staged = Path(temporary.name)
-    try:
-        with zipfile.ZipFile(staged, 'w', compression=zipfile.ZIP_DEFLATED, compresslevel=9) as archive:
-            for name, data in build(args.database):
-                info = zipfile.ZipInfo(name, (2026, 1, 1, 0, 0, 0))
-                archive.writestr(info, data, compress_type=zipfile.ZIP_DEFLATED, compresslevel=9)
-        os.replace(staged, args.output)
-    finally:
-        staged.unlink(missing_ok=True)
+    # Stable entry timestamps/order allow reproducible data-pack hashes. Reviewed image
+    # and card corrections (scripts/target-info-overrides) are applied to the projection.
+    entries = list(build(args.database))
+    files = target_info_overrides.apply(dict(entries))
+    target_info_overrides.write(files, args.output, {name: i for i, (name, _) in enumerate(entries)})
     print(str(args.output) + ': ' + str(args.output.stat().st_size) + ' bytes')

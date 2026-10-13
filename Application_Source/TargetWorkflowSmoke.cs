@@ -39,7 +39,7 @@ namespace AstroArchive {
    var tabs=(TabControl)Window.FindName("MainTabs");tabs.SelectedIndex=2;string source=Path.Combine(fixture,"source");Directory.CreateDirectory(source);int value=20;
    foreach(string name in new[]{"M31.png","M45.png","C2023A3_Tsuchinshan-ATLAS.png"}){var encoder=new PngBitmapEncoder();encoder.Frames.Add(BitmapFrame.Create(BitmapSource.Create(2,2,96,96,PixelFormats.Gray8,null,new byte[]{(byte)value++,80,160,240},2)));using(var stream=File.Create(Path.Combine(source,name)))encoder.Save(stream);}
    repo.AddEditedImages(Directory.GetFiles(source),null,"Selection fixture",CancellationToken.None,null);RefreshEdited();WaitForSearches();
-   TargetWorkflowCheck(EditedTargets.Items.Cast<TargetSummary>().Any(t=>CometTargets.IsComet(t.Name)&&t.Group=="Solar system"),"Edited comet detection/grouping failed.");
+   TargetWorkflowCheck(EditedTargets.Items.Cast<TargetSummary>().Any(t=>t.Name==TargetNavigation.CometsSection&&t.Group=="Solar system"),"Edited comet detection/grouping failed.");
    EditedTargets.SelectedItem=EditedTargets.Items.Cast<TargetSummary>().Single(t=>t.Name=="M31");G("EditedGrid").SelectedIndex=0;PumpPopupLayout();width=EditedTargets.ActualWidth;headerHeight=((FrameworkElement)B("EditedSelectionCounter").Parent).ActualHeight;
    EditedTargets.SelectedItem=EditedTargets.Items.Cast<TargetSummary>().Single(t=>t.Name=="M45");G("EditedGrid").SelectedIndex=0;PumpPopupLayout();
    TargetWorkflowCheck(SelectedEditedImages().Count==2&&B("EditedSelectionCounter").IsVisible&&Convert.ToString(B("EditedSelectionCounter").Content)=="2 selected","Edited selection did not span targets.");

@@ -45,7 +45,7 @@ namespace AstroArchive {
   // This is display only: the stored target, folders and file names do not change.
   // Safe to call from search workers: it reads frames and settings only.
   string TargetSection(Frame frame){return TargetSection(frame,all);}
-  string TargetSection(Frame frame,IList<Frame> pool){var e=FrameEclipse(frame,pool);return e==null?frame.Target:e.Solar?Eclipses.SolarSection:Eclipses.LunarSection;}
+  string TargetSection(Frame frame,IList<Frame> pool){var e=FrameEclipse(frame,pool);return e==null?TargetNavigation.Section(frame.Target):e.Solar?Eclipses.SolarSection:Eclipses.LunarSection;}
   EclipseInfo FrameEclipse(Frame frame,IList<Frame> pool){
    if(frame==null||CaptureSky.IsCalibration(frame))return null;string body=ObservationTargets.NamedSolar(frame.Target)??(Catalog.IsAmbiguous(frame.Target)?ObservationTargets.NamedSolar(ObservationTargets.ModeBody(frame.ObservationMode)):null);if(body!="Sun"&&body!="Moon")return null;
    var current=settings;var timed=StackWithSubframeClock(frame,pool);var utc=CaptureSky.CaptureUtc(timed,current);

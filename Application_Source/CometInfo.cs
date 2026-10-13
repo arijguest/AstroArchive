@@ -65,6 +65,8 @@ namespace AstroArchive {
    string designation=Canonical(CometTargets.Designation(target));
    return new TargetInfoCard{id=designation??label,name=label,domain="solar_system",type_label=designation==null?"Comet":TypeLabel(designation),parent_body="Sun",review_status="derived",content_tier="basic",aliases=new string[0],measurements=new TargetInfoMeasurement[0],citations=new TargetInfoCitation[0],source_urls=new string[0]};
   }
+  // The Comets entry's page when the information pack has no group page.
+  public static TargetInfoCard GroupCard(){return new TargetInfoCard{id="COMETS",name="Comets",domain="group",type_label="Your comet captures",review_status="derived",content_tier="basic",aliases=new string[0],measurements=new TargetInfoMeasurement[0],citations=new TargetInfoCitation[0],source_urls=new string[0]};}
   // Explains what the designation says when no written overview exists.
   public static string Overview(TargetInfoCard card){
    string id=card.id??"",name=string.IsNullOrWhiteSpace(card.name)?id:card.name;
