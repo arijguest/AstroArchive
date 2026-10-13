@@ -2410,3 +2410,10 @@ Set UTC date	设置 UTC 日期
 UTC date (YYYY-MM-DD). Press Enter or Set UTC date.	UTC 日期（YYYY-MM-DD）。按 Enter 或“设置 UTC 日期”。
 Enter a valid UTC date (YYYY-MM-DD) between 1972 and 2026.	请输入 1972 至 2026 年间的有效 UTC 日期（YYYY-MM-DD）。
 Drag to rotate · Shift-drag to pan · Focus/Ctrl + wheel or pinch to zoom.	拖动旋转 · Shift 拖动平移 · 聚焦/Ctrl 加滚轮或双指缩放。
+Earth MOID	与地球的最小轨道交会距离
+Observations	观测
+{0} observations	{0} 次观测
+Meteor showers	流星雨
+Suspected parent of	疑似母体彗星：
+Parabolic	抛物线
+Chiron-type	凯龙型

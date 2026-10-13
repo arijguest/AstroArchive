@@ -10,6 +10,7 @@ import json
 from pathlib import Path
 import sqlite3
 from target_image_credits import repair_image
+import target_info_companions
 import target_info_overrides
 import target_info_essentials
 
@@ -84,8 +85,10 @@ if __name__ == '__main__':
     parser.add_argument('--output', type=Path, default=Path(__file__).resolve().parents[1] / 'Application_Source/TargetInfo.zip')
     args = parser.parse_args()
     # Stable entry timestamps/order allow reproducible data-pack hashes. Reviewed image
-    # and card corrections (scripts/target-info-overrides) are applied to the projection.
+    # and card corrections (scripts/target-info-overrides) are applied to the projection,
+    # followed by the Wikidata distance companion (scripts/target_info_companions.py).
     entries = list(build(args.database))
     files = target_info_overrides.apply(dict(entries))
+    files = target_info_companions.apply(files)
     target_info_essentials.write(target_info_essentials.apply(files), args.output)
     print(str(args.output) + ': ' + str(args.output.stat().st_size) + ' bytes')

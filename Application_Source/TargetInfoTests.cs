@@ -36,7 +36,7 @@ namespace AstroArchive {
     Check(TargetInfoPresentation.Distance(m(1370000000,"redshift"))=="≈ 1.4 billion light-years"&&TargetInfoPresentation.Distance(m(1500,null))=="1,500 light-years","Large or tiny distance formatted wrongly");
     var card=catalog.ById("M77",CancellationToken.None).Cards.Single();var distance=(card.measurements??new TargetInfoMeasurement[0]).FirstOrDefault(x=>x.field=="Distance");
     Check(distance!=null&&distance.band=="redshift"&&distance.value>1e7&&distance.value<2e8&&!string.IsNullOrEmpty(distance.qualifier),"A galaxy with a catalogue redshift lacks its approximate distance");
-    Check(!(catalog.ById("M31",CancellationToken.None).Cards.Single().measurements??new TargetInfoMeasurement[0]).Any(x=>x.field=="Distance"),"A blueshifted galaxy was given a redshift distance");
+    Check(!(catalog.ById("M31",CancellationToken.None).Cards.Single().measurements??new TargetInfoMeasurement[0]).Any(x=>x.field=="Distance"&&x.band=="redshift"),"A blueshifted galaxy was given a redshift distance");
    });
    Test("Thumbnail credits contain creators and acknowledgements without Commons page templates",()=>{
     var iris=catalog.ById("NGC 7023",CancellationToken.None).Cards.Single().image;
@@ -80,7 +80,7 @@ namespace AstroArchive {
     Check(TargetInfoPresentation.Constellation("Ori")=="Orion"&&TargetInfoPresentation.Constellation("Orion")=="Orion"&&TargetInfoPresentation.Summary(ic).Contains("Orion")&&!TargetInfoPresentation.Summary(ic).Contains("IAU constellation code"),"Constellation metadata leaked into the overview");
     Check(TargetInfoPresentation.Constellation("Se1")=="Serpens"&&TargetInfoPresentation.Constellation("Se2")=="Serpens"&&TargetInfoPresentation.Constellation("CrA")=="Corona Australis"&&TargetInfoPresentation.Summary(catalog.Find("M5",CancellationToken.None).Cards.Single()).Contains("Serpens"),"Split Serpens codes or alternate southern constellation name were not resolved");
     Check(TargetInfoPresentation.Caption("Astronomical observation; filter bands and colour processing unspecified.")==""&&TargetInfoPresentation.Caption("Radar map.")=="Radar map.","Meaningless image caption remains or meaningful modality was lost");
-    var sources=TargetInfoPresentation.Sources(catalog.Find("M31",CancellationToken.None).Cards.Single());Check(sources.Count==1,"Duplicate or draft OpenNGC references remain");
+    var sources=TargetInfoPresentation.Sources(catalog.Find("M31",CancellationToken.None).Cards.Single());Check(sources.Count==2&&sources.Count(x=>x.Title.StartsWith("OpenNGC"))==1&&sources.Count(x=>x.Title.StartsWith("Wikidata P2583"))==1,"Duplicate or draft OpenNGC references remain");
    });
    Test("Target info normalizer retains component suffixes and comet punctuation",()=>{
     Check(TargetInfoCatalog.Normalize("NGC 0001 NED02")=="NGC:1:NED2","NED component lost");
@@ -131,6 +131,33 @@ namespace AstroArchive {
     Check(Stellarium.ForCard(catalog.Find(Eclipses.SolarSection,CancellationToken.None).Cards.Single())==null&&Stellarium.ForCard(catalog.Find(Eclipses.LunarSection,CancellationToken.None).Cards.Single())==null,"Eclipse pages should not open Stellarium");
     Check(Stellarium.ForCard(catalog.Find(TargetNavigation.CometsSection,CancellationToken.None).Cards.Single())==null&&Stellarium.ForCard(CometInfo.GroupCard())==null&&Stellarium.ForCard(null)==null,"A group page offered a single Stellarium target");
     Check(Stellarium.Script(new StellariumView{ByName=true,Name="Bad \"name\"\n"}).Contains("\"Bad \\\"name\\\" \""),"Script name not escaped");
+   });
+   Test("Referenced Wikidata distances replace redshift distances, stay approximate and cite their statement",()=>{
+    Func<string,TargetInfoCard> byId=id=>catalog.ById(id,CancellationToken.None).Cards.Single();Func<TargetInfoCard,TargetInfoMeasurement> distanceOf=c=>(c.measurements??new TargetInfoMeasurement[0]).FirstOrDefault(x=>x.field=="Distance");
+    var m31=byId("M31");var andromeda=distanceOf(m31);
+    Check(andromeda!=null&&andromeda.band=="wikidata"&&andromeda.value>2e6&&andromeda.value<3.5e6&&andromeda.qualifier.Contains("0.82 Mpc")&&andromeda.qualifier.Contains("not a redshift calculation"),"M31 lacks its sourced distance");
+    Check(TargetInfoPresentation.Distance(andromeda)=="≈ 2.7 million light-years","Sourced distance not formatted as approximate: "+TargetInfoPresentation.Distance(andromeda));
+    var citation=m31.citations.Single(c=>c.id==andromeda.citation_id);Check(citation.source_url.StartsWith("https://www.wikidata.org/wiki/Q")&&citation.source_url.EndsWith("#P2583")&&citation.publisher=="Wikidata contributors"&&citation.dataset_id=="wikidata"&&citation.retrieved_on=="2026-10-13","Wikidata citation is incomplete");
+    Check(TargetInfoPresentation.Sources(m31).Any(x=>x.Url==citation.source_url&&x.Title.StartsWith("Wikidata P2583")),"Wikidata item is missing from Sources");
+    var ring=distanceOf(byId("M27"));Check(ring!=null&&ring.band=="wikidata"&&ring.value>1000&&ring.value<1500&&TargetInfoPresentation.Distance(ring)=="≈ 1,200 light-years","Planetary nebula distance missing");
+    var group=distanceOf(byId("HCG079"));Check(group!=null&&group.band=="redshift"&&group.value>1e8,"An implausible 190 light-year galaxy-group distance replaced the redshift distance");
+    Check(distanceOf(byId("IC 3418"))==null,"A galaxy whose Wikidata and redshift distances disagree by more than two times kept a distance");
+   });
+   Test("The comet snapshot gives every comet an offline orbit, names and meteor-shower parents",()=>{
+    var invalid=CometCatalog.All.Where(c=>CometCatalog.Orbit(c)==null).Select(c=>c.Id).ToList();Check(CometCatalog.Count>=4000&&invalid.Count<=15&&invalid.All(id=>CometCatalog.Find(id).Epoch<2000000||CometCatalog.Find(id).TimeOfPerihelion<1000000),"Snapshot comets lack a valid orbit: "+string.Join(", ",invalid.Take(8))+" ("+invalid.Count+"); only comets from before the model's AD 763 limit may lack one");
+    var tsuchinshan=CometCatalog.Find("C/2023 A3");Check(tsuchinshan!=null&&tsuchinshan.FullName.Contains("Tsuchinshan-ATLAS")&&tsuchinshan.Kind=="hyperbolic"&&CometCatalog.Find("c/2019 q4").Id=="2I"&&CometCatalog.Find("73P-B")!=null&&CometCatalog.Find("73P-B")!=CometCatalog.Find("73P")&&CometCatalog.Find("M31")==null,"Comet identities are wrong");
+    Check(CometCatalog.FindByName("Hale-Bopp").Id=="C/1995 O1"&&CometCatalog.FindByName("hale bopp").Id=="C/1995 O1"&&CometCatalog.FindByName("ATLAS")==null&&CometCatalog.FindByName("Hyakutake")==null&&CometInfo.InformationDesignation("Comet Hale-Bopp")=="C/1995 O1"&&CometInfo.InformationDesignation("Comet ATLAS")==null,"Shared discoverer names must stay ambiguous");
+    var hartley=CometInfo.Orbit("100P");Check(hartley!=null&&CometInfo.ClassLabel(hartley)=="Jupiter-family"&&CometInfo.Period(hartley)=="6.35 years per orbit"&&CometInfo.Perihelion(hartley)=="2.01 AU from the Sun","Snapshot comet orbit formatted wrongly: "+(hartley==null?"none":CometInfo.Period(hartley)+" "+CometInfo.Perihelion(hartley)));
+    Check(CometInfo.Orbit("1P").Perihelion==new DateTime(1986,2,8)&&Math.Abs(CometInfo.Orbit("1P").Q-0.575)<1e-9,"Reviewed comet orbits must keep precedence");
+    var parabolic=CometCatalog.All.First(c=>c.Kind=="parabolic"&&CometCatalog.Orbit(c)!=null);var parabolicOrbit=CometInfo.Orbit(parabolic.Id);Check(CometInfo.ClassLabel(parabolicOrbit)=="Parabolic"&&parabolicOrbit.PeriodYears==0&&!CometInfo.ShowsAphelion(parabolicOrbit),"Parabolic comet reads as periodic");
+    var card=CometInfo.Card("100P");Check(card.id=="100P"&&card.name=="100P/Hartley 1","Catalogued comet stub lacks its full name: "+card.name);
+    card=CometInfo.Card("Comet Hale-Bopp");Check(card.id=="C/1995 O1"&&card.name=="C/1995 O1 (Hale-Bopp)","Name-only comet did not resolve: "+card.id+" "+card.name);
+    var record=OrbitalCatalog.For(CometInfo.Card("100P"));Check(record!=null&&record.object_id=="100P"&&record.solution_id.StartsWith("JPL")&&record.uncertainties.ContainsKey("e")&&InformationRights.Permitted(record.rights,true,true)&&OrbitalCatalog.Scene(record,CancellationToken.None).Full.Points.Length>10,"Snapshot comet has no complete 3D orbit");
+    Check(OrbitalCatalog.For(CometInfo.Card("C/2099 B12 (Example)"))==null,"An unknown comet was given an orbit");
+    Func<string,bool,string> showers=(id,suspected)=>CometCatalog.ShowerNames(CometCatalog.ShowersOf(id),suspected);
+    Check(showers("109P",false)=="Perseids"&&showers("55P",false)=="Leonids"&&showers("1P",false)=="eta Aquariids, Orionids"&&showers("96P",true)=="Southern delta Aquariids"&&showers("P/2008 Y12",true)=="Southern delta Aquariids"&&showers("96P",false)==""&&showers("73P",false)==""&&showers("73P-B",false)=="","Meteor-shower parents are wrong");
+    Check(CometCatalog.Showers.Count>=30&&CometCatalog.Showers.Any(x=>x.Name=="Geminids"&&x.Parents.Count==0)&&CometCatalog.ShowerEvidence(CometCatalog.ShowersOf("1P")).Contains("not a forecast"),"Meteor-shower list or evidence wrong");
+    Check(TargetInfoPresentation.Sources(catalog.ById("1P",CancellationToken.None).Cards.Single()).Any(x=>x.Url==CometCatalog.ShowerUrl)&&!TargetInfoPresentation.Sources(CometInfo.Card("100P")).Any(x=>x.Url==CometCatalog.ShowerUrl),"Meteor streams missing from a parent comet's sources");
    });
    Test("Target info cancels obsolete loads and fails safely without a pack",()=>{
     using(var cancellation=new CancellationTokenSource()){cancellation.Cancel();bool canceled=false;try{catalog.Find("M31",cancellation.Token);}catch(OperationCanceledException){canceled=true;}Check(canceled,"Canceled card lookup ran");}

@@ -1,0 +1,375 @@
+{
+ "format_version": 1,
+ "note": "Peak wording is approximate and is not a year-specific forecast. No listed parent means not recorded here, not that none exists.",
+ "showers": [
+  {
+   "code": "ACE",
+   "name": "alpha Centaurids",
+   "parents": [],
+   "peak": "early February"
+  },
+  {
+   "code": "AMO",
+   "name": "alpha Monocerotids",
+   "parents": [],
+   "peak": "late November"
+  },
+  {
+   "code": "AUR",
+   "name": "Aurigids",
+   "parents": [
+    {
+     "comet": "C/1911 N1",
+     "listed_as": "C/1911 N1 (Kiess)",
+     "sources": [
+      "https://ssd.jpl.nasa.gov/sb/meteor_streams.html"
+     ],
+     "status": "listed"
+    }
+   ],
+   "peak": "late August"
+  },
+  {
+   "code": "CAP",
+   "name": "alpha Capricornids",
+   "parents": [
+    {
+     "comet": "169P",
+     "listed_as": "169P/NEAT",
+     "sources": [
+      "https://ssd.jpl.nasa.gov/sb/meteor_streams.html"
+     ],
+     "status": "listed"
+    }
+   ],
+   "peak": "late July"
+  },
+  {
+   "code": "COM",
+   "name": "Comae Berenicids",
+   "parents": [],
+   "peak": "late December"
+  },
+  {
+   "code": "DCA",
+   "name": "delta-Cancrids",
+   "parents": [],
+   "peak": "mid-January"
+  },
+  {
+   "code": "DRA",
+   "name": "October Draconids",
+   "parents": [
+    {
+     "comet": "21P",
+     "listed_as": "21P/Giacobini-Zinner",
+     "sources": [
+      "https://ssd.jpl.nasa.gov/sb/meteor_streams.html"
+     ],
+     "status": "listed"
+    }
+   ],
+   "peak": "early October"
+  },
+  {
+   "code": "EGE",
+   "name": "epsilon Geminids",
+   "parents": [],
+   "peak": "mid-October"
+  },
+  {
+   "code": "ELY",
+   "name": "eta Lyrids",
+   "parents": [
+    {
+     "comet": "C/1983 H1",
+     "listed_as": "C/1983 H1 (IRAS-Araki-Alcock)",
+     "sources": [
+      "https://ssd.jpl.nasa.gov/sb/meteor_streams.html"
+     ],
+     "status": "listed"
+    }
+   ],
+   "peak": "mid-May"
+  },
+  {
+   "code": "ETA",
+   "name": "eta Aquariids",
+   "parents": [
+    {
+     "comet": "1P",
+     "listed_as": "1P/Halley",
+     "sources": [
+      "https://science.nasa.gov/solar-system/meteors-meteorites/eta-aquarids/",
+      "https://ssd.jpl.nasa.gov/sb/meteor_streams.html"
+     ],
+     "status": "listed"
+    }
+   ],
+   "peak": "early May"
+  },
+  {
+   "code": "GEM",
+   "name": "Geminids",
+   "parents": [],
+   "peak": "mid-December"
+  },
+  {
+   "code": "HYD",
+   "name": "sigma Hydrids",
+   "parents": [],
+   "peak": "early December"
+  },
+  {
+   "code": "JBO",
+   "name": "June Bootids",
+   "parents": [
+    {
+     "comet": "7P",
+     "listed_as": "7P/Pons-Winnecke",
+     "sources": [
+      "https://ssd.jpl.nasa.gov/sb/meteor_streams.html"
+     ],
+     "status": "listed"
+    }
+   ],
+   "peak": "late June"
+  },
+  {
+   "code": "JPE",
+   "name": "July Pegasids",
+   "parents": [
+    {
+     "comet": "C/1979 Y1",
+     "listed_as": "C/1979 Y1 (Bradfield)",
+     "sources": [
+      "https://ssd.jpl.nasa.gov/sb/meteor_streams.html"
+     ],
+     "status": "listed"
+    }
+   ],
+   "peak": "early July"
+  },
+  {
+   "code": "KCG",
+   "name": "kappa Cygnids",
+   "parents": [],
+   "peak": "mid-August"
+  },
+  {
+   "code": "LEO",
+   "name": "Leonids",
+   "parents": [
+    {
+     "comet": "55P",
+     "listed_as": "55P/Tempel-Tuttle",
+     "sources": [
+      "https://science.nasa.gov/solar-system/meteors-meteorites/leonids/",
+      "https://ssd.jpl.nasa.gov/sb/meteor_streams.html"
+     ],
+     "status": "listed"
+    }
+   ],
+   "peak": "mid-November"
+  },
+  {
+   "code": "LMI",
+   "name": "Leonis Minorids",
+   "parents": [
+    {
+     "comet": "C/1739 K1",
+     "listed_as": "C/1739 K1",
+     "sources": [
+      "https://ssd.jpl.nasa.gov/sb/meteor_streams.html"
+     ],
+     "status": "listed"
+    }
+   ],
+   "peak": "late October"
+  },
+  {
+   "code": "LYR",
+   "name": "April Lyrids",
+   "parents": [
+    {
+     "comet": "C/1861 G1",
+     "listed_as": "C/1861 G1 (Thatcher)",
+     "sources": [
+      "https://science.nasa.gov/solar-system/meteors-meteorites/lyrids/",
+      "https://ssd.jpl.nasa.gov/sb/meteor_streams.html"
+     ],
+     "status": "listed"
+    }
+   ],
+   "peak": "late April"
+  },
+  {
+   "code": "MON",
+   "name": "December Monocerotids",
+   "parents": [
+    {
+     "comet": "C/1917 F1",
+     "listed_as": "C/1917 F1 (Mellish)",
+     "sources": [
+      "https://ssd.jpl.nasa.gov/sb/meteor_streams.html"
+     ],
+     "status": "listed"
+    }
+   ],
+   "peak": "early December"
+  },
+  {
+   "code": "NDA",
+   "name": "Northern delta Aquariids",
+   "parents": [],
+   "peak": "mid-August"
+  },
+  {
+   "code": "NIA",
+   "name": "Northern iota Aquariids",
+   "parents": [],
+   "peak": "mid-August"
+  },
+  {
+   "code": "NOO",
+   "name": "November Orionids",
+   "parents": [],
+   "peak": "late November"
+  },
+  {
+   "code": "NTA",
+   "name": "Northern Taurids",
+   "parents": [],
+   "peak": "mid-November"
+  },
+  {
+   "code": "ORI",
+   "name": "Orionids",
+   "parents": [
+    {
+     "comet": "1P",
+     "listed_as": "1P/Halley",
+     "sources": [
+      "https://science.nasa.gov/solar-system/meteors-meteorites/orionids/",
+      "https://ssd.jpl.nasa.gov/sb/meteor_streams.html"
+     ],
+     "status": "listed"
+    }
+   ],
+   "peak": "mid-October"
+  },
+  {
+   "code": "PAU",
+   "name": "Piscis Austrinids",
+   "parents": [],
+   "peak": "late July"
+  },
+  {
+   "code": "PER",
+   "name": "Perseids",
+   "parents": [
+    {
+     "comet": "109P",
+     "listed_as": "109P/Swift-Tuttle",
+     "sources": [
+      "https://science.nasa.gov/solar-system/meteors-meteorites/perseids/",
+      "https://ssd.jpl.nasa.gov/sb/meteor_streams.html"
+     ],
+     "status": "listed"
+    }
+   ],
+   "peak": "mid-August"
+  },
+  {
+   "code": "PHO",
+   "name": "Phoenicids",
+   "parents": [],
+   "peak": "early December"
+  },
+  {
+   "code": "PPU",
+   "name": "pi Puppids",
+   "parents": [
+    {
+     "comet": "26P",
+     "listed_as": "26P/Grigg-Skjellerup",
+     "sources": [
+      "https://ssd.jpl.nasa.gov/sb/meteor_streams.html"
+     ],
+     "status": "listed"
+    }
+   ],
+   "peak": "late April"
+  },
+  {
+   "code": "QUA",
+   "name": "Quadrantids",
+   "parents": [],
+   "peak": "early January"
+  },
+  {
+   "code": "SDA",
+   "name": "Southern delta Aquariids",
+   "parents": [
+    {
+     "comet": "96P",
+     "listed_as": "96P/Machholz",
+     "sources": [
+      "https://science.nasa.gov/solar-system/meteors-meteorites/delta-aquariids/"
+     ],
+     "status": "suspected"
+    },
+    {
+     "comet": "P/2008 Y12",
+     "listed_as": "P/2008 Y12 (SOHO)",
+     "sources": [
+      "https://ssd.jpl.nasa.gov/sb/meteor_streams.html"
+     ],
+     "status": "candidate"
+    }
+   ],
+   "peak": "late July"
+  },
+  {
+   "code": "SPE",
+   "name": "September epsilon Perseids",
+   "parents": [],
+   "peak": "mid-September"
+  },
+  {
+   "code": "STA",
+   "name": "Southern Taurids",
+   "parents": [
+    {
+     "comet": "2P",
+     "listed_as": "2P/Encke",
+     "sources": [
+      "https://ssd.jpl.nasa.gov/sb/meteor_streams.html"
+     ],
+     "status": "listed"
+    }
+   ],
+   "peak": "mid-October"
+  },
+  {
+   "code": "URS",
+   "name": "Ursids",
+   "parents": [
+    {
+     "comet": "8P",
+     "listed_as": "8P/Tuttle",
+     "sources": [
+      "https://ssd.jpl.nasa.gov/sb/meteor_streams.html"
+     ],
+     "status": "listed"
+    }
+   ],
+   "peak": "late December"
+  }
+ ],
+ "snapshot": "2026-10-13",
+ "sources": [
+  "https://ssd.jpl.nasa.gov/sb/meteor_streams.html",
+  "https://science.nasa.gov/solar-system/meteors-meteorites/"
+ ]
+}

@@ -27,6 +27,19 @@
   },
   {
     "provider": "JPL",
+    "dataset": "meteor-parents",
+    "terms_url": "https://ssd.jpl.nasa.gov/sb/meteor_streams.html",
+    "checked_at": "2026-10-13",
+    "allowed_display": true,
+    "allowed_local_cache": true,
+    "allowed_bundle": true,
+    "allowed_redistribution": true,
+    "commercial_conditions": "Factual parent-body associations only; no NASA prose, images or logos.",
+    "required_attribution": "NASA/JPL Solar System Dynamics Meteor Streams and NASA Science; no endorsement is implied.",
+    "evidence": "Association facts (shower, parent designation, listed or suspected status) with source URLs and retrieval date. NASA content used factually without implying endorsement may be used with acknowledgement. Snapshot 2026-10-13."
+  },
+  {
+    "provider": "JPL",
     "dataset": "planetary-approximation",
     "terms_url": "https://ssd.jpl.nasa.gov/planets/approx_pos.html",
     "checked_at": "2026-10-13",
@@ -50,6 +63,19 @@
     "commercial_conditions": "CC0 structured data.",
     "required_attribution": "Original source, revision/solution/epoch and applicable item credit.",
     "evidence": "Exact P528 astronomical identifiers and verified sitelinks; CC0 applies to structured data, not linked prose/media."
+  },
+  {
+    "provider": "Wikidata",
+    "dataset": "distance-statements",
+    "terms_url": "https://www.wikidata.org/wiki/Wikidata:Licensing",
+    "checked_at": "2026-10-13",
+    "allowed_display": true,
+    "allowed_local_cache": true,
+    "allowed_bundle": true,
+    "allowed_redistribution": true,
+    "commercial_conditions": "CC0 structured data. The adapted OpenNGC identity crosswalk stays CC BY-SA 4.0.",
+    "required_attribution": "Wikidata contributors, item and statement link, snapshot date and original quantity.",
+    "evidence": "Wikidata P2583 statements are structured data released under CC0 1.0. Bundled offline as one referenced estimate per catalogue identity, never averaged; articles, images and linked papers keep their own terms. Applied by scripts/target_info_companions.py."
   },
   {
     "provider": "Wikipedia",

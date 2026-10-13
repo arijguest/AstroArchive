@@ -2411,3 +2411,10 @@ Set UTC date	UTC日付を設定
 UTC date (YYYY-MM-DD). Press Enter or Set UTC date.	UTC日付（YYYY-MM-DD）。Enterまたは「UTC日付を設定」を押してください。
 Enter a valid UTC date (YYYY-MM-DD) between 1972 and 2026.	1972年から2026年までの有効なUTC日付（YYYY-MM-DD）を入力してください。
 Drag to rotate · Shift-drag to pan · Focus/Ctrl + wheel or pinch to zoom.	ドラッグで回転 · Shift＋ドラッグで移動 · フォーカス/Ctrl＋ホイール、またはピンチで拡大縮小。
+Earth MOID	地球との最小軌道交差距離
+Observations	観測
+{0} observations	{0}件の観測
+Meteor showers	流星群
+Suspected parent of	母天体の可能性があるもの：
+Parabolic	放物線
+Chiron-type	ケイロン型
