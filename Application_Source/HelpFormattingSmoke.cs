@@ -6,6 +6,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Input;
+using System.Windows.Media;
 using DocumentList=System.Windows.Documents.List;
 namespace AstroArchive {
  public partial class MainUi {
@@ -45,6 +46,12 @@ namespace AstroArchive {
    File.WriteAllText(Path.Combine(output,"help-formatting-smoke.txt"),"PASS "+cases+" formatted Help topic layouts; help home cards; semantic headings, callouts, links and native ordered/bullet lists; selection/copy; themed contrast and font hierarchy; guided fixes with setup checks; problem report preview and GitHub link; dark/light and 100/150% text.");
    }finally{settings.ThemeMode=theme;settings.TextScalePercent=scale;ApplyAppearance();}
   }
+  // The nearest painted surface behind an element: button text is read against the button, not the window.
+  // Check boxes and text boxes paint only their box, so their labels sit on the surface around them.
+  static Brush BackgroundBehind(DependencyObject element){
+   for(var node=VisualTreeHelper.GetParent(element);node!=null;node=VisualTreeHelper.GetParent(node)){Brush brush=null;var control=node as Control;var border=node as Border;var panel=node as Panel;if(control is Button||control is Window)brush=control.Background;else if(border!=null)brush=border.Background;else if(panel!=null)brush=panel.Background;var solid=brush as SolidColorBrush;if(solid!=null&&solid.Color.A==255)return solid;}
+   return null;
+  }
   void SmokeProblemReport(string output,string label){
    var report=ProblemReport(new InvalidOperationException("Smoke failure at C:\\Users\\sample\\image.fits"),"Smoke report");string opened=null;bool closed=false;report.Launch=url=>{opened=url;return true;};report.Closed+=(s,e)=>closed=true;
    try{
@@ -53,7 +60,7 @@ namespace AstroArchive {
     if(!report.Preview.Text.Contains("### System details")||report.Preview.Text.Contains("sample"))throw new Exception("Problem report preview is missing details or exposes a local path");
     foreach(var choice in report.Choices.Where(c=>((ReportSection)c.Tag).Title!="System details"))choice.IsChecked=false;PumpPopupLayout();
     if(report.Preview.Text.Contains("### Recent app log")||!report.Preview.Text.Contains("### System details"))throw new Exception("Problem report ignores unticked sections");
-    foreach(var text in PopupChildren<TextBlock>(report).Where(t=>t.IsVisible&&!string.IsNullOrWhiteSpace(t.Text)))Readable(text.Foreground,report.Background,"problem report text");
+    foreach(var text in PopupChildren<TextBlock>(report).Where(t=>t.IsVisible&&!string.IsNullOrWhiteSpace(t.Text)))Readable(text.Foreground,BackgroundBehind(text),"problem report text");
     CapturePopup(report,Path.Combine(output,"AstroArchive_Report_Problem_"+label+".png"));
     report.Summary.Text="Smoke title";report.Description.Text="Smoke description";report.Open.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
     if(opened==null||!opened.StartsWith("https://github.com/arijguest/AstroArchive/issues/new?title=Smoke%20title")||!Uri.UnescapeDataString(opened).Contains("Smoke description")||!closed)throw new Exception("Problem report did not open a prefilled GitHub issue");
