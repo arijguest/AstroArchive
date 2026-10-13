@@ -40,7 +40,7 @@ namespace AstroArchive {
      Form.Text("Capture town / city",true);var sites=selected.Select(f=>CaptureSite.Describe(f,settings)).Distinct().ToList();string initial=sites.Count==1?sites[0]:"Mixed";
      CaptureTown=Form.Input("Town / city",initial);CaptureTown.IsReadOnly=true;CaptureTown.Name="MetadataCaptureTown";resets.Add(()=>CaptureTown.Text=initial);
      Form.Text("A chosen town or city replaces the recorded capture location. Use default location to return to file metadata, then the observing location in Settings. Changes are applied when you save metadata.");
-     Form.Button("Choose town / city…",()=>{var picker=new CityPicker(Form.Window,Model.CaptureCity==null?selected.Select(f=>f.CaptureCity).FirstOrDefault(c=>!string.IsNullOrEmpty(c)):Model.CaptureCity.Label);try{if(picker.Show()){Model.SetCaptureCity(picker.SelectedCity);CaptureTown.Text=picker.SelectedCity.Label;UpdateSummary();}}finally{picker.Dispose();}});
+     Form.Button("Choose town / city…",()=>{var townPicker=new CityPicker(Form.Window,Model.CaptureCity==null?selected.Select(f=>f.CaptureCity).FirstOrDefault(c=>!string.IsNullOrEmpty(c)):Model.CaptureCity.Label);try{if(townPicker.Show()){Model.SetCaptureCity(townPicker.SelectedCity);CaptureTown.Text=townPicker.SelectedCity.Label;UpdateSummary();}}finally{townPicker.Dispose();}});
      Form.Button("Use default location",()=>{Model.SetCaptureCity(null);CaptureTown.Text="Default location";UpdateSummary();});
     }
     var grid=new Grid();grid.ColumnDefinitions.Add(new ColumnDefinition());grid.ColumnDefinitions.Add(new ColumnDefinition());Form.Add(grid);
