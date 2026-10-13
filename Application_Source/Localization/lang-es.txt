@@ -2323,6 +2323,9 @@ One of your comets · {0}	Uno de tus cometas · {0}
 1 image	1 imagen
 Open in Stellarium, centred on this object now. Uses Stellarium Web when Stellarium is not installed.	Abrir en Stellarium, centrado ahora en este objeto. Usa Stellarium Web si Stellarium no está instalado.
 Open in Stellarium at the catalogue position. Uses Stellarium Web when Stellarium is not installed.	Abrir en Stellarium en la posición del catálogo. Usa Stellarium Web si Stellarium no está instalado.
+Quality	Calidad
+Sharpness	Nitidez
+Measurements	Mediciones
 # Help navigation
 Your first import	Tu primera importación
 Start tour:	Iniciar recorrido:

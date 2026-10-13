@@ -29,8 +29,13 @@ namespace AstroArchive {
   static double Num(double v){return double.IsNaN(v)||double.IsInfinity(v)?0:v;}
  }
  public static class QualityMeter {
-  // Bump when any measurement changes; stored rows with an older version are measured again lazily.
+  // Bump when any measurement changes. Rows from an older version keep their scores (see OldestShown)
+  // until the next Analyse image quality run measures them again.
   public const int Version=2;
+  // Oldest stored measurement version whose fields still mean the same thing. Raise only when a change
+  // makes older rows misleading; every row older than this loses its score until measured again.
+  public const int OldestShown=1;
+  public static bool Shown(QualityMeasurement m){return m!=null&&m.Version>=OldestShown&&m.Version<=Version;}
   const double FwhmPerSigma=2.3548200450309493;
 
   // Collapses channels (planar) to one finite float plane. Non-finite samples become the plane median-free zero.

@@ -104,6 +104,7 @@ namespace AstroArchive {
     DetailFact(facts,"Filters",string.Join(", ",frames.Select(x=>x.Filter).Where(Known).Distinct(StringComparer.OrdinalIgnoreCase)));
     DetailFact(facts,"Telescope",string.Join(", ",frames.Select(x=>x.Telescope).Where(Known).Distinct(StringComparer.OrdinalIgnoreCase)));
     AnnotationFacts(frames.Cast<IAnnotated>().ToList(),(label,value)=>DetailFact(facts,label,value));
+    DetailFact(facts,"Quality",QualityGroupFact(frames));
     L("DetailsLabel").Text=summary.Flagged>0?summary.Flagged+" flagged for review":"";L("DetailsLabel").FontWeight=FontWeights.SemiBold;return;
    }
    if(f==null){L("DetailsTitle").Text="No capture selected";L("DetailsLabel").Text="Select a capture to view its details.";L("DetailsLabel").FontWeight=FontWeights.Normal;return;}
@@ -115,6 +116,7 @@ namespace AstroArchive {
    DetailFact(facts,"Telescope",Known(f.Telescope)?f.Telescope+(instrument.Length>0?" · "+instrument:""):instrument);
    DetailFact(facts,"Camera",f.Camera=="Auto"?"":f.Camera);DetailFact(facts,"Mount",f.MountText);DetailFact(facts,"Calibration",f.Calibration);
    AnnotationFacts(new IAnnotated[]{f},(label,value)=>DetailFact(facts,label,value));
+   if(f.QualityScore.HasValue){DetailFact(facts,QualityEligibility.IsDisc(f)?"Sharpness":"Quality",QualityFact(f));DetailFact(facts,"Measurements",f.QualitySummary);}
    string issue=f.ReviewReason;L("DetailsLabel").Text=string.IsNullOrWhiteSpace(issue)?"":"Needs review: "+issue;L("DetailsLabel").FontWeight=FontWeights.SemiBold;
   }
   static bool Known(string value){return !string.IsNullOrWhiteSpace(value)&&value.Trim()!="-"&&!value.Trim().StartsWith("Unknown",StringComparison.OrdinalIgnoreCase);}
