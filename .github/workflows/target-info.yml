@@ -3,6 +3,8 @@ on:
   pull_request:
     paths:
       - 'Application_Source/TargetInfo*'
+      - 'Application_Source/Meteor*'
+      - 'Application_Source/MoonPhaseUi.cs'
       - 'Application_Source/PreviewUi.cs'
       - 'Application_Source/EditedUi.cs'
       - 'Application_Source/TargetNamesUi.cs'
