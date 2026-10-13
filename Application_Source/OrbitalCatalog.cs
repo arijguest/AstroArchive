@@ -22,12 +22,10 @@ namespace AstroArchive {
    var planet=PlanetEphemeris.Orbit(card.id,new DateTime(2000,1,1,12,0,0,DateTimeKind.Utc));if(planet!=null)return planet;
    OrbitRecord record;return essentials.Value.TryGetValue(card.id,out record)&&OrbitalModel.Valid(record)?record:null;
   }
-  public static string PlanetName(string id){return string.IsNullOrEmpty(id)?id:id.Substring(0,1).ToUpperInvariant()+id.Substring(1).ToLowerInvariant();}
-  public static readonly string[] Planets={"MERCURY","VENUS","EARTH","MARS","JUPITER","SATURN","URANUS","NEPTUNE"};
   public static OrbitScene Scene(OrbitRecord orbit,CancellationToken token){
    if(!OrbitalModel.Valid(orbit))return null;var scene=new OrbitScene{Record=orbit,Full=OrbitalModel.Path(orbit,false,token),Inner=OrbitalModel.Path(orbit,true,token)};
-   if(orbit.central_body=="Sun")foreach(string id in Planets){
-    token.ThrowIfCancellationRequested();if(id==orbit.object_id)continue;var context=PlanetEphemeris.Orbit(id,new DateTime(2000,1,1,12,0,0,DateTimeKind.Utc));var path=OrbitalModel.Path(context,false,token);if(path!=null)path.Name=PlanetName(id);scene.Context.Add(path);}
+   if(orbit.central_body=="Sun")foreach(string id in new[]{"MERCURY","VENUS","EARTH","MARS","JUPITER","SATURN","URANUS","NEPTUNE"}){
+    token.ThrowIfCancellationRequested();if(id==orbit.object_id)continue;var context=PlanetEphemeris.Orbit(id,new DateTime(2000,1,1,12,0,0,DateTimeKind.Utc));scene.Context.Add(OrbitalModel.Path(context,false,token));}
    return scene;
   }
  }
