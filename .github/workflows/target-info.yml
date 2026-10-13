@@ -14,6 +14,7 @@ on:
       - 'scripts/build-target-info.py'
       - 'scripts/target_image_credits.py'
       - 'scripts/target_info_overrides.py'
+      - 'scripts/target_info_distances.py'
       - 'scripts/target-info-overrides/**'
       - 'scripts/test-target-image-credits.py'
       - 'Installer/InstallCore.cs'

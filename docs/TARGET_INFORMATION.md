@@ -167,6 +167,17 @@ give the one-pixel drift limit from image scale and apparent angular motion. Not
 are shown only when guidance exists; empty entries have no disclosure. Engine and
 Windows UI checks cover repaired Iris credits and empty imaging-note entries.
 
+Deep-sky pages show an approximate **Distance** in light-years when the catalogue
+redshift is large enough to outweigh the galaxy's own motion (recession velocity of
+at least 1,000 km/s). `scripts/target_info_distances.py` calculates it for a flat
+universe (H0 = 70 km/s/Mpc, matter density 0.3) from the OpenNGC redshift already in
+the pack, so no other catalogue is involved. The value carries a "≈" and its tooltip
+gives the redshift and assumptions. Nearby galaxies, nebulae and star clusters show
+no distance, because the pack holds no licensed measured distance for them.
+
+Below the image, the short image description now comes first and the Credits
+disclosure follows, with its arrow centred on the label.
+
 Verified on Windows on 13 October 2026: the credit audit, focused engine and
 installer checks, and information-pane rendering in all seven languages passed
 in [run 38337070529](https://github.com/arijguest/AstroArchive/actions/runs/38337070529).

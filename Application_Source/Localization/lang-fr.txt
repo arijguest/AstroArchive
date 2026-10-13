@@ -2302,3 +2302,7 @@ Start tour:	Lancer la visite :
 Step-by-step fixes for common problems, on AstroArchive's own screens.	Solutions pas à pas aux problèmes courants, sur les écrans d'AstroArchive.
 Short tours of importing, exporting and backups.	Courtes visites de l'importation, de l'exportation et des sauvegardes.
 Search the guide, or start a guided fix or tour.	Rechercher dans le guide, ou lancer une solution guidée ou une visite.
+Distance	Distance
+{0} billion light-years	{0} milliards d'années-lumière
+{0} million light-years	{0} millions d'années-lumière
+{0} light-years	{0} années-lumière

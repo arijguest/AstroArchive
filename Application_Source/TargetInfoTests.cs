@@ -29,6 +29,15 @@ namespace AstroArchive {
     var halleyOrbit=CometInfo.Orbit("1P");Check(CometInfo.SemiMajorAxis(halleyOrbit)=="17.9 AU"&&CometInfo.PerihelionSpeed(halleyOrbit)=="55.1 km/s"&&!CometInfo.ShowsEscapeSpeed(halleyOrbit)&&!CometInfo.HasSemiMajorAxis(CometInfo.Orbit("C/1996 B2"))&&CometInfo.ShowsEscapeSpeed(CometInfo.Orbit("2I"))&&CometInfo.EscapeSpeed(CometInfo.Orbit("2I"))=="32.3 km/s","Comet derived orbit facts wrong");
    });
    var catalog=new TargetInfoCatalog(Path.Combine(AppDomain.CurrentDomain.BaseDirectory,"TargetInfo.zip"));
+   Test("Galaxy distances come from catalogue redshifts and read as approximate light-years",()=>{
+    Func<double,string,TargetInfoMeasurement> m=(v,b)=>new TargetInfoMeasurement{field="Distance",unit="ly",value=v,band=b};
+    Check(TargetInfoPresentation.Distance(m(142000000,"redshift"))=="≈ 140 million light-years","Mid-range redshift distance wrong: "+TargetInfoPresentation.Distance(m(142000000,"redshift")));
+    Check(TargetInfoPresentation.Distance(m(4230000,"redshift"))=="≈ 4.2 million light-years"&&TargetInfoPresentation.Distance(m(42300000,null))=="42 million light-years","Small distance formatted wrongly");
+    Check(TargetInfoPresentation.Distance(m(1370000000,"redshift"))=="≈ 1.4 billion light-years"&&TargetInfoPresentation.Distance(m(1500,null))=="1,500 light-years","Large or tiny distance formatted wrongly");
+    var card=catalog.ById("M77",CancellationToken.None).Cards.Single();var distance=(card.measurements??new TargetInfoMeasurement[0]).FirstOrDefault(x=>x.field=="Distance");
+    Check(distance!=null&&distance.band=="redshift"&&distance.value>1e7&&distance.value<2e8&&!string.IsNullOrEmpty(distance.qualifier),"A galaxy with a catalogue redshift lacks its approximate distance");
+    Check(!(catalog.ById("M31",CancellationToken.None).Cards.Single().measurements??new TargetInfoMeasurement[0]).Any(x=>x.field=="Distance"),"A blueshifted galaxy was given a redshift distance");
+   });
    Test("Thumbnail credits contain creators and acknowledgements without Commons page templates",()=>{
     var iris=catalog.ById("NGC 7023",CancellationToken.None).Cards.Single().image;
     Check(iris.creator=="Andreigusan"&&iris.attribution.StartsWith("Andreigusan — ")&&iris.licence=="CC-BY-SA-4.0","Iris thumbnail credit or licence is wrong");

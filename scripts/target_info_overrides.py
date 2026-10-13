@@ -15,9 +15,13 @@ import hashlib
 import json
 import os
 import re
+import sys
 import tempfile
 import zipfile
 from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import target_info_distances  # noqa: E402
 
 HERE = Path(__file__).resolve().parent / 'target-info-overrides'
 COMMONS = 'https://upload.wikimedia.org/wikipedia/commons/'
@@ -99,6 +103,7 @@ def apply(files):
     for ident, fields in overrides.get('fields', {}).items():
         card(ident).update(fields)
 
+    distances = target_info_distances.apply(cards)
     replaced = set()
     for ident, spec in overrides['images'].items():
         target = card(ident)
@@ -111,7 +116,7 @@ def apply(files):
     for path in replaced - used:
         files.pop(path, None)
     index['image_assignments'] = sum(1 for bucket_cards in cards.values() for c in bucket_cards.values() if c.get('image'))
-    index['runtime_overrides'] = {'revision': 1, 'verified_on': overrides['verified_on'], 'images': sorted(overrides['images']),
+    index['runtime_overrides'] = {'revision': 2, 'distances': distances, 'verified_on': overrides['verified_on'], 'images': sorted(overrides['images']),
                                   'cards': [c['id'] for c in overrides['cards']]}
 
     for name, cards_in_bucket in cards.items():
