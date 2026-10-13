@@ -1031,7 +1031,9 @@ Orbit plane, Fit orbit, Inner solar system and Expand orbit are available.
 
 Body markers are enlarged and distances use a linear scale. Open paths have
 continuation arrows; clipped extents are labelled. Orbit epoch shows the marker
-at the source epoch. Today and a UTC date are enabled only for supported dated
+at the source epoch.
+
+Today and a UTC date are enabled only for supported dated
 positions. Small-body and Moon snapshots use epoch-only markers. Complete elements
 are required; an unavailable orbit never receives an assumed orientation.
 
