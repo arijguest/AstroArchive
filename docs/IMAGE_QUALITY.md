@@ -24,7 +24,11 @@ Measurements are taken once per file content and stored in the repository databa
 (`quality` table, keyed by the content hash and the measurement version). Renamed or
 moved files reuse them; edited files are measured again. Scores are recomputed from
 the stored measurements every time the library loads and are never saved with the
-capture record.
+capture record. The table travels with the repository's portable index, so scores
+survive program updates and moving the repository. When an update improves the
+measurement, existing scores stay in place and are refreshed the next time Analyse
+image quality runs. Original image files are never rewritten to hold a score: that
+would change their content hash and checksums.
 
 *Stars.* Noise comes from 32 px tiles. Stars are found on a binned plane (4x for
 large frames) using a tile background and a 5 sigma threshold; stars at 10 sigma or

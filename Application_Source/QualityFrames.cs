@@ -83,7 +83,8 @@ namespace AstroArchive {
    var items=new List<QualityItem>();var owners=new List<Frame>();
    foreach(var frame in frames){
     QualityMeasurement m;if(string.IsNullOrEmpty(frame.Hash)||!measurements.TryGetValue(frame.Hash,out m))continue;
-    if(m.Version!=QualityMeter.Version||m.Kind!=QualityEligibility.KindOf(frame))continue;
+    // A program update must not wipe scores: older measurements stay in use until they are measured again.
+    if(!QualityMeter.Shown(m)||m.Kind!=QualityEligibility.KindOf(frame))continue;
     if(QualityEligibility.Reason(frame).Length>0)continue;
     // Stacks are compared only with other stacks of the same target and kit, whatever their integration; subs with their session (or target, when chosen).
     string cohort;
@@ -94,6 +95,7 @@ namespace AstroArchive {
    if(items.Count==0)return;
    var outcomes=QualityScorer.Compute(items);
    for(int i=0;i<owners.Count;i++){var o=outcomes[i];var f=owners[i];f.QualityScore=o.Score;f.QualityPercentile=o.Percentile;f.QualityFlags=o.Flags;f.QualityDetail=o.Detail;f.ExposureFit=o.ExposureFit;f.ExposureLabel=o.ExposureLabel;
+    if(items[i].M.Version<QualityMeter.Version&&f.QualityDetail!=null)f.QualityDetail+="\nMeasured by an earlier version. Analyse image quality refreshes it.";
     int status=items[i].M.Status;if(status==QualityStatus.Unsuitable)f.QualityDetail="Not scored: set aside as unsuitable for measuring. Re-measure image quality tries again.";else if(status==QualityStatus.Failed)f.QualityDetail="Not scored: the file could not be read last time. Analyse image quality tries again.";}
   }
  }

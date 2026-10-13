@@ -751,8 +751,9 @@ the tooltip gives the reason. Files found unsuitable while measuring are set asi
 listed in the run report.
 
 Measuring is on demand, or after each import via **Settings → General**. Results are
-remembered per file content, so renamed or moved files aren't measured twice.
-**Re-measure image quality** repeats it; older results refresh when next requested.
+remembered per file content in the repository's index, so renamed or moved files
+aren't measured twice and scores survive program updates. **Re-measure image
+quality** repeats it; results from an earlier version stay until next requested.
 
 ARCHIVE SAFETY AND BACKUPS
 @title Backups and protection
