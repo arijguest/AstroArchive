@@ -16,11 +16,16 @@ namespace AstroArchive {
    if(rows.Count==0){LocalizedMessage.Show(Window,"Choose a target or session with light frames or stacks first. Calibration frames and recordings are not scored.","Nothing to measure");return;}
    var scorable=rows.Where(f=>QualityEligibility.Reason(f).Length==0).ToList();
    if(scorable.Count==0){L("StatusLabel").Text=QualitySkipSummary(rows);return;}
-   QualityRun run=null;
-   Run(ct=>{run=repo.AnalyzeQuality(rows,force,ct,Progress);return run.Summary();},message=>{
-    L("StatusLabel").Text=message+(run.Measured>0?". Sort by QUALITY or use Filters > Quality rank.":"");
-    if(run.NeedsReport)ShowReport("Image quality report",run.Report());
-   },"Measuring image quality");
+   // Measures copies in the background, so importing, exporting and Settings stay available while it runs.
+   var frames=rows.Select(f=>f.Clone()).ToList();var repository=repo;QualityRun run=null;
+   RunBackground(BackgroundJob.Quality,"Measuring image quality",frames,(job,token)=>{run=repository.AnalyzeQuality(frames,force,token,job.Report);return run.Summary();},(message,success)=>{
+    // Whatever was measured is stored, even when the run was stopped, so the library always shows it.
+    if(repository!=repo)return;
+    repository.ApplyQuality(all);Filter(true);
+    string line=message+(run!=null&&run.Measured>0?". Sort by QUALITY or use Filters > Quality rank.":"");
+    BackgroundStatus(line);if(success)completionActivity.Status=line;
+    if(run!=null&&run.NeedsReport)ShowReport("Image quality report",run.Report());
+   },"Stopped. Measurements already stored are kept.");
   }
   // Explains why nothing in view can be scored, using the most common reasons.
   static string QualitySkipSummary(IEnumerable<Frame> rows){

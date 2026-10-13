@@ -113,5 +113,12 @@ namespace AstroArchive {
  public sealed partial class Repository {
   // Background processes and exclusive claims on this archive's captures.
   public readonly BackgroundJobs Background=new BackgroundJobs();
+  // The capture at the place the archive records for it now. A process holds copies from when it started, and an edit made
+  // since (a new target, say) may have moved the file; the copy is returned unchanged when nothing moved.
+  public Frame Located(Frame frame){
+   var now=string.IsNullOrEmpty(frame.Hash)?null:Find(frame.Hash);
+   if(now==null||string.Equals(now.RelativePath,frame.RelativePath,StringComparison.OrdinalIgnoreCase))return frame;
+   var moved=frame.Clone();moved.RelativePath=now.RelativePath;moved.RepositoryStamp=now.RepositoryStamp;return moved;
+  }
  }
 }

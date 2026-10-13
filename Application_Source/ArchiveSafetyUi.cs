@@ -57,7 +57,7 @@ namespace AstroArchive {
    if(folder.Length>0&&repo!=null){d.SelectTab(6);Repository.ValidateBackupDestination(folder,repo.Root);}
   }
   void ChangeArchiveProtection(){
-   if(repo==null||RepositoryOperationBlocked)return;bool enable=!repo.OriginalsProtected;
+   if(repo==null||RepositoryOperationBlocked||BackgroundConflict(null))return;bool enable=!repo.OriginalsProtected;
    var dialog=new FormWindow(Window,enable?"Protect archived originals":"Turn off archive protection",560,440);
    dialog.Text(enable?"Protect archived originals":"Remove deletion protection",true);
    dialog.Text(enable?"Windows will block deletion and renaming of archived originals in File Explorer for this account. AstroArchive can still apply metadata changes and confirmed deletions. Reading, previewing and copying images continue normally.":"Archived originals will use their previous deletion permissions. Existing images and backups are kept.");

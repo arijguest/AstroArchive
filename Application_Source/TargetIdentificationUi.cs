@@ -20,13 +20,20 @@ namespace AstroArchive {
   }
   void IdentifyByPlate(bool imported,List<Frame> selected,int named){
    if(!PlateSolve.Configured(settings)){Configure(3);if(!PlateSolve.Configured(settings)){L("StatusLabel").Text=named+" filename matches; "+selected.Count+" captures need a configured plate solver.";return;}}
-   List<TargetSolveJob> jobs=null;var repository=repo;var scannedPlan=plan;var expected=selected.Where(f=>!PendingImport(f,imported)).GroupBy(f=>f.Hash).ToDictionary(g=>g.Key,g=>IdentificationSnapshot(g.First()));
-   Run(ct=>{jobs=TargetSolving.Plan(selected);TargetSolving.Solve(jobs,(frame,token,stage)=>SolveIdentification(frame,imported,token,stage),ct,IdentificationStage);return "";},done=>ShowTargetReviewWhenReady(()=>{
+   List<TargetSolveJob> jobs=null;var repository=repo;var scannedPlan=plan;var config=settings;
+   // Archived captures are solved in the background on copies, so importing, exporting and Settings stay available; files still to be imported are solved in the foreground because the scan itself changes with the answer.
+   var frames=imported?selected:selected.Select(f=>f.Clone()).ToList();
+   var expected=frames.Where(f=>!PendingImport(f,imported)).GroupBy(f=>f.Hash).ToDictionary(g=>g.Key,g=>IdentificationSnapshot(g.First()));
+   Func<Frame,CancellationToken,Action<string>,SolveResult> solver=(frame,token,stage)=>imported?SolveIdentification(frame,true,token,stage):repository.CachedSolve(repository.Located(frame),config,token,stage);
+   Action<CancellationToken,Action<IdentificationProgress>> solve=(ct,progress)=>{jobs=TargetSolving.Plan(frames);TargetSolving.Solve(jobs,solver,ct,progress);};
+   Action<string> reviewed=done=>ShowTargetReviewWhenReady(()=>{
     if(closing)return;if(repository!=repo||imported&&scannedPlan!=plan)throw new InvalidOperationException("The repository or import scan changed. Identify the selected captures again.");var current=repository.All().ToDictionary(f=>f.Hash);foreach(var pair in expected){Frame existing;if(!current.TryGetValue(pair.Key,out existing)||IdentificationSnapshot(existing)!=pair.Value)throw new InvalidOperationException("Capture metadata changed while these results were waiting. Identify the selected captures again.");}
     if(!jobs.Any(j=>j.Solved)){L("StatusLabel").Text="No fields solved. Capture metadata was retained.";ShowReport("Target identification",IdentificationReport(jobs));return;}
     if(jobs.Count!=1||!jobs[0].Include){var dialog=IdentificationDialog(jobs);if(!dialog.Show()){if(reviewingActivity!=null){reviewingActivity.NeedsReview=true;reviewingActivity.Status="Solved fields kept for later review.";}L("StatusLabel").Text="Solved "+jobs.Count(j=>j.Solved)+" fields; metadata changes were not applied.";return;}}
     ApplyIdentifications(jobs,imported,named);
-   }));
+   });
+   if(imported)Run(ct=>{solve(ct,IdentificationStage);return "";},reviewed);
+   else RunBackground(BackgroundJob.Identification,"Identifying targets",frames,(job,token)=>{solve(token,p=>job.Report(p.Completed,p.Total,p.Stage,(p.Detail??"").Split('\n')[0]));return "";},(message,success)=>{if(success)reviewed(message);else BackgroundStatus(message);},"Identification stopped. Nothing was changed.");
   }
   void ApplyIdentifications(List<TargetSolveJob> jobs,bool imported,int named){
    var chosen=jobs.Where(j=>j.Solved&&j.Include).ToList();int updated=0;var errors=new List<string>();

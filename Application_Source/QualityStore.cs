@@ -158,7 +158,7 @@ namespace AstroArchive {
    try{return MeasureFrame(frame,FilePath(frame),ct);}
    catch(Exception e){
     if(!(e is FileNotFoundException||e is DirectoryNotFoundException))throw;
-    var now=Find(frame.Hash);if(now==null||string.Equals(now.RelativePath,frame.RelativePath,StringComparison.OrdinalIgnoreCase))throw;
+    var now=Located(frame);if(ReferenceEquals(now,frame))throw;
     return MeasureFrame(frame,FilePath(now),ct);
    }
   }

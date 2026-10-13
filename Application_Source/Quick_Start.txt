@@ -714,6 +714,8 @@ Right-click **Edit metadata** to change indexed labels; source headers are kept.
 - One representative is solved per selected Light session or group; stacks solve individually.
 - Online solving sends detected star coordinates, not your image.
 - Cancel keeps completed changes. Recognised names can identify files without a solver.
+- Captures already in the repository are solved in the background: keep importing, exporting
+  or changing Settings. The matches wait in Activity as **Review results**.
 
 ## Rotation analysis
 Needs timestamped acquisition subs with enough time coverage and site / pointing data.
@@ -728,6 +730,9 @@ IMAGE QUALITY
 @keywords quality score rank fwhm stars clouds trailed clipped obstruction trees exposure fit
 **Repository → Review and analysis → Analyse image quality** measures the light frames in
 view (or selected) and fills the **QUALITY** column with a score from 0 to 100.
+It runs in the background: keep importing, exporting or changing Settings while it works,
+and follow it or stop it from Activity. Measurements already made are kept. Deleting the
+files it is reading waits until it finishes.
 
 ## What a score means
 Each sub is compared with similar frames from the same session, so a score says how it
