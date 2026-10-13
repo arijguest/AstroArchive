@@ -2374,3 +2374,8 @@ Perihelion beyond the inner solar system	Perihel außerhalb des inneren Sonnensy
 Updating information…	Informationen werden aktualisiert…
 Information updated.	Informationen aktualisiert.
 No additional information was downloaded. Essential and saved information remain available.	Es wurden keine zusätzlichen Informationen heruntergeladen. Wesentliche und gespeicherte Informationen bleiben verfügbar.
+Today	Heute
+Set UTC date	UTC-Datum setzen
+UTC date (YYYY-MM-DD). Press Enter or Set UTC date.	UTC-Datum (JJJJ-MM-TT). Drücken Sie Enter oder UTC-Datum setzen.
+Enter a valid UTC date (YYYY-MM-DD) between 1972 and 2026.	Geben Sie ein gültiges UTC-Datum (JJJJ-MM-TT) zwischen 1972 und 2026 ein.
+Drag to rotate · Shift-drag to pan · Focus/Ctrl + wheel or pinch to zoom.	Ziehen zum Drehen · Umschalt+Ziehen zum Verschieben · Fokus/Strg+Mausrad oder zwei Finger zum Zoomen.

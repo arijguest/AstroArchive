@@ -2406,3 +2406,8 @@ Perihelion beyond the inner solar system	近日点は内側の太陽系の外
 Updating information…	情報を更新中…
 Information updated.	情報を更新しました。
 No additional information was downloaded. Essential and saved information remain available.	追加情報はダウンロードされませんでした。基本情報と保存済み情報は引き続き利用できます。
+Today	今日
+Set UTC date	UTC日付を設定
+UTC date (YYYY-MM-DD). Press Enter or Set UTC date.	UTC日付（YYYY-MM-DD）。Enterまたは「UTC日付を設定」を押してください。
+Enter a valid UTC date (YYYY-MM-DD) between 1972 and 2026.	1972年から2026年までの有効なUTC日付（YYYY-MM-DD）を入力してください。
+Drag to rotate · Shift-drag to pan · Focus/Ctrl + wheel or pinch to zoom.	ドラッグで回転 · Shift＋ドラッグで移動 · フォーカス/Ctrl＋ホイール、またはピンチで拡大縮小。
