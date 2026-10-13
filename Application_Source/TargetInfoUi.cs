@@ -1,5 +1,7 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -8,11 +10,14 @@ using System.Windows.Controls;
 namespace AstroArchive {
  public partial class MainUi {
   readonly TargetInfoCatalog targetInformation=new TargetInfoCatalog(Path.Combine(AppDomain.CurrentDomain.BaseDirectory,"TargetInfo.zip"));
-  sealed class TargetInfoState {public TargetInfoView View;public CancellationTokenSource Cancel;public int Generation;public string Target;public double? PreferredWidth;public bool Dragging,Constraining;}
+  sealed class TargetInfoState {public TargetInfoView View;public CancellationTokenSource Cancel;public int Generation;public string Target,Member;public double? PreferredWidth;public bool Dragging,Constraining;}
   readonly TargetInfoState libraryInfo=new TargetInfoState(),editedInfo=new TargetInfoState();
   void InitializeTargetInformation(string prefix){
    var state=prefix.Length==0?libraryInfo:editedInfo;state.View=new TargetInfoView{Focusable=true};((Border)Window.FindName(prefix+"TargetInfoPane")).Child=state.View;
-   state.View.ChooseObject=id=>LoadTargetInformation(prefix,state.Target,id);
+   state.View.ChooseObject=id=>LoadTargetInformation(prefix,state.Target,id,state.Member);
+   state.View.ChooseMember=member=>LoadTargetInformation(prefix,state.Target,null,member);
+   state.View.GoBack=()=>LoadTargetInformation(prefix,state.Target,null);
+   state.View.OpenInStellarium=OpenStellariumView;
    var body=(Grid)Window.FindName(prefix.Length==0?"LibraryBody":"EditedBody");body.SizeChanged+=(s,e)=>ConstrainTargetInformationWidth(prefix);
    // A Grid may retain its minimum desired size while an ancestor clips it.
    // Recheck its allotted slot after layout, including preview divider changes.
@@ -38,31 +43,49 @@ namespace AstroArchive {
    if(visible)ConstrainTargetInformationWidth(prefix);else if(prefix.Length>0)SizeEditedPreview();
   }
   void HideTargetInformation(string prefix){
-   var state=prefix.Length==0?libraryInfo:editedInfo;state.Generation++;if(state.Cancel!=null){state.Cancel.Cancel();state.Cancel.Dispose();state.Cancel=null;}state.Target=null;if(state.View!=null){SetTargetInformationVisible(prefix,false);state.View.ToolTip=null;state.View.ShowMessage("Target information","");}
+   var state=prefix.Length==0?libraryInfo:editedInfo;state.Generation++;if(state.Cancel!=null){state.Cancel.Cancel();state.Cancel.Dispose();state.Cancel=null;}state.Target=null;state.Member=null;if(state.View!=null){SetTargetInformationVisible(prefix,false);state.View.ToolTip=null;state.View.ShowMessage("Target information","");}
   }
   void ShowTargetInformation(string prefix){
    var state=prefix.Length==0?libraryInfo:editedInfo;if(state.View==null)return;
    var target=(prefix.Length==0?Targets:EditedTargets).SelectedItem as TargetSummary;string name=target==null?"All targets":target.Name;
-   SetTargetInformationVisible(prefix,true);if(state.Target==name)return;
+   SetTargetInformationVisible(prefix,true);if(state.Target==name&&state.Member==null)return;
    if(name=="All targets"||name=="Calibration"||name=="Unknown"){
     HideTargetInformation(prefix);state.Target=name;SetTargetInformationVisible(prefix,true);state.View.ShowMessage(name=="All targets"?"Explore your targets":name,name=="All targets"?"Choose a target on the left to see its overview and sky location. Select a file to preview your image.":name=="Calibration"?"Calibration frames do not have a celestial target. Select a file to preview it.":"Identify this target to see its catalogue information. Select a file to preview it.");return;
    }
    LoadTargetInformation(prefix,name,null);
   }
-  async void LoadTargetInformation(string prefix,string target,string id){
-   var state=prefix.Length==0?libraryInfo:editedInfo;HideTargetInformation(prefix);state.Target=target;SetTargetInformationVisible(prefix,true);state.View.ShowMessage(Catalog.Label(target),"Loading target information…");
+  // The user's targets inside a section (each comet under Comets), with how many files each has.
+  List<TargetInfoMember> SectionMembers(string prefix,string section){
+   IEnumerable<KeyValuePair<string,int>> counts=prefix.Length==0?all.GroupBy(f=>f.Target).Select(g=>new KeyValuePair<string,int>(g.Key,g.Count())):editedImages.GroupBy(EditedTarget).Select(g=>new KeyValuePair<string,int>(g.Key,g.Count()));
+   counts=counts.Where(c=>c.Key!=null&&TargetNavigation.Section(c.Key)==section);
+   string unit=prefix.Length==0?"{0} files":"{0} images";
+   return counts.Select(c=>new TargetInfoMember{Target=c.Key,Label=TargetNavigation.ShortName(c.Key),Detail=c.Value==1?Localization.T(prefix.Length==0?"1 file":"1 image"):Localization.F(unit,c.Value)}).OrderBy(m=>m.Label,StringComparer.OrdinalIgnoreCase).ToList();
+  }
+  // member reads one target inside a section (a comet under Comets) and offers the way back to the section.
+  async void LoadTargetInformation(string prefix,string target,string id,string member=null){
+   var state=prefix.Length==0?libraryInfo:editedInfo;HideTargetInformation(prefix);state.Target=target;state.Member=member;SetTargetInformationVisible(prefix,true);state.View.ShowMessage(Catalog.Label(member??target),"Loading target information…");
    state.Cancel=new CancellationTokenSource();var token=state.Cancel.Token;int generation=++state.Generation;
    try{
     // The selected canonical target carries saved names; don't use a display label
     // or fuzzy catalogue search to select a scientific identity.
-    // Eclipse sections are groups of Sun or Moon captures; show that body's card.
-    string lookup=target==Eclipses.SolarSection?"Sun":target==Eclipses.LunarSection?"Moon":target;
-    string note=target==Eclipses.SolarSection?"Your captures taken while the Moon covered part of the Sun. Select one to see the covered fraction in Capture details and the sky map.":target==Eclipses.LunarSection?"Your captures taken while the Moon was in Earth's shadow. Select one to see how deep it was in Capture details and the sky map.":null;
-    var result=await Task.Run(()=>id==null?targetInformation.Find(lookup,token):targetInformation.ById(id,token),token);
+    // Eclipse sections are groups of Sun or Moon captures and have their own pages. Comets lists the user's comets.
+    bool comets=target==TargetNavigation.CometsSection;
+    string lookup=member??(target==Eclipses.SolarSection?Eclipses.SolarSection:target==Eclipses.LunarSection?Eclipses.LunarSection:target);
+    var members=comets&&member==null?SectionMembers(prefix,target):null;
+    string note=member!=null?null:target==Eclipses.SolarSection?"Your captures taken while the Moon covered part of the Sun. Select one to see the covered fraction in Capture details and the sky map.":target==Eclipses.LunarSection?"Your captures taken while the Moon was in Earth's shadow. Select one to see how deep it was in Capture details and the sky map.":null;
+    var result=await Task.Run(()=>{
+     var found=id==null?targetInformation.Find(lookup,token):targetInformation.ById(id,token);
+     // An older information pack has no eclipse pages; fall back to the eclipsed body.
+     if(found.Status=="not_found"&&id==null&&Eclipses.IsSection(lookup))found=targetInformation.Find(lookup==Eclipses.SolarSection?"Sun":"Moon",token);
+     return found;
+    },token);
     if(token.IsCancellationRequested||generation!=state.Generation||Window.Dispatcher.HasShutdownStarted)return;
-    if(result.Status=="matched")state.View.ShowCard(result.Cards[0],id==null?note:"Reading a candidate for "+Catalog.Label(target));
-    else if(result.Status=="ambiguous")state.View.ShowChoices(Catalog.Label(target),result);
-    else state.View.ShowMessage(Catalog.Label(target),"No information is available for this target.");
+    string back=member!=null&&comets?"All comets":null;
+    if(member!=null&&id==null)note=Localization.F("One of your comets · {0}",TargetNavigation.ShortName(member));
+    if(result.Status=="matched")state.View.ShowCard(result.Cards[0],id==null?note:"Reading a candidate for "+Catalog.Label(member??target),members,"YOUR COMETS",back);
+    else if(result.Status=="ambiguous")state.View.ShowChoices(Catalog.Label(member??target),result);
+    else if(members!=null)state.View.ShowCard(CometInfo.GroupCard(),null,members,"YOUR COMETS",null);
+    else state.View.ShowMessage(Catalog.Label(member??target),"No information is available for this target.");
    }catch(OperationCanceledException){}catch(Exception error){if(generation!=state.Generation||Window.Dispatcher.HasShutdownStarted)return;state.View.ShowMessage(Catalog.Label(target),"Target information is unavailable. You can still select and preview your files.");state.View.ToolTip=error.Message;}
   }
   void OpenTargetInformation(ListBox list){

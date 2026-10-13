@@ -52,8 +52,11 @@ namespace AstroArchive {
      new Frame{Target="C/2023 A3 (Tsuchinshan-ATLAS)",Kind="Light",Exposure=30,OriginalName="comet.fit"},new Frame{Target="12P/Pons-Brooks",Kind="Stack",OriginalName="comet-stack.fit"},new Frame{Target="Unknown",Kind="Light",OriginalName="unknown.fit"}
     };Filter(true);PumpPopupLayout();
     var view=Targets.ItemsSource as ListCollectionView;if(view==null||view.GroupDescriptions.Count!=1||view.Groups==null)throw new Exception("Target type grouping is missing.");
-    if(!view.Groups.Cast<CollectionViewGroup>().Any(g=>Convert.ToString(g.Name)=="Solar system"&&g.ItemCount==3)||!view.Groups.Cast<CollectionViewGroup>().Any(g=>Convert.ToString(g.Name)=="Nebulae"&&g.ItemCount==2))throw new Exception("Comets or nebulae do not share a section.");
-    if(Targets.Items.Cast<TargetSummary>().Count()!=9||Targets.Items.Cast<TargetSummary>().First().Name!="All targets"||PopupChildren<Expander>(Targets).Any())throw new Exception("Target sections require expanding or include selectable header rows.");
+    if(!view.Groups.Cast<CollectionViewGroup>().Any(g=>Convert.ToString(g.Name)=="Solar system"&&g.ItemCount==2)||!view.Groups.Cast<CollectionViewGroup>().Any(g=>Convert.ToString(g.Name)=="Nebulae"&&g.ItemCount==2))throw new Exception("Comets or nebulae do not share a section.");
+    if(Targets.Items.Cast<TargetSummary>().Any(t=>CometTargets.IsComet(t.Name)))throw new Exception("A comet is listed on its own instead of under Comets.");
+    Targets.SelectedItem=Targets.Items.Cast<TargetSummary>().Single(t=>t.Name==TargetNavigation.CometsSection);WaitForSearches();
+    if(displayed.Count!=2||!displayed.All(f=>CometTargets.IsComet(f.Target)))throw new Exception("Comets did not show every comet's files.");
+    if(Targets.Items.Cast<TargetSummary>().Count()!=8||Targets.Items.Cast<TargetSummary>().First().Name!="All targets"||PopupChildren<Expander>(Targets).Any())throw new Exception("Target sections require expanding or include selectable header rows.");
     Targets.SelectedItem=Targets.Items.Cast<TargetSummary>().Single(t=>t.Name=="M42");if(displayed.Count!=2)throw new Exception("Grouped target selection did not filter files.");
     T("SearchBox").Text="Orion";WaitForSearches();if((Targets.SelectedItem as TargetSummary).Name!="M42"||displayed.Count!=2)throw new Exception("Rebuilding type groups lost target selection.");
     T("SearchBox").Text="C/2023";WaitForSearches();if((Targets.SelectedItem as TargetSummary).Name!="All targets"||displayed.Count!=1)throw new Exception("Missing target did not return to filtered All targets.");
@@ -75,8 +78,8 @@ namespace AstroArchive {
       new EditedImage{Project=project,Filename="comet-stack.png",RelativePath="comet-stack.png",Metadata=new EditedMetadata{Object="12P/Pons-Brooks",ImageClass="Starless"}},
       new EditedImage{Project=project,Filename="nebula.png",RelativePath="nebula.png",Metadata=new EditedMetadata{Object="M42",ImageClass="Starless"}}
      };C("EditedClassFilter").SelectedItem="All images";T("EditedSearchBox").Text="";FilterEditedImages();WaitForSearches();
-     var editedView=EditedTargets.ItemsSource as ListCollectionView;if(editedView==null||!editedView.Groups.Cast<CollectionViewGroup>().Any(g=>Convert.ToString(g.Name)=="Solar system"&&g.ItemCount==2))throw new Exception("Edited comet section is missing");
-     EditedTargets.SelectedItem=EditedTargets.Items.Cast<TargetSummary>().Single(t=>t.Name=="12P/Pons-Brooks");WaitForSearches();if(G("EditedGrid").Items.Count!=1)throw new Exception("Edited comet selection did not filter images");
+     var editedView=EditedTargets.ItemsSource as ListCollectionView;if(editedView==null||!editedView.Groups.Cast<CollectionViewGroup>().Any(g=>Convert.ToString(g.Name)=="Solar system"&&g.ItemCount==1)||EditedTargets.Items.Cast<TargetSummary>().Any(t=>CometTargets.IsComet(t.Name)))throw new Exception("Edited comets are not listed under one Comets entry");
+     EditedTargets.SelectedItem=EditedTargets.Items.Cast<TargetSummary>().Single(t=>t.Name==TargetNavigation.CometsSection);WaitForSearches();if(G("EditedGrid").Items.Count!=2)throw new Exception("Edited Comets selection did not show both comets' images");
     }finally{editedImages=previousEdited;C("EditedClassFilter").SelectedItem=editedClass;T("EditedSearchBox").Text=editedSearch;FilterEditedImages();WaitForSearches();EditedTargets.SelectedItem=EditedTargets.Items.Cast<TargetSummary>().FirstOrDefault(t=>t.Name==editedTarget)??EditedTargets.Items.Cast<TargetSummary>().First();}
    }finally{all=previousRows;libraryFilters.Values.Clear();foreach(var filter in previousFilters)libraryFilters.Values[filter.Key]=filter.Value;T("SearchBox").Text=previousSearch;WaitForSearches();Filter(true);Targets.SelectedItem=Targets.Items.Cast<TargetSummary>().FirstOrDefault(t=>t.Name==previousTarget)??Targets.Items.Cast<TargetSummary>().First();Theme.Apply(Window,settings.ThemeMode);}
   }

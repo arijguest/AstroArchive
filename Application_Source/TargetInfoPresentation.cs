@@ -24,7 +24,7 @@ namespace AstroArchive {
    var curated=TargetDescriptions.For(card.id);if(curated!=null&&!string.IsNullOrWhiteSpace(curated.Overview))return curated.Overview;
    string summary=Summary(card);return string.IsNullOrWhiteSpace(summary)&&CometInfo.IsComet(card)?CometInfo.Overview(card):summary;
   }
-  public static string Imaging(TargetInfoCard card){if(card==null)return null;var curated=TargetDescriptions.For(card.id);string text=curated!=null&&!string.IsNullOrWhiteSpace(curated.Imaging)?curated.Imaging:CometInfo.IsComet(card)?CometInfo.Imaging:null;return string.IsNullOrWhiteSpace(text)?null:text.Trim();}
+  public static string Imaging(TargetInfoCard card){if(card==null)return null;var curated=TargetDescriptions.For(card.id);string text=curated!=null&&!string.IsNullOrWhiteSpace(curated.Imaging)?curated.Imaging:CometInfo.IsComet(card)||card.id=="COMETS"?CometInfo.Imaging:null;return string.IsNullOrWhiteSpace(text)?null:text.Trim();}
   public static string Caption(string value){
    string text=value??"";
    text=text.Replace("Astronomical observation; filter bands and colour processing unspecified.","").Replace("Optical astrophotography; processing/filter details not stated.","");
@@ -56,7 +56,8 @@ namespace AstroArchive {
    foreach(var citation in card.citations??new TargetInfoCitation[0])if(citation.review_status!="draft")add(citation.source_title,citation.source_url);
    foreach(string url in card.source_urls??new string[0])add(null,url);
    if(CometInfo.IsComet(card)){if(CometInfo.Orbit(card.id)!=null||curated)add(CometInfo.SourceTitle+" · "+card.id,CometInfo.LookupUrl(card.id));}
-   else if(curated){
+   // Eclipse and section pages are not catalogue objects, so SIMBAD has nothing for them.
+   else if(curated&&card.domain!="event"&&card.domain!="group"){
     var messier=Regex.Match(card.id??"",@"^M(\d{1,3})$");if(messier.Success)add("NASA Hubble Messier Catalog · Messier "+messier.Groups[1].Value,"https://science.nasa.gov/mission/hubble/science/explore-the-night-sky/hubble-messier-catalog/messier-"+messier.Groups[1].Value+"/");
     add("SIMBAD · "+Catalog.DisplayId(card.id),"https://simbad.cds.unistra.fr/simbad/sim-id?Ident="+Uri.EscapeDataString(Regex.Replace(card.id,@"^SH2-","SH 2-",RegexOptions.IgnoreCase)));
    }

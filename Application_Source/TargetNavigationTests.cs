@@ -76,6 +76,19 @@ namespace AstroArchive {
     Check(targets.Single(t=>t.Name=="NGC2024").DisplayName=="NGC 2024 - Flame Nebula"&&targets.Count==3,"Shared display names merged catalogue identities");
     Check(Catalog.KnownName(Catalog.CommonName("IC434"))=="IC434"&&Catalog.KnownName("Flame Nebula")=="NGC2024","Display formatting changed name resolution");
    });
+   Test("Comets share one target-list entry and keep each comet's captures together",()=>{
+    foreach(string comet in new[]{"C/2023 A3 (Tsuchinshan-ATLAS)","12P/Pons-Brooks","2I/Borisov","NEOWISE","Comet ATLAS"})Check(TargetNavigation.Section(comet)==TargetNavigation.CometsSection,"Comet listed on its own: "+comet);
+    foreach(string other in new[]{"M31","Jupiter","Moon","Sun","Unknown","Calibration","A/2017 U1",TargetNavigation.CometsSection})Check(TargetNavigation.Section(other)==other,"Non-comet moved into a section: "+other);
+    var a=new Frame{Target="C/2023 A3 (Tsuchinshan-ATLAS)",Kind="Light",Exposure=30,OriginalName="b.fit"};var b=new Frame{Target="12P/Pons-Brooks",Kind="Light",Exposure=60,OriginalName="a.fit"};var c=new Frame{Target="C/2023 A3 (Tsuchinshan-ATLAS)",Kind="Light",Exposure=30,OriginalName="c.fit"};
+    var rows=new[]{a,b,c,new Frame{Target="Jupiter",Kind="Video",Exposure=10},new Frame{Target="M31",Kind="Light",Exposure=90}};
+    var targets=TargetNavigation.BuildSections(rows);var comets=targets.Single(t=>t.Name==TargetNavigation.CometsSection);
+    Check(comets.Files==3&&comets.ExposureSeconds==120&&comets.Group=="Solar system"&&comets.DisplayName=="Comets"&&!targets.Any(t=>CometTargets.IsComet(t.Name)),"Comets entry lost files or left comets listed separately");
+    var solar=targets.Where(t=>t.Group=="Solar system").Select(t=>t.Name).ToList();Check(solar.SequenceEqual(new[]{"Jupiter",TargetNavigation.CometsSection}),"Comets entry not after the planets: "+string.Join(",",solar));
+    Check(TargetNavigation.IsSection(TargetNavigation.CometsSection)&&TargetNavigation.IsSection(Eclipses.SolarSection)&&!TargetNavigation.IsSection("M31"),"Section names not recognised");
+    var sorts=new[]{new SearchSort{Property="OriginalName"}};var ordered=RepositoryOrdering.Order(new[]{a,b,c},sorts,System.Globalization.CultureInfo.InvariantCulture,false,false,ct);
+    Check(ordered.SequenceEqual(new[]{b,a,c}),"Comet captures were not kept together by comet in sort order");
+    Check(TargetNavigation.GroupByTarget(new[]{"x1","y1","x2"},s=>s.Substring(0,1)).SequenceEqual(new[]{"x1","x2","y1"}),"Target grouping reordered rows within a target");
+   });
   }
  }
 }

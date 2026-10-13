@@ -2128,3 +2128,13 @@ Sun obscured	太阳遮蔽率
 Check capture metadata	检查拍摄元数据
 Suspected obstruction	疑似遮挡
 A chosen town or city sets the capture location and its historical timezone. Local capture clocks are converted to UTC again when the town changes; explicit UTC or clock offsets keep their instant. Use default location to return to file metadata, then Settings. Changes are applied when you save metadata.	所选城镇或城市会设置拍摄地点及拍摄日期适用的时区。更改地点时，本地拍摄时间会重新转换为 UTC；明确标注 UTC 或时差的时间会保留同一时刻。使用默认地点可恢复为文件元数据，再使用设置中的地点。保存元数据时应用更改。
+Open in Stellarium	在 Stellarium 中打开
+All comets	所有彗星
+YOUR COMETS	你的彗星
+One of your comets · {0}	你的彗星之一 · {0}
+{0} files	{0} 个文件
+{0} images	{0} 张图像
+1 file	1 个文件
+1 image	1 张图像
+Open in Stellarium, centred on this object now. Uses Stellarium Web when Stellarium is not installed.	在 Stellarium 中打开，并以此天体的当前位置为中心。未安装 Stellarium 时使用 Stellarium Web。
+Open in Stellarium at the catalogue position. Uses Stellarium Web when Stellarium is not installed.	在 Stellarium 中打开星表位置。未安装 Stellarium 时使用 Stellarium Web。

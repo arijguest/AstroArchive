@@ -1,0 +1,118 @@
+{
+  "comment": "Image and card corrections applied on top of the database projection by apply-target-info-overrides.py. Each image's Commons file page and licence were checked on 2026-10-13; sha256, bytes and dimensions are computed from the files in assets/.",
+  "verified_on": "2026-10-13",
+  "images": {
+    "SUN": {
+      "file": "sun-commons-sdo-hmi-20260212.jpg",
+      "file_page_url": "https://commons.wikimedia.org/wiki/File:SDO_20260212_045238_4096_HMII_(HMI).jpg",
+      "commons_path": "b/b3/SDO_20260212_045238_4096_HMII_(HMI).jpg",
+      "creator": "NASA/SDO and the AIA, EVE, and HMI science teams",
+      "attribution": "Courtesy of NASA/SDO and the AIA, EVE, and HMI science teams — SDO 20260212 045238 4096 HMII (HMI).jpg; public domain per Commons PD-USGov template",
+      "rights_holder": "NASA government work / public-domain status asserted by the individual Commons file page; SDO science teams credited.",
+      "licence": "Public domain",
+      "licence_url": "https://commons.wikimedia.org/wiki/Template:PD-USGov",
+      "representation": "Full solar disk in white light: SDO Helioseismic and Magnetic Imager continuum intensity near 617 nm, 12 February 2026; greyscale.",
+      "subject_review": "Visually inspected 2026-10-13; a complete, uncropped solar disk with sunspots, matching the file description. Replaces the 2020 granulation close-up."
+    },
+    "IC 1396A": {
+      "file": "ic-1396a-commons-astropizza-2025.jpg",
+      "file_page_url": "https://commons.wikimedia.org/wiki/File:Elephant%27s_Trunk_Nebula_(IC_1396A)_in_Hubble_Palette.jpg",
+      "commons_path": "f/f9/Elephant's_Trunk_Nebula_(IC_1396A)_in_Hubble_Palette.jpg",
+      "creator": "Astropizza",
+      "attribution": "Astropizza — Elephant's Trunk Nebula (IC 1396A) in Hubble Palette.jpg (CC-BY-SA-4.0), via Wikimedia Commons",
+      "rights_holder": "Astropizza",
+      "licence": "CC-BY-SA-4.0",
+      "licence_url": "https://creativecommons.org/licenses/by-sa/4.0",
+      "representation": "Narrowband astrophotography in the Hubble palette from 47.5 hours of Hα/OIII and SII/OIII duo-band data; assigned colour.",
+      "subject_review": "Visually inspected 2026-10-13; the trunk, its bright rim and the surrounding IC 1396 emission agree with the file caption and target."
+    },
+    "NGC 7640": {
+      "file": "ngc-7640-commons-esa-hubble-potw1706a.jpg",
+      "file_page_url": "https://commons.wikimedia.org/wiki/File:NGC_7640_a_spiral_in_Andromeda.jpg",
+      "commons_path": "5/52/NGC_7640_a_spiral_in_Andromeda.jpg",
+      "creator": "ESA/Hubble & NASA",
+      "attribution": "ESA/Hubble & NASA — NGC 7640 a spiral in Andromeda.jpg (CC-BY-4.0), via Wikimedia Commons",
+      "rights_holder": "ESA/Hubble & NASA",
+      "licence": "CC-BY-4.0",
+      "licence_url": "https://creativecommons.org/licenses/by/4.0",
+      "representation": "Hubble Space Telescope image released as ESA/Hubble Picture of the Week potw1706a; processed colour.",
+      "subject_review": "Visually inspected 2026-10-13; the nearly edge-on barred spiral agrees with the file description and catalogue identity."
+    },
+    "SOLAR ECLIPSE": {
+      "file": "solar-eclipse-commons-adler-2017.jpg",
+      "file_page_url": "https://commons.wikimedia.org/wiki/File:Total_Solar_Eclipse_8-21-17.jpg",
+      "commons_path": "c/cd/Total_Solar_Eclipse_8-21-17.jpg",
+      "creator": "Michael S Adler",
+      "attribution": "Michael S Adler — Total Solar Eclipse 8-21-17.jpg (CC-BY-SA-4.0), via Wikimedia Commons",
+      "rights_holder": "Michael S Adler",
+      "licence": "CC-BY-SA-4.0",
+      "licence_url": "https://creativecommons.org/licenses/by-sa/4.0",
+      "representation": "Total solar eclipse of 21 August 2017 from Crowheart, Wyoming: an HDR composite of seven exposures showing the corona and the earthshine-lit Moon.",
+      "subject_review": "Visually inspected 2026-10-13; totality with the corona and the Moon's disk, matching the file description."
+    },
+    "LUNAR ECLIPSE": {
+      "file": "lunar-eclipse-commons-garcia-2014.jpg",
+      "file_page_url": "https://commons.wikimedia.org/wiki/File:Lunar_eclipse_October_8_2014_California_Alfredo_Garcia_Jr_mideclipse.JPG",
+      "commons_path": "1/13/Lunar_eclipse_October_8_2014_California_Alfredo_Garcia_Jr_mideclipse.JPG",
+      "creator": "Alfredo Garcia, Jr",
+      "attribution": "Alfredo Garcia, Jr — Lunar eclipse October 8 2014 California Alfredo Garcia Jr mideclipse.JPG (CC-BY-SA-2.0), via Wikimedia Commons",
+      "rights_holder": "Alfredo Garcia, Jr",
+      "licence": "CC-BY-SA-2.0",
+      "licence_url": "https://creativecommons.org/licenses/by-sa/2.0",
+      "representation": "Total lunar eclipse of 8 October 2014 near greatest eclipse, photographed from California through a 10-inch telescope with a DSLR.",
+      "subject_review": "Visually inspected 2026-10-13; the fully eclipsed, copper-red Moon matches the file description."
+    },
+    "COMETS": {
+      "file": "comets-commons-hale-bopp-1997.jpg",
+      "file_page_url": "https://commons.wikimedia.org/wiki/File:Comet_Hale-Bopp_1995O1.jpg",
+      "commons_path": "b/ba/Comet_Hale-Bopp_1995O1.jpg",
+      "creator": "E. Kolmhofer, H. Raab; Johannes-Kepler-Observatory, Linz, Austria",
+      "attribution": "E. Kolmhofer, H. Raab; Johannes-Kepler-Observatory, Linz, Austria (https://sternwarte.at) — Comet Hale-Bopp 1995O1.jpg (CC-BY-SA-3.0), via Wikimedia Commons",
+      "rights_holder": "E. Kolmhofer, H. Raab; Johannes-Kepler-Observatory, Linz, Austria",
+      "licence": "CC-BY-SA-3.0",
+      "licence_url": "https://creativecommons.org/licenses/by-sa/3.0",
+      "representation": "Comet C/1995 O1 (Hale-Bopp) on 4 April 1997: a 10-minute exposure on colour slide film with a 225 mm Schmidt camera, showing the blue ion tail and white dust tail.",
+      "subject_review": "Visually inspected 2026-10-13; Hale-Bopp with both tails, matching the file description. Illustrates comets in general on the Comets page."
+    }
+  },
+  "fields": {
+    "NGC 7640": {"type_label": "Barred spiral galaxy"}
+  },
+  "cards": [
+    {
+      "id": "SOLAR ECLIPSE",
+      "name": "Solar Eclipse",
+      "domain": "event",
+      "type_label": "The Moon passing in front of the Sun",
+      "aliases": ["Solar Eclipse", "Eclipse of the Sun"],
+      "summary": "A solar eclipse happens when the Moon passes between the Sun and Earth and its shadow falls on Earth. Where the Moon covers only part of the Sun the eclipse is partial. Inside the narrow path of the Moon's dark umbra it is total, and the Sun's faint outer atmosphere, the corona, appears around the black lunar disk. When the Moon is near its farthest from Earth it looks too small to cover the Sun, leaving a bright ring in an annular eclipse. Solar eclipses happen only at new Moon, and somewhere on Earth sees between two and five of them every year.",
+      "fact": "The Sun is about 400 times wider than the Moon but also about 400 times farther away, so the two look almost exactly the same size in our sky.",
+      "source_urls": ["https://science.nasa.gov/eclipses/", "https://eclipse.gsfc.nasa.gov/solar.html"]
+    },
+    {
+      "id": "LUNAR ECLIPSE",
+      "name": "Lunar Eclipse",
+      "domain": "event",
+      "type_label": "The Moon passing through Earth's shadow",
+      "aliases": ["Lunar Eclipse", "Eclipse of the Moon"],
+      "summary": "A lunar eclipse happens when Earth passes between the Sun and the Moon and Earth's shadow falls across the full Moon. In a penumbral eclipse the Moon only dims slightly; in a partial eclipse part of it enters Earth's dark umbra; in a total eclipse all of it does. Sunlight bent through Earth's atmosphere still reaches the Moon during totality and turns it copper red, lit by all the world's sunrises and sunsets at once. Unlike a solar eclipse, a lunar eclipse can be seen from the whole night side of Earth and is safe to watch without any filter.",
+      "fact": "Earth's shadow at the Moon's distance is nearly three times as wide as the Moon, so totality can last for more than an hour and a half.",
+      "source_urls": ["https://science.nasa.gov/eclipses/", "https://eclipse.gsfc.nasa.gov/lunar.html"]
+    },
+    {
+      "id": "COMETS",
+      "name": "Comets",
+      "domain": "group",
+      "type_label": "Icy small bodies of the Solar System",
+      "aliases": ["Comets"],
+      "summary": "Comets are icy bodies left over from the formation of the Solar System, from a few hundred metres to tens of kilometres across. Most spend their lives far beyond the planets. When one swings in towards the Sun its ices turn to gas and release dust, forming a bright head, the coma, and tails that can stretch for millions of kilometres: a curved, whitish dust tail and a straight, blue ion tail blown directly away from the Sun by the solar wind. Each of your comets is listed below by its designation; select one to read about its orbit.",
+      "fact": "A comet's tails always point away from the Sun, so a comet heading back out of the inner Solar System travels tail-first.",
+      "source_urls": ["https://science.nasa.gov/solar-system/comets/"]
+    }
+  ],
+  "notices": {
+    "THUMBNAIL_COVERAGE.md": [
+      ["The Sun has a 2020 close-up of solar granulation at 789 nm, not a full-disk view.", "The Sun has a full-disk white-light image from SDO's Helioseismic and Magnetic Imager (2026)."]
+    ]
+  }
+}
