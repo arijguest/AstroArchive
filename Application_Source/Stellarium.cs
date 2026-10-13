@@ -39,7 +39,7 @@ namespace AstroArchive {
    return Math.Max(MinField,Math.Min(MaxField,side*FieldMargin));
   }
   // A target information page: deep-sky objects open at their J2000 catalogue position, framed to their size;
-  // the Sun, Moon, planets and comets open by name. Eclipse pages show the eclipsed body. Groups have no single target.
+  // the Sun, Moon and planets open by name. Eclipse pages, comets and groups offer none.
   public static StellariumView ForCard(TargetInfoCard card){
    if(card==null||string.IsNullOrWhiteSpace(card.id))return null;
    var measurements=card.measurements??new TargetInfoMeasurement[0];
@@ -49,18 +49,10 @@ namespace AstroArchive {
     return new StellariumView{RA=ra.value,Dec=dec.value,FieldDegrees=field??DefaultFieldDegrees,Name=card.id.Trim()};
    }
    string id=card.id.Trim().ToUpperInvariant();
-   if(id==EclipseCard(true))return Body("Sun",2);
-   if(id==EclipseCard(false))return Body("Moon",2);
-   if(card.domain!="solar_system")return null;
-   if(CometInfo.IsComet(card))return Body(CometName(card),5);
+   // Eclipse pages and comet pages offer no Stellarium button.
+   if(id==EclipseCard(true)||id==EclipseCard(false))return null;
+   if(card.domain!="solar_system"||CometInfo.IsComet(card))return null;
    return Body(card.name??card.id,id=="SUN"||id=="MOON"?2:0.5);
-  }
-  // Stellarium lists comets as "12P/Pons-Brooks" or "C/2023 A3 (Tsuchinshan-ATLAS)"; the pack holds the designation and name apart.
-  static string CometName(TargetInfoCard card){
-   string id=card.id.Trim(),name=System.Text.RegularExpressions.Regex.Replace((card.name??"").Trim(),@"^Comet\s+","");
-   if(name.Length==0||name.IndexOf(id,StringComparison.OrdinalIgnoreCase)>=0)return name.Length==0?id:name;
-   if(char.IsDigit(id[0])){var alias=(card.aliases??new string[0]).FirstOrDefault(a=>a.StartsWith(id+"/",StringComparison.OrdinalIgnoreCase));return alias??id+"/"+name;}
-   return id+" ("+name+")";
   }
   public static string EclipseCard(bool solar){return solar?"SOLAR ECLIPSE":"LUNAR ECLIPSE";}
   static StellariumView Body(string name,double field){return new StellariumView{ByName=true,Name=name.Trim(),FieldDegrees=field};}

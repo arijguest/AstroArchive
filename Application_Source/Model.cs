@@ -79,7 +79,8 @@ namespace AstroArchive {
   public string ReviewReason {get{return CaptureScreening.Reason(this);}}
   public SkyGeometry Sky {get;set;}
   public string ReviewText {get{return CaptureScreening.NeedsReview(this)?"Needs review":Screened?"Passed":"Not screened";}}
-  public string ExposureText {get{return Exposure.HasValue?Util.Num(Exposure)+" s":"-";}}
+  // A stack's exposure is a total, so long ones read as minutes or hours and minutes; subs and videos keep seconds.
+  public string ExposureText {get{return !Exposure.HasValue?"-":Kind=="Stack"&&Exposure.Value>=60?TargetNavigation.Exposure(Exposure.Value):Util.Num(Exposure)+" s";}}
   [ScriptIgnore]public string ExposureTooltip {get{return MetadataProfiles.ExposureEvidence(this);}}
   public string MakeText {get{return !string.IsNullOrEmpty(Make)?Make:InstrumentDetection.MakeOf(Model);}}
   public string InstrumentText {get{return string.IsNullOrEmpty(Model)||Model=="Auto"?MakeText:Model;}}
