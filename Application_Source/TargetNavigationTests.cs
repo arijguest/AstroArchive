@@ -20,6 +20,7 @@ namespace AstroArchive {
     Check(summaries.Single(s=>s.Name=="M42").Files==2&&summaries.Last().Group=="Unidentified","Frame types omitted or unidentified targets misplaced");
     var groups=types.Distinct().ToList();Check(groups.IndexOf("Meteors")>groups.IndexOf("Star clusters")&&groups.IndexOf("Meteors")+1==groups.IndexOf("Other targets"),"Meteors are not just above Other targets");
     var stack=rows.Single(f=>f.Kind=="Stack");var filters=new CaptureFilters();filters.Values["Frame type"]="Stack";Check(stack.KindLabel=="Stack (1445)"&&filters.Apply(rows,"stack").Single()==stack&&CaptureFilters.Options(rows,"Frame type").Contains("Stack"),"Stack count changed its filtering identity");
+    Check(new Frame{Kind="Stack",StackCount=1}.KindLabel=="Stack"&&new Frame{Kind="Stack",StackCount=2}.KindLabel=="Stack (2)","A one-sub stack should read plain Stack");
     Check(new Frame{Kind="Stack"}.KindLabel=="Stack"&&new Frame{Kind="Light",StackCount=1445}.KindLabel=="Light","Missing stack count or a non-stack gained a misleading count");
     var filtered=TargetNavigation.Build(rows.Where(f=>f.Kind=="Stack"));Check(filtered.Count==2&&filtered[0].Files==1&&filtered[1].Name=="NGC6888","Filtered target list retained empty sections");
     Check(TargetNavigation.Build(new Frame[0]).Single().Name=="All targets","Empty repository lost the All targets option");

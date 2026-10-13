@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Windows;
+using System.Windows.Automation;
 using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Media;
@@ -122,6 +123,8 @@ namespace AstroArchive {
     var notesText=PopupChildren<TextBlock>(libraryInfo.View).SingleOrDefault(t=>t.Name=="ImagingNotesText");
     if(notesText==null||!notesText.IsVisible||PopupChildren<Expander>(libraryInfo.View).Any(e=>Convert.ToString((e.Header as TextBlock)==null?e.Header:((TextBlock)e.Header).Text)==Localization.T("IMAGING NOTES")))throw new Exception("Imaging notes are hidden in a disclosure.");
     if(!PopupChildren<Button>(libraryInfo.View).Any(b=>b.Name=="OpenInStellarium"&&b.IsVisible))throw new Exception("The info pane has no Open in Stellarium button.");
+    var stellariumButton=PopupChildren<Button>(libraryInfo.View).First(b=>b.Name=="OpenInStellarium");var previewStellarium=B("StellariumButton");
+    if(!(stellariumButton.Content is Viewbox)||PopupChildren<TextBlock>(stellariumButton).Any()||stellariumButton.Width!=previewStellarium.Width||stellariumButton.Height!=previewStellarium.Height||AutomationProperties.GetName(stellariumButton)!=Localization.T("Open in Stellarium"))throw new Exception("The info pane Open in Stellarium button is not an icon like the preview pane's.");
     libraryInfo.View.ShowCard(targetInformation.Find("Jupiter",CancellationToken.None).Cards.Single());PumpPopupLayout();
     if(!PopupChildren<TextBlock>(libraryInfo.View).Any(t=>t.Text=="2.53 g (24.79 m/s²)"))throw new Exception("Surface gravity is not shown in g.");
     stage="comets section";var cometsPage=targetInformation.Find(TargetNavigation.CometsSection,CancellationToken.None).Cards.Single();
