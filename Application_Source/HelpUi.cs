@@ -16,12 +16,10 @@ namespace AstroArchive {
   void Guide(){
    var menu=new ContextMenu();BuildGuideItems(menu.Items);menu.PlacementTarget=TopMenu("GuideMenu");menu.IsOpen=true;
   }
-  // Shared by the Guide menu and the legacy Guide button: help, guided fixes, the tour, reporting and About.
+  // Shared by the Guide menu and the legacy Guide button: help, reporting and About. Guided fixes and tours live in the Help window.
   void BuildGuideItems(ItemCollection items){
-   items.Add(MenuAction("Help…",()=>OpenGuide(null),true,false));
+   var help=MenuAction("Help…",()=>OpenGuide(null),true,false);UiHelp.Hint(help,"Search the guide, or start a guided fix or tour.");items.Add(help);
    items.Add(MenuAction("Help for this page (F1)",()=>OpenGuide(CurrentHelpTopic()),true,false));
-   var fixes=Branch("Guided fixes");foreach(var guide in WalkthroughCatalog.Fixes()){var chosen=guide;var item=MenuAction(Localization.T(guide.Title)+"…",()=>StartWalkthrough(chosen.Id),true,false);UiHelp.Hint(item,guide.Summary);fixes.Items.Add(item);}items.Add(fixes);
-   var tours=Branch("Guided tours");foreach(var guide in WalkthroughCatalog.Tours()){var chosen=guide;var item=MenuAction(chosen.Id==WalkthroughCatalog.Tour?"Interactive walkthrough…":Localization.T(guide.Title)+"…",()=>StartWalkthrough(chosen.Id),true,false);UiHelp.Hint(item,guide.Summary);tours.Items.Add(item);}items.Add(tours);
    items.Add(new Separator());
    var report=MenuAction("Report a problem…",ReportProblem,true,false);UiHelp.Hint(report,"Open a GitHub bug report with your system details and recent log filled in.");items.Add(report);
    items.Add(new Separator());items.Add(MenuAction("About AstroArchive…",About,true,false));
@@ -42,6 +40,8 @@ namespace AstroArchive {
    help.SearchBox.Text="greyed out";if(!help.GuideMatches.Any(g=>g.Id=="import-disabled"))throw new InvalidOperationException("Help search did not offer the guided fix for a disabled Import.");
    help.SearchBox.Text="no-such-help-topic-123456";if(help.TopicList.Items.Count!=0||help.SelectedTopic!=null||!help.Article.PlainText.Contains("No topics match"))throw new InvalidOperationException("Help search did not explain empty results.");help.SearchBox.Clear();if(help.TopicList.Items.Count<30)throw new InvalidOperationException("Clearing search did not restore guide topics.");
    help.ShowHome();if(help.ShowingArticle||help.TopicList.SelectedItem!=null||help.HomeCards.Count(c=>c.Tag is WalkthroughGuide&&((WalkthroughGuide)c.Tag).Fix)!=WalkthroughCatalog.Fixes().Count())throw new InvalidOperationException("Help home does not list every guided fix.");
+   help.SearchBox.Text="usb";help.ShowFixes();if(help.ShowingArticle||help.SearchBox.Text.Length!=0||!help.FixesNav.IsEnabled||!help.ToursNav.IsEnabled)throw new InvalidOperationException("Guided fixes navigation did not return to the fixes on the help home page.");
+   var guideMenu=new ContextMenu();BuildGuideItems(guideMenu.Items);if(guideMenu.Items.OfType<MenuItem>().Any(m=>m.Items.Count>0))throw new InvalidOperationException("Guided fixes and tours should be in Help, not Guide submenus.");
    string started=null;help.StartGuide=id=>started=id;help.ShowTopic("TROUBLESHOOTING");help.Article.RaiseLink("walkthrough:missing-files");if(started!="missing-files"||help.IsVisible)throw new InvalidOperationException("A guided-fix link did not start its walkthrough.");
    help=new HelpWindow(Window,HelpCatalog.Load(),"TROUBLESHOOTING");help.Article.RaiseLink("topic:REPORTING A PROBLEM");if(help.SelectedTopic==null||help.SelectedTopic.Key!="REPORTING A PROBLEM")throw new InvalidOperationException("A topic link did not open its topic.");help.Close();
    SmokeHelpFormatting(output);
@@ -58,6 +58,8 @@ namespace AstroArchive {
   readonly Button showMe=new Button{HorizontalAlignment=HorizontalAlignment.Left,Margin=new Thickness(0,12,0,0)},home=new Button{Content="Home",HorizontalAlignment=HorizontalAlignment.Stretch,HorizontalContentAlignment=HorizontalAlignment.Left,Margin=new Thickness(0,0,0,10)};
   readonly WrapPanel related=new WrapPanel{Margin=new Thickness(0,12,0,0)},matches=new WrapPanel{Margin=new Thickness(0,0,0,10)};
   readonly FrameworkElement homeView,articleView;readonly StackPanel relatedPanel=new StackPanel();
+  // Guided fixes and tours are reached from the navigation as well as the home page.
+  FrameworkElement fixSection,tourSection;ScrollViewer homeScroller;public Button FixesNav,ToursNav;
   bool showingHome,filtering;
   public HelpTopic SelectedTopic{get{return TopicList.SelectedItem as HelpTopic;}}
   public bool ShowingArticle{get{return !showingHome;}}
@@ -71,7 +73,9 @@ namespace AstroArchive {
    var content=new Grid();content.ColumnDefinitions.Add(new ColumnDefinition{Width=new GridLength(270)});content.ColumnDefinitions.Add(new ColumnDefinition{Width=new GridLength(1,GridUnitType.Star)});Grid.SetRow(content,1);layout.Children.Add(content);
    // Navigation: Home, then topics grouped under their categories.
    var navigation=new DockPanel{Margin=new Thickness(0,0,18,0)};content.Children.Add(navigation);
-   home.Click+=(s,e)=>ShowHome();UiHelp.Describe(home,"Guided fixes, tours and guide sections (Alt+Home).");DockPanel.SetDock(home,Dock.Top);navigation.Children.Add(home);
+   home.Click+=(s,e)=>ShowHome();UiHelp.Describe(home,"Guided fixes, tours and guide sections (Alt+Home).");home.Margin=new Thickness(0,0,0,4);DockPanel.SetDock(home,Dock.Top);navigation.Children.Add(home);
+   FixesNav=NavButton(Localization.T("Guided fixes")+" ("+WalkthroughCatalog.Fixes().Count()+")","Step-by-step fixes for common problems, on AstroArchive's own screens.",()=>ShowSection(fixSection));navigation.Children.Add(FixesNav);
+   ToursNav=NavButton(Localization.T("Guided tours")+" ("+WalkthroughCatalog.Tours().Count()+")","Short tours of importing, exporting and backups.",()=>ShowSection(tourSection));ToursNav.Margin=new Thickness(0,0,0,10);navigation.Children.Add(ToursNav);
    TopicList.BorderThickness=new Thickness(0);Theme.Bind(TopicList,Control.BackgroundProperty,"Surface");TopicList.HorizontalContentAlignment=HorizontalAlignment.Stretch;ScrollViewer.SetHorizontalScrollBarVisibility(TopicList,ScrollBarVisibility.Disabled);TopicList.ItemTemplate=new DataTemplate{VisualTree=TopicLabel()};UiHelp.Describe(TopicList,"Choose a topic.");AutomationProperties.SetName(TopicList,"Guide topics");
    TopicList.GroupStyle.Add(new GroupStyle{HeaderTemplate=new DataTemplate{VisualTree=GroupLabel()}});navigation.Children.Add(TopicList);
    var reading=new Grid();Grid.SetColumn(reading,1);content.Children.Add(reading);
@@ -102,11 +106,20 @@ namespace AstroArchive {
    var page=new StackPanel{Margin=new Thickness(4,0,4,12)};
    var heading=new TextBlock{Text="How can we help?",FontWeight=FontWeights.SemiBold,TextWrapping=TextWrapping.Wrap};heading.SetResourceReference(TextBlock.FontSizeProperty,"UiFontTitle");page.Children.Add(heading);
    var intro=new TextBlock{Text="Guided fixes and tours open on AstroArchive's own screens. They highlight each control, check your setup as you go, and never import or delete anything for you.",TextWrapping=TextWrapping.Wrap,Margin=new Thickness(0,6,0,6)};Theme.Bind(intro,TextBlock.ForegroundProperty,"Muted");page.Children.Add(intro);
-   page.Children.Add(Section("Fix a problem",WalkthroughCatalog.Fixes().Select(g=>Card(g.Title,g.Summary,"Start guided fix ›",g,()=>Start(g.Id)))));
-   page.Children.Add(Section("Learn by doing",WalkthroughCatalog.Tours().Select(g=>Card(g.Title,g.Summary,"Start tour ›",g,()=>Start(g.Id)))));
+   fixSection=Section("Fix a problem",WalkthroughCatalog.Fixes().Select(g=>Card(g.Title,g.Summary,"Start guided fix ›",g,()=>Start(g.Id))));page.Children.Add(fixSection);
+   tourSection=Section("Learn by doing",WalkthroughCatalog.Tours().Select(g=>Card(g.Title,g.Summary,"Start tour ›",g,()=>Start(g.Id))));page.Children.Add(tourSection);
    page.Children.Add(Section("Browse the guide",HelpCatalog.Categories.Where(c=>topics.Any(t=>t.Category==c)).Select(c=>{var first=topics.Where(t=>t.Category==c).OrderBy(t=>topics.IndexOf(t)).First();int n=topics.Count(t=>t.Category==c);return Card(c,string.Join(" · ",topics.Where(t=>t.Category==c).Take(3).Select(t=>t.Title)),n+(n==1?" topic ›":" topics ›"),c,()=>ShowTopic(first.Key));})));
-   var scroller=new ScrollViewer{Content=page,VerticalScrollBarVisibility=ScrollBarVisibility.Auto,HorizontalScrollBarVisibility=ScrollBarVisibility.Disabled,Focusable=false};MenuScrolling.SetEnabled(scroller,true);AutomationProperties.SetName(scroller,"Help home");return scroller;
+   var scroller=new ScrollViewer{Content=page,VerticalScrollBarVisibility=ScrollBarVisibility.Auto,HorizontalScrollBarVisibility=ScrollBarVisibility.Disabled,Focusable=false};MenuScrolling.SetEnabled(scroller,true);AutomationProperties.SetName(scroller,"Help home");homeScroller=scroller;return scroller;
   }
+  // Opens the home page scrolled to a section, with its first card focused for the keyboard.
+  public void ShowSection(FrameworkElement section){
+   if(SearchBox.Text.Length>0)SearchBox.Clear();ShowHome();UpdateLayout();
+   var top=section.TransformToAncestor((Visual)homeScroller.Content).Transform(new Point(0,0)).Y;homeScroller.ScrollToVerticalOffset(top);
+   var first=HomeCards.FirstOrDefault(c=>section.IsAncestorOf(c));if(first!=null)first.Focus();
+  }
+  public void ShowFixes(){ShowSection(fixSection);}
+  public void ShowTours(){ShowSection(tourSection);}
+  Button NavButton(string text,string tip,Action action){var button=Button(text,action,tip);button.HorizontalAlignment=HorizontalAlignment.Stretch;button.HorizontalContentAlignment=HorizontalAlignment.Left;button.Margin=new Thickness(0,0,0,4);DockPanel.SetDock(button,Dock.Top);return button;}
   FrameworkElement Section(string heading,IEnumerable<Button> cards){
    var panel=new StackPanel{Margin=new Thickness(0,18,0,0)};var label=new TextBlock{Text=heading,FontWeight=FontWeights.SemiBold,Margin=new Thickness(0,0,0,10)};label.SetResourceReference(TextBlock.FontSizeProperty,"UiFontHeading");panel.Children.Add(label);
    var wrap=new WrapPanel();foreach(var card in cards)wrap.Children.Add(card);panel.Children.Add(wrap);return panel;
@@ -154,7 +167,7 @@ namespace AstroArchive {
    category.Text=topic==null?"":topic.Category.ToUpperInvariant();title.Text=topic==null?"No matching topics":topic.Title;
    summary.Text=topic==null?"":topic.Summary??"";summary.Visibility=summary.Text.Length==0?Visibility.Collapsed:Visibility.Visible;
    var guide=topic==null||topic.Walkthrough==null?null:WalkthroughCatalog.Find(topic.Walkthrough);showMe.Visibility=guide==null?Visibility.Collapsed:Visibility.Visible;
-   if(guide!=null){showMe.Content="▶  "+Localization.T(guide.Fix?"Start guided fix:":"Show me in AstroArchive:")+" "+Localization.T(guide.Title);AutomationProperties.SetName(showMe,Convert.ToString(showMe.Content));}
+   if(guide!=null){showMe.Content="▶  "+Localization.T(guide.Fix?"Start guided fix:":"Start tour:")+" "+Localization.T(guide.Title);AutomationProperties.SetName(showMe,Convert.ToString(showMe.Content));}
    Article.ShowText(topic==null?Localization.T("No topics match your search. Try fewer words, or **Clear** to browse the guide."):topic.Body);
    related.Children.Clear();if(topic!=null)foreach(string key in topic.Related){var target=topics.FirstOrDefault(t=>t.Key==key);if(target==null)continue;var link=Button(target.Title+" ›",()=>ShowTopic(target.Key),target.Summary??target.Title);link.Margin=new Thickness(0,8,8,0);related.Children.Add(link);}
    relatedPanel.Visibility=related.Children.Count==0?Visibility.Collapsed:Visibility.Visible;
