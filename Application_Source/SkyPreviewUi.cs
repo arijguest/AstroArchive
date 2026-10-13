@@ -48,13 +48,22 @@ namespace AstroArchive {
   string TargetSection(Frame frame,IList<Frame> pool){var e=FrameEclipse(frame,pool);return e==null?frame.Target:e.Solar?Eclipses.SolarSection:Eclipses.LunarSection;}
   EclipseInfo FrameEclipse(Frame frame,IList<Frame> pool){
    if(frame==null||CaptureSky.IsCalibration(frame))return null;string body=ObservationTargets.NamedSolar(frame.Target)??(Catalog.IsAmbiguous(frame.Target)?ObservationTargets.NamedSolar(ObservationTargets.ModeBody(frame.ObservationMode)):null);if(body!="Sun"&&body!="Moon")return null;
-   var current=settings;string key=string.Join("|",new object[]{frame.Target,frame.Kind,frame.Observed,frame.ObservedUtc,frame.TimeZoneId,frame.TimeSource,frame.Latitude,frame.Longitude,frame.CaptureLatitude,frame.CaptureLongitude,frame.CaptureCityId,frame.Session,current.Latitude,current.Longitude,current.ObservingCity,current.ObservingCityId});
-   EclipseSection cached;if(eclipseSections.TryGetValue(frame,out cached)&&cached.Key==key)return cached.Eclipse;
-   var timed=StackWithSubframeClock(frame,pool);var utc=CaptureSky.CaptureUtc(timed,current);bool site=false;double latitude=0,longitude=0;
-   var captureSite=CaptureSite.For(frame,current);if(captureSite!=null){latitude=captureSite.Latitude;longitude=captureSite.Longitude;site=true;}
-   var eclipse=Eclipses.For(body,utc,site,latitude,longitude);eclipseSections.Remove(frame);eclipseSections.Add(frame,new EclipseSection{Key=key,Eclipse=eclipse});return eclipse;
+   var current=settings;var timed=StackWithSubframeClock(frame,pool);var utc=CaptureSky.CaptureUtc(timed,current);
+   string key=string.Join("|",new object[]{frame.Target,frame.Kind,frame.ObservationMode,frame.Observed,frame.ObservedUtc,frame.TimeZoneId,frame.TimeSource,utc,frame.Latitude,frame.Longitude,frame.CaptureLatitude,frame.CaptureLongitude,frame.CaptureCityId,frame.Session,current.Latitude,current.Longitude,current.ObservingCity,current.ObservingCityId});
+   lock(eclipseSections){
+    EclipseSection cached;if(eclipseSections.TryGetValue(frame,out cached)&&cached.Key==key)return cached.Eclipse;
+    var captureSite=CaptureSite.For(frame,current);var eclipse=Eclipses.For(body,utc,captureSite!=null,captureSite==null?0:captureSite.Latitude,captureSite==null?0:captureSite.Longitude);
+    eclipseSections.Remove(frame);eclipseSections.Add(frame,new EclipseSection{Key=key,Eclipse=eclipse});return eclipse;
+   }
   }
-  void RefreshSkyPreviews(){UpdateCaptureSky("",previewSkyFrame);}
+  void RefreshSkyPreviews(){
+   // Metadata saves reload the repository into new Frame instances. Resolve the
+   // preview's identity again rather than recalculating the obsolete clone.
+   var frame=previewSkyFrame;
+   if(frame!=null&&!string.IsNullOrEmpty(frame.Hash))frame=all.FirstOrDefault(f=>f.Hash==frame.Hash)??frame;
+   UpdateCaptureSky("",frame);
+  }
+
   void PositionSkyReset(string prefix){
    var panel=(Grid)Window.FindName(prefix+"PreviewSkyPanel");var globe=(SkyGlobeView)Window.FindName(prefix+"PreviewSky");
    // Before the panel is laid out its size is zero; a later layout pass places the button.

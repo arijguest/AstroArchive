@@ -45,6 +45,31 @@ namespace AstroArchive {
   static List<QualityItem> Items(string cohort,IEnumerable<QualityMeasurement> list){return list.Select(m=>new QualityItem{M=m,Cohort=cohort}).ToList();}
 
   public static void Run(Action<string,Action> test){
+   test("Quality: roofs and broad branches lower scores despite sharp surviving stars",()=>{
+    int w=1200,h=900;var clear=Field(w,h,2.4,180,12,511);var roof=(float[])clear.Clone();var branches=(float[])clear.Clone();
+    var random=new Random(512);
+    for(int y=0;y<h;y++)for(int x=0;x<w;x++){
+     if(x<w/3)roof[y*w+x]=(float)(100+12*Gauss(random));
+     if(x>w*0.24&&x<w*0.36||y>h*0.48&&y<h*0.62)branches[y*w+x]=(float)(100+12*Gauss(random));
+    }
+    var clean=QualityMeter.MeasureStars(clear,w,h,false);var blocked=QualityMeter.MeasureStars(roof,w,h,false);var tree=QualityMeter.MeasureStars(branches,w,h,false);
+    Check(clean.Obstruction<0.03&&blocked.Obstruction>=0.20&&tree.Obstruction>=0.08,"Foreground obstruction evidence missed or clear sky flagged");
+    var group=Enumerable.Repeat(clean,10).Concat(new[]{blocked,tree}).ToList();var scored=QualityScorer.Compute(Items("obstruction",group));
+    Check(scored[10].Score<scored[0].Score&&scored[11].Score<scored[0].Score&&scored[10].Flags.Contains("Suspected obstruction"),"Sharp stars compensated for a blocked field");
+    var restored=QualityMeasurement.Unpack("roof",blocked.Version,blocked.Kind,blocked.Status,blocked.Pack());Check(restored.Obstruction==blocked.Obstruction&&restored.StarCoverage==blocked.StarCoverage,"Stored spatial evidence was lost");
+   });
+   test("Quality: smooth gradients and diffuse nebula backgrounds are not foreground obstructions",()=>{
+    int w=1200,h=900;var p=Field(w,h,2.4,180,12,513,gradient:0.8);
+    for(int y=0;y<h;y++)for(int x=0;x<w;x++)p[y*w+x]+=(float)(1500*Math.Exp(-((x-600.0)*(x-600)/(300*300.0)+(y-450.0)*(y-450)/(220*220.0))));
+    var m=QualityMeter.MeasureStars(p,w,h,false);Check(m.Obstruction<0.03,"Smooth sky/nebula structure was classified as foreground");
+   });
+   test("Quality: identical obstructions across a cohort still reduce the absolute score",()=>{
+    var clean=StarShot(2.5,0.3,200,50);clean.Obstruction=0;
+    var blocked=StarShot(2.5,0.3,200,50);blocked.Obstruction=0.40;
+    var clearScore=QualityScorer.Compute(Items("clear",Enumerable.Repeat(clean,10)))[0];var blockedScore=QualityScorer.Compute(Items("blocked",Enumerable.Repeat(blocked,10)))[0];
+    Check(blockedScore.Score<=35&&blockedScore.Score<clearScore.Score,"A uniformly blocked cohort escaped the obstruction penalty");
+    Check(double.IsNaN(QualityMeasurement.Unpack("old",1,0,0,"1;2").Obstruction),"Legacy records invented spatial evidence");
+   });
    test("Quality: star width follows the true FWHM within 10%",()=>{
     foreach(double fwhm in new[]{1.8,2.2,4.0}){var m=QualityMeter.MeasureStars(Field(1200,900,fwhm,150,12,3),1200,900,false);Check(m.Status==QualityStatus.Ok,"Stars not found at FWHM "+fwhm+": "+m.Stars+" stars, status "+m.Status);Near(m.Fwhm,fwhm,0.10,"FWHM "+fwhm);Check(m.Hfd>0&&m.Hfd<m.Fwhm*1.6,"Half-flux diameter implausible at FWHM "+fwhm+": "+m.Hfd);}
    });

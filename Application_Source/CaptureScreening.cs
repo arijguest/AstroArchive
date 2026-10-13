@@ -34,7 +34,7 @@ namespace AstroArchive {
    HorizonResult cached;if(horizon.TryGetValue(frame,out cached)&&cached.Key==key)return cached.Issue;
    string issue=null;
    try{var sky=CaptureSky.Resolve(frame,settings);
-    if(sky.HasPosition&&sky.HasHorizon&&sky.Altitude<-2)issue=(sky.Body??sky.TargetLabel)+" was below the horizon at the predicted capture time ("+sky.TimeLabel+") from "+CaptureSite.Describe(frame,settings)+". Set the capture town / city for this file (right-click › Set capture town / city…), or correct the capture timezone in metadata.";
+    if(sky.HasHorizon&&(sky.BodyBelowHorizon||sky.HasPosition&&sky.Altitude<-2))issue=(sky.Body??sky.TargetLabel)+" was below the horizon at the predicted capture time ("+sky.TimeLabel+") from "+CaptureSite.Describe(frame,settings)+". Check the target assignment and set the capture town / city or timezone in Edit metadata.";
    }catch(Exception error){if(error is OutOfMemoryException)throw;}
    horizon.Remove(frame);horizon.Add(frame,new HorizonResult{Key=key,Issue=issue});return issue;
   }

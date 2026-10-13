@@ -14,6 +14,40 @@ namespace AstroArchive {
    var timer=System.Diagnostics.Stopwatch.StartNew();while(state.View.CurrentId!=expected&&timer.Elapsed.TotalSeconds<15){PumpPopupLayout();Thread.Sleep(10);}
    if(state.View.CurrentId!=expected)throw new Exception("Target information did not load: "+expected);
   }
+  void CheckInfoReadingOrder(TargetInfoView view){
+   string[] order={"ObjectTitle","ObjectDetails","OverviewHeading","OverviewText","ObjectImage","ImageCredits","FunFact","ParametersHeading","Sources"};
+   double bottom=double.NegativeInfinity;
+   foreach(string name in order){
+    var element=PopupChildren<FrameworkElement>(view).Single(e=>e.Name==name);double top=element.TranslatePoint(new Point(0,0),view).Y;
+    if(top<bottom-0.5)throw new Exception("Information reading order changed at "+name);
+    bottom=top+element.ActualHeight;
+   }
+   var title=PopupChildren<TextBlock>(view).Single(e=>e.Name=="ObjectTitle");var details=PopupChildren<TextBlock>(view).Single(e=>e.Name=="ObjectDetails");
+   if(title.FontSize<=details.FontSize)throw new Exception("Object name is not more prominent than catalogue details.");
+   var sources=PopupChildren<Expander>(view).Single(e=>e.Name=="Sources");
+   if(((TextBlock)sources.Header).Text!=Localization.T("SOURCES")||sources.IsExpanded)throw new Exception("Sources is not a collapsed heading.");
+   if(PopupChildren<TextBlock>(view).Any(t=>t.Text==Localization.T("Sources and catalogue details")))throw new Exception("A separate catalogue details disclosure remains.");
+  }
+  void CheckInfoCredits(TargetInfoView view,TargetInfoCard card,string output){
+   var original=card.image;
+   try{
+    card.image=new TargetInfoImage{creator="Example Observatory",attribution="Example Observatory",licence="CC0",file_page_url=original.file_page_url,licence_url=original.licence_url};
+    view.ShowCard(card);PumpPopupLayout();
+    var shortCredit=PopupChildren<FrameworkElement>(view).Single(e=>e.Name=="ImageCredits");
+    if(!(shortCredit is TextBlock)||!shortCredit.IsVisible)throw new Exception("Short image credit is hidden behind a disclosure.");
+    CheckInfoReadingOrder(view);Capture(Path.Combine(output,"AstroArchive_Info_Short_Credits.png"));
+    string attribution=string.Join(" ",Enumerable.Repeat("A collaboration of observatories and contributing image processors.",5));
+    card.image=new TargetInfoImage{creator="Example Observatory",attribution=attribution,modifications="Cropped and colour adjusted.",licence="CC0",file_page_url=original.file_page_url,licence_url=original.licence_url};
+    view.ShowCard(card);PumpPopupLayout();CheckInfoReadingOrder(view);
+    var credit=PopupChildren<Expander>(view).Single(e=>e.Name=="ImageCredits");
+    if(credit.IsExpanded||((TextBlock)credit.Header).Text!=Localization.T("Credits"))throw new Exception("Long credits are not collapsed under Credits.");
+    credit.IsExpanded=true;PumpPopupLayout();credit.BringIntoView();PumpPopupLayout();
+    var labels=PopupChildren<TextBlock>(credit).Select(t=>t.Text).ToList();
+    if(!labels.Contains(attribution)||!labels.Contains(card.image.modifications)||!PopupChildren<TextBlock>(credit).Any(t=>t.Inlines.OfType<Hyperlink>().Any()))throw new Exception("Expanded credits lost attribution, processing notes or links.");
+    var scroll=PopupChildren<ScrollViewer>(view).First();if(scroll.ScrollableWidth>0.5)throw new Exception("Long credits overflow the pane.");
+    Capture(Path.Combine(output,"AstroArchive_Info_Long_Credits.png"));
+   }finally{card.image=original;view.ShowCard(card);PumpPopupLayout();}
+  }
   public void SmokeTargetInformation(string output){
    Directory.CreateDirectory(output);Window.Show();WaitForSearches();
    var previousRows=all;var previousEdited=editedImages;var previousRepo=repo;var previousView=C("LibraryViewBox").SelectedItem;var manualWidth=editedPreviewManualWidth;double width=Window.Width,height=Window.Height,minWidth=Window.MinWidth;int scale=settings.TextScalePercent,page=((TabControl)Window.FindName("MainTabs")).SelectedIndex;string mode=settings.ThemeMode;bool shown=settings.ShowPreview;
@@ -38,8 +72,8 @@ namespace AstroArchive {
      PumpPopupLayout();
      var loadedCard=targetInformation.Find("M31",CancellationToken.None).Cards.Single();
      var labels=PopupChildren<TextBlock>(state.View).Select(t=>t.Text).ToList();
-     if(!labels.Contains(Localization.T("TARGET INFO"))||!labels.Contains(Localization.T("Sources and catalogue details")))throw new Exception("Info controls did not use the selected language.");
-     if(!labels.Contains(loadedCard.name)||!labels.Contains(TargetInfoPresentation.DisplaySummary(loadedCard)))throw new Exception("Translation changed catalogue data.");
+     if(!labels.Contains(Localization.T("TARGET INFO"))||!labels.Contains(Localization.T("SOURCES")))throw new Exception("Info controls did not use the selected language.");
+     if(!labels.Contains(Catalog.DisplayIds(loadedCard.name))||!labels.Contains(TargetInfoPresentation.DisplaySummary(loadedCard)))throw new Exception("Translation changed catalogue data.");
      // Collapsed expanders have no rendered content in WPF. Open the credit
      // before checking the text the user can actually read.
      foreach(var expander in PopupChildren<Expander>(state.View))expander.IsExpanded=true;PumpPopupLayout();
@@ -52,6 +86,7 @@ namespace AstroArchive {
       state.PreferredWidth=paneWidth;Window.MinWidth=paneWidth==240?minWidth:1600;Window.Width=paneWidth==240?1060:1600;Window.Height=650;settings.ThemeMode=theme;settings.TextScalePercent=textScale;ApplyAppearance();
       var column=tab==0?(ColumnDefinition)Window.FindName("PreviewColumn"):((Grid)Window.FindName("EditedBody")).ColumnDefinitions[3];if(tab==2)editedPreviewManualWidth=paneWidth;column.Width=new GridLength(paneWidth);PumpPopupLayout();
       var scroll=PopupChildren<ScrollViewer>(state.View).First();if(scroll.ScrollableWidth>0.5||scroll.ViewportHeight<60)throw new Exception("Info pane has horizontal overflow or no reading area.");
+      CheckInfoReadingOrder(state.View);
       var thumbnail=PopupChildren<Image>(state.View).Single(i=>i.Source is BitmapSource);var thumbnailBitmap=thumbnail.Source as BitmapSource;
       if(thumbnail.ActualWidth>scroll.ViewportWidth+1||thumbnail.ActualHeight>341||Math.Abs(thumbnail.ActualWidth/thumbnail.ActualHeight-thumbnailBitmap.PixelWidth/(double)thumbnailBitmap.PixelHeight)>0.01)throw new Exception("Thumbnail is cropped, stretched, excessive or wider than the pane.");
       var map=PopupChildren<SkyGlobeView>(state.View).Single();if(!map.Context.HasPosition||map.Context.HasHorizon)throw new Exception("Target map lost its position or inferred a horizon.");
@@ -62,6 +97,7 @@ namespace AstroArchive {
       foreach(var expander in PopupChildren<Expander>(state.View))expander.IsExpanded=true;PumpPopupLayout();scroll.ScrollToEnd();PumpPopupLayout();if(scroll.ScrollableWidth>0.5||scroll.VerticalOffset<scroll.ScrollableHeight-1)throw new Exception("Expanded sources and credits do not fit the pane.");
       foreach(var expander in PopupChildren<Expander>(state.View))expander.IsExpanded=false;scroll.ScrollToTop();
      }
+     if(tab==0){state.PreferredWidth=240;((ColumnDefinition)Window.FindName("PreviewColumn")).Width=new GridLength(240);PumpPopupLayout();CheckInfoCredits(state.View,loadedCard,output);}
      Window.MinWidth=minWidth;Window.Width=1060;PumpPopupLayout();var resizedRoot=(FrameworkElement)Window.Content;var resizedPane=(FrameworkElement)Window.FindName(prefix+"PreviewPane");if(resizedPane.TranslatePoint(new Point(resizedPane.ActualWidth,0),resizedRoot).X>resizedRoot.ActualWidth+1)throw new Exception("Shrinking the window clipped a widened information pane.");
      stage="session selection on page "+tab;
      if(tab==0){
@@ -86,7 +122,7 @@ namespace AstroArchive {
     stage="catalogue name preservation";
     libraryInfo.View.ShowCard(targetInformation.Find("Moon",CancellationToken.None).Cards.Single());PumpPopupLayout();
     if(!PopupChildren<TextBlock>(libraryInfo.View).Any(t=>t.Text=="Moon"))throw new Exception("A catalogue name was translated as an interface label.");
-    File.WriteAllText(Path.Combine(output,"target-info-smoke.txt"),"PASS "+Localization.Current+": Repository/Edited context actions clear visible and retained selections; image/info transitions; offline map; short and narrow layouts; light/dark and 100/150% text; translated controls, unchanged catalogue data/attribution; credits reachable without horizontal scrolling.");
+    File.WriteAllText(Path.Combine(output,"target-info-smoke.txt"),"PASS "+Localization.Current+": Repository/Edited context actions clear visible and retained selections; image/info transitions; offline map; short and narrow layouts; light/dark and 100/150% text; translated controls, unchanged catalogue data/attribution; ordered title/details/overview/image/fun fact/parameters; short credits visible and long attribution expandable; Sources heading expands catalogue details; credits reachable without horizontal scrolling.");
    }catch(Exception error){throw new Exception("Target information UI failed at "+stage+" ("+Localization.Current+").",error);}
    finally{CancelPreview();CancelEditedPreview();HideTargetInformation("");HideTargetInformation("Edited");if(repo!=null&&repo!=previousRepo)repo.Dispose();repo=previousRepo;all=previousRows;editedImages=previousEdited;librarySelection.Clear();editedSelection.Clear();C("LibraryViewBox").SelectedItem=previousView;Window.MinWidth=minWidth;Window.Width=width;Window.Height=height;settings.ThemeMode=mode;settings.TextScalePercent=scale;settings.ShowPreview=shown;editedPreviewManualWidth=manualWidth;ApplyAppearance();SetPreviewVisibility();Filter(true);FilterEditedImages();WaitForSearches();GoToPage(page);}
   }

@@ -55,7 +55,6 @@ namespace AstroArchive {
   ContextMenu BuildImportTools(){
    var menu=ThemedMenu();var selection=G("ImportGrid").SelectedItems.Cast<Frame>().Where(f=>f.Status!="Deleted").ToList();
    menu.Items.Add(FileAction("Edit selected metadata…",()=>Edit(true,selection),selection.Count>0));
-   menu.Items.Add(FileAction("Set capture town / city…",()=>SetCaptureSite(true,Context(true)),plan!=null&&visibleImports.Any(f=>f.Status!="Deleted")));
    menu.Items.Add(FileAction("Identify selected targets…",()=>Identify(true),selection.Count>0));
    menu.Items.Add(FileAction("Set Unknown targets…",AssignUnknownImportTargets,UnknownImportSelection().Count>0));
    menu.Items.Add(new Separator());menu.Items.Add(FileAction("Scan report…",()=>ShowReport("Scan report",plan==null?"Scan a folder first.":plan.Errors.Count==0?"All supported files were read successfully.":string.Join("\r\n\r\n",plan.Errors))));

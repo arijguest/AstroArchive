@@ -2118,3 +2118,12 @@ Target below horizon	目标位于地平线以下
 Set the capture town / city for this file (right-click › Set capture town / city…), or correct the capture timezone in metadata.	请为此文件设置拍摄城镇/城市（右键 › 设置拍摄城镇/城市…），或在元数据中更正拍摄时区。
 Set capture town / city for selected…	为所选项设置拍摄城镇/城市…
 Targets below the horizon at the predicted capture time usually need the capture town / city or timezone set.	在推测拍摄时间位于地平线以下的目标，通常需要设置拍摄城镇/城市或时区。
+
+# Information pane, 3.2.6
+Credits	图片署名
+FUN FACT	趣闻
+
+# Capture checks, 3.2.6
+Sun obscured	太阳遮蔽率
+Check capture metadata	检查拍摄元数据
+Suspected obstruction	疑似遮挡

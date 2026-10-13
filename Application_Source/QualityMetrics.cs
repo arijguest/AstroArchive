@@ -14,21 +14,23 @@ namespace AstroArchive {
   public string Hash;public int Version,Kind,Status;
   public double Fwhm=double.NaN,Hfd=double.NaN,FwhmCentre=double.NaN,FwhmEdge=double.NaN,Ecc=double.NaN,Snr=double.NaN,Noise=double.NaN,Bg=double.NaN,Gradient=double.NaN;
   public int Stars,StarsUsed;
+  // Spatial evidence of a star-poor foreground region with a sharp background boundary.
+  public double Obstruction=double.NaN,StarCoverage=double.NaN;
   public double Detail=double.NaN,Limb=double.NaN,Sat,BlackClip,Peak=double.NaN,Max=double.NaN,Diameter=double.NaN;
   public bool FillsFrame;public int Width,Height;
   public string Pack(){
-   var values=new double[]{Fwhm,Hfd,FwhmCentre,FwhmEdge,Ecc,Snr,Noise,Bg,Gradient,Stars,StarsUsed,Detail,Limb,Sat,BlackClip,Peak,Max,Diameter,FillsFrame?1:0,Width,Height};
+   var values=new double[]{Fwhm,Hfd,FwhmCentre,FwhmEdge,Ecc,Snr,Noise,Bg,Gradient,Stars,StarsUsed,Detail,Limb,Sat,BlackClip,Peak,Max,Diameter,FillsFrame?1:0,Width,Height,Obstruction,StarCoverage};
    var text=new StringBuilder();for(int i=0;i<values.Length;i++){if(i>0)text.Append(';');text.Append(values[i].ToString("R",CultureInfo.InvariantCulture));}return text.ToString();
   }
   public static QualityMeasurement Unpack(string hash,int version,int kind,int status,string data){
-   var parts=(data??"").Split(';');var v=new double[21];for(int i=0;i<v.Length;i++){double x;v[i]=i<parts.Length&&double.TryParse(parts[i],NumberStyles.Float,CultureInfo.InvariantCulture,out x)?x:double.NaN;}
-   return new QualityMeasurement{Hash=hash,Version=version,Kind=kind,Status=status,Fwhm=v[0],Hfd=v[1],FwhmCentre=v[2],FwhmEdge=v[3],Ecc=v[4],Snr=v[5],Noise=v[6],Bg=v[7],Gradient=v[8],Stars=(int)Num(v[9]),StarsUsed=(int)Num(v[10]),Detail=v[11],Limb=v[12],Sat=Num(v[13]),BlackClip=Num(v[14]),Peak=v[15],Max=v[16],Diameter=v[17],FillsFrame=v[18]>0.5,Width=(int)Num(v[19]),Height=(int)Num(v[20])};
+   var parts=(data??"").Split(';');var v=new double[23];for(int i=0;i<v.Length;i++){double x;v[i]=i<parts.Length&&double.TryParse(parts[i],NumberStyles.Float,CultureInfo.InvariantCulture,out x)?x:double.NaN;}
+   return new QualityMeasurement{Hash=hash,Version=version,Kind=kind,Status=status,Fwhm=v[0],Hfd=v[1],FwhmCentre=v[2],FwhmEdge=v[3],Ecc=v[4],Snr=v[5],Noise=v[6],Bg=v[7],Gradient=v[8],Stars=(int)Num(v[9]),StarsUsed=(int)Num(v[10]),Detail=v[11],Limb=v[12],Sat=Num(v[13]),BlackClip=Num(v[14]),Peak=v[15],Max=v[16],Diameter=v[17],FillsFrame=v[18]>0.5,Width=(int)Num(v[19]),Height=(int)Num(v[20]),Obstruction=v[21],StarCoverage=v[22]};
   }
   static double Num(double v){return double.IsNaN(v)||double.IsInfinity(v)?0:v;}
  }
  public static class QualityMeter {
   // Bump when any measurement changes; stored rows with an older version are measured again lazily.
-  public const int Version=1;
+  public const int Version=2;
   const double FwhmPerSigma=2.3548200450309493;
 
   // Collapses channels (planar) to one finite float plane. Non-finite samples become the plane median-free zero.
@@ -112,6 +114,7 @@ namespace AstroArchive {
     if(!peak)continue;candidates.Add(new Candidate{X=x,Y=y,G=v});if(v>=th10)counted++;
    }
    m.Stars=counted;
+   MeasureObstruction(d,dw,dh,g,candidates,th10,m);
    candidates.Sort((a,b)=>b.G.CompareTo(a.G));
    float saturation=maxCount>=4?(float)(max-(max-min)*0.01):0f;
    var fits=new List<StarFit>();int examined=0;int margin=30;
@@ -130,6 +133,47 @@ namespace AstroArchive {
    foreach(var f in fits){bool inside=Math.Abs(f.X-w/2.0)<w/4.0&&Math.Abs(f.Y-h/2.0)<h/4.0;(inside?centre:edge).Add(f.Fwhm);}
    if(centre.Count>=5)m.FwhmCentre=Median(centre);if(edge.Count>=5)m.FwhmEdge=Median(edge);
    m.Status=QualityStatus.Ok;return m;
+  }
+  // Obstructions can leave excellent stars in the remaining clear part of the
+  // frame. Require both a star deficit and an abrupt, connected background
+  // boundary; an empty tile or a smooth sky/vignetting gradient alone is insufficient.
+  static void MeasureObstruction(float[] plane,int w,int h,float[] detection,List<Candidate> candidates,double threshold,QualityMeasurement m){
+   const int nx=8,ny=8,n=nx*ny;var stars=new int[n];int total=0;
+   foreach(var c in candidates){
+    if(c.G<threshold||c.X<3||c.Y<3||c.X>=w-3||c.Y>=h-3)continue;
+    // Reject ridges/edges: a compact source must fall away along both axes.
+    double x=c.G-Math.Max(detection[c.Y*w+c.X-3],detection[c.Y*w+c.X+3]),y=c.G-Math.Max(detection[(c.Y-3)*w+c.X],detection[(c.Y+3)*w+c.X]);
+    if(x<0.25*c.G||y<0.25*c.G||Math.Max(x,y)>4*Math.Min(x,y))continue;
+    stars[Math.Min(ny-1,c.Y*ny/h)*nx+Math.Min(nx-1,c.X*nx/w)]++;total++;
+   }
+   m.Obstruction=0;if(total<24)return;
+   int occupied=0;foreach(int count in stars)if(count>0)occupied++;
+   m.StarCoverage=Math.Min(1,occupied/(n*(1-Math.Exp(-total/(double)n))));
+   var levels=new double[n];var noise=new double[n];var skyLevels=new List<double>();var skyNoise=new List<double>();
+   for(int cy=0;cy<ny;cy++)for(int cx=0;cx<nx;cx++){
+    int k=cy*nx+cx,x0=cx*w/nx,x1=(cx+1)*w/nx,y0=cy*h/ny,y1=(cy+1)*h/ny;var values=new float[81];var diffs=new float[81];int used=0;
+    for(int sy=0;sy<9;sy++)for(int sx=0;sx<9;sx++){
+     int x=x0+(x1-x0-1)*sx/8,y=y0+(y1-y0-1)*sy/8;values[used]=plane[y*w+x];diffs[used]=plane[y*w+Math.Min(w-1,x+1)]-values[used];used++;
+    }
+    levels[k]=Median(values,used);float centre=Median(diffs,used);noise[k]=MadSigma(diffs,used,centre,new float[used])/Math.Sqrt(2);
+    if(stars[k]>0){skyLevels.Add(levels[k]);skyNoise.Add(noise[k]);}
+   }
+   if(skyLevels.Count<4)return;double reference=Median(skyLevels),referenceNoise=Math.Max(1e-6,Median(skyNoise));
+   var slopes=new List<double>();for(int y=0;y<ny;y++)for(int x=0;x<nx;x++){int k=y*nx+x;if(x+1<nx)slopes.Add(Math.Abs(levels[k]-levels[k+1]));if(y+1<ny)slopes.Add(Math.Abs(levels[k]-levels[k+nx]));}
+   double jump=Math.Max(8*referenceNoise,4*Median(slopes));
+   var suspect=new bool[n];for(int i=0;i<n;i++)suspect[i]=stars[i]==0&&(levels[i]<reference-jump||levels[i]>reference+jump&&noise[i]<0.5*referenceNoise);
+   var visited=new bool[n];int blocked=0;
+   for(int seed=0;seed<n;seed++){
+    if(visited[seed]||!suspect[seed])continue;var queue=new Queue<int>();queue.Enqueue(seed);visited[seed]=true;int area=0;bool sharp=false;
+    while(queue.Count>0){int k=queue.Dequeue();area++;int x=k%nx,y=k/nx;
+     foreach(int next in new[]{x>0?k-1:-1,x+1<nx?k+1:-1,y>0?k-nx:-1,y+1<ny?k+nx:-1}){
+      if(next<0)continue;if(!suspect[next]&&stars[next]>0&&Math.Abs(levels[k]-levels[next])>jump)sharp=true;
+      if(suspect[next]&&!visited[next]){visited[next]=true;queue.Enqueue(next);}
+     }
+    }
+    if(sharp&&area>=2)blocked+=area;
+   }
+   m.Obstruction=blocked/(double)n;
   }
   static List<double> Column(List<StarFit> fits,int which){var o=new List<double>(fits.Count);foreach(var f in fits)o.Add(which==0?f.Fwhm:which==1?f.Hfd:which==2?f.Ecc:f.Snr);return o;}
 

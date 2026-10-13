@@ -1,5 +1,5 @@
 AstroArchive user guide
-Application 3.2.5; package 3.2.5.1.
+Application 3.2.6; package 3.2.6.1.
 Windows 10/11 x64; .NET Framework 4.8.
 
 START HERE
@@ -149,14 +149,19 @@ image, a ZIP of images, or an MP4/GIF slideshow. Adjust card… changes one card
 image, zoom, position and short description; the description also shows in videos.
 
 ## Eclipses
-Sun and Moon captures taken during an eclipse list under Solar Eclipse or Lunar
-Eclipse in the target list; files and folders are unchanged. Capture details show
-how much of the Sun (or of the Moon, in Earth's shadow) was covered at the capture,
-with a curve of the whole eclipse, its maximum, when it began and ended, how long
-it lasted and any totality, in the capture's timezone. Solar times are for your
-site; lunar times run from the Moon entering Earth's outer shadow to leaving it.
-The sky map adds a close-up of both discs. Solar eclipses need an observing town /
-city or capture location; both need a correct capture time and timezone.
+Sun and Moon captures taken during an observable eclipse list under Solar Eclipse
+or Lunar Eclipse in the target list; files and folders are unchanged. For solar
+captures the sky map shows obscuration on the Sun itself, and Capture details
+shows only the percentage of the Sun obscured at capture. The local Sun and Moon
+must both be above the horizon for a solar eclipse to be shown. A Sun or Moon
+predicted below the horizon prompts a check of the target, capture location,
+clock and timezone.
+Lunar eclipse details retain the coverage curve and contact times. Moon-to-target
+separation is omitted when the target is the Moon.
+Set a per-file town / city in Edit metadata > Capture; the choice is saved with
+other metadata changes and can apply to selected sessions. Use default location
+returns to the file's recorded location, then the observing town in Settings.
+Sky views, horizon checks and local eclipse detection follow the saved choice.
 
 ## Condensed subs
 Repeated Lights share a collapsed session row with dates, count, per-sub exposure,
@@ -500,7 +505,11 @@ Repository > Review and analysis > Analyse image quality measures the light fram
 view (or selected) and fills the QUALITY column with a score from 0 to 100. Each
 sub is compared with similar frames from the same session, so a score says how it
 ranks among its neighbours, not how good the night was. Deep-sky frames use star
-size, star count, roundness and noise. Planetary, lunar and solar stills use edge
+size, star count, roundness, noise and spatial obstruction evidence. Star-poor
+regions with abrupt background boundaries can flag a suspected foreground
+obstruction (trees, branches, roofs or buildings) and reduce the score even if
+the surviving stars are sharp. Smooth gradients alone do not count as
+obstructions. Planetary, lunar and solar stills use edge
 sharpness, fine detail and noise, and also get an EXPOSURE FIT column (Under,
 Good or Over) from the Columns menu. A flag beside a score (for example Clouded,
 Trailed or Clipped) is explained in its tooltip. Hover any score for the reasons.
@@ -514,7 +523,8 @@ skipped on later runs, and the run report lists every file that was set aside
 or could not be read. Scores only suggest; nothing is rejected or deleted for you. Measuring is
 on demand; Settings > General can also measure after each import. Results are
 remembered per file content, so renamed or moved files are not measured twice.
-Re-measure image quality repeats the measurement.
+Re-measure image quality repeats the measurement. 3.2.6 adds spatial measurements;
+Analyse image quality refreshes older measurements when next requested.
 
 OBSERVING TOWN / CITY
 
@@ -691,3 +701,6 @@ Import/Export handle files; Repository holds sessions, review, maintenance and
 diagnostics. Settings opens Preferences. Guide offers help, walkthrough and About.
 Right-click files for preview, metadata, export, working copies or deletion.
 Short hover hints explain less obvious menu actions.
+
+Very dark linear previews receive a bounded display-only brightness boost.
+Normally exposed previews, source files and scientific exports retain their values.

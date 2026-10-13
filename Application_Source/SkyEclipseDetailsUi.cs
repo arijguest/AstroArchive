@@ -90,7 +90,9 @@ namespace AstroArchive {
   // A card at the top of Sky at capture: cartoon, coverage at capture and the whole event
   // as a curve, followed by its times as ordinary facts.
   void EclipseDetails(Grid facts,CaptureSky sky,Frame frame){
-   var at=sky.Eclipse;var utc=sky.Utc.Value;var e=Eclipses.Event(at,utc,sky.Latitude,sky.Longitude);
+   var at=sky.Eclipse;
+   if(at.Solar){SkyFact(facts,"Sun obscured",MoonEphemeris.Percent(at.Obscuration));return;}
+   var utc=sky.Utc.Value;var e=Eclipses.Event(at,utc,sky.Latitude,sky.Longitude);
    if(e==null){SkyFact(facts,at.Title,at.Summary);return;}
    var zone=EclipseZone(frame);
    var card=new Border{CornerRadius=new CornerRadius(6),Padding=new Thickness(10,8,10,8),Margin=new Thickness(0,0,0,8)};card.SetResourceReference(Border.BackgroundProperty,"SurfaceAlt");

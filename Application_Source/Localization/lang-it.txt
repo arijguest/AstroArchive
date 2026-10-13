@@ -2102,3 +2102,12 @@ Target below horizon	Obiettivo sotto l'orizzonte
 Set the capture town / city for this file (right-click › Set capture town / city…), or correct the capture timezone in metadata.	Imposta la località di ripresa per questo file (clic destro › Imposta località di ripresa…) o correggi il fuso orario di ripresa nei metadati.
 Set capture town / city for selected…	Imposta località di ripresa per la selezione…
 Targets below the horizon at the predicted capture time usually need the capture town / city or timezone set.	Gli obiettivi sotto l'orizzonte all'ora di ripresa stimata di solito richiedono la località o il fuso orario di ripresa.
+
+# Information pane, 3.2.6
+Credits	Crediti
+FUN FACT	CURIOSITÀ
+
+# Capture checks, 3.2.6
+Sun obscured	Sole oscurato
+Check capture metadata	Controllare i metadati di acquisizione
+Suspected obstruction	Possibile ostruzione

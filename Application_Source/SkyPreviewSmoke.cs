@@ -60,7 +60,7 @@ namespace AstroArchive {
        if(reset.BorderThickness!=new Thickness(0)||Math.Abs(resetBounds.Left-sphereBounds.Left)>1||Math.Abs(resetBounds.Bottom-sphereBounds.Bottom)>1||!(reset.Content is System.Windows.Shapes.Path))throw new Exception("Reset is not borderless with an oriented icon close to the sphereBounds edge");
        double expectedReset=Math.Round(Math.Max(22,Math.Min(40,globe.HomeRadius*0.17)));if(Math.Abs(reset.Width-expectedReset)>0.5||Math.Abs(reset.Height-expectedReset)>0.5)throw new Exception("Reset does not scale with the sky map");
        var savedSky=globe.Context;var eclipse=new Frame{Target="Sun",Kind="Light",Observed="2024-04-08T18:17:16Z",TimeSource="FITS UTC",Latitude=25.29,Longitude=-104.14};globe.SetContext(CaptureSky.Resolve(eclipse,null));PumpPopupLayout();globe.InvalidateVisual();PumpPopupLayout();
-       if(globe.Context.Eclipse==null||!globe.EclipseDrawn||!globe.SunDrawn||!globe.MoonDrawn)throw new Exception("Solar eclipse close-up, Sun or Moon was not drawn on the daytime map");globe.SetContext(savedSky);PumpPopupLayout();
+       if(globe.Context.Eclipse==null||!globe.EclipseDrawn||!globe.SunDrawn||globe.EclipseBounds!=globe.SunBounds||globe.MoonDrawn)throw new Exception("Solar obscuration is not drawn on the Sun itself, or a separate Moon obscures it");globe.SetContext(savedSky);PumpPopupLayout();
    }finally{preview.SetImage(original,true);PumpPopupLayout();preview.Resize();PumpPopupLayout();}
   }
   // The globe, header glyph and Capture details must describe the same Moon.
@@ -75,7 +75,7 @@ namespace AstroArchive {
    }
    var icon=((Grid)Window.FindName("SkyFacts")).Children.OfType<DockPanel>().SelectMany(d=>d.Children.OfType<MoonPhaseIcon>()).FirstOrDefault();if(icon==null||Math.Abs(icon.Illumination-moon.Illumination)>1e-9||icon.Waxing!=moon.Waxing)throw new Exception("Capture details phase glyph disagrees with the map");
    var facts=((Grid)Window.FindName("SkyFacts")).Children.OfType<FrameworkElement>().Select(e=>e is TextBlock?((TextBlock)e).Text:string.Join(" ",((Panel)e).Children.OfType<TextBlock>().Select(t=>t.Text))).ToList();
-   if(!facts.Contains("Moon")||!facts.Any(t=>t.Contains(moon.IlluminationText+" illuminated"))||!facts.Contains("Moon elevation")||!facts.Contains("Target elevation")||!facts.Contains("Moon to target"))throw new Exception("Capture details omit the Moon breakdown: "+string.Join(" | ",facts));
+   if(!facts.Contains("Moon")||!facts.Any(t=>t.Contains(moon.IlluminationText+" illuminated"))||!facts.Contains("Moon elevation")||!facts.Contains("Target elevation")||(globe.Context.Body=="Moon"?facts.Contains("Moon to target"):!facts.Contains("Moon to target")))throw new Exception("Capture details omit the Moon breakdown: "+string.Join(" | ",facts));
    if(!globe.MoonDrawn||globe.MoonBounds.IsEmpty||globe.MoonBehindGlobe!=(globe.Context.Orientation.MapOfDate(moon.Topocentric).Dot(new SkyVector(Math.Sin(globe.Camera.Yaw*Math.PI/180)*Math.Cos(globe.Camera.Tilt*Math.PI/180),Math.Cos(globe.Camera.Yaw*Math.PI/180)*Math.Cos(globe.Camera.Tilt*Math.PI/180),Math.Sin(globe.Camera.Tilt*Math.PI/180)))<0))throw new Exception("Moon not drawn on the correct side of the globe");
   }
   public void SmokeCaptureSky(string output){

@@ -12,6 +12,27 @@ namespace AstroArchive {
   }
   static DateTime Utc(int y,int mo,int d,int h,int mi,int s){return new DateTime(y,mo,d,h,mi,s,DateTimeKind.Utc);}
   static void EclipseTests(){
+   Test("Changing a capture town refreshes eclipse, horizon and review evidence",()=>{
+    var frame=new Frame{Target="Sun",Kind="Light",Status="Imported",ObservedUtc="2024-04-08T18:17:16Z",Latitude=25.29,Longitude=-104.14};
+    var previous=CaptureScreening.Site;CaptureScreening.Site=()=>new Settings();
+    try{
+     var before=CaptureSky.Resolve(frame,null);Check(before.Eclipse!=null&&before.Eclipse.Kind=="Total"&&!before.BodyBelowHorizon,"Visible total eclipse fixture missing");
+     // London has no local eclipse at this instant. Tokyo is on the night side.
+     CaptureSite.Apply(frame,new ObservingCity{Id=2,Name="London",Latitude=51.5,Longitude=0});var london=CaptureSky.Resolve(frame,null);
+     Check(london.Eclipse==null&&london.Key!=before.Key&&Math.Abs(london.Altitude-before.Altitude)>1,"Changed town kept the old sky or local eclipse");
+     CaptureSite.Apply(frame,new ObservingCity{Id=3,Name="Tokyo",Latitude=35.7,Longitude=139.7});var night=CaptureSky.Resolve(frame,null);
+     Check(night.BodyBelowHorizon&&night.SunAltitude<0&&night.Eclipse==null&&CaptureScreening.HorizonIssue(frame)!=null,"Night-side Sun was treated as an observable eclipse or left unflagged");
+     // A recorded pointing above the horizon cannot override the physical Sun check.
+     frame.RA=SkyOrientation.Sidereal(night.Utc.Value,139.7);frame.Dec=35.7;var pointing=CaptureSky.Resolve(frame,null);
+     Check(pointing.Altitude>0&&pointing.BodyBelowHorizon&&pointing.Eclipse==null,"Stored pointing hid an impossible Sun capture");
+     frame.RA=null;frame.Dec=null;CaptureSite.Apply(frame,null);var restored=CaptureSky.Resolve(frame,null);
+     Check(restored.Eclipse!=null&&!restored.BodyBelowHorizon&&CaptureScreening.HorizonIssue(frame)==null,"Clearing the town kept stale eclipse/review results");
+     foreach(double latitude in new[]{-70.0,-30,0,30,70})foreach(double longitude in new[]{-180.0,-120,-60,0,60,120,180}){
+      var probe=CaptureSky.Resolve(new Frame{Target="Moon",Kind="Light",ObservedUtc=frame.ObservedUtc,Latitude=latitude,Longitude=longitude},null);
+      if(probe.SunAltitude<0||probe.Moon.Altitude<0)Check(probe.Eclipse==null||!probe.Eclipse.Solar,"A Sun or Moon below the horizon acquired a solar eclipse");
+     }
+    }finally{CaptureScreening.Site=previous;}
+   });
    Test("Solar eclipse magnitude and kind match NASA greatest-eclipse values",()=>{
     var cases=new[]{
      new{Utc=Utc(2024,4,8,18,17,16),Lat=25.29,Lon=-104.14,Magnitude=1.0566,Kind="Total"},

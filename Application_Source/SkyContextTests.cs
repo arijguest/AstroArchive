@@ -16,7 +16,7 @@ namespace AstroArchive {
     copy=Util.Deserialize<Frame>(Util.Serialize(frame));Check(copy.CaptureCityId==sydney.Id&&copy.CaptureLatitude==sydney.Latitude&&copy.CaptureCity==sydney.Label,"Chosen town was not saved with the file");
     var previous=CaptureScreening.Site;try{CaptureScreening.Site=()=>settings;
      var night=new Frame{Target="Sun",Kind="Light",Status="Imported",ObservedUtc="2026-06-21T00:00:00"};
-     Check(CaptureScreening.HorizonIssue(night)!=null&&CaptureScreening.NeedsReview(night)&&night.ReviewCategory.Contains("Target below horizon")&&night.ReviewReason.Contains("Set capture town / city"),"Midnight Sun in London was not flagged");
+     Check(CaptureScreening.HorizonIssue(night)!=null&&CaptureScreening.NeedsReview(night)&&night.ReviewCategory.Contains("Target below horizon")&&night.ReviewReason.Contains("Edit metadata"),"Midnight Sun in London was not flagged");
      Check(CaptureScreening.HorizonIssue(frame)==null,"Daytime Sun in the chosen town was flagged");
      night.Status="New";Check(CaptureScreening.HorizonIssue(night)==null,"Pending imports must not be flagged, or Skip flagged drops them");
     }finally{CaptureScreening.Site=previous;}

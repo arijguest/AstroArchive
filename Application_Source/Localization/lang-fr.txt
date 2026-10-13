@@ -2084,3 +2084,12 @@ Target below horizon	Cible sous l'horizon
 Set the capture town / city for this file (right-click › Set capture town / city…), or correct the capture timezone in metadata.	Définissez la ville de prise de vue de ce fichier (clic droit › Définir la ville de prise de vue…) ou corrigez le fuseau horaire de capture dans les métadonnées.
 Set capture town / city for selected…	Définir la ville de prise de vue de la sélection…
 Targets below the horizon at the predicted capture time usually need the capture town / city or timezone set.	Les cibles sous l'horizon à l'heure de capture estimée nécessitent généralement la ville ou le fuseau horaire de capture.
+
+# Information pane, 3.2.6
+Credits	Crédits
+FUN FACT	LE SAVIEZ-VOUS ?
+
+# Capture checks, 3.2.6
+Sun obscured	Soleil occulté
+Check capture metadata	Vérifier les métadonnées de capture
+Suspected obstruction	Obstruction possible
