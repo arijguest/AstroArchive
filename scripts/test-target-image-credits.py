@@ -50,8 +50,9 @@ class CreditsTests(unittest.TestCase):
                             self.assertTrue(image.get(field), field)
                         self.assertEqual(hashlib.sha256(archive.read(image['local_path'])).hexdigest(), image['sha256'])
                         self.assertEqual(repair_image(image), image)
-            self.assertEqual(count, json.loads(archive.read('index.json'))['image_assignments'])
-            self.assertEqual(count, 330)
+            # The essentials pack keeps a credited subset; its manifest lists every thumbnail it ships.
+            self.assertEqual(count, len(json.loads(archive.read('essentials.json'))['images']))
+            self.assertEqual(count, 200)
 
 
 if __name__ == '__main__':

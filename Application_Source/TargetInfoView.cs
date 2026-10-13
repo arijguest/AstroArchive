@@ -26,6 +26,9 @@ namespace AstroArchive {
   public Action GoBack;
   // Shown only when a card has something Stellarium can point at.
   public Action<StellariumView> OpenInStellarium;
+  // The observing location the Meteors page uses to say which showers can be seen; null when none is set.
+  public Func<CaptureSite> ObserverSite;
+  public const string MeteorCardId="METEORS";
   public string CurrentId{get;private set;}
   public TargetInfoView(){
    // Always reserve the scrollbar gutter: with Auto, text rewrapping at the narrower width toggled the bar on and off.
@@ -79,6 +82,7 @@ namespace AstroArchive {
     var list=Section(membersTitle??"YOUR TARGETS");list.Name="SectionMembers";content.Children.Add(list);
     foreach(var member in members){string name=member.Target;var button=new Button{Content=Data(member.Label+"\n"+member.Detail),HorizontalContentAlignment=HorizontalAlignment.Stretch,Margin=new Thickness(0,0,0,6),Padding=new Thickness(10,8,10,4)};AutomationProperties.SetName(button,"Read about "+member.Label);button.Click+=(s,e)=>{if(ChooseMember!=null)ChooseMember(name);};content.Children.Add(button);}
    }
+   if(card.id==MeteorCardId)AddMeteors();
    if(!string.IsNullOrWhiteSpace(factText)){
     var fact=new StackPanel();var caption=Text("FUN FACT","Muted","UiFontCaption");caption.FontWeight=FontWeights.SemiBold;fact.Children.Add(caption);fact.Children.Add(Data(factText));
     var box=Callout(fact);box.Name="FunFact";content.Children.Add(box);
@@ -99,6 +103,8 @@ namespace AstroArchive {
    if(distance!=null)AddFact(facts,"Distance",TargetInfoPresentation.Distance(distance),Evidence(card,distance));
    AddParameters(facts,card);
    foreach(var m in measurements.Where(m=>new[]{"Diameter","Rotation period","Albedo"}.Contains(m.field))){if(m.field=="Diameter"&&TargetParameters.For(card.id)!=null)continue;AddFact(facts,m.field,m.value.ToString("0.#####",CultureInfo.InvariantCulture)+(string.IsNullOrEmpty(m.uncertainty)?"":" ± "+m.uncertainty)+(m.unit=="dimensionless"?"":" "+m.unit),Evidence(card,m));}
+   // Meteors have no catalogue parameters; their page shows the shower calendar instead.
+   if(card.id==MeteorCardId&&facts.Children.Count==0){article.Children.Remove(parameters);article.Children.Remove(facts);}
    string imaging=TargetInfoPresentation.Imaging(card);
    // Imaging notes are always shown in full, not behind a disclosure.
    if(!string.IsNullOrWhiteSpace(imaging)){var notes=Section("IMAGING NOTES");notes.Name="ImagingNotes";article.Children.Add(notes);var text=Data(imaging);text.Name="ImagingNotesText";article.Children.Add(text);}
@@ -130,6 +136,23 @@ namespace AstroArchive {
    if(sources.Children.Count>0){var disclosure=Disclosure("SOURCES",sources);disclosure.Name="Sources";var heading=(TextBlock)disclosure.Header;heading.FontWeight=FontWeights.SemiBold;heading.SetResourceReference(TextBlock.FontSizeProperty,"UiFontCaption");heading.Margin=new Thickness(0);disclosure.Margin=new Thickness(0,12,0,6);content.Children.Add(disclosure);}
    content.Children.Add(Text("Select a file to return to its image preview.","Muted","UiFontCaption"));ArrangeBody();
   }
+  // The Meteors page: when each annual shower is active and how strong it is from the observer's latitude, then what a meteor's colour means.
+  void AddMeteors(){
+   var site=ObserverSite==null?null:ObserverSite();var today=DateTime.Now;
+   var heading=Section("METEOR SHOWERS THROUGH THE YEAR");heading.Name="MeteorShowersHeading";content.Children.Add(heading);
+   var calendar=new MeteorCalendar(site==null?(double?)null:site.Latitude,site==null?null:site.Label,today){Name="MeteorCalendar",Margin=new Thickness(0,2,0,4)};content.Children.Add(calendar);
+   content.Children.Add(site==null?Text("Showers are shown as seen from anywhere on Earth, at their zenithal hourly rate. Choose an observing town in Settings to see the rates from your location.","Muted","UiFontCaption"):Data(Localization.F("As seen from {0} (latitude {1}°). Rows end in the hourly rate you could expect at the radiant's highest; a dashed line means the radiant stays too low to see.",site.Label,site.Latitude.ToString("0.#",CultureInfo.InvariantCulture)),"Muted","UiFontCaption"));
+   content.Children.Add(Text("Each bar spans a shower's usual dates and rises to its peak; the taller the peak, the stronger the shower. The vertical line is today, a dot marks the peak, and a ring means the Moon is more than 60% lit then. Hover a row for details.","Muted","UiFontCaption"));
+   var colours=Section("WHAT COLOURS CAN MEAN");colours.Name="MeteorColoursHeading";content.Children.Add(colours);
+   var list=new Grid{Margin=new Thickness(0,2,0,6)};list.ColumnDefinitions.Add(new ColumnDefinition{Width=GridLength.Auto});list.ColumnDefinitions.Add(new ColumnDefinition{Width=GridLength.Auto,MaxWidth=110});list.ColumnDefinitions.Add(new ColumnDefinition{Width=new GridLength(1,GridUnitType.Star)});
+   foreach(var colour in MeteorColours.All){
+    int row=list.RowDefinitions.Count;list.RowDefinitions.Add(new RowDefinition{Height=GridLength.Auto});
+    var swatch=new System.Windows.Shapes.Ellipse{Width=12,Height=12,Fill=new SolidColorBrush((Color)ColorConverter.ConvertFromString(colour.Hex)),Margin=new Thickness(0,3,8,0),VerticalAlignment=VerticalAlignment.Top};Grid.SetRow(swatch,row);list.Children.Add(swatch);
+    var name=Text(colour.Name,"Text");name.Margin=new Thickness(0,0,10,7);name.FontWeight=FontWeights.SemiBold;Grid.SetRow(name,row);Grid.SetColumn(name,1);list.Children.Add(name);
+    var cause=Data(colour.Cause,"Muted");cause.Margin=new Thickness(0,0,0,7);Grid.SetRow(cause,row);Grid.SetColumn(cause,2);list.Children.Add(cause);
+   }
+   content.Children.Add(list);content.Children.Add(Data(MeteorColours.Speed,"Muted","UiFontCaption"));
+  }
   public void InformationStatus(string message,bool busy){if(informationStatus!=null){double offset=scroll.VerticalOffset,before=informationStatus.Visibility==Visibility.Visible?informationStatus.DesiredSize.Height:0;informationStatus.Text=Localization.T(message??"");informationStatus.Visibility=string.IsNullOrEmpty(message)?Visibility.Collapsed:Visibility.Visible;UpdateLayout();double after=informationStatus.Visibility==Visibility.Visible?informationStatus.DesiredSize.Height:0;if(offset>0)scroll.ScrollToVerticalOffset(offset+after-before);}if(refreshButton!=null)refreshButton.IsEnabled=InternetAvailable&&!busy;}
   static IEnumerable<FrameworkElement> NamedVisuals(DependencyObject parent){for(int k=0;k<VisualTreeHelper.GetChildrenCount(parent);k++){var child=VisualTreeHelper.GetChild(parent,k);var element=child as FrameworkElement;if(element!=null&&anchorNames.Contains(element.Name)&&element.IsVisible)yield return element;foreach(var nested in NamedVisuals(child))yield return nested;}}
   public void UpdateCard(TargetInfoCard card,string context,IList<TargetInfoMember> members,string membersTitle,string back){
@@ -148,12 +171,13 @@ namespace AstroArchive {
     AddFact(facts,"Orbit type",Localization.T(CometInfo.ClassLabel(orbit)),CometInfo.SourceTitle);
     AddFact(facts,"Perihelion",CometInfo.Perihelion(orbit),"Closest distance to the Sun. "+CometInfo.SourceTitle);
     if(CometInfo.ShowsAphelion(orbit))AddFact(facts,"Aphelion",CometInfo.Aphelion(orbit),"Farthest distance from the Sun. "+CometInfo.SourceTitle);
-    if(complete!=null&&complete.perihelion_time.HasValue)AddFact(facts,"Perihelion (TDB)","JD "+complete.perihelion_time.Value.ToString("0.#####",CultureInfo.InvariantCulture),CometInfo.SourceTitle);else if(CometInfo.ShowsPerihelionDate(orbit))AddFact(facts,"Perihelion date",CometInfo.PerihelionDate(orbit),CometInfo.SourceTitle);
+    if(complete!=null&&complete.perihelion_time.HasValue)AddFact(facts,"Perihelion (TDB)",(CometInfo.ShowsPerihelionDate(orbit)?CometInfo.PerihelionDate(orbit)+" · ":"")+"JD "+complete.perihelion_time.Value.ToString("0.#####",CultureInfo.InvariantCulture),CometInfo.SourceTitle);else if(CometInfo.ShowsPerihelionDate(orbit))AddFact(facts,"Perihelion date",CometInfo.PerihelionDate(orbit),CometInfo.SourceTitle);
     if(orbit.PeriodYears>0)AddFact(facts,"Orbital period",CometInfo.Period(orbit),CometInfo.SourceTitle);
     AddFact(facts,"Eccentricity",CometInfo.Eccentricity(orbit),"0 is a circle; 1 or more is an open orbit. "+CometInfo.SourceTitle);
     if(CometInfo.HasSemiMajorAxis(orbit))AddFact(facts,"Semi-major axis",CometInfo.SemiMajorAxis(orbit),"Average distance from the Sun. "+CometInfo.SourceTitle);
     AddFact(facts,"Perihelion speed",CometInfo.PerihelionSpeed(orbit),"Speed at closest approach to the Sun, from the orbit. "+CometInfo.SourceTitle);
     if(CometInfo.ShowsEscapeSpeed(orbit))AddFact(facts,"Speed at infinity",CometInfo.EscapeSpeed(orbit),"Speed left once far from the Sun on an open orbit. "+CometInfo.SourceTitle);
+    AddCometSnapshot(facts,card);
     return;
    }
    var set=card.domain=="solar_system"?TargetParameters.For(card.id):null;if(set==null)return;
@@ -164,6 +188,17 @@ namespace AstroArchive {
    if(set.Gravity>0)AddFact(facts,"Surface gravity",TargetParameters.SurfaceGravity(set),"In Earth gravities (1 g = 9.80665 m/s²). NASA Planetary Fact Sheet");
    if(TargetParameters.ShowsMoonCount(set))AddFact(facts,"Known moons",set.MoonCount.ToString(CultureInfo.InvariantCulture),"Confirmed moons. NASA Solar System Exploration");
    if(set.Moons.Length>0)AddFact(facts,"Major moons",TargetParameters.Moons(set),null);
+  }
+  // Facts only the bundled Small-Body Database snapshot holds: Earth MOID, the observations behind the orbit and meteor-shower parentage.
+  static void AddCometSnapshot(Grid facts,TargetInfoCard card){
+   var comet=CometCatalog.Find(card.id);if(comet==null)return;
+   if(comet.EarthMoid.HasValue)AddFact(facts,"Earth MOID",Localization.F("{0} AU",comet.EarthMoid.Value.ToString("0.####",CultureInfo.InvariantCulture)),"Minimum orbit intersection distance: how close the two orbital paths come to each other. It is not the comet's current distance from Earth. "+CometInfo.SourceTitle);
+   if(comet.Observations>0){string span=comet.FirstObservation!=null&&comet.LastObservation!=null?comet.FirstObservation.Substring(0,Math.Min(4,comet.FirstObservation.Length))+"–"+comet.LastObservation.Substring(0,Math.Min(4,comet.LastObservation.Length)):null;
+    AddFact(facts,"Observations",Localization.F("{0} observations",comet.Observations.ToString("#,##0",CultureInfo.InvariantCulture))+(span==null?"":" · "+span),"Observations used to fit "+(comet.OrbitId??"this orbit")+(comet.ArcDays.HasValue?" over a data arc of "+comet.ArcDays.Value.ToString("#,##0",CultureInfo.InvariantCulture)+" days":"")+". "+CometInfo.SourceTitle);}
+   var showers=CometCatalog.ShowersOf(card.id);if(showers.Count==0)return;
+   string listed=CometCatalog.ShowerNames(showers,false),suspected=CometCatalog.ShowerNames(showers,true),evidence=CometCatalog.ShowerEvidence(showers);
+   if(listed.Length>0)AddFact(facts,"Meteor showers",listed,evidence);
+   if(suspected.Length>0)AddFact(facts,"Suspected parent of",suspected,evidence);
   }
   // Short creator/licence credits stay visible. Longer attribution is available
   // inline through a keyboard-accessible disclosure, including processing notes.

@@ -40,6 +40,15 @@ Flame Nebula). The pane is divided into Overview, Imaging notes, Parameters,
 Location in the sky and Sources, and the object ID appears once: in the heading
 when the object has no other name, otherwise in the line beneath it.
 
+## Meteors
+
+The Meteors target (and any alias such as "Meteor shower" or "Shooting star") has its own page with a licensed Perseid photograph (ESO/S. Guisard, CC BY 4.0). Below the overview it shows:
+
+- **Meteor showers through the year**: a ridgeline chart of the 19 annual showers in the International Meteor Organization's working list (`MeteorShowers.cs`), ordered by peak date. Each bar spans the shower's usual dates and its height eases up to the peak; the tallest point scales with the hourly rate. The location comes from the observing town in Settings (`CaptureSite.For(null, settings)`): the latitude sets how high each radiant climbs, so the rate is the shower's zenithal rate times the sine of that height, and a dashed line replaces a shower whose radiant never clears 10 degrees. With no town set the chart shows the raw zenithal rates. A line marks today, a dot marks the peak and a ring means the Moon is more than 60% lit at that year's peak. Hovering a row gives the dates, rate, radiant height and Moon.
+- **What colours can mean**: sodium, iron, magnesium, calcium, the air and oxygen trains, and how speed and camera white balance shift them.
+
+In Capture details, a frame whose target is Meteor and whose capture time falls inside a shower's usual dates gains a **Meteor shower** row (for example "Perseids (peak 12 Aug)"), naming up to three showers and ranking by activity and, when a site is known, by what that latitude can see. Showers are matched by date only; the meteor's direction is not compared with a radiant.
+
 ## Comets
 
 Every comet target has a page. The information pack holds only name stubs for 21
@@ -92,6 +101,49 @@ page and licence was checked on 13 October 2026; the thumbnails are Commons 960-
 previews shown at about 600 pixels and re-encoded as JPEG. Credits use the same
 fields and display as the other thumbnails. The pack now has 330 image assignments
 over 318 files, and `index.json` records `runtime_overrides`.
+
+## Distance and comet data in 3.2.9
+
+Two standalone companion datasets (snapshot 13 October 2026) are merged offline.
+Neither adds a runtime database or any download.
+
+**Distances.** `scripts/target-info-overrides/wikidata-distances.json.gz` holds one
+referenced Wikidata P2583 estimate (CC0) for each of 5,210 catalogue identities (5,059 galaxies, 151 nebulae and
+remnants), reduced from the companion by `scripts/build-distance-overlay.py`. `scripts/target_info_companions.py`
+merges it into the pack after the redshift distances (and `build-target-info.py` runs it
+before the essentials projection). Rules:
+
+- Only the companion's `single_referenced_estimate` rows are used. Objects with competing
+  estimates (for example M 42), unreferenced statements or identity questions get no
+  distance rather than an averaged or chosen one.
+- A Wikidata estimate replaces a redshift-derived distance on the same card; the two kinds
+  are never shown together. Both read as approximate ("≈"); the tooltip says which kind it is,
+  keeps the original quantity and unit and links the Wikidata item.
+- A galaxy distance below 20,000 light-years is rejected as a unit slip (19 cards).
+- Where the estimate and the redshift distance differ by more than two times, neither is
+  shown until reviewed (52 cards, listed in `index.json` `runtime_companions`).
+- 5,139 cards end up with a Wikidata distance, 4,604 of them replacing a redshift value.
+
+**Comets.** `Application_Source/CometCatalog.tsv.gz` holds 4,080 comets from the NASA/JPL
+Small-Body Database (API 1.0), with full-precision osculating elements, 1-sigma values,
+MOIDs and observation spans; `MeteorShowers.json` holds 33 named showers and their listed or
+suspected comet parents. `scripts/build-comet-catalog.py` projects them from the companion.
+`CometCatalog.cs` serves them:
+
+- `OrbitalCatalog.For` returns a complete orbit for any snapshot comet, after fresh downloaded
+  orbits, the planets and the 14 audited essentials, so the 3D orbit works offline for every
+  comet. Eleven historical comets from before AD 763 fall outside the orbit model and show no 3D orbit.
+- `CometInfo.Orbit` keeps its reviewed values for the 33 well-known comets and falls back to the snapshot.
+- A discoverer's name alone resolves to a page only when exactly one comet carries it ("Hale-Bopp");
+  shared names (ATLAS, NEOWISE, Hyakutake) stay ambiguous. Fragments keep their own designation.
+- The comet page adds Earth MOID, the observations behind the orbit and, for parent comets,
+  "Meteor showers" or "Suspected parent of". Peaks are approximate, not forecasts, and a missing
+  parent means "not recorded here".
+- `CometCatalog.Showers` and `CometCatalog.ShowersOf(id)` are the API for a Meteors pane.
+
+Because the snapshot orbits retrieved on 13 October 2026 count as fresh for seven days,
+Hybrid mode does not re-download them during that week. Licences are recorded in
+`LICENSING.md`, the pack's `LICENSES_AND_ATTRIBUTION.md` and `InformationProviders.json`.
 
 ## Offline data
 

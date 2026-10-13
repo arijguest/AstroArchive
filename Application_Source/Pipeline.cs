@@ -26,7 +26,7 @@ namespace AstroArchive {
   public string Stage {get{lock(gate)return stage;}set{lock(gate)stage=value;}}
   public PipelineMetrics(Action<ProgressInfo> progress,Func<double> seconds=null){
    callback=progress;time=seconds??(()=>clock.Elapsed.TotalSeconds);
-   foreach(string name in new[]{"Discovery","Metadata","Duplicate checking","Copy + source hash","Verification","Cloud availability","Target identification","Rotation","Index/checkpoint"})meters[name]=new Meter();
+   foreach(string name in new[]{"Discovery","Metadata","Duplicate checking","Copy + source hash","Verification","Cloud availability","Target identification","Index/checkpoint"})meters[name]=new Meter();
    phaseStart=lastAdvance=time();samples.Enqueue(new Sample{Seconds=phaseStart});
   }
   public Scope Begin(string activity,string file){

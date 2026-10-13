@@ -107,7 +107,7 @@ IMPORT WORKFLOW
 4. Check the **Status** and **Review** columns, then **Import**.
 
 Import copies the eligible captures in the filtered view and verifies each copy.
-Target and rotation analysis default to Off.
+Target analysis defaults to Off.
 
 > Tip: Import greyed out? [Run the guided fix](walkthrough:import-disabled).
 
@@ -470,7 +470,7 @@ OBSERVING TOWN / CITY
 @related CAPTURE DETAILS AND SKY | ECLIPSES
 @keywords location town city coordinates latitude longitude site timezone
 **Settings → Sky & solving** offers an offline town / city search or manual coordinates.
-- Place centres approximate your site; use precise coordinates for rotation analysis.
+- Place centres approximate your site; use precise coordinates for accurate sky views.
 - Location search never sends your position to a network service.
 - Individual captures can have their own town: right-click **Edit metadata → Capture**.
 
@@ -621,7 +621,11 @@ image of the target, its integration, light frames, nights and filters.
    images, then stacks and lights.
 2. Drag to move it, `Ctrl`+scroll to zoom, **Rotate left/right** to turn it, or use
    **Adjust image position**.
-3. Add an optional short description under the target name.
+3. Add an optional short description under the target name, or tick **Add automatic
+   description** for what it is, its constellation, how far away it is and how bright
+   (shown only when known; your own text is kept and comes back when you untick it).
+   In **Analytics → Target cards**, **Add automatic descriptions** does this for every
+   card without a description of its own.
 4. Pick a layout for posts, stories or video, Dark or Light, a resolution (Standard,
    High 2x or Sharing) and an optional credit line.
 5. **Save** PNG / JPEG, or **Copy**.
@@ -695,10 +699,10 @@ image and SVG exports arrange pages on one sheet.
 METADATA AND OPTIONAL ANALYSIS
 @title Metadata and target identification
 @category Analysis and metadata
-@summary Edit capture details, re-detect metadata, plate solve targets and analyse rotation.
+@summary Edit capture details, re-detect metadata, plate solve targets.
 @walkthrough identify-targets
 @related IMAGE QUALITY | CATALOGUE IDENTITIES | EDITED METADATA AND EXPOSURE
-@keywords metadata edit plate solve astap astrometry identify target unknown rotation mount
+@keywords metadata edit plate solve astap astrometry identify target unknown mount
 ## Edit metadata
 Right-click **Edit metadata** to change indexed labels; source headers are kept.
 - **More actions → Re-detect metadata and review** compares detected values before
@@ -714,11 +718,12 @@ Right-click **Edit metadata** to change indexed labels; source headers are kept.
 - One representative is solved per selected Light session or group; stacks solve individually.
 - Online solving sends detected star coordinates, not your image.
 - Cancel keeps completed changes. Recognised names can identify files without a solver.
+- Captures already in the repository are solved in the background: keep importing, exporting
+  or changing Settings. The matches wait in Activity as **Review results**.
 
-## Rotation analysis
-Needs timestamped acquisition subs with enough time coverage and site / pointing data.
-Stacks and registered images are unsuitable. Mount labels ending in ? are suggestions;
-confirm them through **Edit metadata**.
+## Mount labels
+Mount labels ending in ? are suggestions from exposure length; confirm them through
+**Edit metadata**.
 
 IMAGE QUALITY
 @title Image quality scores
@@ -728,6 +733,9 @@ IMAGE QUALITY
 @keywords quality score rank fwhm stars clouds trailed clipped obstruction trees exposure fit
 **Repository → Review and analysis → Analyse image quality** measures the light frames in
 view (or selected) and fills the **QUALITY** column with a score from 0 to 100.
+It runs in the background: keep importing, exporting or changing Settings while it works,
+and follow it or stop it from Activity. Measurements already made are kept. Deleting the
+files it is reading waits until it finishes.
 
 ## What a score means
 Each sub is compared with similar frames from the same session, so a score says how it
@@ -1026,16 +1034,33 @@ links and solving require explicit reconnection through Preferences.
 Solar-system and comet pages show **ORBIT** beside Parameters in a wide pane,
 or below in a narrow pane. Drag or use arrow keys to rotate in 3D; Shift-drag to
 pan. Use +/− or pinch to zoom. The wheel zooms only when the orbit has focus or
-Ctrl is held, so the information page remains easy to scroll. Reset, Top view,
-Orbit plane, Fit orbit, Inner solar system and Expand orbit are available.
+Ctrl is held, so the information page remains easy to scroll. Double-click or
+press Home to reset.
 
-Body markers are enlarged and distances use a linear scale. Open paths have
+The picture sits on the real constellations, turned to the ecliptic, with the
+orbit plane drawn as a disc with distance rings. Round buttons over it reset,
+zoom, look straight down (Top view), look along the orbit (Orbit plane) and
+expand the view. The camera glides to each view unless Reduce motion is on.
+
+Fit orbit and Inner solar system frame the whole orbit or the inner planets. The
+target orbit is solid above the ecliptic, dashed below it and fades with depth.
+Diamonds mark the ascending (filled) and descending (open) nodes, with
+perihelion and aphelion (or perigee and apogee) and an arrow for the direction
+of travel.
+
+Planets appear on the marker date with a line down to the plane. Body markers
+are enlarged and distances use a linear scale, with rings and a scale bar in
+round numbers of AU, or kilometres at the Earth–Moon scale. Open paths have
 continuation arrows; clipped extents are labelled. Orbit epoch shows the marker
 at the source epoch.
 
-Today and a UTC date are enabled only for supported dated
-positions. Small-body and Moon snapshots use epoch-only markers. Complete elements
-are required; an unavailable orbit never receives an assumed orientation.
+Today, a UTC date, the timeline and **Play** are enabled only for supported
+dated positions. Play starts paused and runs about one revolution every twelve
+seconds. Press Space with the orbit focused, or the Play button, to pause it;
+moving the timeline or setting a date also pauses.
+
+Small-body and Moon snapshots use epoch-only markers. Complete elements are
+required; an unavailable orbit never receives an assumed orientation.
 
 The view is approximate geometry, not a precision ephemeris or telescope-pointing
 tool. Sources show the reference plane, epoch, time standard and solution. Reviewed

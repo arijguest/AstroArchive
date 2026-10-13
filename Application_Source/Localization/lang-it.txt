@@ -95,7 +95,6 @@ Retry failed imports	Riprova importazioni non riuscite
 Import tools ▾	Strumenti importazione ▾
 Import options	Opzioni di importazione
 TARGET ANALYSIS	ANALISI TARGET
-ROTATION ANALYSIS	ANALISI ROTAZIONE
 Ignore failed	Ignora non riuscite
 Skip filenames containing “failed”; keep originals.	Salta i nomi file che contengono “failed”; conserva gli originali.
 Delete originals after verified import	Elimina gli originali dopo l'importazione verificata
@@ -159,7 +158,6 @@ Importing edited images	Importazione delle immagini elaborate
 Identifying targets	Identificazione dei target
 Applying target metadata	Applicazione dei metadati dei target
 Analyze	Analizza
-Analysing rotation	Analisi della rotazione
 Screening captures	Controllo delle acquisizioni
 Backing up archive	Backup dell'archivio
 Changing originals protection	Modifica della protezione degli originali
@@ -286,8 +284,6 @@ Wide	Grandangolo
 Off	Disattivato
 Ambiguous only	Solo ambigui
 All light/stack files	Tutti i file light/stack
-Ambiguous mounts	Montature ambigue
-All light sessions	Tutte le sessioni light
 Preparing browsing and capture tools…	Preparazione degli strumenti di navigazione e acquisizione…
 Choose a mirrored telescope folder	Scegli una copia della cartella del telescopio
 Canceled	Annullato
@@ -335,10 +331,6 @@ User	Utente
 Saving final archive index and report	Salvataggio dell'indice finale dell'archivio e del report
 Import report	Report di importazione
 Explicit	Esplicito
-Choose a target with individual light frames. Stacks cannot establish acquisition rotation.	Scegli un target con singoli light. Gli stack non consentono di determinare la rotazione di acquisizione.
-Individual subs required	Pose singole obbligatorie
-Rotation analysis complete.	Analisi della rotazione completata.
-Rotation analysis	Analisi della rotazione
 Restore	Ripristina
 Duplicate in source	Duplicato nell'origine
 Failed	Non riuscito
@@ -829,9 +821,7 @@ Windows language	Lingua di Windows
 Language	Lingua
 Applies after AstroArchive restarts. The offline guide stays in English.	Viene applicata al riavvio di AstroArchive. La guida offline resta in inglese.
 Observing town / city	Località di osservazione
-Select your nearest town or city. Its centre is used for rotation analysis; without a selection, capture location metadata is used when available.	Seleziona la località più vicina. Il suo centro viene usato per l'analisi della rotazione; in assenza di una selezione, vengono usati i metadati di posizione dell'acquisizione, se disponibili.
 Town / city	Località
-Saved location used for sky views and mount analysis.	Posizione salvata usata per le viste del cielo e l'analisi della montatura.
 Choose town / city…	Scegli località…
 Clear observing location	Cancella località di osservazione
 Choose observing town / city	Scegli la località di osservazione
@@ -942,7 +932,6 @@ Group subs by session	Raggruppa pose per sessione
 Filters…	Filtri…
 Review and analysis	Verifica e analisi
 Identify targets…	Identifica target…
-Analyse rotation…	Analizza rotazione…
 Maintenance	Manutenzione
 Delete archive data…	Elimina dati dell'archivio…
 Diagnostics	Diagnostica
@@ -1410,11 +1399,8 @@ Inbox for captures waiting to be imported.	Cartella di arrivo per le acquisizion
 Import inbox captures; delete verified science originals and keep calibration frames.	Importa le acquisizioni in arrivo; elimina gli originali scientifici verificati e mantieni i frame di calibrazione.
 Condense acquisition subs into session rows.	Raggruppa le pose di acquisizione in righe di sessione.
 Create a verified copy of the archive.	Crea una copia verificata dell'archivio.
-Review captures, identify objects and assess mount rotation.	Verifica le acquisizioni, identifica gli oggetti e valuta la rotazione della montatura.
 Identify targets	Identifica target
 Solve light groups and stacks to identify objects.	Esegui il plate solving di gruppi di light e stack per identificare gli oggetti.
-Analyse rotation	Analizza rotazione
-Estimate EQ or Alt-Az from acquisition subs.	Stima EQ o Alt-Az dalle pose di acquisizione.
 Verify, reindex or remove archive files.	Verifica, reindicizza o rimuovi i file dell'archivio.
 Delete archive files with 'failed' in their filenames.	Elimina i file dell'archivio con 'failed' nel nome file.
 Delete indexed PNG/JPG/JPEG/MP4 copies; keep source originals.	Elimina le copie PNG/JPG/JPEG/MP4 indicizzate; mantieni gli originali di origine.
@@ -1506,7 +1492,6 @@ Metadata, target identification and scan report.	Metadati, identificazione dei t
 Open the guide (F1).	Apri la guida (F1).
 Choose telescope folders or files, then confirm a full scan and import. Keep originals.	Scegli cartelle o file del telescopio, quindi conferma una scansione completa e l'importazione. Gli originali vengono mantenuti.
 Clear search, filters and target selection.	Cancella ricerca, filtri e selezione del target.
-Assess mount mode from rotation in acquisition subs.	Valuta la modalità della montatura dalla rotazione nelle pose di acquisizione.
 Solve selected Light groups and stacks; review batch target matches.	Esegui il plate solving dei gruppi Light e degli stack selezionati; verifica in blocco le corrispondenze dei target.
 Edit selected files, or all visible files if none selected.	Modifica i file selezionati o, se non ce ne sono, tutti i file visibili.
 Archive tools.	Strumenti dell'archivio.
@@ -1518,7 +1503,6 @@ Use a unique name for each physical telescope.	Usa un nome univoco per ogni tele
 Auto detects each capture’s model.	Automatico rileva il modello di ogni acquisizione.
 Overrides apply to every scanned capture.	Le impostazioni manuali si applicano a ogni acquisizione scansionata.
 Choose which targets to solve; requires a configured solver.	Scegli i target da risolvere; richiede un software di plate solving configurato.
-Choose which acquisition sessions to analyse.	Scegli le sessioni di acquisizione da analizzare.
 Measured work by stage; concurrent times can overlap.	Lavoro misurato per fase; i tempi delle attività simultanee possono sovrapporsi.
 Import timings and error diagnostics.	Tempi di importazione e diagnostica degli errori.
 Stop safely; completed imports remain.	Interrompi in sicurezza; le importazioni completate restano.
@@ -2322,10 +2306,24 @@ Start tour:	Avvia tour:
 Step-by-step fixes for common problems, on AstroArchive's own screens.	Correzioni passo passo per i problemi comuni, direttamente nelle schermate di AstroArchive.
 Short tours of importing, exporting and backups.	Brevi tour su importazione, esportazione e backup.
 Search the guide, or start a guided fix or tour.	Cerca nella guida o avvia una correzione guidata o un tour.
-Distance	Distanza
-{0} billion light-years	{0} miliardi di anni luce
-{0} million light-years	{0} milioni di anni luce
+Add automatic descriptions	Aggiungi descrizioni automatiche
+Add automatic description	Aggiungi descrizione automatica
+Under each target name, say what it is, its constellation, how far away it is and how bright, when known. Your own description on a card still wins; Adjust card changes one card.	Sotto il nome di ogni bersaglio indica cos'è, la costellazione, a che distanza si trova e quanto è luminoso, se noto. La descrizione scritta da te su una scheda ha la precedenza; «Regola scheda» modifica una sola scheda.
+What the target is, its constellation, how far away it is and how bright, when known. It replaces your own text while ticked; your text is kept.	Cos'è il bersaglio, la sua costellazione, la distanza e la luminosità, se noti. Finché è spuntata sostituisce il tuo testo, che viene conservato.
+Nothing is known about this target yet, so there is no automatic description.	Di questo bersaglio non si sa ancora nulla, quindi non c'è una descrizione automatica.
+magnitude {0}	magnitudine {0}
+blue magnitude {0}	magnitudine blu {0}
 {0} light-years	{0} anni luce
+{0} million light-years	{0} milioni di anni luce
+{0} billion light-years	{0} miliardi di anni luce
+Distance	Distanza
+Meteor shower	Sciame meteorico
+Showers are matched by date only; the meteor's direction was not checked against a radiant.	Gli sciami sono associati solo in base alla data; la direzione del meteoroide non è stata confrontata con un radiante.
+METEOR SHOWERS THROUGH THE YEAR	SCIAMI METEORICI DURANTE L'ANNO
+WHAT COLOURS CAN MEAN	COSA POSSONO SIGNIFICARE I COLORI
+Showers are shown as seen from anywhere on Earth, at their zenithal hourly rate. Choose an observing town in Settings to see the rates from your location.	Gli sciami sono mostrati come si vedono da qualsiasi punto della Terra, con il loro tasso orario zenitale. Scegli una località di osservazione nelle Impostazioni per vedere i tassi dalla tua posizione.
+Each bar spans a shower's usual dates and rises to its peak; the taller the peak, the stronger the shower. The vertical line is today, a dot marks the peak, and a ring means the Moon is more than 60% lit then. Hover a row for details.	Ogni barra copre le date abituali di uno sciame e sale fino al massimo; più alto è il massimo, più intenso è lo sciame. La linea verticale è oggi, un punto indica il massimo e un anello significa che la Luna è illuminata per oltre il 60% in quel momento. Passa il cursore su una riga per i dettagli.
+As seen from {0} (latitude {1}°). Rows end in the hourly rate you could expect at the radiant's highest; a dashed line means the radiant stays too low to see.	Visto da {0} (latitudine {1}°). Le righe terminano con il tasso orario atteso quando il radiante è più alto; una linea tratteggiata indica che il radiante resta troppo basso per essere visto.
 
 # Hybrid information, native 3D orbit and setup connectivity.
 Online access	Accesso online
@@ -2394,3 +2392,26 @@ Set UTC date	Imposta data UTC
 UTC date (YYYY-MM-DD). Press Enter or Set UTC date.	Data UTC (AAAA-MM-GG). Premi Invio o Imposta data UTC.
 Enter a valid UTC date (YYYY-MM-DD) between 1972 and 2026.	Inserisci una data UTC valida (AAAA-MM-GG) tra il 1972 e il 2026.
 Drag to rotate · Shift-drag to pan · Focus/Ctrl + wheel or pinch to zoom.	Trascina per ruotare · Maiusc+trascina per spostare · Seleziona/Ctrl + rotella o pizzica per zoomare.
+Earth MOID	MOID con la Terra
+Observations	Osservazioni
+{0} observations	{0} osservazioni
+Meteor showers	Sciami meteorici
+Suspected parent of	Presunta cometa madre di
+Parabolic	Parabolica
+Chiron-type	Tipo Chirone
+Ascending node	Nodo ascendente
+Descending node	Nodo discendente
+Apogee	Apogeo
+Play	Riproduci
+Epoch {0}	Epoca {0}
+Marker date slider	Cursore della data dell’indicatore
+Play or pause the marker date. Space does the same while the orbit has focus.	Avvia o sospende la data dell’indicatore. La barra spaziatrice fa lo stesso quando l’orbita ha il focus.
+Orbit|Sun	Sole
+Orbit|Earth	Terra
+Orbit|Mercury	Mercurio
+Orbit|Venus	Venere
+Orbit|Mars	Marte
+Orbit|Jupiter	Giove
+Orbit|Saturn	Saturno
+Orbit|Uranus	Urano
+Orbit|Neptune	Nettuno

@@ -1,2 +1,3 @@
 # The essentials manifest binds these exact resource bytes on every platform.
 /Application_Source/OrbitEssentials.json text eol=lf
+/Application_Source/MeteorShowers.json text eol=lf

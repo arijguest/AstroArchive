@@ -14,8 +14,8 @@ with zipfile.ZipFile(pack) as archive:
     assert all(not n.startswith('/') and '..' not in n and '\\' not in n and ':' not in n for n in names)
     manifest = json.loads(archive.read('essentials.json'))
     index = json.loads(archive.read('index.json'))
-    assert manifest['identity_count'] == len(index['entries']) == 13527
-    assert manifest['alias_count'] == len(index['aliases']) == 66165
+    assert manifest['identity_count'] == len(index['entries']) == 13528
+    assert manifest['alias_count'] == len(index['aliases']) == 66171
     assert index['uncertain'] and index['nonexistent']
     for name, digest in manifest['entries'].items():
         assert hashlib.sha256(archive.read(name)).hexdigest() == digest, name
@@ -26,7 +26,10 @@ with zipfile.ZipFile(pack) as archive:
     for card in cards.values():
         sources = {c['id'] for c in card.get('citations', [])}
         for citation in card.get('citations', []):
-            assert citation['reference_id'] in index['references']
+            if citation.get('dataset_id') == 'wikidata':
+                assert citation['source_url'].startswith('https://www.wikidata.org/wiki/Q') and citation['publisher'] and citation['retrieved_on']
+            else:
+                assert citation['reference_id'] in index['references']
         for measurement in card.get('measurements', []):
             assert measurement['citation_id'] in sources, card['id']
         image = card.get('image')

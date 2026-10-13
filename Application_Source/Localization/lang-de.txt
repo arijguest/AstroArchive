@@ -93,7 +93,6 @@ Import tools ▾	Import-Tools ▾
 Report	Bericht
 Import options	Importoptionen
 TARGET ANALYSIS	ZIELANALYSE
-ROTATION ANALYSIS	ROTATIONSANALYSE
 Ignore failed	„failed“ ignorieren
 Skip filenames containing “failed”; keep originals.	Dateinamen mit „failed“ überspringen; Originale behalten.
 Delete originals after verified import	Originale nach verifiziertem Import löschen
@@ -156,7 +155,6 @@ Importing edited images	Bearbeitete Bilder werden importiert
 Identifying targets	Ziele werden identifiziert
 Applying target metadata	Zielmetadaten werden angewendet
 Analyze	Analysieren
-Analysing rotation	Rotation wird analysiert
 Screening captures	Aufnahmen werden auf Fehler geprüft
 Backing up archive	Archiv wird gesichert
 Changing originals protection	Originalschutz wird geändert
@@ -282,8 +280,6 @@ Wide	Weitwinkel
 Off	Aus
 Ambiguous only	Nur mehrdeutige
 All light/stack files	Alle Light-/Stack-Dateien
-Ambiguous mounts	Mehrdeutige Montierungen
-All light sessions	Alle Light-Sessions
 Preparing browsing and capture tools…	Durchsuchen- und Aufnahmetools werden vorbereitet…
 Choose a mirrored telescope folder	Gespiegelten Teleskopordner auswählen
 Canceled	Abgebrochen
@@ -331,10 +327,6 @@ User	Benutzer
 Saving final archive index and report	Endgültiger Archivindex und Bericht werden gespeichert
 Import report	Importbericht
 Explicit	Explizit
-Choose a target with individual light frames. Stacks cannot establish acquisition rotation.	Wählen Sie ein Ziel mit einzelnen Light-Frames. Anhand von Stacks lässt sich die Rotation bei der Aufnahme nicht bestimmen.
-Individual subs required	Einzelne Subs erforderlich
-Rotation analysis complete.	Rotationsanalyse abgeschlossen.
-Rotation analysis	Rotationsanalyse
 Restore	Wiederherstellen
 Duplicate in source	Duplikat in Quelle
 Failed	Fehlgeschlagen
@@ -817,9 +809,7 @@ Windows language	Windows-Sprache
 Language	Sprache
 Applies after AstroArchive restarts. The offline guide stays in English.	Wird nach einem Neustart von AstroArchive wirksam. Das Offline-Handbuch bleibt auf Englisch.
 Observing town / city	Beobachtungsort
-Select your nearest town or city. Its centre is used for rotation analysis; without a selection, capture location metadata is used when available.	Wählen Sie den nächstgelegenen Ort aus. Sein Zentrum wird für die Rotationsanalyse verwendet; ohne Auswahl werden, sofern vorhanden, die Standortmetadaten der Aufnahme verwendet.
 Town / city	Ort / Stadt
-Saved location used for sky views and mount analysis.	Gespeicherter Standort für Himmelsansichten und Montierungsanalyse.
 Choose town / city…	Ort / Stadt auswählen…
 Clear observing location	Beobachtungsort entfernen
 Choose observing town / city	Beobachtungsort auswählen
@@ -930,7 +920,6 @@ Group subs by session	Subs nach Session gruppieren
 Filters…	Filter…
 Review and analysis	Prüfung und Analyse
 Identify targets…	Ziele identifizieren…
-Analyse rotation…	Rotation analysieren…
 Maintenance	Wartung
 Delete archive data…	Archivdaten löschen…
 Diagnostics	Diagnose
@@ -1398,11 +1387,8 @@ Inbox for captures waiting to be imported.	Eingangsordner für Aufnahmen, die au
 Import inbox captures; delete verified science originals and keep calibration frames.	Aufnahmen aus dem Eingangsordner importieren; verifizierte Science-Originale löschen, Kalibrierdateien behalten.
 Condense acquisition subs into session rows.	Aufnahme-Subs zu Session-Zeilen zusammenfassen.
 Create a verified copy of the archive.	Eine verifizierte Kopie des Archivs erstellen.
-Review captures, identify objects and assess mount rotation.	Aufnahmen prüfen, Objekte identifizieren und Montierungsrotation bewerten.
 Identify targets	Ziele identifizieren
 Solve light groups and stacks to identify objects.	Objekte in Light-Gruppen und Stacks per Plate Solving identifizieren.
-Analyse rotation	Rotation analysieren
-Estimate EQ or Alt-Az from acquisition subs.	EQ oder Alt-Az anhand der Aufnahme-Subs schätzen.
 Verify, reindex or remove archive files.	Archivdateien verifizieren, neu indizieren oder entfernen.
 Delete archive files with 'failed' in their filenames.	Archivdateien löschen, deren Dateiname „failed“ enthält.
 Delete indexed PNG/JPG/JPEG/MP4 copies; keep source originals.	Indizierte PNG-/JPG-/JPEG-/MP4-Kopien löschen; Quelloriginale behalten.
@@ -1493,7 +1479,6 @@ Metadata, target identification and scan report.	Metadaten, Zielidentifizierung 
 Open the guide (F1).	Handbuch öffnen (F1).
 Choose telescope folders or files, then confirm a full scan and import. Keep originals.	Teleskopordner oder -dateien auswählen, dann vollständigen Scan und Import bestätigen. Originale bleiben erhalten.
 Clear search, filters and target selection.	Suche, Filter und Zielauswahl zurücksetzen.
-Assess mount mode from rotation in acquisition subs.	Montierungsmodus anhand der Rotation in Aufnahme-Subs bestimmen.
 Solve selected Light groups and stacks; review batch target matches.	Ausgewählte Light-Gruppen und Stacks per Plate Solving lösen; Zielzuordnungen gesammelt prüfen.
 Edit selected files, or all visible files if none selected.	Ausgewählte Dateien bearbeiten, oder alle sichtbaren Dateien, wenn keine ausgewählt sind.
 Archive tools.	Archivtools.
@@ -1505,7 +1490,6 @@ Use a unique name for each physical telescope.	Verwenden Sie für jedes physisch
 Auto detects each capture’s model.	„Auto“ erkennt das Modell jeder Aufnahme.
 Overrides apply to every scanned capture.	Überschreibungen gelten für jede gescannte Aufnahme.
 Choose which targets to solve; requires a configured solver.	Wählen Sie die zu lösenden Ziele aus; erfordert einen konfigurierten Plate Solver.
-Choose which acquisition sessions to analyse.	Wählen Sie die zu analysierenden Aufnahme-Sessions aus.
 Measured work by stage; concurrent times can overlap.	Gemessene Arbeit je Phase; gleichzeitige Zeiten können sich überschneiden.
 Import timings and error diagnostics.	Importzeiten und Fehlerdiagnose.
 Stop safely; completed imports remain.	Sicher beenden; abgeschlossene Importe bleiben erhalten.
@@ -2307,10 +2291,24 @@ Start tour:	Tour starten:
 Step-by-step fixes for common problems, on AstroArchive's own screens.	Schritt-für-Schritt-Lösungen für häufige Probleme, direkt in AstroArchive.
 Short tours of importing, exporting and backups.	Kurze Touren zu Import, Export und Sicherungen.
 Search the guide, or start a guided fix or tour.	Hilfe durchsuchen oder eine geführte Lösung bzw. Tour starten.
-Distance	Entfernung
-{0} billion light-years	{0} Milliarden Lichtjahre
-{0} million light-years	{0} Millionen Lichtjahre
+Add automatic descriptions	Automatische Beschreibungen hinzufügen
+Add automatic description	Automatische Beschreibung hinzufügen
+Under each target name, say what it is, its constellation, how far away it is and how bright, when known. Your own description on a card still wins; Adjust card changes one card.	Unter jedem Zielnamen angeben, was es ist, in welchem Sternbild es liegt, wie weit entfernt und wie hell es ist, soweit bekannt. Eine eigene Beschreibung auf einer Karte hat Vorrang; mit „Karte anpassen“ ändern Sie eine einzelne Karte.
+What the target is, its constellation, how far away it is and how bright, when known. It replaces your own text while ticked; your text is kept.	Was das Ziel ist, sein Sternbild, wie weit entfernt und wie hell es ist, soweit bekannt. Solange das Häkchen gesetzt ist, ersetzt sie Ihren eigenen Text; dieser bleibt erhalten.
+Nothing is known about this target yet, so there is no automatic description.	Zu diesem Ziel ist noch nichts bekannt, daher gibt es keine automatische Beschreibung.
+magnitude {0}	Helligkeit {0} mag
+blue magnitude {0}	blaue Helligkeit {0} mag
 {0} light-years	{0} Lichtjahre
+{0} million light-years	{0} Millionen Lichtjahre
+{0} billion light-years	{0} Milliarden Lichtjahre
+Distance	Entfernung
+Meteor shower	Meteorstrom
+Showers are matched by date only; the meteor's direction was not checked against a radiant.	Ströme werden nur nach dem Datum zugeordnet; die Richtung des Meteors wurde nicht mit einem Radianten verglichen.
+METEOR SHOWERS THROUGH THE YEAR	METEORSTRÖME IM JAHRESVERLAUF
+WHAT COLOURS CAN MEAN	WAS FARBEN BEDEUTEN KÖNNEN
+Showers are shown as seen from anywhere on Earth, at their zenithal hourly rate. Choose an observing town in Settings to see the rates from your location.	Die Ströme werden von irgendeinem Ort der Erde aus mit ihrer zenitalen stündlichen Rate gezeigt. Wählen Sie in den Einstellungen einen Beobachtungsort, um die Raten für Ihren Standort zu sehen.
+Each bar spans a shower's usual dates and rises to its peak; the taller the peak, the stronger the shower. The vertical line is today, a dot marks the peak, and a ring means the Moon is more than 60% lit then. Hover a row for details.	Jeder Balken umfasst die üblichen Daten eines Stroms und steigt zum Maximum an; je höher das Maximum, desto stärker der Strom. Die senkrechte Linie ist heute, ein Punkt markiert das Maximum, ein Ring bedeutet, dass der Mond dann zu mehr als 60 % beleuchtet ist. Zeigen Sie auf eine Zeile für Details.
+As seen from {0} (latitude {1}°). Rows end in the hourly rate you could expect at the radiant's highest; a dashed line means the radiant stays too low to see.	Gesehen von {0} (Breite {1}°). Die Zeilen enden mit der stündlichen Rate, die Sie bei höchstem Stand des Radianten erwarten können; eine gestrichelte Linie bedeutet, dass der Radiant zu tief bleibt.
 
 # Hybrid information, native 3D orbit and setup connectivity.
 Online access	Onlinezugriff
@@ -2379,3 +2377,26 @@ Set UTC date	UTC-Datum setzen
 UTC date (YYYY-MM-DD). Press Enter or Set UTC date.	UTC-Datum (JJJJ-MM-TT). Drücken Sie Enter oder UTC-Datum setzen.
 Enter a valid UTC date (YYYY-MM-DD) between 1972 and 2026.	Geben Sie ein gültiges UTC-Datum (JJJJ-MM-TT) zwischen 1972 und 2026 ein.
 Drag to rotate · Shift-drag to pan · Focus/Ctrl + wheel or pinch to zoom.	Ziehen zum Drehen · Umschalt+Ziehen zum Verschieben · Fokus/Strg+Mausrad oder zwei Finger zum Zoomen.
+Earth MOID	MOID zur Erde
+Observations	Beobachtungen
+{0} observations	{0} Beobachtungen
+Meteor showers	Meteorströme
+Suspected parent of	Mutmaßlicher Mutterkomet von
+Parabolic	Parabolisch
+Chiron-type	Chiron-Typ
+Ascending node	Aufsteigender Knoten
+Descending node	Absteigender Knoten
+Apogee	Apogäum
+Play	Abspielen
+Epoch {0}	Epoche {0}
+Marker date slider	Regler für das Markierungsdatum
+Play or pause the marker date. Space does the same while the orbit has focus.	Spielt das Markierungsdatum ab oder hält es an. Die Leertaste tut dasselbe, solange die Umlaufbahn den Fokus hat.
+Orbit|Sun	Sonne
+Orbit|Earth	Erde
+Orbit|Mercury	Merkur
+Orbit|Venus	Venus
+Orbit|Mars	Mars
+Orbit|Jupiter	Jupiter
+Orbit|Saturn	Saturn
+Orbit|Uranus	Uranus
+Orbit|Neptune	Neptun

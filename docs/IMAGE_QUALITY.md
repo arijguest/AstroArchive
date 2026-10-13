@@ -48,6 +48,19 @@ it is stored with that status and skipped on later runs until Re-measure image q
 is used. A file that cannot be opened is tried again on the next run. The run report
 lists both, file by file, with the reason.
 
+## Running in the background
+
+Analyse image quality runs beside everything else. It does not lock the window: importing,
+exporting and Settings stay available, and so does plate solving. The run has its own entry in
+Activity with progress and a Stop button. Whatever it measured before it was stopped, or before
+the program was closed, is kept. The library shows the new scores when the run ends.
+
+The archive decides what may overlap it. Importing, editing metadata, applying a target and
+other measuring all work while it runs (a file that is moved meanwhile is found again at its new
+place). Deleting files, deleting archive data, renaming a telescope and changing original-file
+protection wait for the captures the run is reading and say so; try again when it ends. The
+repository cannot be switched while a background process is running.
+
 ## Scoring
 
 Each measurement is compared with the others in its cohort (same group and session by
@@ -93,4 +106,6 @@ stays hidden. The EXPOSURE FIT column is available from the same menu.
 `QualityEngineTests.cs` measures synthetic star fields and discs with known width, noise, blur and
 clipping; `QualityTests.cs` covers eligibility, scoring in the library, filters, ordering, stored
 measurements and the column layout. Run them alone with `AstroArchiveTests.exe <folder> --quality-only`.
+`BackgroundWorkTests.cs` covers running beside imports, edits, checkpoints and readers
+(`--background-only`).
 

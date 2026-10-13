@@ -13,11 +13,13 @@ namespace AstroArchive {
   sealed class TargetInfoState {public TargetInfoView View;public CancellationTokenSource Cancel;public int Generation;public TargetInfoCard LocalCard,Card;public string Context,Back,CacheKey;public IList<TargetInfoMember> Members;public string Target,Member;public double? PreferredWidth;public bool Dragging,Constraining,Refreshing;}
   readonly TargetInfoState libraryInfo=new TargetInfoState(),editedInfo=new TargetInfoState();
   void InitializeTargetInformation(string prefix){
+   // The orbit view eases its camera and plays its dates only as far as Reduce motion allows; Windows' own animation setting also counts.
+   OrbitView.ReducedMotion=()=>settings.ReducedMotion||!SystemParameters.ClientAreaAnimation;
    var state=prefix.Length==0?libraryInfo:editedInfo;state.View=new TargetInfoView{Focusable=true};((Border)Window.FindName(prefix+"TargetInfoPane")).Child=state.View;
    state.View.ChooseObject=id=>LoadTargetInformation(prefix,state.Target,id,state.Member);
    state.View.ChooseMember=member=>LoadTargetInformation(prefix,state.Target,null,member);
    state.View.GoBack=()=>LoadTargetInformation(prefix,state.Target,null);
-   state.View.OpenInStellarium=OpenStellariumView;state.View.InternetAvailable=AstroArchive.Installation.ConnectivityPolicy.AllowsInternet;state.View.RefreshInformation=()=>EnrichTargetInformation(state,true);
+   state.View.OpenInStellarium=OpenStellariumView;state.View.ObserverSite=()=>CaptureSite.For(null,settings);state.View.InternetAvailable=AstroArchive.Installation.ConnectivityPolicy.AllowsInternet;state.View.RefreshInformation=()=>EnrichTargetInformation(state,true);
    var body=(Grid)Window.FindName(prefix.Length==0?"LibraryBody":"EditedBody");body.SizeChanged+=(s,e)=>ConstrainTargetInformationWidth(prefix);
    // A Grid may retain its minimum desired size while an ancestor clips it.
    // Recheck its allotted slot after layout, including preview divider changes.

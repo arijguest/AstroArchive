@@ -97,7 +97,6 @@ Import tools ▾	インポート ツール ▾
 Report	レポート
 Import options	インポート オプション
 TARGET ANALYSIS	ターゲット解析
-ROTATION ANALYSIS	回転解析
 Ignore failed	失敗を無視
 Skip filenames containing “failed”; keep originals.	ファイル名に “failed” を含むものをスキップし、元ファイルは保持します。
 Delete originals after verified import	検証済みのインポート後に元ファイルを削除
@@ -161,7 +160,6 @@ Importing edited images	Edited の画像をインポート中
 Identifying targets	ターゲットを識別中
 Applying target metadata	ターゲットのメタデータを適用中
 Analyze	解析
-Analysing rotation	回転を解析中
 Screening captures	キャプチャをスクリーニング中
 Backing up archive	アーカイブをバックアップ中
 Changing originals protection	元ファイルの保護を変更中
@@ -289,8 +287,6 @@ Wide	広角
 Off	オフ
 Ambiguous only	あいまいなもののみ
 All light/stack files	すべてのライト/スタック ファイル
-Ambiguous mounts	あいまいな架台
-All light sessions	すべてのライト セッション
 Preparing browsing and capture tools…	参照ツールとキャプチャ ツールを準備しています…
 Choose a mirrored telescope folder	ミラーされた望遠鏡フォルダーを選択
 Canceled	キャンセル済み
@@ -340,10 +336,6 @@ User	ユーザー
 Saving final archive index and report	最終的なアーカイブ インデックスとレポートを保存中
 Import report	インポート レポート
 Explicit	明示的
-Choose a target with individual light frames. Stacks cannot establish acquisition rotation.	個々のライトフレームがあるターゲットを選択してください。スタックからは撮影時の回転を特定できません。
-Individual subs required	個々のサブが必要です
-Rotation analysis complete.	回転解析が完了しました。
-Rotation analysis	回転解析
 Restore	復元
 Duplicate in source	ソース内で重複
 Failed	失敗
@@ -845,9 +837,7 @@ Windows language	Windows の言語
 Language	言語
 Applies after AstroArchive restarts. The offline guide stays in English.	AstroArchive の再起動後に適用されます。オフライン ガイドは英語のままです。
 Observing town / city	観測地の市区町村
-Select your nearest town or city. Its centre is used for rotation analysis; without a selection, capture location metadata is used when available.	最寄りの市区町村を選択してください。その中心が回転解析に使用されます。選択しない場合は、キャプチャの位置メタデータがあればそれが使用されます。
 Town / city	市区町村
-Saved location used for sky views and mount analysis.	空の表示と架台の解析に使用される保存済みの場所です。
 Choose town / city…	市区町村を選択…
 Clear observing location	観測地をクリア
 Choose observing town / city	観測地の市区町村の選択
@@ -958,7 +948,6 @@ Group subs by session	サブをセッションごとにグループ化
 Filters…	フィルター…
 Review and analysis	確認と解析
 Identify targets…	ターゲットを識別…
-Analyse rotation…	回転を解析…
 Maintenance	メンテナンス
 Delete archive data…	アーカイブ データを削除…
 Diagnostics	診断
@@ -1428,11 +1417,8 @@ Inbox for captures waiting to be imported.	インポート待ちのキャプチ�
 Import inbox captures; delete verified science originals and keep calibration frames.	受信トレイのキャプチャをインポートします。検証済みのサイエンス用元ファイルは削除し、キャリブレーション フレームは保持します。
 Condense acquisition subs into session rows.	撮影したサブをセッションごとの行にまとめます。
 Create a verified copy of the archive.	アーカイブの検証済みコピーを作成します。
-Review captures, identify objects and assess mount rotation.	キャプチャを確認し、天体を識別し、架台による回転を評価します。
 Identify targets	ターゲットを識別
 Solve light groups and stacks to identify objects.	ライトのグループとスタックをプレートソルブして天体を識別します。
-Analyse rotation	回転を解析
-Estimate EQ or Alt-Az from acquisition subs.	撮影したサブから EQ か Alt-Az かを推定します。
 Verify, reindex or remove archive files.	アーカイブ ファイルの検証、再インデックス、または削除を行います。
 Delete archive files with 'failed' in their filenames.	ファイル名に「failed」を含むアーカイブ ファイルを削除します。
 Delete indexed PNG/JPG/JPEG/MP4 copies; keep source originals.	インデックスされた PNG/JPG/JPEG/MP4 のコピーを削除します。ソースの元ファイルは保持します。
@@ -1524,7 +1510,6 @@ Metadata, target identification and scan report.	メタデータ、ターゲッ�
 Open the guide (F1).	ガイドを開きます (F1)。
 Choose telescope folders or files, then confirm a full scan and import. Keep originals.	望遠鏡のフォルダーまたはファイルを選択し、完全なスキャンとインポートを確定します。元ファイルは保持されます。
 Clear search, filters and target selection.	検索、フィルター、ターゲットの選択をクリアします。
-Assess mount mode from rotation in acquisition subs.	撮影したサブの回転から架台の方式を評価します。
 Solve selected Light groups and stacks; review batch target matches.	選択したライトのグループとスタックをプレートソルブし、ターゲットの一致を一括で確認します。
 Edit selected files, or all visible files if none selected.	選択したファイルを編集します。選択がない場合は表示中のすべてのファイルを編集します。
 Archive tools.	アーカイブ ツール。
@@ -1536,7 +1521,6 @@ Use a unique name for each physical telescope.	物理的な望遠鏡ごとに一
 Auto detects each capture’s model.	各キャプチャのモデルを自動検出します。
 Overrides apply to every scanned capture.	上書きはスキャンしたすべてのキャプチャに適用されます。
 Choose which targets to solve; requires a configured solver.	プレートソルブするターゲットを選択します。プレートソルバーの構成が必要です。
-Choose which acquisition sessions to analyse.	解析する撮影セッションを選択します。
 Measured work by stage; concurrent times can overlap.	段階ごとに計測した処理時間です。並行処理の時間は重なる場合があります。
 Import timings and error diagnostics.	インポートの所要時間とエラーの診断情報。
 Stop safely; completed imports remain.	安全に停止します。完了したインポートは残ります。
@@ -2339,10 +2323,24 @@ Start tour:	ツアーを開始:
 Step-by-step fixes for common problems, on AstroArchive's own screens.	よくある問題を AstroArchive の画面上で順を追って解決します。
 Short tours of importing, exporting and backups.	インポート、エクスポート、バックアップの短いツアーです。
 Search the guide, or start a guided fix or tour.	ガイドを検索するか、ガイド付き修正やツアーを開始します。
-Distance	距離
-{0} billion light-years	{0}十億光年
-{0} million light-years	{0}百万光年
+Add automatic descriptions	自動の説明を追加
+Add automatic description	自動の説明を追加
+Under each target name, say what it is, its constellation, how far away it is and how bright, when known. Your own description on a card still wins; Adjust card changes one card.	各ターゲット名の下に、天体の種類、星座、距離、明るさを（分かる範囲で）表示します。カードに入力した説明が優先され、1枚だけ変えるには「カードを調整」を使います。
+What the target is, its constellation, how far away it is and how bright, when known. It replaces your own text while ticked; your text is kept.	天体の種類、星座、距離、明るさを（分かる範囲で）表示します。オンの間は入力した文章の代わりに表示され、入力内容は保持されます。
+Nothing is known about this target yet, so there is no automatic description.	このターゲットの情報はまだないため、自動の説明はありません。
+magnitude {0}	{0}等
+blue magnitude {0}	青色光度 {0}等
 {0} light-years	{0}光年
+{0} million light-years	{0}百万光年
+{0} billion light-years	{0}十億光年
+Distance	距離
+Meteor shower	流星群
+Showers are matched by date only; the meteor's direction was not checked against a radiant.	流星群は日付だけで照合しています。流星の向きを放射点と照合してはいません。
+METEOR SHOWERS THROUGH THE YEAR	一年を通した流星群
+WHAT COLOURS CAN MEAN	色が意味しうること
+Showers are shown as seen from anywhere on Earth, at their zenithal hourly rate. Choose an observing town in Settings to see the rates from your location.	流星群は、地球上のどこから見ても、天頂での1時間あたりの出現数で表示しています。設定で観測地を選ぶと、その場所での出現数が表示されます。
+Each bar spans a shower's usual dates and rises to its peak; the taller the peak, the stronger the shower. The vertical line is today, a dot marks the peak, and a ring means the Moon is more than 60% lit then. Hover a row for details.	各バーは流星群の通常の活動期間を示し、極大に向けて高くなります。極大が高いほど強い流星群です。縦線は今日、点は極大、輪はその時の月の照明が60%を超えることを示します。行にカーソルを合わせると詳細が表示されます。
+As seen from {0} (latitude {1}°). Rows end in the hourly rate you could expect at the radiant's highest; a dashed line means the radiant stays too low to see.	{0}（緯度{1}°）からの見え方です。各行の右端は、放射点が最も高いときに期待できる1時間あたりの出現数です。破線は放射点が低すぎて見えないことを示します。
 
 # Hybrid information, native 3D orbit and setup connectivity.
 Online access	オンラインアクセス
@@ -2411,3 +2409,26 @@ Set UTC date	UTC日付を設定
 UTC date (YYYY-MM-DD). Press Enter or Set UTC date.	UTC日付（YYYY-MM-DD）。Enterまたは「UTC日付を設定」を押してください。
 Enter a valid UTC date (YYYY-MM-DD) between 1972 and 2026.	1972年から2026年までの有効なUTC日付（YYYY-MM-DD）を入力してください。
 Drag to rotate · Shift-drag to pan · Focus/Ctrl + wheel or pinch to zoom.	ドラッグで回転 · Shift＋ドラッグで移動 · フォーカス/Ctrl＋ホイール、またはピンチで拡大縮小。
+Earth MOID	地球との最小軌道交差距離
+Observations	観測
+{0} observations	{0}件の観測
+Meteor showers	流星群
+Suspected parent of	母天体の可能性があるもの：
+Parabolic	放物線
+Chiron-type	ケイロン型
+Ascending node	昇交点
+Descending node	降交点
+Apogee	遠地点
+Play	再生
+Epoch {0}	元期 {0}
+Marker date slider	マーカー日付のスライダー
+Play or pause the marker date. Space does the same while the orbit has focus.	マーカーの日付を再生または一時停止します。軌道にフォーカスがあるときは、スペースキーでも操作できます。
+Orbit|Sun	太陽
+Orbit|Earth	地球
+Orbit|Mercury	水星
+Orbit|Venus	金星
+Orbit|Mars	火星
+Orbit|Jupiter	木星
+Orbit|Saturn	土星
+Orbit|Uranus	天王星
+Orbit|Neptune	海王星
