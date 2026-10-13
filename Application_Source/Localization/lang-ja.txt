@@ -2119,3 +2119,7 @@ Target below horizon	対象が地平線下
 Set the capture town / city for this file (right-click › Set capture town / city…), or correct the capture timezone in metadata.	このファイルの撮影地の市区町村を設定するか（右クリック › 撮影地の市区町村を設定…）、メタデータで撮影タイムゾーンを修正してください。
 Set capture town / city for selected…	選択項目の撮影地の市区町村を設定…
 Targets below the horizon at the predicted capture time usually need the capture town / city or timezone set.	推定撮影時刻に地平線下にある対象は、通常、撮影地の市区町村またはタイムゾーンの設定が必要です。
+
+# Information pane, 3.2.6
+Credits	クレジット
+FUN FACT	豆知識

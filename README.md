@@ -167,6 +167,8 @@ It follows your Windows language, or choose one in **Settings → General → La
 
 ### Fresh from the latest releases
 
+**3.2.6 in development** reorganises the information pane with the overview before the image, a highlighted fun fact, compact or expandable image credits, and a single expandable Sources heading.
+
 **[3.2.5 prerelease](https://github.com/arijguest/AstroArchive/releases/tag/v3.2.5.1)** adds Celestron Origin network import, an ETA on every running process, steadier quality ranking with scored stacks, a clearer target overlay with spaced catalogue IDs, per-file capture towns and below-horizon flags, Stellarium Web when Stellarium is not installed, and sturdier FITS/XISF parsing.
 
 **[3.2.4 prerelease](https://github.com/arijguest/AstroArchive/releases/tag/v3.2.4.1)** overhauls Analytics, adds Open in Stellarium and a target overlay to the preview, eclipse timing in Capture details, reorganised menus, a PARAMETERS section with orbits, sizes, masses and moons for solar-system bodies, comet information pages, a backup-in-progress indicator, and fixes for green lunar stacks and Moon sky maps.

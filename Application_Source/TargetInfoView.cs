@@ -33,7 +33,7 @@ namespace AstroArchive {
   void Begin(string title){
    CurrentId=null;body=null;mapPanel=null;mapHost=null;globe=null;photo=null;reset=null;content.Children.Clear();scroll.ScrollToTop();
    var label=Text("TARGET INFO","Muted","UiFontCaption");label.FontWeight=FontWeights.SemiBold;content.Children.Add(label);
-   var heading=Data(title,"Text","UiFontHeading");heading.FontWeight=FontWeights.SemiBold;content.Children.Add(heading);
+   var heading=Data(title,"Text","UiFontHeading");heading.Name="ObjectTitle";heading.FontWeight=FontWeights.SemiBold;content.Children.Add(heading);
   }
   public void ShowMessage(string title,string message){Begin(Localization.T(title));content.Children.Add(Text(message,"Muted"));}
   public void ShowChoices(string target,TargetInfoResult result){
@@ -42,25 +42,27 @@ namespace AstroArchive {
   }
   public void ShowCard(TargetInfoCard card,string context=null){
    Begin(Catalog.DisplayIds(card.name));CurrentId=card.id;
-   if(!string.IsNullOrEmpty(context))content.Children.Add(Data(context,"Muted","UiFontCaption"));
    string constellation=TargetInfoPresentation.Constellation(card.constellation);
    // The ID is shown once: in the heading when the object has no other name, otherwise here.
-   content.Children.Add(Data(TargetInfoPresentation.Tagline(card,constellation),"Muted"));
+   var details=Data(TargetInfoPresentation.Tagline(card,constellation),"Muted","UiFontCaption");details.Name="ObjectDetails";content.Children.Add(details);
+   if(!string.IsNullOrEmpty(context))content.Children.Add(Data(context,"Muted","UiFontCaption"));
    var curated=TargetDescriptions.For(card.id);
    if(card.identity_status=="disputed"||card.domain=="historical_designation")content.Children.Add(Text("Historical designation · identity is disputed.","Muted"));
+   string summary=TargetInfoPresentation.DisplaySummary(card);string factText=curated!=null&&!string.IsNullOrWhiteSpace(curated.Fact)?curated.Fact:card.fact;
+   var overview=Section("OVERVIEW",true);overview.Name="OverviewHeading";content.Children.Add(overview);
+   var prose=string.IsNullOrWhiteSpace(summary)?Text("No information is available for this target.","Muted"):Data(summary);prose.Name="OverviewText";content.Children.Add(prose);
    if(card.Thumbnail!=null&&card.image!=null){try{
     var bitmap=new BitmapImage();using(var stream=new MemoryStream(card.Thumbnail)){bitmap.BeginInit();bitmap.CacheOption=BitmapCacheOption.OnLoad;bitmap.DecodePixelWidth=960;bitmap.StreamSource=stream;bitmap.EndInit();bitmap.Freeze();}
-    photo=new Image{Source=bitmap,Stretch=Stretch.Uniform,HorizontalAlignment=HorizontalAlignment.Center,Margin=new Thickness(0,2,0,6)};RenderOptions.SetBitmapScalingMode(photo,BitmapScalingMode.HighQuality);AutomationProperties.SetName(photo,card.name);content.Children.Add(photo);
+    photo=new Image{Name="ObjectImage",Source=bitmap,Stretch=Stretch.Uniform,HorizontalAlignment=HorizontalAlignment.Center,Margin=new Thickness(0,2,0,6)};RenderOptions.SetBitmapScalingMode(photo,BitmapScalingMode.HighQuality);AutomationProperties.SetName(photo,card.name);content.Children.Add(photo);
     AddImageCredit(card.image);
    }catch(NotSupportedException){}catch(IOException){}catch(ArgumentException){}}
+   if(!string.IsNullOrWhiteSpace(factText)){
+    var fact=new StackPanel();var caption=Text("FUN FACT","Muted","UiFontCaption");caption.FontWeight=FontWeights.SemiBold;fact.Children.Add(caption);fact.Children.Add(Data(factText));
+    var box=Callout(fact);box.Name="FunFact";content.Children.Add(box);
+   }
    body=new Grid();body.ColumnDefinitions.Add(new ColumnDefinition());body.ColumnDefinitions.Add(new ColumnDefinition());body.RowDefinitions.Add(new RowDefinition{Height=GridLength.Auto});body.RowDefinitions.Add(new RowDefinition{Height=GridLength.Auto});content.Children.Add(body);
    article=new StackPanel();body.Children.Add(article);
-   string summary=TargetInfoPresentation.DisplaySummary(card);string factText=curated!=null&&!string.IsNullOrWhiteSpace(curated.Fact)?curated.Fact:card.fact;
-   article.Children.Add(Section("OVERVIEW",true));article.Children.Add(string.IsNullOrWhiteSpace(summary)?Text("No information is available for this target.","Muted"):Data(summary));
-   if(!string.IsNullOrWhiteSpace(factText))article.Children.Add(Callout(Data(factText)));
-   string imaging=TargetInfoPresentation.Imaging(card);
-   if(!string.IsNullOrWhiteSpace(imaging)){article.Children.Add(Section("IMAGING NOTES"));article.Children.Add(Callout(Data(imaging)));}
-   article.Children.Add(Section("PARAMETERS"));var facts=Facts();article.Children.Add(facts);
+   var parameters=Section("PARAMETERS");parameters.Name="ParametersHeading";article.Children.Add(parameters);var facts=Facts();article.Children.Add(facts);
    if(!string.IsNullOrEmpty(card.parent_body))AddFact(facts,"Parent",card.parent_body,null);
    var measurements=card.measurements??new TargetInfoMeasurement[0];
    var ra=measurements.FirstOrDefault(m=>m.field=="RA");var dec=measurements.FirstOrDefault(m=>m.field=="Dec");
@@ -71,6 +73,8 @@ namespace AstroArchive {
    var magnitude=measurements.FirstOrDefault(m=>m.field=="V-Mag")??measurements.FirstOrDefault(m=>m.field=="B-Mag");
    if(magnitude!=null)AddFact(facts,Localization.F("Magnitude ({0})",magnitude.field.Substring(0,1)),magnitude.value.ToString("0.##",CultureInfo.InvariantCulture),Evidence(card,magnitude));
    AddParameters(facts,card);
+   string imaging=TargetInfoPresentation.Imaging(card);
+   if(!string.IsNullOrWhiteSpace(imaging)){var notes=new StackPanel();notes.Children.Add(Data(imaging));article.Children.Add(Disclosure("IMAGING NOTES",notes));}
    if(card.domain=="deep_sky"){
     mapPanel=new StackPanel{Margin=new Thickness(0,4,0,10)};body.Children.Add(mapPanel);mapPanel.Children.Add(Section("LOCATION IN THE SKY"));
     if(ra!=null&&dec!=null){
@@ -90,7 +94,7 @@ namespace AstroArchive {
    foreach(var measurement in measurements.Where(m=>new[]{"PosAng","SurfBr","RadVel","Redshift"}.Contains(m.field)))AddFact(moreFacts,MeasurementLabel(measurement.field),measurement.value.ToString("0.#####",CultureInfo.InvariantCulture)+(measurement.unit=="dimensionless"?"":" "+measurement.unit),Evidence(card,measurement));
    if(moreFacts.Children.Count>0)sources.Children.Add(moreFacts);
    foreach(var source in TargetInfoPresentation.Sources(card,curated!=null&&!string.IsNullOrWhiteSpace(curated.Overview)))sources.Children.Add(Link(source.Title,source.Url));
-   if(sources.Children.Count>0){content.Children.Add(Section("SOURCES"));content.Children.Add(Disclosure("Sources and catalogue details",sources));}
+   if(sources.Children.Count>0){var disclosure=Disclosure("SOURCES",sources);disclosure.Name="Sources";var heading=(TextBlock)disclosure.Header;heading.FontWeight=FontWeights.SemiBold;heading.SetResourceReference(TextBlock.FontSizeProperty,"UiFontCaption");heading.Margin=new Thickness(0);disclosure.Margin=new Thickness(0,12,0,6);content.Children.Add(disclosure);}
    content.Children.Add(Text("Select a file to return to its image preview.","Muted","UiFontCaption"));ArrangeBody();
   }
   // Planets, the largest dwarf planets and the Sun carry fixed physical parameters; the Sun shows only size and mass.
@@ -118,18 +122,26 @@ namespace AstroArchive {
    if(TargetParameters.ShowsMoonCount(set))AddFact(facts,"Known moons",set.MoonCount.ToString(CultureInfo.InvariantCulture),"Confirmed moons. NASA Solar System Exploration");
    if(set.Moons.Length>0)AddFact(facts,"Major moons",TargetParameters.Moons(set),null);
   }
-  // One quiet credit line under the picture: the creator and licence, both linked. The full
-  // attribution and any processing note stay in the tooltip.
+  // Short creator/licence credits stay visible. Longer attribution is available
+  // inline through a keyboard-accessible disclosure, including processing notes.
   void AddImageCredit(TargetInfoImage image){
    string credit=TargetInfoPresentation.Credit(image);string who=!string.IsNullOrWhiteSpace(image.creator)?image.creator:credit.Length>0&&credit.Length<=60&&!credit.Contains("://")?credit:"Wikimedia Commons";
-   var line=Text("","Muted","UiFontCaption");line.TextAlignment=TextAlignment.Center;line.ToolTip=Data((image.attribution+"\n"+image.modifications).Trim(),"Text","UiFontSmall");
-   line.Inlines.Add(new Run("Image: "));line.Inlines.Add(Linked(who,image.file_page_url));
+   string attribution=(image.attribution??"").Trim(),modifications=(image.modifications??"").Trim();
+   string full=(attribution+"\n"+modifications).Trim();
+   var line=Text("","Muted","UiFontCaption");line.TextAlignment=TextAlignment.Center;line.ToolTip=Data(full,"Text","UiFontSmall");
+   line.Inlines.Add(new Run(Localization.T("Image:")+" "));line.Inlines.Add(Linked(who,image.file_page_url));
    if(!string.IsNullOrWhiteSpace(image.licence)){line.Inlines.Add(new Run(" · "));line.Inlines.Add(Linked(image.licence,image.licence_url));}
-   content.Children.Add(line);
+   bool lengthy=(who+(image.licence??"")).Length>100||full.Length>180||full.Contains("\n");
+   if(lengthy){
+    var credits=new StackPanel();credits.Children.Add(line);
+    if(attribution.Length>0&&attribution!=who)credits.Children.Add(Data(attribution,"Muted","UiFontCaption"));
+    if(modifications.Length>0)credits.Children.Add(Data(modifications,"Muted","UiFontCaption"));
+    var disclosure=Disclosure("Credits",credits);disclosure.Name="ImageCredits";content.Children.Add(disclosure);
+   }else{line.Name="ImageCredits";content.Children.Add(line);}
    string caption=TargetInfoPresentation.Caption(image.representation);if(caption.Length>0)content.Children.Add(Data(caption,"Muted","UiFontCaption"));
   }
   // Sections share a quiet caption and divider so the pane reads as distinct parts.
-  static FrameworkElement Section(string title,bool first=false){
+  static StackPanel Section(string title,bool first=false){
    var panel=new StackPanel{Margin=new Thickness(0,first?6:12,0,6)};
    if(!first){var rule=new Border{Height=1,Margin=new Thickness(0,0,0,8),Opacity=0.7};rule.SetResourceReference(Border.BackgroundProperty,"Border");panel.Children.Add(rule);}
    var caption=Text(title,"Muted","UiFontCaption");caption.FontWeight=FontWeights.SemiBold;caption.Margin=new Thickness(0);panel.Children.Add(caption);return panel;

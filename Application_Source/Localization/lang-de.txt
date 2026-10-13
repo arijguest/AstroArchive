@@ -2087,3 +2087,7 @@ Target below horizon	Ziel unter dem Horizont
 Set the capture town / city for this file (right-click › Set capture town / city…), or correct the capture timezone in metadata.	Legen Sie den Aufnahmeort für diese Datei fest (Rechtsklick › Aufnahmeort festlegen…) oder korrigieren Sie die Aufnahme-Zeitzone in den Metadaten.
 Set capture town / city for selected…	Aufnahmeort für Auswahl festlegen…
 Targets below the horizon at the predicted capture time usually need the capture town / city or timezone set.	Ziele unter dem Horizont zur vermuteten Aufnahmezeit benötigen meist einen Aufnahmeort oder eine Zeitzone.
+
+# Information pane, 3.2.6
+Credits	Bildnachweise
+FUN FACT	WISSENSWERTES
