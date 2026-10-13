@@ -201,12 +201,12 @@ namespace AstroArchive {
    bool pointingReplaced=false;string replacedNote="The file's recorded pointing was blank (0°, 0°) and is not used.";
    DateTime? roughTime=!sky.Utc.HasValue&&body=="Moon"?RoughMoonTime(frame):null;
    if(sky.HasPosition&&(sky.Utc.HasValue||roughTime.HasValue)&&body!=null&&Math.Abs(sky.RA)<1e-6&&Math.Abs(sky.Dec)<1e-6){sky.HasPosition=false;pointingReplaced=true;}
-   // The Moon, Sun and planets move, so a stored pointing can be stale: a catalogue or same-session
-   // position from another time, or mount coordinates left over from a previous target. When it lies
-   // far from where the named body was at the capture time, the calculated position wins. A real plate
-   // solve of this very frame is a measurement and is always kept.
+   // The Moon moves about 13° a day, so a stored pointing can be stale: a same-session position from
+   // another time, or mount coordinates left over from a previous target. When it lies far from where
+   // the Moon was at the capture time, the calculated position wins. A real plate solve of this very
+   // frame is a measurement and is always kept. Planets move slowly enough that recorded pointing stays.
    SkyVector calculated;
-   if(body!=null&&sky.HasPosition&&sky.Utc.HasValue&&!(frame.Sky!=null&&!frame.Sky.Approximate&&Position(frame.Sky.RA,frame.Sky.Dec))&&BodyDirection(body,sky.Utc.Value,site,sky.Latitude,sky.Longitude,sky.Orientation,sky.Moon,out calculated)){
+   if(body=="Moon"&&sky.HasPosition&&sky.Utc.HasValue&&!(frame.Sky!=null&&!frame.Sky.Approximate&&Position(frame.Sky.RA,frame.Sky.Dec))&&BodyDirection(body,sky.Utc.Value,site,sky.Latitude,sky.Longitude,sky.Orientation,sky.Moon,out calculated)){
     double offset=MoonEphemeris.Separation(sky.TargetOfDate,calculated);
     if(offset>StalePointingDegrees){sky.HasPosition=false;pointingReplaced=true;replacedNote="The file's recorded pointing (RA "+sky.RA.ToString("0.#",CultureInfo.InvariantCulture)+"°, Dec "+sky.Dec.ToString("0.#",CultureInfo.InvariantCulture)+"°) is "+offset.ToString("0")+"° from the "+body+"'s calculated position at the capture time and is not used.";}
    }

@@ -41,7 +41,7 @@ namespace AstroArchive {
      Check(night.BodyBelowHorizon&&night.SunAltitude<0&&night.Eclipse==null&&CaptureScreening.HorizonIssue(frame)!=null,"Night-side Sun was treated as an observable eclipse or left unflagged");
      // A recorded pointing above the horizon cannot override the physical Sun check.
      frame.RA=SkyOrientation.Sidereal(night.Utc.Value,139.7);frame.Dec=35.7;var pointing=CaptureSky.Resolve(frame,null);
-     Check(pointing.BodyBelowHorizon&&pointing.Eclipse==null&&pointing.Altitude<0,"Stored pointing hid an impossible Sun capture");
+     Check(pointing.Altitude>0&&pointing.BodyBelowHorizon&&pointing.Eclipse==null,"Stored pointing hid an impossible Sun capture");
      frame.RA=null;frame.Dec=null;CaptureSite.Apply(frame,null);var restored=CaptureSky.Resolve(frame,null);
      Check(restored.Eclipse!=null&&!restored.BodyBelowHorizon&&CaptureScreening.HorizonIssue(frame)==null,"Clearing the town kept stale eclipse/review results");
      foreach(double latitude in new[]{-70.0,-30,0,30,70})foreach(double longitude in new[]{-180.0,-120,-60,0,60,120,180}){
