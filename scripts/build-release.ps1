@@ -59,6 +59,7 @@ Copy-Item (Join-Path $root 'Installer\Payload\Release_Notes.txt') (Join-Path $Ou
 # The runner uses a disposable account; no real captures are imported.
 $smokeRoot = Join-Path ([IO.Path]::GetTempPath()) ('AstroArchive-smoke-' + [Guid]::NewGuid().ToString('N'))
 $installed = $false
+$seededChoice = $null
 $pinnedFixture = Join-Path ([Environment]::GetFolderPath('ApplicationData')) ('Microsoft\Internet Explorer\Quick Launch\User Pinned\TaskBar\AstroArchive-smoke-' + [Guid]::NewGuid().ToString('N') + '.lnk')
 $smokeStarted = Get-Date
 function Shortcut-Target([string]$Path) {
@@ -172,6 +173,14 @@ try {
     if (Test-Path (Join-Path $smokeRoot 'launch-blocked.json')) { throw 'A package that starts again is still suppressed.' }
     Write-Output 'PASS launch verification and automatic rollback from a blocked update'
     # Exercise the native update handoff, process wait and offline restart.
+    # A fresh profile makes the restarted app ask for Hybrid/Offline in a modal dialog the smoke cannot close;
+    # record an Offline choice, as a user would have, so the restart opens the main window only.
+    $choicePath = Join-Path $env:LOCALAPPDATA 'AstroArchive\connectivity.json'
+    if (-not (Test-Path $choicePath)) {
+        New-Item -ItemType Directory -Force -Path (Split-Path $choicePath) | Out-Null
+        [IO.File]::WriteAllText($choicePath, '{"Schema":1,"Mode":2}', (New-Object Text.UTF8Encoding($false)))
+        $seededChoice = $choicePath
+    }
     $waitProcess = Start-Process -FilePath 'powershell.exe' -ArgumentList @('-NoProfile', '-Command', 'Start-Sleep -Seconds 5') -PassThru
     $handoffClock = [Diagnostics.Stopwatch]::StartNew()
     Run-Checked $installer @('--update', '--silent', '--root', ('"' + $smokeRoot + '"'), '--waitpid', $waitProcess.Id, '--restart')
@@ -222,7 +231,9 @@ try {
     if ((Test-Path (Join-Path $smokeRoot 'install.json')) -or -not (Test-Path $fixture)) { throw 'Uninstall smoke failed.' }
 } finally {
     if (Test-Path $pinnedFixture) { Remove-Item $pinnedFixture -Force }
-    if ($installed) { Run-Checked $installer @('--uninstall', '--silent', '--root', ('"' + $smokeRoot + '"')) }
+    if ($seededChoice -and (Test-Path $seededChoice)) { Remove-Item $seededChoice -Force }
+    # Cleanup must not replace the failure that brought us here.
+    if ($installed) { try { Run-Checked $installer @('--uninstall', '--silent', '--root', ('"' + $smokeRoot + '"')) } catch { Write-Warning "Cleanup uninstall failed: $_" } }
     if (Test-Path $smokeRoot) { Remove-Item $smokeRoot -Recurse -Force }
 }
 Write-Output "Validated Windows release $tag"
