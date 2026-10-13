@@ -164,10 +164,6 @@ and simultaneous telescope sessions.
 
 <div align="center">
 
-[![Rosette Nebula photographed by Ari J. Guest](docs/images/rosette.jpg)](https://astroarchive.arijguest.com)
-
-*Rosette Nebula · Ari J. Guest*
-
 ### More time with your images. Less time hunting for them.
 
 **[Download AstroArchive for Windows](https://github.com/arijguest/AstroArchive/releases/latest)**
