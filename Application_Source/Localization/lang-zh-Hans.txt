@@ -2128,3 +2128,194 @@ Sun obscured	太阳遮蔽率
 Check capture metadata	检查拍摄元数据
 Suspected obstruction	疑似遮挡
 A chosen town or city sets the capture location and its historical timezone. Local capture clocks are converted to UTC again when the town changes; explicit UTC or clock offsets keep their instant. Use default location to return to file metadata, then Settings. Changes are applied when you save metadata.	所选城镇或城市会设置拍摄地点及拍摄日期适用的时区。更改地点时，本地拍摄时间会重新转换为 UTC；明确标注 UTC 或时差的时间会保留同一时刻。使用默认地点可恢复为文件元数据，再使用设置中的地点。保存元数据时应用更改。
+# Help centre, guided walkthroughs and problem reports
+Use the purple **PAGE** selector to move around AstroArchive. It sits beside the toolbar, or below it in smaller windows.\n\n- Choose **Repository**, **Edited** or **Import**.\n- Search, filters, selections and import progress stay in place.\n- Use `Ctrl+1–3` to select a page or `Ctrl+Tab` to cycle pages.	使用紫色的**页面**选择器在 AstroArchive 中切换。它位于工具栏旁边，在较小的窗口中则位于工具栏下方。\n\n- 选择**存储库**、**Edited** 或**导入**。\n- 搜索、筛选器、所选内容和导入进度将保持不变。\n- 使用 `Ctrl+1–3` 选择页面，或使用 `Ctrl+Tab` 循环切换页面。
+Your repository holds verified capture copies and the archive index.\n\n1. Open **Settings → General**.\n2. Choose your archive folder.\n\nClick the repository path on the main page to open it in Explorer.	你的存储库保存已验证的拍摄文件副本和存档索引。\n\n1. 打开**设置 → 常规**。\n2. 选择你的存档文件夹。\n\n单击主页面上的存储库路径，可在文件资源管理器中将其打开。
+Select a saved telescope or **Browse** its capture folder. Give each physical telescope its own device ID.\n\n- **Import from Seestar… / Dwarflab…** selects USB folders/files and confirms a full scan and import. Choose target folders for faster scans.\n- **Telescopes** saves, renames or recovers profiles.\n- **Scan folder** skips matching filenames and known DWARF sessions; Seestar scans still find new filenames.\n- Enable **Robust file matching** in Import options to revisit edits and additions inside skipped sessions.\n- **Review and repair → Full rescan** reads and hashes every file for a complete check.	选择已保存的望远镜，或**浏览**其拍摄文件夹。请为每台实体望远镜设置各自的设备 ID。\n\n- **从 Seestar 导入… / 从 Dwarflab 导入…**会选择 USB 文件夹/文件，并确认进行完整扫描和导入。选择目标文件夹可加快扫描速度。\n- **望远镜**用于保存、重命名或恢复配置文件。\n- **扫描文件夹**会跳过文件名相同的文件和已知的 DWARF 会话；Seestar 扫描仍会找到新文件名。\n- 在导入选项中启用**可靠文件匹配**，可重新检查已跳过会话中的编辑和新增内容。\n- **审阅和修复 → 完全重新扫描**会读取每个文件并计算哈希值，以进行完整检查。
+Check each file’s **status** and **review reason** in the scan table.\n\n- **Review and repair** opens flagged captures and transfer retries.\n- **Import options** controls analysis and original removal.\n- The policy summary stays visible. **Originals are kept by default.**	在扫描表格中检查每个文件的**状态**和**审阅原因**。\n\n- **审阅和修复**可打开已标记的拍摄文件和传输重试。\n- **导入选项**控制分析和原始文件删除。\n- 策略摘要始终可见。**默认保留原始文件。**
+Browse targets and sessions, or narrow the view with **Search** and **Filters**.\n\n## Select and organise\n- `Ctrl/Shift` selects files; right-click opens file actions.\n- **Group subs by session** switches between compact sessions and files.\n\n## Sort and choose columns\n- Click a heading to sort; click again to reverse. `Shift-click` adds a heading.\n- ▲ / ▼ show direction; numbers show sort priority.\n- Right-click a heading to choose columns.	浏览目标和会话，或使用**搜索**和**筛选器**缩小范围。\n\n## 选择和整理\n- `Ctrl/Shift` 可选择文件；右键单击可打开文件操作。\n- **按会话对子帧分组**可在精简的会话视图和文件视图之间切换。\n\n## 排序和选择列\n- 单击标题可排序，再次单击可反向排序。`Shift-click` 可添加标题。\n- ▲ / ▼ 表示方向；数字表示排序优先级。\n- 右键单击标题可选择列。
+Select captures, then choose **Export**: copy originals, prepare a ready-to-stack folder, open them in an app, or create an AstroBin acquisition CSV.\n\n- Stacks copy to the destination; subs keep compatible input folders.\n- Matching calibrations include reasons; scientific conversion is explicit.\n- **Add Metadata** and **Create new folder** start off. Existing files are kept.\n\nStacking takes place in your chosen processing software.	选择拍摄文件，然后选择**导出**：复制原始文件、准备可直接叠加的文件夹、在应用中打开，或创建 AstroBin 采集 CSV。\n\n- 叠加图会复制到目标位置；子帧会保留兼容的输入文件夹。\n- 匹配的校准文件附有匹配原因；科学转换需明确选择。\n- **添加元数据**和**新建文件夹**默认关闭。现有文件会被保留。\n\n叠加在你选择的处理软件中进行。
+Pick the captures	选择拍摄文件
+Choose a target on the left, then select the subs you want in the table.\n\n- `Ctrl`-click adds files; `Shift`-click selects a range.\n- Selecting a session row includes all of its subs.\n- The counter at the top right shows how many files are selected.	在左侧选择目标，然后在表格中选择要使用的子帧。\n\n- 按住 `Ctrl` 单击可添加文件；按住 `Shift` 单击可选择范围。\n- 选择会话行会包含其所有子帧。\n- 右上角的计数器显示已选择的文件数。
+Prepare a stacking folder	准备叠加文件夹
+Choose **Export**, then **Stacking folder**.\n\n- **Subs**, **Stacks** or **Both** decides what is copied.\n- Matching calibration frames are offered with the reason they match.\n- Existing files in the destination are never overwritten.	选择**导出**，然后选择**叠加文件夹**。\n\n- **子帧**、**叠加图**或**两者**决定复制的内容。\n- 会提供匹配的校准帧及其匹配原因。\n- 目标位置中的现有文件绝不会被覆盖。
+Open Export	打开导出
+Open it in your stacking app	在叠加应用中打开
+**Open in app** can hand the exported files to Siril, DSS or another stacker.\n\n- Set application locations under **Settings → Export**.\n- AstroArchive never starts stacking for you.	**在应用中打开**可将导出的文件交给 Siril、DSS 或其他叠加软件。\n\n- 在**设置 → 导出**下设置应用程序位置。\n- AstroArchive 绝不会替你启动叠加。
+Open export preferences	打开导出首选项
+Make your first backup	创建首次备份
+Choose **Repository → Back up archive…** and pick a folder on a separate drive.\n\n- A folder keeps later backups small; a ZIP is one file.\n- Close editors that write into the archive first.\n- Cancelling removes the unfinished backup and keeps earlier ones.	选择**存储库 → 备份存档…**，然后选择另一个驱动器上的文件夹。\n\n- 使用文件夹可让后续备份更小；ZIP 则是单个文件。\n- 请先关闭会写入存档的编辑器。\n- 取消会删除未完成的备份，并保留之前的备份。
+Repeat it automatically	自动重复备份
+After a backup, AstroArchive offers to repeat it daily, weekly or monthly.\n\n- Change the schedule in **Settings → Backups**.\n- If the backup drive is missing when one is due, Activity reminds you.	备份后，AstroArchive 会询问是否按每天、每周或每月重复备份。\n\n- 可在**设置 → 备份**中更改计划。\n- 如果到期时备份驱动器未连接，“活动”会提醒你。
+Open backup preferences	打开备份首选项
+Protect your originals	保护原始文件
+**Settings → Backups → Protect originals** prevents accidental deletion or renaming on local NTFS drives.\n\n> Note: Protection is not a backup. Turn it off before moving the archive in Explorer.	**设置 → 备份 → 保护原始文件**可防止在本地 NTFS 驱动器上意外删除或重命名文件。\n\n> Note: 保护不等于备份。请先将其关闭，再在文件资源管理器中移动存档。
+Choose a repository	选择存储库
+Import copies files into your repository, so one must be chosen first.\n\n1. Open **Settings → General**.\n2. Choose your archive folder and save.	导入会将文件复制到你的存储库，因此必须先选择存储库。\n\n1. 打开**设置 → 常规**。\n2. 选择你的存档文件夹并保存。
+Let other work finish	等待其他任务完成
+Only one archive job runs at a time. A scan, import, backup or analysis keeps Import unavailable until it ends.\n\n- The bell opens **Activity**, which shows what is running.\n- Wait for it to finish, or pause or cancel it there.	存档任务一次只能运行一个。扫描、导入、备份或分析运行期间，无法使用导入。\n\n- 铃铛图标会打开**活动**，其中显示正在运行的任务。\n- 请等待其完成，或在其中暂停或取消。
+Open Activity	打开活动
+Pick a source	选择源
+Select a saved telescope, or **Browse** to the folder your captures are in.\n\n- A USB telescope appears as **Import from Seestar…** or **Import from Dwarflab…** in the Import menu.\n- For Wi-Fi, use **Connect over network** instead.	选择已保存的望远镜，或**浏览**到拍摄文件所在的文件夹。\n\n- USB 望远镜会在“导入”菜单中显示为**从 Seestar 导入…**或**从 Dwarflab 导入…**。\n- 如果使用 Wi-Fi，请改用**通过网络连接**。
+Browse for a folder…	浏览文件夹…
+Scan the source	扫描源
+**Scan folder** reads the source and lists what can be imported. Nothing is copied yet.\n\n- Files already in the archive are skipped.\n- A large folder can take a while; progress shows in Activity.	**扫描文件夹**会读取源并列出可导入的内容。此时尚未复制任何文件。\n\n- 已在存档中的文件会被跳过。\n- 大型文件夹可能需要一段时间；进度显示在“活动”中。
+Make sure files are ready	确认文件已就绪
+Import copies the **ready** files in the current view. If none are ready:\n\n- Clear the Import search box and **Filters**.\n- Check the **Status** and **Review** columns: duplicates and failed files are skipped.\n- **Import → Review and repair** shows flagged captures.	导入会复制当前视图中**就绪**的文件。如果没有就绪的文件：\n\n- 清除导入搜索框和**筛选器**。\n- 检查**状态**和**审阅**列：重复文件和失败文件会被跳过。\n- **导入 → 审阅和修复**会显示已标记的拍摄文件。
+Clear search and filters	清除搜索和筛选器
+Open the network connection	打开网络连接
+Choose **Connect over network** beside Saved telescope. Discovery starts by itself; no IP address is needed for Seestar, DWARF or Celestron Origin.	选择“已保存的望远镜”旁边的**通过网络连接**。系统会自动开始查找；Seestar、DWARF 或 Celestron Origin 无需 IP 地址。
+Use the same network	使用同一网络
+- Wake the telescope and connect it to your home Wi-Fi, or join the telescope's own hotspot from this PC.\n- Guest Wi-Fi and client isolation block discovery.\n- Click **Search** again after changing networks.	- 唤醒望远镜并将其连接到家庭 Wi-Fi，或让此电脑加入望远镜自己的热点。\n- 访客 Wi-Fi 和客户端隔离会阻止发现。\n- 更换网络后，请再次单击**搜索**。
+Enter the address yourself	手动输入地址
+If discovery still finds nothing, open **Advanced** in the connection window.\n\n1. Find the telescope's IP address in its app or your router's device list.\n2. Enter it as the IPv4 address and leave **Storage path** blank.\n\n> Note: Use the telescope's address, not this PC's.	如果仍然找不到，请在连接窗口中打开**高级**。\n\n1. 在望远镜的应用或路由器的设备列表中找到望远镜的 IP 地址。\n2. 将其作为 IPv4 地址输入，并将**存储路径**留空。\n\n> Note: 请使用望远镜的地址，而不是此电脑的地址。
+Check the telescope keeps frames	确认望远镜保留了各帧
+- **Seestar:** turn on **Save Each Frame** and use current firmware.\n- **Celestron Origin:** turn on **Save Raw Images** (Menu → Settings → Advanced).\n- **DWARF:** check the FTP port and credentials under **Advanced**.	- **Seestar：**打开 **Save Each Frame**，并使用最新固件。\n- **Celestron Origin：**打开 **Save Raw Images**（菜单 → 设置 → 高级）。\n- **DWARF：**在**高级**下检查 FTP 端口和凭据。
+Connect it as a drive	将其作为驱动器连接
+Connect the telescope by USB and check that it appears as a drive in **File Explorer**.\n\n- Some telescopes need USB storage mode turned on in their app.\n- Wake or unlock the telescope if Windows shows no drive.	通过 USB 连接望远镜，并确认它在**文件资源管理器**中显示为驱动器。\n\n- 部分望远镜需要在其应用中打开 USB 存储模式。\n- 如果 Windows 未显示驱动器，请唤醒或解锁望远镜。
+Choose **Import → Telescopes → Refresh USB devices**. A recognised telescope then appears as **Import from Seestar…** or **Import from Dwarflab…** in the Import menu.	选择**导入 → 望远镜 → 刷新 USB 设备**。识别到的望远镜随后会在“导入”菜单中显示为**从 Seestar 导入…**或**从 Dwarflab 导入…**。
+Or browse to the drive	或直接浏览到驱动器
+If it still isn't recognised, **Browse** to the capture folder on the telescope drive and scan it like any folder. Save it as a telescope so it's remembered.	如果仍未识别，请**浏览**到望远镜驱动器上的拍摄文件夹，并像扫描任何文件夹一样扫描它。将其保存为望远镜，以便下次记住。
+Check the right archive is open	确认打开的是正确的存档
+The strip under the table shows which repository is open. If it's the wrong one, choose another in **Settings → General**.	表格下方的条带显示当前打开的存储库。如果不对，请在**设置 → 常规**中选择其他存储库。
+A search term or active **Filters** hide everything that doesn't match.\n\n- **Clear** empties the search and resets filters.\n- The Filters button shows how many are active, for example **Filters (2)**.	搜索词或处于活动状态的**筛选器**会隐藏所有不匹配的内容。\n\n- **清除**会清空搜索并重置筛选器。\n- “筛选器”按钮会显示已启用的数量，例如**筛选器 (2)**。
+Choose All Targets	选择所有目标
+The target list on the left limits the table to one object. **All Targets**, at the top, shows everything.	左侧的目标列表会将表格限制为一个天体。顶部的**所有目标**会显示全部内容。
+Select All Targets	选择所有目标
+Expand sessions	展开会话
+Subs are grouped into one row per session. Expand a row, or turn off **Repository → Group subs by session**, to see every file.	子帧按会话分组，每个会话占一行。展开某一行，或关闭**存储库 → 按会话对子帧分组**，即可查看每个文件。
+Open Repository menu	打开“存储库”菜单
+Import the files	导入文件
+If the archive is empty, the files haven't been imported yet. Go to **Import**, scan the folder and import.	如果存档为空，说明文件尚未导入。请转到**导入**，扫描文件夹并导入。
+Go to Import	转到“导入”
+Turn the preview on	打开预览
+The preview pane can be hidden. Turn on **Show image preview** in **Settings → General**.	预览窗格可能已隐藏。请在**设置 → 常规**中打开**显示图像预览**。
+Select one file	选择一个文件
+Select a single file in the table. With nothing selected, the pane shows information about the target instead.	在表格中只选择一个文件。如果未选择任何内容，窗格会改为显示目标的信息。
+Check the file format	检查文件格式
+- FITS, XISF, TIFF, PNG, JPEG and SER preview directly.\n- RAW camera files (CR2, NEF, ARW, DNG) need a Windows image codec.\n- Tile-compressed FITS needs the optional CFITSIO codec.\n\n**Settings → General → Image compatibility** shows what is installed.	- FITS、XISF、TIFF、PNG、JPEG 和 SER 可直接预览。\n- RAW 相机文件（CR2、NEF、ARW、DNG）需要 Windows 图像编解码器。\n- 分块压缩的 FITS 需要可选的 CFITSIO 编解码器。\n\n**设置 → 常规 → 图像兼容性**会显示已安装的内容。
+Set the app's location	设置应用的位置
+AstroArchive looks for common processing apps where they normally install. If yours is elsewhere:\n\n1. Open **Settings → Export**.\n2. Under **Application locations**, choose the program's main `.exe`.\n3. Save preferences.	AstroArchive 会在常见处理应用的默认安装位置查找它们。如果你的应用在其他位置：\n\n1. 打开**设置 → 导出**。\n2. 在**应用程序位置**下，选择该程序的主 `.exe` 文件。\n3. 保存首选项。
+Try it again	再试一次
+Select files, then choose **Export → Open in app…**. Copies are verified before the app opens them; your originals are never changed.	选择文件，然后选择**导出 → 在应用中打开…**。应用打开之前会先验证副本；你的原始文件绝不会被更改。
+Set your observing town	设置你的观测城镇
+Sky details depend on where and when a capture was taken. Open **Settings → Sky & solving** and search for your town, or enter coordinates.	天空详细信息取决于拍摄的地点和时间。打开**设置 → 天空和解析**，搜索你所在的城镇，或输入坐标。
+Open sky preferences	打开天空首选项
+Fix individual captures	修正个别拍摄文件
+If only some captures are wrong, select them and right-click **Edit metadata → Capture**.\n\n- Set the **town / city** where they were taken.\n- Set the **timezone** if the camera clock wasn't on local time.\n- Changes are saved with the archive; files are never rewritten.	如果只有部分拍摄文件有误，请选择它们，然后右键单击**编辑元数据 → 拍摄**。\n\n- 设置拍摄所在的**城镇/城市**。\n- 如果相机时钟不是当地时间，请设置**时区**。\n- 更改会随存档一起保存；文件不会被重写。
+Check the details again	再次检查详细信息
+Select a capture and open the **i** button above the preview. Target and Moon heights, Moon phase and eclipse details update straight away.	选择一个拍摄文件，然后打开预览上方的 **i** 按钮。目标和月球高度角、月相以及日食/月食详细信息会立即更新。
+Set up a plate solver	设置解析器
+Plate solving works out where in the sky an image points. Open **Settings → Sky & solving → Plate solver setup** and choose **ASTAP** with its star database, or **Astrometry.net** with an API key.	天文定位解算可确定图像指向天空中的哪个位置。打开**设置 → 天空和解析 → 解析器设置**，然后选择带恒星数据库的 **ASTAP**，或使用 API 密钥的 **Astrometry.net**。
+Select the captures	选择拍摄文件
+Select the Unknown captures, or a whole session row. One frame per session is solved and the result applies to the session.	选择目标未知的拍摄文件，或整个会话行。每个会话会解算一帧，结果应用于整个会话。
+Choose **Repository → Review and analysis → Identify targets…**. Review the matches before applying them; cancelling keeps what's already done.	选择**存储库 → 审阅和分析 → 识别目标…**。应用前请先审阅匹配结果；取消会保留已完成的部分。
+Or name it yourself	或自己命名
+If you know the target, right-click **Edit metadata** and type it. Names such as M31, NGC 7000 or Andromeda Galaxy are all recognised.	如果你知道目标，请右键单击**编辑元数据**并输入。M31、NGC 7000 或 Andromeda Galaxy 等名称均可识别。
+A quick tour of pages, importing, browsing, exporting and settings.	快速了解页面、导入、浏览、导出和设置。
+Choose a repository, pick a source, scan it and import verified copies.	选择存储库，选取源，扫描后导入已验证的副本。
+Export captures for stacking	导出拍摄文件以供叠加
+Pick subs, prepare a ready-to-stack folder and open it in your stacking app.	选择子帧，准备可直接叠加的文件夹，并在叠加应用中打开。
+Back up your archive	备份存档
+Make a verified copy on another drive and keep it up to date automatically.	在另一个驱动器上创建已验证的副本，并自动保持更新。
+Import button is greyed out	“导入”按钮呈灰色
+Checks each thing Import needs and takes you to whatever is missing.	检查导入所需的每一项，并带你前往缺失的部分。
+Telescope not found over Wi-Fi	无法通过 Wi-Fi 找到望远镜
+Get discovery working, or connect by IP address, for Seestar, DWARF and Origin.	为 Seestar、DWARF 和 Origin 启用发现功能，或通过 IP 地址连接。
+USB telescope isn't detected	未检测到 USB 望远镜
+Make the telescope show up as a drive, refresh devices, or browse to it directly.	让望远镜显示为驱动器、刷新设备，或直接浏览到它。
+My files don't show in Repository	存储库中不显示我的文件
+Find captures hidden by search, filters, the target list or grouping.	找出被搜索、筛选器、目标列表或分组隐藏的拍摄文件。
+Preview shows no image	预览不显示图像
+Turn the preview on, select one file and check the format is supported.	打开预览，选择一个文件，并确认其格式受支持。
+Open in app can't find my software	“在应用中打开”找不到我的软件
+Point AstroArchive at Siril, DSS, PixInsight or another app installed somewhere else.	让 AstroArchive 找到安装在其他位置的 Siril、DSS、PixInsight 或其他应用。
+Sky, Moon or eclipse details look wrong	天空、月球或日食/月食详细信息看起来不对
+Set where and when captures were taken so heights, phases and eclipses are right.	设置拍摄的地点和时间，使高度角、月相和日食/月食正确无误。
+Captures show an Unknown target	拍摄文件显示未知目标
+Plate solve captures, or name the target yourself.	对拍摄文件进行天文定位解算，或自己为目标命名。
+Search help, for example USB, backup or greyed out	搜索帮助，例如 USB、备份或呈灰色
+Home	主页
+How can we help?	需要什么帮助？
+Guided fixes and tours open on AstroArchive's own screens. They highlight each control, check your setup as you go, and never import or delete anything for you.	引导式修复和导览会在 AstroArchive 自己的界面上打开。它们会突出显示每个控件，随时检查你的设置，且绝不会替你导入或删除任何内容。
+Fix a problem	解决问题
+Learn by doing	边做边学
+Browse the guide	浏览指南
+Start guided fix ›	开始引导式修复 ›
+Start tour ›	开始导览 ›
+{#0} topic ›	{0} 个主题 ›
+{#0} topics ›	{0} 个主题 ›
+Related topics	相关主题
+Start guided fix:	开始引导式修复：
+Show me in AstroArchive:	在 AstroArchive 中向我演示：
+Guided fix:	引导式修复：
+Tour:	导览：
+{#0} topics · F1 for page help · Ctrl+F to search	{0} 个主题 · 按 F1 获取页面帮助 · 按 Ctrl+F 搜索
+{#0} of {#1} topics match	{0} / {1} 个主题匹配
+Tip	提示
+Important	重要
+Start this guided walkthrough.	开始此引导式演练。
+Open this help topic.	打开此帮助主题。
+Guided fixes	引导式修复
+Guided tours	引导式导览
+Open a GitHub bug report with your system details and recent log filled in.	打开 GitHub 错误报告，并自动填入你的系统详细信息和最近的日志。
+Step {#0} of {#1}	第 {0} 步，共 {1} 步
+Looks good	看起来不错
+Repository: {0}	存储库：{0}
+No repository is chosen yet.	尚未选择存储库。
+Nothing else is running.	没有其他任务正在运行。
+Another task is running. Import waits until it finishes.	另一个任务正在运行。导入会等到其结束。
+Source: {0}	源：{0}
+No source folder or telescope is chosen yet.	尚未选择源文件夹或望远镜。
+The chosen source folder isn't available. Reconnect the drive or choose another folder.	所选源文件夹不可用。请重新连接驱动器或选择其他文件夹。
+Scanned: {#0} files found.	已扫描：找到 {0} 个文件。
+This source hasn't been scanned yet.	尚未扫描此源。
+Files are ready to import.	文件已就绪，可以导入。
+No files are ready to import in this view.	此视图中没有可导入的文件。
+Search and filters are clear.	搜索和筛选器已清除。
+Search or filters are hiding some files.	搜索或筛选器隐藏了部分文件。
+All Targets is selected.	已选择“所有目标”。
+Only one target is shown.	仅显示一个目标。
+{#0} captures in this archive.	此存档中有 {0} 个拍摄文件。
+This archive has no captures yet.	此存档中还没有拍摄文件。
+The preview pane is on.	预览窗格已打开。
+The preview pane is turned off.	预览窗格已关闭。
+One file is selected.	已选择一个文件。
+No file is selected.	未选择任何文件。
+Several files are selected. Select just one.	已选择多个文件。请只选择一个。
+{#0} files selected.	已选择 {0} 个文件。
+No files are selected yet.	尚未选择任何文件。
+Observing location: {0}	观测地点：{0}
+coordinates set	已设置坐标
+No observing town is set.	尚未设置观测城镇。
+A plate solver is set up.	已设置解析器。
+No plate solver is set up yet.	尚未设置解析器。
+Found: {0}	找到：{0}
+No USB telescope is detected right now.	当前未检测到 USB 望远镜。
+Last backup: {0}	上次备份：{0}
+No backup has been made yet.	尚未进行备份。
+Describe what went wrong. AstroArchive adds the details you tick below so the problem can be reproduced. Nothing is sent until you submit the issue on GitHub.	请描述出了什么问题。AstroArchive 会添加你在下方勾选的详细信息，以便重现该问题。在你于 GitHub 上提交问题之前，不会发送任何内容。
+AstroArchive hit an error:	AstroArchive 遇到错误：
+Title (optional)	标题（可选）
+What happened?	发生了什么？
+Preview of the diagnostics	诊断信息预览
+Folder paths are replaced with [local path]. Images and archive files are never attached. Remove anything else you'd rather not share in GitHub before submitting.	文件夹路径已替换为 [local path]。图像和存档文件绝不会被附加。如果还有不想分享的内容，请在提交前在 GitHub 中删除。
+Open GitHub issue	打开 GitHub 问题
+Copy report	复制报告
+Save report…	保存报告…
+System details	系统详细信息
+Error	错误
+Recent activity	最近的活动
+Recent app log	最近的应用日志
+Install and update errors	安装和更新错误
+Last scan or import report	上次扫描或导入报告
+About {#0} characters.	约 {0} 个字符。
+Copy the description and diagnostics to the clipboard.	将说明和诊断信息复制到剪贴板。
+Save the description and diagnostics as a text file.	将说明和诊断信息另存为文本文件。
+Opens a prefilled issue in your browser to review and submit.	在浏览器中打开预填的问题，供你审阅和提交。
+The report is too long for a web link, so the issue draft has a shortened copy. The full report is on your clipboard: paste it into the issue before submitting.	报告太长，无法放入网页链接，因此问题草稿中是缩短版。完整报告已在剪贴板中：提交前请将其粘贴到问题中。
+Could not open GitHub. The report has not been sent. Use Copy report or Save report… and attach it to an issue at github.com/arijguest/AstroArchive/issues.	无法打开 GitHub。报告尚未发送。请使用“复制报告”或“保存报告…”，并将其附加到 github.com/arijguest/AstroArchive/issues 上的问题中。
+The report could not be copied	无法复制报告
+The report could not be saved	无法保存报告
+Would you like to report this problem? You can review everything before it is sent.	要报告此问题吗？发送前你可以审阅所有内容。
+Walk through this on AstroArchive's own screens.	在 AstroArchive 自己的界面上逐步操作。

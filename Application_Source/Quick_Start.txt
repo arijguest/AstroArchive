@@ -1,616 +1,273 @@
 AstroArchive user guide
+@title About this guide
+@category Reference
+@summary Which version this guide describes and what AstroArchive needs to run.
 Application 3.2.8; package 3.2.8.1.
 Windows 10/11 x64; .NET Framework 4.8.
 
+Press `F1` on any page for help with that page. Guide topics stay in English;
+the rest of AstroArchive follows your chosen language.
+
 START HERE
+@title Getting started
+@category Get started
+@summary Five steps from a fresh install to a searchable, verified archive.
+@walkthrough first-import
+@related IMPORT WORKFLOW | USB TRANSFER AND SAVED TELESCOPES | IMPORT OVER WI-FI / LAN
+@keywords first setup begin new install quick start
+1. Open **Settings → General → Choose repository** and pick the folder for your archive.
+2. On **Import**, choose a capture folder and a unique physical telescope ID,
+   or use **Connect over network** beside Saved telescope.
+3. For a local folder, **Scan folder** and review before importing. For a network
+   telescope, connect and select files, **Search all** or **Start live import**.
+4. Browse **Repository** by target, search or **Filters**; expand sessions to see subs.
+5. Select files and use **Export** for copies, stacking inputs, apps or AstroBin.
 
-1. Open Settings > General > Choose repository.
-2. On Import, choose a capture folder and a unique physical telescope ID,
-   or use Connect over network beside Saved telescope.
-3. For a local folder, Scan folder and review before importing. For a network
-   telescope, connect and select files, Search all or Start live import.
-4. Browse Repository by target, search or Filters; expand sessions to see subs.
-5. Select files and use Export for copies, stacking inputs, apps or AstroBin.
+> Tip: Imports verify every copy and skip duplicates. Source originals are kept by default.
 
-Imports verify copies and skip duplicates. Source originals are kept by default.
 Stacking and image processing run in your external software.
 
-IMPORT OVER WI-FI / LAN
+FINDING YOUR WAY AROUND
+@title Finding your way around
+@category Get started
+@summary Pages, menus, hover hints and where each kind of task lives.
+@walkthrough tour
+@related KEYBOARD SHORTCUTS | APPEARANCE AND ACCESSIBILITY
+@keywords navigation menu pages toolbar tooltip hint guide walkthrough tour
+## Pages
+- **Repository** holds your archived captures, grouped by target and session.
+- **Edited** keeps working copies and processed results.
+- **Import** scans telescopes and folders and copies verified files in.
 
-## Connect and choose files
-Choose a repository in Settings > General first. On Import, click Connect over
-network beside Saved telescope. Connect this PC and Seestar, DWARF or Celestron
-Origin to the same LAN (or join the telescope hotspot). Discovery starts
-automatically. Select the telescope and Connect; no IP entry is needed.
-Celestron Origin connects over FTP like DWARF and opens its RawData session
-folders. It keeps individual exposures only when Save Raw Images is on in the
-Origin app (Menu > Settings > Advanced); FinalStackedMaster.tiff is its own stack.
+Switch pages with the purple selector, `Ctrl+1–3` or `Ctrl+Tab`.
 
-Choose a saved physical telescope for the import or keep the suggested new name.
-Browse files opens capture folders. Click to select files or folders (a folder
-includes its subfolders); Ctrl or Shift adds more, Esc clears. Double-click a folder
-to open it; selections are kept across folders. Search all selects every supported
-capture. Review the total files and size, then import. Network imports first remind
-you that transfers take longer than USB. Originals stay on the telescope. Adjacent sidecars, DWARF session
-metadata and Origin info.json are downloaded with captures; normal archive checks and duplicates apply.
+## Menus
+- **Import / Export** handle files coming in and going out.
+- **Repository** holds view options, analysis, backups, maintenance and clean-up.
+- **Settings** opens Preferences.
+- **Guide** opens this help, guided fixes, the walkthrough and About AstroArchive.
 
-## Import as the telescope shoots
-Start live import watches the displayed folder and its subfolders. To limit it to
-one session/target, open that folder first; use All captures for the full storage.
-Before it starts, choose how often to check for new captures, the transfer limit,
-and whether to also import captures already in this folder, as in Watch a capture
-folder. That option is off by default: files present at the first successful scan
-are excluded, including any exposure still being written, so only new captures are
-imported.
-Files must remain unchanged across two polls and through download; incomplete
-FITS are retried. Capture still runs in
-the telescope app; AstroArchive does not control exposures. Keep AstroArchive open
-and the PC awake. Connect over network stays available: choose additional files
-or start imports from other telescopes while live import runs. Each telescope
-needs its own saved name. A Live import underway indicator beside the connection
-button opens Activity, where each watcher has its own Stop live import control.
-Stop all telescope imports on Import stops every network watcher and download.
-Completed imports and verified local downloads remain; originals stay on the telescope.
-A short disconnect retries automatically. To catch files captured while AstroArchive
-was stopped, use Search all or Advanced > Also import existing captures.
-The polling interval is not a delivery deadline: downloads, checking and archiving
-also take time. Lower the transfer limit if downloads disrupt telescope operation.
+Right-click files for preview, metadata, export, working copies or deletion.
 
-## Advanced and connection troubleshooting
-Advanced provides manual IPv4 access, a custom storage path, an optional discovery
-adapter, DWARF FTP credentials, live polling (default 5 seconds) and a transfer limit
-(default 2 MB/s). Passwords are kept only for the active connection. Seestar direct
-SMB access leaves Windows SMB/guest/signing policies unchanged. Enable Save Each
-Frame on Seestar and use compatible firmware; file access varies by model/firmware.
+## Hints and controls
+- Less obvious controls show a short hint when you hover over them.
+- Checkboxes show an empty outline when off, a tick when on and a dash when mixed.
+- Unavailable controls keep their recorded state and readable labels.
 
-If nothing is found, check the telescope is awake and both devices share the same
-network. Guest Wi-Fi/client isolation can block discovery. Click Search again.
-For manual access, find the telescope's address in its app's network settings or
-your router's connected-device list. Use the telescope's IP, not this PC's IP.
-Windows Settings > Network & internet > Wi-Fi/Ethernet > Properties shows this
-PC's IPv4 address and gateway; it does not identify the telescope's address.
-Enter the telescope IPv4 address in Advanced; leave Storage path blank first.
-Defaults are \\<telescope IP>\EMMC Images for Seestar and / for DWARF.
-If connection fails after discovery, check the firmware's file-sharing support,
-storage path and (for DWARF) FTP port/credentials. A discovery reply alone does
-not guarantee file access. AstroArchive's direct Seestar access does not require
-opening the share in File Explorer or changing Windows SMB settings.
+> Tip: Not sure where something is? **Guide → Guided fixes** walks you through common problems on the real screens.
 
-## Local space and retry
-Downloads are staged in %LOCALAPPDATA%\AstroArchive\RemoteDownloads.
-Retry checks their saved hashes and reuses complete copies. Space is needed for both
-these local downloads and the final archive. Stop imports and close AstroArchive
-before removing caches. Removing them does not remove completed repository imports.
-If captures are absent, check Save Each Frame and Import preferences; ignored
-failed/raster captures are filtered before transfer. Read Import > Reports > Last
-import report… for import errors and warnings.
+APPEARANCE AND ACCESSIBILITY
+@title Appearance and accessibility
+@category Get started
+@summary Text size, contrast, theme, language and keyboard access.
+@related KEYBOARD SHORTCUTS | FINDING YOUR WAY AROUND
+@keywords theme dark light text size scale contrast motion language translation font
+Settings opens Preferences: General, Import, Export, Sky & solving, Accessibility,
+Updates and Backups. **Save preferences** applies changes; **Cancel** keeps your settings.
 
-GUIDE AND TOOLTIPS
+## Comfort
+- **Accessibility** adjusts text size, rows, contrast and progress animation.
+- **Clearer selections** adds prominent outlines around focused targets, files and
+  sub groups. It is off by default; selected entries keep their usual highlight.
+- Very dark linear previews get a bounded, display-only brightness boost. Source files
+  and scientific exports keep their values.
 
-F1 opens page help. Guide > Help searches titles and full text; Ctrl+F focuses
-search. Guide > Interactive walkthrough introduces controls without importing.
-Less obvious menu options have concise hover hints.
-Checkboxes show an empty outline when off, a tick when on and a dash when mixed.
-Unavailable controls keep their recorded state and readable labels.
-Delete originals shows On/Off and explains when a scan is needed.
+## Language
+**Settings → General → Language** shows AstroArchive in English, Deutsch, Español,
+Français, Italiano, 日本語 or 简体中文, or follows Windows. It applies after a restart.
+
+## Keyboard access
+- `Alt` reveals menu access keys; arrows move through menus; `Tab` moves between controls.
+- The purple selector switches Repository / Edited / Import; `Ctrl+1–3` selects a page.
+
+> Note: Import dialogs include **Import preferences…**, which opens the Import section while keeping the folders and files you selected.
+
+KEYBOARD SHORTCUTS
+@title Keyboard shortcuts
+@category Get started
+@summary Every shortcut in one place.
+@keywords keys hotkeys shortcut ctrl escape f1
+- **Main window:** `Escape` clears the file selection; `Ctrl+F` search; `Ctrl+I` Import; `Ctrl+E` Export; `F1` page help; `Ctrl+Shift+N` Activity.
+- **Tables:** `Left`/`Right` move through visible columns, switching to targets or preview only at the table edges. `Up`/`Down` change the selection; `Ctrl`-click toggles; `Shift`-click selects a range; `Shift`-click a heading adds a sort; `Delete` confirms removal on Repository or Edited.
+- **Preview:** `F` fit; `+`/`-` zoom; `Up`/`Down` or `Ctrl+Left`/`Right` pan in the sidebar; all arrows pan in a separate preview window; `Escape` closes.
+- **Guide:** `Ctrl+F` search; `Up`/`Down` topics; `Alt+Home` guide home; `Ctrl+C` copy; `Escape` close.
+- **Folder picker:** `Alt+D` address bar.
 
 IMPORT WORKFLOW
-
+@title Import from a folder
+@category Import
+@summary Scan a folder, review what was found, then copy verified files into your archive.
+@walkthrough first-import
+@related USB TRANSFER AND SAVED TELESCOPES | IMPORT OVER WI-FI / LAN | PAUSING AND RESUMING IMPORTS | REVIEW, EXCLUSIONS AND DELETION
+@keywords scan folder copy rescan watch nina sharpcap asiair capture software
 ## Scan and import
-Choose a saved telescope or Browse a folder. Leave model/camera on Auto unless
-an override is needed. Target and rotation analysis default Off.
-Scan folder reviews files; Import copies eligible captures in the filtered view.
+1. Choose a saved telescope, or **Browse** to a capture folder.
+2. Leave model and camera on **Auto** unless an override is needed.
+3. **Scan folder** lists what can be imported. Nothing is copied yet.
+4. Check the **Status** and **Review** columns, then **Import**.
+
+Import copies the eligible captures in the filtered view and verifies each copy.
+Target and rotation analysis default to Off.
+
+> Tip: Import greyed out? [Run the guided fix](walkthrough:import-disabled).
 
 ## Repeat imports
-Default filename matching skips known captures and completed dated DWARF sessions.
-Robust file matching revisits same-name edits, sidecars and missing archive copies.
-Import > Full rescan reads and hashes every source file.
-Cancel keeps completed imports. Changed sources need a new scan.
+- Default filename matching skips known captures and completed dated DWARF sessions.
+- **Robust file matching** revisits same-name edits, sidecars and missing archive copies.
+- **Import → Full rescan** reads and hashes every source file.
+- **Cancel** keeps completed imports. Changed sources need a new scan.
 
 ## Watch a capture folder
-Import > Watch a capture folder… (or Watch folder… beside Scan folder) imports
+**Import → Watch a capture folder…** (or **Watch folder…** beside Scan folder) imports
 captures from N.I.N.A., SharpCap, ASIAIR or other software as they are saved.
-Choose the folder your capture software writes to and a physical telescope ID.
-Each file is imported once it stops changing; incomplete FITS are retried.
-Earlier captures stay put unless you include them; Scan folder imports them later.
+1. Choose the folder your capture software writes to.
+2. Choose a physical telescope ID.
+3. Each file is imported once it stops changing; incomplete FITS are retried.
+
+Earlier captures stay put unless you include them; **Scan folder** imports them later.
 Originals stay in the capture folder. Stop watching from Activity at any time.
 
-LIBRARY WORKFLOW
-
-## Find and select files
-Choose a target or All Targets. Search IDs, common names, dates, filenames or
-device details. Combine terms: M45 Dwarflab, M45 S50 Pro, M45 stack.
-Quotes or file: search literal filename text. Clear resets search and filters.
-Selections survive target changes. The top-right counter shows the batch total;
-click it or press Escape to clear. Ctrl-click toggles; Shift-click selects a range.
-The path strip shows the repository's total size; hover it for a breakdown of
-captures, Edited, Dump and archive data.
-
-## Stars, tags and notes
-Press S, or right-click > Star, to star files, a session row or a whole selection.
-Starred rows carry a subtle tint and a ★ in Repository and Edited.
-Right-click > Tags and notes… adds personal tags and a note to the selection.
-Search starred, a tag or note text, or use Filters > Starred and Tag.
-They are saved with the repository and never change the files themselves.
-
-## Target cards
-Right-click a target > Create target card… makes a shareable image with your best
-image of the target, its integration, light frames, nights and filters.
-Choose any image of the target: Edited images linked to its captures come first,
-then starred and newer Edited images (no link is needed), then stacks and lights.
-Drag the preview to move the image, Ctrl+scroll to zoom it and Rotate left/right to
-turn it, or use Adjust image position. Add an optional short description under the
-target name. Each target remembers its image, framing and description for next time. Pick a layout
-for posts, stories or video, Dark or Light, a resolution (Standard, High 2x or
-Sharing), and an optional credit line. Cards show the AstroArchive logo and website. Save PNG/JPEG or Copy.
-More cards & video… opens Analytics > Target cards: cards for your top 3-25
-targets (by integration or light frames) or targets you choose, saved as one
-image, a ZIP of images, or an MP4/GIF slideshow. Adjust card… changes one card's
-image, zoom, position and short description; the description also shows in videos.
-
-## Eclipses
-Sun and Moon captures taken during an observable eclipse list under Solar Eclipse
-or Lunar Eclipse in the target list; files and folders are unchanged. For solar
-captures the sky map shows obscuration on the Sun itself, and Capture details
-shows only the percentage of the Sun obscured at capture. The local Sun and Moon
-must both be above the horizon for a solar eclipse to be shown. A Sun or Moon
-predicted below the horizon prompts a check of the target, capture location,
-clock and timezone.
-Lunar eclipse details retain the coverage curve and contact times. Moon-to-target
-separation is omitted when the target is the Moon.
-Set a per-file town / city in Edit metadata > Capture; the choice is saved with
-other metadata changes and can apply to selected sessions. Use default location
-returns to the file's recorded location, then the observing town in Settings.
-Sky views, horizon checks and local eclipse detection follow the saved choice.
-
-## Condensed subs
-Repeated Lights share a collapsed session row with dates, count, per-sub exposure,
-total integration and filters. Mixed durations show a range; missing values remain
-unknown. Expand the row or turn off Repository > Group subs by session.
-Stacks remain separate. Known counts show Stack (1445); filters still use Stack.
-
-## Pausing and resuming imports
-Pause import keeps your queue and verified copies. Use Activity to pause an
-individual telescope or resume a paused/interrupted import. Pause all imports
-pauses every active network session. Cancel/Stop ends the queue instead.
-Closing AstroArchive preserves active import queues; after a crash or update,
-open Activity and choose Resume. Reconnect the original source and telescope.
-Completed archive copies are verified and skipped; an unfinished file restarts
-from its beginning. Existing live-watch baselines are preserved, so captures
-made while paused are eligible after resuming. Source-removal choices from a
-confirmed file/Dump import remain in effect; USB/network imports keep originals.
-Recovery supports folder, USB, network/live, Dump and edited-image imports.
-
-Settings, filters, grouping and Analytics remain available during network
-imports. Preference changes apply to future imports. Repository switching and
-conflicting file changes remain unavailable until active imports finish/pause.
-Downloads appear in Import as they arrive, with a numeric ETA after transfer
-starts (or immediately when a bandwidth limit is set).
-
-## Analytics exports
-Repository > Analytics offers six branded charts: Targets photographed, Imaging
-timeline, Time per target, Time per telescope, Filter mix and Exposure lengths.
-The window has three parts: the chart list on the left, the preview in the middle
-and the options panel on the right. Hide options gives the preview the full width.
-Select a chart to preview it, Combined document for one document of several
-charts, or Target cards. Analytics reopens on the chart you viewed last.
-Scope starts with the entire repository, independently of browsing filters or
-selection. Expand Scope to choose a physical telescope, inclusive acquisition
-dates, or whether to include rejected light frames. Reset scope restores the
-entire repository. Undated frames are excluded only when a date range is set.
-Time is recorded individual light-frame integration, not elapsed observing time.
-Calibrations are excluded. A stack counts only when no sub of its target was
-saved in the same session or on the same date, so it never doubles those subs;
-the same rule applies to target and session totals. Missing exposures and dates
-remain unknown and are reported with the chart.
-
-The options panel shows only what applies to the item you selected:
-- Output: Images & documents (PNG, JPEG, PDF, SVG) or Video & GIF (MP4, GIF).
-- This chart: Chart type (donut, bars or columns), Order (Largest first,
-  Smallest first or A-Z for rankings), and your own title and subtitle. Blank
-  titles use the standard wording. Reset this chart restores its defaults, and
-  customised charts say so in the chart list. Every group is still included; the
-  timeline and exposure lengths keep their own order.
-- Charts in the document: tick the charts that go into the combined document and
-  Export all. At least one chart stays included.
-- Target cards: the targets, card layout and optional credit line.
-- Document: layout, Dark or Light theme, colour palette and the document label.
-  Palettes are AstroArchive, Nebula, Aurora and Colour-blind safe (Okabe-Ito).
-  Lettering keeps the theme's colours.
-- Export: format, then Export options for resolution, video timing and size.
-Your chart, document and export choices are remembered for next time. Reset all
-options returns them to their defaults without changing the scope. Ctrl+E exports
-what is shown; Ctrl+Shift+E exports the combined document.
-
-Documents default to Dark. The larger AstroArchive logo, midnight/blue/cyan
-colours, and concise headers/footers appear in previews and PNG, JPEG, PDF and
-SVG exports. Document layout defaults to Landscape. Social layouts rearrange the
-charts and branding for the selected frame, with these Social image presets:
-- Vertical 9:16: 1080 x 1920, for TikTok, Reels and Stories.
-- Portrait 4:5: 1080 x 1350, for Instagram feed posts.
-- Square 1:1: 1080 x 1080, for square posts.
-- Widescreen 16:9: 1920 x 1080, for video and presentations.
-- Pinterest 2:3: 1000 x 1500, for pins.
-Print and Screen resolutions remain available. Preview, PDF and SVG use the same
-selected layout. Social image presets apply to each page.
-Target/filter shares show the largest seven categories plus Other when needed.
-Time rankings continue onto additional pages so every target and telescope is
-included. Timeline gaps remain zero; longer timelines use years or grouped periods.
-Choose PNG or JPEG at 300 dpi for print or 150 dpi for screen. PDF keeps charts and
-lettering as vectors; SVG embeds the logo and keeps graphics scalable. Export chart
-saves the selected chart; Export all saves the combined document.
-PDF uses individual pages in the selected layout; image/SVG exports arrange pages
-on one sheet. Tall collections stack pages vertically; square and wide collections
-use a grid.
-Very large collections may need 150 dpi, PDF or SVG. Open export folder appears
-after a successful save. Exports leave the archive and capture files unchanged.
-
 USB TRANSFER AND SAVED TELESCOPES
-
+@title Import over USB
+@category Import
+@summary Import straight from a Seestar or DWARF connected by USB, and manage saved telescopes.
+@walkthrough usb-telescope
+@related IMPORT WORKFLOW | IMPORT OVER WI-FI / LAN
+@keywords usb cable drive volume seestar dwarf dwarflab telescope profile device id rename
 ## Connect and import
-Expose the telescope as a Windows USB volume. When recognised, Import offers
-**Import from Seestar…** or **Import from Dwarflab…**; the connected-import button
-opens the same picker. Choose a saved physical telescope or name a new one.
-Use **Add folder…** and **Add files…** to select captures on that telescope drive.
-Folders include subfolders; overlapping selections are scanned once. Previous
-selections are remembered for that telescope and volume.
-For faster scans, choose only the target folders or files you need. **Entire
-telescope drive** checks all capture folders and may take a long time.
-**Import** starts directly for small selections. Selections containing 500 or more
-capture files, including files inside folders, show a concise confirmation first.
-Cancel leaves the selection unimported.
-Every selected capture is fully scanned and hashed, then
-eligible files are screened and copied with verification. Saved filename/session
-shortcuts are bypassed even when Robust file matching is off. Import exclusions
-still apply; rejected or unreadable captures remain for review.
-Connected imports keep originals and leave analysis off. Cancel retains completed
-copies; reconnect and select the captures again to resume or repair missing copies.
+1. Connect the telescope so Windows shows it as a USB drive.
+2. Choose **Import → Import from Seestar…** or **Import from Dwarflab…**.
+3. Choose a saved physical telescope or name a new one.
+4. Use **Add folder…** and **Add files…** to pick captures on the telescope drive.
+5. Choose **Import**.
 
-## Manage profiles
-Import > Telescopes saves, renames or recovers profiles from archive data,
-and Refresh USB devices looks for telescopes connected by USB.
-Recovered profiles need a source association before USB import.
-A physical telescope ID identifies one device; its model can be shared.
+- Folders include subfolders; overlapping selections are scanned once.
+- Previous selections are remembered for that telescope and volume.
+- Selections of 500 or more capture files show a short confirmation first.
 
-ARCHIVE SAFETY AND BACKUPS
+> Tip: For faster scans, choose only the target folders you need. **Entire telescope drive** checks every capture folder and can take a long time.
 
-## Create and restore a backup
-Repository > Back up archive… copies images, Edited and the current database to
-a verified folder or lossless ZIP outside the archive. Prefer a separate drive.
-Close other writers/editors. Cancel removes the incomplete backup, keeping earlier
-backups. Restore by selecting the backup's Repository folder; Restore.txt and
-backup.json contain instructions and checksums.
-Settings > Backups > Restore a backup… verifies every file while restoring into a
-new folder, then offers to open the restored archive.
+## What happens during a USB import
+Every selected capture is fully scanned and hashed, then eligible files are screened
+and copied with verification. Saved filename and session shortcuts are bypassed, even
+when Robust file matching is off. Import exclusions still apply; rejected or unreadable
+captures stay for review.
+- Connected imports keep originals and leave analysis off.
+- **Cancel** keeps completed copies. Reconnect and select the captures again to resume.
 
-## Incremental and automatic backups
-The first backup in a folder is complete. Later folder backups share unchanged
-files with the previous one (NTFS hard links), so each stays complete on its own.
-Later ZIPs hold only what changed and restore through the earlier ZIPs they need.
-After a backup, AstroArchive offers to repeat it daily, weekly or monthly; change
-this in Settings > Backups. Keep removes older backups but never one still needed.
-If the backup drive is missing when a backup is due, Activity reminds you.
+## Manage telescope profiles
+- **Import → Telescopes** saves, renames or recovers profiles from archive data.
+- **Refresh USB devices** looks again for telescopes connected by USB.
+- Recovered profiles need a source association before USB import.
+- A physical telescope ID identifies one device; several can share a model.
 
-## Protect originals
-Settings > Backups > Protect originals can prevent accidental deletion/renaming
-on local NTFS drives. Edited, Dump and metadata remain writable.
-Turn protection off before moving the archive in Explorer.
-The Windows owner can change permissions; protection is not a backup.
+IMPORT OVER WI-FI / LAN
+@title Import over Wi-Fi or LAN
+@category Import
+@summary Connect to Seestar, DWARF or Celestron Origin over the network and import as you shoot.
+@walkthrough network-telescope
+@related USB TRANSFER AND SAVED TELESCOPES | PAUSING AND RESUMING IMPORTS | ACTIVITY AND PROGRESS
+@keywords wifi wi-fi network lan wireless seestar dwarf origin celestron live hotspot ip smb ftp discovery
+## Connect and choose files
+1. Choose a repository in **Settings → General** first.
+2. On **Import**, click **Connect over network** beside Saved telescope.
+3. Put this PC and the telescope on the same network, or join the telescope's hotspot.
+4. Discovery starts automatically. Select the telescope and **Connect**; no IP is needed.
+5. Choose a saved physical telescope, or keep the suggested new name.
+6. **Browse files**, select files or folders, review the total and import.
 
-IMAGE PREVIEW AND TABLES
-On first opening, Repository and Edited select the top All Targets entry and
-load its preview. Returning to a view keeps its selection for this session.
+- Click to select; `Ctrl` or `Shift` adds more; `Esc` clears. Double-click a folder to open it.
+- **Search all** selects every supported capture.
+- Adjacent sidecars, DWARF session metadata and Origin info.json come with the captures.
+- Originals stay on the telescope. Network transfers take longer than USB.
 
+> Note: Celestron Origin keeps individual exposures only when **Save Raw Images** is on in the Origin app (Menu → Settings → Advanced). FinalStackedMaster.tiff is its own stack.
 
-## Preview
-Select a file for the sidebar; open Preview image for a larger window.
-The i button above the preview opens Capture details. With a known capture time
-and observing town/city, it lists the target and Moon elevations, the Moon's
-phase and illumination, and how far the Moon was from the target.
-The Stellarium button next to it opens Stellarium on the selected capture: its position
-and field of view, plus the capture time and place when they are known. If Stellarium is
-already open with its Remote Control plugin switched on, that window is reused; otherwise
-a new Stellarium window opens. If Stellarium is not installed, the same view opens in
-Stellarium Web in your browser, which receives the target, time and place. Calibration frames and
-captures without a position leave the button off.
-The target button, after Stellarium, draws a white circle around every catalogue
-object in the preview, sized to cover the whole object, with its ID (M 42, NGC 1977)
-set in a break in the ring. Circles that run past the edge stay partly drawn, with
-the ID in a visible part of the ring. The same button sits on the Edited preview and
-in enlarged previews; it is off until you switch it on, and switching it off in any
-preview switches it off everywhere. Circles come from the capture's plate solution
-or the image's WCS header and the built-in catalogue, so nothing leaves your PC.
-Captures without a full solution show a note with Plate solve…, which runs Identify
-target on that capture and then marks the field.
-When no files are selected, the sidebar shows information for the selected target:
-its catalogue overview, available thumbnail and sources. Deep-sky objects also
-have an interactive map of their catalogue position. Right-click a target and
-choose Show target info to clear the current file selection and reveal this view.
-Escape also clears a file selection. Select a file to return to its image preview.
-The information wraps and scrolls in small panes; expand Sources or Image credit
-for details. Ambiguous names offer object choices without renaming your files.
-For recorded captures without pointing coordinates, the sky map can calculate
-approximate Sun, Moon and major-planet positions from the capture time. AVI, SER
-and other videos use their retained capture timestamp, not recording duration.
-If a capture supplies a time without its timezone, the map uses your selected
-observing town/city timezone, including daylight saving at the capture date.
-A timezone or UTC time in capture metadata takes priority. The metadata editor
-lets you set a capture timezone explicitly. The map uses your observing location
-for the local horizon.
-Click a constellation on the sky map to show its name; click it, the name or
-empty sky again, or press Escape, to hide it. Click the Moon, Sun or target marker
-(or press Enter on the map) to open Capture details.
-Repository's wider preview pane is adjustable by dragging its divider.
-Sidebars sample still images, normally to 1,400 pixels on the longest edge.
-Large still/SER windows decode native pixels within format limits.
-Preview never resizes or rewrites source files.
+## Import as the telescope shoots
+**Start live import** watches the displayed folder and its subfolders. Open one
+session or target folder first to limit it, or use **All captures** for the whole storage.
+- Before it starts, choose how often to check, the transfer limit, and whether to
+  include captures already in the folder (off by default).
+- Files must stay unchanged across two checks and through download; incomplete FITS are retried.
+- Capture still runs in the telescope app. Keep AstroArchive open and the PC awake.
+- Each telescope needs its own saved name; several can run live imports at once.
+- **Live import underway** opens Activity, where each watcher has **Stop live import**.
+- **Stop all telescope imports** on Import stops every network watcher and download.
 
-## Zoom and display
-Scroll or pinch to zoom; drag or use arrows to pan. Fit or F recenters.
-Plus/minus zoom; Escape closes the popup. Large previews open in source orientation;
-Rotate left/right changes the display. Stretch changes display values only.
-Scientific images default to Auto per channel; processed/planetary images use Linear.
+> Tip: To catch files captured while AstroArchive was closed, use **Search all** or **Advanced → Also import existing captures**.
 
-## Tables and target groups
-Click a heading to sort; click again to reverse. Shift-click adds a sort column.
-Right-click to choose columns; drag to reorder. Each page saves its layout.
-Targets show the preferred ID first: M31 - Andromeda Galaxy.
-All Targets is bold and shaded; comets share Solar system. Meteors sit above
-Other targets. All Targets orders merged subs, stacks, ungrouped files, calibrations.
-Individual targets: stacks above lights. Sorts apply within each section.
+## Advanced settings
+**Advanced** offers manual IPv4 access, a custom storage path, a discovery adapter,
+DWARF FTP credentials, live polling (default 5 seconds) and a transfer limit (default 2 MB/s).
+- Passwords are kept only for the active connection.
+- Seestar direct access leaves Windows SMB, guest and signing settings unchanged.
+- Turn on **Save Each Frame** on Seestar and use compatible firmware.
+- Lower the transfer limit if downloads disrupt the telescope.
 
-EDITED IMAGES AND WORKING COPIES
+## If the telescope isn't found
+- Check the telescope is awake and both devices share the same network.
+- Guest Wi-Fi and client isolation can block discovery. Click **Search** again.
+- Find the telescope's IP in its app or your router's device list, then enter it in
+  **Advanced** and leave **Storage path** blank.
+- Defaults are `\\<telescope IP>\EMMC Images` for Seestar and `/` for DWARF.
+- A discovery reply alone doesn't guarantee file access: check firmware file sharing,
+  storage path and, for DWARF, the FTP port and credentials.
 
-## Add and browse
-Edited keeps working copies and returned outputs with the repository.
-Add images copies files. Import folder scans with optional subfolders and a review.
-Archived originals and byte-identical Edited files are skipped; changed files
-can become new versions. Unchecked entries leave existing files untouched.
-RAW/scientific types are grouped first by type; GIFs are last.
-Selections stay selected across targets, searches and refreshes. The target-pane
-counter shows the whole batch; export includes files selected under other targets.
-Click the counter or press Escape to clear the selection.
+> Note: Use the telescope's IP address, not this PC's. Windows network settings show this PC's address, not the telescope's.
 
-## Export and delete
-Export > Open in app… opens supported working images in your editor. Save outputs
-alongside the working copy; Refresh finds them. Settings > Export stores app defaults.
-Export > Files… copies individual or multiple selected images, verifies their bytes
-and adds suffixes for filename collisions.
-Delete files… or Delete confirms removal of Edited copies. Source originals and
-archived captures remain. Right-click also offers preview, details and file location.
+## Local space and retry
+Downloads are staged in `%LOCALAPPDATA%\AstroArchive\RemoteDownloads`. Retry checks their
+saved hashes and reuses complete copies, so leave space for these and for the archive.
+Stop imports and close AstroArchive before removing caches; completed imports stay.
+Read **Import → Reports → Last import report…** for errors and warnings.
 
-EDITED METADATA AND EXPOSURE
+PAUSING AND RESUMING IMPORTS
+@title Pause, resume and recover imports
+@category Import
+@summary Pause work, resume after a restart or crash, and keep working while imports run.
+@related ACTIVITY AND PROGRESS | IMPORT OVER WI-FI / LAN
+@keywords pause resume crash interrupted queue stop cancel recover
+- **Pause import** keeps your queue and verified copies.
+- In **Activity**, pause one telescope or resume a paused or interrupted import.
+- **Pause all imports** pauses every active network session.
+- **Cancel / Stop** ends the queue instead.
 
-Select images > Edit metadata to assign targets, filters, class, exposures, sub
-counts or coordinates. Empty/unchanged fields retain values; files are not rewritten.
-Starless and Stars only labels are recognised in filenames.
-120x60s means 120 subs of 60 seconds; 30s40 means sub exposure/gain.
-Seestar's Stacked_36_NGC 7000_5.0s_... means 36 subs of 5 seconds: 180 seconds
-total exposure. Repository and Edited metadata use that count and duration;
-explicit header totals and manual corrections take precedence. Existing repository
-records are repaired on opening, without rereading or moving capture files.
-DWARF's stacked-16 is bit depth. For recognised DWARF device stacks, total
-integration divided by filename per-sub exposure supplies a count only when
-the result is a whole number. Existing cached records gain the same count.
-Explicit/manual counts take precedence. Other unspecified EXPTIME stays reported exposure;
-it is not assumed to be per-sub or total. Unknown/conflicting values need review.
-The Exposure tooltip shows the evidence. Sub-summary integration
-counts acquisition subs only, excluding stacks.
+## After closing, a crash or an update
+1. Reconnect the original source and telescope.
+2. Open **Activity** and choose **Resume**.
 
-GIF AND VIDEO PREVIEWS
+Completed archive copies are verified and skipped; an unfinished file restarts from its
+beginning. Live-watch baselines are kept, so captures made while paused are still imported.
+Source-removal choices from a confirmed file or Dump import stay in effect; USB and network
+imports keep originals. Recovery supports folder, USB, network/live, Dump and Edited imports.
 
-GIF, SER and supported Windows videos offer Pause/Play below Preview.
-Playback pauses when leaving the page. SER previews run at 10 fps, not an
-inferred capture rate. Other videos require compatible Windows codecs.
-
-GIFs inherit missing acquisition data only from a unique nearby still with the
-same stem or a processing/progress/animation/timelapse/edit-history suffix.
-Ambiguous matches and conflicting metadata are not guessed.
-
-CATALOGUE IDENTITIES
-
-Aliases share an identity: M106, NGC4258, UGC7353 and PGC39600 resolve to M106.
-Catalogue prefixes matter; M106 differs from NGC106. Spacing, accents and full
-Messier/Caldwell prefixes are normalised. Conflicting IDs stay unresolved.
-Rosette/NGC2244 labels use NGC2237. Moon/Lunar and Sun/Solar share labels.
-Planet names in filenames, such as Jupiter or Saturn, resolve to Solar system
-targets during scanning. Recognised catalogue targets take precedence.
-Comet designations and recognised names such as NEAT/LINEAR/NEOWISE group in
-Solar system. Meteor filename labels use Meteor and leave object ID blank.
-
-Right-click a target > Edit name and aliases saves custom names in app settings.
-Names cannot claim another object's identity. Use built-in names resets that object.
-
-STACKING PROJECTS AND SESSIONS
-
-## Choose an export
-Export opens one window. Its header counts the files and names their targets; the
-left list chooses Files, Stacking folder, Open in app, AstroBin CSV or Catalogue CSV.
-Right-click Export items open the same window with that option chosen, and the
-window reopens on the option you used last. Folder exports share one destination.
-Files copies originals; Stacking folder offers Subs, Stacks or Both.
-Open in app verifies copies before opening supported inputs in external software.
-DSS loads file lists. Siril opens the exported folder; other stackers may require
-choosing the inputs. No app starts stacking automatically.
-Choose subframes separately from finished stacks.
-
-## Optional settings
-Matching calibrations are optional; unknown calibration state needs explicit
-inclusion. More options includes separate sessions and rejected-file choices.
-Add Metadata and Create new folder default Off. Metadata adds manifests, session
-details and workflow notes. Existing files stay; collisions get numbered suffixes.
-Inputs are grouped by target, device, camera, filter, geometry and acquisition
-settings. Different calibration sets stay separate.
-
-## Single-stack handoff
-Open with… after export can open one eligible FITS stack in Siril after verification.
-Configure its location and export folder under Settings > Export.
-Cancelled/failed exports do not launch it; launch failures keep completed copies.
-
-Catalogue CSV exports metadata for the selection or the whole repository.
-Formula-like text is prefixed with a tab to avoid spreadsheet execution; numeric
-columns retain their values.
-
-## AstroBin acquisition CSV
-AstroBin CSV previews, copies or saves AstroBin's acquisition table without
-exporting images. Stacking folders add astrobin_acquisition.csv and notes by
-default; clear Add AstroBin acquisition CSV to skip them.
-Values come from the archived originals. Matching subs are combined by date,
-equipment, filter, exposure, binning, gain and ISO. Calibration frames, duplicate
-exposures and rejected files are not counted as integration. Stacks are skipped
-when their subs are included, and overlapping snapshots count once. Each target
-gets its own CSV; recordings use AstroBin's video columns.
-Unknown values stay blank and are listed under Check before uploading. AstroBin
-needs a numeric filter ID: paste each filter's AstroBin page address or number in
-AstroBin filter IDs. Local start times, Bortle, SQM and seeing are not invented.
-
-CALIBRATION AND FITS CONVERSION
-
-Matching labels candidates Accepted, Partial match, Needs review or Rejected.
-Values recorded on both files must agree (device, camera, gain, geometry, binning,
-Bayer, offset, readout, filter). Darks need matching exposure and temperatures within
-3°C. A master missing some headers is a Partial match, used only if nothing matches
-fully, and is listed as an export warning. Each group gets the nearest-night set
-(closest temperature for darks). Seestar/DWARF flats may come from the nearest night
-within 30 days. Processed subs get no extra calibration.
-Dark flats match raw-flat exposure; do not subtract both bias and dark flat.
-
-Convert supported images to FITS is explicit and requires confirmed linear data.
-Selected pages/slices convert physical values without display stretch.
-Originals remain. Cancel keeps verified outputs and removes unfinished copies;
-wait for completion before processing the full set.
-
-METADATA AND OPTIONAL ANALYSIS
-
-## Metadata
-Right-click Edit metadata changes indexed labels, retaining source headers.
-More actions > Re-detect metadata and review compares detected values before
-applying fields; user edits have priority. Choose HDU / page / frame selects a
-container image for supported pixel operations.
-
-## Target identification
-Settings > Sky & solving > Plate solver setup configures ASTAP plus its database
-or Astrometry.net with an API key. Online solving sends detected star coordinates.
-Identify targets solves one representative per selected Light session/group;
-stacks solve individually. Review batch matches before applying.
-Cancel retains completed changes. Recognised names can identify files without a solver.
-
-## Rotation analysis
-Requires timestamped acquisition subs with enough time coverage and site/pointing
-data. Stacks and registered images are unsuitable. Mount labels ending in ? are
-suggestions; confirm them through Edit metadata.
-
-## Image quality
-Repository > Review and analysis > Analyse image quality measures the light frames in
-view (or selected) and fills the QUALITY column with a score from 0 to 100. Each
-sub is compared with similar frames from the same session, so a score says how it
-ranks among its neighbours, not how good the night was. Deep-sky frames use star
-size, star count, roundness, noise and spatial obstruction evidence. Star-poor
-regions with abrupt background boundaries can flag a suspected foreground
-obstruction (trees, branches, roofs or buildings) and reduce the score even if
-the surviving stars are sharp. Smooth gradients alone do not count as
-obstructions. Planetary, lunar and solar stills use edge
-sharpness, fine detail and noise, and also get an EXPOSURE FIT column (Under,
-Good or Over) from the Columns menu. A flag beside a score (for example Clouded,
-Trailed or Clipped) is explained in its tooltip. Hover any score for the reasons.
-Filters > Quality rank keeps the top or weakest frames, frames with flags, or
-frames without a score. Subs inside each session are listed best first when scores
-exist. Linear stacks are scored too, compared only with other stacks of the
-same target. Calibration frames, recordings, JPEG and other non-linear or
-oversized images are not scored; their cell shows - and the tooltip gives the
-reason. Files that turn out to be unsuitable while measuring are set aside and
-skipped on later runs, and the run report lists every file that was set aside
-or could not be read. Scores only suggest; nothing is rejected or deleted for you. Measuring is
-on demand; Settings > General can also measure after each import. Results are
-remembered per file content, so renamed or moved files are not measured twice.
-Re-measure image quality repeats the measurement. 3.2.6 adds spatial measurements;
-Analyse image quality refreshes older measurements when next requested.
-
-OBSERVING TOWN / CITY
-
-Settings > Sky & solving offers an offline town/city search or manual coordinates.
-Place centres approximate your site; use precise coordinates for rotation analysis.
-Location search does not send your position to a network service.
+## Working while imports run
+Settings, filters, grouping and Analytics stay available during network imports.
+Preference changes apply to future imports. Switching repository and conflicting file
+changes wait until active imports finish or pause. Downloads appear in Import as they
+arrive, with an ETA once transfer starts (immediately when a bandwidth limit is set).
 
 DUMP INBOX
+@title Dump folder
+@category Import
+@summary Drop files into the repository's Dump folder and let AstroArchive file them.
+@related IMPORT WORKFLOW
+@keywords dump inbox drop folder
+1. Copy FITS files or telescope folders into the repository's **Dump** folder.
+2. Finish copying before AstroArchive checks it.
+3. Confirm source removal when asked, at startup or when switching repository.
 
-Drop FITS files or telescope folders into the repository's Dump folder.
-Finish copying first. Startup/repository switching check pending FITS and ask you
-to confirm source removal before processing;
-Import > Dump folder also opens or processes it manually.
-Verified science imports and duplicates are removed; calibration originals stay.
-Changed, locked or failed inputs remain for retry. Other files stay. Correct Unknown device IDs through Edit metadata.
-
-REVIEW, EXCLUSIONS AND DELETION
-
-## Review and retry
-Import > Review and repair separates rejection, integrity and transfer issues.
-Import > Reports shows the latest scan report and import report.
-Flagged captures are skipped by default. Retry failed imports uses the filtered scan;
-changed sources need a fresh scan. Completed imports survive cancellation.
-
-## Exclusions and deletion
-Settings > Import can ignore failed filenames and PNG/JPG/JPEG/MP4 inputs; rescan after
-changes. Repository > Clean up offers Delete failed and Purge non-raw files, and
-keeps Delete archive data apart at the bottom. Repository > Maintenance offers
-Fill missing metadata, checksum verification, reindexing and deletion history.
-Fill missing metadata previews additions from original headers, recognised
-filenames and preserved session metadata. Existing values and user edits stay
-in place; conflicting or unsupported fields remain unknown. DSO and solar-system
-targets default to Tele when the camera channel is unknown; this is recorded
-as a target-based default rather than a detected camera marker.
-Recordings (AVI, MP4, MOV, M4V, WMV, MKV and SER) use the Video frame type.
-Their Exposure column shows recording length in seconds. SER uses its measured
-capture timestamp span; files without readable duration show unknown.
-In All Targets, videos appear below still images and above calibrations. Within
-an individual target, videos appear above grouped subs.
-Compact process summaries below the menu show active work and completion results.
-Live imports stay first, followed by other running jobs and completed processes.
-Summaries show elapsed time, ETA, counts and transfer details where available.
-Dismiss hides the summary without canceling work; it stays listed in Activity.
-A manually dismissed process stays hidden when it completes. Other completed
-banners clear after clicks, typing or scrolling elsewhere in the app, or when
-another process completes; their entries remain in Activity. Reading notifications
-keeps the banners visible. Running and paused imports are not cleared automatically.
-Multiple processes scroll only when the available space is filled.
-Activity keeps completed entries, but only processes lasting more than five minutes
-raise an unread count. Opening Activity acknowledges the count; click outside to close.
-Delete files confirms archive-copy removal; source files and shared metadata stay.
-Deletion history blocks reimport of deleted checksums. Allow reimport permits a
-later source import; it does not restore deleted files.
-
-Delete originals is optional and only removes safely removable, verified new or
-restored source captures. Calibration frames (dark, flat, bias, dark-flat and master
-calibrations) always remain on the source/telescope. Duplicates and failed cleanup
-retain originals. An import with deletion enabled asks you to confirm source removal
-before it starts. Cancel leaves source files untouched. Edited imports always keep
-source files and do not offer this deletion option.
-Delete archive data clears indexed captures/managed metadata, keeping Edited,
-source mirrors, unindexed files and deletion history.
-
-CLOUD FOLDERS AND BACKUPS
-
-Use folders exposed in Windows; browser-only storage is unsupported.
-Make cloud inputs available offline and keep the whole repository, including
-.astroarchive and Edited, together. Links are skipped. Use one archive writer.
-Cloud sync can continue after copying; deletions in synced folders propagate.
-Uninstall retains repositories and settings.
-
-INSTALLATION AND UPDATES
-
-Run the installer to install, update or repair. The default location is
-%LOCALAPPDATA%\Programs\AstroArchive and needs no administrator access.
-Settings > Updates checks releases, shows notes and offers Install and restart.
-Automatic checks run after startup and every six hours while open; Activity and
-Guide > About AstroArchive show availability. Disable checks in Settings > Updates.
-Downloads show progress/Cancel in Activity. Failed downloads retain the current app.
-If Windows blocks a new version from starting, setup restores the newest earlier
-version that starts and does not offer the blocked package again.
-Manual installation works offline; Start.exe --no-updates skips automatic checks.
-Uninstall through Windows Installed Apps; user data and codecs remain.
+**Import → Dump folder** also opens or processes it manually.
+- Verified science imports and duplicates are removed from Dump; calibration originals stay.
+- Changed, locked or failed inputs stay for retry. Other files are left alone.
+- Correct Unknown device IDs through **Edit metadata**.
 
 SUPPORTED FILES
-
+@title Supported files
+@category Import
+@summary Which formats AstroArchive reads, previews and exports.
+@related IMAGE PREVIEW AND TABLES | GIF AND VIDEO PREVIEWS
+@keywords format fits xisf tiff png jpeg gif ser avi mp4 raw cr2 cr3 nef arw dng codec cfitsio
 - **FITS/gzip FITS:** supported HDUs, RGB/Bayer and selected cube slices.
 - **TIFF/PNG/XISF:** supported numeric layouts; eligible linear FITS conversion.
 - **JPEG/GIF:** display, GIF animation and original-file export.
@@ -618,61 +275,673 @@ SUPPORTED FILES
 - **AVI/MP4/MOV/M4V/WMV/MKV:** Windows-codec playback and original-file export.
 - **CR2/CR3/NEF/ARW/DNG:** original import/export; preview needs a Windows codec.
 
-Tile-compressed FITS needs optional CFITSIO; Zstandard XISF needs its codec.
-Settings > General > Image compatibility shows availability and the codec folder.
-Scientific decoding has size/layout limits; ordinary exports preserve bytes.
+> Note: Tile-compressed FITS needs the optional CFITSIO; Zstandard XISF needs its codec. **Settings → General → Image compatibility** shows what is available and the codec folder.
 
-APPEARANCE AND ACCESSIBILITY
+Scientific decoding has size and layout limits; ordinary exports keep the original bytes.
 
-Import dialogs include Import preferences…; it opens the Import section while
-keeping the selected folders and files in the dialog.
+LIBRARY WORKFLOW
+@title Find and select captures
+@category Browse and preview
+@summary Search, filter, select and group captures in Repository.
+@walkthrough missing-files
+@related STARS, TAGS AND NOTES | IMAGE PREVIEW AND TABLES | CATALOGUE IDENTITIES
+@keywords search filter find select session group subs condensed counter selection query
+## Find files
+Choose a target or **All Targets**, then search IDs, common names, dates, filenames or
+device details. Words combine to narrow results: `M45 Dwarflab`, `M45 S50 Pro`, `M45 stack`.
+- Quotes or `file:` search literal filename text.
+- **Clear** resets search and filters.
+- `Enter` searches immediately; `Escape` clears the search but keeps table filters.
 
-Settings opens Preferences: General, Import, Export, Sky & solving, Accessibility,
-Updates and Backups. Save preferences applies changes; Cancel retains settings.
-Accessibility adjusts text size, rows, contrast and progress animation.
-Enable Clearer selections for prominent outlines around focused targets, files and
-sub groups. It is off by default; selected entries retain their usual highlight.
-Alt reveals menu access keys; arrows navigate menus; Tab moves between controls.
-The purple selector switches Repository/Edited/Import; Ctrl+1–3 selects a page.
-Settings > General > Language shows AstroArchive in English, Deutsch, Español,
-Français, Italiano, 日本語 or 简体中文, or follows Windows. It applies after a
-restart; this guide stays in English.
+## Search fields
+Use `field:value` to search one field: target, file, path, device, camera, filter, type,
+format, date, mount, notes, status, review, session and hash (Edited also has source).
+- `exposure:>=20 gain:80` compares numbers; exposure is in seconds.
+- `-type:Stack` excludes; `OR` or `|` separates alternatives; `*` and `?` are wildcards.
+- `"wide field"` keeps a phrase together.
 
-The Activity bell beside Buy Me a Coffee (Ctrl+Shift+N) shows progress, ETA, Cancel,
-reports and review actions. Closing it leaves work running; cancellation waits for
-a safe stopping point. ETA covers the current stage. Conflicting changes wait.
-Repository > Last operation… shows timings; Import > Reports shows the latest
-import report.
+> Tip: Files missing from the table? [Find them with the guided fix](walkthrough:missing-files).
 
-KEYBOARD SHORTCUTS
+## Select files
+- `Ctrl`-click toggles; `Shift`-click selects a range.
+- Selections survive target changes. The counter at the top right shows the batch total;
+  click it or press `Escape` to clear.
+- The path strip shows the repository's total size; hover for captures, Edited, Dump
+  and archive data.
 
-- **Main window:** Escape clears the active file selection; Ctrl+F search; Ctrl+I Import; Ctrl+E Export; F1 page help.
-- **Tables:** Left/Right moves through visible columns, switching to targets or preview only at the table edges. Entering a pane activates the current entry (or the first if none is selected); Up/Down changes selection; Ctrl-click toggles; Shift-click selects a range; Shift-click heading adds sort; Delete confirms removal on Repository or Edited.
-- **Preview:** F Fit; plus/minus zoom; Up/Down or Ctrl+Left/Right pans in the sidebar; all arrows pan in a separate preview window; Escape closes.
-- **Guide:** Ctrl+F search; Up/Down topic; Ctrl+C copy; Escape close.
-- **Folder picker:** Alt+D address bar.
+## Condensed subs
+Repeated Lights share a collapsed session row with dates, count, per-sub exposure, total
+integration and filters. Mixed durations show a range; missing values stay unknown.
+Expand the row, or turn off **Repository → Group subs by session**.
+Stacks stay separate. Known counts show Stack (1445); filters still use Stack.
+
+STARS, TAGS AND NOTES
+@title Stars, tags and notes
+@category Browse and preview
+@summary Mark favourite captures and add your own tags and notes.
+@related LIBRARY WORKFLOW
+@keywords star favourite favorite tag note label
+- Press `S`, or right-click **Star**, to star files, a session row or a whole selection.
+- Starred rows carry a subtle tint and a ★ in Repository and Edited.
+- Right-click **Tags and notes…** adds personal tags and a note to the selection.
+- Search `starred`, a tag or note text, or use **Filters → Starred** and **Tag**.
+
+Stars, tags and notes are saved with the repository and never change the files.
+
+IMAGE PREVIEW AND TABLES
+@title Preview and tables
+@category Browse and preview
+@summary Zoom and pan previews, sort tables and choose columns.
+@walkthrough preview-blank
+@related CAPTURE DETAILS AND SKY | GIF AND VIDEO PREVIEWS | SUPPORTED FILES
+@keywords preview zoom pan pinch stretch rotate fit sort column table heading
+Select a file to preview it in the sidebar; open **Preview image** for a larger window.
+On first opening, Repository and Edited select **All Targets** and load its preview;
+returning to a view keeps its selection for this session.
+
+## Zoom and display
+- Scroll or pinch to zoom; drag or use arrows to pan. **Fit** or `F` recenters.
+- `+`/`-` zoom; `Escape` closes the popup.
+- Large previews open in source orientation; **Rotate left/right** changes the display.
+- **Stretch** changes display values only. Scientific images default to Auto per channel;
+  processed and planetary images use Linear.
+
+Sidebars sample still images, normally to 1,400 pixels on the longest edge. Large still
+and SER windows decode native pixels within format limits. Repository's preview pane
+can be resized by dragging its divider.
+
+> Note: Preview never resizes or rewrites source files.
+
+## Tables and target groups
+- Click a heading to sort; click again to reverse. `Shift`-click adds a sort column.
+- Right-click a heading to choose columns; drag to reorder. Each page saves its layout.
+- Targets show the preferred ID first: M31 - Andromeda Galaxy.
+- **All Targets** is bold and shaded; comets share Solar system; Meteors sit above Other targets.
+- All Targets orders merged subs, stacks, ungrouped files, then calibrations.
+- Individual targets: stacks above lights. Sorts apply within each section.
+
+CAPTURE DETAILS AND SKY
+@title Capture details, Stellarium and target circles
+@category Browse and preview
+@summary The buttons above the preview: capture details, Stellarium and catalogue circles.
+@walkthrough sky-wrong
+@related OBSERVING TOWN / CITY | ECLIPSES | IMAGE PREVIEW AND TABLES
+@keywords details moon elevation altitude phase stellarium target circles overlay info sky map constellation planets
+## Capture details (i)
+The **i** button above the preview opens Capture details. With a known capture time and
+observing town, it lists target and Moon elevations, the Moon's phase and illumination,
+and how far the Moon was from the target.
+
+## Stellarium
+The **Stellarium** button opens the selected capture's position and field of view, plus
+its time and place when known.
+- An open Stellarium with the Remote Control plugin is reused; otherwise a new window opens.
+- Without Stellarium installed, the same view opens in Stellarium Web in your browser.
+- Calibration frames and captures without a position leave the button off.
+
+## Target circles
+The target button draws a white circle around every catalogue object in the preview,
+labelled with its ID (M 42, NGC 1977) in a break in the ring.
+- It is off until you switch it on; switching it off in any preview switches it off everywhere.
+- Circles come from the plate solution or the image's WCS header and the built-in catalogue,
+  so nothing leaves your PC.
+- Captures without a full solution offer **Plate solve…**, which identifies the target first.
+
+## Target information
+With no file selected, the sidebar shows the selected target's catalogue overview,
+thumbnail and sources, and deep-sky objects get an interactive sky map. Right-click a
+target and choose **Show target info**, or press `Escape`, to clear the selection.
+- Ambiguous names offer object choices without renaming your files.
+- Click a constellation to show its name; click again or press `Escape` to hide it.
+- Click the Moon, Sun or target marker (or press `Enter` on the map) for Capture details.
+
+## Times and places
+For captures without pointing coordinates, the sky map can calculate approximate Sun,
+Moon and planet positions from the capture time. Videos use their capture timestamp.
+- A time without a timezone uses your observing town's timezone, including daylight saving.
+- A timezone or UTC time in the capture's metadata takes priority.
+- The metadata editor can set a capture's timezone explicitly.
+
+ECLIPSES
+@title Eclipses
+@category Browse and preview
+@summary How solar and lunar eclipse captures are recognised and shown.
+@walkthrough sky-wrong
+@related CAPTURE DETAILS AND SKY | OBSERVING TOWN / CITY
+@keywords eclipse solar lunar sun moon obscuration contact
+Sun and Moon captures taken during an observable eclipse list under **Solar Eclipse** or
+**Lunar Eclipse** in the target list; files and folders are unchanged.
+- Solar captures show obscuration on the Sun in the sky map; Capture details shows the
+  percentage of the Sun obscured.
+- The local Sun and Moon must both be above the horizon for a solar eclipse to show.
+- Lunar eclipse details keep the coverage curve and contact times.
+- Moon-to-target separation is omitted when the target is the Moon.
+
+## When eclipses don't show
+A Sun or Moon predicted below the horizon usually means the target, location, clock or
+timezone is wrong.
+1. Select the captures and right-click **Edit metadata → Capture**.
+2. Set the town / city they were taken in; it can apply to selected sessions.
+3. **Use default location** returns to the file's recorded location, then your observing town.
+
+Sky views, horizon checks and eclipse detection follow the saved choice.
+
+GIF AND VIDEO PREVIEWS
+@title GIF and video previews
+@category Browse and preview
+@summary Playing animations and recordings, and how their metadata is filled in.
+@related SUPPORTED FILES | IMAGE PREVIEW AND TABLES
+@keywords gif video ser avi mp4 playback play pause animation
+- GIF, SER and supported Windows videos offer **Pause/Play** below the preview.
+- Playback pauses when you leave the page.
+- SER previews run at 10 fps, not an inferred capture rate.
+- Other videos need compatible Windows codecs.
+
+GIFs inherit missing acquisition data only from one nearby still with the same stem or a
+processing / progress / animation / timelapse / edit-history suffix. Ambiguous matches
+and conflicting metadata are not guessed.
+
+CATALOGUE IDENTITIES
+@title Target names and aliases
+@category Browse and preview
+@summary How catalogue IDs, common names and aliases resolve to one target.
+@related LIBRARY WORKFLOW | METADATA AND OPTIONAL ANALYSIS
+@keywords alias name messier ngc ic caldwell comet planet meteor rename identity
+Aliases share an identity: M106, NGC4258, UGC7353 and PGC39600 all resolve to M106.
+- Catalogue prefixes matter; M106 differs from NGC106.
+- Spacing, accents and full Messier / Caldwell prefixes are normalised.
+- Conflicting IDs stay unresolved. Rosette / NGC2244 labels use NGC2237.
+- Moon / Lunar and Sun / Solar share labels.
+- Planet names in filenames, such as Jupiter or Saturn, resolve to Solar system targets.
+- Comet designations and names such as NEAT, LINEAR or NEOWISE group in Solar system.
+- Meteor filename labels use Meteor and leave the object ID blank.
+
+## Rename a target
+Right-click a target → **Edit name and aliases** saves custom names in app settings.
+Names can't claim another object's identity. **Use built-in names** resets that object.
+
+OBSERVING TOWN / CITY
+@title Observing town or city
+@category Browse and preview
+@summary Set where you observe so sky details, horizons and eclipses are right.
+@walkthrough sky-wrong
+@related CAPTURE DETAILS AND SKY | ECLIPSES
+@keywords location town city coordinates latitude longitude site timezone
+**Settings → Sky & solving** offers an offline town / city search or manual coordinates.
+- Place centres approximate your site; use precise coordinates for rotation analysis.
+- Location search never sends your position to a network service.
+- Individual captures can have their own town: right-click **Edit metadata → Capture**.
+
+EDITED IMAGES AND WORKING COPIES
+@title Edited images and working copies
+@category Edited images
+@summary Keep processed results and working copies alongside your archive.
+@related EDITED METADATA AND EXPOSURE | STACKING PROJECTS AND SESSIONS
+@keywords edited working copy processed output version editor photoshop
+**Edited** keeps working copies and returned outputs with the repository.
+
+## Add and browse
+- **Add images** copies files; **Import folder** scans, with optional subfolders and a review.
+- Archived originals and byte-identical Edited files are skipped; changed files can
+  become new versions. Unchecked entries leave existing files untouched.
+- RAW and scientific types are grouped first by type; GIFs are last.
+- Selections stay across targets, searches and refreshes; export includes files selected
+  under other targets. Click the counter or press `Escape` to clear.
+
+## Open, export and delete
+- **Export → Open in app…** opens working images in your editor. Save outputs alongside
+  the working copy; **Refresh** finds them. **Settings → Export** stores app defaults.
+- **Export → Files…** copies selected images, verifies their bytes and adds suffixes for
+  name collisions.
+- **Delete files…** confirms removal of Edited copies. Source originals and archived
+  captures stay. Right-click also offers preview, details and file location.
+
+EDITED METADATA AND EXPOSURE
+@title Edited metadata and exposure
+@category Edited images
+@summary How targets, sub counts and total exposure are read and corrected for edited images.
+@related EDITED IMAGES AND WORKING COPIES | METADATA AND OPTIONAL ANALYSIS
+@keywords exposure integration subs count stacked filename metadata starless
+Select images → **Edit metadata** to assign targets, filters, class, exposures, sub counts
+or coordinates. Empty or unchanged fields keep their values; files are not rewritten.
+
+## How filenames are read
+- `120x60s` means 120 subs of 60 seconds; `30s40` means sub exposure / gain.
+- Seestar's `Stacked_36_NGC 7000_5.0s_…` means 36 subs of 5 seconds: 180 seconds in total.
+- DWARF's `stacked-16` is bit depth. For recognised DWARF stacks, total integration divided
+  by the filename's per-sub exposure gives a count only when it is a whole number.
+- Starless and Stars only labels are recognised.
+
+## Which value wins
+- Explicit header totals and manual corrections take precedence.
+- Other unspecified EXPTIME stays reported exposure; it isn't assumed per-sub or total.
+- Unknown or conflicting values need review; the Exposure tooltip shows the evidence.
+- Sub-summary integration counts acquisition subs only, excluding stacks.
+
+Existing records are repaired on opening, without rereading or moving capture files.
+
+STACKING PROJECTS AND SESSIONS
+@title Export and stacking projects
+@category Export and stacking
+@summary Copy originals, prepare stacking folders or open captures in your processing app.
+@walkthrough export-stacking
+@related CALIBRATION AND FITS CONVERSION | ASTROBIN ACQUISITION CSV | EDITED IMAGES AND WORKING COPIES
+@keywords export stack stacking siril dss deep sky stacker pixinsight copy folder subs app catalogue csv
+## Choose an export
+**Export** opens one window. Its header counts the files and names their targets; the list
+on the left chooses what to make:
+- **Files** copies originals.
+- **Stacking folder** prepares **Subs**, **Stacks** or **Both**, grouped for stacking.
+- **Open in app** verifies copies, then opens them in external software.
+- **AstroBin CSV** makes an acquisition table without exporting images.
+- **Catalogue CSV** exports metadata for the selection or the whole repository.
+
+Right-click Export items open the same window with that option chosen, and the window
+reopens on the option you used last. Folder exports share one destination.
+
+> Note: No app starts stacking automatically. DSS loads file lists; Siril opens the exported folder; other stackers may need you to choose the inputs.
+
+## Optional settings
+- Matching calibrations are optional; unknown calibration state needs explicit inclusion.
+- **More options** includes separate sessions and rejected-file choices.
+- **Add Metadata** and **Create new folder** default to Off. Metadata adds manifests,
+  session details and workflow notes.
+- Existing files stay; collisions get numbered suffixes.
+- Inputs are grouped by target, device, camera, filter, geometry and acquisition settings.
+  Different calibration sets stay separate.
+
+## Single-stack handoff
+Open with… after export can open one eligible FITS stack in Siril after verification.
+Set its location and export folder under **Settings → Export**. Cancelled or failed
+exports don't launch it; launch failures keep completed copies.
+
+> Tip: App not found? [Point AstroArchive at it](walkthrough:app-missing).
+
+Catalogue CSV prefixes formula-like text with a tab to avoid spreadsheet execution;
+numeric columns keep their values.
+
+ASTROBIN ACQUISITION CSV
+@title AstroBin acquisition CSV
+@category Export and stacking
+@summary Fill AstroBin's acquisition table from your archived originals.
+@related STACKING PROJECTS AND SESSIONS
+@keywords astrobin csv acquisition upload filter id
+**AstroBin CSV** previews, copies or saves AstroBin's acquisition table without
+exporting images. Stacking folders add `astrobin_acquisition.csv` and notes by default;
+clear **Add AstroBin acquisition CSV** to skip them.
+- Values come from archived originals. Matching subs are combined by date, equipment,
+  filter, exposure, binning, gain and ISO.
+- Calibration frames, duplicate exposures and rejected files don't count as integration.
+- Stacks are skipped when their subs are included; overlapping snapshots count once.
+- Each target gets its own CSV; recordings use AstroBin's video columns.
+
+## Before uploading
+Unknown values stay blank and are listed under **Check before uploading**.
+- AstroBin needs a numeric filter ID: paste each filter's AstroBin page address or number
+  in **AstroBin filter IDs**.
+- Local start times, Bortle, SQM and seeing are never invented.
+
+CALIBRATION AND FITS CONVERSION
+@title Calibration matching and FITS conversion
+@category Export and stacking
+@summary How darks, flats and bias frames are matched, and converting images to FITS.
+@related STACKING PROJECTS AND SESSIONS | FRAME TYPES AND GLOSSARY
+@keywords calibration dark flat bias master match temperature convert fits linear
+## Calibration matching
+Candidates are labelled **Accepted**, **Partial match**, **Needs review** or **Rejected**.
+- Values recorded on both files must agree: device, camera, gain, geometry, binning,
+  Bayer, offset, readout and filter.
+- Darks need matching exposure and temperatures within 3°C.
+- A master missing some headers is a Partial match, used only if nothing matches fully,
+  and is listed as an export warning.
+- Each group gets the nearest-night set (closest temperature for darks).
+- Seestar and DWARF flats may come from the nearest night within 30 days.
+- Processed subs get no extra calibration.
+
+> Note: Dark flats match raw-flat exposure; don't subtract both bias and dark flat.
+
+## Convert to FITS
+**Convert supported images to FITS** is explicit and needs confirmed linear data.
+- Selected pages and slices convert physical values without display stretch.
+- Originals stay. Cancel keeps verified outputs and removes unfinished copies.
+
+TARGET CARDS
+@title Target cards
+@category Export and stacking
+@summary Make shareable cards and slideshows of your best images and their statistics.
+@related ANALYTICS
+@keywords card share social instagram post image slideshow video
+Right-click a target → **Create target card…** makes a shareable image with your best
+image of the target, its integration, light frames, nights and filters.
+1. Choose an image: linked Edited images come first, then starred and newer Edited
+   images, then stacks and lights.
+2. Drag to move it, `Ctrl`+scroll to zoom, **Rotate left/right** to turn it, or use
+   **Adjust image position**.
+3. Add an optional short description under the target name.
+4. Pick a layout for posts, stories or video, Dark or Light, a resolution (Standard,
+   High 2x or Sharing) and an optional credit line.
+5. **Save** PNG / JPEG, or **Copy**.
+
+Each target remembers its image, framing and description. Cards show the AstroArchive
+logo and website.
+
+## Several cards at once
+**More cards & video…** opens **Analytics → Target cards**: cards for your top 3–25
+targets (by integration or light frames) or targets you choose, saved as one image, a
+ZIP of images, or an MP4 / GIF slideshow. **Adjust card…** changes one card's image,
+zoom, position and description; the description also shows in videos.
+
+ANALYTICS
+@title Analytics charts and documents
+@category Export and stacking
+@summary Chart your imaging history and export it as images, documents or video.
+@related TARGET CARDS
+@keywords analytics chart graph statistics timeline integration pdf svg png mp4 gif social
+**Repository → Analytics** offers six branded charts: Targets photographed, Imaging
+timeline, Time per target, Time per telescope, Filter mix and Exposure lengths.
+
+## The window
+- **Left:** the chart list. Select a chart, **Combined document**, or **Target cards**.
+- **Middle:** the preview. **Hide options** gives it the full width.
+- **Right:** options for the selected item.
+
+Analytics reopens on the chart you viewed last.
+
+## Scope
+Scope starts with the entire repository, independently of browsing filters or selection.
+Expand **Scope** to choose a telescope, inclusive dates, or whether to include rejected
+light frames. **Reset scope** restores the entire repository.
+
+## What counts as time
+- Time is recorded light-frame integration, not elapsed observing time.
+- Calibrations are excluded.
+- A stack counts only when no sub of its target was saved in the same session or on the
+  same date, so it never doubles those subs.
+- Missing exposures and dates stay unknown and are reported with the chart; undated
+  frames are excluded only when a date range is set.
+
+## Options
+- **Output:** Images & documents (PNG, JPEG, PDF, SVG) or Video & GIF (MP4, GIF).
+- **This chart:** chart type, order (Largest first, Smallest first or A–Z) and your own
+  title and subtitle. **Reset this chart** restores its defaults.
+- **Charts in the document:** tick the charts for the combined document; at least one stays.
+- **Document:** layout, Dark or Light, colour palette and label. Palettes are
+  AstroArchive, Nebula, Aurora and Colour-blind safe (Okabe-Ito).
+- **Export:** format, then **Export options** for resolution, video timing and size.
+
+Your choices are remembered. **Reset all options** restores defaults without changing
+scope. `Ctrl+E` exports what is shown; `Ctrl+Shift+E` exports the combined document.
+
+## Layouts and resolutions
+Documents default to Dark and Landscape. Social layouts rearrange charts and branding:
+- **Vertical 9:16:** 1080 × 1920, for TikTok, Reels and Stories.
+- **Portrait 4:5:** 1080 × 1350, for Instagram feed posts.
+- **Square 1:1:** 1080 × 1080, for square posts.
+- **Widescreen 16:9:** 1920 × 1080, for video and presentations.
+- **Pinterest 2:3:** 1000 × 1500, for pins.
+
+Choose PNG or JPEG at 300 dpi for print or 150 dpi for screen. PDF keeps charts and
+lettering as vectors; SVG embeds the logo and stays scalable. PDF uses one page per chart;
+image and SVG exports arrange pages on one sheet.
+- Target and filter shares show the largest seven categories plus Other.
+- Time rankings continue onto extra pages so every target and telescope is included.
+
+> Tip: Very large collections may need 150 dpi, PDF or SVG. Exports never change the archive or capture files.
+
+METADATA AND OPTIONAL ANALYSIS
+@title Metadata and target identification
+@category Analysis and metadata
+@summary Edit capture details, re-detect metadata, plate solve targets and analyse rotation.
+@walkthrough identify-targets
+@related IMAGE QUALITY | CATALOGUE IDENTITIES | EDITED METADATA AND EXPOSURE
+@keywords metadata edit plate solve astap astrometry identify target unknown rotation mount
+## Edit metadata
+Right-click **Edit metadata** to change indexed labels; source headers are kept.
+- **More actions → Re-detect metadata and review** compares detected values before
+  applying them; your own edits have priority.
+- **Choose HDU / page / frame** selects the image inside a container file.
+
+## Identify targets
+1. Set up a solver in **Settings → Sky & solving → Plate solver setup**: ASTAP with its
+   database, or Astrometry.net with an API key.
+2. Select captures and choose **Identify targets…**.
+3. Review the matches before applying them.
+
+- One representative is solved per selected Light session or group; stacks solve individually.
+- Online solving sends detected star coordinates, not your image.
+- Cancel keeps completed changes. Recognised names can identify files without a solver.
+
+## Rotation analysis
+Needs timestamped acquisition subs with enough time coverage and site / pointing data.
+Stacks and registered images are unsuitable. Mount labels ending in ? are suggestions;
+confirm them through **Edit metadata**.
+
+IMAGE QUALITY
+@title Image quality scores
+@category Analysis and metadata
+@summary Score light frames 0–100 against their neighbours and spot clouds, trails and obstructions.
+@related METADATA AND OPTIONAL ANALYSIS
+@keywords quality score rank fwhm stars clouds trailed clipped obstruction trees exposure fit
+**Repository → Review and analysis → Analyse image quality** measures the light frames in
+view (or selected) and fills the **QUALITY** column with a score from 0 to 100.
+
+## What a score means
+Each sub is compared with similar frames from the same session, so a score says how it
+ranks among its neighbours, not how good the night was.
+- **Deep-sky:** star size, star count, roundness, noise and obstruction evidence.
+- **Planetary, lunar and solar:** edge sharpness, fine detail and noise, plus an
+  **EXPOSURE FIT** column (Under, Good or Over) from the Columns menu.
+- **Linear stacks** are compared only with other stacks of the same target.
+
+Star-poor regions with abrupt background edges can flag a suspected foreground
+obstruction (trees, roofs, buildings) even if the remaining stars are sharp. Smooth
+gradients alone don't count.
+
+## Reading the results
+- A flag beside a score (Clouded, Trailed, Clipped…) is explained in its tooltip.
+- Hover any score for the reasons.
+- **Filters → Quality rank** keeps the top or weakest frames, flagged frames or unscored ones.
+- Subs inside each session are listed best first when scores exist.
+
+> Note: Scores only suggest. Nothing is rejected or deleted for you.
+
+## What isn't scored
+Calibration frames, recordings, JPEG and other non-linear or oversized images show `-`;
+the tooltip gives the reason. Files found unsuitable while measuring are set aside and
+listed in the run report.
+
+Measuring is on demand, or after each import via **Settings → General**. Results are
+remembered per file content, so renamed or moved files aren't measured twice.
+**Re-measure image quality** repeats it; older results refresh when next requested.
+
+ARCHIVE SAFETY AND BACKUPS
+@title Backups and protection
+@category Keep your archive safe
+@summary Back up to another drive, restore, schedule backups and protect originals.
+@walkthrough backup
+@related CLOUD FOLDERS AND BACKUPS | REVIEW, EXCLUSIONS AND DELETION
+@keywords backup restore zip incremental schedule protect originals ntfs copy drive
+## Create a backup
+1. Choose **Repository → Back up archive…**.
+2. Pick a folder or ZIP outside the archive, ideally on a separate drive.
+3. Close other programs that write to the archive while it runs.
+
+Backups copy images, Edited and the current database, and verify every file.
+**Cancel** removes the unfinished backup and keeps earlier ones.
+
+## Restore
+**Settings → Backups → Restore a backup…** verifies every file while restoring into a new
+folder, then offers to open the restored archive. Restore.txt and backup.json in each
+backup also explain the steps and hold checksums.
+
+## Incremental and automatic backups
+- The first backup in a folder is complete. Later folder backups share unchanged files
+  with the previous one (NTFS hard links), so each stays complete on its own.
+- Later ZIPs hold only what changed and restore through the earlier ZIPs they need.
+- After a backup, AstroArchive offers to repeat it daily, weekly or monthly; change this
+  in **Settings → Backups**. **Keep** removes older backups but never one still needed.
+- If the backup drive is missing when a backup is due, Activity reminds you.
+
+## Protect originals
+**Settings → Backups → Protect originals** prevents accidental deletion or renaming on
+local NTFS drives. Edited, Dump and metadata stay writable.
+
+> Important: Protection is not a backup. Turn it off before moving the archive in Explorer; the Windows owner can still change permissions.
+
+REVIEW, EXCLUSIONS AND DELETION
+@title Review, clean-up and deletion
+@category Keep your archive safe
+@summary Retry failed imports, exclude unwanted files and delete safely.
+@related ACTIVITY AND PROGRESS | ARCHIVE SAFETY AND BACKUPS | IMPORT WORKFLOW
+@keywords review repair retry failed flagged delete purge clean exclude ignore originals checksum verify
+## Review and retry
+- **Import → Review and repair** separates rejection, integrity and transfer issues.
+- **Import → Reports** shows the latest scan and import reports.
+- Flagged captures are skipped by default. **Retry failed imports** uses the filtered scan;
+  changed sources need a fresh scan. Completed imports survive cancellation.
+
+## Exclusions
+**Settings → Import** can ignore failed filenames and PNG / JPG / JPEG / MP4 inputs;
+rescan after changing them.
+
+## Maintenance and clean-up
+- **Repository → Maintenance:** Fill missing metadata, checksum verification, reindexing
+  and deletion history.
+- **Repository → Clean up:** Delete failed and Purge non-raw files, with Delete archive
+  data kept apart at the bottom.
+
+Fill missing metadata previews additions from original headers, recognised filenames
+and session metadata. Existing values and your edits stay; conflicting or unsupported
+fields stay unknown. Deep-sky and solar-system targets default to Tele when the camera
+channel is unknown, recorded as a target-based default.
+
+## Deleting files
+- **Delete files** confirms archive-copy removal; source files and shared metadata stay.
+- Deletion history blocks reimport of deleted checksums. **Allow reimport** permits a
+  later import; it doesn't restore deleted files.
+- **Delete archive data** clears indexed captures and managed metadata, keeping Edited,
+  source mirrors, unindexed files and deletion history.
+
+## Deleting originals after import
+**Delete originals** is optional and only removes verified new or restored source captures.
+- Calibration frames (dark, flat, bias, dark-flat and masters) always stay on the source.
+- Duplicates and failed clean-ups keep their originals.
+- You confirm source removal before the import starts; **Cancel** leaves sources untouched.
+- Edited imports always keep source files.
+
+## Recordings
+AVI, MP4, MOV, M4V, WMV, MKV and SER use the Video frame type. Their Exposure column
+shows recording length in seconds; SER uses its capture timestamp span. In All Targets,
+videos appear below still images and above calibrations; within a target, above grouped subs.
+
+ACTIVITY AND PROGRESS
+@title Activity and progress
+@category Keep your archive safe
+@summary Follow running work, find reports, and pause or cancel jobs.
+@related PAUSING AND RESUMING IMPORTS | REVIEW, EXCLUSIONS AND DELETION
+@keywords activity bell progress eta notification banner summary report cancel running
+The **Activity** bell beside Buy Me a Coffee (`Ctrl+Shift+N`) shows progress, ETA,
+**Cancel**, reports and review actions.
+- Closing Activity leaves work running; cancelling waits for a safe stopping point.
+- ETA covers the current stage. Conflicting changes wait their turn.
+- Only processes lasting more than five minutes raise an unread count.
+
+## Summaries below the menu
+Compact summaries show active work and results: live imports first, then other running
+jobs, then completed ones, with elapsed time, ETA, counts and transfer details.
+- **Dismiss** hides a summary without cancelling the work; it stays in Activity.
+- Completed summaries clear after you click, type or scroll elsewhere, or when another
+  process completes. Running and paused imports are never cleared automatically.
+
+**Repository → Last operation…** shows timings; **Import → Reports** shows the latest import report.
+
+CLOUD FOLDERS AND BACKUPS
+@title Cloud folders
+@category Keep your archive safe
+@summary Keeping an archive or imports in OneDrive, Dropbox or similar folders.
+@related ARCHIVE SAFETY AND BACKUPS
+@keywords cloud onedrive dropbox google drive sync offline
+- Use folders that appear in Windows; browser-only storage isn't supported.
+- Make cloud inputs available offline.
+- Keep the whole repository together, including `.astroarchive` and Edited.
+- Links are skipped. Use only one program writing to the archive.
+
+> Important: Cloud sync can continue after copying, and deletions in synced folders propagate to other devices.
+
+INSTALLATION AND UPDATES
+@title Installation and updates
+@category Keep your archive safe
+@summary Install, update, repair or uninstall AstroArchive.
+@related REPORTING A PROBLEM
+@keywords install update upgrade repair uninstall version setup offline
+Run the installer to install, update or repair. The default location is
+`%LOCALAPPDATA%\Programs\AstroArchive` and needs no administrator access.
+- **Settings → Updates** checks releases, shows notes and offers **Install and restart**.
+- Automatic checks run after startup and every six hours; Activity and
+  **Guide → About AstroArchive** show what's available. Turn checks off in **Settings → Updates**.
+- Downloads show progress and **Cancel** in Activity. A failed download keeps the current app.
+- If Windows blocks a new version from starting, setup restores the newest earlier version
+  that starts and doesn't offer the blocked package again.
+- Manual installation works offline; `Start.exe --no-updates` skips automatic checks.
+- Uninstall from Windows Installed Apps; your repositories, settings and codecs stay.
 
 TROUBLESHOOTING
+@title Troubleshooting
+@category Fix a problem
+@summary Quick answers to common problems, with guided fixes that walk you through the app.
+@related REPORTING A PROBLEM | INSTALLATION AND UPDATES
+@keywords problem error broken not working disabled missing fix help stuck
+Many of these have a guided fix that highlights each control on screen and checks your
+setup as you go.
 
-- **Import disabled:** choose a repository/source/device, scan and check eligible rows.
-- **No rows:** clear search/filters, choose All Targets and expand session summaries.
-- **USB missing:** check its Windows volume, Browse/save the source and refresh devices.
-- **Import failure:** read the report; check paths, space and offline cloud availability.
-- **Preview unavailable:** check format/decoder limits and required Windows/native codecs.
-- **Application missing:** Settings > Export > Application locations; select its GUI executable.
-- **Unknown metadata:** inspect Image details; ambiguous values are not inferred.
-- **Unknown exposure:** use the Exposure tooltip; EXPTIME or filename gain alone is not total integration.
-- **Analysis uncertain:** check solver, site/time and camera/processing metadata.
-- **Windows policy block:** inspect signing status and Windows Security; managed policies may need publisher approval.
+- **Import disabled:** choose a repository, source and device, scan, and check for ready rows. [Guided fix](walkthrough:import-disabled)
+- **No rows:** clear search and filters, choose All Targets and expand session rows. [Guided fix](walkthrough:missing-files)
+- **USB missing:** check the Windows drive, refresh devices, or Browse to it. [Guided fix](walkthrough:usb-telescope)
+- **Import failure:** read the import report; check paths, free space and cloud files being available offline.
+- **Preview unavailable:** check format and decoder limits and any needed Windows codecs. [Guided fix](walkthrough:preview-blank)
+- **Application missing:** set its location in **Settings → Export → Application locations**. [Guided fix](walkthrough:app-missing)
+- **Unknown metadata:** inspect Image details; ambiguous values aren't guessed. [Identify targets](walkthrough:identify-targets)
+- **Unknown exposure:** check the Exposure tooltip; EXPTIME or a filename gain alone isn't total integration.
+- **Analysis uncertain:** check the solver, site and time, and camera / processing metadata. [Guided fix](walkthrough:sky-wrong)
+- **Windows policy block:** check signing status and Windows Security; managed PCs may need publisher approval.
 
-Setup log: %TEMP%\AstroArchive-setup-error.txt.
-Update log: %LOCALAPPDATA%\AstroArchive\updates\last-error.txt.
-Report the version and exact error: https://github.com/arijguest/AstroArchive/issues.
+## Logs
+- Setup log: `%TEMP%\AstroArchive-setup-error.txt`
+- Update log: `%LOCALAPPDATA%\AstroArchive\updates\last-error.txt`
+- App log: `%LOCALAPPDATA%\AstroArchive\logs\astroarchive.log`
+
+> Tip: Still stuck? [Report a problem](topic:REPORTING A PROBLEM): AstroArchive gathers these logs for you.
+
+REPORTING A PROBLEM
+@title Report a problem
+@category Fix a problem
+@summary Send a bug report with your system details and recent log already filled in.
+@related TROUBLESHOOTING
+@keywords bug report issue github log crash error diagnostics feedback
+1. Choose **Guide → Report a problem…**, or **Report a problem** at the bottom of this window.
+2. Describe what you were doing and what you expected.
+3. Tick the details to include and read the preview.
+4. Choose **Open GitHub issue**, check the draft in your browser and submit it.
+
+## What can be included
+- System details: AstroArchive and Windows versions, language and display settings.
+- The error, when one was caught.
+- Recent activity and the app log, so the lead-up to the problem is visible.
+- The last import report, and any installer or updater errors.
+
+> Note: Folder paths are replaced with [local path]. Images and archive files are never attached, and nothing is sent until you submit the issue on GitHub.
+
+Long reports are shortened to fit; the full report is copied to your clipboard so you
+can paste it into the issue. **Copy report** and **Save report…** keep a copy for yourself.
 
 FRAME TYPES AND GLOSSARY
-
+@title Frame types and glossary
+@category Reference
+@summary What lights, stacks, darks, flats and other terms mean in AstroArchive.
+@related CALIBRATION AND FITS CONVERSION
+@keywords glossary terms definition light sub stack dark flat bias master session device id plate solving
 - **Light / sub:** one acquisition exposure.
-- **Stack:** combined/registered result, separate from its source subs.
+- **Stack:** combined / registered result, separate from its source subs.
 - **Dark / Flat / Bias:** calibration exposures for sensor noise, illumination or offset.
 - **Master calibration:** combined dark, flat or bias.
 - **Starless / Stars only:** edited image layers.
@@ -682,25 +951,25 @@ FRAME TYPES AND GLOSSARY
 - **Repository / Edited:** archived originals / working copies and outputs.
 
 CATALOGUE CREDITS
+@title Catalogue credits
+@category Reference
+@summary The open catalogues AstroArchive is built on.
+@related LICENSING
+@keywords openngc geonames d3-celestial credits catalogue license
+- OpenNGC by Mattia Verga and contributors: CC BY-SA 4.0.
+- GeoNames offline places: CC BY 4.0.
+- D3-Celestial constellation figures by Olaf Frohn: BSD 3-clause.
 
-OpenNGC by Mattia Verga and contributors: CC BY-SA 4.0.
-GeoNames offline places: CC BY 4.0.
-D3-Celestial constellation figures by Olaf Frohn: BSD 3-clause.
 See Catalogue_Notice.md, City_Catalogue_Notice.md and Sky_Catalogue_Notice.md.
 
 LICENSING
-
+@title Licensing
+@category Reference
+@summary How AstroArchive may be used and shared.
+@related CATALOGUE CREDITS
+@keywords license licence polyform noncommercial commercial
 Source-available under PolyForm Noncommercial 1.0.0.
-Commercial use requires separate permission from Ari J. Guest.
-Your images and outputs remain yours; third-party data keeps its own licences.
+- Commercial use requires separate permission from Ari J. Guest.
+- Your images and outputs remain yours; third-party data keeps its own licences.
+
 See LICENSE and LICENSING.md for terms and required notices.
-
-SIMPLIFIED NAVIGATION
-
-Import/Export handle files; Repository holds sessions, review, maintenance and
-diagnostics. Settings opens Preferences. Guide offers help, walkthrough and About.
-Right-click files for preview, metadata, export, working copies or deletion.
-Short hover hints explain less obvious menu actions.
-
-Very dark linear previews receive a bounded display-only brightness boost.
-Normally exposed previews, source files and scientific exports retain their values.

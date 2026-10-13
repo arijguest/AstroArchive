@@ -130,7 +130,7 @@ namespace AstroArchive {
                     tour.Show(); PumpPopupLayout();
                     for (int index = 0; index < steps.Length; index++) { tour.SetStep(index); PumpPopupLayout(); if (tour.StepIndex != index || tour.Heading.Text != steps[index].Title) throw new Exception("Walkthrough lost a step.");CheckHelpArticle(tour.Body);if(!tour.Body.Document.Blocks.OfType<System.Windows.Documents.List>().Any()||tour.Heading.FontSize<=tour.Body.Document.FontSize||tour.Count.FontSize>=tour.Body.Document.FontSize)throw new Exception("Walkthrough lost its lists or text hierarchy"); }
                     tour.SetStep(0); tour.Try.RaiseEvent(new RoutedEventArgs(Button.ClickEvent)); PumpPopupLayout();
-                    if (!C("PageSelector").IsDropDownOpen || walkthroughHighlight == null || walkthroughHighlight.AdornedElement != C("PageSelector")) throw new Exception("Walkthrough did not highlight and open the page selector.");
+                    if (!C("PageSelector").IsDropDownOpen || walkthroughHighlight == null || walkthroughHighlight.Target != C("PageSelector")) throw new Exception("Walkthrough did not highlight and open the page selector.");
                     tour.SetStep(1); tour.Back.RaiseEvent(new RoutedEventArgs(Button.ClickEvent)); if (tour.StepIndex != 0) throw new Exception("Walkthrough Back did not return.");
                     if (T("SourceBox").Text != originalSource || cancel != null) throw new Exception("Walkthrough performed an import or changed the source.");
                     foreach (var button in new[] { tour.Next, tour.Back, tour.Try }) {
@@ -151,6 +151,25 @@ namespace AstroArchive {
                     walkthrough.Close(); PumpPopupLayout();
                     if (walkthroughHighlight != null || walkthroughHighlightLayer != null || (skippedLayer.GetAdorners(skippedHighlight.AdornedElement) ?? new System.Windows.Documents.Adorner[0]).Contains(skippedHighlight)) throw new Exception("Dismissed walkthrough left a highlight behind.");
                 } finally { tour.Close(); RemoveWalkthroughHighlight(); }
+                File.WriteAllText(Path.Combine(output,"ui-current-stage.txt"),"SmokeNavigation: guided walkthroughs");
+                foreach (var guide in WalkthroughCatalog.All()) {
+                    StartWalkthrough(guide.Id); var shown = walkthrough;
+                    try {
+                        if (shown == null || shown.Walkthrough.Id != guide.Id) throw new Exception("Guided walkthrough did not open: " + guide.Id);
+                        PumpPopupLayout();
+                        for (int index = 0; index < guide.Steps.Length; index++) {
+                            shown.SetStep(index); PumpPopupLayout(); var step = guide.Steps[index];
+                            if (WalkthroughTarget(step.Target) == null) throw new Exception("Walkthrough target missing: " + guide.Id + " / " + step.Target);
+                            if (step.Page >= 0 && tabs.SelectedIndex != step.Page) throw new Exception("Walkthrough did not show its page: " + guide.Id + " / " + step.Title);
+                            if ((step.Check != null) != (shown.StatusPanel.Visibility == Visibility.Visible) || step.Check != null && shown.Status.Text.Length == 0) throw new Exception("Walkthrough setup check missing: " + guide.Id + " / " + step.Title);
+                            if (walkthroughHighlight != null && walkthroughHighlight.Target != WalkthroughTarget(step.Target)) throw new Exception("Walkthrough spotlighted the wrong control: " + guide.Id + " / " + step.Title);
+                            if (step.Action != null && shown.Try.IsEnabled != WalkthroughActionAvailable(step)) throw new Exception("Walkthrough action availability is wrong: " + guide.Id + " / " + step.Title);
+                            if (T("SourceBox").Text != originalSource || cancel != null) throw new Exception("Guided walkthrough changed the source or started work: " + guide.Id);
+                        }
+                        CapturePopup(shown, Path.Combine(output, "AstroArchive_Guide_" + guide.Id + ".png"));
+                    } finally { if (walkthrough != null) walkthrough.Close(); PumpPopupLayout(); }
+                    if (walkthrough != null || walkthroughHighlight != null) throw new Exception("Guided walkthrough left a highlight behind: " + guide.Id);
+                }
                 if (L("RateLabel").IsVisible || ((ProgressBar)Window.FindName("ProgressBar")).IsVisible) throw new Exception("Idle status bar still displays processing indicators.");
             } finally { settings = Util.Deserialize<Settings>(saved); ApplyAppearance(); GoToPage(page); UpdateNavigationState(); }
         }

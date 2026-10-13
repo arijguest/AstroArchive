@@ -212,7 +212,7 @@ namespace AstroArchive {
             menu.Items.Add(MenuAction("Last operation…",ShowPerformanceTable,true,false));
         }
         void BuildGuideNavigation(MenuItem menu) {
-            menu.Items.Add(MenuAction("Help…",()=>OpenGuide(CurrentHelpTopic()),true,false));menu.Items.Add(MenuAction("Interactive walkthrough…",StartWalkthrough,!RepositoryOperationBlocked));menu.Items.Add(new Separator());menu.Items.Add(MenuAction("About AstroArchive…",About,true,false));
+            BuildGuideItems(menu.Items);
         }
         // Each table shows the folder behind it in a centred bar; clicking opens that folder.
         void UpdatePathStrips() {
