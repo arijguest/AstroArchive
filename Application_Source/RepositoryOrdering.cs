@@ -32,8 +32,10 @@ namespace AstroArchive {
    if(sessionSummaries){
     var spots=new List<int>();for(int i=0;i<ordered.Count;i++)if(grouped(ordered[i]))spots.Add(i);
     if(spots.Count>1){
-     var groups=spots.Select(i=>ordered[i]).GroupBy(membership.Get).Select(g=>g.ToList()).ToList();
-     var arranged=groups.Where(g=>g.All(f=>f.IsStarred)).Concat(groups.Where(g=>!g.All(f=>f.IsStarred))).SelectMany(g=>g).ToList();
+     // Partition in place so each frame keeps its sorted position relative to the others; regrouping by session would break the table's sort order.
+     var full=new HashSet<string>(spots.Select(i=>ordered[i]).GroupBy(membership.Get).Where(g=>g.All(f=>f.IsStarred)).Select(g=>g.Key));
+     var members=spots.Select(i=>ordered[i]).ToList();
+     var arranged=members.Where(f=>full.Contains(membership.Get(f))).Concat(members.Where(f=>!full.Contains(membership.Get(f)))).ToList();
      for(int k=0;k<spots.Count;k++)ordered[spots[k]]=arranged[k];
     }
    }
