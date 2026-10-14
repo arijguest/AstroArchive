@@ -161,7 +161,7 @@ captures stay for review.
 
 ## Manage telescope profiles
 - **Import → Telescopes** saves, renames or recovers profiles from archive data.
-- **Settings → Telescopes** changes a saved telescope's model and camera, removes it, or recovers profiles from the repository.
+- **Settings → Telescopes** renames a saved telescope (updating its captures), changes its model and camera, removes it, or recovers profiles.
 - **Refresh USB devices** looks again for telescopes connected by USB.
 - Recovered profiles need a source association before USB import.
 - A physical telescope ID identifies one device; several can share a model.
