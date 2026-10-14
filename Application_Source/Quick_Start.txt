@@ -106,7 +106,7 @@ IMPORT WORKFLOW
 ## Scan and import
 1. Choose a saved telescope, or **Browse** to a capture folder.
 2. Leave model and camera on **Auto** unless an override is needed.
-3. **Scan folder** lists what can be imported. Nothing is copied yet.
+3. **Scan folder** (or **Import → Scan folder…**, which asks for the folder first) lists what can be imported. Nothing is copied yet.
 4. Check the **Status** and **Review** columns, then **Import**.
 
 Import copies the eligible captures in the filtered view and verifies each copy.
@@ -161,6 +161,7 @@ captures stay for review.
 
 ## Manage telescope profiles
 - **Import → Telescopes** saves, renames or recovers profiles from archive data.
+- **Settings → Telescopes** changes a saved telescope's model and camera, removes it, or recovers profiles from the repository.
 - **Refresh USB devices** looks again for telescopes connected by USB.
 - Recovered profiles need a source association before USB import.
 - A physical telescope ID identifies one device; several can share a model.

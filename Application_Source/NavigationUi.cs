@@ -162,12 +162,14 @@ namespace AstroArchive {
         }
         // Import: live status, telescope sources, the scan-and-import flow, grouped tools, then preferences.
         void BuildImportNavigation(MenuItem menu) {
+            // Scan folder… leads the menu: choose a folder, then scan it for importable files.
+            menu.Items.Add(MenuAction("Scan folder…",()=>{GoToPage(1);string chosen=Folder("Choose a folder to scan",T("SourceBox").Text);if(chosen==null)return;T("SourceBox").Text=chosen;((CheckBox)Window.FindName("DeleteOriginalsCheck")).IsChecked=false;Scan();},repo!=null));
+            menu.Items.Add(new Separator());
             if(remoteSessions.Count>0)menu.Items.Add(MenuAction("Live import underway…",OpenActivity,true,false));
             foreach(var telescope in usbTelescopes){var device=telescope;menu.Items.Add(MenuAction(UsbImportLabel(device),()=>{GoToPage(1);UploadUsb(device);},repo!=null&&!RepositoryOperationBlocked&&!usbImportPicking));}
             menu.Items.Add(MenuAction("Connect over network…",()=>{GoToPage(1);OpenRemoteImport();},repo!=null&&!NetworkImportBlocked,false));
             menu.Items.Add(MenuAction("Watch a capture folder…",()=>{GoToPage(1);OpenLocalWatch();},repo!=null&&!NetworkImportBlocked,false));
             menu.Items.Add(new Separator());
-            menu.Items.Add(ButtonAction("Scan source", "ScanButton", 1));
             menu.Items.Add(MenuAction("Full rescan",()=>{if(!ConfirmLongProcess("FullRescan","Full rescan may take a long time","A full rescan re-reads every file in your source folder and checks it against the archive."+ArchiveSizeNote()+" On a large archive this can take a long time."))return;GoToPage(1);Scan(true);},repo!=null));
             menu.Items.Add(ButtonAction("Import ready files", "ImportButton", 1));
             menu.Items.Add(new Separator());
