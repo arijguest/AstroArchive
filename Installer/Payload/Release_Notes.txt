@@ -1,28 +1,30 @@
-AstroArchive 3.3.0
-Package 3.3.0.1
+AstroArchive 3.3.1
+Package 3.3.1.1
 
-Covers everything since 3.2.8.1.
+Covers everything since 3.3.0.1.
 
-3D orbit viewer
-The orbit view is redrawn in the sky globe's style: a constellation backdrop that turns with the camera, a ringed reference plane with distance rings and spokes, a solid orbit above the plane and a dashed one below it, ascending and descending nodes, perihelion and aphelion, a scale bar and round icon buttons (Reset, Zoom, Top view, Orbit plane, Expand). Camera moves ease unless Reduce motion is on, and labels are placed by priority so they no longer collide.
-It now simply shows where the target is now: the last stretch of its orbit is drawn bold and ends in a ringed marker with an arrow along the path. Small rings show where the target was on each date you imaged it in your archive; rings that fall close together are drawn once with a count. Click a ring to see the date it was taken. Play, the date timeline, the date box, the framing chips, the axis triad, the stray mid-orbit arrow and the notes below the picture are gone. Orbit credits are under SOURCES.
+Exports
+The AstroArchive title and logo on Analytics exports are 15% smaller and stay centred on each other, and the "01 / 06" counter at the top right is gone (multi-page charts say "Part 1 of 2" instead). Widescreen exports use the full width, and tall layouts such as Pinterest and Vertical grow the charts to fill the page. Automatic card descriptions are now on by default and capitalised ("Spiral Galaxy · Magnitude 3.4"), with better comet descriptions covering type, orbit class, period and perihelion.
 
-Target information
-Open in Stellarium and Refresh information (now a download icon, to the right of Stellarium) are small icons beside the details line instead of a line of their own. Every image credit now sits in the Credits dropdown rather than under the picture. Other catalogue IDs (NGC, IC, UGC and similar) show under the object line, or beside the main ID when there is only one.
+Image quality
+Stacks and solar images are no longer scored for quality, and any earlier scores for them are ignored. Re-measure image quality is gone: Analyse image quality now measures again only when the number of frames it compares against has changed.
 
-Work during long processes
-Image quality scoring and plate solving run beside importing, exporting and Settings. A background process registry with progress, ETA and a pulsing bell shows what is running, and the archive stays safe to use alongside it.
+Menus and activity
+Export > Metadata groups the AstroBin and Catalogue exports and opens both on hover. Reports moved from the Import menu to the Activity panel, beside Clear completed. Activity details list only the measurements a process actually reports.
 
-Distances and comets
-Approximate distances for galaxies and other deep-sky objects, a bundled comet catalogue so comet orbits work offline, and automatic short descriptions on target cards. Meteors have an information page with a Perseid photograph, a yearly shower chart and a guide to meteor colours; a meteor capture within a known shower's dates shows the shower's name in Capture details. Open in Stellarium is removed from the Solar Eclipse, Lunar Eclipse and comet panes.
+Orbit viewer and target information
+Click an imaged-date ring in the 3D orbit viewer to see its date, and the orbit header shows a date you can click to change. The target label is just its name. Totality is tagged for solar captures at 99% obscuration or more, with a corona on the sky map. The sky map zooms with the mouse wheel only after you click it or while holding Ctrl.
 
-Quality and library
-Obstructed frames rank below clear ones, scores are kept across program updates, long stack exposure totals read in minutes or hours, DWARF stacks without a filename duration get their sub count, and best-first sub order is kept when the library table is re-sorted. Stale pointings are ignored for the Moon and planets, and the plate-solved target with the most prominence is preferred. Rotation analysis is removed.
+Dates and first run
+Preferences has a Date format choice (Automatic, DD/MM/YY, MM/DD/YY); Automatic uses month first when your observing location is in the United States. A one-time prompt on first run asks where you observe from, and can be skipped.
 
-Lists and menus
-Starred files and Edited images can be shown above everything else with Settings > General > Show starred on top (on by default); starred sessions come first among the grouped subs. Group subs by session moved from the Repository menu to Settings > General. Re-measure image quality and Last operation moved into Repository > Maintenance. After deleting, moving, merging or re-identifying files, the window now stays on the same page and target and selects the row that followed them, instead of returning to All Targets.
+Lists and processes
+After deleting, moving, merging or re-identifying files, the window stays on the same page and target and selects the next row, and no longer freezes while lists reload. Starred sessions keep the table's sort order inside their groups. Long imports add copy workers when they turn out to take a while, and Activity shows how many started and how many were added.
 
-Help and settings
-Help is a help centre with guided fixes and tours that walk the real window, plus a Smart App Control article. Preferences > General > Online access offers Hybrid or Offline, and About keeps the available release visible while online access is paused.
+Backups and warnings
+Pausing or interrupting a backup keeps the verified copies, and Activity offers Resume, Discard backup and Dismiss, even after restarting the app. Full rescan, Verify repository checksums and Index an existing repository warn before they start, with a "Don't warn me again" option that Preferences can reset.
 
-One hybrid installer replaces the Offline-Setup duplicate. Setup, update review and progress windows fit the active monitor and DPI and follow the app theme and language. Archive files, target identities and local telescope workflows are preserved. New controls are translated into all seven interface languages.
+Installer
+Setup header text no longer clips under the logo.
+
+The guide, tours and all seven interface languages are updated for these changes.
