@@ -13,12 +13,12 @@ using System.Windows.Threading;
 
 namespace AstroArchive {
  public sealed class ActivityEntry {
-  public string Title,Status,ReportTitle,Report,OutputPath,ActionLabel,RepositoryRoot,CancelLabel,ImportKind,ProcessContext,ProcessOutcome;
+  public string DiscardLabel,ResumeTip,Title,Status,ReportTitle,Report,OutputPath,ActionLabel,RepositoryRoot,CancelLabel,ImportKind,ProcessContext,ProcessOutcome;
   public DateTime StartedUtc=DateTime.UtcNow;
   public bool Logged,Running,Unread,NeedsReview,Failed,Canceled,NetworkImport,LiveImport,ProcessTracked,BannerDismissed,BannerAutoHidden,WasRunning;
   public double? DurationSeconds;
   public ProgressInfo Progress;
-  public Action Review,Cancel,Pause,Resume,Discard;public Func<bool> ResumeAvailable;
+  public Action Review,Cancel,Pause,Resume,Discard,Dismiss;public Func<bool> ResumeAvailable;
  }
  public partial class MainUi {
   readonly List<ActivityEntry> activities=new List<ActivityEntry>();
@@ -133,11 +133,11 @@ namespace AstroArchive {
    var detail=new StringBuilder(entry.RepositoryRoot==null?"":"Repository: "+entry.RepositoryRoot+"\n");if(p!=null){if(p.Activity!=null)detail.AppendLine(p.Activity);if(p.CopyPhase)detail.AppendLine(p.Workers+" copy workers · "+ImportWorkflow.Size(p.BytesDone)+" / "+ImportWorkflow.Size(p.BytesTotal)+" · "+(p.EffectiveBytesPerSecond/1000000.0).ToString("0.0")+" MB/s");else detail.AppendLine(p.WorkPerSecond.ToString("0.0")+" files/s");if(p.Stages!=null)foreach(var stage in p.Stages)detail.AppendLine(stage.Stage+": "+stage.Files+" files · "+stage.Seconds.ToString("0.0")+"s · "+stage.MBPerSecond.ToString("0.0")+" MB/s");}if(entry.Report!=null)detail.AppendLine("A report is available below.");card.Details.Text=detail.ToString();
    card.Actions.Children.Clear();if(entry.Running&&entry.Cancel!=null)card.Actions.Children.Add(ActivityAction(entry.Canceled?"Canceling…":entry.CancelLabel??"Cancel",()=>{entry.Canceled=true;entry.Cancel();RenderActivity();}));
    if(entry.Running&&entry.Pause!=null)card.Actions.Children.Add(ActivityAction("Pause",()=>{entry.Pause();RenderActivity();}));
-   if(!entry.Running&&entry.Resume!=null){var resume=ActivityAction("Resume",entry.Resume);resume.IsEnabled=entry.ResumeAvailable==null||entry.ResumeAvailable();resume.ToolTip=resume.IsEnabled?"Verify completed copies and continue this import.":"Finish the conflicting operation or open this import's repository first.";card.Actions.Children.Add(resume);}
-   if(!entry.Running&&entry.Discard!=null)card.Actions.Children.Add(ActivityAction("Cancel import",entry.Discard));
+   if(!entry.Running&&entry.Resume!=null){var resume=ActivityAction("Resume",entry.Resume);resume.IsEnabled=entry.ResumeAvailable==null||entry.ResumeAvailable();resume.ToolTip=resume.IsEnabled?entry.ResumeTip??"Verify completed copies and continue this import.":"Finish the conflicting operation or open this import's repository first.";card.Actions.Children.Add(resume);}
+   if(!entry.Running&&entry.Discard!=null)card.Actions.Children.Add(ActivityAction(entry.DiscardLabel??"Cancel import",entry.Discard));
    if(entry.Review!=null){var review=ActivityAction(entry.ActionLabel??"Review results",()=>{if(RepositoryOperationBlocked)return;var action=entry.Review;entry.Review=null;entry.NeedsReview=false;entry.Unread=false;var previous=reviewingActivity;reviewingActivity=entry;try{action();if(entry.NeedsReview||entry.ActionLabel=="View release")entry.Review=action;}catch{entry.Review=action;entry.NeedsReview=true;throw;}finally{reviewingActivity=previous;RenderActivity();}});review.IsEnabled=!RepositoryOperationBlocked;review.ToolTip=review.IsEnabled?null:"Available when the current operation finishes.";card.Actions.Children.Add(review);}
    if(entry.Report!=null)card.Actions.Children.Add(ActivityAction("View report",()=>{activityOpeningReport=true;try{ShowReport(entry.ReportTitle??entry.Title,entry.Report);entry.Unread=false;if(entry.Review==null)entry.NeedsReview=false;}finally{activityOpeningReport=false;RenderActivity();}}));
-   if(entry.OutputPath!=null)card.Actions.Children.Add(ActivityAction("Open folder",()=>OpenFolder(entry.OutputPath)));if(!entry.Running&&entry.NeedsReview)card.Actions.Children.Add(ActivityAction("Dismiss",()=>{entry.NeedsReview=false;entry.Unread=false;entry.Review=null;RenderActivity();}));
+   if(entry.OutputPath!=null)card.Actions.Children.Add(ActivityAction("Open folder",()=>OpenFolder(entry.OutputPath)));if(!entry.Running&&entry.NeedsReview)card.Actions.Children.Add(ActivityAction("Dismiss",()=>{if(entry.Dismiss!=null){entry.Dismiss();return;}entry.NeedsReview=false;entry.Unread=false;entry.Review=null;RenderActivity();}));
   }
   void UpdateActivityProgress(ProgressInfo progress){if(currentActivity==null)return;currentActivity.Progress=progress;currentActivity.Status=currentActivity.Canceled?"Canceling after the current operation…":L("StatusLabel").Text;if(currentActivity.Canceled)progress.RemainingSeconds=null;ActivityCard card;if(activityCards.TryGetValue(currentActivity,out card)){
    // Keep focused action controls intact while progress changes.

@@ -117,7 +117,8 @@ Target analysis defaults to Off.
 ## Repeat imports
 - Default filename matching skips known captures and completed dated DWARF sessions.
 - **Robust file matching** revisits same-name edits, sidecars and missing archive copies.
-- **Import → Full rescan** reads and hashes every source file.
+- **Import → Full rescan** reads and hashes every source file, so AstroArchive warns first that
+  it may take a long time. Tick **Don't warn me again**, or turn warnings back on in **Settings → General**.
 - **Cancel** keeps completed imports. Changed sources need a new scan.
 
 ## Watch a capture folder
@@ -794,7 +795,11 @@ ARCHIVE SAFETY AND BACKUPS
 3. Close other programs that write to the archive while it runs.
 
 Backups copy images, Edited and the current database, and verify every file.
-**Cancel** removes the unfinished backup and keeps earlier ones.
+
+**Pause** (in Activity) stops the backup and keeps the files already copied. Close the program
+if you like: Activity still lists the paused backup, and starting a backup in the same folder
+resumes it however long it has been. Files changed in the meantime are copied again.
+**Discard backup** removes the paused copy; earlier backups are always kept.
 
 ## Restore
 **Settings → Backups → Restore a backup…** verifies every file while restoring into a new

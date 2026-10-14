@@ -168,7 +168,7 @@ namespace AstroArchive {
             menu.Items.Add(MenuAction("Watch a capture folder…",()=>{GoToPage(1);OpenLocalWatch();},repo!=null&&!NetworkImportBlocked,false));
             menu.Items.Add(new Separator());
             menu.Items.Add(ButtonAction("Scan source", "ScanButton", 1));
-            menu.Items.Add(MenuAction("Full rescan",()=>{GoToPage(1);Scan(true);},repo!=null));
+            menu.Items.Add(MenuAction("Full rescan",()=>{if(!ConfirmLongProcess("FullRescan","Full rescan may take a long time","A full rescan re-reads every file in your source folder and checks it against the archive."+ArchiveSizeNote()+" On a large archive this can take a long time."))return;GoToPage(1);Scan(true);},repo!=null));
             menu.Items.Add(ButtonAction("Import ready files", "ImportButton", 1));
             menu.Items.Add(new Separator());
             var tools=Branch("Review and repair", ButtonAction("Review flagged files…", "ReviewImportsButton", 1),ButtonAction("Screen for failures", "ScreenImportsButton", 1),ButtonAction("Retry failed imports", "RetryImportsButton", 1));
