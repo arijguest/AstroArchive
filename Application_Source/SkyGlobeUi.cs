@@ -176,13 +176,24 @@ namespace AstroArchive {
    DrawMoonDisc(dc,point,size,context.Moon.Illumination,angle,Tint(line,0.55),Stroke(text,0.55,0.8),opacity);
    MoonDrawn=true;MoonBehindGlobe=moon.Dot(front)<0;MoonBounds=new Rect(point.X-size,point.Y-size,2*size,2*size);
   }
-  internal bool SunDrawn,EclipseDrawn;internal Rect EclipseBounds;
+  internal bool SunDrawn,EclipseDrawn,CoronaDrawn;internal Rect EclipseBounds;
   static readonly Color SunLight=Color.FromRgb(255,206,84);
+  void DrawCorona(DrawingContext dc,Point at,double size){
+   double reach=size*3;var halo=new RadialGradientBrush();double edge=size/reach;
+   halo.GradientStops.Add(new GradientStop(Color.FromArgb(255,255,255,255),0));halo.GradientStops.Add(new GradientStop(Color.FromArgb(235,246,248,255),edge));halo.GradientStops.Add(new GradientStop(Color.FromArgb(110,200,214,255),edge+(1-edge)*0.35));halo.GradientStops.Add(new GradientStop(Color.FromArgb(0,180,200,255),1));halo.Freeze();
+   dc.DrawEllipse(halo,null,at,reach,reach);
+   var ray=new SolidColorBrush(Color.FromArgb(190,240,244,255));ray.Freeze();var pen=new Pen(ray,Math.Max(0.8,size*0.1)){StartLineCap=PenLineCap.Round,EndLineCap=PenLineCap.Round};pen.Freeze();
+   for(int i=0;i<12;i++){double a=i*Math.PI/6+0.2,inner=size*1.05,outer=size*(i%2==0?2.5:1.9);dc.DrawLine(pen,new Point(at.X+Math.Cos(a)*inner,at.Y+Math.Sin(a)*inner),new Point(at.X+Math.Cos(a)*outer,at.Y+Math.Sin(a)*outer));}
+   CoronaDrawn=true;
+  }
   void DrawSun(DrawingContext dc,double opacity){
    var point=Project(sun);double size=Math.Max(6,Math.Min(12,radius*0.07));if(opacity<1)dc.PushOpacity(opacity);
    bool eclipsed=context.Eclipse!=null&&context.Eclipse.Solar;
    if(!eclipsed){var glow=new RadialGradientBrush(Color.FromArgb(110,255,214,110),Color.FromArgb(0,255,214,110));glow.Freeze();dc.DrawEllipse(glow,null,point,size*2.2,size*2.2);}
-   var disc=new SolidColorBrush(SunLight);disc.Freeze();dc.DrawEllipse(disc,null,point,size,size);
+   var disc=new SolidColorBrush(SunLight);disc.Freeze();
+   // At 99% or more the corona shows: a pearly halo with short streamers around the dark disc.
+   if(eclipsed&&Eclipses.IsTotal(context.Eclipse))DrawCorona(dc,point,size);
+   dc.DrawEllipse(disc,null,point,size,size);
    if(eclipsed){
     var e=context.Eclipse;var other=Project(moon);double dx=other.X-point.X,dy=other.Y-point.Y,length=Math.Sqrt(dx*dx+dy*dy);if(length<1e-9){dx=1;dy=0;length=1;}
     double scale=size/e.SunRadiusArcmin;var shadow=new SolidColorBrush(Color.FromRgb(22,26,38));shadow.Freeze();
@@ -232,7 +243,7 @@ namespace AstroArchive {
    ConstellationLabelBounds=bounds;
   }
   DrawingGroup Build(Brush line,Brush text,Brush accent,Brush surface){
-   EclipseDrawn=false;
+   EclipseDrawn=false;CoronaDrawn=false;
    var group=new DrawingGroup();centre=new Point(ActualWidth/2,ActualHeight/2);radius=Math.Max(5,Math.Min(ActualWidth/2-14,ActualHeight/2-14))*Camera.Zoom;
    var target=context.TargetOnGlobe;double yaw=Camera.Yaw*Math.PI/180,tilt=Camera.Tilt*Math.PI/180;
    right=new SkyVector(Math.Cos(yaw),-Math.Sin(yaw),0);up=new SkyVector(-Math.Sin(yaw)*Math.Sin(tilt),-Math.Cos(yaw)*Math.Sin(tilt),Math.Cos(tilt));front=new SkyVector(Math.Sin(yaw)*Math.Cos(tilt),Math.Cos(yaw)*Math.Cos(tilt),Math.Sin(tilt));

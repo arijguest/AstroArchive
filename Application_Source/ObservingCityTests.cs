@@ -29,6 +29,13 @@ namespace AstroArchive {
     settings.DateFormat=DateFormats.DayFirst;DateFormats.Configure(settings);Check(DateFormats.TryParse("31.12.2026",out parsed)&&parsed==new DateTime(2026,12,31)&&!DateFormats.TryParse("12/31/26",out parsed),"Day-first parsing is wrong");
     DateFormats.Configure(new Settings());
    });
+   Test("Totality is tagged once and stays removed",()=>{
+    var store=new System.Collections.Generic.Dictionary<string,CaptureAnnotation>();var frame=new Frame{Hash="abc"};var edit=new AnnotationEdit();edit.AutoTags.Add(Eclipses.TotalityTag);
+    Check(CaptureAnnotations.Edit(store,new[]{frame},edit)==1&&frame.Tags.Contains("Totality"),"Totality tag was not added");
+    var remove=new AnnotationEdit();remove.RemoveTags.Add("Totality");CaptureAnnotations.Edit(store,new[]{frame},remove);
+    Check(CaptureAnnotations.Edit(store,new[]{frame},edit)==0&&(frame.Tags==null||!frame.Tags.Contains("Totality")),"A removed Totality tag came back");
+    Check(Eclipses.IsTotal(new EclipseInfo{Solar=true,Obscuration=0.995})&&!Eclipses.IsTotal(new EclipseInfo{Solar=true,Obscuration=0.9})&&!Eclipses.IsTotal(new EclipseInfo{Solar=false,Obscuration=1}),"Totality threshold wrong");
+   });
    Test("Choosing a city is transactional and legacy coordinates remain usable",()=>{
     var settings=Util.Deserialize<Settings>("{\"Latitude\":51.5,\"Longitude\":-0.1}");var draft=new ObservingSiteChoice(settings);
     Check(draft.Label=="Previously saved location"&&draft.Latitude==51.5&&draft.Longitude==-0.1,"Old location silently changed");
