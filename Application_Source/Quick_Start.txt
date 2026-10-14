@@ -1048,8 +1048,8 @@ marker with an arrow along the path, showing where the target is now. Dated
 bodies show today; others show their position at the orbit epoch.
 
 Small rings mark where the target was on each date you imaged it; rings that
-fall close together are drawn once with a count. Click a ring to see the date it
-was taken. Diamonds mark the ascending
+fall close together are drawn once with a count. Click a ring, or press Enter
+in the orbit, for its date. Diamonds mark the ascending
 (filled) and descending (open) nodes, with perihelion and aphelion (or perigee
 and apogee).
 

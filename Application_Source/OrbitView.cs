@@ -58,7 +58,7 @@ namespace AstroArchive {
    MouseMove+=(s,e)=>{if(!dragging)return;var point=e.GetPosition(this);double dx=point.X-last.X,dy=point.Y-last.Y;last=point;if(panning)Pan(dx,dy);else Rotate(dx*0.5,dy*0.5);e.Handled=true;};
    MouseLeftButtonUp+=(s,e)=>{if(dragging&&(e.GetPosition(this)-pressed).Length<4)ClickImaged(e.GetPosition(this));dragging=false;Cursor=Cursors.Hand;ReleaseMouseCapture();e.Handled=true;};LostMouseCapture+=(s,e)=>{dragging=false;Cursor=Cursors.Hand;};
    PreviewMouseWheel+=(s,e)=>{if(!IsKeyboardFocusWithin&&(Keyboard.Modifiers&ModifierKeys.Control)==0)return;StopTween();Zoom(Math.Exp(Math.Max(-1200,Math.Min(1200,e.Delta))/600.0),e.GetPosition(this));e.Handled=true;};
-   KeyDown+=(s,e)=>{bool handled=true;StopTween();switch(e.Key){case Key.Left:Rotate(-5,0);break;case Key.Right:Rotate(5,0);break;case Key.Up:Rotate(0,5);break;case Key.Down:Rotate(0,-5);break;case Key.Add:case Key.OemPlus:Zoom(1.25);break;case Key.Subtract:case Key.OemMinus:Zoom(0.8);break;case Key.Home:GoReset();break;case Key.Space:if(TogglePlay==null)handled=false;else TogglePlay();break;case Key.Escape:MoveFocus(new TraversalRequest(FocusNavigationDirection.Previous));break;default:handled=false;break;}e.Handled=handled;};
+   KeyDown+=(s,e)=>{bool handled=true;StopTween();switch(e.Key){case Key.Left:Rotate(-5,0);break;case Key.Right:Rotate(5,0);break;case Key.Up:Rotate(0,5);break;case Key.Down:Rotate(0,-5);break;case Key.Add:case Key.OemPlus:Zoom(1.25);break;case Key.Subtract:case Key.OemMinus:Zoom(0.8);break;case Key.Home:GoReset();break;case Key.Enter:if(drawnMarks.Count==0)handled=false;else CycleImaged();break;case Key.Space:if(TogglePlay==null)handled=false;else TogglePlay();break;case Key.Escape:MoveFocus(new TraversalRequest(FocusNavigationDirection.Previous));break;default:handled=false;break;}e.Handled=handled;};
    ManipulationStarting+=(s,e)=>{StopTween();dragging=false;ReleaseMouseCapture();e.Mode=ManipulationModes.Translate|ManipulationModes.Scale;e.ManipulationContainer=this;e.Handled=true;};
    ManipulationDelta+=(s,e)=>{Focus();double scale=e.DeltaManipulation.Scale.X;if(OrbitalModel.Finite(scale)&&scale>0)Zoom(scale,e.ManipulationOrigin);if(TouchesCapturedWithin.Concat(TouchesOver).Distinct().Count()<2)Rotate(e.DeltaManipulation.Translation.X*0.5,e.DeltaManipulation.Translation.Y*0.5);else Pan(e.DeltaManipulation.Translation.X,e.DeltaManipulation.Translation.Y);e.Handled=true;};
    Unloaded+=(s,e)=>StopTween(true);IsVisibleChanged+=(s,e)=>{if(!IsVisible)StopTween(true);};
@@ -267,8 +267,15 @@ namespace AstroArchive {
   // A click on an imaged-date ring shows the date it was taken; clicking it again or anywhere else clears it.
   void ClickImaged(Point at){
    MarkGroup hit=null;double best=11;foreach(var group in drawnMarks){double d=(group.At-at).Length;if(d<best){best=d;hit=group;}}
-   string next=hit==null||hit.Key==pickedMark?null:hit.Key;if(next!=pickedMark){pickedMark=next;InvalidateVisual();}
+   string next=hit==null||hit.Key==pickedMark?null:hit.Key;if(next!=pickedMark){pickedMark=next;Announce();InvalidateVisual();}
   }
+  // Enter steps through the imaged dates in order and past the last one back to none, so the dates are reachable without a pointer.
+  void CycleImaged(){
+   var ordered=drawnMarks.OrderBy(g=>g.Marks[0].Utc).ToList();int at=ordered.FindIndex(g=>g.Key==pickedMark);
+   pickedMark=at+1<ordered.Count?ordered[at+1].Key:null;Announce();InvalidateVisual();
+  }
+  // The picked date is also exposed as the orbit's automation status for screen readers.
+  void Announce(){var group=drawnMarks.FirstOrDefault(g=>g.Key==pickedMark);AutomationProperties.SetItemStatus(this,group==null?"":Dates(group.Marks));}
   void ImagedMarks(DrawingContext dc){
    drawnMarks=new List<MarkGroup>();if(Imaged==null||Imaged.Count==0||Overview)return;Brush accent=Colour("Accent"),surface=Colour("Surface");
    double radius=Imaged.Count>40?24:12;
