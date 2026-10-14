@@ -67,6 +67,7 @@ namespace AstroArchive {
    // Refresh and Open in Stellarium are small icons at the right of the details line rather than a line of their own.
    var headerRow=new Grid();headerRow.ColumnDefinitions.Add(new ColumnDefinition());headerRow.ColumnDefinitions.Add(new ColumnDefinition{Width=GridLength.Auto});headerRow.Children.Add(details);
    var icons=headerIcons=new StackPanel{Orientation=Orientation.Horizontal,VerticalAlignment=VerticalAlignment.Top,Margin=new Thickness(6,0,0,0)};headerRow_=headerRow;Grid.SetColumn(icons,1);headerRow.Children.Add(icons);content.Children.Add(headerRow);
+   string alternatives=TargetInfoPresentation.AlternativeLine(card);if(alternatives.Length>0){var other=Data(alternatives,"Muted","UiFontCaption");other.Name="ObjectAlternativeIds";content.Children.Add(other);}
    if(!string.IsNullOrEmpty(context))content.Children.Add(Data(context,"Muted","UiFontCaption"));
    var actions=new WrapPanel{Margin=new Thickness(0,0,0,4)};
    if(!string.IsNullOrEmpty(card.downloaded_at))content.Children.Add(Data(Localization.F("Saved information · retrieved {0}",card.downloaded_at),"Muted","UiFontCaption"));

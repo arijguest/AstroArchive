@@ -48,11 +48,23 @@ namespace AstroArchive {
    if(title>0&&credit.EndsWith(", via Wikimedia Commons",StringComparison.Ordinal))credit=credit.Substring(0,title);
    return credit.Trim();
   }
+  // Other catalogue designations of the object (NGC, IC, Messier...), without the survey identifiers that fill the full alias list.
+  // One alternative joins the tagline; several go on a line of their own.
+  public static List<string> AlternativeIds(TargetInfoCard card){
+   var result=new List<string>();if(card==null||card.aliases==null)return result;
+   Func<string,string> key=t=>Regex.Replace(t??"","[^A-Za-z0-9]","").ToUpperInvariant();var seen=new HashSet<string>{key(card.id),key(Catalog.DisplayId(card.id))};string heading=key(card.name);
+   foreach(string alias in card.aliases){
+    var m=Regex.Match((alias??"").Trim(),@"^(M|NGC|IC|C|Caldwell|Arp|B|Mel|Cr|Collinder|Melotte|Abell|UGC|Sh\s*2)[\s-]*0*(\d+.*)$",RegexOptions.IgnoreCase|RegexOptions.CultureInvariant);if(!m.Success)continue;
+    string text=Regex.Replace(m.Groups[1].Value,@"\s+","")+" "+m.Groups[2].Value;string id=key(text);if(!seen.Add(id)||heading.Contains(id))continue;result.Add(text);
+   }
+   return result.Take(8).ToList();
+  }
+  public static string AlternativeLine(TargetInfoCard card){var ids=AlternativeIds(card);return ids.Count>1?string.Join(" · ",ids):"";}
   public static string Tagline(TargetInfoCard card,string constellation){
    // "IC 434" or "NGC 2237 (Rosette A)" already show the ID in the heading.
    string id=(card.id??"").Trim();bool inHeading=id.Length>0&&Regex.IsMatch(card.name??"",@"(?<![A-Za-z0-9])"+string.Join(@"[\s-]*",Regex.Split(id,@"[\s-]+").Select(Regex.Escape))+@"(?![0-9])",RegexOptions.IgnoreCase|RegexOptions.CultureInvariant);
    bool named=!string.IsNullOrWhiteSpace(card.name)&&!inHeading;
-   var parts=new List<string>();if(named)parts.Add(Catalog.DisplayId(card.id));if(!string.IsNullOrWhiteSpace(card.type_label))parts.Add(card.type_label);if(constellation!=null)parts.Add(constellation);
+   var parts=new List<string>();if(named)parts.Add(Catalog.DisplayId(card.id));var other=AlternativeIds(card);if(other.Count==1)parts.Add(other[0]);if(!string.IsNullOrWhiteSpace(card.type_label))parts.Add(card.type_label);if(constellation!=null)parts.Add(constellation);
    return string.Join(" · ",parts);
   }
   public static List<TargetInfoSource> Sources(TargetInfoCard card){return Sources(card,false);}
