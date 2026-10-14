@@ -13,12 +13,12 @@ using System.Windows.Threading;
 
 namespace AstroArchive {
  public sealed class ActivityEntry {
-  public string Title,Status,ReportTitle,Report,OutputPath,ActionLabel,RepositoryRoot,CancelLabel,ImportKind,ProcessContext,ProcessOutcome;
+  public string DiscardLabel,ResumeTip,Title,Status,ReportTitle,Report,OutputPath,ActionLabel,RepositoryRoot,CancelLabel,ImportKind,ProcessContext,ProcessOutcome;
   public DateTime StartedUtc=DateTime.UtcNow;
   public bool Logged,Running,Unread,NeedsReview,Failed,Canceled,NetworkImport,LiveImport,ProcessTracked,BannerDismissed,BannerAutoHidden,WasRunning;
   public double? DurationSeconds;
   public ProgressInfo Progress;
-  public Action Review,Cancel,Pause,Resume,Discard;public Func<bool> ResumeAvailable;
+  public Action Review,Cancel,Pause,Resume,Discard,Dismiss;public Func<bool> ResumeAvailable;
  }
  public partial class MainUi {
   readonly List<ActivityEntry> activities=new List<ActivityEntry>();
@@ -128,21 +128,38 @@ namespace AstroArchive {
    string eta=p.Finished||!entry.Running?"":entry.NetworkImport?" · "+RemoteEstimateLabel(p):p.Finalising?" · Finalising":p.Stalled?" · "+(p.Activity!=null&&p.Activity.Contains("Cloud availability")?"Waiting for cloud provider":"Waiting for filesystem"):p.RemainingSeconds.HasValue?" · ETA ~"+EtaEstimate.Format(p.RemainingSeconds.Value):" · ETA estimating";
    return "Elapsed "+PipelineMetrics.Duration(p.ElapsedSeconds)+eta+" · "+(p.TotalKnown?p.Done+" / "+p.Total:p.Done+" inspected · "+p.Total+" discovered")+PipelineMetrics.Reading(p);
   }
+  // Details lists only measurements the process actually reports; a value of zero or nothing is left out, not shown as 0.
+  string ActivityDetailText(ActivityEntry entry,ProgressInfo p){
+   var lines=new List<string>();if(entry.RepositoryRoot!=null)lines.Add("Repository: "+entry.RepositoryRoot);
+   if(p!=null){
+    if(!string.IsNullOrEmpty(p.Activity))lines.Add(p.Activity);
+    if(p.TotalKnown&&p.Total>0)lines.Add("Files: "+p.Done+" of "+p.Total+(p.Done>0?" ("+(100.0*p.Done/p.Total).ToString("0")+"%)":""));else if(p.Done>0)lines.Add("Files: "+p.Done+" so far");
+    if(p.BytesTotal>0)lines.Add("Data: "+ImportWorkflow.Size(p.BytesDone)+" of "+ImportWorkflow.Size(p.BytesTotal));else if(p.BytesDone>0)lines.Add("Data: "+ImportWorkflow.Size(p.BytesDone));
+    var speed=new List<string>();if(p.EffectiveBytesPerSecond>=1000)speed.Add((p.EffectiveBytesPerSecond/1000000.0).ToString("0.0")+" MB/s");else if(p.ReadBytesPerSecond>=1000)speed.Add((p.ReadBytesPerSecond/1000000.0).ToString("0.0")+" MB/s read");if(p.WorkPerSecond>=0.05)speed.Add(p.WorkPerSecond.ToString("0.0")+" files/s");if(p.CopyPhase&&p.Workers>0)speed.Add(p.Workers+" copy worker"+(p.Workers==1?"":"s")+(p.WorkersStarted>0&&p.WorkersStarted<p.Workers?" (started with "+p.WorkersStarted+")":""));
+    if(speed.Count>0)lines.Add("Speed: "+string.Join(" · ",speed));
+    var time=new List<string>();if(p.ElapsedSeconds>=1)time.Add("Elapsed "+PipelineMetrics.Duration(p.ElapsedSeconds));if(entry.Running&&!p.Finished&&p.RemainingSeconds.HasValue&&p.RemainingSeconds.Value>=1)time.Add("about "+EtaEstimate.Format(p.RemainingSeconds.Value)+" left");
+    if(time.Count>0)lines.Add("Time: "+string.Join(" · ",time));
+    if(p.Stages!=null)foreach(var stage in p.Stages)if(stage.Files>0||stage.Seconds>=0.05){var part=new List<string>();if(stage.Files>0)part.Add(stage.Files+" file"+(stage.Files==1?"":"s"));if(stage.Seconds>=0.05)part.Add(stage.Seconds.ToString("0.0")+"s");if(stage.MBPerSecond>=0.05)part.Add(stage.MBPerSecond.ToString("0.0")+" MB/s");lines.Add(stage.Stage+": "+string.Join(" · ",part));}
+   }
+   if(entry.Report!=null)lines.Add("A report is available below.");
+   if(lines.Count==(entry.RepositoryRoot==null?0:1))lines.Add(entry.Running?"No measurements yet.":"No further details were recorded.");
+   return string.Join("\n",lines);
+  }
   void UpdateActivityCard(ActivityEntry entry,ActivityCard card){
    card.Title.Text=(entry.ProcessTracked?ProcessState(entry)+" · ":"")+entry.Title;card.Status.Text=entry.Status;card.Rate.Text=entry.ProcessTracked?ProcessParameters(entry):ActivityRate(entry);var p=entry.Progress;card.Bar.Visibility=entry.Running||p!=null?Visibility.Visible:Visibility.Collapsed;card.Bar.IsIndeterminate=entry.Running&&!settings.ReducedMotion&&(p==null||!p.TotalKnown&&!p.Finished);card.Bar.Value=p==null?0:Math.Max(0,Math.Min(1,p.ProgressFraction));
-   var detail=new StringBuilder(entry.RepositoryRoot==null?"":"Repository: "+entry.RepositoryRoot+"\n");if(p!=null){if(p.Activity!=null)detail.AppendLine(p.Activity);if(p.CopyPhase)detail.AppendLine(p.Workers+" copy workers"+(p.WorkersStarted>0&&p.WorkersStarted<p.Workers?" (started with "+p.WorkersStarted+")":"")+" · "+ImportWorkflow.Size(p.BytesDone)+" / "+ImportWorkflow.Size(p.BytesTotal)+" · "+(p.EffectiveBytesPerSecond/1000000.0).ToString("0.0")+" MB/s");else detail.AppendLine(p.WorkPerSecond.ToString("0.0")+" files/s");if(p.Stages!=null)foreach(var stage in p.Stages)detail.AppendLine(stage.Stage+": "+stage.Files+" files · "+stage.Seconds.ToString("0.0")+"s · "+stage.MBPerSecond.ToString("0.0")+" MB/s");}if(entry.Report!=null)detail.AppendLine("A report is available below.");card.Details.Text=detail.ToString();
+   card.Details.Text=ActivityDetailText(entry,p);
    card.Actions.Children.Clear();if(entry.Running&&entry.Cancel!=null)card.Actions.Children.Add(ActivityAction(entry.Canceled?"Canceling…":entry.CancelLabel??"Cancel",()=>{entry.Canceled=true;entry.Cancel();RenderActivity();}));
    if(entry.Running&&entry.Pause!=null)card.Actions.Children.Add(ActivityAction("Pause",()=>{entry.Pause();RenderActivity();}));
-   if(!entry.Running&&entry.Resume!=null){var resume=ActivityAction("Resume",entry.Resume);resume.IsEnabled=entry.ResumeAvailable==null||entry.ResumeAvailable();resume.ToolTip=resume.IsEnabled?"Verify completed copies and continue this import.":"Finish the conflicting operation or open this import's repository first.";card.Actions.Children.Add(resume);}
-   if(!entry.Running&&entry.Discard!=null)card.Actions.Children.Add(ActivityAction("Cancel import",entry.Discard));
+   if(!entry.Running&&entry.Resume!=null){var resume=ActivityAction("Resume",entry.Resume);resume.IsEnabled=entry.ResumeAvailable==null||entry.ResumeAvailable();resume.ToolTip=resume.IsEnabled?entry.ResumeTip??"Verify completed copies and continue this import.":"Finish the conflicting operation or open this import's repository first.";card.Actions.Children.Add(resume);}
+   if(!entry.Running&&entry.Discard!=null)card.Actions.Children.Add(ActivityAction(entry.DiscardLabel??"Cancel import",entry.Discard));
    if(entry.Review!=null){var review=ActivityAction(entry.ActionLabel??"Review results",()=>{if(RepositoryOperationBlocked)return;var action=entry.Review;entry.Review=null;entry.NeedsReview=false;entry.Unread=false;var previous=reviewingActivity;reviewingActivity=entry;try{action();if(entry.NeedsReview||entry.ActionLabel=="View release")entry.Review=action;}catch{entry.Review=action;entry.NeedsReview=true;throw;}finally{reviewingActivity=previous;RenderActivity();}});review.IsEnabled=!RepositoryOperationBlocked;review.ToolTip=review.IsEnabled?null:"Available when the current operation finishes.";card.Actions.Children.Add(review);}
    if(entry.Report!=null)card.Actions.Children.Add(ActivityAction("View report",()=>{activityOpeningReport=true;try{ShowReport(entry.ReportTitle??entry.Title,entry.Report);entry.Unread=false;if(entry.Review==null)entry.NeedsReview=false;}finally{activityOpeningReport=false;RenderActivity();}}));
-   if(entry.OutputPath!=null)card.Actions.Children.Add(ActivityAction("Open folder",()=>OpenFolder(entry.OutputPath)));if(!entry.Running&&entry.NeedsReview)card.Actions.Children.Add(ActivityAction("Dismiss",()=>{entry.NeedsReview=false;entry.Unread=false;entry.Review=null;RenderActivity();}));
+   if(entry.OutputPath!=null)card.Actions.Children.Add(ActivityAction("Open folder",()=>OpenFolder(entry.OutputPath)));if(!entry.Running&&entry.NeedsReview)card.Actions.Children.Add(ActivityAction("Dismiss",()=>{if(entry.Dismiss!=null){entry.Dismiss();return;}entry.NeedsReview=false;entry.Unread=false;entry.Review=null;RenderActivity();}));
   }
   void UpdateActivityProgress(ProgressInfo progress){if(currentActivity==null)return;currentActivity.Progress=progress;currentActivity.Status=currentActivity.Canceled?"Canceling after the current operation…":L("StatusLabel").Text;if(currentActivity.Canceled)progress.RemainingSeconds=null;ActivityCard card;if(activityCards.TryGetValue(currentActivity,out card)){
    // Keep focused action controls intact while progress changes.
    card.Status.Text=currentActivity.Status;card.Rate.Text=ProcessParameters(currentActivity);card.Bar.IsIndeterminate=!settings.ReducedMotion&&!progress.TotalKnown&&!progress.Finished;card.Bar.Value=Math.Max(0,Math.Min(1,progress.ProgressFraction));
-   if(progress.Stages!=null)card.Details.Text=(currentActivity.RepositoryRoot??"")+"\n"+L("RateLabel").ToolTip+(progress.CopyPhase?" · "+progress.Workers+" copy workers"+(progress.WorkersStarted>0&&progress.WorkersStarted<progress.Workers?" (started with "+progress.WorkersStarted+")":""):"")+"\n"+string.Join("\n",progress.Stages.Select(s=>s.Stage+": "+s.Files+" files · "+s.Seconds.ToString("0.0")+"s · "+s.MBPerSecond.ToString("0.0")+" MB/s"));
+   card.Details.Text=ActivityDetailText(currentActivity,progress);
   }}
   void RecordActivityReport(string title,string text){var entry=completionActivity??AddActivity(title);entry.ReportTitle=title;entry.Report=text;entry.NeedsReview=true;entry.Status="Completed with results to review.";NotifyActivity(entry);}
   void QueueActivityReview(string title,Action review){var entry=completionActivity??AddActivity(title);entry.Title=title;entry.Status="Ready to review";entry.NeedsReview=true;entry.Review=review;entry.ActionLabel="Review results";NotifyActivity(entry);}
