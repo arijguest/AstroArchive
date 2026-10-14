@@ -118,7 +118,7 @@ It follows your Windows language, or choose one in **Settings → General → La
 
 **Need a hand?** Press **F1** in the app, follow the [offline guide](Application_Source/Quick_Start.txt), or [report an issue](https://github.com/arijguest/AstroArchive/issues).
 
-### What's new in 3.3.2
+### Fresh from the latest release
 
 **[3.3.2](https://github.com/arijguest/AstroArchive/releases/tag/v3.3.2.2)** draws a
 solar-cycle corona on the total eclipse sky map, adds upcoming sky events to All
