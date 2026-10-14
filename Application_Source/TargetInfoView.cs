@@ -226,7 +226,7 @@ namespace AstroArchive {
    var disclosure=Disclosure("Credits",credits);disclosure.Name="ImageCredits";
    // The header icons sit on the Credits row, centred on it and aligned with the image's right edge; with no image they stay by the details.
    if(headerIcons!=null&&headerIcons.Children.Count>0&&headerRow_!=null){
-    headerRow_.Children.Remove(headerIcons);headerIcons.Margin=new Thickness(6,0,0,0);headerIcons.VerticalAlignment=VerticalAlignment.Top;
+    headerRow_.Children.Remove(headerIcons);headerIcons.Margin=new Thickness(6,0,0,0);headerIcons.VerticalAlignment=VerticalAlignment.Center;
     var creditRow=new Grid();creditRow.ColumnDefinitions.Add(new ColumnDefinition());creditRow.ColumnDefinitions.Add(new ColumnDefinition{Width=GridLength.Auto});
     creditRow.Children.Add(disclosure);Grid.SetColumn(headerIcons,1);creditRow.Children.Add(headerIcons);content.Children.Add(creditRow);
    }else content.Children.Add(disclosure);
