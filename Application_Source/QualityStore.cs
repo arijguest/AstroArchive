@@ -18,7 +18,7 @@ namespace AstroArchive {
   internal void Problem(string line){if(Errors.Count<MaxLines)Errors.Add(line);else omitted++;}
   public bool NeedsReport{get{return Failed>0||Unsuitable>0||NotReached>0||Errors.Count>0;}}
   public string Summary(){
-   if(Eligible==0)return "No light frames or stacks in this view can be scored. Calibration frames, recordings and non-linear images are skipped.";
+   if(Eligible==0)return "No light frames in this view can be scored. Stacks, solar images, calibration frames, recordings and non-linear images are skipped.";
    string text=Measured+" measured";if(Reused>0)text+=" · "+Reused+" already measured";if(TooFewStars>0)text+=" · "+TooFewStars+" with too few stars";if(NoObject>0)text+=" · "+NoObject+" without a measurable object";if(Failed>0)text+=" · "+Failed+" unreadable";if(Unsuitable+SetAside>0)text+=" · "+(Unsuitable+SetAside)+" set aside as unsuitable";if(NotReached>0)text+=" · "+NotReached+" not reached";if(Skipped>0)text+=" · "+Skipped+" not scorable";
    return text;
   }

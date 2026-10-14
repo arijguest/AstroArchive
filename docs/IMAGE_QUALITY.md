@@ -10,12 +10,11 @@ and never delete or move a file.
 | Frame | Scored? | How |
 | --- | --- | --- |
 | Deep-sky light frames (FITS or XISF, linear data) | Yes | Star shape and noise |
-| Planetary, lunar and solar stills | Yes | Disc sharpness (separate method), plus an exposure fit column |
-| Stacks (FITS or XISF, linear data) | Yes | Same methods, compared only with other stacks of the same target, telescope, camera and filter |
-| Calibration frames, recordings | No | Shown as `-` with a reason in the tooltip |
+| Planetary and lunar stills | Yes | Disc sharpness (separate method), plus an exposure fit column |
+| Solar images, stacks, calibration frames, recordings | No | Shown as `-` with a reason in the tooltip |
 | JPEG, GIF, BMP and other non-linear data, meteor captures, images under 96 px or beyond the decoder limit | No | Same |
 
-Exposure fit (Under, Good, Over) is only computed for planetary, lunar and solar
+Exposure fit (Under, Good, Over) is only computed for planetary and lunar
 stills. It is a separate column and is not part of the quality score.
 
 ## Measurements
@@ -65,8 +64,7 @@ repository cannot be switched while a background process is running.
 
 Each measurement is compared with the others in its cohort (same group and session by
 default; same target when "Compare deep-sky frames across the whole target" is on;
-disc frames always compare within the session and target; stacks compare only with
-other stacks of the same target, telescope, camera and filter). Robust z-scores (median
+disc frames always compare within the session and target). Robust z-scores (median
 and MAD with floors) pass through a logistic map to 0 to 100 and are combined with a
 weighted geometric mean.
 

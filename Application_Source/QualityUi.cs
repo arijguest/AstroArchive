@@ -13,7 +13,7 @@ namespace AstroArchive {
   void AnalyzeQuality(bool force){
    if(repo==null||RepositoryOperationBlocked)return;
    var rows=Context().Where(f=>f.Status!="Deleted").ToList();
-   if(rows.Count==0){LocalizedMessage.Show(Window,"Choose a target or session with light frames or stacks first. Calibration frames and recordings are not scored.","Nothing to measure");return;}
+   if(rows.Count==0){LocalizedMessage.Show(Window,"Choose a target or session with light frames first. Stacks, solar images, calibration frames and recordings are not scored.","Nothing to measure");return;}
    var scorable=rows.Where(f=>QualityEligibility.Reason(f).Length==0).ToList();
    if(scorable.Count==0){L("StatusLabel").Text=QualitySkipSummary(rows);return;}
    // Measures copies in the background, so importing, exporting and Settings stay available while it runs.

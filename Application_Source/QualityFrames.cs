@@ -50,13 +50,17 @@ namespace AstroArchive {
   public static bool HasMosaic(Frame frame){return frame!=null&&Mosaic.IsMatch(frame.Bayer??"");}
   // Planetary, lunar and solar stills are scored by disc sharpness instead of star shape.
   public static bool IsDisc(Frame frame){return frame!=null&&ObservationTargets.Unstretched(frame.Target,frame.ObservationMode);}
+  // The Sun is the one disc target left out of scoring, so its frames drop out even when an older version scored them.
+  public static bool IsSolar(Frame frame){return frame!=null&&(ObservationTargets.CanonicalSolar((frame.Target??"").Trim())=="Sun"||System.Text.RegularExpressions.Regex.IsMatch(frame.ObservationMode??"",@"^\s*(solar|sun)(?:[ _-]+(?:mode|capture|imaging|light))?\s*$",System.Text.RegularExpressions.RegexOptions.IgnoreCase));}
   public static int KindOf(Frame frame){return IsDisc(frame)?QualityKind.Disc:QualityKind.Stars;}
   // Empty when the capture can be scored; otherwise the short reason it cannot. Reads only stored metadata.
   public static string Reason(Frame f){
    if(f==null)return "No capture";string kind=f.Kind??"";
    if(kind=="Video")return "recordings are not scored";
    if(CaptureSky.IsCalibration(f))return "calibration frames are not scored";
-   if(kind!="Light"&&kind!="Stack")return "only light frames and stacks are scored";
+   if(kind=="Stack")return "stacks are not scored: there are too few comparable references";
+   if(kind!="Light")return "only light frames are scored";
+   if(IsSolar(f))return "solar images are not scored: there are too few comparable references";
    if(Array.IndexOf(new[]{"Deleted","Missing","Unreadable","Failed","Changed"},f.Status)>=0)return "the archived file is not available";
    if(string.IsNullOrEmpty(f.RelativePath))return "not yet in the repository";
    if(f.Target=="Meteor")return "meteor captures are not scored";
@@ -88,10 +92,8 @@ namespace AstroArchive {
     // A program update must not wipe scores: older measurements stay in use until they are measured again.
     if(!QualityMeter.Shown(m)||m.Kind!=QualityEligibility.KindOf(frame))continue;
     if(QualityEligibility.Reason(frame).Length>0)continue;
-    // Stacks are compared only with other stacks of the same target and kit, whatever their integration; subs with their session (or target, when chosen).
-    string cohort;
-    if(frame.Kind=="Stack")cohort="stack|"+Catalog.CanonicalTarget(frame.Target)+"|"+string.Join("|",new[]{frame.Telescope,frame.Camera,frame.Filter,frame.Channels.ToString(CultureInfo.InvariantCulture)});
-    else{string scope=m.Kind==QualityKind.Disc||!compareTarget?frame.SessionKey:frame.Target;cohort=(m.Kind==QualityKind.Disc?frame.Target+"|":"")+frame.Group+"|"+scope;}
+    // Subs compare within their session (or target, when chosen).
+    string scope=m.Kind==QualityKind.Disc||!compareTarget?frame.SessionKey:frame.Target;string cohort=(m.Kind==QualityKind.Disc?frame.Target+"|":"")+frame.Group+"|"+scope;
     items.Add(new QualityItem{M=m,Cohort=cohort});owners.Add(frame);
    }
    if(items.Count==0)return;
