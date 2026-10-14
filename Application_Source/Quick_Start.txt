@@ -619,6 +619,25 @@ Candidates are labelled **Accepted**, **Partial match**, **Needs review** or **R
 - Selected pages and slices convert physical values without display stretch.
 - Originals stay. Cancel keeps verified outputs and removes unfinished copies.
 
+UPCOMING SKY EVENTS
+@title Upcoming sky events
+@category Browse and preview
+@summary What is worth watching in the next 30 days from your observing town, with the best time and where to look.
+@related OBSERVING TOWN / CITY | ECLIPSES | CAPTURE DETAILS AND SKY
+@keywords upcoming events eclipse occultation meteor shower opposition conjunction what to observe stellarium all targets
+Choose **All Targets** in Repository or Edited to see the Target Info pane list what is
+worth going outside for over the next 30 days from your observing town.
+- It covers solar and lunar eclipses, the Moon covering bright stars and planets, close
+  approaches of the Moon to planets and stars, meteor shower peaks, planets at opposition
+  or greatest elongation, and close pairs of planets.
+- Events are ranked by how well you can see them: height above the horizon, darkness and,
+  for meteors, how bright the Moon is. Each card gives the best date and time at your
+  site, the compass direction and height, and a note on what to expect.
+- **Open in Stellarium** opens the sky at that date and time from your observing town.
+- Everything is calculated on this computer, so no internet is needed. Timings are good
+  to a few minutes.
+- No town set? Choose one from the pane, or in **Settings → General**.
+
 TARGET CARDS
 @title Target cards
 @category Export and stacking
