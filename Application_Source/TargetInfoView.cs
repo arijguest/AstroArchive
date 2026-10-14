@@ -19,6 +19,7 @@ namespace AstroArchive {
  public sealed class TargetInfoView:UserControl {
   static readonly HashSet<string> anchorNames=new HashSet<string>(new[]{"ObjectTitle","ObjectDetails","OverviewHeading","OverviewText","ObjectImage","FunFact","ParametersHeading","ImagingNotes","ImagingNotesText","Sources","ImageCredits","OrbitPanel"});
   readonly StackPanel content=new StackPanel();readonly ScrollViewer scroll;
+  StackPanel headerIcons;Grid headerRow_;
   TextBlock informationStatus;Button refreshButton;OrbitPanel orbitPanel;Grid body,mapHost;StackPanel article,mapPanel;SkyGlobeView globe;Image photo;Button reset;
   public Action<string> ChooseObject;public Action RefreshInformation;public bool InternetAvailable;
   // A section such as Comets lists the user's targets inside it; choosing one reads that target's page.
@@ -44,8 +45,10 @@ namespace AstroArchive {
   static TextBlock Data(string value,string colour="Text",string size="UiFontControl"){
    var text=Text("",colour,size);text.SetBinding(TextBlock.TextProperty,new Binding{Source=value??""});return text;
   }
+  // Disclosures sit directly in the content, or beside the header icons in a row.
+  IEnumerable<Expander> Expanders(){return content.Children.OfType<Expander>().Concat(content.Children.OfType<Grid>().SelectMany(g=>g.Children.OfType<Expander>()));}
   void Begin(string title){
-   if(orbitPanel!=null)orbitPanel.Cancel();orbitPanel=null;informationStatus=null;refreshButton=null;CurrentId=null;body=null;mapPanel=null;mapHost=null;globe=null;photo=null;reset=null;content.Children.Clear();scroll.ScrollToTop();
+   if(orbitPanel!=null)orbitPanel.Cancel();orbitPanel=null;informationStatus=null;refreshButton=null;headerIcons=null;headerRow_=null;CurrentId=null;body=null;mapPanel=null;mapHost=null;globe=null;photo=null;reset=null;content.Children.Clear();scroll.ScrollToTop();
    var label=Text("TARGET INFO","Muted","UiFontCaption");label.FontWeight=FontWeights.SemiBold;content.Children.Add(label);
    var heading=Data(title,"Text","UiFontHeading");heading.Name="ObjectTitle";heading.FontWeight=FontWeights.SemiBold;content.Children.Add(heading);
   }
@@ -63,7 +66,7 @@ namespace AstroArchive {
    var details=Data(TargetInfoPresentation.Tagline(card,constellation),"Muted","UiFontCaption");details.Name="ObjectDetails";
    // Refresh and Open in Stellarium are small icons at the right of the details line rather than a line of their own.
    var headerRow=new Grid();headerRow.ColumnDefinitions.Add(new ColumnDefinition());headerRow.ColumnDefinitions.Add(new ColumnDefinition{Width=GridLength.Auto});headerRow.Children.Add(details);
-   var icons=new StackPanel{Orientation=Orientation.Horizontal,VerticalAlignment=VerticalAlignment.Top,Margin=new Thickness(6,0,0,0)};Grid.SetColumn(icons,1);headerRow.Children.Add(icons);content.Children.Add(headerRow);
+   var icons=headerIcons=new StackPanel{Orientation=Orientation.Horizontal,VerticalAlignment=VerticalAlignment.Top,Margin=new Thickness(6,0,0,0)};headerRow_=headerRow;Grid.SetColumn(icons,1);headerRow.Children.Add(icons);content.Children.Add(headerRow);
    if(!string.IsNullOrEmpty(context))content.Children.Add(Data(context,"Muted","UiFontCaption"));
    var actions=new WrapPanel{Margin=new Thickness(0,0,0,4)};
    if(!string.IsNullOrEmpty(card.downloaded_at))content.Children.Add(Data(Localization.F("Saved information · retrieved {0}",card.downloaded_at),"Muted","UiFontCaption"));
@@ -162,9 +165,9 @@ namespace AstroArchive {
   static IEnumerable<FrameworkElement> NamedVisuals(DependencyObject parent){for(int k=0;k<VisualTreeHelper.GetChildrenCount(parent);k++){var child=VisualTreeHelper.GetChild(parent,k);var element=child as FrameworkElement;if(element!=null&&anchorNames.Contains(element.Name)&&element.IsVisible)yield return element;foreach(var nested in NamedVisuals(child))yield return nested;}}
   public void UpdateCard(TargetInfoCard card,string context,IList<TargetInfoMember> members,string membersTitle,string back){
    bool orbitFocused=orbitPanel!=null&&orbitPanel.View.IsKeyboardFocused;DateTime? marker=orbitPanel==null?null:orbitPanel.MarkerUtc;var anchors=NamedVisuals(content).Select(e=>new{e.Name,Y=e.TranslatePoint(new Point(),scroll).Y}).Where(e=>e.Y<=8).OrderByDescending(e=>e.Y).ToArray();double offset=scroll.VerticalOffset;var camera=orbitPanel==null?null:orbitPanel.View.Camera.Copy();double height=orbitPanel==null?280:orbitPanel.View.Height;
-   var expanded=content.Children.OfType<Expander>().Where(e=>e.IsExpanded).Select(e=>e.Name).ToArray();bool same=CurrentId==card.id;
+   var expanded=Expanders().Where(e=>e.IsExpanded).Select(e=>e.Name).ToArray();bool same=CurrentId==card.id;
    ShowCard(card,context,members,membersTitle,back);if(!same)return;
-   foreach(var e in content.Children.OfType<Expander>())if(expanded.Contains(e.Name))e.IsExpanded=true;
+   foreach(var e in Expanders())if(expanded.Contains(e.Name))e.IsExpanded=true;
    if(camera!=null&&orbitPanel!=null){orbitPanel.MarkerUtc=marker;orbitPanel.View.Camera=camera;orbitPanel.View.Height=height;}UpdateLayout();var names=NamedVisuals(content).ToDictionary(e=>e.Name,e=>e);foreach(var anchor in anchors){FrameworkElement element;if(names.TryGetValue(anchor.Name,out element)){offset=Math.Max(0,element.TranslatePoint(new Point(),scroll).Y-anchor.Y);break;}}scroll.ScrollToVerticalOffset(offset);if(orbitFocused&&orbitPanel!=null)orbitPanel.View.Focus();
   }
   // Planets, the largest dwarf planets and the Sun carry fixed physical parameters; the Sun shows only size and mass.
@@ -220,7 +223,13 @@ namespace AstroArchive {
    var credits=new StackPanel();credits.Children.Add(line);
    if(attribution.Length>0&&attribution!=who)credits.Children.Add(Data(attribution,"Muted","UiFontCaption"));
    if(modifications.Length>0)credits.Children.Add(Data(modifications,"Muted","UiFontCaption"));
-   var disclosure=Disclosure("Credits",credits);disclosure.Name="ImageCredits";content.Children.Add(disclosure);
+   var disclosure=Disclosure("Credits",credits);disclosure.Name="ImageCredits";
+   // The header icons sit on the Credits row, centred on it and aligned with the image's right edge; with no image they stay by the details.
+   if(headerIcons!=null&&headerIcons.Children.Count>0&&headerRow_!=null){
+    headerRow_.Children.Remove(headerIcons);headerIcons.Margin=new Thickness(6,0,0,0);headerIcons.VerticalAlignment=VerticalAlignment.Top;
+    var creditRow=new Grid();creditRow.ColumnDefinitions.Add(new ColumnDefinition());creditRow.ColumnDefinitions.Add(new ColumnDefinition{Width=GridLength.Auto});
+    creditRow.Children.Add(disclosure);Grid.SetColumn(headerIcons,1);creditRow.Children.Add(headerIcons);content.Children.Add(creditRow);
+   }else content.Children.Add(disclosure);
   }
   // Sections share a quiet caption and divider so the pane reads as distinct parts.
   static StackPanel Section(string title,bool first=false){
