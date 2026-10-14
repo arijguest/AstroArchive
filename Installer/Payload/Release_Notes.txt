@@ -8,7 +8,7 @@ The orbit view is redrawn in the sky globe's style: a constellation backdrop tha
 It now simply shows where the target is now: the last stretch of its orbit is drawn bold and ends in a ringed marker with an arrow along the path. Small rings show where the target was on each date you imaged it in your archive; rings that fall close together are drawn once with a count. Click a ring to see the date it was taken. Play, the date timeline, the date box, the framing chips, the axis triad, the stray mid-orbit arrow and the notes below the picture are gone. Orbit credits are under SOURCES.
 
 Target information
-Open in Stellarium and Refresh information (now a download icon, to the right of Stellarium) are small icons beside the details line instead of a line of their own. Every image credit now sits in the Credits dropdown rather than under the picture.
+Open in Stellarium and Refresh information (now a download icon, to the right of Stellarium) are small icons beside the details line instead of a line of their own. Every image credit now sits in the Credits dropdown rather than under the picture. Other catalogue IDs (NGC, IC, UGC and similar) show under the object line, or beside the main ID when there is only one.
 
 Work during long processes
 Image quality scoring and plate solving run beside importing, exporting and Settings. A background process registry with progress, ETA and a pulsing bell shows what is running, and the archive stays safe to use alongside it.
