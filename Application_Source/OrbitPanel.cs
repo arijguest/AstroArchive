@@ -8,6 +8,7 @@ using System.Windows;
 using System.Windows.Automation;
 using System.Windows.Controls;
 using System.Windows.Data;
+using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Shapes;
 
@@ -22,7 +23,7 @@ namespace AstroArchive {
   public DateTime? MarkerUtc;
   // Dates this target was imaged in the repository, set before SetCard.
   public List<DateTime> CaptureDates;
-  readonly TextBlock caption;
+  readonly TextBlock caption,dateText;readonly TextBox dateEdit;readonly Grid dateHost;
   readonly Border toolbar;readonly StackPanel tools=new StackPanel{Orientation=Orientation.Horizontal};
   readonly Button expand;readonly Path expandIcon;
   CancellationTokenSource work;int generation;OrbitRecord record;bool overview,supportsDate;
@@ -38,6 +39,13 @@ namespace AstroArchive {
    expand=Tool("Expand orbit",Larger,()=>{View.Height=View.Height==Compact?Tall:Compact;Sync();});expandIcon=(Path)expand.Content;
    stage.Children.Add(toolbar);Children.Add(stage);
    caption=new TextBlock{TextWrapping=TextWrapping.Wrap,Margin=new Thickness(0,6,0,2)};caption.SetResourceReference(TextBlock.ForegroundProperty,"Muted");caption.SetResourceReference(TextBlock.FontSizeProperty,"UiFontCaption");Children.Add(caption);
+   // The date sits opposite the ORBIT heading in the same small caps style; clicking it opens a box to type another date.
+   dateText=new TextBlock{FontWeight=FontWeights.SemiBold,HorizontalAlignment=HorizontalAlignment.Right,VerticalAlignment=VerticalAlignment.Bottom,Focusable=true};KeyboardNavigation.SetIsTabStop(dateText,true);
+   dateText.SetResourceReference(TextBlock.ForegroundProperty,"Muted");dateText.SetResourceReference(TextBlock.FontSizeProperty,"UiFontCaption");
+   dateEdit=new TextBox{Visibility=Visibility.Collapsed,HorizontalAlignment=HorizontalAlignment.Right,MinWidth=96,Padding=new Thickness(4,1,4,1),MaxLength=12};dateEdit.SetResourceReference(TextBox.FontSizeProperty,"UiFontCaption");
+   dateHost=new Grid();dateHost.Children.Add(dateText);dateHost.Children.Add(dateEdit);
+   dateText.MouseLeftButtonUp+=(s,e)=>{BeginDateEdit();e.Handled=true;};dateText.KeyDown+=(s,e)=>{if(e.Key==Key.Enter||e.Key==Key.Space){BeginDateEdit();e.Handled=true;}};
+   dateEdit.KeyDown+=(s,e)=>{if(e.Key==Key.Enter){CommitDateEdit();e.Handled=true;}else if(e.Key==Key.Escape){EndDateEdit();e.Handled=true;}};dateEdit.LostKeyboardFocus+=(s,e)=>{if(dateEdit.Visibility==Visibility.Visible)CommitDateEdit();};
    View.Changed=Sync;Unloaded+=(s,e)=>Cancel();Loaded+=(s,e)=>{if(record!=null&&View.Scene==null)LoadScene();};
   }
   // Line icons on a 16 by 16 grid, stroked in the button's own text colour so they follow the theme and the disabled state.
@@ -54,6 +62,28 @@ namespace AstroArchive {
   void Sync(){
    bool tall=View.Height!=Compact;if(tall!=shownTall||expand.ToolTip==null){shownTall=tall;expandIcon.Data=Geometry.Parse(tall?Smaller:Larger);AutomationProperties.SetName(expand,Localization.T(tall?"Collapse orbit":"Expand orbit"));UiHelp.Tip(expand,tall?"Collapse orbit":"Expand orbit");}
   }
+  // Placed beside the heading by the card; shows where the target is on the chosen date.
+  public FrameworkElement HeaderDate{get{return dateHost;}}
+  void ShowDate(string text){
+   dateText.Text=text;bool editable=supportsDate&&record!=null;dateText.Cursor=editable?Cursors.Hand:Cursors.Arrow;dateText.Focusable=editable;
+   dateText.TextDecorations=editable?TextDecorations.Underline:null;
+   string tip=editable?Localization.F("Click to change the date ({0}).",DateFormats.Hint):null;dateText.ToolTip=tip;AutomationProperties.SetName(dateText,Localization.T("Orbit date")+": "+text);AutomationProperties.SetHelpText(dateText,tip??"");
+  }
+  void BeginDateEdit(){
+   if(!supportsDate||record==null)return;
+   dateEdit.Text=DateFormats.Format((MarkerUtc??DateTime.UtcNow).Date);dateEdit.ToolTip=Localization.F("Type a date as {0}, then press Enter. Esc cancels.",DateFormats.Hint);AutomationProperties.SetName(dateEdit,Localization.T("Orbit date"));
+   dateEdit.Visibility=Visibility.Visible;dateText.Visibility=Visibility.Hidden;dateEdit.Focus();dateEdit.SelectAll();
+  }
+  void EndDateEdit(){dateEdit.Visibility=Visibility.Collapsed;dateText.Visibility=Visibility.Visible;dateEdit.ClearValue(Control.BorderBrushProperty);}
+  void CommitDateEdit(){
+   DateTime day;
+   if(!DateFormats.TryParse(dateEdit.Text,out day)||day<Earliest.Date||day>Latest.Date||!OrbitalModel.Dynamical(DateTime.SpecifyKind(day,DateTimeKind.Utc)).HasValue){
+    dateEdit.BorderBrush=Brushes.IndianRed;dateEdit.ToolTip=Localization.F("Enter a date as {0} between {1} and {2}.",DateFormats.Hint,DateFormats.Format(Earliest),DateFormats.Format(Latest));return;
+   }
+   EndDateEdit();var utc=DateTime.SpecifyKind(day,DateTimeKind.Utc);
+   // Today keeps the live clock time, so "now" stays now.
+   SetMarker(utc.Date==DateTime.UtcNow.Date&&OrbitalModel.Dynamical(DateTime.UtcNow).HasValue?DateTime.UtcNow:utc);
+  }
   public void SetCard(TargetInfoCard card){
    overview=card.id=="SUN";record=overview?PlanetEphemeris.Orbit("EARTH",new DateTime(2000,1,1,12,0,0,DateTimeKind.Utc)):OrbitalCatalog.For(card);View.Overview=overview;supportsDate=false;
    if(record!=null&&record.valid_from.HasValue&&record.valid_to.HasValue){
@@ -65,8 +95,8 @@ namespace AstroArchive {
    LoadScene();
   }
   async void LoadScene(){Cancel();int current=++generation;
-   if(record==null){View.SetScene(null);toolbar.Visibility=Visibility.Collapsed;caption.Text=Localization.T("Complete orbital elements are unavailable. No orientation has been assumed.");return;}
-   toolbar.Visibility=Visibility.Visible;caption.Text=Localization.T("Preparing 3D orbit…");Sync();work=new CancellationTokenSource();var token=work.Token;
+   if(record==null){View.SetScene(null);toolbar.Visibility=Visibility.Collapsed;dateHost.Visibility=Visibility.Collapsed;caption.Text=Localization.T("Complete orbital elements are unavailable. No orientation has been assumed.");return;}
+   toolbar.Visibility=Visibility.Visible;dateHost.Visibility=Visibility.Visible;caption.Text=Localization.T("Preparing 3D orbit…");Sync();work=new CancellationTokenSource();var token=work.Token;
    try{var value=await Task.Run(()=>OrbitalCatalog.Scene(record,token),token);if(current!=generation||token.IsCancellationRequested)return;if(overview){value.Full.Extent=35;value.Inner.Extent=6;}Action apply=()=>{if(current!=generation||token.IsCancellationRequested)return;View.SetScene(value);View.Imaged=ImagedMarks();SetMarker(MarkerUtc);Sync();};if(Dispatcher.CheckAccess())apply();else await Dispatcher.InvokeAsync(apply);}catch(OperationCanceledException){}catch(Exception){Action failed=()=>{if(current==generation)caption.Text=Localization.T("The orbit could not be drawn.");};if(Dispatcher.CheckAccess())failed();else Dispatcher.BeginInvoke(failed);}
   }
   public void Cancel(){generation++;if(work!=null){work.Cancel();work.Dispose();work=null;}}
@@ -90,9 +120,9 @@ namespace AstroArchive {
    MarkerUtc=utc;if(record==null)return;OrbitPoint point=new OrbitPoint();bool available;DateTime shown;
    if(utc.HasValue){
     shown=utc.Value;double? day=OrbitalModel.Dynamical(shown);var planet=record.rights.dataset=="planetary-approximation"?PlanetEphemeris.Orbit(record.object_id,shown):null;
-    available=day.HasValue&&OrbitalModel.Position(planet??record,day.Value,out point);View.DateLabel=shown.ToString("yyyy-MM-dd",CultureInfo.InvariantCulture)+" UTC";
+    available=day.HasValue&&OrbitalModel.Position(planet??record,day.Value,out point);ShowDate(DateFormats.Format(shown)+" UTC");
    }else{
-    available=OrbitalModel.Position(record,record.epoch,out point,true);shown=OrbitalModel.Utc(record.epoch)??DateTime.UtcNow;View.DateLabel=Localization.F("Epoch {0}",shown.ToString("yyyy-MM-dd",CultureInfo.InvariantCulture));
+    available=OrbitalModel.Position(record,record.epoch,out point,true);shown=OrbitalModel.Utc(record.epoch)??DateTime.UtcNow;ShowDate(Localization.F("Epoch {0}",DateFormats.Format(shown)));
    }
    View.Marker=available&&!overview?(OrbitPoint?)point:null;View.MarkerIsNow=utc.HasValue&&Math.Abs((shown-DateTime.UtcNow).TotalDays)<1.5;Place(shown);
    string text=Localization.T("Approximate orbit · linear distances; body markers enlarged.");
