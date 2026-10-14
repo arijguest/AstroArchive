@@ -60,7 +60,7 @@ namespace AstroArchive {
    using(var stream=Assembly.GetExecutingAssembly().GetManifestResourceStream("AstroArchive_Logo.png")){var logo=new BitmapImage();logo.BeginInit();logo.CacheOption=BitmapCacheOption.OnLoad;logo.StreamSource=stream;logo.EndInit();logo.Freeze();((Image)Window.FindName("BrandLogo")).Source=logo;Window.Icon=ApplicationIcon.Image;}
    Rect desktop=SystemParameters.WorkArea;Window.MinWidth=Math.Min(Window.MinWidth,Math.Max(800,desktop.Width-24));Window.MinHeight=Math.Min(Window.MinHeight,Math.Max(550,desktop.Height-24));Window.Width=Math.Min(Window.Width,desktop.Width-24);Window.Height=Math.Min(Window.Height,desktop.Height-24);
    InitializeWindowPlacement(test);
-   opening(25,"Loading your preferences…");try{settings=!test&&File.Exists(config)?Util.Deserialize<Settings>(File.ReadAllText(config)):new Settings();}catch{settings=new Settings();}if(settings==null)settings=new Settings();InitializeConnectivity(test);if(string.IsNullOrEmpty(settings.Astap))settings.Astap=PlateSolve.FindAstap();
+   opening(25,"Loading your preferences…");try{settings=!test&&File.Exists(config)?Util.Deserialize<Settings>(File.ReadAllText(config)):new Settings();}catch{settings=new Settings();}if(settings==null)settings=new Settings();DateFormats.Configure(settings);InitializeConnectivity(test);if(string.IsNullOrEmpty(settings.Astap))settings.Astap=PlateSolve.FindAstap();
    try{Catalog.ConfigureNames(settings.TargetNames);}catch(ArgumentException){Catalog.ConfigureNames(null);}
    LocalizedInterface.Install();LocalizedInterface.Prepare(Window.Resources);LocalizedInterface.Prepare(Window);
    T("SourceBox").Text=settings.LastSource??"";T("TelescopeBox").Text=settings.Telescope??"Telescope-01";

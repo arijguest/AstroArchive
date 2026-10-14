@@ -8,6 +8,19 @@ using System.Windows.Input;
 using System.Windows.Threading;
 namespace AstroArchive {
  public partial class MainUi {
+  // Asked once, on first use. Skipping is fine: Preferences > Sky & solving keeps the same choice.
+  void AskObservingLocation(){
+   if(settings.LocationPromptSeen||settings.ObservingCityId.HasValue||closing)return;
+   settings.LocationPromptSeen=true;SaveSettings();
+   var d=new FormWindow(Window,"Where do you observe from?",600,430);d.Text("Where do you observe from?",true);
+   d.Text("Pick your nearest town or city. AstroArchive uses it for sky views and to choose your date format (month first in the United States). You can skip this and set it later in Preferences.");
+   var choice=new ObservingSiteChoice(settings);var label=d.Input("Town / city",choice.Label);label.IsReadOnly=true;UiHelp.Hint(label,"Saved location used for sky views.");
+   var format=new TextBlock{TextWrapping=TextWrapping.Wrap,Margin=new Thickness(0,0,0,8)};format.SetResourceReference(TextBlock.FontSizeProperty,"UiFontBody");Theme.Bind(format,TextBlock.ForegroundProperty,"Muted");
+   Action showFormat=()=>{format.Text=Localization.F("Dates will show as {0}. Change this any time in Preferences.",DateFormats.Resolve(settings.DateFormat,choice.CountryCode));};showFormat();d.Add(format);
+   d.Button("Choose town / city…",()=>{var picker=new CityPicker(d.Window,choice.CityLabel);try{if(picker.Show()){choice.Select(picker.SelectedCity);label.Text=choice.Label;showFormat();}}finally{picker.Dispose();}});
+   d.Accept("Save location",()=>{if(!choice.CityId.HasValue){LocalizedMessage.Show(d.Window,"Choose a town or city first, or press Cancel to skip.","No location chosen",MessageBoxButton.OK,MessageBoxImage.Information);return false;}choice.Save(settings);DateFormats.Configure(settings);SaveSettings();RefreshSkyPreviews();return true;});
+   d.Show();
+  }
   ObservingSiteChoice AddObservingSite(FormWindow dialog){
    var choice=new ObservingSiteChoice(settings);dialog.Text("Observing town / city",true);
    dialog.Text("Select your nearest town or city. Its centre is used for sky views; without a selection, capture location metadata is used when available.");

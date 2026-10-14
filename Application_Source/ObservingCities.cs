@@ -38,12 +38,12 @@ namespace AstroArchive {
  }
  // Settings are edited in a draft so canceling a dialog retains the previous site.
  public sealed class ObservingSiteChoice {
-  public int? CityId;public string CityLabel;public double? Latitude,Longitude;
-  public ObservingSiteChoice(Settings settings){CityId=settings.ObservingCityId;CityLabel=settings.ObservingCity;Latitude=settings.Latitude;Longitude=settings.Longitude;}
+  public int? CityId;public string CityLabel,CountryCode;public double? Latitude,Longitude;
+  public ObservingSiteChoice(Settings settings){CityId=settings.ObservingCityId;CityLabel=settings.ObservingCity;CountryCode=settings.ObservingCountryCode;Latitude=settings.Latitude;Longitude=settings.Longitude;}
   public string Label{get{return !string.IsNullOrEmpty(CityLabel)?CityLabel:Latitude.HasValue&&Longitude.HasValue?"Previously saved location":"Not selected";}}
-  public void Select(ObservingCity city){if(city==null||!ObservingCities.ValidCoordinates(city.Latitude,city.Longitude))throw new ArgumentException("Choose a valid town or city.");CityId=city.Id;CityLabel=city.Label;Latitude=city.Latitude;Longitude=city.Longitude;}
-  public void Clear(){CityId=null;CityLabel=null;Latitude=null;Longitude=null;}
-  public void Save(Settings settings){settings.ObservingCityId=CityId;settings.ObservingCity=CityLabel;settings.Latitude=Latitude;settings.Longitude=Longitude;}
+  public void Select(ObservingCity city){if(city==null||!ObservingCities.ValidCoordinates(city.Latitude,city.Longitude))throw new ArgumentException("Choose a valid town or city.");CityId=city.Id;CityLabel=city.Label;CountryCode=city.CountryCode;Latitude=city.Latitude;Longitude=city.Longitude;}
+  public void Clear(){CityId=null;CityLabel=null;CountryCode=null;Latitude=null;Longitude=null;}
+  public void Save(Settings settings){settings.ObservingCityId=CityId;settings.ObservingCity=CityLabel;settings.ObservingCountryCode=CountryCode;settings.Latitude=Latitude;settings.Longitude=Longitude;}
  }
  // Where a capture was taken: a town/city the user chose for the file, then
  // coordinates recorded in its metadata, then the observing town in Settings.

@@ -114,7 +114,7 @@ namespace AstroArchive {
             var originals=(CheckBox)Window.FindName("DeleteOriginalsCheck");originals.Checked+=(s,e)=>UpdateNavigationState();originals.Unchecked+=(s,e)=>UpdateNavigationState();
             UpdateNavigationState();
             if (firstRun) Window.ContentRendered += (s,e) => {
-                Window.Dispatcher.BeginInvoke(new Action(() => { if (!settings.GuideSeen && !RepositoryOperationBlocked && !closing) StartWalkthrough(true); }));
+                Window.Dispatcher.BeginInvoke(new Action(() => { if (!closing) AskObservingLocation(); if (!settings.GuideSeen && !RepositoryOperationBlocked && !closing) StartWalkthrough(true); }));
             };
         }
         void NavigationKeys(object sender, KeyEventArgs e) {

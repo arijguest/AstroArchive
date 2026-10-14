@@ -125,8 +125,8 @@ namespace AstroArchive {
     }else mapPanel.Children.Add(Text("Catalogue coordinates are not available for this target.","Muted"));
    }
    if(card.domain=="solar_system"){
-    mapPanel=new StackPanel{Margin=new Thickness(0,4,0,10)};body.Children.Add(mapPanel);mapPanel.Children.Add(Section("ORBIT"));
-    orbitPanel=new OrbitPanel{Name="OrbitPanel"};mapPanel.Children.Add(orbitPanel);if(CaptureDates!=null)orbitPanel.CaptureDates=CaptureDates(card);orbitPanel.SetCard(card);
+    mapPanel=new StackPanel{Margin=new Thickness(0,4,0,10)};body.Children.Add(mapPanel);var orbitHeading=Section("ORBIT");mapPanel.Children.Add(orbitHeading);
+    orbitPanel=new OrbitPanel{Name="OrbitPanel"};OrbitHeadingDate(orbitHeading,orbitPanel);mapPanel.Children.Add(orbitPanel);if(CaptureDates!=null)orbitPanel.CaptureDates=CaptureDates(card);orbitPanel.SetCard(card);
    }
    var sources=new StackPanel();
    var complete=OrbitalCatalog.For(card);if(complete!=null){sources.Children.Add(Link("NASA/JPL · "+complete.solution_id,complete.source));sources.Children.Add(Data(Localization.F("Source epoch: JD {0} {1} · {2}",complete.epoch.ToString("0.#####",CultureInfo.InvariantCulture),complete.time_standard,complete.solution_id),"Muted","UiFontCaption"));if(complete.uncertainties!=null&&complete.uncertainties.Count>0)sources.Children.Add(Data(string.Join(" · ",complete.uncertainties.Select(p=>p.Key+" σ "+p.Value)),"Muted","UiFontCaption"));}
@@ -227,6 +227,12 @@ namespace AstroArchive {
    }else{line.Name="ImageCredits";content.Children.Add(line);}
   }
   // Sections share a quiet caption and divider so the pane reads as distinct parts.
+  // Puts the orbit date on the heading's line, right-aligned, in the heading's own style.
+  static void OrbitHeadingDate(StackPanel heading,OrbitPanel orbit){
+   var caption=heading.Children[heading.Children.Count-1];heading.Children.Remove(caption);
+   var row=new Grid();row.ColumnDefinitions.Add(new ColumnDefinition{Width=new GridLength(1,GridUnitType.Star)});row.ColumnDefinitions.Add(new ColumnDefinition{Width=GridLength.Auto});
+   row.Children.Add(caption);Grid.SetColumn(orbit.HeaderDate,1);row.Children.Add(orbit.HeaderDate);heading.Children.Add(row);
+  }
   static StackPanel Section(string title,bool first=false){
    var panel=new StackPanel{Margin=new Thickness(0,first?6:12,0,6)};
    if(!first){var rule=new Border{Height=1,Margin=new Thickness(0,0,0,8),Opacity=0.7};rule.SetResourceReference(Border.BackgroundProperty,"Border");panel.Children.Add(rule);}
