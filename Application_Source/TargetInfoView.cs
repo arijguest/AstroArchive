@@ -19,7 +19,7 @@ namespace AstroArchive {
  public sealed class TargetInfoView:UserControl {
   static readonly HashSet<string> anchorNames=new HashSet<string>(new[]{"ObjectTitle","ObjectDetails","OverviewHeading","OverviewText","ObjectImage","FunFact","ParametersHeading","ImagingNotes","ImagingNotesText","Sources","ImageCredits","OrbitPanel"});
   readonly StackPanel content=new StackPanel();readonly ScrollViewer scroll;
-  StackPanel headerIcons;Grid headerRow_;
+  StackPanel headerIcons;Grid headerRow_,creditRow_;
   TextBlock informationStatus;Button refreshButton;OrbitPanel orbitPanel;Grid body,mapHost;StackPanel article,mapPanel;SkyGlobeView globe;Image photo;Button reset;
   public Action<string> ChooseObject;public Action RefreshInformation;public bool InternetAvailable;
   // A section such as Comets lists the user's targets inside it; choosing one reads that target's page.
@@ -48,7 +48,7 @@ namespace AstroArchive {
   // Disclosures sit directly in the content, or beside the header icons in a row.
   IEnumerable<Expander> Expanders(){return content.Children.OfType<Expander>().Concat(content.Children.OfType<Grid>().SelectMany(g=>g.Children.OfType<Expander>()));}
   void Begin(string title){
-   if(orbitPanel!=null)orbitPanel.Cancel();orbitPanel=null;informationStatus=null;refreshButton=null;headerIcons=null;headerRow_=null;CurrentId=null;body=null;mapPanel=null;mapHost=null;globe=null;photo=null;reset=null;content.Children.Clear();scroll.ScrollToTop();
+   if(orbitPanel!=null)orbitPanel.Cancel();orbitPanel=null;informationStatus=null;refreshButton=null;headerIcons=null;headerRow_=null;creditRow_=null;CurrentId=null;body=null;mapPanel=null;mapHost=null;globe=null;photo=null;reset=null;content.Children.Clear();scroll.ScrollToTop();
    var label=Text("TARGET INFO","Muted","UiFontCaption");label.FontWeight=FontWeights.SemiBold;content.Children.Add(label);
    var heading=Data(title,"Text","UiFontHeading");heading.Name="ObjectTitle";heading.FontWeight=FontWeights.SemiBold;content.Children.Add(heading);
   }
@@ -228,7 +228,7 @@ namespace AstroArchive {
    if(headerIcons!=null&&headerIcons.Children.Count>0&&headerRow_!=null){
     headerRow_.Children.Remove(headerIcons);headerIcons.Margin=new Thickness(6,0,0,0);headerIcons.VerticalAlignment=VerticalAlignment.Center;
     var creditRow=new Grid();creditRow.ColumnDefinitions.Add(new ColumnDefinition());creditRow.ColumnDefinitions.Add(new ColumnDefinition{Width=GridLength.Auto});
-    creditRow.Children.Add(disclosure);Grid.SetColumn(headerIcons,1);creditRow.Children.Add(headerIcons);content.Children.Add(creditRow);
+    creditRow.Children.Add(disclosure);Grid.SetColumn(headerIcons,1);creditRow.Children.Add(headerIcons);creditRow.HorizontalAlignment=HorizontalAlignment.Center;creditRow_=creditRow;content.Children.Add(creditRow);
    }else content.Children.Add(disclosure);
   }
   // Sections share a quiet caption and divider so the pane reads as distinct parts.
@@ -266,7 +266,7 @@ namespace AstroArchive {
   static TextBlock Link(string label,string url){var text=Text("","Muted","UiFontCaption");text.Inlines.Add(Linked(label,url));return text;}
   void PositionReset(){SkyGlobeView.PlaceReset(reset,globe,mapHost);}
   void ArrangeBody(){
-   if(photo!=null){var bitmap=photo.Source as BitmapSource;double ratio=bitmap.PixelWidth/(double)bitmap.PixelHeight,width=Math.Max(1,ActualWidth-scroll.Padding.Left-scroll.Padding.Right-SystemParameters.VerticalScrollBarWidth-8),cap=Math.Min(340,Math.Max(160,scroll.ActualHeight*0.48));double height=Math.Min(cap,width/ratio);photo.Height=height;photo.Width=height*ratio;}
+   if(photo!=null){var bitmap=photo.Source as BitmapSource;double ratio=bitmap.PixelWidth/(double)bitmap.PixelHeight,width=Math.Max(1,ActualWidth-scroll.Padding.Left-scroll.Padding.Right-SystemParameters.VerticalScrollBarWidth-8),cap=Math.Min(340,Math.Max(160,scroll.ActualHeight*0.48));double height=Math.Min(cap,width/ratio);photo.Height=height;photo.Width=height*ratio;if(creditRow_!=null)creditRow_.Width=photo.Width;}
    if(body==null)return;bool wide=ActualWidth>=540&&mapPanel!=null;body.ColumnDefinitions[0].Width=new GridLength(1,GridUnitType.Star);body.ColumnDefinitions[1].Width=wide?new GridLength(orbitPanel==null?230:Math.Max(260,ActualWidth*0.48)):new GridLength(0);
    if(mapPanel!=null){Grid.SetColumn(mapPanel,wide?1:0);Grid.SetRow(mapPanel,wide?0:1);mapPanel.Margin=new Thickness(wide?16:0,4,0,10);if(mapHost!=null)mapHost.Height=wide?230:Math.Min(280,Math.Max(160,ActualWidth-40));}
   }
