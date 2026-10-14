@@ -1,11 +1,11 @@
 AstroArchive 3.3.0
-Package 3.3.0.1
+Package 3.3.0.2
 
 Covers everything since 3.2.8.1.
 
 3D orbit viewer
 The orbit view is redrawn in the sky globe's style: a constellation backdrop that turns with the camera, a ringed reference plane with distance rings and spokes, a solid orbit above the plane and a dashed one below it, ascending and descending nodes, perihelion and aphelion, a scale bar and round icon buttons (Reset, Zoom, Top view, Orbit plane, Expand). Camera moves ease unless Reduce motion is on, and labels are placed by priority so they no longer collide.
-It now simply shows where the target is now: the last stretch of its orbit is drawn bold and ends in a ringed marker with an arrow along the path. Small rings show where the target was on each date you imaged it in your archive; rings that fall close together are drawn once with a count. Play, the date timeline, the date box, the framing chips, the axis triad, the stray mid-orbit arrow and the notes below the picture are gone. Orbit credits are under SOURCES.
+It now simply shows where the target is now: the last stretch of its orbit is drawn bold and ends in a ringed marker with an arrow along the path. Small rings show where the target was on each date you imaged it in your archive; rings that fall close together are drawn once with a count. Click a ring to see the date it was taken. Play, the date timeline, the date box, the framing chips, the axis triad, the stray mid-orbit arrow and the notes below the picture are gone. Orbit credits are under SOURCES.
 
 Target information
 The Refresh information and Open in Stellarium buttons are now small icons beside the details line instead of a line of their own.

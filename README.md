@@ -167,7 +167,7 @@ It follows your Windows language, or choose one in **Settings → General → La
 
 ### Fresh from the latest releases
 
-**[3.3.0 prerelease](https://github.com/arijguest/AstroArchive/releases/tag/v3.3.0.1)** sharpens the 3D orbit viewer so the target's place now stands out, adds small rings for the dates you imaged it (grouped when close together), and rolls up everything since 3.2.8: background processes, distance and comet data, Meteors and the help centre.
+**[3.3.0 prerelease](https://github.com/arijguest/AstroArchive/releases/tag/v3.3.0.2)** sharpens the 3D orbit viewer so the target's place now stands out, adds small rings for the dates you imaged it (grouped when close together), and rolls up everything since 3.2.8: background processes, distance and comet data, Meteors and the help centre.
 
 **[3.2.8 prerelease](https://github.com/arijguest/AstroArchive/releases/tag/v3.2.8.1)** rebuilds Help as a help centre with guided fixes and tours that walk the real window, adds Report a problem with the app log attached, groups comets under one target with a fuller information pane, applies capture-town timezones to local capture clocks, and repairs thumbnail credits.
 

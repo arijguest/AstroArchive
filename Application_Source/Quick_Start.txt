@@ -2,7 +2,7 @@ AstroArchive user guide
 @title About this guide
 @category Reference
 @summary Which version this guide describes and what AstroArchive needs to run.
-Application 3.3.0; package 3.3.0.1.
+Application 3.3.0; package 3.3.0.2.
 Windows 10/11 x64; .NET Framework 4.8.
 
 Press `F1` on any page for help with that page. Guide topics stay in English;
@@ -1048,7 +1048,8 @@ marker with an arrow along the path, showing where the target is now. Dated
 bodies show today; others show their position at the orbit epoch.
 
 Small rings mark where the target was on each date you imaged it; rings that
-fall close together are drawn once with a count. Diamonds mark the ascending
+fall close together are drawn once with a count. Click a ring to see the date it
+was taken. Diamonds mark the ascending
 (filled) and descending (open) nodes, with perihelion and aphelion (or perigee
 and apogee).
 

@@ -96,7 +96,7 @@ namespace AstroArchive {
    }
    View.Marker=available&&!overview?(OrbitPoint?)point:null;View.MarkerIsNow=utc.HasValue&&Math.Abs((shown-DateTime.UtcNow).TotalDays)<1.5;Place(shown);
    string text=Localization.T("Approximate orbit · linear distances; body markers enlarged.");
-   if(View.Imaged!=null&&View.Imaged.Count>0)text+=" "+Localization.T("Small rings: where it was when you imaged it.");
+   if(View.Imaged!=null&&View.Imaged.Count>0)text+=" "+Localization.T("Small rings: where it was when you imaged it. Click one for its date.");
    caption.Text=available||overview?text:Localization.T("A current position is unavailable for this solution.");
    View.Redraw();
   }
