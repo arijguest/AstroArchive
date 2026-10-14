@@ -22,26 +22,20 @@ Windows 10 / 11 x64 &nbsp; · &nbsp; .NET Framework 4.8 &nbsp; · &nbsp; Archive
 
 | Keep every session organised | Pick up your next project | See your imaging progress |
 | :--- | :--- | :--- |
-| Find captures by target, telescope or session instead of digging through folders. | Gather the right files for processing and keep working copies with your archive. | Compare your targets, capture history and integration time with exportable analytics. |
+| Find captures by target, telescope or session instead of digging through folders. | Gather the right files for processing and keep working copies with your archive. | Compare targets, capture history and integration time in Analytics. |
 
-**Explore:** [Import](#bring-the-night-straight-into-your-archive) · [Process](#give-your-next-processing-project-a-head-start) · [Analytics](#see-the-bigger-picture) · [Get started](#start-with-your-next-session)
+**Explore:** [Import](#bring-the-night-straight-into-your-archive) · [Process](#give-your-next-processing-project-a-head-start) · [Analytics](#see-the-bigger-picture) · [Targets](#know-what-you-captured) · [Get started](#start-with-your-next-session)
 
 ## Bring the night straight into your archive
 
-Keep capturing while AstroArchive brings new files into your collection. Import
-from a folder or USB, or connect to **Seestar, DWARF and Celestron Origin over your local network**.
+Import from a folder or USB, watch the folder N.I.N.A., SharpCap or ASIAIR saves to,
+or connect to **Seestar, DWARF and Celestron Origin over your local network** and
+collect captures while the telescope keeps shooting.
 
 [![Network import showing three real Orion Nebula subframes selected from a Seestar S50 Pro](docs/images/network-import.png)](docs/images/network-import.png)
 
-- **Let captures come to you.** Live import watches for completed files while the telescope app keeps shooting.
-- **Watch your capture folder.** Point AstroArchive at the folder N.I.N.A., SharpCap or ASIAIR saves to, and each finished capture is archived as it lands.
-- **Run more than one telescope.** Each device has its own progress and controls; select extra files while live imports continue.
-- **Pick up where you left off.** Pause and resume imports, including unfinished queues after a restart or update.
-- **Keep track of the night.** Compact process summaries show progress, transfer speeds and results without interrupting your work.
-
-Network imports retain telescope originals. Transfers and archive copies are
-verified, duplicates are skipped, and completed copies survive interruptions.
-Compatible firmware file access is required.
+Transfers are verified, duplicates are skipped, telescope originals are kept, and
+paused or interrupted imports resume where they left off.
 [Connection setup and troubleshooting →](docs/REMOTE_IMPORT.md)
 
 ## Give your next processing project a head start
@@ -60,78 +54,37 @@ your captures, then prepare files for the processing software you already use.
 Stacking and calibration run in your processing software.
 [Explore processing handoffs →](docs/PROCESSOR_HANDOFFS.md)
 
-**Star the keepers.** Star files, sessions or Edited images, and add your own tags
-and notes; starred rows carry a subtle tint in every theme, and search and filters
-find them again. Capture details show the Moon’s phase, illumination and elevation
-at capture time, and how far it sat from your target.
+**Star the keepers.** Star, tag and annotate files, sessions or Edited images, and find them again with search and filters.
 
 ## See the bigger picture
 
-Where have you spent your imaging time? Which targets are ready for another pass?
-**Repository → Analytics** turns your archive into six branded charts.
+**Repository → Analytics** charts your targets, imaging timeline and integration
+time per target, telescope, filter and exposure length. Export a chart or a full
+report as PNG, JPEG, PDF, SVG, MP4 or GIF, or right-click a target to make a
+shareable card of your best image of it.
 
-| Your question | Your chart |
-| :--- | :--- |
-| What have I photographed? | Targets photographed |
-| How has my imaging changed over time? | Imaging timeline |
-| Where have I invested the most exposure? | Time per target |
-| How much imaging time has each telescope contributed? | Time per telescope |
-| Which filters do I use most? | Filter mix |
-| What exposure lengths do I shoot? | Exposure lengths |
+## Know what you captured
 
-Filter by acquisition dates or telescope, add a document label, and choose a
-**Dark or Light** report. Export **PNG, JPEG, PDF or SVG**—one chart or all six in
-one document, with 150 or 300 DPI for raster images. Choose Landscape or a social
-layout: **9:16**, **4:5**, **1:1**, **16:9** or **2:3**, with matching pixel presets.
-
-Make each chart your own: show it as a donut, bars or columns, reorder rankings,
-give it your own title and subtitle, and pick a colour palette, including a
-colour-blind safe one. Choose which charts go into the combined document.
-Analytics remembers these choices for next time.
-
-Choose **MP4** or **GIF** to share an animated chart or an **Export all** story.
-Preview the chart reveals and Glide, Zoom or Dissolve transitions; set 4, 6 or 8
-seconds per page and choose original or smaller dimensions. MP4 uses Windows’
-built-in H.264 encoder at 24 fps; GIF loops at 12 fps. Exports show progress and
-remaining time, and cancellation preserves any previous output.
-
-**Share a target.** Right-click any target to create a card with your best image
-of it and its integration, light frames, nights and filters, sized for posts,
-stories or video, in Dark or Light.
-
-<details>
-<summary><strong>What the analytics measure</strong></summary>
-
-Time means individual light-frame integration. Stacks, videos and calibrations
-are excluded to avoid double counting; missing dates and exposures are reported.
-The report starts with the entire repository independently of browsing filters.
-Including rejected lights is optional. Long rankings continue across pages so
-every target and telescope remains represented. Headline cards always show the
-whole repository’s light-frame integration, frame count and target count, including
-rejected and undated lights. Chart filters affect the plot and its footer totals.
-PDF gives each chart its own page; image/SVG collections stack tall layouts or
-use a grid for square and wide pages.
-
-</details>
+Every target gets an offline overview, fun facts and sky position, with optional
+downloaded detail and 3D orbits that mark the nights you imaged it. AstroArchive
+detects solar and lunar eclipses in your Sun and Moon captures, and **All Targets**
+lists upcoming sky events at your observing location.
+[Hybrid information guide](docs/HYBRID_INFORMATION.md)
 
 ## Find your sharpest subs
 
-**Repository → Review and analysis → Analyse image quality** scores each light frame from 0 to 100 against
-similar frames in its session: star size, roundness, star count and noise for deep-sky subs, and
-edge sharpness and detail for planetary, lunar and solar stills. Sort by **QUALITY**, or use
-**Filters → Quality rank** to keep the top or weakest frames, flagged frames or unscored ones.
-Subs inside each session list best first. Flags such as Soft, Clouded or Trailed explain themselves
-in a tooltip, and scores only suggest: nothing is rejected for you. Linear stacks are scored against
-other stacks of the same target. Calibration frames, recordings and non-linear images are never graded. [How scoring works](docs/IMAGE_QUALITY.md)
+**Repository → Review and analysis → Analyse image quality** scores each light frame
+from 0 to 100 against its session, then lets you sort, filter and see why a frame
+was flagged. Scores only suggest: nothing is rejected for you.
+[How scoring works](docs/IMAGE_QUALITY.md)
 
 ## Built around the captures you want to keep
 
 **Verified copies. Original bytes. A collection you can return to.**
 
-- Ordinary imports and exports preserve image bytes; source originals are kept by default.
-- Preview stretches affect the display. Metadata edits update indexed labels, while **Fill missing metadata** previews supported additions without replacing existing values or user edits.
-- Verified folder or lossless ZIP backups include images, Edited files and the database. Later backups copy only what changed, can repeat daily, weekly or monthly, and restore with every file verified.
-- The repository path shows your archive’s total size, with a breakdown on hover.
+- Imports and exports preserve image bytes; source originals are kept by default.
+- Previews never change your files, and metadata edits only update the index.
+- Verified folder or ZIP backups include images, Edited files and the database, copy only what changed, and can run on a schedule.
 
 <details>
 <summary><strong>Formats and archive care</strong></summary>
@@ -165,45 +118,12 @@ It follows your Windows language, or choose one in **Settings → General → La
 
 **Need a hand?** Press **F1** in the app, follow the [offline guide](Application_Source/Quick_Start.txt), or [report an issue](https://github.com/arijguest/AstroArchive/issues).
 
-### Fresh from the latest releases
+### What's new in 3.3.2
 
-**[3.3.2](https://github.com/arijguest/AstroArchive/releases/tag/v3.3.2.2)** draws a solar-cycle corona on the total eclipse sky map, adds upcoming sky events to All Targets, manages telescope profiles in Settings and starts Import with Scan folder….
-
-**[3.3.1 prerelease](https://github.com/arijguest/AstroArchive/releases/tag/v3.3.1.1)** tidies Analytics exports (smaller title, fuller layouts, capitalised automatic descriptions with comet orbits), stops scoring stacks and solar images for quality, adds a date format setting and first-run observing location, groups the metadata exports under Export > Metadata, keeps your place after deleting files, adds copy workers to long imports and makes backups resumable.
-
-**[3.3.0 prerelease](https://github.com/arijguest/AstroArchive/releases/tag/v3.3.0.1)** sharpens the 3D orbit viewer so the target's place now stands out, adds small rings for the dates you imaged it (grouped when close together), and rolls up everything since 3.2.8: background processes, distance and comet data, Meteors and the help centre.
-
-**[3.2.8 prerelease](https://github.com/arijguest/AstroArchive/releases/tag/v3.2.8.1)** rebuilds Help as a help centre with guided fixes and tours that walk the real window, adds Report a problem with the app log attached, groups comets under one target with a fuller information pane, applies capture-town timezones to local capture clocks, and repairs thumbnail credits.
-
-**[3.2.7](https://github.com/arijguest/AstroArchive/releases/tag/v3.2.7.2)** retains the 3.2.6 application improvements and makes publisher signing optional. Unsigned publication keeps checksum and update-feed validation; Windows may still block unsigned packages.
-
-**[3.2.6](https://github.com/arijguest/AstroArchive/releases/tag/v3.2.6.1)** reorganises the information pane with the overview before the image, a highlighted fun fact, compact or expandable image credits, and a single expandable Sources heading. It also simplifies solar eclipse displays, moves capture town/city editing into Edit metadata, improves DSO obstruction scoring, and hardens FITS and very dark previews.
-
-**[3.2.5 prerelease](https://github.com/arijguest/AstroArchive/releases/tag/v3.2.5.1)** adds Celestron Origin network import, an ETA on every running process, steadier quality ranking with scored stacks, a clearer target overlay with spaced catalogue IDs, per-file capture towns and below-horizon flags, Stellarium Web when Stellarium is not installed, and sturdier FITS/XISF parsing.
-
-**[3.2.4 prerelease](https://github.com/arijguest/AstroArchive/releases/tag/v3.2.4.1)** overhauls Analytics, adds Open in Stellarium and a target overlay to the preview, eclipse timing in Capture details, reorganised menus, a PARAMETERS section with orbits, sizes, masses and moons for solar-system bodies, comet information pages, a backup-in-progress indicator, and fixes for green lunar stacks and Moon sky maps.
-
-**[3.2.3 prerelease](https://github.com/arijguest/AstroArchive/releases/tag/v3.2.3.1)** detects solar and lunar eclipses in your Sun and Moon captures, adds daytime sky maps, in-depth overviews for 170 popular targets and image-quality scoring.
-
-**[3.2.2 prerelease](https://github.com/arijguest/AstroArchive/releases/tag/v3.2.2.1)** adds chart types, target cards for your top or chosen targets as images or video, adjustable card images, and centred folder bars under each table.
-
-**3.2.9** adds a single hybrid installer, an explicit Hybrid/Offline connectivity choice, bounded downloaded information, and native 3D orbit views. [Read the hybrid information guide](docs/HYBRID_INFORMATION.md).
-
-**[3.2.1 prerelease](https://github.com/arijguest/AstroArchive/releases/tag/v3.2.1.1)** adds offline target information and thumbnails, seven interface languages, and corrected planetary sky positions from capture times.
-
-**[3.1.9](https://github.com/arijguest/AstroArchive/releases/tag/v3.1.9.1)** opens
-where you left it, remembering window position, size and monitor, and greets you with a
-Rosette Nebula startup window showing loading progress, hints and celestial facts.
-**[3.1.8](https://github.com/arijguest/AstroArchive/releases/tag/v3.1.8.1)** makes
-stacking exports find the right calibration files, including master bias and flat
-frames from Siril, PixInsight and DSS. Network imports gain folder selection,
-Ctrl/Shift multi-select and a running total of files and size. The Capture details
-panel is shorter, comets show their proper names, and the preview's folder button
-shows the file in File Explorer. 3.1.7 made updates roll back automatically if
-Windows blocks a new version from starting.
-Earlier releases added animated analytics stories, recoverable import queues
-and simultaneous telescope sessions.
-[See what’s new →](https://github.com/arijguest/AstroArchive/releases)
+**[3.3.2](https://github.com/arijguest/AstroArchive/releases/tag/v3.3.2.2)** draws a
+solar-cycle corona on the total eclipse sky map, adds upcoming sky events to All
+Targets, manages telescope profiles in **Settings → Telescopes** and starts Import
+with **Scan folder…**. [All releases →](https://github.com/arijguest/AstroArchive/releases)
 
 ## Go further
 
