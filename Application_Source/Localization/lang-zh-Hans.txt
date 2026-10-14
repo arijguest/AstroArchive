@@ -2431,3 +2431,7 @@ Orbit|Jupiter	木星
 Orbit|Saturn	土星
 Orbit|Uranus	天王星
 Orbit|Neptune	海王星
+now	现在
+on this date	此日期
+Small rings: where it was when you imaged it.	小圆环：拍摄当天它所在的位置。
+A current position is unavailable for this solution.	此解没有可用的当前位置。

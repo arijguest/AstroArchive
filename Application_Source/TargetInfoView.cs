@@ -28,6 +28,8 @@ namespace AstroArchive {
   public Action<StellariumView> OpenInStellarium;
   // The observing location the Meteors page uses to say which showers can be seen; null when none is set.
   public Func<CaptureSite> ObserverSite;
+  // The dates the card's target was imaged in the repository, for the orbit's imaged markers.
+  public Func<TargetInfoCard,List<DateTime>> CaptureDates;
   public const string MeteorCardId="METEORS";
   public string CurrentId{get;private set;}
   public TargetInfoView(){
@@ -58,14 +60,17 @@ namespace AstroArchive {
    Begin(Catalog.DisplayIds(card.name));CurrentId=card.id;
    string constellation=TargetInfoPresentation.Constellation(card.constellation);
    // The ID is shown once: in the heading when the object has no other name, otherwise here.
-   var details=Data(TargetInfoPresentation.Tagline(card,constellation),"Muted","UiFontCaption");details.Name="ObjectDetails";content.Children.Add(details);
+   var details=Data(TargetInfoPresentation.Tagline(card,constellation),"Muted","UiFontCaption");details.Name="ObjectDetails";
+   // Refresh and Open in Stellarium are small icons at the right of the details line rather than a line of their own.
+   var headerRow=new Grid();headerRow.ColumnDefinitions.Add(new ColumnDefinition());headerRow.ColumnDefinitions.Add(new ColumnDefinition{Width=GridLength.Auto});headerRow.Children.Add(details);
+   var icons=new StackPanel{Orientation=Orientation.Horizontal,VerticalAlignment=VerticalAlignment.Top,Margin=new Thickness(6,0,0,0)};Grid.SetColumn(icons,1);headerRow.Children.Add(icons);content.Children.Add(headerRow);
    if(!string.IsNullOrEmpty(context))content.Children.Add(Data(context,"Muted","UiFontCaption"));
    var actions=new WrapPanel{Margin=new Thickness(0,0,0,4)};
-   if(RefreshInformation!=null&&InformationCoordinator.Provider(card)!=null){var refresh=refreshButton=ActionButton("Refresh information",false);refresh.IsEnabled=InternetAvailable;UiHelp.Hint(refresh,InternetAvailable?"Download missing or updated information for this target.":"Choose Hybrid in Preferences > General > Online access to reconnect.");refresh.Click+=(s,e)=>RefreshInformation();actions.Children.Add(refresh);}
+   if(RefreshInformation!=null&&InformationCoordinator.Provider(card)!=null){var refresh=refreshButton=IconButton(RefreshGeometry,"Refresh information");refresh.IsEnabled=InternetAvailable;UiHelp.Hint(refresh,InternetAvailable?"Download missing or updated information for this target.":"Choose Hybrid in Preferences > General > Online access to reconnect.");refresh.Click+=(s,e)=>RefreshInformation();icons.Children.Add(refresh);}
    if(!string.IsNullOrEmpty(card.downloaded_at))content.Children.Add(Data(Localization.F("Saved information · retrieved {0}",card.downloaded_at),"Muted","UiFontCaption"));
    if(!string.IsNullOrEmpty(back)&&GoBack!=null){var up=ActionButton(back,true);up.Name="BackToSection";up.Click+=(s,e)=>GoBack();actions.Children.Add(up);}
    var stellarium=OpenInStellarium==null?null:Stellarium.ForCard(card);
-   if(stellarium!=null){var open=StellariumIconButton();open.Name="OpenInStellarium";AutomationProperties.SetName(open,Localization.T("Open in Stellarium"));UiHelp.Hint(open,Localization.T(Stellarium.CardTooltip(stellarium)));open.Click+=(s,e)=>OpenInStellarium(stellarium);actions.Children.Add(open);}
+   if(stellarium!=null){var open=IconButton(Stellarium.IconGeometry,"Open in Stellarium");open.Name="OpenInStellarium";UiHelp.Hint(open,Localization.T(Stellarium.CardTooltip(stellarium)));open.Click+=(s,e)=>OpenInStellarium(stellarium);icons.Children.Add(open);}
    if(actions.Children.Count>0)content.Children.Add(actions);
    informationStatus=Text("","Muted","UiFontCaption");informationStatus.Visibility=Visibility.Collapsed;AutomationProperties.SetLiveSetting(informationStatus,AutomationLiveSetting.Polite);content.Children.Add(informationStatus);
    var curated=TargetDescriptions.For(card.id);
@@ -121,7 +126,7 @@ namespace AstroArchive {
    }
    if(card.domain=="solar_system"){
     mapPanel=new StackPanel{Margin=new Thickness(0,4,0,10)};body.Children.Add(mapPanel);mapPanel.Children.Add(Section("ORBIT"));
-    orbitPanel=new OrbitPanel{Name="OrbitPanel"};mapPanel.Children.Add(orbitPanel);orbitPanel.SetCard(card);
+    orbitPanel=new OrbitPanel{Name="OrbitPanel"};mapPanel.Children.Add(orbitPanel);if(CaptureDates!=null)orbitPanel.CaptureDates=CaptureDates(card);orbitPanel.SetCard(card);
    }
    var sources=new StackPanel();
    var complete=OrbitalCatalog.For(card);if(complete!=null){sources.Children.Add(Link("NASA/JPL · "+complete.solution_id,complete.source));sources.Children.Add(Data(Localization.F("Source epoch: JD {0} {1} · {2}",complete.epoch.ToString("0.#####",CultureInfo.InvariantCulture),complete.time_standard,complete.solution_id),"Muted","UiFontCaption"));if(complete.uncertainties!=null&&complete.uncertainties.Count>0)sources.Children.Add(Data(string.Join(" · ",complete.uncertainties.Select(p=>p.Key+" σ "+p.Value)),"Muted","UiFontCaption"));}
@@ -233,10 +238,11 @@ namespace AstroArchive {
    if(back){var arrow=Text("←");arrow.Margin=new Thickness(0,0,6,0);face.Children.Add(arrow);}face.Children.Add(text);
    return new Button{Content=face,Margin=new Thickness(0,0,6,6),Padding=new Thickness(10,3,10,3),HorizontalAlignment=HorizontalAlignment.Left};
   }
-  // Icon-only, like the Stellarium button in the preview pane header (same glyph, size and padding).
-  static Button StellariumIconButton(){
-   var glyph=new System.Windows.Shapes.Path{Data=Geometry.Parse(Stellarium.IconGeometry),StrokeThickness=1.6,StrokeLineJoin=PenLineJoin.Round,StrokeStartLineCap=PenLineCap.Round,StrokeEndLineCap=PenLineCap.Round};glyph.SetResourceReference(System.Windows.Shapes.Shape.StrokeProperty,"Text");
-   return new Button{Content=new Viewbox{Child=glyph},Width=28,Height=28,MinHeight=0,Padding=new Thickness(6),Margin=new Thickness(0,0,6,6),HorizontalAlignment=HorizontalAlignment.Left};
+  // Icon-only buttons for the details line, sharing the Stellarium glyph's size and padding.
+  const string RefreshGeometry="M 5,7 A 7,7 0 1 1 5,15 M 5,3 L 5,7 L 9,7";
+  static Button IconButton(string geometry,string name){
+   var glyph=new System.Windows.Shapes.Path{Data=Geometry.Parse(geometry),StrokeThickness=1.6,StrokeLineJoin=PenLineJoin.Round,StrokeStartLineCap=PenLineCap.Round,StrokeEndLineCap=PenLineCap.Round};glyph.SetResourceReference(System.Windows.Shapes.Shape.StrokeProperty,"Text");
+   var button=new Button{Content=new Viewbox{Child=glyph},Width=28,Height=28,MinHeight=0,Padding=new Thickness(6),Margin=new Thickness(2,0,0,0)};AutomationProperties.SetName(button,Localization.T(name));return button;
   }
   static Border Callout(UIElement child){var callout=new Border{Padding=new Thickness(10,8,10,2),CornerRadius=new CornerRadius(6),Margin=new Thickness(0,2,0,8),Child=child};callout.SetResourceReference(Border.BackgroundProperty,"SurfaceAlt");return callout;}
   static Grid Facts(){var grid=new Grid{Margin=new Thickness(0,4,0,10)};grid.ColumnDefinitions.Add(new ColumnDefinition{Width=GridLength.Auto,MaxWidth=115});grid.ColumnDefinitions.Add(new ColumnDefinition{Width=new GridLength(1,GridUnitType.Star)});return grid;}

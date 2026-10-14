@@ -9,7 +9,7 @@ using AstroArchive.Installation;
 namespace AstroArchive {
  public sealed class InformationRateLimit:IOException {public DateTime RetryUtc;public InformationRateLimit(DateTime retry):base("The information provider asked for a pause."){RetryUtc=retry;}}
  public static class InformationHttp {
-  public const string UserAgent="AstroArchive/3.2.9 (https://github.com/arijguest/AstroArchive; target information)";
+  public const string UserAgent="AstroArchive/3.3.0 (https://github.com/arijguest/AstroArchive; target information)";
   static readonly SemaphoreSlim transport=new SemaphoreSlim(2,2);
   public static Func<Uri,int,CancellationToken,byte[]> Fetch=Download;
   public static bool WikipediaHost(string host){return host=="en.wikipedia.org"||host=="fr.wikipedia.org"||host=="de.wikipedia.org"||host=="es.wikipedia.org"||host=="it.wikipedia.org"||host=="ja.wikipedia.org"||host=="zh.wikipedia.org";}

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -17,8 +18,10 @@ namespace AstroArchive {
     Action<string> shoot=name=>{var bitmap=new RenderTargetBitmap((int)Math.Ceiling(host.ActualWidth),(int)Math.Ceiling(host.ActualHeight),96,96,PixelFormats.Pbgra32);bitmap.Render(host);var png=new PngBitmapEncoder();png.Frames.Add(BitmapFrame.Create(bitmap));using(var stream=File.Create(Path.Combine(output,name+".png")))png.Save(stream);};
     foreach(string mode in new[]{"Light","Dark"})foreach(int width in new[]{620,280})foreach(string id in new[]{"SUN","MOON","MARS","1P"}){
      settings.ThemeMode=mode;settings.TextScalePercent=width<300?150:100;ApplyAppearance();host.Width=width;
+     view.CaptureDates=c=>c.id=="MARS"?new List<DateTime>{new DateTime(2022,12,8),new DateTime(2023,1,14),new DateTime(2023,9,2),new DateTime(2024,3,21),new DateTime(2025,5,30),new DateTime(2025,6,1),new DateTime(2025,6,3),new DateTime(2025,6,4),new DateTime(2025,6,9),new DateTime(2026,2,11)}:null;
      var card=id=="1P"?CometInfo.Card("1P/Halley"):targetInformation.ById(id,CancellationToken.None).Cards.Single();view.ShowCard(card);PumpPopupLayout();
      var panel=PopupChildren<OrbitPanel>(view).Single();var clock=System.Diagnostics.Stopwatch.StartNew();while(panel.View.Scene==null&&clock.Elapsed.TotalSeconds<10){PumpPopupLayout();Thread.Sleep(10);}if(panel.View.Scene==null)throw new Exception("Native orbit did not prepare: "+id);
+     if(id=="MARS"&&(panel.View.Imaged==null||panel.View.Imaged.Count<5))throw new Exception("Imaged dates were not placed on the orbit.");
      panel.BringIntoView();PumpPopupLayout();if(panel.View.ActualWidth<120||panel.View.ActualHeight<160)throw new Exception("Orbit became too small in a narrow pane.");
      var surface=PopupChildren<ScrollViewer>(view).First();surface.Focusable=true;surface.Focus();PumpPopupLayout();var unzoomed=panel.View.Camera.Zoom;var wheel=new MouseWheelEventArgs(Mouse.PrimaryDevice,Environment.TickCount,120){RoutedEvent=Mouse.PreviewMouseWheelEvent};panel.View.RaiseEvent(wheel);
      if(wheel.Handled||panel.View.Camera.Zoom!=unzoomed)throw new Exception("Unfocused orbit intercepted page scrolling.");
@@ -28,14 +31,9 @@ namespace AstroArchive {
      clock.Restart();while(panel.View.Scene==null&&clock.Elapsed.TotalSeconds<10){PumpPopupLayout();Thread.Sleep(10);}panel.View.Zoom(double.PositiveInfinity);panel.View.Zoom(1e100);panel.View.Pan(double.NaN,0);panel.View.InvalidateVisual();PumpPopupLayout();if(!OrbitalModel.Finite(panel.View.Camera.Zoom)||panel.View.Camera.Zoom>1e10)throw new Exception("Orbit zoom escaped its finite bounds.");
      // The icon toolbar sits over the picture: every control is a named, tabbable button that keeps clear of the axis triad.
      foreach(string name in new[]{"Reset orbit","Zoom out","Zoom in","Top view","Orbit plane","Expand orbit"}){var button=PopupChildren<Button>(panel).FirstOrDefault(b=>AutomationProperties.GetName(b)==Localization.T(name));if(button==null||!button.IsVisible||!button.IsTabStop||button.ActualWidth<22||PopupBounds(button,panel).Right>PopupBounds(panel.View,panel).Right-(panel.View.ActualWidth>=250?60:0))throw new Exception("Orbit control missing, unreachable or overlapping at "+width+": "+name);}
-     // Dated bodies offer Play, initially paused; it moves the marker date and Pause stops it. Undated ones do not offer it.
-     Func<Button> playControl=()=>PopupChildren<Button>(panel).FirstOrDefault(b=>b.IsVisible&&(AutomationProperties.GetName(b)==Localization.T("Play")||AutomationProperties.GetName(b)==Localization.T("Pause")));
-     if(id=="MARS"){
-      var playButton=playControl();if(playButton==null||panel.Playing||!PopupChildren<Slider>(panel).Any(t=>t.IsVisible))throw new Exception("A dated body lacks a paused Play control or its timeline.");
-      var startedAt=panel.MarkerUtc;playButton.RaiseEvent(new RoutedEventArgs(Button.ClickEvent,playButton));PumpPopupLayout();if(!panel.Playing)throw new Exception("Play did not start.");
-      var waiting=System.Diagnostics.Stopwatch.StartNew();while(panel.MarkerUtc==startedAt&&waiting.Elapsed.TotalSeconds<5){PumpPopupLayout();Thread.Sleep(20);}if(panel.MarkerUtc==startedAt)throw new Exception("Playback did not advance the marker date.");
-      panel.TogglePlay();var stoppedAt=panel.MarkerUtc;waiting.Restart();while(waiting.Elapsed.TotalMilliseconds<400){PumpPopupLayout();Thread.Sleep(20);}if(panel.Playing||panel.MarkerUtc!=stoppedAt)throw new Exception("Pause did not stop the marker.");
-     }else if((id=="MOON"||id=="1P")&&playControl()!=null)throw new Exception("An undated orbit offers Play: "+id);
+     // The picture shows the current position only: no playback or date controls, and Space does nothing.
+     if(PopupChildren<Slider>(panel).Any(t=>t.IsVisible)||PopupChildren<Button>(panel).Any(b=>b.IsVisible&&(AutomationProperties.GetName(b)==Localization.T("Play")||AutomationProperties.GetName(b)==Localization.T("Pause"))))throw new Exception("Orbit still offers playback or date controls: "+id);
+     if(id=="MARS"&&(!panel.View.Marker.HasValue||!panel.View.MarkerIsNow))throw new Exception("Dated body did not show its current position.");
      // Eased camera moves finish on exactly the requested view.
      panel.View.GoTop();var settling=System.Diagnostics.Stopwatch.StartNew();while(panel.View.Animating&&settling.Elapsed.TotalSeconds<3){PumpPopupLayout();Thread.Sleep(10);}if(panel.View.Animating||panel.View.Camera.Tilt!=90||panel.View.Camera.Yaw!=0||panel.View.Camera.Plane)throw new Exception("Top view did not settle.");
      panel.View.GoReset();settling.Restart();while(panel.View.Animating&&settling.Elapsed.TotalSeconds<3){PumpPopupLayout();Thread.Sleep(10);}if(panel.View.Animating||panel.View.Camera.Tilt!=55||panel.View.Camera.Yaw!=35||panel.View.Camera.Zoom!=1)throw new Exception("Reset did not settle.");
@@ -43,7 +41,7 @@ namespace AstroArchive {
      if(width==620&&(id=="MARS"||id=="SUN")){panel.View.Top();PumpPopupLayout();shoot("Orbit-"+id+"-"+mode+"-top");panel.View.Plane();PumpPopupLayout();shoot("Orbit-"+id+"-"+mode+"-plane");panel.View.Reset();}
     }
     view.ShowCard(new TargetInfoCard{id="IO",name="Io",domain="solar_system",type_label="Satellite"});PumpPopupLayout();if(PopupChildren<OrbitView>(view).Single().Scene!=null||!PopupChildren<TextBlock>(view).Any(t=>t.Text==Localization.T("Complete orbital elements are unavailable. No orientation has been assumed.")))throw new Exception("Unsupported satellite invented a geometry.");
-    File.WriteAllText(Path.Combine(output,"orbit-ui-smoke.txt"),"PASS "+cases+" light/dark, narrow/wide orbit layouts; source refresh camera/scroll; focused wheel, finite zoom/pan, named toolbar controls, Play/Pause moving the marker date, eased camera moves; unsupported elements. Language: "+Localization.Current);
+    File.WriteAllText(Path.Combine(output,"orbit-ui-smoke.txt"),"PASS "+cases+" light/dark, narrow/wide orbit layouts; source refresh camera/scroll; focused wheel, finite zoom/pan, named toolbar controls, current-position marker without playback, imaged-date markers, eased camera moves; unsupported elements. Language: "+Localization.Current);
    }finally{host.Close();settings.ThemeMode=previous;settings.TextScalePercent=textScale;ApplyAppearance();}
   }
  }

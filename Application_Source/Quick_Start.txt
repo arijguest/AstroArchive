@@ -2,7 +2,7 @@ AstroArchive user guide
 @title About this guide
 @category Reference
 @summary Which version this guide describes and what AstroArchive needs to run.
-Application 3.2.9; package 3.2.9.1.
+Application 3.3.0; package 3.3.0.1.
 Windows 10/11 x64; .NET Framework 4.8.
 
 Press `F1` on any page for help with that page. Guide topics stay in English;
@@ -1042,22 +1042,22 @@ orbit plane drawn as a disc with distance rings. Round buttons over it reset,
 zoom, look straight down (Top view), look along the orbit (Orbit plane) and
 expand the view. The camera glides to each view unless Reduce motion is on.
 
-Fit orbit and Inner solar system frame the whole orbit or the inner planets. The
-target orbit is solid above the ecliptic, dashed below it and fades with depth.
-Diamonds mark the ascending (filled) and descending (open) nodes, with
-perihelion and aphelion (or perigee and apogee) and an arrow for the direction
-of travel.
+The target orbit is solid above the ecliptic, dashed below it and fades with
+depth. The last stretch it has travelled is drawn bold and ends in a ringed
+marker with an arrow along the path, showing where the target is now. Dated
+bodies show today; others show their position at the orbit epoch.
 
-Planets appear on the marker date with a line down to the plane. Body markers
-are enlarged and distances use a linear scale, with rings and a scale bar in
-round numbers of AU, or kilometres at the Earth–Moon scale. Open paths have
-continuation arrows; clipped extents are labelled. Orbit epoch shows the marker
-at the source epoch.
+Small rings mark where the target was on each date you imaged it; rings that
+fall close together are drawn once with a count. Diamonds mark the ascending
+(filled) and descending (open) nodes, with perihelion and aphelion (or perigee
+and apogee).
 
-Today, a UTC date, the timeline and **Play** are enabled only for supported
-dated positions. Play starts paused and runs about one revolution every twelve
-seconds. Press Space with the orbit focused, or the Play button, to pause it;
-moving the timeline or setting a date also pauses.
+Planets appear on the same date with a line down to the plane. Body markers are
+enlarged and distances use a linear scale, with rings and a scale bar in round
+numbers of AU, or kilometres at the Earth–Moon scale.
+
+Open paths have continuation arrows; clipped extents are labelled. Source credits are in the
+Sources list at the foot of the page.
 
 Small-body and Moon snapshots use epoch-only markers. Complete elements are
 required; an unavailable orbit never receives an assumed orientation.

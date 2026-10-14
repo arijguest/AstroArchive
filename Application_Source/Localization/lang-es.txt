@@ -2425,3 +2425,7 @@ Orbit|Jupiter	Júpiter
 Orbit|Saturn	Saturno
 Orbit|Uranus	Urano
 Orbit|Neptune	Neptuno
+now	ahora
+on this date	en esta fecha
+Small rings: where it was when you imaged it.	Anillos pequeños: dónde estaba cuando lo fotografió.
+A current position is unavailable for this solution.	No hay una posición actual disponible para esta solución.

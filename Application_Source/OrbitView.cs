@@ -9,6 +9,8 @@ using System.Windows.Input;
 using System.Windows.Media;
 
 namespace AstroArchive {
+ // A date this target was imaged in the repository, placed on its orbit.
+ public struct ImagedMark {public DateTime Utc;public OrbitPoint Point;}
  public sealed class OrbitCamera {
   public double Yaw=35,Tilt=55,Zoom=1,PanX,PanY;public bool Plane,Inner;
   public OrbitCamera Copy(){return (OrbitCamera)MemberwiseClone();}
@@ -44,7 +46,7 @@ namespace AstroArchive {
   static readonly Dictionary<string,Color> PlanetColours=new Dictionary<string,Color>{{"Mercury",Color.FromRgb(166,166,172)},{"Venus",Color.FromRgb(222,184,100)},{"Earth",Color.FromRgb(82,142,222)},{"Mars",Color.FromRgb(216,104,72)},{"Jupiter",Color.FromRgb(204,158,112)},{"Saturn",Color.FromRgb(212,184,112)},{"Uranus",Color.FromRgb(104,196,210)},{"Neptune",Color.FromRgb(96,120,224)}};
   const double TweenSeconds=0.28;
   public OrbitCamera Camera=new OrbitCamera();public OrbitScene Scene {get;private set;}
-  public OrbitPoint? Marker;public List<KeyValuePair<string,OrbitPoint>> Bodies;public bool Overview;public string DateLabel;
+  public OrbitPoint? Marker;public bool MarkerIsNow;public List<ImagedMark> Imaged;public List<KeyValuePair<string,OrbitPoint>> Bodies;public bool Overview;public string DateLabel;
   public Action Changed,TogglePlay;Point last;bool dragging,panning;
   OrbitCamera from,to;Stopwatch clock;bool tweening;
   public OrbitView(){
@@ -205,8 +207,8 @@ namespace AstroArchive {
    var peri=ProjectScene(OrbitalModel.AtAnomaly(record,0));bool perihelion=Finite(peri)&&bounds.Contains(peri);
    if(perihelion){dc.DrawEllipse(surface,Stroke(accent,1,1.5),peri,3,3);Ask(Localization.T(near),new Point(peri.X+8,peri.Y+5),4);}
    if(record.IsClosed&&record.q*(1+record.e)/(1-record.e)<=target.Extent*1.0001){var apo=ProjectScene(OrbitalModel.AtAnomaly(record,Math.PI));if(Finite(apo)&&bounds.Contains(apo)&&(!perihelion||(apo-peri).Length>9)){dc.DrawEllipse(surface,Stroke(accent,1,1.5),apo,3,3);Ask(Localization.T(far),new Point(apo.X+8,apo.Y+5),4);}}
-   // The path follows increasing true anomaly, so a filled arrowhead shows the direction of travel, retrograde included.
-   Brush ink=Tint(accent,1);int direction=points.Length/2+Math.Max(1,points.Length/12);if(direction<points.Length-1)Arrow(dc,ProjectScene(points[direction]),ProjectScene(points[direction+1]),ink);
+   // Open paths that run off the picture end in arrowheads; the direction of travel is shown at the target itself.
+   Brush ink=Tint(accent,1);
    if(target.Clipped){Arrow(dc,ProjectScene(points[1]),ProjectScene(points[0]),ink);Arrow(dc,ProjectScene(points[points.Length-2]),ProjectScene(points.Last()),ink);}
   }
   bool NotedClipped;
@@ -232,24 +234,46 @@ namespace AstroArchive {
    var glow=new RadialGradientBrush(Color.FromArgb((byte)(sun?120:100),light.R,light.G,light.B),Color.FromArgb(0,light.R,light.G,light.B));glow.Freeze();dc.DrawEllipse(glow,null,middle,16,16);
    dc.DrawEllipse(Solid(light,1),dark?null:Stroke(Solid(Color.FromRgb(190,130,20),1),0.7,0.8),middle,sun?5:5.5,sun?5:5.5);Ask(Body(Scene.Record.central_body),new Point(middle.X+10,middle.Y-24),3);
   }
-  // The target now: a ringed marker with ticks like the sky globe's, and a dashed line down to the plane.
+  // The target now: the stretch of orbit it has just travelled in bold, a guide line from the central body, a pulsing-style double ring with ticks like the sky globe's, and a dashed line down to the plane.
   void MarkerGlyph(DrawingContext dc){
-   if(!Marker.HasValue||Overview)return;Brush accent=Colour("Accent");var p=Marker.Value;var at=ProjectScene(p);var foot=ProjectScene(new OrbitPoint(p.X,p.Y,0));if(!Finite(at)||!Finite(foot))return;
+   if(!Marker.HasValue||Overview)return;Brush accent=Colour("Accent"),surface=Colour("Surface");var p=Marker.Value;var at=ProjectScene(p);var foot=ProjectScene(new OrbitPoint(p.X,p.Y,0));if(!Finite(at)||!Finite(foot))return;
+   heading=null;Trail(dc,accent,p);
+   var middle=ProjectScene(new OrbitPoint());if(Finite(middle)){var m=middle;var t=at;if(VisibleLine(ref m,ref t,bounds))dc.DrawLine(Dashes(accent,0.35,0.8),m,t);}
    var a=at;var b=foot;if((foot-at).Length>3){if(VisibleLine(ref a,ref b,bounds))dc.DrawLine(Dashes(accent,0.55,1),a,b);if(bounds.Contains(foot))dc.DrawEllipse(null,Stroke(accent,0.55,1),foot,3.5,1.5);}
-   if(!bounds.Contains(at))return;dc.DrawEllipse(Tint(accent,0.12),Stroke(accent,1,1.5),at,7,7);dc.DrawEllipse(accent,null,at,2.5,2.5);var tick=Stroke(accent,0.8,1);dc.DrawLine(tick,new Point(at.X-11,at.Y),new Point(at.X-8,at.Y));dc.DrawLine(tick,new Point(at.X+8,at.Y),new Point(at.X+11,at.Y));
-   Ask(Catalog.DisplayId(Scene.Record.object_id),new Point(at.X+10,at.Y-24),0,true,true);
+   if(!bounds.Contains(at))return;
+   dc.DrawEllipse(Tint(accent,0.1),Stroke(accent,0.45,1),at,15,15);dc.DrawEllipse(Tint(accent,0.2),Stroke(accent,1,2),at,8.5,8.5);dc.DrawEllipse(accent,Stroke(surface,1,1),at,3.5,3.5);
+   if(heading.HasValue){var d=heading.Value;d.Normalize();Arrow(dc,at,new Point(at.X+d.X*26,at.Y+d.Y*26),Tint(accent,1));}
+   Ask(Catalog.DisplayId(Scene.Record.object_id)+" · "+Localization.T(MarkerIsNow?"now":"on this date"),new Point(at.X+14,at.Y-30),0,true,true);
   }
-  // Scale bar, axis triad, marker date and notices, over everything else.
+  // The recent past of the orbit, ending at the target, drawn heavier than the rest so the direction and place of the target read at once.
+  void Trail(DrawingContext dc,Brush accent,OrbitPoint p){
+   var points=target.Points;int n=points.Length;if(n<12)return;int near=0;double best=double.MaxValue;
+   for(int k=0;k<n;k++){double dx=points[k].X-p.X,dy=points[k].Y-p.Y,dz=points[k].Z-p.Z,d=dx*dx+dy*dy+dz*dz;if(d<best){best=d;near=k;}}
+   if(best>Math.Pow(extent*0.08,2))return;int length=Math.Max(3,n/10);var line=new OrbitStrokes();var previous=ProjectScene(p);
+   for(int step=1;step<=length;step++){int index=near-step;if(index<0){if(!target.Closed)break;index+=n;}var q=ProjectScene(points[index]);if(!Finite(q)||!Finite(previous))break;var x=previous;var y=q;if(VisibleLine(ref x,ref y,bounds))line.Add(x,y);previous=q;}
+   Draw(dc,line,Stroke(accent,0.95,3.6));
+   // Heading: from a point a little behind the target along the drawn path, so the arrow lies on the path itself.
+   int back=near-Math.Max(2,length/4);if(back<0){if(!target.Closed)return;back+=n;}var behind=ProjectScene(points[back]);var here=ProjectScene(p);if(Finite(behind)&&Finite(here)&&(here-behind).Length>1)heading=here-behind;
+  }
+  Vector? heading;
+  // Dates this target was imaged: small rings on the orbit. Marks that fall close together on screen are drawn once, with a count.
+  void ImagedMarks(DrawingContext dc){
+   if(Imaged==null||Imaged.Count==0||Overview)return;Brush accent=Colour("Accent"),surface=Colour("Surface");
+   double radius=Imaged.Count>40?24:12;var groups=new List<List<ImagedMark>>();var anchors=new List<Point>();
+   foreach(var mark in Imaged.OrderBy(m=>m.Utc)){var at=ProjectScene(mark.Point);if(!Finite(at)||!bounds.Contains(at))continue;int found=-1;for(int i=0;i<anchors.Count;i++)if((anchors[i]-at).Length<radius){found=i;break;}if(found<0){anchors.Add(at);groups.Add(new List<ImagedMark>{mark});}else groups[found].Add(mark);}
+   for(int i=0;i<groups.Count;i++){
+    var at=anchors[i];int count=groups[i].Count;double r=count>1?6:4;
+    dc.DrawEllipse(Tint(surface,0.95),Stroke(accent,0.95,1.6),at,r,r);if(count==1)dc.DrawEllipse(Tint(accent,0.9),null,at,1.3,1.3);
+    if(count>1)Ask("×"+count,new Point(at.X+8,at.Y-7),7);
+    else if(groups.Count<=4)Ask(groups[i][0].Utc.ToString("yyyy-MM-dd",CultureInfo.InvariantCulture),new Point(at.X+7,at.Y+5),9);
+   }
+  }
+  // Scale bar, marker date and notices, over everything else.
   void Overlays(DrawingContext dc,List<Rect> placed){
    Brush surface=Colour("Surface"),muted=Colour("Muted");
    double raw=64/scale,unit=OrbitMath.Kilometres(raw)?OrbitMath.AuKm:1,value=OrbitMath.NiceStep(raw*unit)/unit,pixels=Math.Max(10,Math.Min(bounds.Width/2,value*scale));var bar=Stroke(muted,1,1);
    dc.DrawLine(bar,new Point(12,ActualHeight-12),new Point(12+pixels,ActualHeight-12));dc.DrawLine(bar,new Point(12,ActualHeight-15),new Point(12,ActualHeight-9));dc.DrawLine(bar,new Point(12+pixels,ActualHeight-15),new Point(12+pixels,ActualHeight-9));
    var scaleLabel=Format(OrbitMath.Distance(value),muted,false);var scaleAt=new Point(12,ActualHeight-14-scaleLabel.Height);dc.DrawText(scaleLabel,scaleAt);placed.Add(new Rect(scaleAt.X-3,scaleAt.Y-2,Math.Max(pixels,scaleLabel.Width)+6,scaleLabel.Height+20));
-   // Axis triad: the reference-plane axes, with Z (towards the pole) in the accent colour. A narrow pane leaves the corner to the toolbar.
-   if(ActualWidth>=250){
-    var axes=new[]{new OrbitPoint(1,0,0),new OrbitPoint(0,1,0),new OrbitPoint(0,0,1)};var origin=new Point(ActualWidth-34,36);dc.DrawEllipse(Tint(surface,0.85),Stroke(muted,0.35,1),origin,25,25);placed.Add(new Rect(origin.X-25,origin.Y-25,50,50));
-    for(int axis=0;axis<3;axis++){var v=View(axes[axis]);var end=new Point(origin.X+v.X*18,origin.Y-v.Y*18);dc.DrawLine(Stroke(Colour(axis==2?"Accent":"Muted"),1,axis==2?1.6:1.1),origin,end);var name=Format(new[]{"X","Y","Z"}[axis],muted,false);dc.DrawText(name,new Point(Math.Max(2,Math.Min(ActualWidth-name.Width-2,end.X+2)),Math.Max(2,Math.Min(ActualHeight-name.Height-2,end.Y-7))));}
-   }
    if(!string.IsNullOrEmpty(DateLabel))Ask(DateLabel,new Point(ActualWidth,ActualHeight),1,false,true);
    if(NotedClipped)Ask(Localization.T(Camera.Inner&&Scene.Record.central_body=="Sun"&&Scene.Record.q>40?"Perihelion beyond the inner solar system":"Extent clipped"),new Point(10,44),2,false,true);
   }
@@ -258,7 +282,7 @@ namespace AstroArchive {
    dc.DrawRoundedRectangle(Colour("SurfaceAlt"),null,frame,8,8);
    if(Scene!=null){
     Prepare();NotedClipped=false;dc.PushClip(new RectangleGeometry(frame,8,8));
-    Backdrop(dc);Grid(dc);Orbits(dc);Planets(dc);Centre(dc);MarkerGlyph(dc);var placed=new List<Rect>();Overlays(dc,placed);Flush(dc,placed);dc.Pop();
+    Backdrop(dc);Grid(dc);Orbits(dc);ImagedMarks(dc);Planets(dc);Centre(dc);MarkerGlyph(dc);var placed=new List<Rect>();Overlays(dc,placed);Flush(dc,placed);dc.Pop();
    }
    // The frame is drawn last so the focus ring is never hidden by the scene.
    dc.DrawRoundedRectangle(null,new Pen(Colour(IsKeyboardFocused?"Accent":"Border"),IsKeyboardFocused?1.5:1),frame,8,8);
