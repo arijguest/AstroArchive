@@ -1,7 +1,7 @@
 AstroArchive 3.3.2
-Package 3.3.2.1
+Package 3.3.2.2
 
-Covers everything since 3.3.1.1.
+Covers everything since 3.3.1.1 (first published as prerelease 3.3.2.1).
 
 Sky map and targets
 The total solar eclipse icon on the sky map now draws a corona shaped by the solar cycle and oriented to the Sun's axis. Totality captures get the object Totality, and Sun pictures taken through a non-solar telescope get the SOL filter (Totality stays VIS). All Targets has an upcoming sky events view for the next month at your observing location, with Stellarium links, computed locally.

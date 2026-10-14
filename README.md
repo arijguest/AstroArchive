@@ -167,7 +167,7 @@ It follows your Windows language, or choose one in **Settings → General → La
 
 ### Fresh from the latest releases
 
-**[3.3.2 prerelease](https://github.com/arijguest/AstroArchive/releases/tag/v3.3.2.1)** draws a solar-cycle corona on the total eclipse sky map, adds upcoming sky events to All Targets, manages telescope profiles in Settings and starts Import with Scan folder….
+**[3.3.2](https://github.com/arijguest/AstroArchive/releases/tag/v3.3.2.2)** draws a solar-cycle corona on the total eclipse sky map, adds upcoming sky events to All Targets, manages telescope profiles in Settings and starts Import with Scan folder….
 
 **[3.3.1 prerelease](https://github.com/arijguest/AstroArchive/releases/tag/v3.3.1.1)** tidies Analytics exports (smaller title, fuller layouts, capitalised automatic descriptions with comet orbits), stops scoring stacks and solar images for quality, adds a date format setting and first-run observing location, groups the metadata exports under Export > Metadata, keeps your place after deleting files, adds copy workers to long imports and makes backups resumable.
 
