@@ -187,12 +187,28 @@ namespace AstroArchive {
   }
   internal bool SunDrawn,EclipseDrawn,CoronaDrawn;internal Rect EclipseBounds;
   static readonly Color SunLight=Color.FromRgb(255,206,84);
+  static readonly Brush[] CoronaLayers=SolarCorona.LayerScale.Select(i=>{var b=new SolidColorBrush(Color.FromArgb(34,238,243,255));b.Freeze();return (Brush)b;}).ToArray();
+  // Nested translucent outlines of the same shape: brightness falls steeply with radius, and the tips stay soft.
+  static void DrawCoronaShape(DrawingContext dc,Point at,double size,double activity,double poleAngle){
+   double ex=-Math.Sin(poleAngle),ey=Math.Cos(poleAngle),px=Math.Cos(poleAngle),py=Math.Sin(poleAngle);
+   const int steps=96;
+   var glow=new RadialGradientBrush();double edge=1/1.9;glow.GradientStops.Add(new GradientStop(Color.FromArgb(150,250,251,255),edge));glow.GradientStops.Add(new GradientStop(Color.FromArgb(0,230,238,255),1));glow.Freeze();
+   dc.DrawEllipse(glow,null,at,size*1.9,size*1.9);
+   for(int layer=0;layer<SolarCorona.LayerScale.Length;layer++){
+    var geometry=new StreamGeometry();using(var g=geometry.Open()){
+     for(int i=0;i<=steps;i++){
+      double a=2*Math.PI*i/steps,reach=1+(SolarCorona.Reach(activity,a,Math.Cos(a)<0)-1)*SolarCorona.LayerScale[layer],c=Math.Cos(a)*size*reach,s=Math.Sin(a)*size*reach;
+      var point=new Point(at.X+c*ex+s*px,at.Y+c*ey+s*py);if(i==0)g.BeginFigure(point,true,true);else g.LineTo(point,true,true);
+     }
+    }
+    geometry.Freeze();dc.DrawGeometry(CoronaLayers[layer],null,geometry);
+   }
+  }
   void DrawCorona(DrawingContext dc,Point at,double size){
-   double reach=size*3;var halo=new RadialGradientBrush();double edge=size/reach;
-   halo.GradientStops.Add(new GradientStop(Color.FromArgb(255,255,255,255),0));halo.GradientStops.Add(new GradientStop(Color.FromArgb(235,246,248,255),edge));halo.GradientStops.Add(new GradientStop(Color.FromArgb(110,200,214,255),edge+(1-edge)*0.35));halo.GradientStops.Add(new GradientStop(Color.FromArgb(0,180,200,255),1));halo.Freeze();
-   dc.DrawEllipse(halo,null,at,reach,reach);
-   var ray=new SolidColorBrush(Color.FromArgb(190,240,244,255));ray.Freeze();var pen=new Pen(ray,Math.Max(0.8,size*0.1)){StartLineCap=PenLineCap.Round,EndLineCap=PenLineCap.Round};pen.Freeze();
-   for(int i=0;i<12;i++){double a=i*Math.PI/6+0.2,inner=size*1.05,outer=size*(i%2==0?2.5:1.9);dc.DrawLine(pen,new Point(at.X+Math.Cos(a)*inner,at.Y+Math.Sin(a)*inner),new Point(at.X+Math.Cos(a)*outer,at.Y+Math.Sin(a)*outer));}
+   // Streamers lie along the Sun's equator for the capture date and follow the solar cycle's shape.
+   double pole=-Math.PI/2,activity=0.5;
+   if(context.Utc.HasValue&&context.Orientation!=null){var utc=context.Utc.Value;activity=SolarCorona.Activity(utc);pole=SolarCorona.ScreenAngle(sun,context.Orientation.MapOfDate(new SkyVector(0,0,1)),SolarCorona.PositionAngle(utc),right,up);}
+   DrawCoronaShape(dc,at,size,activity,pole);
    CoronaDrawn=true;
   }
   void DrawSun(DrawingContext dc,double opacity){

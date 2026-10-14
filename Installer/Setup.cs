@@ -44,7 +44,6 @@ namespace AstroArchive.Installation {
     var header=new Panel{Dock=DockStyle.Top,AutoSize=true,Padding=new Padding(0,0,0,18),BackColor=Color.FromArgb(17,28,55)};
     using(var stream=new MemoryStream(Resource("logo.png")))header.Controls.Add(new PictureBox{Image=new Bitmap(Image.FromStream(stream)),SizeMode=PictureBoxSizeMode.Zoom,Location=new Point(24,18),Size=new Size(76,76)});
     header.Controls.Add(new Label{Text="AstroArchive",ForeColor=Color.White,Font=new Font("Segoe UI",23,FontStyle.Bold),Location=new Point(120,23),AutoSize=true});
-    header.Controls.Add(new Label{Text="Version "+ApplicationVersion+"  ·  Windows 10 / 11",ForeColor=Color.FromArgb(194,210,235),Location=new Point(123,72),AutoSize=true});
     var footer=new TableLayoutPanel{Dock=DockStyle.Bottom,AutoSize=true,AutoSizeMode=AutoSizeMode.GrowAndShrink,BackColor=Color.White,Padding=new Padding(32,16,32,20),ColumnCount=1,RowCount=3};
     footer.ColumnStyles.Add(new ColumnStyle(SizeType.Percent,100));for(int row=0;row<3;row++)footer.RowStyles.Add(new RowStyle(SizeType.AutoSize));
     status=new Label{Text="Ready. Close AstroArchive before continuing.",AutoSize=true,ForeColor=Color.FromArgb(77,96,124),Margin=new Padding(0,0,0,12)};footer.Controls.Add(status,0,0);

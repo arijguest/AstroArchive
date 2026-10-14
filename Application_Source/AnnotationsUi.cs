@@ -32,7 +32,30 @@ namespace AstroArchive {
    if(candidates.Count==0)return;totalityRunning=true;
    System.Threading.Tasks.Task.Run(()=>candidates.Where(f=>{var e=FrameEclipse(f,pool);return e!=null&&Eclipses.IsTotal(e);}).ToList()).ContinueWith(t=>Window.Dispatcher.BeginInvoke(new Action(()=>{
     totalityRunning=false;if(closing||repo!=opened||t.IsFaulted||t.Result.Count==0||RepositoryOperationBlocked)return;
-    var edit=new AnnotationEdit();edit.AutoTags.Add(Eclipses.TotalityTag);int changed;SaveAnnotations(t.Result.Cast<IAnnotated>().ToList(),edit,out changed);
+    var edit=new AnnotationEdit();edit.AutoTags.Add(Eclipses.TotalityTag);int changed;SaveAnnotations(t.Result.Cast<IAnnotated>().ToList(),edit,out changed);ScheduleSolarMetadata();
+   })));
+  }
+  // Totality captures take the object "Totality" once, and keep (or return to) the VIS filter. Every other picture of the Sun
+  // from a scope that is not a solar telescope gets the SOL filter, once for existing archives and on import afterwards.
+  bool solarRunning;
+  void ScheduleSolarMetadata(){
+   if(repo==null||solarRunning||closing||RepositoryOperationBlocked||operationBusy||all==null)return;
+   var opened=repo;var pool=all.ToList();bool migrate=!settings.SolarFilterMigrated;var done=new HashSet<string>(settings.TotalityObjectDone??new List<string>());
+   Func<Frame,bool> totality=f=>f.Tags!=null&&f.Tags.Contains(Eclipses.TotalityTag);
+   var retarget=pool.Where(f=>!string.IsNullOrEmpty(f.Hash)&&totality(f)&&!Assets.IsCalibration(f.Kind)&&f.Target!=ObservationTargets.TotalityObject&&!done.Contains(f.Hash)).ToList();
+   var solar=migrate?pool.Where(f=>!totality(f)&&ObservationTargets.NeedsSolarFilter(f)&&f.Filter!="SOL").ToList():new List<Frame>();
+   if(retarget.Count==0&&solar.Count==0){if(migrate&&pool.Count>0){settings.SolarFilterMigrated=true;SaveSettings();}return;}
+   solarRunning=true;
+   System.Threading.Tasks.Task.Run(()=>{
+    var moved=new List<string>();int changed=0;
+    foreach(var f in solar){try{f.Filter="SOL";opened.Save(f);changed++;}catch(Exception e){if(!(e is System.IO.IOException||e is InvalidOperationException))throw;}}
+    foreach(var f in retarget){try{f.Target=ObservationTargets.TotalityObject;if(f.Filter=="SOL")f.Filter="VIS";opened.Refile(f,System.Threading.CancellationToken.None);moved.Add(f.Hash);changed++;}catch(Exception e){if(!(e is System.IO.IOException||e is UnauthorizedAccessException||e is InvalidOperationException))throw;}}
+    return new{moved,changed};
+   }).ContinueWith(t=>Window.Dispatcher.BeginInvoke(new Action(()=>{
+    solarRunning=false;if(closing||repo!=opened||t.IsFaulted)return;
+    if(migrate){settings.SolarFilterMigrated=true;}
+    settings.TotalityObjectDone=(settings.TotalityObjectDone??new List<string>()).Concat(t.Result.moved).Distinct().ToList();SaveSettings();
+    if(t.Result.changed>0)Refresh();
    })));
   }
   void ApplyAnnotations(IEnumerable<IAnnotated> items){CaptureAnnotations.Apply(items,Annotations);}

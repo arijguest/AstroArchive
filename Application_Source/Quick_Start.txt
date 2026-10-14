@@ -106,7 +106,7 @@ IMPORT WORKFLOW
 ## Scan and import
 1. Choose a saved telescope, or **Browse** to a capture folder.
 2. Leave model and camera on **Auto** unless an override is needed.
-3. **Scan folder** lists what can be imported. Nothing is copied yet.
+3. **Scan folder** (or **Import → Scan folder…**, which asks for the folder first) lists what can be imported. Nothing is copied yet.
 4. Check the **Status** and **Review** columns, then **Import**.
 
 Import copies the eligible captures in the filtered view and verifies each copy.
@@ -161,6 +161,7 @@ captures stay for review.
 
 ## Manage telescope profiles
 - **Import → Telescopes** saves, renames or recovers profiles from archive data.
+- **Settings → Telescopes** renames a saved telescope (updating its captures), changes its model and camera, removes it, or recovers profiles.
 - **Refresh USB devices** looks again for telescopes connected by USB.
 - Recovered profiles need a source association before USB import.
 - A physical telescope ID identifies one device; several can share a model.
@@ -359,7 +360,7 @@ can be resized by dragging its divider.
 > Note: Preview never resizes or rewrites source files.
 
 ## Tables and target groups
-- Click a heading to sort; click again to reverse. `Shift`-click adds a sort column.
+- Click a heading to sort; click again to reverse. `Shift`-click adds a sort column. Sorting by Date also orders by time within a day.
 - Right-click a heading to choose columns; drag to reorder. Each page saves its layout.
 - Targets show the preferred ID first: M31 - Andromeda Galaxy.
 - **All Targets** is bold and shaded; comets share Solar system; Meteors sit above Other targets.
@@ -418,7 +419,7 @@ ECLIPSES
 Sun and Moon captures taken during an observable eclipse list under **Solar Eclipse** or
 **Lunar Eclipse** in the target list; files and folders are unchanged.
 - Solar captures show obscuration on the Sun in the sky map. At 99% or more the Sun is
-  drawn with a corona and the capture is tagged **Totality** (remove the tag and it stays removed). Capture details shows the
+  drawn with a corona (its streamers lie along the Sun's equator and its shape follows the solar cycle) and the capture is tagged **Totality** (remove the tag and it stays removed) and filed under the object **Totality** with the VIS filter. Other pictures of the Sun from scopes that are not solar telescopes (DWARF, Seestar) get the **SOL** filter. Capture details shows the
   percentage of the Sun obscured at capture, a coverage curve with start and end
   times, and the duration of totality or annularity. The Moon's own phase,
   illumination and distance to the target are left out.
@@ -617,6 +618,25 @@ Candidates are labelled **Accepted**, **Partial match**, **Needs review** or **R
 **Convert supported images to FITS** is explicit and needs confirmed linear data.
 - Selected pages and slices convert physical values without display stretch.
 - Originals stay. Cancel keeps verified outputs and removes unfinished copies.
+
+UPCOMING SKY EVENTS
+@title Upcoming sky events
+@category Browse and preview
+@summary What is worth watching in the next 30 days from your observing town, with the best time and where to look.
+@related OBSERVING TOWN / CITY | ECLIPSES | CAPTURE DETAILS AND SKY
+@keywords upcoming events eclipse occultation meteor shower opposition conjunction what to observe stellarium all targets
+Choose **All Targets** in Repository or Edited to see the Target Info pane list what is
+worth going outside for over the next 30 days from your observing town.
+- It covers solar and lunar eclipses, the Moon covering bright stars and planets, close
+  approaches of the Moon to planets and stars, meteor shower peaks, planets at opposition
+  or greatest elongation, and close pairs of planets.
+- Events are ranked by how well you can see them: height above the horizon, darkness and,
+  for meteors, how bright the Moon is. Each card gives the best date and time at your
+  site, the compass direction and height, and a note on what to expect.
+- **Open in Stellarium** opens the sky at that date and time from your observing town.
+- Everything is calculated on this computer, so no internet is needed. Timings are good
+  to a few minutes.
+- No town set? Choose one from the pane, or in **Settings → General**.
 
 TARGET CARDS
 @title Target cards

@@ -53,6 +53,34 @@ namespace AstroArchive {
    var heading=Data(title,"Text","UiFontHeading");heading.Name="ObjectTitle";heading.FontWeight=FontWeights.SemiBold;content.Children.Add(heading);
   }
   public void ShowMessage(string title,string message){Begin(Localization.T(title));content.Children.Add(Text(message,"Muted"));}
+  // The All targets page: what is worth going outside for in the next month, from the observing site.
+  public Action ChooseLocation;
+  public void ShowUpcoming(List<SkyEvent> events,CaptureSite site,TimeZoneInfo zone,bool busy){
+   Begin("Explore your targets");var heading=Section("UPCOMING SKY EVENTS",true);heading.Name="SkyEventsHeading";content.Children.Add(heading);
+   if(site==null){
+    content.Children.Add(Text("Set your observing town to see eclipses, Moon occultations, meteor shower peaks and planet events for the next month, with the best time and where to look.","Muted"));
+    if(ChooseLocation!=null){var choose=ActionButton("Choose observing location…",false);choose.Name="ChooseSkyEventsLocation";choose.Click+=(s,e)=>ChooseLocation();content.Children.Add(choose);}
+   }else if(busy){content.Children.Add(Text(Localization.F("Finding what is worth watching from {0} over the next 30 days…",site.Label),"Muted"));}
+   else{
+    content.Children.Add(Data(Localization.F("From {0} over the next 30 days, best first. Times are local to the site; altitude is the height above the horizon.",site.Label),"Muted","UiFontCaption"));
+    if(events==null||events.Count==0)content.Children.Add(Text("Nothing notable is due from here in the next 30 days.","Muted"));
+    else foreach(var item in events.Take(12)){var ev=item;content.Children.Add(SkyEventCard(ev,zone));}
+    content.Children.Add(Text("Calculated on this computer from astronomical models, so no internet is needed. Timings are good to a few minutes; Open in Stellarium to see the sky at that moment.","Muted","UiFontCaption"));
+   }
+   content.Children.Add(Text("Choose a target on the left to see its overview and sky location. Select a file to preview your image.","Muted"));
+  }
+  FrameworkElement SkyEventCard(SkyEvent ev,TimeZoneInfo zone){
+   var panel=new StackPanel();string rank=ev.Score>=70?"Highlight":ev.Score>=40?"Very good":"Worth a look";
+   var kind=Text(Localization.T(ev.Kind).ToUpperInvariant()+" · "+Localization.T(rank),"Muted","UiFontCaption");kind.FontWeight=FontWeights.SemiBold;kind.Margin=new Thickness(0,0,0,2);panel.Children.Add(kind);
+   var title=Data(ev.Title,"Text","UiFontControl");title.FontWeight=FontWeights.SemiBold;title.Margin=new Thickness(0,0,0,2);panel.Children.Add(title);
+   DateTime best=TimeZoneInfo.ConvertTimeFromUtc(ev.BestUtc,zone);string when=DateFormats.Format(best)+" "+best.ToString("HH:mm",CultureInfo.InvariantCulture);
+   if(ev.StartUtc.HasValue&&ev.EndUtc.HasValue){var a=TimeZoneInfo.ConvertTimeFromUtc(ev.StartUtc.Value,zone);var b=TimeZoneInfo.ConvertTimeFromUtc(ev.EndUtc.Value,zone);when+=" ("+a.ToString("HH:mm",CultureInfo.InvariantCulture)+"–"+b.ToString("HH:mm",CultureInfo.InvariantCulture)+")";}
+   panel.Children.Add(Data(Localization.F("Best at {0}",when)));
+   panel.Children.Add(Data(Localization.F("Look {0}, {1}° above the horizon",SkyEvents.CompassName(ev.Azimuth),Math.Max(0,Math.Round(ev.Altitude)).ToString("0",CultureInfo.InvariantCulture)),"Muted"));
+   panel.Children.Add(Data(ev.Detail,"Muted","UiFontCaption"));
+   if(OpenInStellarium!=null&&ev.View!=null){var open=ActionButton("Open in Stellarium",false);open.Margin=new Thickness(0,2,0,6);var view=ev.View;AutomationProperties.SetName(open,Localization.T("Open in Stellarium")+": "+ev.Title);UiHelp.Hint(open,Localization.T("Opens Stellarium at this date and time from your observing location. Uses Stellarium Web when Stellarium is not installed."));open.Click+=(s,e)=>OpenInStellarium(view);panel.Children.Add(open);}
+   var card=Callout(panel);card.Padding=new Thickness(10,8,10,2);card.Name="SkyEventCard";return card;
+  }
   public void ShowChoices(string target,TargetInfoResult result){
    Begin(target);content.Children.Add(Text(result.Message,"Muted"));
    foreach(var card in result.Cards){string id=card.id;var button=new Button{Content=Data(Catalog.DisplayIds(card.name)+" · "+Catalog.DisplayId(card.id)+"\n"+card.type_label),HorizontalContentAlignment=HorizontalAlignment.Stretch,Margin=new Thickness(0,0,0,6),Padding=new Thickness(10,8,10,4)};AutomationProperties.SetName(button,"Read about "+card.name+" "+id);button.Click+=(s,e)=>{if(ChooseObject!=null)ChooseObject(id);};content.Children.Add(button);}
@@ -112,8 +140,8 @@ namespace AstroArchive {
    if(distance!=null)AddFact(facts,"Distance",TargetInfoPresentation.Distance(distance),Evidence(card,distance));
    AddParameters(facts,card);
    foreach(var m in measurements.Where(m=>new[]{"Diameter","Rotation period","Albedo"}.Contains(m.field))){if(m.field=="Diameter"&&TargetParameters.For(card.id)!=null)continue;AddFact(facts,m.field,m.value.ToString("0.#####",CultureInfo.InvariantCulture)+(string.IsNullOrEmpty(m.uncertainty)?"":" ± "+m.uncertainty)+(m.unit=="dimensionless"?"":" "+m.unit),Evidence(card,m));}
-   // Meteors have no catalogue parameters; their page shows the shower calendar instead.
-   if(card.id==MeteorCardId&&facts.Children.Count==0){article.Children.Remove(parameters);article.Children.Remove(facts);}
+   // A card with no parameters at all (meteors, which show the shower calendar instead, or sparse catalogue entries) has no empty heading.
+   if(facts.Children.Count==0){article.Children.Remove(parameters);article.Children.Remove(facts);}
    string imaging=TargetInfoPresentation.Imaging(card);
    // Imaging notes are always shown in full, not behind a disclosure.
    if(!string.IsNullOrWhiteSpace(imaging)){var notes=Section("IMAGING NOTES");notes.Name="ImagingNotes";article.Children.Add(notes);var text=Data(imaging);text.Name="ImagingNotesText";article.Children.Add(text);}

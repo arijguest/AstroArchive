@@ -9,6 +9,13 @@ namespace AstroArchive {
   public static string NamedSolar(string target){string body=Bodies.FirstOrDefault(b=>b!="Planetary"&&b.Equals((target??"").Trim(),StringComparison.OrdinalIgnoreCase));return body=="Solar"?"Sun":body=="Lunar"?"Moon":body;}
   // "Lunar mode", "Solar" and similar capture modes name a body when the target is unknown.
   public static string ModeBody(string observationMode){var match=Regex.Match(observationMode??"",@"^\s*(solar|sun|lunar|moon)(?:[ _-]+(?:mode|capture|imaging|light))?\s*$",RegexOptions.IgnoreCase);return match.Success?match.Groups[1].Value:null;}
+  // A capture retargeted to "Totality" is still a picture of the Sun for sky and eclipse calculations.
+  public const string TotalityObject="Totality";
+  public static string BodyOf(string target){return NamedSolar(target)??(string.Equals((target??"").Trim(),TotalityObject,StringComparison.OrdinalIgnoreCase)?"Sun":null);}
+  static readonly Regex solarScope=new Regex(@"(?<!\p{L})(lunt|coronado|daystar|solarscope|quark|h-?alpha|solar)(?!\p{L})",RegexOptions.IgnoreCase|RegexOptions.CultureInvariant|RegexOptions.Compiled);
+  // Dedicated solar telescopes keep the filter they report; everything else imaging the Sun is behind a solar filter.
+  public static bool SolarTelescope(Frame f){return f!=null&&solarScope.IsMatch(string.Join(" ",f.Telescope??"",f.Model??"",f.MakeText??""));}
+  public static bool NeedsSolarFilter(Frame f){return f!=null&&NamedSolar(f.Target)=="Sun"&&!Assets.IsCalibration(f.Kind)&&!SolarTelescope(f);}
   public static string CanonicalSolar(string target){return NamedSolar(target)??target;}
   public static string SolarFromFilename(string filename){
    string name=Path.GetFileName(filename??"");if(Regex.IsMatch(name,@"(?<![a-z])(nebula|galaxy|cluster)(?![a-z])",RegexOptions.IgnoreCase))return null;
