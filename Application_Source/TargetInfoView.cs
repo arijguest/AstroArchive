@@ -112,8 +112,8 @@ namespace AstroArchive {
    if(distance!=null)AddFact(facts,"Distance",TargetInfoPresentation.Distance(distance),Evidence(card,distance));
    AddParameters(facts,card);
    foreach(var m in measurements.Where(m=>new[]{"Diameter","Rotation period","Albedo"}.Contains(m.field))){if(m.field=="Diameter"&&TargetParameters.For(card.id)!=null)continue;AddFact(facts,m.field,m.value.ToString("0.#####",CultureInfo.InvariantCulture)+(string.IsNullOrEmpty(m.uncertainty)?"":" ± "+m.uncertainty)+(m.unit=="dimensionless"?"":" "+m.unit),Evidence(card,m));}
-   // Meteors have no catalogue parameters; their page shows the shower calendar instead.
-   if(card.id==MeteorCardId&&facts.Children.Count==0){article.Children.Remove(parameters);article.Children.Remove(facts);}
+   // A card with no parameters at all (meteors, which show the shower calendar instead, or sparse catalogue entries) has no empty heading.
+   if(facts.Children.Count==0){article.Children.Remove(parameters);article.Children.Remove(facts);}
    string imaging=TargetInfoPresentation.Imaging(card);
    // Imaging notes are always shown in full, not behind a disclosure.
    if(!string.IsNullOrWhiteSpace(imaging)){var notes=Section("IMAGING NOTES");notes.Name="ImagingNotes";article.Children.Add(notes);var text=Data(imaging);text.Name="ImagingNotesText";article.Children.Add(text);}

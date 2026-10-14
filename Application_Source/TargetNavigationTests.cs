@@ -39,6 +39,14 @@ namespace AstroArchive {
     Check(TargetNavigation.WithoutObjectType("M31 - Andromeda Galaxy")=="M31 - Andromeda"&&TargetNavigation.WithoutObjectType("M13 - Hercules Globular Cluster")=="M13 - Hercules","Object type suffix retained");
     Check(TargetNavigation.WithoutObjectType("NGC891 - Silver Sliver Galaxy with an extended observing name")=="NGC891 - Silver Sliver Galaxy with an extended observing name"&&TargetNavigation.WithoutObjectType("M45")=="M45","Non-suffix text or identity removed");
    });
+   Test("Sorting by date orders by time within the same date",()=>{
+    Func<string,string,string,Frame> shot=(name,day,stamp)=>new Frame{Target="M31",Kind="Light",OriginalName=name,AcquisitionDate=day,Observed=stamp};
+    var late=shot("late.fit","2026-10-01","2026-10-01T22:30:00Z");var early=shot("early.fit","2026-10-01","2026-10-01T03:00:00Z");var next=shot("next.fit","2026-10-02","2026-10-02T01:00:00Z");var bare=shot("bare.fit","2026-10-01","");var rows=new[]{next,late,bare,early};
+    var up=SearchOrdering.Order(rows,new[]{new SearchSort{Property="AcquisitionDateLabel"}},System.Globalization.CultureInfo.InvariantCulture,ct);
+    Check(up.Select(f=>f.OriginalName).SequenceEqual(new[]{"bare.fit","early.fit","late.fit","next.fit"}),"Date sort ignored the time of day");
+    var down=SearchOrdering.Order(rows,new[]{new SearchSort{Property="AcquisitionDateLabel",Descending=true}},System.Globalization.CultureInfo.InvariantCulture,ct);
+    Check(down.Select(f=>f.OriginalName).SequenceEqual(new[]{"next.fit","late.fit","early.fit","bare.fit"}),"Descending date sort ignored the time of day");
+   });
    Test("Starred on top leads the list but never splits grouped subs",()=>{
     var a=new Frame{Target="M31",Kind="Light",Session="s1",OriginalName="a.fit"};var b=a.Clone();b.OriginalName="b.fit";var c=new Frame{Target="M31",Kind="Light",Session="s2",OriginalName="c.fit"};var d=c.Clone();d.OriginalName="d.fit";
     var stack=new Frame{Target="M31",Kind="Stack",OriginalName="stack.fit"};var single=new Frame{Target="M31",Kind="Light",OriginalName="single.fit"};var rows=new[]{a,b,c,d,stack,single};var sorts=new SearchSort[0];var culture=System.Globalization.CultureInfo.InvariantCulture;var saved=RepositoryOrdering.StarredFirst;

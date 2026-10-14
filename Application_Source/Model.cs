@@ -55,6 +55,11 @@ namespace AstroArchive {
   public string TargetName {get{return CommonName.Length>0?CommonName:ObjectId.Length==0?Target:"";}}
   public string SessionKey {get{return CaptureSessions.Key(this);}}
   public string AcquisitionDate {get;set;} public string AcquisitionDateSource {get;set;}
+  // Sort value for the DATE column: the capture date plus the recorded time of day when the timestamp is on that date.
+  [ScriptIgnore]public DateTime? AcquisitionSortTime {get{
+   var date=CaptureSessions.Date(this);if(date==null)return null;DateTime stamp;
+   if(!string.IsNullOrWhiteSpace(Observed)&&!(TimeSource??"").StartsWith("Session folder")&&DateTime.TryParse(Observed,CultureInfo.InvariantCulture,DateTimeStyles.RoundtripKind,out stamp)){if(stamp.Kind==DateTimeKind.Local)stamp=stamp.ToUniversalTime();if(stamp.Date==date.Date.Date)return stamp.Kind==DateTimeKind.Utc?DateTime.SpecifyKind(stamp,DateTimeKind.Unspecified):stamp;}
+   return date.Date.Date;}}
   public string AcquisitionDateLabel {get{var date=CaptureSessions.Date(this);return date==null?"Unknown":date.Text;}}
   public string SessionGroup {get{return SessionKey;}}
   public string Make {get;set;} public string MakeEvidence {get;set;} public string TargetEvidence {get;set;} public string SourceDisposition {get;set;}
