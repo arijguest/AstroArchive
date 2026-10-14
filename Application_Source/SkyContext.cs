@@ -188,7 +188,7 @@ namespace AstroArchive {
    sky.Utc=CaptureUtc(frame,settings);bool site=false;string place="";
    var captureSite=CaptureSite.For(frame,settings);if(captureSite!=null){sky.Latitude=captureSite.Latitude;sky.Longitude=captureSite.Longitude;site=true;place=captureSite.Label;}
    sky.HasHorizon=site&&sky.Utc.HasValue;sky.Orientation=new SkyOrientation(sky.Utc,sky.HasHorizon,sky.Latitude,sky.Longitude);
-   if(sky.Utc.HasValue)sky.TimeLabel=sky.Utc.Value.ToString("dd/MM/yy HH:mm:ss 'UTC'",CultureInfo.InvariantCulture);
+   if(sky.Utc.HasValue)sky.TimeLabel=DateFormats.Format(sky.Utc.Value)+sky.Utc.Value.ToString(" HH:mm:ss 'UTC'",CultureInfo.InvariantCulture);
    else{var date=frame==null?null:CaptureSessions.Date(frame);sky.TimeLabel=date==null?"Capture time unknown":date.Text+" · time / timezone unknown";}
    if(sky.Utc.HasValue){
     var moon=MoonEphemeris.At(sky.Utc.Value,site,sky.Latitude,sky.Longitude);moon.HasHorizon=sky.HasHorizon;

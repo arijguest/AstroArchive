@@ -17,7 +17,7 @@ namespace AstroArchive {
   static void QualityLibraryTests(){
    Test("Quality: only linear light subs are eligible and every skip gives a reason",()=>{
     Check(QualityReason(f=>{})=="","A plain FITS light sub was refused");
-    Check(QualityReason(f=>f.Kind="Stack")=="","A linear stack was refused");
+    Check(QualityReason(f=>f.Kind="Stack").Contains("stacks"),"A stack was graded");Check(QualityReason(f=>f.Target="Sun").Contains("solar")&&QualityReason(f=>{f.Target="Unknown";f.ObservationMode="Solar";}).Contains("solar")&&QualityReason(f=>f.Target="Jupiter")==""&&QualityReason(f=>f.Target="Moon")=="","Solar images were graded, or planetary and lunar ones refused");
     Check(QualityReason(f=>f.Kind="Video").Contains("recordings"),"A video was graded");
     foreach(string kind in new[]{"Dark","Flat","Bias","Master dark"})Check(QualityReason(f=>f.Kind=kind).Contains("calibration"),kind+" frames were graded");
     Check(QualityReason(f=>{f.Kind="Light";f.Target="Calibration";}).Contains("calibration"),"A calibration target was graded");
@@ -55,7 +55,7 @@ namespace AstroArchive {
     var unmeasured=QualitySub("none","one","2026-10-05T22:55:00Z");frames.Add(unmeasured);
     QualityAnnotator.Apply(frames,measurements,false);
     Check(frames.Take(20).All(f=>f.QualityScore.HasValue&&f.QualityPercentile>=0&&f.QualityPercentile<=1),"Eligible subs were not scored");
-    Check(stack.QualityScore.HasValue&&frames[0].QualityPercentile==1,"A stack was not scored or was ranked among the subs");
+    Check(!stack.QualityScore.HasValue&&stack.QualityTooltip.Contains("stacks")&&frames[0].QualityPercentile==1,"A stack with an earlier score was still scored or ranked");
     Check(!future.QualityScore.HasValue&&!ancient.QualityScore.HasValue&&!wrong.QualityScore.HasValue&&!unmeasured.QualityScore.HasValue,"Unknown, mismatched or missing measurements were scored");
     if(QualityMeter.OldestShown<QualityMeter.Version)Check(stale.QualityScore.HasValue&&stale.QualityTooltip.Contains("earlier version"),"A program update wiped an earlier-version score");
     Check(unmeasured.QualityTooltip.Contains("Analyse image quality"),"An unmeasured sub does not say how to get a score");
@@ -135,6 +135,11 @@ namespace AstroArchive {
      var scored=repo.All();Check(scored.Where(f=>f.Kind=="Light").All(f=>f.QualityScore.HasValue)&&scored.Where(f=>f.Kind!="Light").All(f=>!f.QualityScore.HasValue),"Library rows were not annotated on load");
      var tight=scored.Single(f=>f.OriginalName=="Light_M51_0.fit");var loose=scored.Single(f=>f.OriginalName=="Light_M51_2.fit");Check(tight.QualityScore.Value>loose.QualityScore.Value,"The sharper capture did not score higher: "+tight.QualityScore+" vs "+loose.QualityScore);
      var forced=repo.AnalyzeQuality(repo.All(),true,ct,NoProgress);Check(forced.Measured==3&&forced.Reused==0,"A fresh measurement was not forced");
+     // A score is measured again only when the number of captures it was compared against has changed.
+     var stored=repo.QualityMeasurements();Check(stored.Values.All(m=>m.Compared==3),"The comparison size was not recorded: "+string.Join(",",stored.Values.Select(m=>m.Compared)));
+     var hash=stored.Keys.First();var edited=stored[hash];edited.Compared=2;var older=stored.Keys.Skip(1).First();stored[older].Compared=0;
+     typeof(Repository).GetMethod("SaveQuality",System.Reflection.BindingFlags.NonPublic|System.Reflection.BindingFlags.Instance).Invoke(repo,new object[]{new List<QualityMeasurement>{edited,stored[older]}});
+     var changed=repo.AnalyzeQuality(repo.All(),false,ct,NoProgress);Check(changed.Measured==1&&changed.Reused==2,"A changed comparison size did not trigger one new measurement, or an unrecorded one was measured: "+changed.Summary());
      repo.ClearQuality();Check(repo.All().All(f=>!f.QualityScore.HasValue)&&repo.UnmeasuredQuality(repo.All()).Count==3,"Clearing left measurements behind");
      var found=repo.AnalyzeMissingQuality(ct,NoProgress);Check(found.Measured==3,"Missing measurements were not found: "+found.Summary());
     }

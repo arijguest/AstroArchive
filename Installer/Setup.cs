@@ -41,7 +41,7 @@ namespace AstroArchive.Installation {
     updateOnly=onlyUpdate;Text="AstroArchive "+ApplicationVersion+" Setup";Icon=Icon.ExtractAssociatedIcon(Assembly.GetExecutingAssembly().Location);
     InstallerLayout.Configure(this,760,600,600,420);StartPosition=FormStartPosition.CenterScreen;
     Font=new Font("Segoe UI",10);BackColor=Color.FromArgb(242,245,250);
-    var header=new Panel{Dock=DockStyle.Top,Height=112,BackColor=Color.FromArgb(17,28,55)};
+    var header=new Panel{Dock=DockStyle.Top,AutoSize=true,Padding=new Padding(0,0,0,18),BackColor=Color.FromArgb(17,28,55)};
     using(var stream=new MemoryStream(Resource("logo.png")))header.Controls.Add(new PictureBox{Image=new Bitmap(Image.FromStream(stream)),SizeMode=PictureBoxSizeMode.Zoom,Location=new Point(24,18),Size=new Size(76,76)});
     header.Controls.Add(new Label{Text="AstroArchive",ForeColor=Color.White,Font=new Font("Segoe UI",23,FontStyle.Bold),Location=new Point(120,23),AutoSize=true});
     header.Controls.Add(new Label{Text="Version "+ApplicationVersion+"  ·  Windows 10 / 11",ForeColor=Color.FromArgb(194,210,235),Location=new Point(123,72),AutoSize=true});

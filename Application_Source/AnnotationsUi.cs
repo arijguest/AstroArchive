@@ -23,6 +23,18 @@ namespace AstroArchive {
     catch(Exception e){if(!(e is System.IO.IOException||e is UnauthorizedAccessException||e is ArgumentException||e is InvalidOperationException))throw;annotations=new Dictionary<string,CaptureAnnotation>(StringComparer.OrdinalIgnoreCase);L("StatusLabel").Text="Stars, tags and notes could not be read: "+e.Message;}
    }return annotations;
   }}
+  // Solar captures at 99% or more obscuration get a Totality tag, once. The user can remove it for good.
+  bool totalityRunning;
+  void ScheduleTotalityTags(){
+   if(repo==null||totalityRunning||closing)return;
+   var pool=all;var store=Annotations;var opened=repo;
+   var candidates=pool.Where(f=>!string.IsNullOrEmpty(f.AnnotationKey)&&(f.Tags==null||!f.Tags.Any(t=>t==Eclipses.TotalityTag))&&!(store.ContainsKey(f.AnnotationKey)&&store[f.AnnotationKey].AutoTags!=null&&store[f.AnnotationKey].AutoTags.Contains(Eclipses.TotalityTag))).ToList();
+   if(candidates.Count==0)return;totalityRunning=true;
+   System.Threading.Tasks.Task.Run(()=>candidates.Where(f=>{var e=FrameEclipse(f,pool);return e!=null&&Eclipses.IsTotal(e);}).ToList()).ContinueWith(t=>Window.Dispatcher.BeginInvoke(new Action(()=>{
+    totalityRunning=false;if(closing||repo!=opened||t.IsFaulted||t.Result.Count==0||RepositoryOperationBlocked)return;
+    var edit=new AnnotationEdit();edit.AutoTags.Add(Eclipses.TotalityTag);int changed;SaveAnnotations(t.Result.Cast<IAnnotated>().ToList(),edit,out changed);
+   })));
+  }
   void ApplyAnnotations(IEnumerable<IAnnotated> items){CaptureAnnotations.Apply(items,Annotations);}
   void InitializeAnnotations(){
    foreach(string name in new[]{"FramesGrid","EditedGrid"}){

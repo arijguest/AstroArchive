@@ -23,7 +23,7 @@ namespace AstroArchive {
  }
  // What is known about a target beyond the user's own files, for the automatic card description.
  public sealed class TargetCardFacts {
-  public string Kind,Constellation;public double? LightYears;public bool ApproximateDistance;public double? Magnitude;public bool BlueMagnitude;
+  public string Kind,Constellation;public double? LightYears;public bool ApproximateDistance;public double? Magnitude;public bool BlueMagnitude;public List<string> Extra;
  }
  public sealed class TargetCardChoice {public string Target,Label;public double Seconds;public int Lights;public override string ToString(){return Label;}}
  public enum TargetCardLayout {Portrait,Vertical,Square,Widescreen}
@@ -44,12 +44,20 @@ namespace AstroArchive {
   // Anything not known is left out, and nothing is guessed. Translated part by part.
   public static string Describe(TargetCardFacts facts){
    if(facts==null)return null;var parts=new List<string>();
-   if(!string.IsNullOrWhiteSpace(facts.Kind))parts.Add(Localization.T(facts.Kind.Trim()));
+   if(!string.IsNullOrWhiteSpace(facts.Kind))parts.Add(TitleCase(Localization.T(facts.Kind.Trim())));
    if(!string.IsNullOrWhiteSpace(facts.Constellation))parts.Add(Localization.T(facts.Constellation.Trim()));
    if(facts.LightYears.HasValue&&facts.LightYears.Value>0&&!double.IsInfinity(facts.LightYears.Value))parts.Add((facts.ApproximateDistance?"~":"")+Distance(facts.LightYears.Value));
-   if(facts.Magnitude.HasValue&&!double.IsNaN(facts.Magnitude.Value))parts.Add(Localization.F(facts.BlueMagnitude?"blue magnitude {0}":"magnitude {0}",facts.Magnitude.Value.ToString("0.0",CultureInfo.CurrentCulture)));
+   if(facts.Magnitude.HasValue&&!double.IsNaN(facts.Magnitude.Value))parts.Add(TitleCase(Localization.F(facts.BlueMagnitude?"blue magnitude {0}":"magnitude {0}",facts.Magnitude.Value.ToString("0.0",CultureInfo.CurrentCulture))));
+   if(facts.Extra!=null)parts.AddRange(facts.Extra.Where(e=>!string.IsNullOrWhiteSpace(e)));
    return parts.Count==0?null:string.Join(" · ",parts);
   }
+  // English object types read as names ("Spiral Galaxy"); short joining words stay lower case. Other languages keep their own casing.
+  static string TitleCase(string text){
+   if(!Localization.English)return Capitalise(text);
+   var small=new HashSet<string>{"of","in","the","and","with","on","a"};
+   return string.Join(" ",text.Split(' ').Select((w,i)=>w.Length==0?w:i>0&&small.Contains(w)?w:string.Join("-",w.Split('-').Select(Capitalise))));
+  }
+  static string Capitalise(string text){return string.IsNullOrEmpty(text)||!char.IsLower(text[0])?text:char.ToUpper(text[0],CultureInfo.CurrentCulture)+text.Substring(1);}
   // Two significant figures, in light-years, millions or billions of light-years.
   public static string Distance(double lightYears){
    double rounded=lightYears;if(lightYears>0){double scale=Math.Pow(10,Math.Floor(Math.Log10(lightYears))-1);rounded=Math.Round(lightYears/scale)*scale;}
@@ -76,6 +84,16 @@ namespace AstroArchive {
   public static TargetCardFacts Facts(TargetInfoCard card){
    if(card==null||card.domain!="deep_sky"&&card.domain!="solar_system")return null;
    var facts=new TargetCardFacts();string kind=(card.type_label??"").Trim();if(kind.Length>0&&!kind.StartsWith("Uncertain",StringComparison.OrdinalIgnoreCase))facts.Kind=kind;
+   if(CometInfo.IsComet(card)){
+    // A comet's distance and brightness change by the day, so describe its orbit: class, period and closest approach to the Sun.
+    var orbit=CometInfo.Orbit(card.id);
+    if(orbit!=null){
+     facts.Extra=new List<string>();
+     if(!string.IsNullOrEmpty(orbit.Class)||orbit.E>=1)facts.Extra.Add(Localization.T(CometInfo.ClassLabel(orbit))+" "+Localization.T("orbit"));
+     facts.Extra.Add(orbit.PeriodYears>0?CometInfo.Period(orbit):Localization.T("Passes through once"));
+     facts.Extra.Add(Localization.T("Perihelion")+" "+Localization.F("{0} AU",orbit.Q.ToString("0.0##",CultureInfo.CurrentCulture))+(CometInfo.ShowsPerihelionDate(orbit)?" · "+CometInfo.PerihelionDate(orbit):""));
+    }
+   }
    if(card.domain=="deep_sky"){
     facts.Constellation=TargetInfoPresentation.Constellation(card.constellation);var measurements=card.measurements??new TargetInfoMeasurement[0];
     var distance=measurements.FirstOrDefault(m=>m.field=="Distance"&&m.value>0&&LightYears(m.value,m.unit).HasValue);
@@ -83,7 +101,7 @@ namespace AstroArchive {
     var visual=measurements.FirstOrDefault(m=>m.field=="V-Mag"&&m.unit=="mag");var blue=measurements.FirstOrDefault(m=>m.field=="B-Mag"&&m.unit=="mag");
     if(visual!=null)facts.Magnitude=visual.value;else if(blue!=null){facts.Magnitude=blue.value;facts.BlueMagnitude=true;}
    }
-   return facts.Kind==null&&facts.Constellation==null&&!facts.LightYears.HasValue&&!facts.Magnitude.HasValue?null:facts;
+   return facts.Kind==null&&facts.Extra==null&&facts.Constellation==null&&!facts.LightYears.HasValue&&!facts.Magnitude.HasValue?null:facts;
   }
   public static int QuarterTurn(int degrees){return ((int)Math.Round(degrees/90.0)%4+4)%4*90;}
   public static bool Eligible(string target){return !string.IsNullOrWhiteSpace(target)&&target!="All targets"&&target!="Calibration"&&!Catalog.IsAmbiguous(target);}

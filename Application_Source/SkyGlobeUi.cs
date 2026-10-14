@@ -30,7 +30,7 @@ namespace AstroArchive {
   // Raised when the Moon, Sun, target or eclipse close-up is clicked, for Capture details.
   public event EventHandler DetailsRequested;
   public CaptureSky Context{get{return context;}}
-  const string NavigationHelp="Drag to rotate; scroll or pinch to zoom.\nClick a constellation to name it, or the Moon, Sun or target for capture details.";
+  const string NavigationHelp="Drag to rotate. Click the map, then scroll to zoom (or hold Ctrl and scroll); pinch also zooms.\nClick a constellation to name it, or the Moon, Sun or target for capture details.";
   void ViewChanged(){drawing=null;InvalidateVisual();}
   // Raised after the globe's size changes so overlay controls can follow it.
   public event EventHandler GlobeResized;
@@ -50,7 +50,7 @@ namespace AstroArchive {
   internal void RotateView(double dx,double dy){double scale=180/(Math.PI*Math.Max(25,radius));Camera.Orbit(-dx*scale,dy*scale);ViewChanged();}
   internal void ZoomView(double factor){Camera.Magnify(factor);ViewChanged();}
   protected override void OnMouseLeftButtonDown(MouseButtonEventArgs e){
-   base.OnMouseLeftButtonDown(e);if(e.StylusDevice!=null)return;Focus();
+   base.OnMouseLeftButtonDown(e);if(e.StylusDevice!=null)return;Focus();SetWheelActive(true);
    if(e.ClickCount==2){ResetView();e.Handled=true;return;}
    dragPoint=pressPoint=e.GetPosition(this);moved=false;dragging=CaptureMouse();if(dragging)Cursor=Cursors.SizeAll;e.Handled=true;
   }
@@ -92,7 +92,15 @@ namespace AstroArchive {
    if(total!=null&&total.Translation.Length<6&&Math.Abs(total.Scale.X*total.Scale.Y-1)<0.05)Tap(e.ManipulationOrigin);
   }
   protected override void OnLostMouseCapture(MouseEventArgs e){base.OnLostMouseCapture(e);dragging=false;Cursor=Cursors.Hand;}
-  protected override void OnMouseWheel(MouseWheelEventArgs e){base.OnMouseWheel(e);ZoomView(Math.Pow(1.2,e.Delta/120.0));e.Handled=true;}
+  // The wheel scrolls the page until the map is chosen on purpose: a click on it, or Ctrl+wheel.
+  // Leaving the map or pressing Esc hands the wheel back to the page.
+  internal bool WheelActive;internal bool WheelZooms{get{return WheelActive||(Keyboard.Modifiers&ModifierKeys.Control)!=0;}}
+  void SetWheelActive(bool value){if(WheelActive==value)return;WheelActive=value;InvalidateVisual();}
+  protected override void OnMouseWheel(MouseWheelEventArgs e){
+   base.OnMouseWheel(e);if(!WheelZooms)return;
+   ZoomView(Math.Pow(1.2,e.Delta/120.0));e.Handled=true;
+  }
+  protected override void OnMouseLeave(MouseEventArgs e){base.OnMouseLeave(e);if(!dragging)SetWheelActive(false);}
   protected override void OnManipulationStarting(ManipulationStartingEventArgs e){base.OnManipulationStarting(e);e.ManipulationContainer=this;e.Mode=ManipulationModes.Translate|ManipulationModes.Scale;e.Handled=true;}
   protected override void OnManipulationDelta(ManipulationDeltaEventArgs e){
    base.OnManipulationDelta(e);if(e.IsInertial){e.Complete();e.Handled=true;return;}
@@ -104,7 +112,7 @@ namespace AstroArchive {
     case Key.Up:Camera.Orbit(0,-10);break;case Key.Down:Camera.Orbit(0,10);break;
     case Key.Add:case Key.OemPlus:Camera.Magnify(1.2);break;case Key.Subtract:case Key.OemMinus:Camera.Magnify(1/1.2);break;
     case Key.Home:case Key.D0:case Key.NumPad0:case Key.F:Camera.Reset();break;
-    case Key.Escape:if(selectedFigure<0)return;SelectConstellation(-1);e.Handled=true;return;
+    case Key.Escape:if(selectedFigure>=0){SelectConstellation(-1);e.Handled=true;return;}if(!WheelActive)return;SetWheelActive(false);e.Handled=true;return;
     case Key.Enter:case Key.Space:RequestDetails();e.Handled=true;return;default:return;
    }ViewChanged();e.Handled=true;
   }
@@ -128,7 +136,8 @@ namespace AstroArchive {
    var previous=SkyVector.Horizontal(0,altitude);for(int angle=5;angle<=360;angle+=5){var next=SkyVector.Horizontal(angle,altitude);dc.DrawLine((previous.Dot(front)+next.Dot(front))/2>=0?visible:faint,Project(previous),Project(next));previous=next;}
   }
   protected override void OnRender(DrawingContext dc){
-   base.OnRender(dc);if(context.BelowHorizon){CardinalLabels.Clear();TargetMarkerDrawn=false;MoonDrawn=false;return;}dc.DrawRectangle(Brushes.Transparent,null,new Rect(RenderSize));if(ActualWidth<50||ActualHeight<50)return;
+   base.OnRender(dc);if(WheelActive&&ActualWidth>8&&ActualHeight>8)dc.DrawRoundedRectangle(null,new Pen(GetValue(AccentBrushProperty) as Brush??Brushes.SteelBlue,1.5),new Rect(1,1,ActualWidth-2,ActualHeight-2),6,6);
+   if(context.BelowHorizon){CardinalLabels.Clear();TargetMarkerDrawn=false;MoonDrawn=false;return;}dc.DrawRectangle(Brushes.Transparent,null,new Rect(RenderSize));if(ActualWidth<50||ActualHeight<50)return;
    var colours=new[]{GetValue(LineBrushProperty),GetValue(TextBrushProperty),GetValue(AccentBrushProperty),GetValue(SurfaceBrushProperty)};
    if(drawing==null||lastWidth!=ActualWidth||lastHeight!=ActualHeight||palette==null||colours.Where((c,i)=>!ReferenceEquals(c,palette[i])).Any()){
     lastWidth=ActualWidth;lastHeight=ActualHeight;palette=colours;drawing=Build((Brush)colours[0],(Brush)colours[1],(Brush)colours[2],(Brush)colours[3]);DrawingBuilds++;
@@ -176,13 +185,24 @@ namespace AstroArchive {
    DrawMoonDisc(dc,point,size,context.Moon.Illumination,angle,Tint(line,0.55),Stroke(text,0.55,0.8),opacity);
    MoonDrawn=true;MoonBehindGlobe=moon.Dot(front)<0;MoonBounds=new Rect(point.X-size,point.Y-size,2*size,2*size);
   }
-  internal bool SunDrawn,EclipseDrawn;internal Rect EclipseBounds;
+  internal bool SunDrawn,EclipseDrawn,CoronaDrawn;internal Rect EclipseBounds;
   static readonly Color SunLight=Color.FromRgb(255,206,84);
+  void DrawCorona(DrawingContext dc,Point at,double size){
+   double reach=size*3;var halo=new RadialGradientBrush();double edge=size/reach;
+   halo.GradientStops.Add(new GradientStop(Color.FromArgb(255,255,255,255),0));halo.GradientStops.Add(new GradientStop(Color.FromArgb(235,246,248,255),edge));halo.GradientStops.Add(new GradientStop(Color.FromArgb(110,200,214,255),edge+(1-edge)*0.35));halo.GradientStops.Add(new GradientStop(Color.FromArgb(0,180,200,255),1));halo.Freeze();
+   dc.DrawEllipse(halo,null,at,reach,reach);
+   var ray=new SolidColorBrush(Color.FromArgb(190,240,244,255));ray.Freeze();var pen=new Pen(ray,Math.Max(0.8,size*0.1)){StartLineCap=PenLineCap.Round,EndLineCap=PenLineCap.Round};pen.Freeze();
+   for(int i=0;i<12;i++){double a=i*Math.PI/6+0.2,inner=size*1.05,outer=size*(i%2==0?2.5:1.9);dc.DrawLine(pen,new Point(at.X+Math.Cos(a)*inner,at.Y+Math.Sin(a)*inner),new Point(at.X+Math.Cos(a)*outer,at.Y+Math.Sin(a)*outer));}
+   CoronaDrawn=true;
+  }
   void DrawSun(DrawingContext dc,double opacity){
    var point=Project(sun);double size=Math.Max(6,Math.Min(12,radius*0.07));if(opacity<1)dc.PushOpacity(opacity);
    bool eclipsed=context.Eclipse!=null&&context.Eclipse.Solar;
    if(!eclipsed){var glow=new RadialGradientBrush(Color.FromArgb(110,255,214,110),Color.FromArgb(0,255,214,110));glow.Freeze();dc.DrawEllipse(glow,null,point,size*2.2,size*2.2);}
-   var disc=new SolidColorBrush(SunLight);disc.Freeze();dc.DrawEllipse(disc,null,point,size,size);
+   var disc=new SolidColorBrush(SunLight);disc.Freeze();
+   // At 99% or more the corona shows: a pearly halo with short streamers around the dark disc.
+   if(eclipsed&&Eclipses.IsTotal(context.Eclipse))DrawCorona(dc,point,size);
+   dc.DrawEllipse(disc,null,point,size,size);
    if(eclipsed){
     var e=context.Eclipse;var other=Project(moon);double dx=other.X-point.X,dy=other.Y-point.Y,length=Math.Sqrt(dx*dx+dy*dy);if(length<1e-9){dx=1;dy=0;length=1;}
     double scale=size/e.SunRadiusArcmin;var shadow=new SolidColorBrush(Color.FromRgb(22,26,38));shadow.Freeze();
@@ -232,7 +252,7 @@ namespace AstroArchive {
    ConstellationLabelBounds=bounds;
   }
   DrawingGroup Build(Brush line,Brush text,Brush accent,Brush surface){
-   EclipseDrawn=false;
+   EclipseDrawn=false;CoronaDrawn=false;
    var group=new DrawingGroup();centre=new Point(ActualWidth/2,ActualHeight/2);radius=Math.Max(5,Math.Min(ActualWidth/2-14,ActualHeight/2-14))*Camera.Zoom;
    var target=context.TargetOnGlobe;double yaw=Camera.Yaw*Math.PI/180,tilt=Camera.Tilt*Math.PI/180;
    right=new SkyVector(Math.Cos(yaw),-Math.Sin(yaw),0);up=new SkyVector(-Math.Sin(yaw)*Math.Sin(tilt),-Math.Cos(yaw)*Math.Sin(tilt),Math.Cos(tilt));front=new SkyVector(Math.Sin(yaw)*Math.Cos(tilt),Math.Cos(yaw)*Math.Cos(tilt),Math.Sin(tilt));

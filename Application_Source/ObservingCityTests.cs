@@ -18,6 +18,24 @@ namespace AstroArchive {
      Check(ObservingCities.Search("x").Count==0&&ObservingCities.Search("no-such-town-zzzzzz").Count==0,"Short or unknown queries select a location");
     }finally{CultureInfo.CurrentCulture=previous;}
    });
+   Test("Date format follows the observing location until chosen in Preferences",()=>{
+    var settings=new Settings();DateFormats.Configure(settings);var day=new DateTime(2026,3,4);
+    Check(DateFormats.Format(day)=="04/03/26"&&DateFormats.Hint=="DD/MM/YY","No location should keep day-first dates");
+    var draft=new ObservingSiteChoice(settings);draft.Select(ObservingCities.Search("New York USA").First());draft.Save(settings);DateFormats.Configure(settings);
+    Check(settings.ObservingCountryCode=="US"&&DateFormats.Format(day)=="03/04/26","A US location should switch to month-first dates");
+    settings.DateFormat=DateFormats.DayFirst;DateFormats.Configure(settings);Check(DateFormats.Format(day)=="04/03/26","An explicit day-first choice should beat the US location");
+    settings.DateFormat=DateFormats.Automatic;settings.ObservingCountryCode=null;DateFormats.Configure(settings);Check(DateFormats.Format(day)=="03/04/26","A saved city without a country should be resolved from the catalogue");
+    DateTime parsed;Check(DateFormats.TryParse("12/31/26",out parsed)&&parsed==new DateTime(2026,12,31)&&DateFormats.TryParse("2026-03-04",out parsed)&&parsed==day&&!DateFormats.TryParse("31/12/26",out parsed),"Month-first parsing is wrong");
+    settings.DateFormat=DateFormats.DayFirst;DateFormats.Configure(settings);Check(DateFormats.TryParse("31.12.2026",out parsed)&&parsed==new DateTime(2026,12,31)&&!DateFormats.TryParse("12/31/26",out parsed),"Day-first parsing is wrong");
+    DateFormats.Configure(new Settings());
+   });
+   Test("Totality is tagged once and stays removed",()=>{
+    var store=new System.Collections.Generic.Dictionary<string,CaptureAnnotation>();var frame=new Frame{Hash="abc"};var edit=new AnnotationEdit();edit.AutoTags.Add(Eclipses.TotalityTag);
+    Check(CaptureAnnotations.Edit(store,new[]{frame},edit)==1&&frame.Tags.Contains("Totality"),"Totality tag was not added");
+    var remove=new AnnotationEdit();remove.RemoveTags.Add("Totality");CaptureAnnotations.Edit(store,new[]{frame},remove);
+    Check(CaptureAnnotations.Edit(store,new[]{frame},edit)==0&&(frame.Tags==null||!frame.Tags.Contains("Totality")),"A removed Totality tag came back");
+    Check(Eclipses.IsTotal(new EclipseInfo{Solar=true,Obscuration=0.995})&&!Eclipses.IsTotal(new EclipseInfo{Solar=true,Obscuration=0.9})&&!Eclipses.IsTotal(new EclipseInfo{Solar=false,Obscuration=1}),"Totality threshold wrong");
+   });
    Test("Choosing a city is transactional and legacy coordinates remain usable",()=>{
     var settings=Util.Deserialize<Settings>("{\"Latitude\":51.5,\"Longitude\":-0.1}");var draft=new ObservingSiteChoice(settings);
     Check(draft.Label=="Previously saved location"&&draft.Latitude==51.5&&draft.Longitude==-0.1,"Old location silently changed");

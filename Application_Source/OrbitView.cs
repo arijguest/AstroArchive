@@ -47,23 +47,23 @@ namespace AstroArchive {
   const double TweenSeconds=0.28;
   public OrbitCamera Camera=new OrbitCamera();public OrbitScene Scene {get;private set;}
   public OrbitPoint? Marker;public bool MarkerIsNow;public List<ImagedMark> Imaged;public List<KeyValuePair<string,OrbitPoint>> Bodies;public bool Overview;public string DateLabel;
-  public Action Changed,TogglePlay;Point last;bool dragging,panning;
+  public Action Changed,TogglePlay;Point last,pressed;bool dragging,panning;
   OrbitCamera from,to;Stopwatch clock;bool tweening;
   public OrbitView(){
    foreach(var colour in palette)SetResourceReference(colour.Value,colour.Key);SetResourceReference(CaptionSizeProperty,"UiFontCaption");
    Cursor=Cursors.Hand;ToolTip=Localization.T("Drag or use arrows to rotate. Shift-drag to pan. Focus the orbit or hold Ctrl to zoom with the wheel. Pinch to zoom.");Focusable=true;IsManipulationEnabled=true;ClipToBounds=true;MinHeight=160;
    SetResourceReference(FocusVisualStyleProperty,SystemParameters.FocusVisualStyleKey);
    AutomationProperties.SetName(this,Localization.T("3D orbit"));AutomationProperties.SetHelpText(this,Localization.T("Drag or use arrows to rotate. Shift-drag to pan. Focus the orbit or hold Ctrl to zoom with the wheel. Pinch to zoom."));
-   MouseLeftButtonDown+=(s,e)=>{Focus();StopTween();if(e.ClickCount==2){GoReset();e.Handled=true;return;}last=e.GetPosition(this);dragging=true;panning=(Keyboard.Modifiers&ModifierKeys.Shift)!=0;Cursor=panning?Cursors.ScrollAll:Cursors.SizeAll;CaptureMouse();e.Handled=true;};
+   MouseLeftButtonDown+=(s,e)=>{Focus();StopTween();pressed=e.GetPosition(this);if(e.ClickCount==2){GoReset();e.Handled=true;return;}last=e.GetPosition(this);dragging=true;panning=(Keyboard.Modifiers&ModifierKeys.Shift)!=0;Cursor=panning?Cursors.ScrollAll:Cursors.SizeAll;CaptureMouse();e.Handled=true;};
    MouseMove+=(s,e)=>{if(!dragging)return;var point=e.GetPosition(this);double dx=point.X-last.X,dy=point.Y-last.Y;last=point;if(panning)Pan(dx,dy);else Rotate(dx*0.5,dy*0.5);e.Handled=true;};
-   MouseLeftButtonUp+=(s,e)=>{dragging=false;Cursor=Cursors.Hand;ReleaseMouseCapture();e.Handled=true;};LostMouseCapture+=(s,e)=>{dragging=false;Cursor=Cursors.Hand;};
+   MouseLeftButtonUp+=(s,e)=>{if(dragging&&(e.GetPosition(this)-pressed).Length<4)ClickImaged(e.GetPosition(this));dragging=false;Cursor=Cursors.Hand;ReleaseMouseCapture();e.Handled=true;};LostMouseCapture+=(s,e)=>{dragging=false;Cursor=Cursors.Hand;};
    PreviewMouseWheel+=(s,e)=>{if(!IsKeyboardFocusWithin&&(Keyboard.Modifiers&ModifierKeys.Control)==0)return;StopTween();Zoom(Math.Exp(Math.Max(-1200,Math.Min(1200,e.Delta))/600.0),e.GetPosition(this));e.Handled=true;};
-   KeyDown+=(s,e)=>{bool handled=true;StopTween();switch(e.Key){case Key.Left:Rotate(-5,0);break;case Key.Right:Rotate(5,0);break;case Key.Up:Rotate(0,5);break;case Key.Down:Rotate(0,-5);break;case Key.Add:case Key.OemPlus:Zoom(1.25);break;case Key.Subtract:case Key.OemMinus:Zoom(0.8);break;case Key.Home:GoReset();break;case Key.Space:if(TogglePlay==null)handled=false;else TogglePlay();break;case Key.Escape:MoveFocus(new TraversalRequest(FocusNavigationDirection.Previous));break;default:handled=false;break;}e.Handled=handled;};
+   KeyDown+=(s,e)=>{bool handled=true;StopTween();switch(e.Key){case Key.Left:Rotate(-5,0);break;case Key.Right:Rotate(5,0);break;case Key.Up:Rotate(0,5);break;case Key.Down:Rotate(0,-5);break;case Key.Add:case Key.OemPlus:Zoom(1.25);break;case Key.Subtract:case Key.OemMinus:Zoom(0.8);break;case Key.Home:GoReset();break;case Key.Enter:if(drawnMarks.Count==0)handled=false;else CycleImaged();break;case Key.Space:if(TogglePlay==null)handled=false;else TogglePlay();break;case Key.Escape:MoveFocus(new TraversalRequest(FocusNavigationDirection.Previous));break;default:handled=false;break;}e.Handled=handled;};
    ManipulationStarting+=(s,e)=>{StopTween();dragging=false;ReleaseMouseCapture();e.Mode=ManipulationModes.Translate|ManipulationModes.Scale;e.ManipulationContainer=this;e.Handled=true;};
    ManipulationDelta+=(s,e)=>{Focus();double scale=e.DeltaManipulation.Scale.X;if(OrbitalModel.Finite(scale)&&scale>0)Zoom(scale,e.ManipulationOrigin);if(TouchesCapturedWithin.Concat(TouchesOver).Distinct().Count()<2)Rotate(e.DeltaManipulation.Translation.X*0.5,e.DeltaManipulation.Translation.Y*0.5);else Pan(e.DeltaManipulation.Translation.X,e.DeltaManipulation.Translation.Y);e.Handled=true;};
    Unloaded+=(s,e)=>StopTween(true);IsVisibleChanged+=(s,e)=>{if(!IsVisible)StopTween(true);};
   }
-  public void SetScene(OrbitScene scene){Scene=scene;StopTween(true);InvalidateVisual();}
+  public void SetScene(OrbitScene scene){Scene=scene;pickedMark=null;StopTween(true);InvalidateVisual();}
   void Update(){InvalidateVisual();if(Changed!=null)Changed();}
   public void Redraw(){InvalidateVisual();}
   public void Reset(){StopTween();Camera=new OrbitCamera();Update();}
@@ -243,7 +243,7 @@ namespace AstroArchive {
    if(!bounds.Contains(at))return;
    dc.DrawEllipse(Tint(accent,0.1),Stroke(accent,0.45,1),at,15,15);dc.DrawEllipse(Tint(accent,0.2),Stroke(accent,1,2),at,8.5,8.5);dc.DrawEllipse(accent,Stroke(surface,1,1),at,3.5,3.5);
    if(heading.HasValue){var d=heading.Value;d.Normalize();Arrow(dc,at,new Point(at.X+d.X*26,at.Y+d.Y*26),Tint(accent,1));}
-   Ask(Catalog.DisplayId(Scene.Record.object_id)+" · "+Localization.T(MarkerIsNow?"now":"on this date"),new Point(at.X+14,at.Y-30),0,true,true);
+   Ask(Catalog.DisplayId(Scene.Record.object_id),new Point(at.X+14,at.Y-30),0,true,true);
   }
   // The recent past of the orbit, ending at the target, drawn heavier than the rest so the direction and place of the target read at once.
   void Trail(DrawingContext dc,Brush accent,OrbitPoint p){
@@ -257,15 +257,34 @@ namespace AstroArchive {
   }
   Vector? heading;
   // Dates this target was imaged: small rings on the orbit. Marks that fall close together on screen are drawn once, with a count.
+  // The marks as last drawn (grouped by screen position), so a click can find one; the picked group is kept by its first date.
+  sealed class MarkGroup {public Point At;public List<ImagedMark> Marks;public string Key{get{return Marks[0].Utc.ToString("yyyy-MM-dd",CultureInfo.InvariantCulture);}}}
+  List<MarkGroup> drawnMarks=new List<MarkGroup>();string pickedMark;
+  static string Dates(List<ImagedMark> marks){
+   string first=marks[0].Utc.ToString("yyyy-MM-dd",CultureInfo.InvariantCulture),last=marks[marks.Count-1].Utc.ToString("yyyy-MM-dd",CultureInfo.InvariantCulture);
+   return marks.Count==1?first:Localization.F("{0} nights · {1} to {2}",marks.Count,first,last);
+  }
+  // A click on an imaged-date ring shows the date it was taken; clicking it again or anywhere else clears it.
+  void ClickImaged(Point at){
+   MarkGroup hit=null;double best=11;foreach(var group in drawnMarks){double d=(group.At-at).Length;if(d<best){best=d;hit=group;}}
+   string next=hit==null||hit.Key==pickedMark?null:hit.Key;if(next!=pickedMark){pickedMark=next;Announce();InvalidateVisual();}
+  }
+  // Enter steps through the imaged dates in order and past the last one back to none, so the dates are reachable without a pointer.
+  void CycleImaged(){
+   var ordered=drawnMarks.OrderBy(g=>g.Marks[0].Utc).ToList();int at=ordered.FindIndex(g=>g.Key==pickedMark);
+   pickedMark=at+1<ordered.Count?ordered[at+1].Key:null;Announce();InvalidateVisual();
+  }
+  // The picked date is also exposed as the orbit's automation status for screen readers.
+  void Announce(){var group=drawnMarks.FirstOrDefault(g=>g.Key==pickedMark);AutomationProperties.SetItemStatus(this,group==null?"":Dates(group.Marks));}
   void ImagedMarks(DrawingContext dc){
-   if(Imaged==null||Imaged.Count==0||Overview)return;Brush accent=Colour("Accent"),surface=Colour("Surface");
-   double radius=Imaged.Count>40?24:12;var groups=new List<List<ImagedMark>>();var anchors=new List<Point>();
-   foreach(var mark in Imaged.OrderBy(m=>m.Utc)){var at=ProjectScene(mark.Point);if(!Finite(at)||!bounds.Contains(at))continue;int found=-1;for(int i=0;i<anchors.Count;i++)if((anchors[i]-at).Length<radius){found=i;break;}if(found<0){anchors.Add(at);groups.Add(new List<ImagedMark>{mark});}else groups[found].Add(mark);}
-   for(int i=0;i<groups.Count;i++){
-    var at=anchors[i];int count=groups[i].Count;double r=count>1?6:4;
-    dc.DrawEllipse(Tint(surface,0.95),Stroke(accent,0.95,1.6),at,r,r);if(count==1)dc.DrawEllipse(Tint(accent,0.9),null,at,1.3,1.3);
-    if(count>1)Ask("×"+count,new Point(at.X+8,at.Y-7),7);
-    else if(groups.Count<=4)Ask(groups[i][0].Utc.ToString("yyyy-MM-dd",CultureInfo.InvariantCulture),new Point(at.X+7,at.Y+5),9);
+   drawnMarks=new List<MarkGroup>();if(Imaged==null||Imaged.Count==0||Overview)return;Brush accent=Colour("Accent"),surface=Colour("Surface");
+   double radius=Imaged.Count>40?24:12;
+   foreach(var mark in Imaged.OrderBy(m=>m.Utc)){var at=ProjectScene(mark.Point);if(!Finite(at)||!bounds.Contains(at))continue;MarkGroup found=null;foreach(var group in drawnMarks)if((group.At-at).Length<radius){found=group;break;}if(found==null)drawnMarks.Add(new MarkGroup{At=at,Marks=new List<ImagedMark>{mark}});else found.Marks.Add(mark);}
+   foreach(var group in drawnMarks){
+    var at=group.At;int count=group.Marks.Count;bool picked=group.Key==pickedMark;double r=count>1?6:4;
+    dc.DrawEllipse(picked?Tint(accent,0.9):Tint(surface,0.95),Stroke(accent,0.95,1.6),at,r,r);if(count==1&&!picked)dc.DrawEllipse(Tint(accent,0.9),null,at,1.3,1.3);
+    if(picked)Ask(Dates(group.Marks),new Point(at.X+10,at.Y+6),0,true,true);
+    else if(count>1)Ask("×"+count,new Point(at.X+8,at.Y-7),7);
    }
   }
   // Scale bar, marker date and notices, over everything else.

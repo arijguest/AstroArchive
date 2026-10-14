@@ -5,10 +5,10 @@ Covers everything since 3.2.8.1.
 
 3D orbit viewer
 The orbit view is redrawn in the sky globe's style: a constellation backdrop that turns with the camera, a ringed reference plane with distance rings and spokes, a solid orbit above the plane and a dashed one below it, ascending and descending nodes, perihelion and aphelion, a scale bar and round icon buttons (Reset, Zoom, Top view, Orbit plane, Expand). Camera moves ease unless Reduce motion is on, and labels are placed by priority so they no longer collide.
-It now simply shows where the target is now: the last stretch of its orbit is drawn bold and ends in a ringed marker with an arrow along the path. Small rings show where the target was on each date you imaged it in your archive; rings that fall close together are drawn once with a count. Play, the date timeline, the date box, the framing chips, the axis triad, the stray mid-orbit arrow and the notes below the picture are gone. Orbit credits are under SOURCES.
+It now simply shows where the target is now: the last stretch of its orbit is drawn bold and ends in a ringed marker with an arrow along the path. Small rings show where the target was on each date you imaged it in your archive; rings that fall close together are drawn once with a count. Click a ring to see the date it was taken. Play, the date timeline, the date box, the framing chips, the axis triad, the stray mid-orbit arrow and the notes below the picture are gone. Orbit credits are under SOURCES.
 
 Target information
-The Refresh information and Open in Stellarium buttons are now small icons beside the details line instead of a line of their own.
+Open in Stellarium and Refresh information (now a download icon, to the right of Stellarium) are small icons beside the details line instead of a line of their own. Every image credit now sits in the Credits dropdown rather than under the picture. Other catalogue IDs (NGC, IC, UGC and similar) show under the object line, or beside the main ID when there is only one.
 
 Work during long processes
 Image quality scoring and plate solving run beside importing, exporting and Settings. A background process registry with progress, ETA and a pulsing bell shows what is running, and the archive stays safe to use alongside it.
@@ -18,6 +18,9 @@ Approximate distances for galaxies and other deep-sky objects, a bundled comet c
 
 Quality and library
 Obstructed frames rank below clear ones, scores are kept across program updates, long stack exposure totals read in minutes or hours, DWARF stacks without a filename duration get their sub count, and best-first sub order is kept when the library table is re-sorted. Stale pointings are ignored for the Moon and planets, and the plate-solved target with the most prominence is preferred. Rotation analysis is removed.
+
+Lists and menus
+Starred files and Edited images can be shown above everything else with Settings > General > Show starred on top (on by default); starred sessions come first among the grouped subs. Group subs by session moved from the Repository menu to Settings > General. Re-measure image quality and Last operation moved into Repository > Maintenance. After deleting, moving, merging or re-identifying files, the window now stays on the same page and target and selects the row that followed them, instead of returning to All Targets.
 
 Help and settings
 Help is a help centre with guided fixes and tours that walk the real window, plus a Smart App Control article. Preferences > General > Online access offers Hybrid or Offline, and About keeps the available release visible while online access is paused.

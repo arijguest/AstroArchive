@@ -14,11 +14,13 @@ namespace AstroArchive {
  public interface IAnnotated {string AnnotationKey{get;}bool IsStarred{get;set;}List<string> Tags{get;set;}string UserNote{get;set;}}
  public sealed class CaptureAnnotation {
   public bool Starred{get;set;}public List<string> Tags{get;set;}public string Note{get;set;}public string Updated{get;set;}
-  public bool Empty{get{return !Starred&&(Tags==null||Tags.Count==0)&&string.IsNullOrWhiteSpace(Note);}}
+  // Tags AstroArchive added by itself, once. Removing one stays removed.
+  public List<string> AutoTags{get;set;}
+  public bool Empty{get{return !Starred&&(Tags==null||Tags.Count==0)&&string.IsNullOrWhiteSpace(Note)&&(AutoTags==null||AutoTags.Count==0);}}
  }
  // One edit applied to a batch: null leaves that part of each capture unchanged.
  public sealed class AnnotationEdit {
-  public bool? Starred;public string Note;public List<string> AddTags=new List<string>(),RemoveTags=new List<string>();
+  public bool? Starred;public string Note;public List<string> AddTags=new List<string>(),RemoveTags=new List<string>(),AutoTags=new List<string>();
  }
  public static class CaptureAnnotations {
   public const string FileName="annotations.json";public const int MaxTags=30,MaxTagLength=40,MaxNoteLength=4000;
@@ -26,7 +28,7 @@ namespace AstroArchive {
   public static Dictionary<string,CaptureAnnotation> Load(string meta){
    var result=new Dictionary<string,CaptureAnnotation>(StringComparer.OrdinalIgnoreCase);string path=PathFor(meta);if(!File.Exists(path))return result;
    var saved=Util.Deserialize<Dictionary<string,CaptureAnnotation>>(File.ReadAllText(path));if(saved==null)return result;
-   foreach(var pair in saved){if(string.IsNullOrWhiteSpace(pair.Key)||pair.Value==null)continue;var value=pair.Value;value.Tags=Tags(string.Join(",",value.Tags??new List<string>()));value.Note=Note(value.Note);if(!value.Empty)result[pair.Key]=value;}
+   foreach(var pair in saved){if(string.IsNullOrWhiteSpace(pair.Key)||pair.Value==null)continue;var value=pair.Value;value.Tags=Tags(string.Join(",",value.Tags??new List<string>()));value.Note=Note(value.Note);value.AutoTags=Tags(string.Join(",",value.AutoTags??new List<string>()));if(!value.Empty)result[pair.Key]=value;}
    return result;
   }
   public static void Save(string meta,Dictionary<string,CaptureAnnotation> annotations){
@@ -53,11 +55,12 @@ namespace AstroArchive {
   public static int Edit<T>(Dictionary<string,CaptureAnnotation> annotations,IEnumerable<T> items,AnnotationEdit edit) where T:IAnnotated{
    int changed=0;string now=DateTime.UtcNow.ToString("o",CultureInfo.InvariantCulture);var add=Tags(string.Join(",",edit.AddTags));var remove=Tags(string.Join(",",edit.RemoveTags));
    foreach(var group in items.Where(f=>!string.IsNullOrEmpty(f.AnnotationKey)).GroupBy(f=>f.AnnotationKey,StringComparer.OrdinalIgnoreCase)){
-    CaptureAnnotation current;annotations.TryGetValue(group.Key,out current);var next=new CaptureAnnotation{Starred=current!=null&&current.Starred,Tags=current==null||current.Tags==null?new List<string>():new List<string>(current.Tags),Note=current==null?null:current.Note};
+    CaptureAnnotation current;annotations.TryGetValue(group.Key,out current);var next=new CaptureAnnotation{Starred=current!=null&&current.Starred,Tags=current==null||current.Tags==null?new List<string>():new List<string>(current.Tags),Note=current==null?null:current.Note,AutoTags=current==null||current.AutoTags==null?new List<string>():new List<string>(current.AutoTags)};
     if(edit.Starred.HasValue)next.Starred=edit.Starred.Value;
     next.Tags.RemoveAll(t=>remove.Any(r=>string.Equals(r,t,StringComparison.OrdinalIgnoreCase)));foreach(string tag in add)if(next.Tags.Count<MaxTags&&!next.Tags.Any(t=>string.Equals(t,tag,StringComparison.OrdinalIgnoreCase)))next.Tags.Add(tag);
     if(edit.Note!=null)next.Note=Note(edit.Note);
-    bool same=current!=null&&current.Starred==next.Starred&&current.Note==next.Note&&(current.Tags??new List<string>()).SequenceEqual(next.Tags);if(same||(current==null&&next.Empty))continue;
+    foreach(string tag in Tags(string.Join(",",edit.AutoTags)))if(!next.AutoTags.Any(t=>string.Equals(t,tag,StringComparison.OrdinalIgnoreCase))){next.AutoTags.Add(tag);if(next.Tags.Count<MaxTags&&!next.Tags.Any(t=>string.Equals(t,tag,StringComparison.OrdinalIgnoreCase)))next.Tags.Add(tag);}
+    bool same=current!=null&&current.Starred==next.Starred&&current.Note==next.Note&&(current.Tags??new List<string>()).SequenceEqual(next.Tags)&&(current.AutoTags??new List<string>()).SequenceEqual(next.AutoTags);if(same||(current==null&&next.Empty))continue;
     changed++;if(next.Empty)annotations.Remove(group.Key);else{next.Updated=now;annotations[group.Key]=next;}
     foreach(var item in group)Apply(item,annotations);
    }

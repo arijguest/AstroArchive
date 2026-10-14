@@ -1890,7 +1890,6 @@ Choose card targets	Choisir les cibles des cartes
 QUALITY	QUALITÉ
 EXPOSURE FIT	ADÉQUATION D'EXPOSITION
 Analyse image quality…	Analyser la qualité d'image…
-Re-measure image quality…	Mesurer à nouveau la qualité d'image…
 Analyse image quality	Analyser la qualité d'image
 Quality rank	Rang de qualité
 Exposure fit	Adéquation d'exposition
@@ -2400,5 +2399,8 @@ Orbit|Uranus	Uranus
 Orbit|Neptune	Neptune
 now	maintenant
 on this date	à cette date
-Small rings: where it was when you imaged it.	Petits anneaux : où il se trouvait lors de vos prises de vue.
+Small rings: where it was when you imaged it. Click one for its date.	Petits anneaux : où il se trouvait lors de vos prises de vue. Cliquez pour la date.
 A current position is unavailable for this solution.	Aucune position actuelle n’est disponible pour cette solution.
+{0} nights · {1} to {2}	{0} nuits · {1} à {2}
+Show starred on top	Afficher les favoris en premier
+Reports…	Rapports…

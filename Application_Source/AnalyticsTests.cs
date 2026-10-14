@@ -37,8 +37,8 @@ namespace AstroArchive {
    });
    Test("Automatic card descriptions say what, where, how far and how bright, and never guess",()=>{
     var facts=new TargetCardFacts{Kind="Spiral galaxy",Constellation="Andromeda",LightYears=2537000,ApproximateDistance=true,Magnitude=3.44};
-    string text=TargetCards.Describe(facts);Check(text=="Spiral galaxy · Andromeda · ~2.5 million light-years · magnitude 3.4","Automatic description was "+text);
-    Check(TargetCards.Describe(new TargetCardFacts{Kind="Open cluster",Magnitude=1.6,BlueMagnitude=true})=="Open cluster · blue magnitude 1.6","Missing facts were not simply left out");
+    string text=TargetCards.Describe(facts);Check(text=="Spiral Galaxy · Andromeda · ~2.5 million light-years · Magnitude 3.4","Automatic description was "+text);
+    Check(TargetCards.Describe(new TargetCardFacts{Kind="Open cluster",Magnitude=1.6,BlueMagnitude=true})=="Open Cluster · Blue Magnitude 1.6","Missing facts were not simply left out");
     Check(TargetCards.Describe(null)==null&&TargetCards.Describe(new TargetCardFacts())==null,"An unknown target gained a description");
     Check(TargetCards.Distance(1350)=="1,400 light-years"&&TargetCards.Distance(4.2e9)=="4.2 billion light-years"&&TargetCards.Distance(24e6)=="24 million light-years","Distances were not rounded and scaled");
     Check(TargetCards.CardDescription("Mine",null,true,facts)=="Mine"&&TargetCards.CardDescription(null,null,true,facts)==text&&TargetCards.CardDescription(null,null,false,facts)==null,"The default overrode a description or did not fill an empty one");
@@ -46,8 +46,13 @@ namespace AstroArchive {
     var card=new TargetInfoCard{domain="deep_sky",type_label="Spiral galaxy",constellation="And",measurements=new[]{new TargetInfoMeasurement{field="Distance",value=2.5,unit="Mly",qualifier="Approximate"},new TargetInfoMeasurement{field="V-Mag",value=3.44,unit="mag"}}};
     var read=TargetCards.Facts(card);Check(read!=null&&read.Kind=="Spiral galaxy"&&read.LightYears==2500000&&read.ApproximateDistance&&read.Magnitude==3.44&&!read.BlueMagnitude,"Facts were not read from the information card");
     Check(TargetCards.Facts(new TargetInfoCard{domain="event",type_label="Eclipse"})==null&&TargetCards.Facts(new TargetInfoCard{domain="solar_system",type_label="Planet",measurements=card.measurements}).LightYears==null,"Events or solar-system distances were used");
+    Check(TargetCards.Describe(new TargetCardFacts{Kind="Cluster of galaxies"})=="Cluster of Galaxies","Small words were capitalised in an object type");
+    var comet=TargetCards.Facts(new TargetInfoCard{id="1P",domain="solar_system",type_label="Periodic comet"});var cometText=TargetCards.Describe(comet);
+    Check(cometText=="Periodic Comet · Halley-type orbit · 75.9 years per orbit · Perihelion 0.575 AU · 8 Feb 1986"||cometText=="Periodic Comet · Halley-type orbit · 75.9 years per orbit · Perihelion 0.575 AU","Comet description was "+cometText);
+    var hyperbolic=TargetCards.Describe(TargetCards.Facts(new TargetInfoCard{id="2I",domain="solar_system",type_label="Interstellar object"}));
+    Check(hyperbolic!=null&&hyperbolic.Contains("Passes through once")&&hyperbolic.StartsWith("Interstellar Object"),"Open-orbit comet description was "+hyperbolic);
     var saved=Util.Deserialize<Settings>(Util.Serialize(new Settings{CardAutoDescription=true,CardChoices=new Dictionary<string,TargetCardMemory>{{"M31",new TargetCardMemory{Path="",AutoDescription=false}}}}));
-    Check(saved.CardAutoDescription&&saved.CardChoices["M31"].AutoDescription==false&&Util.Deserialize<Settings>("{}").CardAutoDescription==false,"Automatic description choices were not remembered");
+    Check(saved.CardAutoDescription&&saved.CardChoices["M31"].AutoDescription==false&&Util.Deserialize<Settings>("{}").CardAutoDescription&&new Settings().CardAutoDescription,"Automatic description choices were not remembered");
    });
    Test("Analytics preferences repair saved values and migrate 3.1.5 chart choices",()=>{
     var fresh=AnalyticsPreferences.Load(Util.Deserialize<Settings>("{}").Analytics,null);
@@ -115,7 +120,7 @@ namespace AstroArchive {
      var page=AnalyticsGraphics.Page(data,index,true,layout);Check(page.Marks.Any(m=>m.Role=="header"&&m.Text=="4.25 h")&&page.Marks.Count(m=>m.Role=="header"&&m.Text=="4")==2,"Headline does not show whole-repository figures");
      string[] metrics={"4.25 h","4","4"},captions={"REPOSITORY INTEGRATION",layout==AnalyticsLayout.Landscape||layout==AnalyticsLayout.Widescreen?"LIGHT FRAMES IN REPOSITORY":"LIGHT FRAMES",layout==AnalyticsLayout.Landscape||layout==AnalyticsLayout.Widescreen?"TARGETS IN REPOSITORY":"REPOSITORY TARGETS"};
      for(int i=0;i<3;i++){
-      double expected=layout==AnalyticsLayout.Landscape?240+i*360:layout==AnalyticsLayout.Widescreen?(240+i*360)*1.35+150:layout==AnalyticsLayout.Pinterest?(220+i*320)*1000.0/1080:layout==AnalyticsLayout.Vertical?80+(i+.5)*920/3:220+i*320;
+      double expected=layout==AnalyticsLayout.Landscape?240+i*360:layout==AnalyticsLayout.Widescreen?81+((240+i*360)*1.35-81)*(1920-162)/(1620-162.0):layout==AnalyticsLayout.Pinterest?(220+i*320)*1000.0/1080:layout==AnalyticsLayout.Vertical?80+(i+.5)*920/3:220+i*320;
       foreach(string text in new[]{metrics[i],captions[i]}){var matches=page.Marks.Where(m=>m.Role=="header"&&m.Text==text&&Math.Abs(m.X-expected)<.01).ToList();Check(matches.Count==1,"Metric header text did not land at its centered position for "+layout+" / "+text+" / "+expected+"; found "+string.Join(", ",page.Marks.Where(m=>m.Role=="header"&&m.Text==text).Select(m=>m.X)));Check(matches[0].Centered,"Metric header text is not centered in its card: "+text);}
      }
      var svg=XDocument.Parse(AnalyticsGraphics.Svg(new[]{page},""));XNamespace ns="http://www.w3.org/2000/svg";Check(svg.Descendants(ns+"text").Where(e=>e.Value=="REPOSITORY INTEGRATION").Single().Attribute("text-anchor").Value=="middle","SVG metric caption is not center-anchored");
@@ -211,7 +216,7 @@ namespace AstroArchive {
    });
    Test("Analytics uses branded dark documents by default and clean light alternatives",()=>{
     var data=ArchiveAnalytics.Build(new[]{AnalyticsLight("M31",3600)},new AnalyticsOptions{Caption="Observatory"});
-    for(int i=0;i<6;i++){var dark=AnalyticsGraphics.Page(data,i);var light=AnalyticsGraphics.Page(data,i,false);Check(dark.Background=="#0C1220"&&dark.Marks[0].Fill==dark.Background&&light.Background=="#FFFFFF"&&light.Marks[0].Fill==light.Background,"Theme background does not match page scene");Check(dark.Marks.Any(m=>m.Fill=="#90B8FF")&&dark.Marks.Any(m=>m.Fill=="#E9EEF8"),"Dark chart does not use AstroArchive brand colours");Check(dark.Marks.Single(m=>m.Kind=="logo").Width==56,"Publication logo is not the agreed size");Check(dark.Marks.Count(m=>m.Text=="AstroArchive")==1&&!dark.Marks.Any(m=>m.Text!=null&&(m.Text.Contains("OBSERVATORY NOTES")||m.Text.Contains("known exposure")||m.Text.Contains(" · UTC"))),"Header and footer retain redundant text");var svg=XDocument.Parse(AnalyticsGraphics.Svg(new[]{dark},""));XNamespace ns="http://www.w3.org/2000/svg";Check(svg.Root.Elements(ns+"rect").First().Attribute("fill").Value==dark.Background,"SVG sheet has a white surround on dark documents");}
+    for(int i=0;i<6;i++){var dark=AnalyticsGraphics.Page(data,i);var light=AnalyticsGraphics.Page(data,i,false);Check(dark.Background=="#0C1220"&&dark.Marks[0].Fill==dark.Background&&light.Background=="#FFFFFF"&&light.Marks[0].Fill==light.Background,"Theme background does not match page scene");Check(dark.Marks.Any(m=>m.Fill=="#90B8FF")&&dark.Marks.Any(m=>m.Fill=="#E9EEF8"),"Dark chart does not use AstroArchive brand colours");Check(Math.Abs(dark.Marks.Single(m=>m.Kind=="logo").Width-47.6)<.001,"Publication logo is not the agreed size");Check(dark.Marks.Count(m=>m.Text=="AstroArchive")==1&&!dark.Marks.Any(m=>m.Text!=null&&(m.Text.Contains("OBSERVATORY NOTES")||m.Text.Contains("known exposure")||m.Text.Contains(" · UTC"))),"Header and footer retain redundant text");var svg=XDocument.Parse(AnalyticsGraphics.Svg(new[]{dark},""));XNamespace ns="http://www.w3.org/2000/svg";Check(svg.Root.Elements(ns+"rect").First().Attribute("fill").Value==dark.Background,"SVG sheet has a white surround on dark documents");}
    });
    Test("Empty analytics produces informative charts with finite coordinates",()=>{
     var data=ArchiveAnalytics.Build(new Frame[0],new AnalyticsOptions());Check(data.Captures==0&&data.Seconds==0&&data.UnknownExposure==0,"Empty totals incorrect");
@@ -224,7 +229,7 @@ namespace AstroArchive {
      var pages=AnalyticsGraphics.Pages(data,index,dark,AnalyticsLayout.Vertical);
      foreach(var page in pages){
       Check(page.CanvasWidth==1080&&page.CanvasHeight==1920&&page.Portrait,"Portrait dimensions are not 9:16");
-      Check(page.Marks[0].Fill==(dark?"#0C1220":"#FFFFFF")&&page.Marks.Single(m=>m.Kind=="logo").Width==70.4,"Portrait branding or document theme lost");
+      Check(page.Marks[0].Fill==(dark?"#0C1220":"#FFFFFF")&&Math.Abs(page.Marks.Single(m=>m.Kind=="logo").Width-59.8)<.001,"Portrait branding or document theme lost");
       Check(page.Marks.All(m=>m.Kind=="polygon"?Enumerable.Range(0,m.Points.Length/2).All(i=>m.Points[i*2]>=0&&m.Points[i*2]<1080&&m.Points[i*2+1]>=0&&m.Points[i*2+1]<1920):m.X>=0&&m.Y>=0&&m.X+m.Width<=1080&&m.Y+m.Height<=1920),"Portrait chart geometry escaped its page");
      }
      if(index==2||index==3){Check(pages.Count==4,"Portrait ranking dropped continuation pages");foreach(var value in data.Reports[index].Values)Check(pages.SelectMany(p=>p.Marks).Any(m=>m.Detail==value.Label),"Portrait ranking lost a category");Check(pages.Select(p=>p.Marks.Where(m=>m.Kind=="text"&&m.Y==1480).Last().Text).Distinct().Count()==1,"Portrait ranking scales differ across pages");}

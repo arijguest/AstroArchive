@@ -19,6 +19,7 @@ namespace AstroArchive {
  public sealed class TargetInfoView:UserControl {
   static readonly HashSet<string> anchorNames=new HashSet<string>(new[]{"ObjectTitle","ObjectDetails","OverviewHeading","OverviewText","ObjectImage","FunFact","ParametersHeading","ImagingNotes","ImagingNotesText","Sources","ImageCredits","OrbitPanel"});
   readonly StackPanel content=new StackPanel();readonly ScrollViewer scroll;
+  StackPanel headerIcons;Grid headerRow_,creditRow_;
   TextBlock informationStatus;Button refreshButton;OrbitPanel orbitPanel;Grid body,mapHost;StackPanel article,mapPanel;SkyGlobeView globe;Image photo;Button reset;
   public Action<string> ChooseObject;public Action RefreshInformation;public bool InternetAvailable;
   // A section such as Comets lists the user's targets inside it; choosing one reads that target's page.
@@ -44,8 +45,10 @@ namespace AstroArchive {
   static TextBlock Data(string value,string colour="Text",string size="UiFontControl"){
    var text=Text("",colour,size);text.SetBinding(TextBlock.TextProperty,new Binding{Source=value??""});return text;
   }
+  // Disclosures sit directly in the content, or beside the header icons in a row.
+  IEnumerable<Expander> Expanders(){return content.Children.OfType<Expander>().Concat(content.Children.OfType<Grid>().SelectMany(g=>g.Children.OfType<Expander>()));}
   void Begin(string title){
-   if(orbitPanel!=null)orbitPanel.Cancel();orbitPanel=null;informationStatus=null;refreshButton=null;CurrentId=null;body=null;mapPanel=null;mapHost=null;globe=null;photo=null;reset=null;content.Children.Clear();scroll.ScrollToTop();
+   if(orbitPanel!=null)orbitPanel.Cancel();orbitPanel=null;informationStatus=null;refreshButton=null;headerIcons=null;headerRow_=null;creditRow_=null;CurrentId=null;body=null;mapPanel=null;mapHost=null;globe=null;photo=null;reset=null;content.Children.Clear();scroll.ScrollToTop();
    var label=Text("TARGET INFO","Muted","UiFontCaption");label.FontWeight=FontWeights.SemiBold;content.Children.Add(label);
    var heading=Data(title,"Text","UiFontHeading");heading.Name="ObjectTitle";heading.FontWeight=FontWeights.SemiBold;content.Children.Add(heading);
   }
@@ -63,14 +66,15 @@ namespace AstroArchive {
    var details=Data(TargetInfoPresentation.Tagline(card,constellation),"Muted","UiFontCaption");details.Name="ObjectDetails";
    // Refresh and Open in Stellarium are small icons at the right of the details line rather than a line of their own.
    var headerRow=new Grid();headerRow.ColumnDefinitions.Add(new ColumnDefinition());headerRow.ColumnDefinitions.Add(new ColumnDefinition{Width=GridLength.Auto});headerRow.Children.Add(details);
-   var icons=new StackPanel{Orientation=Orientation.Horizontal,VerticalAlignment=VerticalAlignment.Top,Margin=new Thickness(6,0,0,0)};Grid.SetColumn(icons,1);headerRow.Children.Add(icons);content.Children.Add(headerRow);
+   var icons=headerIcons=new StackPanel{Orientation=Orientation.Horizontal,VerticalAlignment=VerticalAlignment.Top,Margin=new Thickness(6,0,0,0)};headerRow_=headerRow;Grid.SetColumn(icons,1);headerRow.Children.Add(icons);content.Children.Add(headerRow);
+   string alternatives=TargetInfoPresentation.AlternativeLine(card);if(alternatives.Length>0){var other=Data(alternatives,"Muted","UiFontCaption");other.Name="ObjectAlternativeIds";content.Children.Add(other);}
    if(!string.IsNullOrEmpty(context))content.Children.Add(Data(context,"Muted","UiFontCaption"));
    var actions=new WrapPanel{Margin=new Thickness(0,0,0,4)};
-   if(RefreshInformation!=null&&InformationCoordinator.Provider(card)!=null){var refresh=refreshButton=IconButton(RefreshGeometry,"Refresh information");refresh.IsEnabled=InternetAvailable;UiHelp.Hint(refresh,InternetAvailable?"Download missing or updated information for this target.":"Choose Hybrid in Preferences > General > Online access to reconnect.");refresh.Click+=(s,e)=>RefreshInformation();icons.Children.Add(refresh);}
    if(!string.IsNullOrEmpty(card.downloaded_at))content.Children.Add(Data(Localization.F("Saved information · retrieved {0}",card.downloaded_at),"Muted","UiFontCaption"));
    if(!string.IsNullOrEmpty(back)&&GoBack!=null){var up=ActionButton(back,true);up.Name="BackToSection";up.Click+=(s,e)=>GoBack();actions.Children.Add(up);}
    var stellarium=OpenInStellarium==null?null:Stellarium.ForCard(card);
    if(stellarium!=null){var open=IconButton(Stellarium.IconGeometry,"Open in Stellarium");open.Name="OpenInStellarium";UiHelp.Hint(open,Localization.T(Stellarium.CardTooltip(stellarium)));open.Click+=(s,e)=>OpenInStellarium(stellarium);icons.Children.Add(open);}
+   if(RefreshInformation!=null&&InformationCoordinator.Provider(card)!=null){var refresh=refreshButton=IconButton(DownloadGeometry,"Refresh information");refresh.IsEnabled=InternetAvailable;UiHelp.Hint(refresh,InternetAvailable?"Download missing or updated information for this target.":"Choose Hybrid in Preferences > General > Online access to reconnect.");refresh.Click+=(s,e)=>RefreshInformation();icons.Children.Add(refresh);}
    if(actions.Children.Count>0)content.Children.Add(actions);
    informationStatus=Text("","Muted","UiFontCaption");informationStatus.Visibility=Visibility.Collapsed;AutomationProperties.SetLiveSetting(informationStatus,AutomationLiveSetting.Polite);content.Children.Add(informationStatus);
    var curated=TargetDescriptions.For(card.id);
@@ -121,12 +125,12 @@ namespace AstroArchive {
      globe=new SkyGlobeView{Margin=new Thickness(4)};globe.SetContext(sky);globe.Camera.SetHome(90-ra.value,dec.value);globe.ResetView();AutomationProperties.SetName(globe,"Sky location of "+card.name);mapHost.Children.Add(globe);
      reset=new Button{Width=26,Height=26,MinHeight=0,Padding=new Thickness(0),Margin=new Thickness(0),BorderThickness=new Thickness(0),Background=Brushes.Transparent,HorizontalAlignment=HorizontalAlignment.Left,VerticalAlignment=VerticalAlignment.Top};
      var icon=new System.Windows.Shapes.Path{Data=Geometry.Parse("M 5,7 A 7,7 0 1 1 5,15 M 5,3 L 5,7 L 9,7"),Width=18,Height=18,Stretch=Stretch.Uniform,StrokeThickness=1.6,StrokeStartLineCap=PenLineCap.Round,StrokeEndLineCap=PenLineCap.Round};icon.SetBinding(System.Windows.Shapes.Shape.StrokeProperty,new Binding("Foreground"){Source=reset});reset.Content=icon;AutomationProperties.SetName(reset,"Reset sky view");UiHelp.Hint(reset,"Reset sky view.");reset.Click+=(s,e)=>globe.ResetView();mapHost.Children.Add(reset);globe.GlobeResized+=(s,e)=>PositionReset();mapHost.SizeChanged+=(s,e)=>PositionReset();
-     mapPanel.Children.Add(Text("Catalogue position · drag to rotate. Scroll or pinch over the map to zoom.","Muted","UiFontCaption"));
+     mapPanel.Children.Add(Text("Catalogue position · drag to rotate. Click the map, then scroll to zoom (or hold Ctrl and scroll).","Muted","UiFontCaption"));
     }else mapPanel.Children.Add(Text("Catalogue coordinates are not available for this target.","Muted"));
    }
    if(card.domain=="solar_system"){
-    mapPanel=new StackPanel{Margin=new Thickness(0,4,0,10)};body.Children.Add(mapPanel);mapPanel.Children.Add(Section("ORBIT"));
-    orbitPanel=new OrbitPanel{Name="OrbitPanel"};mapPanel.Children.Add(orbitPanel);if(CaptureDates!=null)orbitPanel.CaptureDates=CaptureDates(card);orbitPanel.SetCard(card);
+    mapPanel=new StackPanel{Margin=new Thickness(0,4,0,10)};body.Children.Add(mapPanel);var orbitHeading=Section("ORBIT");mapPanel.Children.Add(orbitHeading);
+    orbitPanel=new OrbitPanel{Name="OrbitPanel"};OrbitHeadingDate(orbitHeading,orbitPanel);mapPanel.Children.Add(orbitPanel);if(CaptureDates!=null)orbitPanel.CaptureDates=CaptureDates(card);orbitPanel.SetCard(card);
    }
    var sources=new StackPanel();
    var complete=OrbitalCatalog.For(card);if(complete!=null){sources.Children.Add(Link("NASA/JPL · "+complete.solution_id,complete.source));sources.Children.Add(Data(Localization.F("Source epoch: JD {0} {1} · {2}",complete.epoch.ToString("0.#####",CultureInfo.InvariantCulture),complete.time_standard,complete.solution_id),"Muted","UiFontCaption"));if(complete.uncertainties!=null&&complete.uncertainties.Count>0)sources.Children.Add(Data(string.Join(" · ",complete.uncertainties.Select(p=>p.Key+" σ "+p.Value)),"Muted","UiFontCaption"));}
@@ -162,9 +166,9 @@ namespace AstroArchive {
   static IEnumerable<FrameworkElement> NamedVisuals(DependencyObject parent){for(int k=0;k<VisualTreeHelper.GetChildrenCount(parent);k++){var child=VisualTreeHelper.GetChild(parent,k);var element=child as FrameworkElement;if(element!=null&&anchorNames.Contains(element.Name)&&element.IsVisible)yield return element;foreach(var nested in NamedVisuals(child))yield return nested;}}
   public void UpdateCard(TargetInfoCard card,string context,IList<TargetInfoMember> members,string membersTitle,string back){
    bool orbitFocused=orbitPanel!=null&&orbitPanel.View.IsKeyboardFocused;DateTime? marker=orbitPanel==null?null:orbitPanel.MarkerUtc;var anchors=NamedVisuals(content).Select(e=>new{e.Name,Y=e.TranslatePoint(new Point(),scroll).Y}).Where(e=>e.Y<=8).OrderByDescending(e=>e.Y).ToArray();double offset=scroll.VerticalOffset;var camera=orbitPanel==null?null:orbitPanel.View.Camera.Copy();double height=orbitPanel==null?280:orbitPanel.View.Height;
-   var expanded=content.Children.OfType<Expander>().Where(e=>e.IsExpanded).Select(e=>e.Name).ToArray();bool same=CurrentId==card.id;
+   var expanded=Expanders().Where(e=>e.IsExpanded).Select(e=>e.Name).ToArray();bool same=CurrentId==card.id;
    ShowCard(card,context,members,membersTitle,back);if(!same)return;
-   foreach(var e in content.Children.OfType<Expander>())if(expanded.Contains(e.Name))e.IsExpanded=true;
+   foreach(var e in Expanders())if(expanded.Contains(e.Name))e.IsExpanded=true;
    if(camera!=null&&orbitPanel!=null){orbitPanel.MarkerUtc=marker;orbitPanel.View.Camera=camera;orbitPanel.View.Height=height;}UpdateLayout();var names=NamedVisuals(content).ToDictionary(e=>e.Name,e=>e);foreach(var anchor in anchors){FrameworkElement element;if(names.TryGetValue(anchor.Name,out element)){offset=Math.Max(0,element.TranslatePoint(new Point(),scroll).Y-anchor.Y);break;}}scroll.ScrollToVerticalOffset(offset);if(orbitFocused&&orbitPanel!=null)orbitPanel.View.Focus();
   }
   // Planets, the largest dwarf planets and the Sun carry fixed physical parameters; the Sun shows only size and mass.
@@ -216,17 +220,25 @@ namespace AstroArchive {
    var line=Text("","Muted","UiFontCaption");line.TextAlignment=TextAlignment.Center;line.ToolTip=Data(full,"Text","UiFontSmall");
    line.Inlines.Add(new Run(Localization.T("Image:")+" "));line.Inlines.Add(Linked(who,image.file_page_url));
    if(!string.IsNullOrWhiteSpace(image.licence)){line.Inlines.Add(new Run(" · "));line.Inlines.Add(Linked(image.licence,image.licence_url));}
-   bool lengthy=(who+(image.licence??"")).Length>100||full.Length>180||full.Contains("\n");
-   bool mandatory=attribution.IndexOf("ESA",StringComparison.OrdinalIgnoreCase)>=0||attribution.IndexOf("Hubble",StringComparison.OrdinalIgnoreCase)>=0;
-   if(mandatory&&attribution.Length>0){var fullCredit=Data(attribution,"Muted","UiFontCaption");fullCredit.Name="MandatoryImageCredit";content.Children.Add(fullCredit);}
-   if(lengthy){
-    var credits=new StackPanel();credits.Children.Add(line);
-    if(!mandatory&&attribution.Length>0&&attribution!=who)credits.Children.Add(Data(attribution,"Muted","UiFontCaption"));
-    if(modifications.Length>0)credits.Children.Add(Data(modifications,"Muted","UiFontCaption"));
-    var disclosure=Disclosure("Credits",credits);disclosure.Name="ImageCredits";content.Children.Add(disclosure);
-   }else{line.Name="ImageCredits";content.Children.Add(line);}
+   // Every image credit, however short, sits in the Credits dropdown rather than under the picture.
+   var credits=new StackPanel();credits.Children.Add(line);
+   if(attribution.Length>0&&attribution!=who)credits.Children.Add(Data(attribution,"Muted","UiFontCaption"));
+   if(modifications.Length>0)credits.Children.Add(Data(modifications,"Muted","UiFontCaption"));
+   var disclosure=Disclosure("Credits",credits);disclosure.Name="ImageCredits";
+   // The header icons sit on the Credits row, centred on it and aligned with the image's right edge; with no image they stay by the details.
+   if(headerIcons!=null&&headerIcons.Children.Count>0&&headerRow_!=null){
+    headerRow_.Children.Remove(headerIcons);headerIcons.Margin=new Thickness(6,0,0,0);headerIcons.VerticalAlignment=VerticalAlignment.Center;
+    var creditRow=new Grid();creditRow.ColumnDefinitions.Add(new ColumnDefinition());creditRow.ColumnDefinitions.Add(new ColumnDefinition{Width=GridLength.Auto});
+    creditRow.Children.Add(disclosure);Grid.SetColumn(headerIcons,1);creditRow.Children.Add(headerIcons);creditRow.HorizontalAlignment=HorizontalAlignment.Center;creditRow_=creditRow;content.Children.Add(creditRow);
+   }else content.Children.Add(disclosure);
   }
   // Sections share a quiet caption and divider so the pane reads as distinct parts.
+  // Puts the orbit date on the heading's line, right-aligned, in the heading's own style.
+  static void OrbitHeadingDate(StackPanel heading,OrbitPanel orbit){
+   var caption=heading.Children[heading.Children.Count-1];heading.Children.Remove(caption);
+   var row=new Grid();row.ColumnDefinitions.Add(new ColumnDefinition{Width=new GridLength(1,GridUnitType.Star)});row.ColumnDefinitions.Add(new ColumnDefinition{Width=GridLength.Auto});
+   row.Children.Add(caption);Grid.SetColumn(orbit.HeaderDate,1);row.Children.Add(orbit.HeaderDate);heading.Children.Add(row);
+  }
   static StackPanel Section(string title,bool first=false){
    var panel=new StackPanel{Margin=new Thickness(0,first?6:12,0,6)};
    if(!first){var rule=new Border{Height=1,Margin=new Thickness(0,0,0,8),Opacity=0.7};rule.SetResourceReference(Border.BackgroundProperty,"Border");panel.Children.Add(rule);}
@@ -239,7 +251,7 @@ namespace AstroArchive {
    return new Button{Content=face,Margin=new Thickness(0,0,6,6),Padding=new Thickness(10,3,10,3),HorizontalAlignment=HorizontalAlignment.Left};
   }
   // Icon-only buttons for the details line, sharing the Stellarium glyph's size and padding.
-  const string RefreshGeometry="M 5,7 A 7,7 0 1 1 5,15 M 5,3 L 5,7 L 9,7";
+  const string DownloadGeometry="M 12,3 L 12,15 M 7,10 L 12,15 L 17,10 M 5,19 L 19,19";
   static Button IconButton(string geometry,string name){
    var glyph=new System.Windows.Shapes.Path{Data=Geometry.Parse(geometry),StrokeThickness=1.6,StrokeLineJoin=PenLineJoin.Round,StrokeStartLineCap=PenLineCap.Round,StrokeEndLineCap=PenLineCap.Round};glyph.SetResourceReference(System.Windows.Shapes.Shape.StrokeProperty,"Text");
    var button=new Button{Content=new Viewbox{Child=glyph},Width=28,Height=28,MinHeight=0,Padding=new Thickness(6),Margin=new Thickness(2,0,0,0)};AutomationProperties.SetName(button,Localization.T(name));return button;
@@ -261,7 +273,7 @@ namespace AstroArchive {
   static TextBlock Link(string label,string url){var text=Text("","Muted","UiFontCaption");text.Inlines.Add(Linked(label,url));return text;}
   void PositionReset(){SkyGlobeView.PlaceReset(reset,globe,mapHost);}
   void ArrangeBody(){
-   if(photo!=null){var bitmap=photo.Source as BitmapSource;double ratio=bitmap.PixelWidth/(double)bitmap.PixelHeight,width=Math.Max(1,ActualWidth-scroll.Padding.Left-scroll.Padding.Right-SystemParameters.VerticalScrollBarWidth-8),cap=Math.Min(340,Math.Max(160,scroll.ActualHeight*0.48));double height=Math.Min(cap,width/ratio);photo.Height=height;photo.Width=height*ratio;}
+   if(photo!=null){var bitmap=photo.Source as BitmapSource;double ratio=bitmap.PixelWidth/(double)bitmap.PixelHeight,width=Math.Max(1,ActualWidth-scroll.Padding.Left-scroll.Padding.Right-SystemParameters.VerticalScrollBarWidth-8),cap=Math.Min(340,Math.Max(160,scroll.ActualHeight*0.48));double height=Math.Min(cap,width/ratio);photo.Height=height;photo.Width=height*ratio;if(creditRow_!=null)creditRow_.Width=photo.Width;}
    if(body==null)return;bool wide=ActualWidth>=540&&mapPanel!=null;body.ColumnDefinitions[0].Width=new GridLength(1,GridUnitType.Star);body.ColumnDefinitions[1].Width=wide?new GridLength(orbitPanel==null?230:Math.Max(260,ActualWidth*0.48)):new GridLength(0);
    if(mapPanel!=null){Grid.SetColumn(mapPanel,wide?1:0);Grid.SetRow(mapPanel,wide?0:1);mapPanel.Margin=new Thickness(wide?16:0,4,0,10);if(mapHost!=null)mapHost.Height=wide?230:Math.Min(280,Math.Max(160,ActualWidth-40));}
   }

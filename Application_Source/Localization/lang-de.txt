@@ -1892,7 +1892,6 @@ Choose card targets	Kartenziele auswählen
 QUALITY	QUALITÄT
 EXPOSURE FIT	BELICHTUNGSPASSUNG
 Analyse image quality…	Bildqualität analysieren…
-Re-measure image quality…	Bildqualität neu messen…
 Analyse image quality	Bildqualität analysieren
 Quality rank	Qualitätsrang
 Exposure fit	Belichtungspassung
@@ -2402,5 +2401,8 @@ Orbit|Uranus	Uranus
 Orbit|Neptune	Neptun
 now	jetzt
 on this date	an diesem Datum
-Small rings: where it was when you imaged it.	Kleine Ringe: wo es bei Ihren Aufnahmen stand.
+Small rings: where it was when you imaged it. Click one for its date.	Kleine Ringe: wo es bei Ihren Aufnahmen stand. Zum Datum anklicken.
 A current position is unavailable for this solution.	Für diese Lösung ist keine aktuelle Position verfügbar.
+{0} nights · {1} to {2}	{0} Nächte · {1} bis {2}
+Show starred on top	Markierte oben anzeigen
+Reports…	Berichte…

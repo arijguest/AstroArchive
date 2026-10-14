@@ -25,6 +25,9 @@ namespace AstroArchive {
     Check(parsed["X 1"].Overview=="First line. Second line."&&parsed["X 1"].Imaging=="Use Hα."&&parsed["X 1"].Fact=="True."&&parsed["X 1"].HiddenAliases.Length==2&&parsed["X 2"].Overview==null,"Description format was misread");
     Check(TargetInfoPresentation.Tagline(new TargetInfoCard{id="IC 434",name="IC 434",type_label="H II region"},"Orion")=="H II region · Orion","Tagline repeated the ID shown in the heading");
     Check(TargetInfoPresentation.Tagline(new TargetInfoCard{id="NGC 2237",name="NGC 2237 (Rosette A)",type_label="Emission nebula"},null)=="Emission nebula","Tagline repeated an ID contained in the heading");
+    var sunflower=new TargetInfoCard{id="M63",name="Sunflower Galaxy",type_label="Spiral galaxy",aliases=new[]{"2MASX J13154932+4201454","IRAS 13135+4217","M63","NGC 5055","PGC 046153","Sunflower Galaxy","UGC 08334"}};
+    Check(TargetInfoPresentation.AlternativeIds(sunflower).SequenceEqual(new[]{"NGC 5055","UGC 8334"})&&TargetInfoPresentation.AlternativeLine(sunflower)=="NGC 5055 · UGC 8334"&&TargetInfoPresentation.Tagline(sunflower,null)=="M 63 · Spiral galaxy","Alternative IDs wrong or survey identifiers shown");
+    sunflower.aliases=new[]{"M63","NGC 5055"};Check(TargetInfoPresentation.Tagline(sunflower,"Canes Venatici")=="M 63 · NGC 5055 · Spiral galaxy · Canes Venatici"&&TargetInfoPresentation.AlternativeLine(sunflower)=="","A single alternative ID did not join the tagline");
     Check(TargetInfoPresentation.Tagline(new TargetInfoCard{id="M31",name="Andromeda Galaxy",type_label="Spiral galaxy"},"Andromeda")=="M 31 · Spiral galaxy · Andromeda","Tagline dropped the ID of a named object");
     var sources=TargetInfoPresentation.Sources(new TargetInfoCard{id="M42"},true);Check(sources.Any(x=>x.Url.EndsWith("/messier-42/"))&&sources.Any(x=>x.Url.Contains("simbad")),"Curated overview sources are missing");
    });

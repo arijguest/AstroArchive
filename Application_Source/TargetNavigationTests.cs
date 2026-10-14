@@ -39,6 +39,16 @@ namespace AstroArchive {
     Check(TargetNavigation.WithoutObjectType("M31 - Andromeda Galaxy")=="M31 - Andromeda"&&TargetNavigation.WithoutObjectType("M13 - Hercules Globular Cluster")=="M13 - Hercules","Object type suffix retained");
     Check(TargetNavigation.WithoutObjectType("NGC891 - Silver Sliver Galaxy with an extended observing name")=="NGC891 - Silver Sliver Galaxy with an extended observing name"&&TargetNavigation.WithoutObjectType("M45")=="M45","Non-suffix text or identity removed");
    });
+   Test("Starred on top leads the list but never splits grouped subs",()=>{
+    var a=new Frame{Target="M31",Kind="Light",Session="s1",OriginalName="a.fit"};var b=a.Clone();b.OriginalName="b.fit";var c=new Frame{Target="M31",Kind="Light",Session="s2",OriginalName="c.fit"};var d=c.Clone();d.OriginalName="d.fit";
+    var stack=new Frame{Target="M31",Kind="Stack",OriginalName="stack.fit"};var single=new Frame{Target="M31",Kind="Light",OriginalName="single.fit"};var rows=new[]{a,b,c,d,stack,single};var sorts=new SearchSort[0];var culture=System.Globalization.CultureInfo.InvariantCulture;var saved=RepositoryOrdering.StarredFirst;
+    try{
+     RepositoryOrdering.StarredFirst=true;single.IsStarred=true;c.IsStarred=true;d.IsStarred=true;
+     var all=RepositoryOrdering.Order(rows,sorts,culture,true,true,ct);Check(all[0].Session=="s2"&&all[1].Session=="s2"&&(all[2]==a||all[2]==b),"Starred session did not lead the grouped subs");Check(all[4]==single&&all[5]==stack,"Starred file did not follow the grouped subs");
+     var one=RepositoryOrdering.Order(rows,sorts,culture,false,true,ct);Check(one[0]==single,"Starred file was not first in a single target");
+     RepositoryOrdering.StarredFirst=false;var off=RepositoryOrdering.Order(rows,sorts,culture,true,true,ct);Check(off.IndexOf(stack)<off.IndexOf(single),"Starred order applied while switched off");
+    }finally{RepositoryOrdering.StarredFirst=saved;}
+   });
    Test("Repository ordering keeps merged subs stacks and calibrations in their sections",()=>{
     var a=new Frame{Target="M31",Kind="Light",Session="fixture",OriginalName="z-sub.fit"};var b=a.Clone();b.OriginalName="a-sub.fit";
     var stack=new Frame{Target="M31",Kind="Stack",OriginalName="a-stack.fit"};var single=new Frame{Target="M31",Kind="Light",OriginalName="single.fit"};

@@ -64,6 +64,9 @@ APPEARANCE AND ACCESSIBILITY
 @keywords theme dark light text size scale contrast motion language translation font
 Settings opens Preferences: General, Import, Export, Sky & solving, Accessibility,
 Updates and Backups. **Save preferences** applies changes; **Cancel** keeps your settings.
+**General → Date format** chooses Automatic, DD/MM/YY or MM/DD/YY; Automatic uses
+MM/DD/YY when your observing location is in the United States. Stored and exported
+dates stay in the ISO form.
 
 ## Comfort
 - **Accessibility** adjusts text size, rows, contrast and progress animation.
@@ -114,7 +117,8 @@ Target analysis defaults to Off.
 ## Repeat imports
 - Default filename matching skips known captures and completed dated DWARF sessions.
 - **Robust file matching** revisits same-name edits, sidecars and missing archive copies.
-- **Import → Full rescan** reads and hashes every source file.
+- **Import → Full rescan** reads and hashes every source file, so AstroArchive warns first that
+  it may take a long time. Tick **Don't warn me again**, or turn warnings back on in **Settings → General**.
 - **Cancel** keeps completed imports. Changed sources need a new scan.
 
 ## Watch a capture folder
@@ -219,7 +223,7 @@ DWARF FTP credentials, live polling (default 5 seconds) and a transfer limit (de
 Downloads are staged in `%LOCALAPPDATA%\AstroArchive\RemoteDownloads`. Retry checks their
 saved hashes and reuses complete copies, so leave space for these and for the archive.
 Stop imports and close AstroArchive before removing caches; completed imports stay.
-Read **Import → Reports → Last import report…** for errors and warnings.
+Read **Reports… → Last import report…** in the bell's Activity panel for errors and warnings.
 
 PAUSING AND RESUMING IMPORTS
 @title Pause, resume and recover imports
@@ -312,7 +316,9 @@ format, date, mount, notes, status, review, session and hash (Edited also has so
 ## Condensed subs
 Repeated Lights share a collapsed session row with dates, count, per-sub exposure, total
 integration and filters. Mixed durations show a range; missing values stay unknown.
-Expand the row, or turn off **Repository → Group subs by session**.
+Expand the row, or turn off **Group subs by session** in **Settings → General**.
+
+**Show starred on top** (same place, on by default) lists starred files above the rest, and starred sessions first among the session rows.
 Stacks stay separate. Known counts show Stack (1445); filters still use Stack.
 
 STARS, TAGS AND NOTES
@@ -411,7 +417,8 @@ ECLIPSES
 @keywords eclipse solar lunar sun moon obscuration contact
 Sun and Moon captures taken during an observable eclipse list under **Solar Eclipse** or
 **Lunar Eclipse** in the target list; files and folders are unchanged.
-- Solar captures show obscuration on the Sun in the sky map. Capture details shows the
+- Solar captures show obscuration on the Sun in the sky map. At 99% or more the Sun is
+  drawn with a corona and the capture is tagged **Totality** (remove the tag and it stays removed). Capture details shows the
   percentage of the Sun obscured at capture, a coverage curve with start and end
   times, and the duration of totality or annularity. The Moon's own phase,
   illumination and distance to the target are left out.
@@ -469,7 +476,8 @@ OBSERVING TOWN / CITY
 @walkthrough sky-wrong
 @related CAPTURE DETAILS AND SKY | ECLIPSES
 @keywords location town city coordinates latitude longitude site timezone
-**Settings → Sky & solving** offers an offline town / city search or manual coordinates.
+The first time you start AstroArchive it asks **Where do you observe from?**; you can
+skip it. **Settings → Sky & solving** offers the same offline town / city search or manual coordinates.
 - Place centres approximate your site; use precise coordinates for accurate sky views.
 - Location search never sends your position to a network service.
 - Individual captures can have their own town: right-click **Edit metadata → Capture**.
@@ -537,8 +545,9 @@ on the left chooses what to make:
 - **Files** copies originals.
 - **Stacking folder** prepares **Subs**, **Stacks** or **Both**, grouped for stacking.
 - **Open in app** verifies copies, then opens them in external software.
-- **AstroBin CSV** makes an acquisition table without exporting images.
-- **Catalogue CSV** exports metadata for the selection or the whole repository.
+- **Export → Metadata** (hover it) offers two table exports:
+  **AstroBin CSV** makes an acquisition table without exporting images, and
+  **Catalogue CSV** exports metadata for the selection or the whole repository.
 
 Right-click Export items open the same window with that option chosen, and the window
 reopens on the option you used last. Folder exports share one destination.
@@ -621,9 +630,11 @@ image of the target, its integration, light frames, nights and filters.
    images, then stacks and lights.
 2. Drag to move it, `Ctrl`+scroll to zoom, **Rotate left/right** to turn it, or use
    **Adjust image position**.
-3. Add an optional short description under the target name, or tick **Add automatic
-   description** for what it is, its constellation, how far away it is and how bright
-   (shown only when known; your own text is kept and comes back when you untick it).
+3. Add an optional short description under the target name. **Add automatic
+   description** (on by default) writes what it is, its constellation, how far away it
+   is and how bright, for example "Spiral Galaxy · Andromeda · 2.5 million light-years ·
+   Magnitude 3.4" (shown only when known; your own text is kept and comes back when you
+   untick it). Comets show their orbit class, period and closest approach to the Sun.
    In **Analytics → Target cards**, **Add automatic descriptions** does this for every
    card without a description of its own.
 4. Pick a layout for posts, stories or video, Dark or Light, a resolution (Standard,
@@ -741,9 +752,9 @@ files it is reading waits until it finishes.
 Each sub is compared with similar frames from the same session, so a score says how it
 ranks among its neighbours, not how good the night was.
 - **Deep-sky:** star size, star count, roundness, noise and obstruction evidence.
-- **Planetary, lunar and solar:** edge sharpness, fine detail and noise, plus an
+- **Planetary and lunar:** edge sharpness, fine detail and noise, plus an
   **EXPOSURE FIT** column (Under, Good or Over) from the Columns menu.
-- **Linear stacks** are compared only with other stacks of the same target.
+- **Stacks and solar images** are not scored: there are too few comparable references.
 
 Star-poor regions with abrupt background edges can flag a suspected foreground
 obstruction (trees, roofs, buildings), and so can a frame whose stars cover clearly
@@ -761,14 +772,15 @@ alone don't count.
 > Note: Scores only suggest. Nothing is rejected or deleted for you.
 
 ## What isn't scored
-Calibration frames, recordings, JPEG and other non-linear or oversized images show `-`;
+Stacks, solar images, calibration frames, recordings, JPEG and other non-linear or oversized images show `-`;
 the tooltip gives the reason. Files found unsuitable while measuring are set aside and
 listed in the run report.
 
 Measuring is on demand, or after each import via **Settings → General**. Results are
 remembered per file content in the repository's index, so renamed or moved files
-aren't measured twice and scores survive program updates. **Re-measure image
-quality** repeats it; results from an earlier version stay until next requested.
+aren't measured twice and scores survive program updates. **Analyse image
+quality** measures a file again only when the number of captures it is compared
+against has changed since; results from an earlier version stay until then.
 
 ARCHIVE SAFETY AND BACKUPS
 @title Backups and protection
@@ -783,7 +795,11 @@ ARCHIVE SAFETY AND BACKUPS
 3. Close other programs that write to the archive while it runs.
 
 Backups copy images, Edited and the current database, and verify every file.
-**Cancel** removes the unfinished backup and keeps earlier ones.
+
+**Pause** (in Activity) stops the backup and keeps the files already copied. Close the program
+if you like: Activity still lists the paused backup, and starting a backup in the same folder
+resumes it however long it has been. Files changed in the meantime are copied again.
+**Discard backup** removes the paused copy; earlier backups are always kept.
 
 ## Restore
 **Settings → Backups → Restore a backup…** verifies every file while restoring into a new
@@ -812,7 +828,7 @@ REVIEW, EXCLUSIONS AND DELETION
 @keywords review repair retry failed flagged delete purge clean exclude ignore originals checksum verify
 ## Review and retry
 - **Import → Review and repair** separates rejection, integrity and transfer issues.
-- **Import → Reports** shows the latest scan and import reports.
+- **Reports…** in the Activity panel (the bell) shows the latest scan and import reports.
 - Flagged captures are skipped by default. **Retry failed imports** uses the filtered scan;
   changed sources need a fresh scan. Completed imports survive cancellation.
 
@@ -869,7 +885,7 @@ jobs, then completed ones, with elapsed time, ETA, counts and transfer details.
 - Completed summaries clear after you click, type or scroll elsewhere, or when another
   process completes. Running and paused imports are never cleared automatically.
 
-**Repository → Last operation…** shows timings; **Import → Reports** shows the latest import report.
+**Repository → Maintenance → Last operation…** shows timings; **Reports…** in the Activity panel shows the latest import report.
 
 CLOUD FOLDERS AND BACKUPS
 @title Cloud folders
@@ -1048,7 +1064,8 @@ marker with an arrow along the path, showing where the target is now. Dated
 bodies show today; others show their position at the orbit epoch.
 
 Small rings mark where the target was on each date you imaged it; rings that
-fall close together are drawn once with a count. Diamonds mark the ascending
+fall close together are drawn once with a count. Click a ring, or press Enter
+in the orbit, for its date. The date opposite the ORBIT heading can be clicked to type another. Diamonds mark the ascending
 (filled) and descending (open) nodes, with perihelion and aphelion (or perigee
 and apogee).
 
