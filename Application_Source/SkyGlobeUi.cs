@@ -94,10 +94,10 @@ namespace AstroArchive {
   protected override void OnLostMouseCapture(MouseEventArgs e){base.OnLostMouseCapture(e);dragging=false;Cursor=Cursors.Hand;}
   // The wheel scrolls the page until the map is chosen on purpose: a click on it, or Ctrl+wheel.
   // Leaving the map or pressing Esc hands the wheel back to the page.
-  internal bool WheelActive;
+  internal bool WheelActive;internal bool WheelZooms{get{return WheelActive||(Keyboard.Modifiers&ModifierKeys.Control)!=0;}}
   void SetWheelActive(bool value){if(WheelActive==value)return;WheelActive=value;InvalidateVisual();}
   protected override void OnMouseWheel(MouseWheelEventArgs e){
-   base.OnMouseWheel(e);if(!WheelActive&&(Keyboard.Modifiers&ModifierKeys.Control)==0)return;
+   base.OnMouseWheel(e);if(!WheelZooms)return;
    ZoomView(Math.Pow(1.2,e.Delta/120.0));e.Handled=true;
   }
   protected override void OnMouseLeave(MouseEventArgs e){base.OnMouseLeave(e);if(!dragging)SetWheelActive(false);}
