@@ -2437,3 +2437,4 @@ on this date	この日付
 Small rings: where it was when you imaged it. Click one for its date.	小さな輪：撮影した日の位置です。クリックで日付を表示。
 A current position is unavailable for this solution.	この解には現在位置がありません。
 {0} nights · {1} to {2}	{0}夜 · {1}〜{2}
+Show starred on top	スター付きを先頭に表示

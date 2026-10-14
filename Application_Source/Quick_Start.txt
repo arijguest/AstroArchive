@@ -312,7 +312,7 @@ format, date, mount, notes, status, review, session and hash (Edited also has so
 ## Condensed subs
 Repeated Lights share a collapsed session row with dates, count, per-sub exposure, total
 integration and filters. Mixed durations show a range; missing values stay unknown.
-Expand the row, or turn off **Repository → Group subs by session**.
+Expand the row, or turn off **Group subs by session** in **Settings → General**. **Show starred on top** (same place, on by default) lists starred files above the rest, and starred sessions first among the session rows.
 Stacks stay separate. Known counts show Stack (1445); filters still use Stack.
 
 STARS, TAGS AND NOTES
@@ -869,7 +869,7 @@ jobs, then completed ones, with elapsed time, ETA, counts and transfer details.
 - Completed summaries clear after you click, type or scroll elsewhere, or when another
   process completes. Running and paused imports are never cleared automatically.
 
-**Repository → Last operation…** shows timings; **Import → Reports** shows the latest import report.
+**Repository → Maintenance → Last operation…** shows timings; **Import → Reports** shows the latest import report.
 
 CLOUD FOLDERS AND BACKUPS
 @title Cloud folders

@@ -194,11 +194,10 @@ namespace AstroArchive {
         // Repository: view options, analysis, then safety and upkeep with permanent deletions kept apart.
         void BuildRepositoryNavigation(MenuItem menu) {
             menu.Items.Add(MenuAction("Filters…",()=>{GoToPage(0);ShowFilters(false);},repo!=null,false));
-            var grouped=MenuAction("Group subs by session",()=>{GoToPage(0);C("LibraryViewBox").SelectedItem=Convert.ToString(C("LibraryViewBox").SelectedItem)=="Session summaries"?"Show all files":"Session summaries";},repo!=null,false);grouped.IsCheckable=true;grouped.IsChecked=Convert.ToString(C("LibraryViewBox").SelectedItem)=="Session summaries";menu.Items.Add(grouped);
             menu.Items.Add(new Separator());
             menu.Items.Add(AnalyticsMenu());
             var review=Branch("Review and analysis",ButtonAction("Review flagged files…","ReviewLibraryButton",0),ButtonAction("Screen for failures","ScreenLibraryButton",0));
-            review.Items.Add(new Separator());foreach(var item in new[]{ButtonAction("Identify targets…","SolveButton",0),ButtonAction("Analyse image quality…","AnalyzeQualityButton",0),MenuAction("Re-measure image quality…",()=>{GoToPage(0);AnalyzeQuality(true);},B("AnalyzeQualityButton").IsEnabled)})review.Items.Add(item);menu.Items.Add(review);
+            review.Items.Add(new Separator());foreach(var item in new[]{ButtonAction("Identify targets…","SolveButton",0),ButtonAction("Analyse image quality…","AnalyzeQualityButton",0)})review.Items.Add(item);menu.Items.Add(review);
             menu.Items.Add(new Separator());
             menu.Items.Add(MenuAction("Back up archive…",BackUpArchive,repo!=null));
             var tools=BuildRepositoryTools();
@@ -207,9 +206,8 @@ namespace AstroArchive {
             foreach(string header in new[]{"Fill missing metadata…","Verify repository checksums","Index an existing repository","Deletion history…"}){var item=tool(header);if(item!=null)maintenance.Items.Add(item);}
             foreach(string header in new[]{"Delete failed…","Purge non-raw files…"}){var item=tool(header);if(item!=null)cleanUp.Items.Add(item);}
             if(cleanUp.Items.Count>0)cleanUp.Items.Add(new Separator());cleanUp.Items.Add(MenuAction("Delete archive data…",ResetArchive,repo!=null));
+            maintenance.Items.Add(MenuAction("Re-measure image quality…",()=>{GoToPage(0);AnalyzeQuality(true);},B("AnalyzeQualityButton").IsEnabled));maintenance.Items.Add(MenuAction("Last operation…",ShowPerformanceTable,true,false));
             maintenance.IsEnabled=cleanUp.IsEnabled=!RepositoryOperationBlocked&&repo!=null;menu.Items.Add(maintenance);menu.Items.Add(cleanUp);
-            menu.Items.Add(new Separator());
-            menu.Items.Add(MenuAction("Last operation…",ShowPerformanceTable,true,false));
         }
         void BuildGuideNavigation(MenuItem menu) {
             BuildGuideItems(menu.Items);

@@ -2436,3 +2436,4 @@ on this date	此日期
 Small rings: where it was when you imaged it. Click one for its date.	小圆环：拍摄当天它所在的位置。点击查看日期。
 A current position is unavailable for this solution.	此解没有可用的当前位置。
 {0} nights · {1} to {2}	{0} 晚 · {1} 至 {2}
+Show starred on top	将加星项显示在顶部

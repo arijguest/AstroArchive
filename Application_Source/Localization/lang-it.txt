@@ -2420,3 +2420,4 @@ on this date	a questa data
 Small rings: where it was when you imaged it. Click one for its date.	Piccoli anelli: dove si trovava quando lo hai ripreso. Fai clic per la data.
 A current position is unavailable for this solution.	Per questa soluzione non è disponibile una posizione attuale.
 {0} nights · {1} to {2}	{0} notti · {1} a {2}
+Show starred on top	Mostra i preferiti in alto
