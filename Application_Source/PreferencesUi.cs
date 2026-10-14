@@ -76,7 +76,7 @@ namespace AstroArchive {
   // Telescope profiles: change a saved telescope's model and camera, remove it, or recover profiles from the repository. Renaming stays in Import > Telescopes because it rewrites capture records.
   List<TelescopeProfile> AddTelescopePreferences(FormWindow d){
    TelescopeProfiles.Initialize(settings);var scopes=Util.Deserialize<Settings>(Util.Serialize(settings)).Telescopes;
-   d.Text("Telescope profiles",true);d.Text("Saved telescopes remember their model, camera and last source folder. Changes apply when you save preferences. To rename a telescope and update its captures, use Import > Telescopes > Rename telescope….");
+   d.Text("Telescopes",true);d.Text("Saved telescopes remember their model, camera and last source folder. Changes apply when you save preferences. To rename a telescope and update its captures, use Import > Telescopes > Rename telescope….");
    var list=new ListBox{MinHeight=150,MaxHeight=240,Margin=new Thickness(0,6,0,8),DisplayMemberPath="DisplayText"};System.Windows.Automation.AutomationProperties.SetName(list,"Saved telescopes");
    var empty=new TextBlock{Text="No saved telescopes yet. Save one from the Import page, or recover profiles from the repository.",TextWrapping=TextWrapping.Wrap,Margin=new Thickness(0,0,0,8)};empty.SetResourceReference(TextBlock.FontSizeProperty,"UiFontBody");Theme.Bind(empty,TextBlock.ForegroundProperty,"Muted");
    var model=d.Select("Model",TelescopeProfiles.Models,"Auto");var camera=d.Select("Camera",new[]{"Auto","Telephoto","Wide"},"Auto");var source=d.Input("Last source folder","");source.IsReadOnly=true;
