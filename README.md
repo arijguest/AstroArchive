@@ -65,7 +65,7 @@ shareable card of your best image of it.
 
 ## Know what you captured
 
-Every target gets an offline overview, fun facts and sky position, with optional
+Popular targets get an offline overview and fun facts, with optional
 downloaded detail and 3D orbits that mark the nights you imaged it. AstroArchive
 detects solar and lunar eclipses in your Sun and Moon captures, and **All Targets**
 lists upcoming sky events at your observing location.
@@ -82,9 +82,9 @@ was flagged. Scores only suggest: nothing is rejected for you.
 
 **Verified copies. Original bytes. A collection you can return to.**
 
-- Imports and exports preserve image bytes; source originals are kept by default.
-- Previews never change your files, and metadata edits only update the index.
-- Verified folder or ZIP backups include images, Edited files and the database, copy only what changed, and can run on a schedule.
+- Ordinary imports and exports preserve image bytes; source originals are kept by default.
+- Preview stretches only affect the display, and **Fill missing metadata** never replaces existing values or your edits.
+- Verified folder or ZIP backups include images, Edited files and the database, and later incremental backups copy only what changed. Backups can run on a schedule.
 
 <details>
 <summary><strong>Formats and archive care</strong></summary>
