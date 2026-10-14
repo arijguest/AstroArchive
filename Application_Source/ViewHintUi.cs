@@ -20,10 +20,11 @@ namespace AstroArchive {
    viewHint=null;if(repo==null)return;int page=((TabControl)Window.FindName("MainTabs")).SelectedIndex;if(page!=0&&page!=2)return;
    var grid=G(page==0?"FramesGrid":"EditedGrid");var items=grid.Items.Cast<object>().Where(o=>HintKey(o)!=null).ToList();
    var chosen=page==0?librarySelection.Items.Cast<object>():editedSelection.Items.Cast<object>();
-   var selected=new HashSet<string>(chosen.Select(HintKey).Where(k=>k!=null));if(selected.Count==0)return;
-   int first=items.FindIndex(o=>selected.Contains(HintKey(o))),last=items.FindLastIndex(o=>selected.Contains(HintKey(o)));if(first<0)return;
+   var selected=new HashSet<string>(chosen.Select(HintKey).Where(k=>k!=null));
+   int first=items.FindIndex(o=>selected.Contains(HintKey(o))),last=items.FindLastIndex(o=>selected.Contains(HintKey(o)));
    var target=(page==0?Targets:EditedTargets).SelectedItem as TargetSummary;
-   var hint=new ViewHint{Page=page,Target=target==null?null:target.Name,Selected=selected};
+   // The target is kept for every process, even with nothing selected; the next row is only chosen when rows were selected.
+   var hint=new ViewHint{Page=page,Target=target==null?null:target.Name,Selected=selected};if(first<0){viewHint=hint;return;}
    hint.Next.AddRange(items.Skip(last+1).Take(200).Select(HintKey).Where(k=>!selected.Contains(k)));
    hint.Next.AddRange(items.Take(first).Reverse().Take(200).Select(HintKey).Where(k=>!selected.Contains(k)));
    viewHint=hint;
