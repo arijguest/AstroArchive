@@ -30,7 +30,7 @@ namespace AstroArchive {
    }else{subframeSessions.Clear();activeSessionKey=null;if(mode!="Files"&&mode!="Show all files"){view.GroupDescriptions.Add(new CaptureTypeTargetDescription());if(mode=="By target and session")view.GroupDescriptions.Add(new PropertyGroupDescription("SessionKey"));}}
    changingSessionSelection=true;try{
     SetRows("FramesGrid",view,presorted);
-   }finally{changingSessionSelection=false;}SelectOpeningRow("FramesGrid");Details();
+   }finally{changingSessionSelection=false;}SelectOpeningRow("FramesGrid");Details();ApplyViewHint(0);
    var summary=preparedSummary??CaptureGroups.Summarize(displayed);L("LibrarySummaryLabel").Text="In view: "+summary.Detail;
   }
  }

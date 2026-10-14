@@ -20,7 +20,7 @@ Quality and library
 Obstructed frames rank below clear ones, scores are kept across program updates, long stack exposure totals read in minutes or hours, DWARF stacks without a filename duration get their sub count, and best-first sub order is kept when the library table is re-sorted. Stale pointings are ignored for the Moon and planets, and the plate-solved target with the most prominence is preferred. Rotation analysis is removed.
 
 Lists and menus
-Starred files and Edited images can be shown above everything else with Settings > General > Show starred on top (on by default); starred sessions come first among the grouped subs. Group subs by session moved from the Repository menu to Settings > General. Re-measure image quality and Last operation moved into Repository > Maintenance.
+Starred files and Edited images can be shown above everything else with Settings > General > Show starred on top (on by default); starred sessions come first among the grouped subs. Group subs by session moved from the Repository menu to Settings > General. Re-measure image quality and Last operation moved into Repository > Maintenance. After deleting, moving, merging or re-identifying files, the window now stays on the same page and target and selects the row that followed them, instead of returning to All Targets.
 
 Help and settings
 Help is a help centre with guided fixes and tours that walk the real window, plus a Smart App Control article. Preferences > General > Online access offers Hybrid or Offline, and About keeps the available release visible while online access is paused.
