@@ -52,8 +52,8 @@ namespace AstroArchive {
    UiHelp.Describe(B("EditedAddButton"),"Add images to Edited.");UiHelp.Hint(B("EditedRefreshButton"),"Find new editor outputs.");UiHelp.Describe(B("EditedFolderButton"),"Open image folder.");UiHelp.Hint(B("EditedClearButton"),"Clear search, image-class filter and target selection.");
    editedReady=true;RefreshEdited();InitializeEditedRefresh();
   }
-  void RefreshEdited(string select=null,string focusPath=null){
-   if(!editedReady)return;CancelAutomaticEditedRefresh();editedCaptureTargets=all.Select(f=>f.Target).Distinct().ToArray();var gallery=EditedGallery.Read(repo,editedCaptureTargets,CancellationToken.None);editedImages=gallery.Images;
+  void RefreshEdited(string select=null,string focusPath=null,EditedGallery preloaded=null){
+   if(!editedReady)return;CancelAutomaticEditedRefresh();editedCaptureTargets=all.Select(f=>f.Target).Distinct().ToArray();var gallery=preloaded??EditedGallery.Read(repo,editedCaptureTargets,CancellationToken.None);editedImages=gallery.Images;
    if(select!=null){T("EditedSearchBox").Clear();C("EditedClassFilter").SelectedIndex=0;refreshingEditedTargets=true;try{EditedTargets.SelectedIndex=0;}finally{refreshingEditedTargets=false;}}
    editedFocusProject=select;editedFocusPath=focusPath;FilterEditedImages();
    L("EditedSummary").ToolTip=gallery.Errors.Count==0?null:string.Join("\n",gallery.Errors);
