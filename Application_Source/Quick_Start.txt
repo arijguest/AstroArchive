@@ -359,7 +359,7 @@ can be resized by dragging its divider.
 > Note: Preview never resizes or rewrites source files.
 
 ## Tables and target groups
-- Click a heading to sort; click again to reverse. `Shift`-click adds a sort column.
+- Click a heading to sort; click again to reverse. `Shift`-click adds a sort column. Sorting by Date also orders by time within a day.
 - Right-click a heading to choose columns; drag to reorder. Each page saves its layout.
 - Targets show the preferred ID first: M31 - Andromeda Galaxy.
 - **All Targets** is bold and shaded; comets share Solar system; Meteors sit above Other targets.
