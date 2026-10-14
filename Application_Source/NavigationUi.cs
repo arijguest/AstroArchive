@@ -176,7 +176,6 @@ namespace AstroArchive {
             var telescopes=Branch("Telescopes", ButtonAction("Save current telescope…", "SaveTelescopeButton", 1), ButtonAction("Rename telescope…", "RenameTelescopeButton", 1), ButtonAction("Recover profiles", "RebuildTelescopesButton", 1));
             telescopes.Items.Add(new Separator());telescopes.Items.Add(ButtonAction("Refresh USB devices", "RefreshUsbButton"));menu.Items.Add(telescopes);
             menu.Items.Add(Branch("Dump folder",MenuAction("Open folder",()=>{repo.EnsureDumpFolder();OpenFolder(repo.DumpFolder);},repo!=null),MenuAction("Process files",ProcessDumpUi,repo!=null)));
-            menu.Items.Add(Branch("Reports",MenuAction("Scan report…",()=>ShowReport("Scan report",plan==null?"Scan a folder first.":plan.ScanReport),true,false),MenuAction("Last import report…",()=>ShowReport("Import report",repo==null?"Choose a repository first.":repo.LastReport),true,false)));
             menu.Items.Add(new Separator());menu.Items.Add(MenuAction("Import preferences…",ImportPreferences,!NetworkImportBlocked,false));
         }
         void BuildExportNavigation(MenuItem menu) {

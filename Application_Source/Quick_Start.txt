@@ -222,7 +222,7 @@ DWARF FTP credentials, live polling (default 5 seconds) and a transfer limit (de
 Downloads are staged in `%LOCALAPPDATA%\AstroArchive\RemoteDownloads`. Retry checks their
 saved hashes and reuses complete copies, so leave space for these and for the archive.
 Stop imports and close AstroArchive before removing caches; completed imports stay.
-Read **Import → Reports → Last import report…** for errors and warnings.
+Read **Reports… → Last import report…** in the bell's Activity panel for errors and warnings.
 
 PAUSING AND RESUMING IMPORTS
 @title Pause, resume and recover imports
@@ -822,7 +822,7 @@ REVIEW, EXCLUSIONS AND DELETION
 @keywords review repair retry failed flagged delete purge clean exclude ignore originals checksum verify
 ## Review and retry
 - **Import → Review and repair** separates rejection, integrity and transfer issues.
-- **Import → Reports** shows the latest scan and import reports.
+- **Reports…** in the Activity panel (the bell) shows the latest scan and import reports.
 - Flagged captures are skipped by default. **Retry failed imports** uses the filtered scan;
   changed sources need a fresh scan. Completed imports survive cancellation.
 
@@ -879,7 +879,7 @@ jobs, then completed ones, with elapsed time, ETA, counts and transfer details.
 - Completed summaries clear after you click, type or scroll elsewhere, or when another
   process completes. Running and paused imports are never cleared automatically.
 
-**Repository → Maintenance → Last operation…** shows timings; **Import → Reports** shows the latest import report.
+**Repository → Maintenance → Last operation…** shows timings; **Reports…** in the Activity panel shows the latest import report.
 
 CLOUD FOLDERS AND BACKUPS
 @title Cloud folders

@@ -53,7 +53,13 @@ namespace AstroArchive {
    var close=new Button{Content="Close",Padding=new Thickness(9,4,9,4)};DockPanel.SetDock(close,Dock.Right);heading.Children.Add(close);heading.Children.Add(new TextBlock{Text="Activity",FontWeight=FontWeights.SemiBold,VerticalAlignment=VerticalAlignment.Center});
    close.Click+=(s,e)=>CloseActivity();activityBell.Click+=(s,e)=>{if(activityPanel.Visibility==Visibility.Visible)CloseActivity();else OpenActivity();};
    var footerRow=new WrapPanel{Margin=new Thickness(0,12,0,0)};DockPanel.SetDock(footerRow,Dock.Bottom);layout.Children.Add(footerRow);
-   var footer=new Button{Content="Clear completed"};footerRow.Children.Add(footer);
+   // Reports sit beside Clear completed, in the same button style, instead of in the Import menu.
+   var reports=new Button{Content="Reports…",Padding=new Thickness(9,4,9,4),Margin=new Thickness(0,0,8,0),VerticalAlignment=VerticalAlignment.Center};footerRow.Children.Add(reports);
+   UiHelp.Hint(reports,"Show the latest scan and import reports.");reports.Click+=(s,e)=>{var reportMenu=new ContextMenu{PlacementTarget=reports,Placement=System.Windows.Controls.Primitives.PlacementMode.Top};
+    reportMenu.Items.Add(MenuAction("Scan report…",()=>ShowReport("Scan report",plan==null?"Scan a folder first.":plan.ScanReport),true,false));
+    reportMenu.Items.Add(MenuAction("Last import report…",()=>ShowReport("Import report",repo==null?"Choose a repository first.":repo.LastReport),true,false));
+    reportMenu.IsOpen=true;};
+   var footer=new Button{Content="Clear completed",Padding=new Thickness(9,4,9,4),VerticalAlignment=VerticalAlignment.Center};footerRow.Children.Add(footer);
    footer.Click+=(s,e)=>{activities.RemoveAll(a=>!a.Running&&!a.NeedsReview&&a.Review==null);RenderActivity();};
    activityItems=new StackPanel();var scroll=new ScrollViewer{Content=activityItems,VerticalScrollBarVisibility=ScrollBarVisibility.Auto,HorizontalScrollBarVisibility=ScrollBarVisibility.Disabled};MenuScrolling.SetEnabled(scroll,true);layout.Children.Add(scroll);
    activityPanel.PreviewKeyDown+=(s,e)=>{if(e.Key==Key.Escape){CloseActivity();e.Handled=true;}};

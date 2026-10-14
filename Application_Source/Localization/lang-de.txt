@@ -2405,3 +2405,4 @@ Small rings: where it was when you imaged it. Click one for its date.	Kleine Rin
 A current position is unavailable for this solution.	Für diese Lösung ist keine aktuelle Position verfügbar.
 {0} nights · {1} to {2}	{0} Nächte · {1} bis {2}
 Show starred on top	Markierte oben anzeigen
+Reports…	Berichte…

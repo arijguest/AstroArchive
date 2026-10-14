@@ -2430,3 +2430,4 @@ Small rings: where it was when you imaged it. Click one for its date.	Anillos pe
 A current position is unavailable for this solution.	No hay una posición actual disponible para esta solución.
 {0} nights · {1} to {2}	{0} noches · {1} a {2}
 Show starred on top	Mostrar destacados arriba
+Reports…	Informes…

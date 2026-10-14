@@ -2437,3 +2437,4 @@ Small rings: where it was when you imaged it. Click one for its date.	小さな�
 A current position is unavailable for this solution.	この解には現在位置がありません。
 {0} nights · {1} to {2}	{0}夜 · {1}〜{2}
 Show starred on top	スター付きを先頭に表示
+Reports…	レポート…
