@@ -64,6 +64,9 @@ APPEARANCE AND ACCESSIBILITY
 @keywords theme dark light text size scale contrast motion language translation font
 Settings opens Preferences: General, Import, Export, Sky & solving, Accessibility,
 Updates and Backups. **Save preferences** applies changes; **Cancel** keeps your settings.
+**General → Date format** chooses Automatic, DD/MM/YY or MM/DD/YY; Automatic uses
+MM/DD/YY when your observing location is in the United States. Stored and exported
+dates stay in the ISO form.
 
 ## Comfort
 - **Accessibility** adjusts text size, rows, contrast and progress animation.
@@ -312,7 +315,9 @@ format, date, mount, notes, status, review, session and hash (Edited also has so
 ## Condensed subs
 Repeated Lights share a collapsed session row with dates, count, per-sub exposure, total
 integration and filters. Mixed durations show a range; missing values stay unknown.
-Expand the row, or turn off **Group subs by session** in **Settings → General**. **Show starred on top** (same place, on by default) lists starred files above the rest, and starred sessions first among the session rows.
+Expand the row, or turn off **Group subs by session** in **Settings → General**.
+
+**Show starred on top** (same place, on by default) lists starred files above the rest, and starred sessions first among the session rows.
 Stacks stay separate. Known counts show Stack (1445); filters still use Stack.
 
 STARS, TAGS AND NOTES
@@ -411,7 +416,8 @@ ECLIPSES
 @keywords eclipse solar lunar sun moon obscuration contact
 Sun and Moon captures taken during an observable eclipse list under **Solar Eclipse** or
 **Lunar Eclipse** in the target list; files and folders are unchanged.
-- Solar captures show obscuration on the Sun in the sky map. Capture details shows the
+- Solar captures show obscuration on the Sun in the sky map. At 99% or more the Sun is
+  drawn with a corona and the capture is tagged **Totality** (remove the tag and it stays removed). Capture details shows the
   percentage of the Sun obscured at capture, a coverage curve with start and end
   times, and the duration of totality or annularity. The Moon's own phase,
   illumination and distance to the target are left out.
@@ -469,7 +475,8 @@ OBSERVING TOWN / CITY
 @walkthrough sky-wrong
 @related CAPTURE DETAILS AND SKY | ECLIPSES
 @keywords location town city coordinates latitude longitude site timezone
-**Settings → Sky & solving** offers an offline town / city search or manual coordinates.
+The first time you start AstroArchive it asks **Where do you observe from?**; you can
+skip it. **Settings → Sky & solving** offers the same offline town / city search or manual coordinates.
 - Place centres approximate your site; use precise coordinates for accurate sky views.
 - Location search never sends your position to a network service.
 - Individual captures can have their own town: right-click **Edit metadata → Capture**.
@@ -621,9 +628,11 @@ image of the target, its integration, light frames, nights and filters.
    images, then stacks and lights.
 2. Drag to move it, `Ctrl`+scroll to zoom, **Rotate left/right** to turn it, or use
    **Adjust image position**.
-3. Add an optional short description under the target name, or tick **Add automatic
-   description** for what it is, its constellation, how far away it is and how bright
-   (shown only when known; your own text is kept and comes back when you untick it).
+3. Add an optional short description under the target name. **Add automatic
+   description** (on by default) writes what it is, its constellation, how far away it
+   is and how bright, for example "Spiral Galaxy · Andromeda · 2.5 million light-years ·
+   Magnitude 3.4" (shown only when known; your own text is kept and comes back when you
+   untick it). Comets show their orbit class, period and closest approach to the Sun.
    In **Analytics → Target cards**, **Add automatic descriptions** does this for every
    card without a description of its own.
 4. Pick a layout for posts, stories or video, Dark or Light, a resolution (Standard,
@@ -741,9 +750,9 @@ files it is reading waits until it finishes.
 Each sub is compared with similar frames from the same session, so a score says how it
 ranks among its neighbours, not how good the night was.
 - **Deep-sky:** star size, star count, roundness, noise and obstruction evidence.
-- **Planetary, lunar and solar:** edge sharpness, fine detail and noise, plus an
+- **Planetary and lunar:** edge sharpness, fine detail and noise, plus an
   **EXPOSURE FIT** column (Under, Good or Over) from the Columns menu.
-- **Linear stacks** are compared only with other stacks of the same target.
+- **Stacks and solar images** are not scored: there are too few comparable references.
 
 Star-poor regions with abrupt background edges can flag a suspected foreground
 obstruction (trees, roofs, buildings), and so can a frame whose stars cover clearly
@@ -761,7 +770,7 @@ alone don't count.
 > Note: Scores only suggest. Nothing is rejected or deleted for you.
 
 ## What isn't scored
-Calibration frames, recordings, JPEG and other non-linear or oversized images show `-`;
+Stacks, solar images, calibration frames, recordings, JPEG and other non-linear or oversized images show `-`;
 the tooltip gives the reason. Files found unsuitable while measuring are set aside and
 listed in the run report.
 
@@ -1050,7 +1059,7 @@ bodies show today; others show their position at the orbit epoch.
 
 Small rings mark where the target was on each date you imaged it; rings that
 fall close together are drawn once with a count. Click a ring, or press Enter
-in the orbit, for its date. Diamonds mark the ascending
+in the orbit, for its date. The date opposite the ORBIT heading can be clicked to type another. Diamonds mark the ascending
 (filled) and descending (open) nodes, with perihelion and aphelion (or perigee
 and apogee).
 
