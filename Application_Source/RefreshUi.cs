@@ -13,7 +13,7 @@ namespace AstroArchive {
    if(closing||Window.Dispatcher.HasShutdownStarted)return;
    // Another repository may have been opened meanwhile, or the read failed: fall back to the plain refresh.
    if(repo!=repository||frames==null){Refresh();return;}
-   all=frames;ApplyAnnotations(all);ScheduleTotalityTags();ScheduleRepositorySize();repositoryRows.Clear();for(int i=0;i<all.Count;i++)if(!string.IsNullOrEmpty(all[i].Hash))repositoryRows[all[i].Hash]=i;
+   all=frames;ApplyAnnotations(all);ScheduleTotalityTags();ScheduleSolarMetadata();ScheduleRepositorySize();repositoryRows.Clear();for(int i=0;i<all.Count;i++)if(!string.IsNullOrEmpty(all[i].Hash))repositoryRows[all[i].Hash]=i;
    Filter(true);RefreshEdited(null,null,gallery);SetBusy(cancel!=null);
   }
  }

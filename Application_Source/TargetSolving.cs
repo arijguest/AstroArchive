@@ -55,7 +55,7 @@ namespace AstroArchive {
   // Returns the target to keep, or null to use the suggestion.
   public static string Retained(TargetSolveJob job){
    string suggested=job.Result==null?null:job.Result.Suggested,current=CurrentTarget(job);if(current==null||string.Equals(current,suggested,StringComparison.Ordinal))return null;
-   if(ObservationTargets.NamedSolar(current)!=null||CometTargets.IsComet(current))return current;
+   if(ObservationTargets.BodyOf(current)!=null||CometTargets.IsComet(current))return current;
    var held=Catalog.Objects.FirstOrDefault(o=>o.Name==current);int rank=PlateSolve.Rank(held);if(rank==0)return null;
    var offered=suggested==null?null:Catalog.Objects.FirstOrDefault(o=>o.Name==suggested);return PlateSolve.Rank(offered)>rank?null:current;
   }
