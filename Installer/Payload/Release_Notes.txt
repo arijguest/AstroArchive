@@ -1,5 +1,5 @@
 AstroArchive 3.3.0
-Package 3.3.0.2
+Package 3.3.0.1
 
 Covers everything since 3.2.8.1.
 
