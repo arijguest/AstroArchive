@@ -1,30 +1,18 @@
-AstroArchive 3.3.1
-Package 3.3.1.1
+AstroArchive 3.3.2
+Package 3.3.2.1
 
-Covers everything since 3.3.0.1.
+Covers everything since 3.3.1.1.
 
-Exports
-The AstroArchive title and logo on Analytics exports are 15% smaller and stay centred on each other, and the "01 / 06" counter at the top right is gone (multi-page charts say "Part 1 of 2" instead). Widescreen exports use the full width, and tall layouts such as Pinterest and Vertical grow the charts to fill the page. Automatic card descriptions are now on by default and capitalised ("Spiral Galaxy · Magnitude 3.4"), with better comet descriptions covering type, orbit class, period and perihelion.
+Sky map and targets
+The total solar eclipse icon on the sky map now draws a corona shaped by the solar cycle and oriented to the Sun's axis. Totality captures get the object Totality, and Sun pictures taken through a non-solar telescope get the SOL filter (Totality stays VIS). All Targets has an upcoming sky events view for the next month at your observing location, with Stellarium links, computed locally.
 
-Image quality
-Stacks and solar images are no longer scored for quality, and any earlier scores for them are ignored. Re-measure image quality is gone: Analyse image quality now measures again only when the number of frames it compares against has changed.
+Orbit viewer
+Dates sort by time of day as well as date, and the Parameters section is hidden when it is empty.
 
-Menus and activity
-Export > Metadata groups the AstroBin and Catalogue exports and opens both on hover. Reports moved from the Import menu to the Activity panel, beside Clear completed. Activity details list only the measurements a process actually reports.
-
-Orbit viewer and target information
-Click an imaged-date ring in the 3D orbit viewer to see its date, and the orbit header shows a date you can click to change. The target label is just its name. Totality is tagged for solar captures at 99% obscuration or more, with a corona on the sky map. The sky map zooms with the mouse wheel only after you click it or while holding Ctrl.
-
-Dates and first run
-Preferences has a Date format choice (Automatic, DD/MM/YY, MM/DD/YY); Automatic uses month first when your observing location is in the United States. A one-time prompt on first run asks where you observe from, and can be skipped.
-
-Lists and processes
-After deleting, moving, merging or re-identifying files, the window stays on the same page and target and selects the next row, and no longer freezes while lists reload. Starred sessions keep the table's sort order inside their groups. Long imports add copy workers when they turn out to take a while, and Activity shows how many started and how many were added.
-
-Backups and warnings
-Pausing or interrupting a backup keeps the verified copies, and Activity offers Resume, Discard backup and Dismiss, even after restarting the app. Full rescan, Verify repository checksums and Index an existing repository warn before they start, with a "Don't warn me again" option that Preferences can reset.
+Settings and menus
+Settings has a Telescopes section to rename a saved telescope (updating its captures), change its model and camera, remove it, or recover profiles from the repository. Import now starts with Scan folder…, which replaces Scan source….
 
 Installer
-Setup header text no longer clips under the logo.
+The setup window no longer shows the version line under the logo.
 
 The guide, tours and all seven interface languages are updated for these changes.
