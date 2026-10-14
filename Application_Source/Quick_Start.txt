@@ -544,8 +544,9 @@ on the left chooses what to make:
 - **Files** copies originals.
 - **Stacking folder** prepares **Subs**, **Stacks** or **Both**, grouped for stacking.
 - **Open in app** verifies copies, then opens them in external software.
-- **AstroBin CSV** makes an acquisition table without exporting images.
-- **Catalogue CSV** exports metadata for the selection or the whole repository.
+- **Export → Metadata** (hover it) offers two table exports:
+  **AstroBin CSV** makes an acquisition table without exporting images, and
+  **Catalogue CSV** exports metadata for the selection or the whole repository.
 
 Right-click Export items open the same window with that option chosen, and the window
 reopens on the option you used last. Folder exports share one destination.

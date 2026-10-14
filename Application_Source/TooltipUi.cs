@@ -28,6 +28,7 @@ namespace AstroArchive {
    {"Telescopes","Save, rename or recover telescope profiles, or look for USB telescopes."},
    {"Refresh USB devices","Look for telescopes connected by USB."},
    {"Reports","Show the latest scan and import reports."},
+   {"Metadata","Export an AstroBin acquisition table or a catalogue CSV of the archive metadata."},
    {"Live import underway","View live telescope imports in Activity."},
    {"Retry failed imports","Retry failed transfers from unchanged source files."},
    {"Identify selected targets","Solve selected lights and stacks to identify objects."},

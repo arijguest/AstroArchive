@@ -186,9 +186,11 @@ namespace AstroArchive {
             var selected=Context();var summary=ExportSummaries.Describe(selected,SelectedFiles().Count>0);var header=new MenuItem{Header=summary.Title+(summary.Targets.Length>0?" · "+summary.Targets:""),IsEnabled=false};if(summary.TargetList.Contains("\n"))UiHelp.Tip(header,summary.TargetList);menu.Items.Add(header);
             foreach(var category in new[]{ExportCategory.Files,ExportCategory.Stacking,ExportCategory.Application}){var chosen=category;menu.Items.Add(MenuAction(ExportCategoryName(chosen)+"…",()=>OpenExport(chosen,selected),ExportCategoryAvailable(chosen,selected)));}
             menu.Items.Add(new Separator());
-            menu.Items.Add(MenuAction(ExportCategoryName(ExportCategory.AstroBin)+"…",()=>OpenExport(ExportCategory.AstroBin,selected),ExportCategoryAvailable(ExportCategory.AstroBin,selected)));
-            // The Export window's Rows choice covers the selection or the entire repository; with nothing in view it starts on the entire repository.
-            menu.Items.Add(MenuAction(ExportCategoryName(ExportCategory.Catalogue)+"…",()=>OpenExport(ExportCategory.Catalogue,selected,selected.Count==0),repo!=null));
+            // The two table exports share one entry; hovering it opens both.
+            menu.Items.Add(Branch("Metadata",
+                MenuAction(ExportCategoryName(ExportCategory.AstroBin)+"…",()=>OpenExport(ExportCategory.AstroBin,selected),ExportCategoryAvailable(ExportCategory.AstroBin,selected)),
+                // The Export window's Rows choice covers the selection or the entire repository; with nothing in view it starts on the entire repository.
+                MenuAction(ExportCategoryName(ExportCategory.Catalogue)+"…",()=>OpenExport(ExportCategory.Catalogue,selected,selected.Count==0),repo!=null)));
         }
         // Repository: view options, analysis, then safety and upkeep with permanent deletions kept apart.
         void BuildRepositoryNavigation(MenuItem menu) {
