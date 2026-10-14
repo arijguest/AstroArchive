@@ -1045,15 +1045,18 @@ expand the view. The camera glides to each view unless Reduce motion is on.
 The target orbit is solid above the ecliptic, dashed below it and fades with
 depth. The last stretch it has travelled is drawn bold and ends in a ringed
 marker with an arrow along the path, showing where the target is now. Dated
-bodies show today; others show their position at the orbit epoch. Small rings
-mark where the target was on each date you imaged it; rings that fall close
-together are drawn once with a count. Diamonds mark the ascending (filled) and
-descending (open) nodes, with perihelion and aphelion (or perigee and apogee).
+bodies show today; others show their position at the orbit epoch.
+
+Small rings mark where the target was on each date you imaged it; rings that
+fall close together are drawn once with a count. Diamonds mark the ascending
+(filled) and descending (open) nodes, with perihelion and aphelion (or perigee
+and apogee).
 
 Planets appear on the same date with a line down to the plane. Body markers are
 enlarged and distances use a linear scale, with rings and a scale bar in round
-numbers of AU, or kilometres at the Earth–Moon scale. Open paths have
-continuation arrows; clipped extents are labelled. Source credits are in the
+numbers of AU, or kilometres at the Earth–Moon scale.
+
+Open paths have continuation arrows; clipped extents are labelled. Source credits are in the
 Sources list at the foot of the page.
 
 Small-body and Moon snapshots use epoch-only markers. Complete elements are
