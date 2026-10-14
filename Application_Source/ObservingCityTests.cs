@@ -29,6 +29,11 @@ namespace AstroArchive {
     settings.DateFormat=DateFormats.DayFirst;DateFormats.Configure(settings);Check(DateFormats.TryParse("31.12.2026",out parsed)&&parsed==new DateTime(2026,12,31)&&!DateFormats.TryParse("12/31/26",out parsed),"Day-first parsing is wrong");
     DateFormats.Configure(new Settings());
    });
+   Test("Pictures of the Sun from non-solar scopes take the SOL filter and Totality stays a Sun target",()=>{
+    Check(ObservationTargets.NeedsSolarFilter(new Frame{Target="Sun",Kind="Light",Telescope="Seestar S50"})&&ObservationTargets.NeedsSolarFilter(new Frame{Target="Solar",Kind="Light",Telescope="DWARF 3"}),"Seestar and DWARF Sun frames need SOL");
+    Check(!ObservationTargets.NeedsSolarFilter(new Frame{Target="Sun",Kind="Light",Telescope="Lunt LS60"})&&!ObservationTargets.NeedsSolarFilter(new Frame{Target="M31",Kind="Light",Telescope="Seestar S50"})&&!ObservationTargets.NeedsSolarFilter(new Frame{Target="Sun",Kind="Dark",Telescope="Seestar S50"}),"Solar scopes, other targets and calibration keep their filters");
+    Check(ObservationTargets.BodyOf("Totality")=="Sun"&&ObservationTargets.BodyOf("Moon")=="Moon"&&ObservationTargets.BodyOf("M31")==null,"Totality is not treated as a Sun target");
+   });
    Test("Totality is tagged once and stays removed",()=>{
     var store=new System.Collections.Generic.Dictionary<string,CaptureAnnotation>();var frame=new Frame{Hash="abc"};var edit=new AnnotationEdit();edit.AutoTags.Add(Eclipses.TotalityTag);
     Check(CaptureAnnotations.Edit(store,new[]{frame},edit)==1&&frame.Tags.Contains("Totality"),"Totality tag was not added");
