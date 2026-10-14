@@ -1053,8 +1053,8 @@ descending (open) nodes, with perihelion and aphelion (or perigee and apogee).
 Planets appear on the same date with a line down to the plane. Body markers are
 enlarged and distances use a linear scale, with rings and a scale bar in round
 numbers of AU, or kilometres at the Earth–Moon scale. Open paths have
-continuation arrows; clipped extents are labelled. Source credits are under
-SOURCES.
+continuation arrows; clipped extents are labelled. Source credits are in the
+Sources list at the foot of the page.
 
 Small-body and Moon snapshots use epoch-only markers. Complete elements are
 required; an unavailable orbit never receives an assumed orientation.
