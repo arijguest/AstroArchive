@@ -418,7 +418,7 @@ ECLIPSES
 Sun and Moon captures taken during an observable eclipse list under **Solar Eclipse** or
 **Lunar Eclipse** in the target list; files and folders are unchanged.
 - Solar captures show obscuration on the Sun in the sky map. At 99% or more the Sun is
-  drawn with a corona and the capture is tagged **Totality** (remove the tag and it stays removed). Capture details shows the
+  drawn with a corona (its streamers lie along the Sun's equator and its shape follows the solar cycle) and the capture is tagged **Totality** (remove the tag and it stays removed). Capture details shows the
   percentage of the Sun obscured at capture, a coverage curve with start and end
   times, and the duration of totality or annularity. The Moon's own phase,
   illumination and distance to the target are left out.
