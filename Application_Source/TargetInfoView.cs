@@ -66,11 +66,11 @@ namespace AstroArchive {
    var icons=new StackPanel{Orientation=Orientation.Horizontal,VerticalAlignment=VerticalAlignment.Top,Margin=new Thickness(6,0,0,0)};Grid.SetColumn(icons,1);headerRow.Children.Add(icons);content.Children.Add(headerRow);
    if(!string.IsNullOrEmpty(context))content.Children.Add(Data(context,"Muted","UiFontCaption"));
    var actions=new WrapPanel{Margin=new Thickness(0,0,0,4)};
-   if(RefreshInformation!=null&&InformationCoordinator.Provider(card)!=null){var refresh=refreshButton=IconButton(RefreshGeometry,"Refresh information");refresh.IsEnabled=InternetAvailable;UiHelp.Hint(refresh,InternetAvailable?"Download missing or updated information for this target.":"Choose Hybrid in Preferences > General > Online access to reconnect.");refresh.Click+=(s,e)=>RefreshInformation();icons.Children.Add(refresh);}
    if(!string.IsNullOrEmpty(card.downloaded_at))content.Children.Add(Data(Localization.F("Saved information · retrieved {0}",card.downloaded_at),"Muted","UiFontCaption"));
    if(!string.IsNullOrEmpty(back)&&GoBack!=null){var up=ActionButton(back,true);up.Name="BackToSection";up.Click+=(s,e)=>GoBack();actions.Children.Add(up);}
    var stellarium=OpenInStellarium==null?null:Stellarium.ForCard(card);
    if(stellarium!=null){var open=IconButton(Stellarium.IconGeometry,"Open in Stellarium");open.Name="OpenInStellarium";UiHelp.Hint(open,Localization.T(Stellarium.CardTooltip(stellarium)));open.Click+=(s,e)=>OpenInStellarium(stellarium);icons.Children.Add(open);}
+   if(RefreshInformation!=null&&InformationCoordinator.Provider(card)!=null){var refresh=refreshButton=IconButton(DownloadGeometry,"Refresh information");refresh.IsEnabled=InternetAvailable;UiHelp.Hint(refresh,InternetAvailable?"Download missing or updated information for this target.":"Choose Hybrid in Preferences > General > Online access to reconnect.");refresh.Click+=(s,e)=>RefreshInformation();icons.Children.Add(refresh);}
    if(actions.Children.Count>0)content.Children.Add(actions);
    informationStatus=Text("","Muted","UiFontCaption");informationStatus.Visibility=Visibility.Collapsed;AutomationProperties.SetLiveSetting(informationStatus,AutomationLiveSetting.Polite);content.Children.Add(informationStatus);
    var curated=TargetDescriptions.For(card.id);
@@ -216,15 +216,11 @@ namespace AstroArchive {
    var line=Text("","Muted","UiFontCaption");line.TextAlignment=TextAlignment.Center;line.ToolTip=Data(full,"Text","UiFontSmall");
    line.Inlines.Add(new Run(Localization.T("Image:")+" "));line.Inlines.Add(Linked(who,image.file_page_url));
    if(!string.IsNullOrWhiteSpace(image.licence)){line.Inlines.Add(new Run(" · "));line.Inlines.Add(Linked(image.licence,image.licence_url));}
-   bool lengthy=(who+(image.licence??"")).Length>100||full.Length>180||full.Contains("\n");
-   bool mandatory=attribution.IndexOf("ESA",StringComparison.OrdinalIgnoreCase)>=0||attribution.IndexOf("Hubble",StringComparison.OrdinalIgnoreCase)>=0;
-   if(mandatory&&attribution.Length>0){var fullCredit=Data(attribution,"Muted","UiFontCaption");fullCredit.Name="MandatoryImageCredit";content.Children.Add(fullCredit);}
-   if(lengthy){
-    var credits=new StackPanel();credits.Children.Add(line);
-    if(!mandatory&&attribution.Length>0&&attribution!=who)credits.Children.Add(Data(attribution,"Muted","UiFontCaption"));
-    if(modifications.Length>0)credits.Children.Add(Data(modifications,"Muted","UiFontCaption"));
-    var disclosure=Disclosure("Credits",credits);disclosure.Name="ImageCredits";content.Children.Add(disclosure);
-   }else{line.Name="ImageCredits";content.Children.Add(line);}
+   // Every image credit, however short, sits in the Credits dropdown rather than under the picture.
+   var credits=new StackPanel();credits.Children.Add(line);
+   if(attribution.Length>0&&attribution!=who)credits.Children.Add(Data(attribution,"Muted","UiFontCaption"));
+   if(modifications.Length>0)credits.Children.Add(Data(modifications,"Muted","UiFontCaption"));
+   var disclosure=Disclosure("Credits",credits);disclosure.Name="ImageCredits";content.Children.Add(disclosure);
   }
   // Sections share a quiet caption and divider so the pane reads as distinct parts.
   static StackPanel Section(string title,bool first=false){
@@ -239,7 +235,7 @@ namespace AstroArchive {
    return new Button{Content=face,Margin=new Thickness(0,0,6,6),Padding=new Thickness(10,3,10,3),HorizontalAlignment=HorizontalAlignment.Left};
   }
   // Icon-only buttons for the details line, sharing the Stellarium glyph's size and padding.
-  const string RefreshGeometry="M 5,7 A 7,7 0 1 1 5,15 M 5,3 L 5,7 L 9,7";
+  const string DownloadGeometry="M 12,3 L 12,15 M 7,10 L 12,15 L 17,10 M 5,19 L 19,19";
   static Button IconButton(string geometry,string name){
    var glyph=new System.Windows.Shapes.Path{Data=Geometry.Parse(geometry),StrokeThickness=1.6,StrokeLineJoin=PenLineJoin.Round,StrokeStartLineCap=PenLineCap.Round,StrokeEndLineCap=PenLineCap.Round};glyph.SetResourceReference(System.Windows.Shapes.Shape.StrokeProperty,"Text");
    var button=new Button{Content=new Viewbox{Child=glyph},Width=28,Height=28,MinHeight=0,Padding=new Thickness(6),Margin=new Thickness(2,0,0,0)};AutomationProperties.SetName(button,Localization.T(name));return button;
