@@ -82,6 +82,10 @@ namespace AstroArchive {
  }
 
  public static class QualityAnnotator {
+  // The captures a score is compared against: the same group and session (or target, when chosen); discs also per target.
+  public static string Cohort(Frame frame,int kind,bool compareTarget){
+   string scope=kind==QualityKind.Disc||!compareTarget?frame.SessionKey:frame.Target;return (kind==QualityKind.Disc?frame.Target+"|":"")+frame.Group+"|"+scope;
+  }
   // Clears and refills the transient quality properties of the supplied captures.
   public static void Apply(IList<Frame> frames,IDictionary<string,QualityMeasurement> measurements,bool compareTarget){
    foreach(var frame in frames){frame.QualityScore=null;frame.QualityPercentile=-1;frame.QualityFlags=null;frame.QualityDetail=null;frame.QualitySummary=null;frame.ExposureFit=null;frame.ExposureLabel=null;}
@@ -93,14 +97,14 @@ namespace AstroArchive {
     if(!QualityMeter.Shown(m)||m.Kind!=QualityEligibility.KindOf(frame))continue;
     if(QualityEligibility.Reason(frame).Length>0)continue;
     // Subs compare within their session (or target, when chosen).
-    string scope=m.Kind==QualityKind.Disc||!compareTarget?frame.SessionKey:frame.Target;string cohort=(m.Kind==QualityKind.Disc?frame.Target+"|":"")+frame.Group+"|"+scope;
+    string cohort=Cohort(frame,m.Kind,compareTarget);
     items.Add(new QualityItem{M=m,Cohort=cohort});owners.Add(frame);
    }
    if(items.Count==0)return;
    var outcomes=QualityScorer.Compute(items);
    for(int i=0;i<owners.Count;i++){var o=outcomes[i];var f=owners[i];f.QualityScore=o.Score;f.QualityPercentile=o.Percentile;f.QualityFlags=o.Flags;f.QualityDetail=o.Detail;f.QualitySummary=o.Summary;f.ExposureFit=o.ExposureFit;f.ExposureLabel=o.ExposureLabel;
     if(items[i].M.Version<QualityMeter.Version&&f.QualityDetail!=null)f.QualityDetail+="\nMeasured by an earlier version. Analyse image quality refreshes it.";
-    int status=items[i].M.Status;if(status==QualityStatus.Unsuitable)f.QualityDetail="Not scored: set aside as unsuitable for measuring. Re-measure image quality tries again.";else if(status==QualityStatus.Failed)f.QualityDetail="Not scored: the file could not be read last time. Analyse image quality tries again.";}
+    int status=items[i].M.Status;if(status==QualityStatus.Unsuitable)f.QualityDetail="Not scored: set aside as unsuitable for measuring.";else if(status==QualityStatus.Failed)f.QualityDetail="Not scored: the file could not be read last time. Analyse image quality tries again.";}
   }
  }
 }

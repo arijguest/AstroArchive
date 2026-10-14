@@ -43,8 +43,7 @@ clipping beyond 2 percent of the disc caps the score at 40.
 
 A file that cannot be measured because of its content (an unsupported layout, damaged
 data, or too large for the memory available even when measured on its own) is set aside:
-it is stored with that status and skipped on later runs until Re-measure image quality
-is used. A file that cannot be opened is tried again on the next run. The run report
+it is stored with that status and skipped on later runs. A file that cannot be opened is tried again on the next run. The run report
 lists both, file by file, with the reason.
 
 ## Running in the background
@@ -93,7 +92,7 @@ measured directly and still flags Over.
 * QUALITY column (sortable) and an optional EXPOSURE FIT column in the repository table.
 * Filters: Quality rank (Top 10 percent, Top 25 percent, Top half, Bottom half, Weakest 25 percent,
   Has quality flags, Not scored), Exposure fit, and a Quality score range.
-* Repository > Review and analysis > Analyse image quality / Re-measure image quality.
+* Repository > Review and analysis > Analyse image quality.
 * Settings > General > Image quality: measure after each import, and the deep-sky comparison scope.
 
 Saved table layouts gain the QUALITY column once; hide it again from the Columns menu and it
@@ -107,3 +106,6 @@ measurements and the column layout. Run them alone with `AstroArchiveTests.exe <
 `BackgroundWorkTests.cs` covers running beside imports, edits, checkpoints and readers
 (`--background-only`).
 
+
+Analyse image quality measures a file again only when the number of captures it is compared
+against has changed since its last analysis. Older results that recorded no such number stay as they are.

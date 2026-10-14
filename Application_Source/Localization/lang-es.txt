@@ -1918,7 +1918,6 @@ Choose card targets	Elegir objetos de las tarjetas
 QUALITY	CALIDAD
 EXPOSURE FIT	AJUSTE DE EXPOSICIÓN
 Analyse image quality…	Analizar la calidad de imagen…
-Re-measure image quality…	Volver a medir la calidad de imagen…
 Analyse image quality	Analizar la calidad de imagen
 Quality rank	Rango de calidad
 Exposure fit	Ajuste de exposición

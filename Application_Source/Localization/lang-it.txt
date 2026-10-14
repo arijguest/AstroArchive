@@ -1908,7 +1908,6 @@ Choose card targets	Scegli gli oggetti delle schede
 QUALITY	QUALITÀ
 EXPOSURE FIT	ADEGUATEZZA ESPOSIZIONE
 Analyse image quality…	Analizza la qualità dell'immagine…
-Re-measure image quality…	Misura di nuovo la qualità dell'immagine…
 Analyse image quality	Analizza la qualità dell'immagine
 Quality rank	Posizione di qualità
 Exposure fit	Adeguatezza esposizione

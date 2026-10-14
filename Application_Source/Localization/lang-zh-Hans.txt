@@ -1924,7 +1924,6 @@ Choose card targets	选择卡片目标
 QUALITY	质量
 EXPOSURE FIT	曝光适度
 Analyse image quality…	分析图像质量…
-Re-measure image quality…	重新测量图像质量…
 Analyse image quality	分析图像质量
 Quality rank	质量排名
 Exposure fit	曝光适度

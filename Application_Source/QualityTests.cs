@@ -135,6 +135,11 @@ namespace AstroArchive {
      var scored=repo.All();Check(scored.Where(f=>f.Kind=="Light").All(f=>f.QualityScore.HasValue)&&scored.Where(f=>f.Kind!="Light").All(f=>!f.QualityScore.HasValue),"Library rows were not annotated on load");
      var tight=scored.Single(f=>f.OriginalName=="Light_M51_0.fit");var loose=scored.Single(f=>f.OriginalName=="Light_M51_2.fit");Check(tight.QualityScore.Value>loose.QualityScore.Value,"The sharper capture did not score higher: "+tight.QualityScore+" vs "+loose.QualityScore);
      var forced=repo.AnalyzeQuality(repo.All(),true,ct,NoProgress);Check(forced.Measured==3&&forced.Reused==0,"A fresh measurement was not forced");
+     // A score is measured again only when the number of captures it was compared against has changed.
+     var stored=repo.QualityMeasurements();Check(stored.Values.All(m=>m.Compared==3),"The comparison size was not recorded: "+string.Join(",",stored.Values.Select(m=>m.Compared)));
+     var hash=stored.Keys.First();var edited=stored[hash];edited.Compared=2;var older=stored.Keys.Skip(1).First();stored[older].Compared=0;
+     typeof(Repository).GetMethod("SaveQuality",System.Reflection.BindingFlags.NonPublic|System.Reflection.BindingFlags.Instance).Invoke(repo,new object[]{new List<QualityMeasurement>{edited,stored[older]}});
+     var changed=repo.AnalyzeQuality(repo.All(),false,ct,NoProgress);Check(changed.Measured==1&&changed.Reused==2,"A changed comparison size did not trigger one new measurement, or an unrecorded one was measured: "+changed.Summary());
      repo.ClearQuality();Check(repo.All().All(f=>!f.QualityScore.HasValue)&&repo.UnmeasuredQuality(repo.All()).Count==3,"Clearing left measurements behind");
      var found=repo.AnalyzeMissingQuality(ct,NoProgress);Check(found.Measured==3,"Missing measurements were not found: "+found.Summary());
     }

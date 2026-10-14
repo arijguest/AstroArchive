@@ -27,7 +27,7 @@ namespace AstroArchive {
    var lines=new List<string>{Summary(),""};
    lines.Add("Measured now: "+Measured+(TooFewStars+NoObject>0?" ("+(TooFewStars>0?TooFewStars+" with too few stars":"")+(TooFewStars>0&&NoObject>0?", ":"")+(NoObject>0?NoObject+" without a measurable object":"")+")":""));
    lines.Add("Already measured: "+Reused);
-   if(Unsuitable>0)lines.Add("Set aside as unsuitable: "+Unsuitable+". They are skipped from now on; Re-measure image quality tries them again.");
+   if(Unsuitable>0)lines.Add("Set aside as unsuitable: "+Unsuitable+". They are skipped from now on.");
    if(SetAside>0)lines.Add("Skipped, set aside by an earlier run: "+SetAside);
    if(Failed>0)lines.Add("Could not be read: "+Failed+". They are tried again on the next run.");
    if(NotReached>0)lines.Add("Not reached because the run stopped early: "+NotReached+". Run it again to measure them.");
@@ -101,12 +101,15 @@ namespace AstroArchive {
 
   public QualityRun AnalyzeQuality(IEnumerable<Frame> selection,bool force,CancellationToken ct,Action<ProgressInfo> progress){
    var run=new QualityRun();EnsureQualityTable();var known=QualityMeasurements();var todo=new List<Frame>();var seen=new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+   // How many captures each score is compared against now. A score measured against a different number is measured again.
+   var cohorts=CohortSizes(selection);
    foreach(var frame in selection){
     if(frame==null||frame.Status=="Deleted"||string.IsNullOrEmpty(frame.Hash)||!seen.Add(frame.Hash))continue;
     string reason;try{reason=QualityEligibility.Reason(frame);}catch(Exception e){reason="its details could not be read ("+e.Message+")";}
     if(reason.Length>0){run.Skip(reason);continue;}
     run.Eligible++;QualityMeasurement old;
-    if(!force&&known.TryGetValue(frame.Hash,out old)&&old.Version==QualityMeter.Version&&old.Kind==QualityEligibility.KindOf(frame)){
+    int size;cohorts.TryGetValue(QualityAnnotator.Cohort(frame,QualityEligibility.KindOf(frame),QualityCompareTarget),out size);
+    if(!force&&known.TryGetValue(frame.Hash,out old)&&old.Version==QualityMeter.Version&&old.Kind==QualityEligibility.KindOf(frame)&&!(old.Compared>0&&size>0&&old.Compared!=size)){
      if(old.Status==QualityStatus.Unsuitable){run.SetAside++;continue;}
      // Unreadable files are tried again; the problem may have been the drive, not the file.
      if(old.Status!=QualityStatus.Failed){run.Reused++;Tally(run,old);continue;}
@@ -126,6 +129,7 @@ namespace AstroArchive {
     catch(OperationCanceledException){if(ct.IsCancellationRequested)throw;error="measuring stopped before it finished";}
     catch(Exception e){if(!alone&&QualityFailure.OutOfMemory(e)){lock(gate)retry.Add(frame);return;}error=QualityFailure.Describe(e);unsuitable=QualityFailure.Unsuitable(e);}
     if(m==null)m=new QualityMeasurement{Hash=frame.Hash,Version=QualityMeter.Version,Kind=QualityEligibility.KindOf(frame),Status=unsuitable?QualityStatus.Unsuitable:QualityStatus.Failed};
+    int compared;cohorts.TryGetValue(QualityAnnotator.Cohort(frame,m.Kind,QualityCompareTarget),out compared);m.Compared=compared;
     lock(gate){
      pending.Add(m);Tally(run,m);done++;
      if(m.Status==QualityStatus.Unsuitable){run.Unsuitable++;run.Problem(frame.OriginalName+": set aside, "+error);}
@@ -151,6 +155,16 @@ namespace AstroArchive {
    lock(gate)run.NotReached=Math.Max(0,todo.Count-done);
    Report(progress,new ProgressInfo{Done=done,Total=todo.Count,Workers=workers,Stage="Measuring image quality",Text=run.Summary()});
    return run;
+  }
+  // Scorable captures per comparison group, across the whole repository and the selection.
+  Dictionary<string,int> CohortSizes(IEnumerable<Frame> selection){
+   var sizes=new Dictionary<string,int>(StringComparer.Ordinal);var seen=new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+   foreach(var frame in All().Concat(selection)){
+    if(frame==null||frame.Status=="Deleted"||string.IsNullOrEmpty(frame.Hash)||!seen.Add(frame.Hash))continue;
+    string reason;try{reason=QualityEligibility.Reason(frame);}catch(Exception){continue;}if(reason.Length>0)continue;
+    string key=QualityAnnotator.Cohort(frame,QualityEligibility.KindOf(frame),QualityCompareTarget);int n;sizes.TryGetValue(key,out n);sizes[key]=n+1;
+   }
+   return sizes;
   }
   // Measures an archived capture. A run holds copies of the captures from when it started, so a file that was moved since
   // (renamed by a metadata edit or a target change) is looked for again at the place the archive now records.

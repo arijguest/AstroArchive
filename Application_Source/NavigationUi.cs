@@ -206,7 +206,7 @@ namespace AstroArchive {
             foreach(string header in new[]{"Fill missing metadata…","Verify repository checksums","Index an existing repository","Deletion history…"}){var item=tool(header);if(item!=null)maintenance.Items.Add(item);}
             foreach(string header in new[]{"Delete failed…","Purge non-raw files…"}){var item=tool(header);if(item!=null)cleanUp.Items.Add(item);}
             if(cleanUp.Items.Count>0)cleanUp.Items.Add(new Separator());cleanUp.Items.Add(MenuAction("Delete archive data…",ResetArchive,repo!=null));
-            maintenance.Items.Add(MenuAction("Re-measure image quality…",()=>{GoToPage(0);AnalyzeQuality(true);},B("AnalyzeQualityButton").IsEnabled));maintenance.Items.Add(MenuAction("Last operation…",ShowPerformanceTable,true,false));
+            maintenance.Items.Add(MenuAction("Last operation…",ShowPerformanceTable,true,false));
             maintenance.IsEnabled=cleanUp.IsEnabled=!RepositoryOperationBlocked&&repo!=null;menu.Items.Add(maintenance);menu.Items.Add(cleanUp);
         }
         void BuildGuideNavigation(MenuItem menu) {

@@ -1890,7 +1890,6 @@ Choose card targets	Choisir les cibles des cartes
 QUALITY	QUALITÉ
 EXPOSURE FIT	ADÉQUATION D'EXPOSITION
 Analyse image quality…	Analyser la qualité d'image…
-Re-measure image quality…	Mesurer à nouveau la qualité d'image…
 Analyse image quality	Analyser la qualité d'image
 Quality rank	Rang de qualité
 Exposure fit	Adéquation d'exposition

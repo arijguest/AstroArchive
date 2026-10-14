@@ -767,8 +767,9 @@ listed in the run report.
 
 Measuring is on demand, or after each import via **Settings → General**. Results are
 remembered per file content in the repository's index, so renamed or moved files
-aren't measured twice and scores survive program updates. **Re-measure image
-quality** repeats it; results from an earlier version stay until next requested.
+aren't measured twice and scores survive program updates. **Analyse image
+quality** measures a file again only when the number of captures it is compared
+against has changed since; results from an earlier version stay until then.
 
 ARCHIVE SAFETY AND BACKUPS
 @title Backups and protection

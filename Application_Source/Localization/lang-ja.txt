@@ -1925,7 +1925,6 @@ Choose card targets	カードのターゲットを選択
 QUALITY	品質
 EXPOSURE FIT	露出の適正度
 Analyse image quality…	画質を解析…
-Re-measure image quality…	画質を再測定…
 Analyse image quality	画質を解析
 Quality rank	品質ランク
 Exposure fit	露出の適正度

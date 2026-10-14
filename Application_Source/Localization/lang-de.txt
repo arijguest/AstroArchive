@@ -1892,7 +1892,6 @@ Choose card targets	Kartenziele auswählen
 QUALITY	QUALITÄT
 EXPOSURE FIT	BELICHTUNGSPASSUNG
 Analyse image quality…	Bildqualität analysieren…
-Re-measure image quality…	Bildqualität neu messen…
 Analyse image quality	Bildqualität analysieren
 Quality rank	Qualitätsrang
 Exposure fit	Belichtungspassung
