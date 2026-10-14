@@ -63,7 +63,7 @@ namespace AstroArchive {
    int version=++state.Version;state.Timer.Stop();state.Worker.Cancel();state.Pending=true;state.SortOnly=true;
    try{
     var result=await state.Worker.Submit(token=>{
-     if(images!=null){var sortedImages=SearchOrdering.Order(images,sorts,culture,token);return new SearchResult{Images=editedComets?TargetNavigation.GroupByTarget(sortedImages,EditedTarget):sortedImages};}
+     if(images!=null){var sortedImages=SearchOrdering.Order(images,sorts,culture,token);return new SearchResult{Images=RepositoryOrdering.StarredImagesFirst(editedComets?TargetNavigation.GroupByTarget(sortedImages,EditedTarget):sortedImages)};}
      if(gridName=="ImportGrid")return new SearchResult{Frames=SearchOrdering.Order(frames,sorts,culture,token)};
      List<SubframeSession> groups;var ordered=RepositoryOrdering.Order(frames,sorts,culture,allTargets,sessions,token,out groups);return new SearchResult{Frames=ordered,Sessions=groups,Summary=CaptureGroups.Summarize(ordered,token)};
     });
@@ -87,7 +87,7 @@ namespace AstroArchive {
      work=token=>{var query=FileSearch.Parse(text);var rows=index.Find(source,query,i=>imageClass=="All images"||i.Metadata.ImageClass==imageClass,token);token.ThrowIfCancellationRequested();
       var targets=TargetNavigation.BuildSections(rows.Select(i=>new Frame{Target=i.Metadata.ImageClass=="Meteor"?"Meteor":i.Metadata.Object,Kind="Edited image"}),token).Select(t=>(TargetSummary)new EditedTargetSummary{Name=t.Name,Files=t.Files}).ToList();
       string active=targets.Any(t=>t.Name==target)?target:"All targets";if(active!="All targets")rows=rows.Where(i=>EditedSection(i)==active).ToList();
-      var ordered=SearchOrdering.Order(rows,sorts,culture,token);if(active==TargetNavigation.CometsSection)ordered=TargetNavigation.GroupByTarget(ordered,EditedTarget);
+      var ordered=SearchOrdering.Order(rows,sorts,culture,token);if(active==TargetNavigation.CometsSection)ordered=TargetNavigation.GroupByTarget(ordered,EditedTarget);ordered=RepositoryOrdering.StarredImagesFirst(ordered);
       return new SearchResult{Query=query,Targets=targets,Target=active,Images=ordered};};
     }else{
      bool imports=name=="ImportSearchBox";var source=(imports?CurrentImportRows():all).ToArray();var criteria=(imports?importFilters:libraryFilters).Snapshot();bool skip=SkipFlagged;

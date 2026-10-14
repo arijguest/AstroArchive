@@ -37,7 +37,7 @@ namespace AstroArchive {
     card.image=new TargetInfoImage{creator="Example Observatory",attribution="Example Observatory",licence="CC0",file_page_url=original.file_page_url,licence_url=original.licence_url};
     view.ShowCard(card);PumpPopupLayout();
     var shortCredit=PopupChildren<FrameworkElement>(view).Single(e=>e.Name=="ImageCredits");
-    if(!(shortCredit is TextBlock)||!shortCredit.IsVisible)throw new Exception("Short image credit is hidden behind a disclosure.");
+    if(!(shortCredit is Expander)||((Expander)shortCredit).IsExpanded||PopupChildren<TextBlock>(view).Any(t=>t.Name=="MandatoryImageCredit"))throw new Exception("Short image credit is shown under the image instead of in the Credits dropdown.");
     CheckInfoReadingOrder(view);Capture(Path.Combine(output,"AstroArchive_Info_Short_Credits.png"));
     string attribution=string.Join(" ",Enumerable.Repeat("A collaboration of observatories and contributing image processors.",5));
     card.image=new TargetInfoImage{creator="Example Observatory",attribution=attribution,modifications="Cropped and colour adjusted.",representation="Example processed colour image.",licence="CC0",file_page_url=original.file_page_url,licence_url=original.licence_url};
