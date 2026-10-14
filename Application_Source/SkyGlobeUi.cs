@@ -30,7 +30,7 @@ namespace AstroArchive {
   // Raised when the Moon, Sun, target or eclipse close-up is clicked, for Capture details.
   public event EventHandler DetailsRequested;
   public CaptureSky Context{get{return context;}}
-  const string NavigationHelp="Drag to rotate; scroll or pinch to zoom.\nClick a constellation to name it, or the Moon, Sun or target for capture details.";
+  const string NavigationHelp="Drag to rotate. Click the map, then scroll to zoom (or hold Ctrl and scroll); pinch also zooms.\nClick a constellation to name it, or the Moon, Sun or target for capture details.";
   void ViewChanged(){drawing=null;InvalidateVisual();}
   // Raised after the globe's size changes so overlay controls can follow it.
   public event EventHandler GlobeResized;
@@ -50,7 +50,7 @@ namespace AstroArchive {
   internal void RotateView(double dx,double dy){double scale=180/(Math.PI*Math.Max(25,radius));Camera.Orbit(-dx*scale,dy*scale);ViewChanged();}
   internal void ZoomView(double factor){Camera.Magnify(factor);ViewChanged();}
   protected override void OnMouseLeftButtonDown(MouseButtonEventArgs e){
-   base.OnMouseLeftButtonDown(e);if(e.StylusDevice!=null)return;Focus();
+   base.OnMouseLeftButtonDown(e);if(e.StylusDevice!=null)return;Focus();SetWheelActive(true);
    if(e.ClickCount==2){ResetView();e.Handled=true;return;}
    dragPoint=pressPoint=e.GetPosition(this);moved=false;dragging=CaptureMouse();if(dragging)Cursor=Cursors.SizeAll;e.Handled=true;
   }
@@ -92,7 +92,15 @@ namespace AstroArchive {
    if(total!=null&&total.Translation.Length<6&&Math.Abs(total.Scale.X*total.Scale.Y-1)<0.05)Tap(e.ManipulationOrigin);
   }
   protected override void OnLostMouseCapture(MouseEventArgs e){base.OnLostMouseCapture(e);dragging=false;Cursor=Cursors.Hand;}
-  protected override void OnMouseWheel(MouseWheelEventArgs e){base.OnMouseWheel(e);ZoomView(Math.Pow(1.2,e.Delta/120.0));e.Handled=true;}
+  // The wheel scrolls the page until the map is chosen on purpose: a click on it, or Ctrl+wheel.
+  // Leaving the map or pressing Esc hands the wheel back to the page.
+  internal bool WheelActive;
+  void SetWheelActive(bool value){if(WheelActive==value)return;WheelActive=value;InvalidateVisual();}
+  protected override void OnMouseWheel(MouseWheelEventArgs e){
+   base.OnMouseWheel(e);if(!WheelActive&&(Keyboard.Modifiers&ModifierKeys.Control)==0)return;
+   ZoomView(Math.Pow(1.2,e.Delta/120.0));e.Handled=true;
+  }
+  protected override void OnMouseLeave(MouseEventArgs e){base.OnMouseLeave(e);if(!dragging)SetWheelActive(false);}
   protected override void OnManipulationStarting(ManipulationStartingEventArgs e){base.OnManipulationStarting(e);e.ManipulationContainer=this;e.Mode=ManipulationModes.Translate|ManipulationModes.Scale;e.Handled=true;}
   protected override void OnManipulationDelta(ManipulationDeltaEventArgs e){
    base.OnManipulationDelta(e);if(e.IsInertial){e.Complete();e.Handled=true;return;}
@@ -104,7 +112,7 @@ namespace AstroArchive {
     case Key.Up:Camera.Orbit(0,-10);break;case Key.Down:Camera.Orbit(0,10);break;
     case Key.Add:case Key.OemPlus:Camera.Magnify(1.2);break;case Key.Subtract:case Key.OemMinus:Camera.Magnify(1/1.2);break;
     case Key.Home:case Key.D0:case Key.NumPad0:case Key.F:Camera.Reset();break;
-    case Key.Escape:if(selectedFigure<0)return;SelectConstellation(-1);e.Handled=true;return;
+    case Key.Escape:if(selectedFigure>=0){SelectConstellation(-1);e.Handled=true;return;}if(!WheelActive)return;SetWheelActive(false);e.Handled=true;return;
     case Key.Enter:case Key.Space:RequestDetails();e.Handled=true;return;default:return;
    }ViewChanged();e.Handled=true;
   }
@@ -128,7 +136,8 @@ namespace AstroArchive {
    var previous=SkyVector.Horizontal(0,altitude);for(int angle=5;angle<=360;angle+=5){var next=SkyVector.Horizontal(angle,altitude);dc.DrawLine((previous.Dot(front)+next.Dot(front))/2>=0?visible:faint,Project(previous),Project(next));previous=next;}
   }
   protected override void OnRender(DrawingContext dc){
-   base.OnRender(dc);if(context.BelowHorizon){CardinalLabels.Clear();TargetMarkerDrawn=false;MoonDrawn=false;return;}dc.DrawRectangle(Brushes.Transparent,null,new Rect(RenderSize));if(ActualWidth<50||ActualHeight<50)return;
+   base.OnRender(dc);if(WheelActive&&ActualWidth>8&&ActualHeight>8)dc.DrawRoundedRectangle(null,new Pen(GetValue(AccentBrushProperty) as Brush??Brushes.SteelBlue,1.5),new Rect(1,1,ActualWidth-2,ActualHeight-2),6,6);
+   if(context.BelowHorizon){CardinalLabels.Clear();TargetMarkerDrawn=false;MoonDrawn=false;return;}dc.DrawRectangle(Brushes.Transparent,null,new Rect(RenderSize));if(ActualWidth<50||ActualHeight<50)return;
    var colours=new[]{GetValue(LineBrushProperty),GetValue(TextBrushProperty),GetValue(AccentBrushProperty),GetValue(SurfaceBrushProperty)};
    if(drawing==null||lastWidth!=ActualWidth||lastHeight!=ActualHeight||palette==null||colours.Where((c,i)=>!ReferenceEquals(c,palette[i])).Any()){
     lastWidth=ActualWidth;lastHeight=ActualHeight;palette=colours;drawing=Build((Brush)colours[0],(Brush)colours[1],(Brush)colours[2],(Brush)colours[3]);DrawingBuilds++;
