@@ -17,16 +17,16 @@ using Microsoft.Win32;
 namespace AstroArchive {
  // The image on one target's card and where it sits in the frame.
  public sealed class TargetCardComposition {
-  public string Path,Label,Description;public BitmapSource Image;public bool Fill;public TargetCardPlacement Placement=new TargetCardPlacement();
+  public string Path,Label,Description;public bool? AutoDescription;public BitmapSource Image;public bool Fill;public TargetCardPlacement Placement=new TargetCardPlacement();
   public TargetCardComposition Copy(){var copy=(TargetCardComposition)MemberwiseClone();copy.Placement=Placement.Copy();return copy;}
  }
  public sealed class TargetCardEdit {
-  public Window Owner;public TargetCardData Data;public TargetCardLayout Layout;public bool Dark;public string Credit;public TargetCardComposition Current;
+  public Window Owner;public TargetCardData Data;public TargetCardLayout Layout;public bool Dark;public string Credit;public bool DefaultAuto;public TargetCardFacts Facts;public TargetCardComposition Current;
  }
  // What Analytics needs from the main window to make cards. Without image
  // callbacks every card uses the star field.
  public sealed class AnalyticsCardSource {
-  public List<Frame> Frames;public List<string> InitialTargets;public bool Fill;public string Credit;public int Layout;
+  public List<Frame> Frames;public List<string> InitialTargets;public bool Fill;public string Credit;public int Layout;public bool AutoDescription;public Func<string,TargetCardFacts> Facts;
   public Func<string,CancellationToken,Task<TargetCardComposition>> DefaultImage;public Func<TargetCardEdit,TargetCardComposition> Adjust;
  }
  public static class TargetCardExport {
@@ -51,10 +51,10 @@ namespace AstroArchive {
   }
  }
  public sealed partial class AnalyticsWindow {
-  sealed class CardJob {public string Target;public TargetCardData Data;public TargetCardComposition Composition;}
+  sealed class CardJob {public TargetCardFacts Facts;public string Target,Description;public TargetCardData Data;public TargetCardComposition Composition;}
   AnalyticsCardSource cards;List<AnalyticsPage> cardPages=new List<AnalyticsPage>();List<CardJob> cardJobs=new List<CardJob>();List<TargetCardChoice> ranked;
   readonly Dictionary<string,TargetCardComposition> compositions=new Dictionary<string,TargetCardComposition>(StringComparer.Ordinal);
-  Button cardTargets,adjustCard;ComboBox cardLayout,cardResolution;TextBox cardCredit;FrameworkElement cardLayoutField,cardResolutionField,cardCreditField;DispatcherTimer cardDebounce;
+  CheckBox cardAuto;readonly Dictionary<string,TargetCardFacts> cardFacts=new Dictionary<string,TargetCardFacts>(StringComparer.Ordinal);Button cardTargets,adjustCard;ComboBox cardLayout,cardResolution;TextBox cardCredit;FrameworkElement cardLayoutField,cardResolutionField,cardCreditField;DispatcherTimer cardDebounce;
   List<string> chosenTargets;int topCount=10;bool rankByFrames,previewHoldsCards;CancellationTokenSource cardLoading;int cardGeneration;
   bool IsCards {get{return charts!=null&&charts.SelectedIndex==CardsIndex;}}
   void InitializeCardChoices(Panel parent){
@@ -65,6 +65,9 @@ namespace AstroArchive {
    cardLayout=new ComboBox{ItemsSource=TargetCards.LayoutLabels,SelectedIndex=Math.Max(0,Math.Min(TargetCards.LayoutLabels.Length-1,cards.Layout))};cardLayoutField=Field(parent,"Card layout",cardLayout);
    cardLayout.SelectionChanged+=(s,e)=>{if(IsCards&&!exporting)RenderCards();};
    cardCredit=new TextBox{Text=cards.Credit??"",MaxLength=80};cardCreditField=Field(parent,"Card credit (optional)",cardCredit);UiHelp.Hint(cardCredit,"For example, your name or handle. Leave blank for “Made with AstroArchive”.");
+   cardAuto=new CheckBox{Content=new TextBlock{Text="Add automatic descriptions",TextWrapping=TextWrapping.Wrap},IsChecked=cards.AutoDescription,Margin=new Thickness(0,2,0,12)};AccessibleName(cardAuto,"Add automatic descriptions");parent.Children.Add(cardAuto);
+   UiHelp.Hint(cardAuto,"Under each target name, say what it is, its constellation, how far away it is and how bright, when known. Your own description on a card still wins; Adjust card changes one card.");
+   cardAuto.Click+=(s,e)=>{if(IsCards&&!exporting)RenderCards();};
   }
   void InitializeCardHeader(DockPanel header){
    adjustCard=new Button{Content="Adjust card…",Margin=new Thickness(12,0,0,0),Visibility=Visibility.Collapsed};AccessibleName(adjustCard,"Adjust card image");DockPanel.SetDock(adjustCard,Dock.Right);header.Children.Add(adjustCard);
@@ -80,7 +83,7 @@ namespace AstroArchive {
    cardSection.Visibility=active?Visibility.Visible:Visibility.Collapsed;layoutField.Visibility=active?Visibility.Collapsed:Visibility.Visible;
    cardResolutionField.Visibility=active&&!IsMotion?Visibility.Visible:Visibility.Collapsed;adjustCard.Visibility=active&&cards.Adjust!=null?Visibility.Visible:Visibility.Collapsed;
   }
-  void SetCardControlsEnabled(bool enabled){foreach(var control in new Control[]{cardTargets,adjustCard,cardLayout,cardResolution,cardCredit})control.IsEnabled=enabled;}
+  void SetCardControlsEnabled(bool enabled){foreach(var control in new Control[]{cardTargets,adjustCard,cardLayout,cardResolution,cardCredit,cardAuto})control.IsEnabled=enabled;}
   void UpdateTargetsLabel(){cardTargets.Content=chosenTargets==null?"Top "+topCount+" targets · by "+(rankByFrames?"light frames":"integration")+"  ▾":chosenTargets.Count+" chosen target"+(chosenTargets.Count==1?"":"s")+"  ▾";}
   void CancelCards(){cardGeneration++;if(cardLoading!=null){cardLoading.Cancel();cardLoading=null;}if(cardDebounce!=null)cardDebounce.Stop();}
   TargetCardLayout CurrentCardLayout(){return (TargetCardLayout)Math.Max(0,cardLayout.SelectedIndex);}
@@ -98,7 +101,7 @@ namespace AstroArchive {
   async void RenderCards(){
    if(!ready||snapshot==null||exporting||!IsCards)return;CancelCards();var loading=cardLoading=new CancellationTokenSource();int request=cardGeneration;
    export.IsEnabled=exportAll.IsEnabled=play.IsEnabled=adjustCard.IsEnabled=false;exportAll.Visibility=Visibility.Collapsed;export.Content=IsMotion?"Export card video…":"Export cards…";previewTitle.Text="Target cards";status.Text="Preparing target cards…";if(!previewHoldsCards)ShowLoading("Preparing target cards…");
-   var scoped=CardScope();bool includeRejected=rejected.IsChecked==true,byFrames=rankByFrames;var layout=CurrentCardLayout();bool dark=documentTheme.SelectedIndex==0;string credit=cardCredit.Text;
+   var scoped=CardScope();bool includeRejected=rejected.IsChecked==true,byFrames=rankByFrames;var layout=CurrentCardLayout();bool dark=documentTheme.SelectedIndex==0;string credit=cardCredit.Text;bool automatic=cardAuto.IsChecked==true;
    try{
     var rank=await Task.Run(()=>TargetCards.Rank(scoped,byFrames,includeRejected),loading.Token);if(closed||request!=cardGeneration)return;ranked=rank;
     var targets=chosenTargets==null?rank.Take(topCount).Select(c=>c.Target).ToList():chosenTargets.Where(t=>rank.Any(c=>c.Target==t)).Take(TargetCardExport.MaximumCards).ToList();
@@ -106,8 +109,11 @@ namespace AstroArchive {
     for(int i=0;i<targets.Count;i++){
      status.Text="Preparing card "+(i+1)+" of "+targets.Count+"…";TargetCardComposition composition;
      if(!compositions.TryGetValue(targets[i],out composition)){composition=cards.DefaultImage==null?new TargetCardComposition{Fill=cards.Fill}:await cards.DefaultImage(targets[i],loading.Token);if(closed||request!=cardGeneration)return;compositions[targets[i]]=composition;}
-     var data=TargetCards.Build(scoped,targets[i],includeRejected);var bitmap=TargetCardRenderer.Render(data,composition.Image,layout,dark,composition.Fill,credit,composition.Placement,1,composition.Description);
-     jobs.Add(new CardJob{Target=targets[i],Data=data,Composition=composition});result.Add(CardPage(data,bitmap,layout,dark));
+     TargetCardFacts facts=null;
+     if(cards.Facts!=null&&!cardFacts.TryGetValue(targets[i],out facts)){string lookup=targets[i];facts=await Task.Run(()=>cards.Facts(lookup),loading.Token);if(closed||request!=cardGeneration)return;cardFacts[lookup]=facts;}
+     string description=TargetCards.CardDescription(composition.Description,composition.AutoDescription,automatic,facts);
+     var data=TargetCards.Build(scoped,targets[i],includeRejected);var bitmap=TargetCardRenderer.Render(data,composition.Image,layout,dark,composition.Fill,credit,composition.Placement,1,description);
+     jobs.Add(new CardJob{Target=targets[i],Data=data,Composition=composition,Description=description,Facts=facts});result.Add(CardPage(data,bitmap,layout,dark));
      // Let the window repaint between cards rather than freezing for the whole set.
      await System.Windows.Threading.Dispatcher.Yield(DispatcherPriority.Background);if(closed||request!=cardGeneration)return;
     }
@@ -128,7 +134,7 @@ namespace AstroArchive {
   int CurrentCardIndex(){int index=previewPage.SelectedIndex-1;return Math.Max(0,Math.Min(cardJobs.Count-1,index));}
   void AdjustCurrentCard(){
    if(cards.Adjust==null||cardJobs.Count==0||exporting)return;int index=CurrentCardIndex();var job=cardJobs[index];
-   var result=cards.Adjust(new TargetCardEdit{Owner=this,Data=job.Data,Layout=CurrentCardLayout(),Dark=documentTheme.SelectedIndex==0,Credit=cardCredit.Text,Current=job.Composition});
+   var result=cards.Adjust(new TargetCardEdit{Owner=this,Data=job.Data,Layout=CurrentCardLayout(),Dark=documentTheme.SelectedIndex==0,Credit=cardCredit.Text,DefaultAuto=cardAuto.IsChecked==true,Facts=job.Facts,Current=job.Composition});
    if(result==null)return;compositions[job.Target]=result;RenderCards();
   }
   void ChooseCardTargets(){
@@ -164,7 +170,7 @@ namespace AstroArchive {
    try{
     await RunExport(()=>{
      if(motion)AnalyticsAnimation.Save(dialog.FileName,scenes,kind,videoOptions,report,token);
-     else TargetCardExport.Save(dialog.FileName,jobs.Count,i=>factor==1?(BitmapSource)scenes[i].Marks[0].Image:TargetCardRenderer.Render(jobs[i].Data,jobs[i].Composition.Image,layout,dark,jobs[i].Composition.Fill,credit,jobs[i].Composition.Placement,factor,jobs[i].Composition.Description),i=>jobs[i].Data.Title,jpeg,report,token);
+     else TargetCardExport.Save(dialog.FileName,jobs.Count,i=>factor==1?(BitmapSource)scenes[i].Marks[0].Image:TargetCardRenderer.Render(jobs[i].Data,jobs[i].Composition.Image,layout,dark,jobs[i].Composition.Fill,credit,jobs[i].Composition.Placement,factor,jobs[i].Description),i=>jobs[i].Data.Title,jpeg,report,token);
     });
     lastOutput=dialog.FileName;status.Text="Exported "+jobs.Count+" target card"+(jobs.Count==1?"":"s")+" · "+Path.GetFileName(lastOutput);return true;
    }catch(OperationCanceledException){status.Text="Export stopped. Your previous file is preserved.";return false;}catch(Exception error){status.Text="Cards could not be saved: "+error.Message;return false;}
@@ -173,7 +179,7 @@ namespace AstroArchive {
  }
  public partial class MainUi {
   AnalyticsCardSource CardSource(string target){
-   return new AnalyticsCardSource{Frames=all.Where(f=>(f.Kind=="Light"||f.Kind=="Stack")&&f.Status!="Deleted").ToList(),InitialTargets=TargetCards.Eligible(target)?new List<string>{target}:null,Fill=settings.CardFill,Credit=settings.CardCredit,Layout=settings.CardLayout,DefaultImage=DefaultCardImage,Adjust=AdjustCardImage};
+   return new AnalyticsCardSource{Frames=all.Where(f=>(f.Kind=="Light"||f.Kind=="Stack")&&f.Status!="Deleted").ToList(),InitialTargets=TargetCards.Eligible(target)?new List<string>{target}:null,Fill=settings.CardFill,Credit=settings.CardCredit,Layout=settings.CardLayout,AutoDescription=settings.CardAutoDescription,Facts=CardFacts,DefaultImage=DefaultCardImage,Adjust=AdjustCardImage};
   }
   // Keeps memory bounded when many cards are open: the card frame is at most
   // about 1900 pixels wide even at High resolution.
@@ -187,7 +193,7 @@ namespace AstroArchive {
   // otherwise its first readable image.
   async Task<TargetCardComposition> DefaultCardImage(string target,CancellationToken ct){
    var memory=CardMemory(target);var images=CardImages(target);
-   Func<TargetCardComposition,TargetCardComposition> restore=c=>{if(memory!=null){c.Description=memory.Description;if(memory.Path!=null&&(memory.Path.Length==0||string.Equals(memory.Path,c.Path,StringComparison.OrdinalIgnoreCase))){c.Fill=memory.Fill;c.Placement=memory.Placement();}}return c;};
+   Func<TargetCardComposition,TargetCardComposition> restore=c=>{if(memory!=null){c.Description=memory.Description;c.AutoDescription=memory.AutoDescription;if(memory.Path!=null&&(memory.Path.Length==0||string.Equals(memory.Path,c.Path,StringComparison.OrdinalIgnoreCase))){c.Fill=memory.Fill;c.Placement=memory.Placement();}}return c;};
    if(memory!=null&&memory.Path!=null){
     if(memory.Path.Length==0)return restore(new TargetCardComposition{Fill=settings.CardFill});
     var saved=images.FirstOrDefault(c=>c.Path!=null&&string.Equals(c.Path,memory.Path,StringComparison.OrdinalIgnoreCase));
@@ -205,7 +211,7 @@ namespace AstroArchive {
   // Path is the chosen image, "" for the star field, or null while nothing was chosen.
   void RememberCard(string target,string path,TargetCardComposition card){
    if(settings.CardChoices==null)settings.CardChoices=new Dictionary<string,TargetCardMemory>(StringComparer.Ordinal);var p=card.Placement??new TargetCardPlacement();
-   settings.CardChoices[Catalog.CanonicalTarget(target)]=new TargetCardMemory{Path=path,Fill=card.Fill,Zoom=p.Zoom,PanX=p.PanX,PanY=p.PanY,Rotation=TargetCardRenderer.QuarterTurn(p.Rotation),Description=string.IsNullOrWhiteSpace(card.Description)?null:card.Description.Trim()};SaveSettings();
+   settings.CardChoices[Catalog.CanonicalTarget(target)]=new TargetCardMemory{Path=path,Fill=card.Fill,Zoom=p.Zoom,PanX=p.PanX,PanY=p.PanY,Rotation=TargetCardRenderer.QuarterTurn(p.Rotation),Description=string.IsNullOrWhiteSpace(card.Description)?null:card.Description.Trim(),AutoDescription=card.AutoDescription};SaveSettings();
   }
   static Expander CardPlacementControls(TargetCardPlacement placement,Action changed){
    var panel=new StackPanel{Margin=new Thickness(0,6,0,0)};var expander=new Expander{Header="Adjust image position",Content=panel,Margin=new Thickness(0,0,0,12)};AutomationProperties.SetName(expander,"Adjust image position");
@@ -258,6 +264,30 @@ namespace AstroArchive {
    var box=new TextBox{Text=text??"",MaxLength=TargetCardRenderer.DescriptionLength,TextWrapping=TextWrapping.Wrap,MinHeight=54,VerticalScrollBarVisibility=ScrollBarVisibility.Auto};AutomationProperties.SetName(box,"Short description (optional)");
    UiHelp.Hint(box,"A line or two under the target name, in card images and videos. Leave blank for none.");return box;
   }
+  // What the target information pack knows about a target, for the automatic description.
+  // Only a single confident match is used, and a missing pack simply means no facts.
+  TargetCardFacts CardFacts(string target){
+   try{var found=targetInformation.Find(target,CancellationToken.None);return found.Status=="matched"&&found.Cards.Count>0?TargetCards.Facts(found.Cards[0]):null;}
+   catch(Exception e){if(e is IOException||e is InvalidDataException||e is UnauthorizedAccessException)return null;throw;}
+  }
+  // The short description box with its tick-box for the automatic description.
+  sealed class CardNote {
+   public readonly StackPanel Panel=new StackPanel();public readonly TextBox Box;public readonly CheckBox Auto;public bool? Choice;TargetCardFacts facts;readonly bool byDefault;readonly Action changed;
+   public CardNote(string own,bool? choice,bool byDefault,TargetCardFacts facts,Action changed){
+    Box=CardDescription(own);Choice=choice;this.byDefault=byDefault;this.changed=changed;
+    Auto=new CheckBox{Content=new TextBlock{Text="Add automatic description",TextWrapping=TextWrapping.Wrap},Margin=new Thickness(0,0,0,6)};AutomationProperties.SetName(Auto,"Add automatic description");
+    Panel.Children.Add(Auto);Panel.Children.Add(Box);SetFacts(facts,false);
+    Auto.Click+=(s,e)=>{Choice=Auto.IsChecked==true;Sync();changed();};Box.TextChanged+=(s,e)=>changed();
+   }
+   // Facts may arrive after the window opens, so the tick-box starts disabled and enables itself.
+   public void SetFacts(TargetCardFacts value,bool redraw){
+    facts=value;bool known=TargetCards.Describe(facts)!=null;Auto.IsEnabled=known;Auto.IsChecked=known&&(Choice.HasValue?Choice.Value:string.IsNullOrWhiteSpace(Box.Text)&&byDefault);
+    UiHelp.Hint(Auto,known?"What the target is, its constellation, how far away it is and how bright, when known. It replaces your own text while ticked; your text is kept.":"Nothing is known about this target yet, so there is no automatic description.");Sync();if(redraw)changed();
+   }
+   void Sync(){Box.IsEnabled=!(Auto.IsEnabled&&Auto.IsChecked==true);}
+   public string Own{get{return string.IsNullOrWhiteSpace(Box.Text)?null:Box.Text.Trim();}}
+   public string Text(){return TargetCards.CardDescription(Box.Text,Choice,byDefault,facts);}
+  }
   // Any image of the target qualifies: Edited images need no archive link,
   // though linked images are listed first.
   TargetCardComposition AdjustCardImage(TargetCardEdit edit){
@@ -276,12 +306,11 @@ namespace AstroArchive {
    var imageBox=new ComboBox{ItemsSource=choices,SelectedIndex=selected,MaxDropDownHeight=320,Margin=new Thickness(0,0,0,10)};AutomationProperties.SetName(imageBox,"Image");UiHelp.Hint(imageBox,"Linked Edited images come first, then starred and newer images, then archive stacks and lights.");options.Children.Add(imageBox);
    var fill=new CheckBox{Content=new TextBlock{Text="Fill the frame (crop edges)",TextWrapping=TextWrapping.Wrap},IsChecked=work.Fill,Margin=new Thickness(0,2,0,12)};AutomationProperties.SetName(fill,"Fill the frame");options.Children.Add(fill);
    var noteCaption=new TextBlock{Text="Short description (optional)",Margin=new Thickness(0,0,0,5)};noteCaption.SetResourceReference(TextBlock.FontSizeProperty,"UiFontBody");options.Children.Add(noteCaption);
-   var note=CardDescription(work.Description);note.Margin=new Thickness(0,0,0,12);options.Children.Add(note);
+   Action draw=null;var note=new CardNote(work.Description,work.AutoDescription,edit.DefaultAuto,edit.Facts,()=>{if(draw!=null)draw();});note.Panel.Margin=new Thickness(0,0,0,12);options.Children.Add(note.Panel);
    bool loading=false;int generation=0;var cancel=new CancellationTokenSource();
-   Action draw=()=>{try{preview.Source=TargetCardRenderer.Render(edit.Data,work.Image,edit.Layout,edit.Dark,work.Fill,edit.Credit,work.Placement,.6,work.Description);}catch(Exception e){if(!(e is ArgumentException||e is InvalidOperationException||e is OutOfMemoryException))throw;status.Text="The card could not be drawn: "+e.Message;}};
+   draw=()=>{work.Description=note.Own;work.AutoDescription=note.Choice;try{preview.Source=TargetCardRenderer.Render(edit.Data,work.Image,edit.Layout,edit.Dark,work.Fill,edit.Credit,work.Placement,.6,note.Text());}catch(Exception e){if(!(e is ArgumentException||e is InvalidOperationException||e is OutOfMemoryException))throw;status.Text="The card could not be drawn: "+e.Message;}};
    var placement=CardPlacementControls(work.Placement,draw);options.Children.Add(placement);
    CardGestures(preview,placement,work.Placement,()=>work.Image,()=>edit.Layout,()=>work.Fill);previewStack.Children.Insert(1,CardRotation(placement));
-   note.TextChanged+=(s,e)=>{work.Description=string.IsNullOrWhiteSpace(note.Text)?null:note.Text.Trim();draw();};
    fill.Checked+=(s,e)=>{work.Fill=true;draw();};fill.Unchecked+=(s,e)=>{work.Fill=false;draw();};
    imageBox.SelectionChanged+=async(s,e)=>{
     int current=++generation;var choice=imageBox.SelectedItem as CardImage;ResetCardPlacement(placement);

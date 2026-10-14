@@ -14,6 +14,8 @@ using Microsoft.Win32;
 namespace AstroArchive {
  public sealed class StellariumView {
   public double RA,Dec;public double? FieldDegrees,Latitude,Longitude,Altitude,Azimuth;public DateTime? Utc;public bool Approximate;public string Name;
+  // Solar System bodies move, so Stellarium finds them by name at its current time rather than at a fixed position.
+  public bool ByName;
  }
  public static class Stellarium {
   public const string Id="stellarium";
@@ -36,6 +38,27 @@ namespace AstroArchive {
    double side=Math.Max(sky.WidthDegrees,sky.HeightDegrees);if(!CaptureSky.Finite(side)||side<=0)return null;
    return Math.Max(MinField,Math.Min(MaxField,side*FieldMargin));
   }
+  // A target information page: deep-sky objects open at their J2000 catalogue position, framed to their size;
+  // the Sun, Moon and planets open by name. Eclipse pages, comets and groups offer none.
+  public static StellariumView ForCard(TargetInfoCard card){
+   if(card==null||string.IsNullOrWhiteSpace(card.id))return null;
+   var measurements=card.measurements??new TargetInfoMeasurement[0];
+   if(card.domain=="deep_sky"){
+    var ra=measurements.FirstOrDefault(m=>m.field=="RA");var dec=measurements.FirstOrDefault(m=>m.field=="Dec");if(ra==null||dec==null||!CaptureSky.Finite(ra.value)||!CaptureSky.Finite(dec.value))return null;
+    var major=measurements.FirstOrDefault(m=>m.field=="MajAx");double? field=major!=null&&CaptureSky.Finite(major.value)&&major.value>0?Math.Max(0.5,Math.Min(MaxField,major.value/60*3)):(double?)null;
+    return new StellariumView{RA=ra.value,Dec=dec.value,FieldDegrees=field??DefaultFieldDegrees,Name=card.id.Trim()};
+   }
+   string id=card.id.Trim().ToUpperInvariant();
+   // Eclipse pages and comet pages offer no Stellarium button.
+   if(id==EclipseCard(true)||id==EclipseCard(false))return null;
+   if(card.domain!="solar_system"||CometInfo.IsComet(card))return null;
+   return Body(card.name??card.id,id=="SUN"||id=="MOON"?2:0.5);
+  }
+  public static string EclipseCard(bool solar){return solar?"SOLAR ECLIPSE":"LUNAR ECLIPSE";}
+  static StellariumView Body(string name,double field){return new StellariumView{ByName=true,Name=name.Trim(),FieldDegrees=field};}
+  // Same glyph as PreviewStellariumIcon in MainWindow.xaml.
+  public const string IconGeometry="M13,2 A8,8 0 1 0 18,13 A6.5,6.5 0 0 1 13,2 Z M4,2 L4,6 M2,4 L6,4";
+  public static string CardTooltip(StellariumView view){return view.ByName?"Open in Stellarium, centred on this object now. Uses Stellarium Web when Stellarium is not installed.":"Open in Stellarium at the catalogue position. Uses Stellarium Web when Stellarium is not installed.";}
   public static string Tooltip(StellariumView view){
    if(view==null)return "Open in Stellarium (needs a light frame with a known position)";
    var text=new StringBuilder("Open in Stellarium");
@@ -60,13 +83,16 @@ namespace AstroArchive {
    long d=tenths/36000,m=tenths/600%60,s=tenths%600;
    return (degrees<0?"-":"+")+d.ToString(CultureInfo.InvariantCulture)+"d"+m.ToString(CultureInfo.InvariantCulture)+"m"+(s/10.0).ToString("0.0",CultureInfo.InvariantCulture)+"s";
   }
+  // Names go inside a double-quoted script string.
+  static string Quoted(string value){return (value??"").Replace("\\","\\\\").Replace("\"","\\\"").Replace("\r"," ").Replace("\n"," ");}
   static string Number(double value){return value.ToString("0.######",CultureInfo.InvariantCulture);}
   // Only touches location, time and view. Time is frozen so the sky stays as it was at capture.
   public static string Script(StellariumView view){
    var text=new StringBuilder();
    if(view.Latitude.HasValue&&view.Longitude.HasValue)text.Append("core.setObserverLocation(").Append(Number(view.Longitude.Value)).Append(", ").Append(Number(view.Latitude.Value)).Append(", 0, 0, \"\", \"Earth\");\n");
    if(view.Utc.HasValue)text.Append("core.setTimeRate(0);\ncore.setDate(\"").Append(view.Utc.Value.ToString("yyyy-MM-dd'T'HH:mm:ss",CultureInfo.InvariantCulture)).Append("\", \"utc\");\n");
-   text.Append("core.moveToRaDecJ2000(\"").Append(Hours(view.RA)).Append("\", \"").Append(Degrees(view.Dec)).Append("\", 0);\n");
+   if(view.ByName)text.Append("core.selectObjectByName(\"").Append(Quoted(view.Name)).Append("\", true);\nStelMovementMgr.setFlagTracking(true);\n");
+   else text.Append("core.moveToRaDecJ2000(\"").Append(Hours(view.RA)).Append("\", \"").Append(Degrees(view.Dec)).Append("\", 0);\n");
    text.Append("StelMovementMgr.zoomTo(").Append(Number(view.FieldDegrees ?? DefaultFieldDegrees)).Append(", 0);\n");
    return text.ToString();
   }

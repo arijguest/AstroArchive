@@ -97,7 +97,7 @@ namespace AstroArchive {
    for(int i=0;i<3;i++)RemoteSmokeFits(Path.Combine(source,"Light_file_resume_"+i+".fit"),3000+i);
    using(var copied=new ManualResetEvent(false))try{
     temporary=new Repository(Path.Combine(output,"file-resume-archive"));repo=temporary;plan=repo.Scan(source,"Folder resume scope","Seestar S50",CancellationToken.None,p=>{},fullScan:true);
-    var options=new ImportOptions{SourceRoot=source,Workers=1,OnFrame=LiveFrame};var record=FolderImportRecord(plan.Frames,options,"Off","Off");pendingImportRecord=record;BeginLive(false);
+    var options=new ImportOptions{SourceRoot=source,Workers=1,OnFrame=LiveFrame};var record=FolderImportRecord(plan.Frames,options,"Off");pendingImportRecord=record;BeginLive(false);
     work=RunOperation(ct=>{repo.Import(plan.Frames.Take(1).ToList(),ct,Progress,options);copied.Set();ct.WaitHandle.WaitOne();ct.ThrowIfCancellationRequested();return "";},null,"Folder pause recovery");var entry=currentActivity;
     WaitRemote(WaitRemoteUntil(()=>copied.WaitOne(0)));if(B("PauseImportButton").Visibility!=Visibility.Visible)throw new Exception("A foreground file import did not expose Pause.");B("PauseImportButton").RaiseEvent(new RoutedEventArgs(Button.ClickEvent));WaitRemote(work);
     if(!L("StatusLabel").Text.StartsWith("Paused")||entry.Resume==null||record.State!="Paused"||repo.All().Count!=1||!new ImportResumeStore(Path.Combine(Path.GetDirectoryName(config),"ImportJobs")).Load().Any(r=>r.Id==record.Id&&r.State=="Paused"))throw new Exception("File pause lost its completed copy or durable queue.");

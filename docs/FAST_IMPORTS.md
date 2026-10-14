@@ -60,7 +60,7 @@ capture files, including files inside selected folders, show a compact confirmat
 with the batch size and **Import / Cancel** buttons. This flow always bypasses filename,
 DWARF-session and header-cache shortcuts and checks hashes/archive copies before
 screening and verified import. Existing ignore/rejection/deletion policies remain
-applicable; originals stay and plate solving/rotation stay off. Results state the
+applicable; originals stay and plate solving stays off. Results state the
 selected scope instead of declaring the entire repository up to date.
 
 Generated-data checks cover deliberately edited matching names, bounded session

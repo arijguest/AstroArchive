@@ -3,6 +3,8 @@ on:
   pull_request:
     paths:
       - 'Application_Source/TargetInfo*'
+      - 'Application_Source/Meteor*'
+      - 'Application_Source/MoonPhaseUi.cs'
       - 'Application_Source/PreviewUi.cs'
       - 'Application_Source/EditedUi.cs'
       - 'Application_Source/TargetNamesUi.cs'
@@ -12,6 +14,11 @@ on:
       - 'Application_Source/build.ps1'
       - 'Application_Source/test.ps1'
       - 'scripts/build-target-info.py'
+      - 'scripts/target_image_credits.py'
+      - 'scripts/target_info_overrides.py'
+      - 'scripts/target_info_distances.py'
+      - 'scripts/target-info-overrides/**'
+      - 'scripts/test-target-image-credits.py'
       - 'Installer/InstallCore.cs'
       - 'Installer/Tests.cs'
       - 'Installer/build.ps1'
@@ -28,6 +35,7 @@ jobs:
       - name: Build and check offline information lookup
         shell: powershell
         run: |
+          python scripts/test-target-image-credits.py
           .\Application_Source\build.ps1
           .\Application_Source\test.ps1 -TargetsOnly
           .\Installer\test.ps1

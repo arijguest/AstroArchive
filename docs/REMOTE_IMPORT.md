@@ -41,7 +41,7 @@ selects them all for review.
 **Skip “failed” files** and **Skip PNG/JPG/MP4** sit beside **Browse files** and **Search all**.
 They filter files before transfer, are saved as import preferences shared with folder, USB and
 Dump imports, and keep the current selection. Clearing one shows the files it hid. Copy workers
-stay in Preferences → Import; network imports always keep originals and skip target and rotation analysis. Every network import, including live import, first shows a short
+stay in Preferences → Import; network imports always keep originals and skip target analysis. Every network import, including live import, first shows a short
 notice that network imports take longer than a wired connection and that USB is
 recommended for large numbers of files.
 

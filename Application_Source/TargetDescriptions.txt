@@ -498,6 +498,14 @@ Imaging: Bright; frame with the Horsehead Nebula and keep Alnitak's glare under 
 IC 1396 is a large emission nebula and young cluster about 2,400 light-years away in Cepheus, spanning about 3 degrees. Its best-known feature is the Elephant's Trunk Nebula, a dark globule sculpted by radiation from the hot star HD 206267 at the region's centre.
 Imaging: Spans about 3 degrees; narrowband shows the Elephant's Trunk well.
 
+## IC 1396A
+The Elephant's Trunk Nebula is a dense globule of gas and dust more than 20 light-years long, curling into the large IC 1396 emission region about 2,400 light-years away in Cepheus. Intense light from the massive star HD 206267 erodes and lights up its rim, and young stars are forming inside its head, where that radiation has compressed the gas. Its bright edge and dark, twisting trunk make it one of the most photographed features in the northern sky.
+Imaging: Narrowband shows the rim best: Hα alone gives a strong trunk, and SII and OIII add Hubble-palette contrast. Frame it at 600–1500 mm; at shorter focal lengths it is a small part of IC 1396.
+
+## NGC 7640
+NGC 7640 is a barred spiral galaxy, classified SB(s)c, about 30 million light-years away in Andromeda. We see it almost edge-on, so its arms and central bar are foreshortened into a long, mottled streak about 10 arcminutes across, threaded with dust lanes and blue knots of star formation. Its disturbed outer regions suggest a past encounter with another galaxy. William Herschel discovered it in 1786.
+Imaging: An autumn target for northern observers. At magnitude 11 and only about 2 arcminutes wide, it needs 800 mm or more and several hours of luminance to show the dust lanes and knotty disk.
+
 ## NGC 7635
 The Bubble Nebula is a shell of gas about 7,000 to 8,000 light-years away in Cassiopeia, inflated by the fast stellar wind of the massive young star BD+60 2522. The bubble is about 7 light-years across and sits inside a larger cloud of glowing hydrogen.
 Imaging: Narrowband shows the shell; M52 is nearby.
@@ -788,3 +796,12 @@ Comet Lemmon was discovered at the Mount Lemmon Observatory in January 2025. In 
 
 ## C/2025 R2
 Comet SWAN was spotted in September 2025 in images from the SWAN instrument on the SOHO spacecraft, around the time of its perihelion. It reached binocular visibility that month.
+
+## SOLAR ECLIPSE
+Imaging: Never look at or image the Sun without a certified solar filter over the whole front of the lens or telescope, and keep it on through every partial phase, using fast shutter speeds at low ISO. Remove it only during totality. Then bracket widely, from about 1/4000 s for prominences to 1 s or longer for the outer corona, and combine the frames as an HDR composite. A focal length of 400–800 mm on an APS-C camera frames the corona well.
+
+## LUNAR ECLIPSE
+Imaging: No filter is needed. The Moon dims by thousands of times between the partial phases and mid-totality, so expose by the histogram: around 1/250 s at ISO 200 and f/8 for the uneclipsed limb, then several seconds at higher ISO in totality. A tracking mount keeps long totality exposures sharp; without one, keep them under about 2 seconds at 1000 mm. A sequence on a fixed composition records the Moon's path through Earth's shadow.
+
+## METEORS
+Imaging: Use a wide, fast lens (14 to 24 mm at f/2.8 or faster) on a fixed tripod, ISO 1600 to 3200 and 10 to 20 second exposures, and shoot hundreds of frames in a continuous burst; only a few will catch a meteor. Point about 45 to 60 degrees from the radiant, where the trails are longest, and keep the exposure short enough to avoid star trails. Set a fixed white balance so colours compare between frames, and shoot RAW to keep the faint green and violet tones.

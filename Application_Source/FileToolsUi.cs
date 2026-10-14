@@ -63,7 +63,7 @@ namespace AstroArchive {
    DeleteFiles(matches,false,true);
   }
   void DeleteFiles(List<Frame> selected,bool failedNames=false,bool nonRawFiles=false){
-   if(repo==null||RepositoryOperationBlocked||selected.Count==0)return;
+   if(repo==null||RepositoryOperationBlocked||selected.Count==0||BackgroundConflict(selected))return;
    var d=new FormWindow(Window,nonRawFiles?"Purge non-raw files":failedNames?"Delete failed":"Delete selected files",640,520);d.Text("Delete "+selected.Count+" "+(failedNames||nonRawFiles?"matching":"selected")+" file"+(selected.Count==1?"":"s")+"?",true);d.Text(repo.Root);
    if(failedNames)d.Text("Searches the entire active repository for filenames containing 'failed', regardless of case. Current filters and telescope selection do not limit this action.");
    if(nonRawFiles)d.Text("Finds indexed PNG/JPG/JPEG/MP4 files in the entire active repository, regardless of case or current filters. Edited images, FITS, TIFF, XISF, SER and camera RAW files are excluded from this purge.");

@@ -7,11 +7,11 @@ namespace AstroArchive {
  public sealed class TargetSolveJob {
   public List<Frame> Frames;public Frame Representative;public SolveResult Result{get;set;}
   public IEnumerable<Candidate> Choices{get{var choices=Result==null||Result.Candidates==null?new List<Candidate>():Result.Candidates.ToList();if(!string.IsNullOrEmpty(Target)&&!choices.Any(c=>c.Name==Target))choices.Add(new Candidate{Name=Target,Common=Catalog.CommonName(Target)});return choices;}}
-  public string Error{get;set;}public string Target{get;set;}public bool Include{get;set;}
+  public string Error{get;set;}public string Target{get;set;}public bool Include{get;set;}public string Kept{get;set;}
   public bool Solved{get{return Result!=null;}}
   public string Filename{get{return Representative.OriginalName;}}
   string scope;public string Scope{get{return scope??(scope=Frames.Count+" "+(Representative.Kind=="Light"?"Light frame"+(Frames.Count==1?"":"s"):Representative.Kind)+" · "+CaptureSessions.Describe(Frames).Dates+" · "+Representative.Telescope+" / "+Representative.Camera);}}
-  public string Match{get{return Error??(Result==null?"Pending":Result.MatchReason??"Choose a target");}}
+  public string Match{get{return Error??(Result==null?"Pending":Kept!=null?"Kept "+Catalog.Label(Kept)+" · the solution offers only a less prominent target":Result.MatchReason??"Choose a target");}}
   public string Centre{get{return Result==null?"":Result.RA.ToString("0.00000",CultureInfo.InvariantCulture)+"°, "+Result.Dec.ToString("0.00000",CultureInfo.InvariantCulture)+"°";}}
   public string TargetLabel{get{return string.IsNullOrEmpty(Target)?"Choose target…":Catalog.Label(Target);}}
  }
@@ -39,11 +39,25 @@ namespace AstroArchive {
       try{job.Result=solver(job.Representative,ct,stage);ct.ThrowIfCancellationRequested();PlateSolve.MatchTargets(job.Result);break;}
       catch(OperationCanceledException){throw;}catch(Exception){if(attempt+1==attempts.Count)throw;stage("Representative failed; trying another group frame");}
      }
-     job.Target=job.Result.Suggested;job.Include=!string.IsNullOrEmpty(job.Target);job.Error=null;
+     job.Kept=null;job.Target=job.Result.Suggested;var existing=Retained(job);if(existing!=null){job.Kept=job.Target==existing?null:existing;job.Target=existing;}job.Include=!string.IsNullOrEmpty(job.Target);job.Error=null;
     }
     catch(OperationCanceledException){throw;}catch(Exception error){job.Error=error.Message;job.Result=null;job.Include=false;}
     if(progress!=null)progress(new IdentificationProgress{Completed=i+1,Total=jobs.Count,Stage=job.Solved?"Field solved": "Solve failed; continuing",Detail=job.Filename+"\n"+job.Scope});
    }
+  }
+  // The target the group already carries (most common among its frames), or null when it is unset or ambiguous.
+  public static string CurrentTarget(TargetSolveJob job){
+   var targets=job.Frames.Select(f=>Catalog.Normalize(f.Target)).Where(t=>!Catalog.IsAmbiguous(t)).GroupBy(t=>t).OrderByDescending(g=>g.Count()).ThenBy(g=>g.Key,StringComparer.Ordinal).FirstOrDefault();return targets==null?null:targets.Key;
+  }
+  // A target already set to something major is never replaced by a less prominent suggestion
+  // (M31 stays M31 when the field also holds M110); a more prominent one still wins. Targets
+  // that are not major catalogue entries (HD stars, unnamed fields) are replaced as before.
+  // Returns the target to keep, or null to use the suggestion.
+  public static string Retained(TargetSolveJob job){
+   string suggested=job.Result==null?null:job.Result.Suggested,current=CurrentTarget(job);if(current==null||string.Equals(current,suggested,StringComparison.Ordinal))return null;
+   if(ObservationTargets.BodyOf(current)!=null||CometTargets.IsComet(current))return current;
+   var held=Catalog.Objects.FirstOrDefault(o=>o.Name==current);int rank=PlateSolve.Rank(held);if(rank==0)return null;
+   var offered=suggested==null?null:Catalog.Objects.FirstOrDefault(o=>o.Name==suggested);return PlateSolve.Rank(offered)>rank?null:current;
   }
   public static Frame WithPointing(TargetSolveJob job,Frame original){
    if(job.Result==null)throw new InvalidOperationException("This field has not been solved.");
@@ -54,7 +68,9 @@ namespace AstroArchive {
   }
   public static Frame Apply(TargetSolveJob job,Frame original,string target){
    target=Catalog.Normalize(target);if(Catalog.IsAmbiguous(target))throw new ArgumentException("Choose a target before applying this match.");
-   var updated=WithPointing(job,original);updated.Target=target;updated.TargetEvidence=original==job.Representative?"Plate solved using "+job.Result.Solver:"Target from same-session plate-solved Light frame: "+job.Filename;
+   var updated=WithPointing(job,original);
+   if(job.Kept!=null&&Catalog.Normalize(original.Target)==target){updated.Target=original.Target;CameraDetection.DefaultForTarget(updated);return updated;} // Existing major target kept: record the pointing only and keep the original evidence.
+   updated.Target=target;updated.TargetEvidence=original==job.Representative?"Plate solved using "+job.Result.Solver:"Target from same-session plate-solved Light frame: "+job.Filename;
    if(updated.Facts==null)updated.Facts=new Dictionary<string,MetadataFact>();updated.Facts["Target"]=new MetadataFact{Value=target,Raw=target,Source=updated.TargetEvidence};
    updated.Notes=(updated.Notes??"")+updated.TargetEvidence+". ";CameraDetection.DefaultForTarget(updated);return updated;
   }

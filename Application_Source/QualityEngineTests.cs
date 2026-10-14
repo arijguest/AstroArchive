@@ -70,6 +70,17 @@ namespace AstroArchive {
     Check(blockedScore.Score<=35&&blockedScore.Score<clearScore.Score,"A uniformly blocked cohort escaped the obstruction penalty");
     Check(double.IsNaN(QualityMeasurement.Unpack("old",1,0,0,"1;2").Obstruction),"Legacy records invented spatial evidence");
    });
+   test("Quality: a partly blocked frame ranks below every clear companion, even with sharper stars",()=>{
+    var group=new List<QualityMeasurement>();for(int i=0;i<10;i++){var c=StarShot(2.4+0.08*i,0.30+0.01*i,200-5*i,50-i);c.Obstruction=0;c.StarCoverage=0.95+0.004*(i%3);group.Add(c);}
+    var tree=StarShot(1.9,0.22,230,60);tree.Obstruction=0.05;tree.StarCoverage=0.80;group.Add(tree);
+    var missed=StarShot(1.9,0.22,230,60);missed.Obstruction=0;missed.StarCoverage=0.70;group.Add(missed);
+    var o=QualityScorer.Compute(Items("edge",group));double weakestClear=o.Take(10).Min(x=>x.Score.Value);
+    Check(o[10].Score.Value<weakestClear&&o[10].Flags.Contains("Suspected obstruction"),"A detected obstruction outranked a clear frame: "+o[10].Score+" vs "+weakestClear);
+    Check(o[11].Score.Value<weakestClear&&o[11].Flags.Contains("Suspected obstruction"),"A coverage gap the detector missed outranked a clear frame: "+o[11].Score+" vs "+weakestClear);
+    Check(o.Take(10).All(x=>!x.Flags.Contains("obstruction")),"Ordinary coverage scatter was flagged as an obstruction");
+    Check(o[0].Detail.StartsWith("Quality ")&&o[0].Detail.Contains("ranked 1 of 12 similar frames")&&o[0].Detail.Contains("Field clear")&&o[10].Detail.Contains("blocked"),"Tooltip does not lead with the score and rank: "+o[0].Detail);
+    Check(o[0].Summary.Contains("FWHM")&&o[0].Summary.Contains("stars"),"Measurement summary missing: "+o[0].Summary);
+   });
    test("Quality: star width follows the true FWHM within 10%",()=>{
     foreach(double fwhm in new[]{1.8,2.2,4.0}){var m=QualityMeter.MeasureStars(Field(1200,900,fwhm,150,12,3),1200,900,false);Check(m.Status==QualityStatus.Ok,"Stars not found at FWHM "+fwhm+": "+m.Stars+" stars, status "+m.Status);Near(m.Fwhm,fwhm,0.10,"FWHM "+fwhm);Check(m.Hfd>0&&m.Hfd<m.Fwhm*1.6,"Half-flux diameter implausible at FWHM "+fwhm+": "+m.Hfd);}
    });

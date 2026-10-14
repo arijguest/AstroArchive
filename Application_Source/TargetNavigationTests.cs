@@ -20,6 +20,7 @@ namespace AstroArchive {
     Check(summaries.Single(s=>s.Name=="M42").Files==2&&summaries.Last().Group=="Unidentified","Frame types omitted or unidentified targets misplaced");
     var groups=types.Distinct().ToList();Check(groups.IndexOf("Meteors")>groups.IndexOf("Star clusters")&&groups.IndexOf("Meteors")+1==groups.IndexOf("Other targets"),"Meteors are not just above Other targets");
     var stack=rows.Single(f=>f.Kind=="Stack");var filters=new CaptureFilters();filters.Values["Frame type"]="Stack";Check(stack.KindLabel=="Stack (1445)"&&filters.Apply(rows,"stack").Single()==stack&&CaptureFilters.Options(rows,"Frame type").Contains("Stack"),"Stack count changed its filtering identity");
+    Check(new Frame{Kind="Stack",StackCount=1}.KindLabel=="Stack"&&new Frame{Kind="Stack",StackCount=2}.KindLabel=="Stack (2)","A one-sub stack should read plain Stack");
     Check(new Frame{Kind="Stack"}.KindLabel=="Stack"&&new Frame{Kind="Light",StackCount=1445}.KindLabel=="Light","Missing stack count or a non-stack gained a misleading count");
     var filtered=TargetNavigation.Build(rows.Where(f=>f.Kind=="Stack"));Check(filtered.Count==2&&filtered[0].Files==1&&filtered[1].Name=="NGC6888","Filtered target list retained empty sections");
     Check(TargetNavigation.Build(new Frame[0]).Single().Name=="All targets","Empty repository lost the All targets option");
@@ -37,6 +38,24 @@ namespace AstroArchive {
     Check(TargetNavigation.WithoutObjectType("NGC6960 - Western Veil Nebula")=="NGC6960 - Western Veil"&&TargetNavigation.WithoutObjectType("NGC6992 - Eastern Veil Nebula")=="NGC6992 - Eastern Veil","Veil titles were not shortened");
     Check(TargetNavigation.WithoutObjectType("M31 - Andromeda Galaxy")=="M31 - Andromeda"&&TargetNavigation.WithoutObjectType("M13 - Hercules Globular Cluster")=="M13 - Hercules","Object type suffix retained");
     Check(TargetNavigation.WithoutObjectType("NGC891 - Silver Sliver Galaxy with an extended observing name")=="NGC891 - Silver Sliver Galaxy with an extended observing name"&&TargetNavigation.WithoutObjectType("M45")=="M45","Non-suffix text or identity removed");
+   });
+   Test("Sorting by date orders by time within the same date",()=>{
+    Func<string,string,string,Frame> shot=(name,day,stamp)=>new Frame{Target="M31",Kind="Light",OriginalName=name,AcquisitionDate=day,Observed=stamp};
+    var late=shot("late.fit","2026-10-01","2026-10-01T22:30:00Z");var early=shot("early.fit","2026-10-01","2026-10-01T03:00:00Z");var next=shot("next.fit","2026-10-02","2026-10-02T01:00:00Z");var bare=shot("bare.fit","2026-10-01","");var rows=new[]{next,late,bare,early};
+    var up=SearchOrdering.Order(rows,new[]{new SearchSort{Property="AcquisitionDateLabel"}},System.Globalization.CultureInfo.InvariantCulture,ct);
+    Check(up.Select(f=>f.OriginalName).SequenceEqual(new[]{"bare.fit","early.fit","late.fit","next.fit"}),"Date sort ignored the time of day");
+    var down=SearchOrdering.Order(rows,new[]{new SearchSort{Property="AcquisitionDateLabel",Descending=true}},System.Globalization.CultureInfo.InvariantCulture,ct);
+    Check(down.Select(f=>f.OriginalName).SequenceEqual(new[]{"next.fit","late.fit","early.fit","bare.fit"}),"Descending date sort ignored the time of day");
+   });
+   Test("Starred on top leads the list but never splits grouped subs",()=>{
+    var a=new Frame{Target="M31",Kind="Light",Session="s1",OriginalName="a.fit"};var b=a.Clone();b.OriginalName="b.fit";var c=new Frame{Target="M31",Kind="Light",Session="s2",OriginalName="c.fit"};var d=c.Clone();d.OriginalName="d.fit";
+    var stack=new Frame{Target="M31",Kind="Stack",OriginalName="stack.fit"};var single=new Frame{Target="M31",Kind="Light",OriginalName="single.fit"};var rows=new[]{a,b,c,d,stack,single};var sorts=new SearchSort[0];var culture=System.Globalization.CultureInfo.InvariantCulture;var saved=RepositoryOrdering.StarredFirst;
+    try{
+     RepositoryOrdering.StarredFirst=true;single.IsStarred=true;c.IsStarred=true;d.IsStarred=true;
+     var all=RepositoryOrdering.Order(rows,sorts,culture,true,true,ct);Check(all[0].Session=="s2"&&all[1].Session=="s2"&&(all[2]==a||all[2]==b),"Starred session did not lead the grouped subs");Check(all[4]==single&&all[5]==stack,"Starred file did not follow the grouped subs");
+     var one=RepositoryOrdering.Order(rows,sorts,culture,false,true,ct);Check(one[0]==single,"Starred file was not first in a single target");
+     RepositoryOrdering.StarredFirst=false;var off=RepositoryOrdering.Order(rows,sorts,culture,true,true,ct);Check(off.IndexOf(stack)<off.IndexOf(single),"Starred order applied while switched off");
+    }finally{RepositoryOrdering.StarredFirst=saved;}
    });
    Test("Repository ordering keeps merged subs stacks and calibrations in their sections",()=>{
     var a=new Frame{Target="M31",Kind="Light",Session="fixture",OriginalName="z-sub.fit"};var b=a.Clone();b.OriginalName="a-sub.fit";
@@ -75,6 +94,19 @@ namespace AstroArchive {
     Check(targets.Single(t=>t.Name=="IC434").DisplayName=="IC 434 - Flame Nebula","IC434 repeats its ID after the common name");
     Check(targets.Single(t=>t.Name=="NGC2024").DisplayName=="NGC 2024 - Flame Nebula"&&targets.Count==3,"Shared display names merged catalogue identities");
     Check(Catalog.KnownName(Catalog.CommonName("IC434"))=="IC434"&&Catalog.KnownName("Flame Nebula")=="NGC2024","Display formatting changed name resolution");
+   });
+   Test("Comets share one target-list entry and keep each comet's captures together",()=>{
+    foreach(string comet in new[]{"C/2023 A3 (Tsuchinshan-ATLAS)","12P/Pons-Brooks","2I/Borisov","NEOWISE","Comet ATLAS"})Check(TargetNavigation.Section(comet)==TargetNavigation.CometsSection,"Comet listed on its own: "+comet);
+    foreach(string other in new[]{"M31","Jupiter","Moon","Sun","Unknown","Calibration","A/2017 U1",TargetNavigation.CometsSection})Check(TargetNavigation.Section(other)==other,"Non-comet moved into a section: "+other);
+    var a=new Frame{Target="C/2023 A3 (Tsuchinshan-ATLAS)",Kind="Light",Exposure=30,OriginalName="b.fit"};var b=new Frame{Target="12P/Pons-Brooks",Kind="Light",Exposure=60,OriginalName="a.fit"};var c=new Frame{Target="C/2023 A3 (Tsuchinshan-ATLAS)",Kind="Light",Exposure=30,OriginalName="c.fit"};
+    var rows=new[]{a,b,c,new Frame{Target="Jupiter",Kind="Video",Exposure=10},new Frame{Target="M31",Kind="Light",Exposure=90}};
+    var targets=TargetNavigation.BuildSections(rows);var comets=targets.Single(t=>t.Name==TargetNavigation.CometsSection);
+    Check(comets.Files==3&&comets.ExposureSeconds==120&&comets.Group=="Solar system"&&comets.DisplayName=="Comets"&&!targets.Any(t=>CometTargets.IsComet(t.Name)),"Comets entry lost files or left comets listed separately");
+    var solar=targets.Where(t=>t.Group=="Solar system").Select(t=>t.Name).ToList();Check(solar.SequenceEqual(new[]{"Jupiter",TargetNavigation.CometsSection}),"Comets entry not after the planets: "+string.Join(",",solar));
+    Check(TargetNavigation.IsSection(TargetNavigation.CometsSection)&&TargetNavigation.IsSection(Eclipses.SolarSection)&&!TargetNavigation.IsSection("M31"),"Section names not recognised");
+    var sorts=new[]{new SearchSort{Property="OriginalName"}};var ordered=RepositoryOrdering.Order(new[]{a,b,c},sorts,System.Globalization.CultureInfo.InvariantCulture,false,false,ct);
+    Check(ordered.SequenceEqual(new[]{b,a,c}),"Comet captures were not kept together by comet in sort order");
+    Check(TargetNavigation.GroupByTarget(new[]{"x1","y1","x2"},s=>s.Substring(0,1)).SequenceEqual(new[]{"x1","x2","y1"}),"Target grouping reordered rows within a target");
    });
   }
  }

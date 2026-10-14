@@ -33,7 +33,7 @@ namespace AstroArchive {
   Frame StackWithSubframeClock(Frame frame){return StackWithSubframeClock(frame,all);}
   Frame StackWithSubframeClock(Frame frame,IList<Frame> pool){
    if(frame==null||frame.Kind!="Stack"||pool==null||CaptureSky.CaptureUtc(frame,settings).HasValue)return frame;
-   string body=ObservationTargets.NamedSolar(frame.Target)??ObservationTargets.NamedSolar(ObservationTargets.ModeBody(frame.ObservationMode));if(body==null)return frame;
+   string body=ObservationTargets.BodyOf(frame.Target)??ObservationTargets.NamedSolar(ObservationTargets.ModeBody(frame.ObservationMode));if(body==null)return frame;
    string session=frame.SessionKey;var date=CaptureSessions.Date(frame);
    var times=pool.Where(f=>f!=null&&f.Kind=="Light"&&f.Status!="Deleted"&&string.Equals(f.Target,frame.Target,StringComparison.OrdinalIgnoreCase)&&(f.SessionKey==session||date!=null&&CaptureSessions.Date(f)!=null&&CaptureSessions.Date(f).Date==date.Date))
     .Select(f=>CaptureSky.CaptureUtc(f,settings)).Where(t=>t.HasValue).Select(t=>t.Value).OrderBy(t=>t).ToList();
@@ -45,9 +45,9 @@ namespace AstroArchive {
   // This is display only: the stored target, folders and file names do not change.
   // Safe to call from search workers: it reads frames and settings only.
   string TargetSection(Frame frame){return TargetSection(frame,all);}
-  string TargetSection(Frame frame,IList<Frame> pool){var e=FrameEclipse(frame,pool);return e==null?frame.Target:e.Solar?Eclipses.SolarSection:Eclipses.LunarSection;}
+  string TargetSection(Frame frame,IList<Frame> pool){var e=FrameEclipse(frame,pool);return e==null?TargetNavigation.Section(frame.Target):e.Solar?Eclipses.SolarSection:Eclipses.LunarSection;}
   EclipseInfo FrameEclipse(Frame frame,IList<Frame> pool){
-   if(frame==null||CaptureSky.IsCalibration(frame))return null;string body=ObservationTargets.NamedSolar(frame.Target)??(Catalog.IsAmbiguous(frame.Target)?ObservationTargets.NamedSolar(ObservationTargets.ModeBody(frame.ObservationMode)):null);if(body!="Sun"&&body!="Moon")return null;
+   if(frame==null||CaptureSky.IsCalibration(frame))return null;string body=ObservationTargets.BodyOf(frame.Target)??(Catalog.IsAmbiguous(frame.Target)?ObservationTargets.NamedSolar(ObservationTargets.ModeBody(frame.ObservationMode)):null);if(body!="Sun"&&body!="Moon")return null;
    var current=settings;var timed=StackWithSubframeClock(frame,pool);var utc=CaptureSky.CaptureUtc(timed,current);
    string key=string.Join("|",new object[]{frame.Target,frame.Kind,frame.ObservationMode,frame.Observed,frame.ObservedUtc,frame.TimeZoneId,frame.TimeSource,utc,frame.Latitude,frame.Longitude,frame.CaptureLatitude,frame.CaptureLongitude,frame.CaptureCityId,frame.Session,current.Latitude,current.Longitude,current.ObservingCity,current.ObservingCityId});
    lock(eclipseSections){

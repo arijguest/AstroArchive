@@ -8,7 +8,7 @@ using System.Threading;
 namespace AstroArchive {
  public sealed class AcquisitionDate {
   public DateTime Date;public string Basis;
-  public string Text {get{return Date.ToString("dd/MM/yy",CultureInfo.InvariantCulture);}}
+  public string Text {get{return DateFormats.Format(Date);}}
  }
  public sealed class CaptureSessionChoice {
   public string Key,Label,Dates,Description;public DateTime? First,Last;public int Count,MissingDates;
@@ -47,7 +47,7 @@ namespace AstroArchive {
   }
   public static CaptureSessionChoice Describe(IEnumerable<Frame> captures){
    var rows=captures.ToList();var dated=rows.Select(Date).Where(d=>d!=null).ToList();DateTime? first=dated.Count==0?(DateTime?)null:dated.Min(d=>d.Date),last=dated.Count==0?(DateTime?)null:dated.Max(d=>d.Date);
-   string range=first.HasValue?first.Value.ToString("dd/MM/yy",CultureInfo.InvariantCulture)+(last!=first?"-"+last.Value.ToString("dd/MM/yy",CultureInfo.InvariantCulture):""):"Dates unknown";
+   string range=first.HasValue?DateFormats.Format(first.Value)+(last!=first?"-"+DateFormats.Format(last.Value):""):"Dates unknown";
    int missing=rows.Count-dated.Count;bool mixed=dated.Any(d=>d.Basis=="FITS UTC")&&dated.Any(d=>d.Basis.IndexOf("timezone unknown",StringComparison.OrdinalIgnoreCase)>=0);
    string dates=range+(missing>0&&dated.Count>0?" · partial dates":"")+(mixed?" · mixed clocks":"");
    string context=string.Join(" · ",rows.Select(f=>f.Telescope??"Unknown device").Distinct())+" · "+string.Join(", ",rows.Select(f=>f.TargetLabel).Distinct())+" · "+string.Join(", ",rows.Select(f=>f.Camera??"Unknown camera").Distinct());

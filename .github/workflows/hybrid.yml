@@ -1,0 +1,48 @@
+name: Hybrid information and 3D orbit validation
+on:
+  push:
+    branches: ['3.2.9', '3.3.0']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  windows:
+    runs-on: windows-2022
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+      - name: Check the deterministic essentials and publication gate
+        run: |
+          python scripts/check-hybrid-pack.py
+          if ($LASTEXITCODE -ne 0) { throw 'Essentials integrity check failed.' }
+          python scripts/test-release-report.py
+          if ($LASTEXITCODE -ne 0) { throw 'Publication gate failed.' }
+      - name: Test information, orbit, identity and planetary engines
+        shell: powershell
+        run: |
+          .\Application_Source\test.ps1 -TargetInfoOnly
+          .\Application_Source\test.ps1 -TargetsOnly
+          .\Application_Source\test.ps1 -SkyOnly
+          .\Installer\test.ps1
+      - name: Build the application and single installer
+        shell: powershell
+        run: |
+          .\Application_Source\build.ps1
+          .\Installer\build.ps1 -SkipTests -OutputDirectory release-artifacts
+      - name: Review information and orbit layouts in all seven languages
+        shell: powershell
+        run: |
+          foreach ($language in @('en','de','es','fr','it','ja','zh-Hans')) {
+            $output = Join-Path $pwd "release-artifacts\info-$language"
+            $process = Start-Process '.\Application_Source\dist\AstroArchive.exe' -ArgumentList @('--ui-test',$output,'--info-only','--no-updates','--language',$language) -PassThru
+            if (-not $process.WaitForExit(120000)) { $process.Kill(); throw "$language information UI timed out." }
+            if ($process.ExitCode -ne 0) { if (Test-Path "$output\ui-smoke-error.txt") { Get-Content "$output\ui-smoke-error.txt" }; throw "$language information UI failed." }
+          }
+          $setup = Get-ChildItem release-artifacts -Filter 'AstroArchive*.exe' | Select-Object -First 1
+          $process = Start-Process $setup.FullName -ArgumentList @('--ui-test',(Join-Path $pwd 'release-artifacts\setup-ui')) -PassThru
+          if (-not $process.WaitForExit(60000) -or $process.ExitCode -ne 0) { throw 'Installer UI validation failed.' }
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: hybrid-information-orbit-validation
+          path: release-artifacts/

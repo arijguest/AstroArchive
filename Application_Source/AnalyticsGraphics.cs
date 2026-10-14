@@ -60,9 +60,9 @@ namespace AstroArchive {
    if(layout!=AnalyticsLayout.Landscape)return SocialPage(data,index,part,parts,values,dark,layout);
    var report=data.Reports[index];var p=new AnalyticsPage{Title=report.Title,Background=dark?"#0C1220":"#FFFFFF"};
    Box(p,0,0,1200,800,"#FFFFFF");Box(p,0,0,1200,8,Accent);
-   p.Marks.Add(new AnalyticsMark{Kind="logo",X=56,Y=31,Width=56,Height=56});
-   Text(p,"AstroArchive",142,46,24,Ink,true);
-   Text(p,(index+1).ToString("00",CultureInfo.InvariantCulture)+" / 06"+(parts>1?" · "+(part+1)+"/"+parts:""),parts>1?980:1060,47,17,Accent,true);
+   p.Marks.Add(new AnalyticsMark{Kind="logo",X=56,Y=35.2,Width=47.6,Height=47.6});
+   Text(p,"AstroArchive",118,47.8,20.4,Ink,true);
+   if(parts>1)Text(p,"Part "+(part+1)+" of "+parts,1144-TextWidth("Part "+(part+1)+" of "+parts,17),47,17,Accent,true);
    Text(p,Fit(report.Title,1080,42),60,112,42,Ink,true,report.Title);Text(p,Fit(report.Description+(parts>1?" · Groups "+(part*8+1)+"–"+Math.Min((part+1)*8,report.Values.Count)+" of "+report.Values.Count:""),1080,17),60,165,17,Muted);
    Box(p,60,210,1080,78,"#F5F7FC");
    string[] metrics={ArchiveAnalytics.Number(data.RepositorySeconds/3600)+" h",data.RepositoryCaptures.ToString("N0",CultureInfo.InvariantCulture),data.RepositoryTargets.ToString("N0",CultureInfo.InvariantCulture)};

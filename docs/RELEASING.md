@@ -42,7 +42,7 @@ and its matching source/licence notices. The installer build bundles these files
 alongside the guide and application notices. See [SMBLibrary distribution terms](../Application_Source/Remote/lib/README.md).
 
 The workflow uses `GITHUB_TOKEN` with `contents: write` in the publishing job.
-It stages the installer, compatibility alias, SHA-256 checksums and `update.json`
+It stages one hybrid installer, its SHA-256 checksum and `update.json`
 in a draft, verifies them, then makes the completed release latest.
 
 When signing is disabled, packages are unsigned and the release notes say so.
@@ -80,7 +80,7 @@ for a file signed by the profile. Use the validated publisher consistently.
 
 The workflow signs app/launcher before embedding their hashes, signs setup after
 compilation, and verifies publisher and timestamp on all three files. It produces
-`signatures.json` and binds the final installer bytes to the alias, checksums and
+`signatures.json` and binds the final installer bytes to the checksum and
 update feed. `Uninstall.exe` uses the setup's signed bytes.
 
 For manual staged builds, run `scripts/build-release.ps1 -Stage Prepare`, sign the
@@ -111,3 +111,22 @@ Smart App Control evaluates each new unsigned file by hash. An older version's
 acceptance does not transfer to a newly rebuilt package. Publishing unsigned
 therefore cannot guarantee that Windows will allow installation or launch.
 See [Microsoft's reputation explanation](https://learn.microsoft.com/en-us/windows/apps/package-and-deploy/smartscreen-reputation).
+
+## Single hybrid installer from 3.2.9
+
+Build `AstroArchive3.2.9.1.exe` once. Both `url` and `download_url` in the
+schema-1 feed point to that concise asset. The publication gate rejects extra
+executables, including the retired `*-Offline-Setup.exe` alias. Reused staging
+folders have generated offline aliases and their checksums removed. No historical
+release is deleted or republished by this workflow.
+
+The reviewed 3.2.9 branch baseline already accepts concise feed URLs and
+`download_url`; installer tests exercise the 3.2.8.1 → 3.2.9.1 path. Very old
+1.2.0 launchers only accept the retired alias: install the current single installer
+manually to bridge those installations. Archive files and user preferences stay
+outside versioned application directories.
+
+`hybrid.yml` validates pushes to branch `3.2.9` without publishing a release. It
+checks identities, rights, cache/network/orbit engines, seven-language WPF layouts,
+and setup rendering. Inspect its screenshots before publication. Native Windows
+validation remains necessary for per-monitor DPI and actual installation/launch.

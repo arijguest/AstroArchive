@@ -7,6 +7,7 @@ namespace AstroArchive {
  // it needs the observer's location. A lunar eclipse is the same for everyone who
  // can see the Moon, so it needs only the capture time.
  public sealed class EclipseInfo {
+  public const double TotalityThreshold=0.99;
   public bool Solar;public string Kind;
   // Solar: fraction of the Sun's disc covered. Lunar: fraction of the Moon's disc inside the umbra.
   public double Obscuration;
@@ -44,6 +45,9 @@ namespace AstroArchive {
  public static class Eclipses {
   const double Degrees=Math.PI/180,EarthRadiusKm=6378.137,MoonRadiusKm=1737.4,SunRadiusKm=695700,AuKm=149597870.7;
   public const string SolarSection="Solar Eclipse",LunarSection="Lunar Eclipse";
+  public const string TotalityTag="Totality";
+  // A solar eclipse covering 99% or more of the Sun reads as total: the corona shows and the capture is tagged.
+  public static bool IsTotal(EclipseInfo e){return e!=null&&e.Solar&&e.Obscuration>=EclipseInfo.TotalityThreshold;}
   public static bool IsSection(string name){return name==SolarSection||name==LunarSection;}
   // Area shared by two discs of radius a and b whose centres are d apart.
   public static double Overlap(double a,double b,double d){

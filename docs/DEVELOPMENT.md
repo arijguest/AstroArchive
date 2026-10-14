@@ -29,6 +29,7 @@ or packaging this folder. The embedded offline guide comes from
 | Checkbox, focus, disabled or theme states | Build the app | `--controls-only` |
 | Startup splash, rotating content or window restoration | `test-startup.ps1` | `--startup-only` (included by the script) |
 | Network discovery, selected transfers, live imports | `test.ps1 -RemoteOnly`; transport checks below | `--remote-only` |
+| Background processes (image quality, plate solving), archive claims | `AstroArchiveTests.exe <folder> --background-only` | Full UI suite (Activity checks) |
 | Broader engine changes or release preparation | `test.ps1` | Full UI suite |
 
 Example:
@@ -77,6 +78,35 @@ Full checks:
 .\Installer\test.ps1
 .\Application_Source\dist\AstroArchive.exe --ui-test .\Application_Source\test-data\ui-checks --no-updates
 ~~~
+
+## Background processes
+
+Long read-mostly work (measuring image quality, solving plates for archived captures) runs
+in the background lane instead of the foreground operation: it does not take the
+cancellation token or the busy state, so scanning, importing, exporting and Settings stay
+enabled. Remote telescope sessions are the other concurrent lane.
+
+* `BackgroundWork.cs` holds the per-repository registry (`Repository.Background`). A process
+  is registered with the content hashes it reads. There is one process per kind
+  (`BackgroundJob.Quality`, `BackgroundJob.Identification`); different kinds run together.
+* Operations that delete or move captures in bulk (`DeleteFrames`, `ResetArchive`,
+  `RenameTelescope`, `SetOriginalsProtection`) take a short exclusive claim over the captures they
+  touch, or the whole archive. A claim and a process over the same capture refuse each other in
+  both directions with a message that names the process. Metadata edits, applying a target
+  (`Refile`) and imports are not claimed: processes re-find a moved capture with
+  `Repository.Located`, and `ValidateCapture` only ever stores the file stamp, never a stale copy.
+* A process works on copies (`Frame.Clone()`), reports through `BackgroundJob.Report` (its own
+  `PipelineMetrics`, never the foreground progress fields), and ends into Activity with
+  `RecordActivityReport` or `QueueActivityReview`, never a modal dialog.
+  `BackgroundWorkUi.cs` starts it (`RunBackground`), mirrors its progress on the live timer and
+  finishes it; `Repository.Dispose`, the window's closing handler and the repository picker all
+  stop or wait for running processes first.
+* To add a process: pick a kind, hand `RunBackground` cloned frames and a worker that takes
+  `(BackgroundJob, CancellationToken)`, keep results idempotent (stored once per capture) and
+  add the command to `ApplyBackgroundAvailability`. If it reads files, any archive change that
+  could remove or move them needs a claim like the ones above.
+* Checks: `BackgroundWorkTests.cs` (`--background-only`) and `BackgroundWorkSmoke.cs`, which runs
+  with the Activity checks in the full UI suite.
 
 ## Network and live import checks
 

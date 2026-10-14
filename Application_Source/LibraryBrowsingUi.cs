@@ -9,8 +9,14 @@ using System.Windows.Data;
 using System.Windows.Media;
 namespace AstroArchive {
  public partial class MainUi {
+  // Preferences > Show starred on top and Group subs by session. Only the two session views follow the grouping preference; the target views stay as chosen.
+  void ApplyListSettings(bool refresh){
+   RepositoryOrdering.StarredFirst=settings.StarredOnTop;string mode=Convert.ToString(C("LibraryViewBox").SelectedItem);
+   if(mode=="Session summaries"||mode=="Show all files"){string wanted=settings.GroupSubsBySession?"Session summaries":"Show all files";if(mode!=wanted){updating=true;C("LibraryViewBox").SelectedItem=wanted;updating=false;}}
+   if(refresh){Filter(true);FilterEditedImages();}
+  }
   void InitializeBrowsing(){
-   C("LibraryViewBox").ItemsSource=new[]{"Session summaries","Show all files","By target","By target and session"};C("LibraryViewBox").SelectedIndex=0;
+   C("LibraryViewBox").ItemsSource=new[]{"Session summaries","Show all files","By target","By target and session"};C("LibraryViewBox").SelectedIndex=0;ApplyListSettings(false);
    C("LibraryViewBox").SelectionChanged+=(s,e)=>{if(!updating)Filter(false);};
    G("FramesGrid").GroupStyle.Add(new GroupStyle{ContainerStyle=(Style)Window.FindResource("CaptureSessionGroupStyle")});
    InitializeSessionSelection();InitializeTargetSelection();InitializeTargetKeyboard();
@@ -24,7 +30,7 @@ namespace AstroArchive {
    }else{subframeSessions.Clear();activeSessionKey=null;if(mode!="Files"&&mode!="Show all files"){view.GroupDescriptions.Add(new CaptureTypeTargetDescription());if(mode=="By target and session")view.GroupDescriptions.Add(new PropertyGroupDescription("SessionKey"));}}
    changingSessionSelection=true;try{
     SetRows("FramesGrid",view,presorted);
-   }finally{changingSessionSelection=false;}SelectOpeningRow("FramesGrid");Details();
+   }finally{changingSessionSelection=false;}SelectOpeningRow("FramesGrid");Details();ApplyViewHint(0);
    var summary=preparedSummary??CaptureGroups.Summarize(displayed);L("LibrarySummaryLabel").Text="In view: "+summary.Detail;
   }
  }

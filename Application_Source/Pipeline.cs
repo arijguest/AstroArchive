@@ -16,7 +16,7 @@ namespace AstroArchive {
   readonly HashSet<Transfer> transfers=new HashSet<Transfer>();
   readonly Queue<Sample> samples=new Queue<Sample>();
   readonly Stopwatch clock=Stopwatch.StartNew();readonly Func<double> time;readonly Action<ProgressInfo> callback;
-  double phaseStart,lastPulse=-1,lastAdvance,lastWork,settledCopies,settledVerifies,skippedBytes,skippedVerificationBytes,verificationWeight=1,copySeconds,verifySeconds,copyMeasuredBytes,verifyMeasuredBytes;int generation,workers=1,extraVerificationPasses;
+  double phaseStart,lastPulse=-1,lastAdvance,lastWork,settledCopies,settledVerifies,skippedBytes,skippedVerificationBytes,verificationWeight=1,copySeconds,verifySeconds,copyMeasuredBytes,verifyMeasuredBytes;int generation,workers=1,workersStarted,extraVerificationPasses;
   long doneBytes,totalBytes,readBytes;int done,total;bool totalKnown,copyPhase,finished,finalising;string current="Starting",stage="Preparing";
   public long DoneBytes {get{lock(gate)return doneBytes;}}
   public long TotalBytes {get{lock(gate)return totalBytes;}set{lock(gate)totalBytes=value;}}
@@ -26,7 +26,7 @@ namespace AstroArchive {
   public string Stage {get{lock(gate)return stage;}set{lock(gate)stage=value;}}
   public PipelineMetrics(Action<ProgressInfo> progress,Func<double> seconds=null){
    callback=progress;time=seconds??(()=>clock.Elapsed.TotalSeconds);
-   foreach(string name in new[]{"Discovery","Metadata","Duplicate checking","Copy + source hash","Verification","Cloud availability","Target identification","Rotation","Index/checkpoint"})meters[name]=new Meter();
+   foreach(string name in new[]{"Discovery","Metadata","Duplicate checking","Copy + source hash","Verification","Cloud availability","Target identification","Index/checkpoint"})meters[name]=new Meter();
    phaseStart=lastAdvance=time();samples.Enqueue(new Sample{Seconds=phaseStart});
   }
   public Scope Begin(string activity,string file){
@@ -48,6 +48,9 @@ namespace AstroArchive {
   public void Discover(long bytes){lock(gate){total++;totalBytes+=Math.Max(0,bytes);lastAdvance=time();}Pulse(false);}
   public void InventoryComplete(){lock(gate)totalKnown=true;Pulse(true);}
   public void Workers(int count){lock(gate){if(workers==count)return;workers=count;ResetSamples();}}
+  // The count a long-running import grew to; the first count is kept so Activity can say it started smaller.
+  public void RaiseWorkers(int count){lock(gate){if(count<=workers)return;if(workersStarted==0)workersStarted=workers;workers=count;ResetSamples();}}
+  public int CurrentWorkers{get{lock(gate){return workers;}}}
   void ResetSamples(){etaEstimate.Reset();samples.Clear();lastWork=Work();lastAdvance=time();samples.Enqueue(new Sample{Seconds=lastAdvance,Work=lastWork,ReadBytes=readBytes});}
   double Work(){return copyPhase?settledCopies+settledVerifies*verificationWeight+transfers.Sum(t=>t.CopiedBytes+(t.VerifiedBytes+t.CleanupBytes)*verificationWeight):done;}
   public ProgressInfo Progress(bool details=true){
@@ -63,7 +66,7 @@ namespace AstroArchive {
     double? eta=finished?(double?)0:totalKnown&&!finalising&&!stalled&&remaining>0&&rate>0&&seconds-phaseStart>=1?(double?)(remaining/rate):null;
     if(eta.HasValue&&copyPhase&&transfers.Count>0){double largest=transfers.Max(t=>Math.Max(0,t.Size*(1+verificationWeight)-t.CopiedBytes-(t.VerifiedBytes+t.CleanupBytes)*verificationWeight));eta=Math.Max(eta.Value,largest/(rate/Math.Max(1,Math.Min(workers,total-done))));}
     eta=finished?(double?)0:etaEstimate.Update(eta,seconds);long copied=doneBytes+transfers.Sum(t=>t.CopiedBytes);
-    return new ProgressInfo{LiveMetrics=this,Workers=workers,Done=done,Total=total,TotalKnown=totalKnown,Text=current,Stage=stage,Activity=string.Join(", ",meters.Where(k=>k.Value.Active>0).Select(k=>k.Key)),ReadBytes=readBytes,ReadBytesPerSecond=span>0?(readBytes-first.ReadBytes)/span:0,BytesDone=Math.Min(totalBytes,copied),BytesTotal=totalBytes,ElapsedSeconds=seconds,RemainingSeconds=eta,Stalled=stalled,Finalising=finalising,Finished=finished,WorkPerSecond=rate,EffectiveBytesPerSecond=copyPhase?rate/(1+(1+extraVerificationPasses)*verificationWeight):0,CopyPhase=copyPhase,EtaProvisional=copyPhase&&verifyMeasuredBytes==0,ProgressFraction=finished?1:copyPhase?(totalBytes>0?Math.Min(0.99,work/(totalBytes*(1+(1+extraVerificationPasses)*verificationWeight))):0):(totalKnown&&total>0?(double)done/total:0),Stages=details?Snapshot():null};
+    return new ProgressInfo{LiveMetrics=this,Workers=workers,WorkersStarted=workersStarted,Done=done,Total=total,TotalKnown=totalKnown,Text=current,Stage=stage,Activity=string.Join(", ",meters.Where(k=>k.Value.Active>0).Select(k=>k.Key)),ReadBytes=readBytes,ReadBytesPerSecond=span>0?(readBytes-first.ReadBytes)/span:0,BytesDone=Math.Min(totalBytes,copied),BytesTotal=totalBytes,ElapsedSeconds=seconds,RemainingSeconds=eta,Stalled=stalled,Finalising=finalising,Finished=finished,WorkPerSecond=rate,EffectiveBytesPerSecond=copyPhase?rate/(1+(1+extraVerificationPasses)*verificationWeight):0,CopyPhase=copyPhase,EtaProvisional=copyPhase&&verifyMeasuredBytes==0,ProgressFraction=finished?1:copyPhase?(totalBytes>0?Math.Min(0.99,work/(totalBytes*(1+(1+extraVerificationPasses)*verificationWeight))):0):(totalKnown&&total>0?(double)done/total:0),Stages=details?Snapshot():null};
    }
   }
   public void UpdateLegacy(int count,int expected,string text){lock(gate){done=count;total=expected;totalKnown=expected>0;current=text;}}

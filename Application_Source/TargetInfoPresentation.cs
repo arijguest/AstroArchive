@@ -6,6 +6,18 @@ using System.Text.RegularExpressions;
 namespace AstroArchive {
  public sealed class TargetInfoSource {public string Title,Url;}
  public static class TargetInfoPresentation {
+  // A distance in light-years, rounded to two significant figures. Redshift calculations and
+  // collected literature estimates (Wikidata) are marked approximate; their tooltips say which.
+  public static string Distance(TargetInfoMeasurement m){
+   double ly=m.value;string approximate=m.band=="redshift"||m.band=="wikidata"?"≈ ":"";
+   if(ly>=1e9)return approximate+Localization.F("{0} billion light-years",Significant(ly/1e9));
+   if(ly>=1e6)return approximate+Localization.F("{0} million light-years",Significant(ly/1e6));
+   return approximate+Localization.F("{0} light-years",Significant(ly));
+  }
+  static string Significant(double value){
+   int decades=(int)Math.Floor(Math.Log10(Math.Abs(value)));double rounded=Math.Round(value/Math.Pow(10,decades-1))*Math.Pow(10,decades-1);
+   return rounded.ToString(decades>=2?"#,##0":decades==1?"0":"0.0",System.Globalization.CultureInfo.InvariantCulture);
+  }
   public static string Constellation(string value){
    if(new[]{"Ser","Se1","Se2","Serpens","Serpens Caput","Serpens Cauda"}.Any(v=>string.Equals(v,value,StringComparison.OrdinalIgnoreCase)))return "Serpens";
    if(new[]{"CrA","Corona Austrina","Corona Australis"}.Any(v=>string.Equals(v,value,StringComparison.OrdinalIgnoreCase)))return "Corona Australis";
@@ -24,7 +36,7 @@ namespace AstroArchive {
    var curated=TargetDescriptions.For(card.id);if(curated!=null&&!string.IsNullOrWhiteSpace(curated.Overview))return curated.Overview;
    string summary=Summary(card);return string.IsNullOrWhiteSpace(summary)&&CometInfo.IsComet(card)?CometInfo.Overview(card):summary;
   }
-  public static string Imaging(TargetInfoCard card){var curated=TargetDescriptions.For(card.id);return curated!=null&&!string.IsNullOrWhiteSpace(curated.Imaging)?curated.Imaging:CometInfo.IsComet(card)?CometInfo.Imaging:null;}
+  public static string Imaging(TargetInfoCard card){if(card==null)return null;var curated=TargetDescriptions.For(card.id);string text=curated!=null&&!string.IsNullOrWhiteSpace(curated.Imaging)?curated.Imaging:CometInfo.IsComet(card)||card.id=="COMETS"?CometInfo.Imaging:null;return string.IsNullOrWhiteSpace(text)?null:text.Trim();}
   public static string Caption(string value){
    string text=value??"";
    text=text.Replace("Astronomical observation; filter bands and colour processing unspecified.","").Replace("Optical astrophotography; processing/filter details not stated.","");
@@ -36,11 +48,23 @@ namespace AstroArchive {
    if(title>0&&credit.EndsWith(", via Wikimedia Commons",StringComparison.Ordinal))credit=credit.Substring(0,title);
    return credit.Trim();
   }
+  // Other catalogue designations of the object (NGC, IC, Messier...), without the survey identifiers that fill the full alias list.
+  // One alternative joins the tagline; several go on a line of their own.
+  public static List<string> AlternativeIds(TargetInfoCard card){
+   var result=new List<string>();if(card==null||card.aliases==null)return result;
+   Func<string,string> key=t=>Regex.Replace(t??"","[^A-Za-z0-9]","").ToUpperInvariant();var seen=new HashSet<string>{key(card.id),key(Catalog.DisplayId(card.id))};string heading=key(card.name);
+   foreach(string alias in card.aliases){
+    var m=Regex.Match((alias??"").Trim(),@"^(M|NGC|IC|C|Caldwell|Arp|B|Mel|Cr|Collinder|Melotte|Abell|UGC|Sh\s*2)[\s-]*0*(\d+.*)$",RegexOptions.IgnoreCase|RegexOptions.CultureInvariant);if(!m.Success)continue;
+    string text=Regex.Replace(m.Groups[1].Value,@"\s+","")+" "+m.Groups[2].Value;string id=key(text);if(!seen.Add(id)||heading.Contains(id))continue;result.Add(text);
+   }
+   return result.Take(8).ToList();
+  }
+  public static string AlternativeLine(TargetInfoCard card){var ids=AlternativeIds(card);return ids.Count>1?string.Join(" · ",ids):"";}
   public static string Tagline(TargetInfoCard card,string constellation){
    // "IC 434" or "NGC 2237 (Rosette A)" already show the ID in the heading.
    string id=(card.id??"").Trim();bool inHeading=id.Length>0&&Regex.IsMatch(card.name??"",@"(?<![A-Za-z0-9])"+string.Join(@"[\s-]*",Regex.Split(id,@"[\s-]+").Select(Regex.Escape))+@"(?![0-9])",RegexOptions.IgnoreCase|RegexOptions.CultureInvariant);
    bool named=!string.IsNullOrWhiteSpace(card.name)&&!inHeading;
-   var parts=new List<string>();if(named)parts.Add(Catalog.DisplayId(card.id));if(!string.IsNullOrWhiteSpace(card.type_label))parts.Add(card.type_label);if(constellation!=null)parts.Add(constellation);
+   var parts=new List<string>();if(named)parts.Add(Catalog.DisplayId(card.id));var other=AlternativeIds(card);if(other.Count==1)parts.Add(other[0]);if(!string.IsNullOrWhiteSpace(card.type_label))parts.Add(card.type_label);if(constellation!=null)parts.Add(constellation);
    return string.Join(" · ",parts);
   }
   public static List<TargetInfoSource> Sources(TargetInfoCard card){return Sources(card,false);}
@@ -55,8 +79,9 @@ namespace AstroArchive {
    };
    foreach(var citation in card.citations??new TargetInfoCitation[0])if(citation.review_status!="draft")add(citation.source_title,citation.source_url);
    foreach(string url in card.source_urls??new string[0])add(null,url);
-   if(CometInfo.IsComet(card)){if(CometInfo.Orbit(card.id)!=null||curated)add(CometInfo.SourceTitle+" · "+card.id,CometInfo.LookupUrl(card.id));}
-   else if(curated){
+   if(CometInfo.IsComet(card)){if(CometInfo.Orbit(card.id)!=null||curated)add(CometInfo.SourceTitle+" · "+card.id,CometInfo.LookupUrl(card.id));if(CometCatalog.ShowersOf(card.id).Count>0)add(CometCatalog.ShowerSource,CometCatalog.ShowerUrl);}
+   // Eclipse and section pages are not catalogue objects, so SIMBAD has nothing for them.
+   else if(curated&&card.domain!="event"&&card.domain!="group"){
     var messier=Regex.Match(card.id??"",@"^M(\d{1,3})$");if(messier.Success)add("NASA Hubble Messier Catalog · Messier "+messier.Groups[1].Value,"https://science.nasa.gov/mission/hubble/science/explore-the-night-sky/hubble-messier-catalog/messier-"+messier.Groups[1].Value+"/");
     add("SIMBAD · "+Catalog.DisplayId(card.id),"https://simbad.cds.unistra.fr/simbad/sim-id?Ident="+Uri.EscapeDataString(Regex.Replace(card.id,@"^SH2-","SH 2-",RegexOptions.IgnoreCase)));
    }

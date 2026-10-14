@@ -84,6 +84,7 @@ namespace AstroArchive {
        if(videoGroups.Any(g=>!(g.Name is Frame)||((Frame)g.Name).Kind!="Video"))throw new Exception("Rendered videos are misplaced among session groups.");
        int sessionIndex=groups.FindIndex(g=>g.Name is SubframeSession);
        if(allTargets?sessionIndex!=0:sessionIndex<7)throw new Exception("Grouped subs are misplaced relative to videos.");
+       if(!allTargets){int lastLoose=groups.FindLastIndex(g=>!(g.Name is SubframeSession)&&!(g.Name is Frame&&CaptureSky.IsCalibration((Frame)g.Name)));if(sessionIndex>=0&&sessionIndex<lastLoose)throw new Exception("Grouped subs are spread among loose files and stacks.");}
       }
      }
     }

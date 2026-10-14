@@ -1,10 +1,18 @@
-AstroArchive 3.2.7
-Package 3.2.7.2
+AstroArchive 3.3.2
+Package 3.3.2.2
 
-Signing is optional for this release. It can publish a checksum-verified unsigned installer when publisher signing is not configured. If signing is enabled, trusted RSA publisher signatures and timestamps are verified on the application, launcher and installer before publication; checksums describe the final bytes.
+Covers everything since 3.3.1.1 (first published as prerelease 3.3.2.1).
 
-Installer repair now retries transient Windows shortcut file locks before failing, while preserving errors for access restrictions and application-control policy.
+Sky map and targets
+The total solar eclipse icon on the sky map now draws a corona shaped by the solar cycle and oriented to the Sun's axis. Totality captures get the object Totality, and Sun pictures taken through a non-solar telescope get the SOL filter (Totality stays VIS). All Targets has an upcoming sky events view for the next month at your observing location, with Stellarium links, computed locally.
 
-Includes the application changes from 3.2.6: reordered information panes, compact and expandable image credits, simplified solar eclipse displays, per-file capture towns in Edit metadata, refreshed sky and eclipse checks, DSO foreground-obstruction scoring, FITS preview recovery, display-only brightness correction for very dark frames, and no Moon-to-target separation for lunar images.
+Orbit viewer
+Dates sort by time of day as well as date, and the Parameters section is hidden when it is empty.
 
-Unsigned packages can still be blocked by Smart App Control or SmartScreen. This release does not claim to bypass or remedy those Windows trust decisions. Repositories, images and settings are retained.
+Settings and menus
+Settings has a Telescopes section to rename a saved telescope (updating its captures), change its model and camera, remove it, or recover profiles from the repository. Import now starts with Scan folder…, which replaces Scan source….
+
+Installer
+The setup window no longer shows the version line under the logo.
+
+The guide, tours and all seven interface languages are updated for these changes.

@@ -32,7 +32,7 @@ namespace AstroArchive {
    state.Timer.Tick+=(s,e)=>{state.Timer.Stop();ExecuteSearch(name,state);};searchPanels[name]=state;return state;
   }
   IEnumerable<string> SearchControls(string name){
-   return name=="SearchBox"?new[]{"FramesGrid","TargetList","ExportButton","RotationButton","AnalyzeQualityButton","SolveButton","EditButton","MoreButton","ScreenLibraryButton","ReviewLibraryButton"}:
+   return name=="SearchBox"?new[]{"FramesGrid","TargetList","ExportButton","AnalyzeQualityButton","SolveButton","EditButton","MoreButton","ScreenLibraryButton","ReviewLibraryButton"}:
     name=="ImportSearchBox"?new[]{"ImportGrid","ImportButton","ScreenImportsButton","ReviewImportsButton","RetryImportsButton","AssignUnknownTargetButton","ImportToolsButton"}:
     new[]{"EditedGrid","EditedTargetList","EditedPreviewButton","EditedDetailsButton","EditedEditorButton","EditedOpenPreviewButton"};
   }
@@ -58,12 +58,12 @@ namespace AstroArchive {
    // A pending query owns membership. Resubmit it with the latest column ordering.
    if(state.Pending&&!state.SortOnly){ScheduleSearch(name,false,true);return;}
    var view=source as ListCollectionView;var rows=view==null?source:view.SourceCollection;var sorts=SearchSorts(gridName);var culture=grid.Items.Culture??CultureInfo.CurrentCulture;
-   var target=Targets.SelectedItem as TargetSummary;bool allTargets=target==null||target.Name=="All targets",sessions=Convert.ToString(C("LibraryViewBox").SelectedItem)=="Session summaries";
+   var target=Targets.SelectedItem as TargetSummary;var editedTarget=EditedTargets.SelectedItem as TargetSummary;bool editedComets=editedTarget!=null&&editedTarget.Name==TargetNavigation.CometsSection;bool allTargets=target==null||target.Name=="All targets",sessions=Convert.ToString(C("LibraryViewBox").SelectedItem)=="Session summaries";
    var frames=gridName=="EditedGrid"?null:rows.Cast<Frame>().ToArray();var images=gridName=="EditedGrid"?rows.Cast<EditedImage>().ToArray():null;
    int version=++state.Version;state.Timer.Stop();state.Worker.Cancel();state.Pending=true;state.SortOnly=true;
    try{
     var result=await state.Worker.Submit(token=>{
-     if(images!=null)return new SearchResult{Images=SearchOrdering.Order(images,sorts,culture,token)};
+     if(images!=null){var sortedImages=SearchOrdering.Order(images,sorts,culture,token);return new SearchResult{Images=RepositoryOrdering.StarredImagesFirst(editedComets?TargetNavigation.GroupByTarget(sortedImages,EditedTarget):sortedImages)};}
      if(gridName=="ImportGrid")return new SearchResult{Frames=SearchOrdering.Order(frames,sorts,culture,token)};
      List<SubframeSession> groups;var ordered=RepositoryOrdering.Order(frames,sorts,culture,allTargets,sessions,token,out groups);return new SearchResult{Frames=ordered,Sessions=groups,Summary=CaptureGroups.Summarize(ordered,token)};
     });
@@ -82,22 +82,21 @@ namespace AstroArchive {
    try{
     Func<CancellationToken,SearchResult> work;
     if(name=="EditedSearchBox"){
-     var source=editedImages.ToArray();string imageClass=Convert.ToString(C("EditedClassFilter").SelectedItem);string target=EditedTargets.SelectedItem is TargetSummary?((TargetSummary)EditedTargets.SelectedItem).Name:"All targets";
+     var source=editedImages.ToArray();string imageClass=Convert.ToString(C("EditedClassFilter").SelectedItem);string target=HintTarget(2,EditedTargets.SelectedItem is TargetSummary?((TargetSummary)EditedTargets.SelectedItem).Name:"All targets");
      var sorts=SearchSorts("EditedGrid");var culture=G("EditedGrid").Items.Culture??CultureInfo.CurrentCulture;var index=state.Edited??(state.Edited=new SearchIndex<EditedImage>(EditedSearchDocument));
      work=token=>{var query=FileSearch.Parse(text);var rows=index.Find(source,query,i=>imageClass=="All images"||i.Metadata.ImageClass==imageClass,token);token.ThrowIfCancellationRequested();
-      var targets=TargetNavigation.Build(rows.Select(i=>new Frame{Target=i.Metadata.ImageClass=="Meteor"?"Meteor":i.Metadata.Object,Kind="Edited image"}),token).Select(t=>(TargetSummary)new EditedTargetSummary{Name=t.Name,Files=t.Files}).ToList();
-      string active=targets.Any(t=>t.Name==target)?target:"All targets";if(active!="All targets")rows=rows.Where(i=>Catalog.CanonicalTarget(i.Metadata.ImageClass=="Meteor"?"Meteor":i.Metadata.Object)==active).ToList();
-      return new SearchResult{Query=query,Targets=targets,Target=active,Images=SearchOrdering.Order(rows,sorts,culture,token)};};
+      var targets=TargetNavigation.BuildSections(rows.Select(i=>new Frame{Target=i.Metadata.ImageClass=="Meteor"?"Meteor":i.Metadata.Object,Kind="Edited image"}),token).Select(t=>(TargetSummary)new EditedTargetSummary{Name=t.Name,Files=t.Files}).ToList();
+      string active=targets.Any(t=>t.Name==target)?target:"All targets";if(active!="All targets")rows=rows.Where(i=>EditedSection(i)==active).ToList();
+      var ordered=SearchOrdering.Order(rows,sorts,culture,token);if(active==TargetNavigation.CometsSection)ordered=TargetNavigation.GroupByTarget(ordered,EditedTarget);ordered=RepositoryOrdering.StarredImagesFirst(ordered);
+      return new SearchResult{Query=query,Targets=targets,Target=active,Images=ordered};};
     }else{
      bool imports=name=="ImportSearchBox";var source=(imports?CurrentImportRows():all).ToArray();var criteria=(imports?importFilters:libraryFilters).Snapshot();bool skip=SkipFlagged;
-     string target=Targets.SelectedItem is TargetSummary?((TargetSummary)Targets.SelectedItem).Name:"All targets";string mode=Convert.ToString(C("LibraryViewBox").SelectedItem);
+     string target=HintTarget(0,Targets.SelectedItem is TargetSummary?((TargetSummary)Targets.SelectedItem).Name:"All targets");string mode=Convert.ToString(C("LibraryViewBox").SelectedItem);
      var sorts=SearchSorts(imports?"ImportGrid":"FramesGrid");var culture=G(imports?"ImportGrid":"FramesGrid").Items.Culture??CultureInfo.CurrentCulture;
      var index=state.Captures??(state.Captures=new SearchIndex<Frame>(SearchDocument.FromFrame));
      work=token=>{var query=FileSearch.Parse(text);var rows=index.Find(source,query,criteria.Matches,token);token.ThrowIfCancellationRequested();
       if(imports){var summary=ImportWorkflow.Summarize(source,rows,skip);int retry=ImportWorkflow.Select(rows,skip,true).Count;return new SearchResult{Query=query,Source=source.ToList(),Frames=SearchOrdering.Order(rows,sorts,culture,token),ImportSummary=summary,Retry=retry};}
       Func<Frame,string> section=f=>TargetSection(f,source);var targets=TargetNavigation.Build(rows,section,token);string active=targets.Any(t=>t.Name==target)?target:"All targets";if(active!="All targets")rows=rows.Where(f=>section(f)==active).ToList();
-      // Preserve the established target/session order as a stable tie-breaker; inside a session the best-scored captures come first.
-      rows=QualityOrdering.Order(rows);
       List<SubframeSession> sessions;rows=RepositoryOrdering.Order(rows,sorts,culture,active=="All targets",mode=="Session summaries",token,out sessions);token.ThrowIfCancellationRequested();
       return new SearchResult{Query=query,Frames=rows,Targets=targets,Target=active,Sessions=sessions,Summary=CaptureGroups.Summarize(rows,token)};};
     }
@@ -122,7 +121,7 @@ namespace AstroArchive {
    try{EditedTargets.ItemsSource=view;EditedTargets.SelectedItem=result.Targets.First(t=>t.Name==result.Target);}finally{refreshingEditedTargets=false;}
    SetRows("EditedGrid",result.Images,true);RestoreEditedSelection(result.Images,selected);
    RestoreTargetKeyboardFocus(EditedTargets);
-   L("EditedSummary").Text=result.Images.Count+" images";L("EditedSearchHint").Visibility=result.Query.IsEmpty?Visibility.Visible:Visibility.Collapsed;L("EditedEmptyState").Visibility=result.Images.Count==0?Visibility.Visible:Visibility.Collapsed;UpdateEditedActions();
+   L("EditedSummary").Text=result.Images.Count+" images";L("EditedSearchHint").Visibility=result.Query.IsEmpty?Visibility.Visible:Visibility.Collapsed;L("EditedEmptyState").Visibility=result.Images.Count==0?Visibility.Visible:Visibility.Collapsed;UpdateEditedActions();ApplyViewHint(2);
   }
   void DisposeSearch(){foreach(var state in searchPanels.Values)state.Dispose();}
  }

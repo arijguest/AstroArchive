@@ -22,6 +22,9 @@ namespace AstroArchive {
    File.Delete(RenameJournalPath);db.Exec("DELETE FROM sessions WHERE id=?","rename:"+journal.Id);
   }
   public TelescopeRenameResult RenameTelescope(string oldName,string newName,CancellationToken ct,Action<ProgressInfo> progress,Action persistProfile=null,string settingsPath=null,string originalSettings=null,string renamedSettings=null){
+   using(Background.Claim("Renaming the telescope",null))return RenameTelescopeClaimed(oldName,newName,ct,progress,persistProfile,settingsPath,originalSettings,renamedSettings);
+  }
+  TelescopeRenameResult RenameTelescopeClaimed(string oldName,string newName,CancellationToken ct,Action<ProgressInfo> progress,Action persistProfile,string settingsPath,string originalSettings,string renamedSettings){
    if(File.Exists(RenameJournalPath))throw new IOException("An interrupted telescope rename needs recovery. Reopen the repository before renaming again.");
    oldName=(oldName??"").Trim();newName=(newName??"").Trim();if(oldName.Length==0||newName.Length==0)throw new ArgumentException("A telescope name is required.");
    var all=All();if(all.Any(f=>string.Equals(f.Telescope,newName,StringComparison.OrdinalIgnoreCase)&&!string.Equals(f.Telescope,oldName,StringComparison.OrdinalIgnoreCase)))throw new IOException("That telescope name is already in use in the repository. Choose a unique name.");

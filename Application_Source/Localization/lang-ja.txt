@@ -97,7 +97,6 @@ Import tools ▾	インポート ツール ▾
 Report	レポート
 Import options	インポート オプション
 TARGET ANALYSIS	ターゲット解析
-ROTATION ANALYSIS	回転解析
 Ignore failed	失敗を無視
 Skip filenames containing “failed”; keep originals.	ファイル名に “failed” を含むものをスキップし、元ファイルは保持します。
 Delete originals after verified import	検証済みのインポート後に元ファイルを削除
@@ -161,7 +160,6 @@ Importing edited images	Edited の画像をインポート中
 Identifying targets	ターゲットを識別中
 Applying target metadata	ターゲットのメタデータを適用中
 Analyze	解析
-Analysing rotation	回転を解析中
 Screening captures	キャプチャをスクリーニング中
 Backing up archive	アーカイブをバックアップ中
 Changing originals protection	元ファイルの保護を変更中
@@ -289,8 +287,6 @@ Wide	広角
 Off	オフ
 Ambiguous only	あいまいなもののみ
 All light/stack files	すべてのライト/スタック ファイル
-Ambiguous mounts	あいまいな架台
-All light sessions	すべてのライト セッション
 Preparing browsing and capture tools…	参照ツールとキャプチャ ツールを準備しています…
 Choose a mirrored telescope folder	ミラーされた望遠鏡フォルダーを選択
 Canceled	キャンセル済み
@@ -340,10 +336,6 @@ User	ユーザー
 Saving final archive index and report	最終的なアーカイブ インデックスとレポートを保存中
 Import report	インポート レポート
 Explicit	明示的
-Choose a target with individual light frames. Stacks cannot establish acquisition rotation.	個々のライトフレームがあるターゲットを選択してください。スタックからは撮影時の回転を特定できません。
-Individual subs required	個々のサブが必要です
-Rotation analysis complete.	回転解析が完了しました。
-Rotation analysis	回転解析
 Restore	復元
 Duplicate in source	ソース内で重複
 Failed	失敗
@@ -845,9 +837,7 @@ Windows language	Windows の言語
 Language	言語
 Applies after AstroArchive restarts. The offline guide stays in English.	AstroArchive の再起動後に適用されます。オフライン ガイドは英語のままです。
 Observing town / city	観測地の市区町村
-Select your nearest town or city. Its centre is used for rotation analysis; without a selection, capture location metadata is used when available.	最寄りの市区町村を選択してください。その中心が回転解析に使用されます。選択しない場合は、キャプチャの位置メタデータがあればそれが使用されます。
 Town / city	市区町村
-Saved location used for sky views and mount analysis.	空の表示と架台の解析に使用される保存済みの場所です。
 Choose town / city…	市区町村を選択…
 Clear observing location	観測地をクリア
 Choose observing town / city	観測地の市区町村の選択
@@ -937,7 +927,7 @@ Filename matching	ファイル名で照合
 Connect telescope over network…	ネットワーク経由で望遠鏡を接続…
 Watch a capture folder…	キャプチャ フォルダーを監視…
 Telescope import progress…	望遠鏡のインポートの進行状況…
-Scan source	ソースをスキャン
+Scan folder…	フォルダーをスキャン…
 Import ready files	準備完了のファイルをインポート
 Connected telescopes	接続されている望遠鏡
 Refresh devices	デバイスを更新
@@ -958,7 +948,6 @@ Group subs by session	サブをセッションごとにグループ化
 Filters…	フィルター…
 Review and analysis	確認と解析
 Identify targets…	ターゲットを識別…
-Analyse rotation…	回転を解析…
 Maintenance	メンテナンス
 Delete archive data…	アーカイブ データを削除…
 Diagnostics	診断
@@ -1428,11 +1417,8 @@ Inbox for captures waiting to be imported.	インポート待ちのキャプチ�
 Import inbox captures; delete verified science originals and keep calibration frames.	受信トレイのキャプチャをインポートします。検証済みのサイエンス用元ファイルは削除し、キャリブレーション フレームは保持します。
 Condense acquisition subs into session rows.	撮影したサブをセッションごとの行にまとめます。
 Create a verified copy of the archive.	アーカイブの検証済みコピーを作成します。
-Review captures, identify objects and assess mount rotation.	キャプチャを確認し、天体を識別し、架台による回転を評価します。
 Identify targets	ターゲットを識別
 Solve light groups and stacks to identify objects.	ライトのグループとスタックをプレートソルブして天体を識別します。
-Analyse rotation	回転を解析
-Estimate EQ or Alt-Az from acquisition subs.	撮影したサブから EQ か Alt-Az かを推定します。
 Verify, reindex or remove archive files.	アーカイブ ファイルの検証、再インデックス、または削除を行います。
 Delete archive files with 'failed' in their filenames.	ファイル名に「failed」を含むアーカイブ ファイルを削除します。
 Delete indexed PNG/JPG/JPEG/MP4 copies; keep source originals.	インデックスされた PNG/JPG/JPEG/MP4 のコピーを削除します。ソースの元ファイルは保持します。
@@ -1524,7 +1510,6 @@ Metadata, target identification and scan report.	メタデータ、ターゲッ�
 Open the guide (F1).	ガイドを開きます (F1)。
 Choose telescope folders or files, then confirm a full scan and import. Keep originals.	望遠鏡のフォルダーまたはファイルを選択し、完全なスキャンとインポートを確定します。元ファイルは保持されます。
 Clear search, filters and target selection.	検索、フィルター、ターゲットの選択をクリアします。
-Assess mount mode from rotation in acquisition subs.	撮影したサブの回転から架台の方式を評価します。
 Solve selected Light groups and stacks; review batch target matches.	選択したライトのグループとスタックをプレートソルブし、ターゲットの一致を一括で確認します。
 Edit selected files, or all visible files if none selected.	選択したファイルを編集します。選択がない場合は表示中のすべてのファイルを編集します。
 Archive tools.	アーカイブ ツール。
@@ -1536,7 +1521,6 @@ Use a unique name for each physical telescope.	物理的な望遠鏡ごとに一
 Auto detects each capture’s model.	各キャプチャのモデルを自動検出します。
 Overrides apply to every scanned capture.	上書きはスキャンしたすべてのキャプチャに適用されます。
 Choose which targets to solve; requires a configured solver.	プレートソルブするターゲットを選択します。プレートソルバーの構成が必要です。
-Choose which acquisition sessions to analyse.	解析する撮影セッションを選択します。
 Measured work by stage; concurrent times can overlap.	段階ごとに計測した処理時間です。並行処理の時間は重なる場合があります。
 Import timings and error diagnostics.	インポートの所要時間とエラーの診断情報。
 Stop safely; completed imports remain.	安全に停止します。完了したインポートは残ります。
@@ -1941,7 +1925,6 @@ Choose card targets	カードのターゲットを選択
 QUALITY	品質
 EXPOSURE FIT	露出の適正度
 Analyse image quality…	画質を解析…
-Re-measure image quality…	画質を再測定…
 Analyse image quality	画質を解析
 Quality rank	品質ランク
 Exposure fit	露出の適正度
@@ -2128,3 +2111,330 @@ FUN FACT	豆知識
 Sun obscured	太陽の遮蔽率
 Check capture metadata	撮影メタデータを確認
 Suspected obstruction	遮蔽物の疑い
+A chosen town or city sets the capture location and its historical timezone. Local capture clocks are converted to UTC again when the town changes; explicit UTC or clock offsets keep their instant. Use default location to return to file metadata, then Settings. Changes are applied when you save metadata.	選択した市区町村は、撮影地と撮影日時に適用されるタイムゾーンを設定します。撮影地を変更すると現地の撮影時刻をUTCに再変換します。明示的なUTC時刻や時差付き時刻は同じ瞬間を保持します。既定の撮影地を使うと、ファイルのメタデータ、次に設定に戻ります。変更はメタデータの保存時に適用されます。
+# Help centre, guided walkthroughs and problem reports
+Use the purple **PAGE** selector to move around AstroArchive. It sits beside the toolbar, or below it in smaller windows.\n\n- Choose **Repository**, **Edited** or **Import**.\n- Search, filters, selections and import progress stay in place.\n- Use `Ctrl+1–3` to select a page or `Ctrl+Tab` to cycle pages.	紫色の **ページ** セレクターで AstroArchive 内を移動します。ツール バーの横、またはウィンドウが小さい場合はその下にあります。\n\n- **リポジトリ**、**Edited**、**インポート** のいずれかを選択します。\n- 検索、フィルター、選択内容、インポートの進行状況はそのまま維持されます。\n- `Ctrl+1–3` でページを選択し、`Ctrl+Tab` でページを順に切り替えます。
+Your repository holds verified capture copies and the archive index.\n\n1. Open **Settings → General**.\n2. Choose your archive folder.\n\nClick the repository path on the main page to open it in Explorer.	リポジトリには、検証済みのキャプチャのコピーとアーカイブ インデックスが保存されます。\n\n1. **設定 → 全般** を開きます。\n2. アーカイブ フォルダーを選択します。\n\nメイン ページのリポジトリ パスをクリックすると、エクスプローラーで開きます。
+Select a saved telescope or **Browse** its capture folder. Give each physical telescope its own device ID.\n\n- **Import from Seestar… / Dwarflab…** selects USB folders/files and confirms a full scan and import. Choose target folders for faster scans.\n- **Telescopes** saves, renames or recovers profiles.\n- **Scan folder** skips matching filenames and known DWARF sessions; Seestar scans still find new filenames.\n- Enable **Robust file matching** in Import options to revisit edits and additions inside skipped sessions.\n- **Review and repair → Full rescan** reads and hashes every file for a complete check.	保存済みの望遠鏡を選択するか、キャプチャ フォルダーを **参照** します。物理的な望遠鏡ごとに個別のデバイス ID を設定してください。\n\n- **Seestar からインポート… / Dwarflab からインポート…** では、USB のフォルダーまたはファイルを選択し、フルスキャンとインポートを確認します。ターゲット フォルダーを選ぶとスキャンが速くなります。\n- **望遠鏡** では、プロファイルの保存、名前の変更、復元ができます。\n- **フォルダーをスキャン** では、ファイル名が一致するものと既知の DWARF セッションをスキップします。Seestar のスキャンでは新しいファイル名は引き続き検出されます。\n- スキップされたセッション内の編集や追加を再確認するには、インポート オプションで **厳密なファイル照合** を有効にします。\n- **確認と修復 → 完全な再スキャン** では、すべてのファイルを読み取ってハッシュ化し、完全にチェックします。
+Check each file’s **status** and **review reason** in the scan table.\n\n- **Review and repair** opens flagged captures and transfer retries.\n- **Import options** controls analysis and original removal.\n- The policy summary stays visible. **Originals are kept by default.**	スキャン表で、各ファイルの **状態** と **確認理由** を確認します。\n\n- **確認と修復** では、フラグ付きキャプチャと転送の再試行を開きます。\n- **インポート オプション** では、解析と元ファイルの削除を設定します。\n- ポリシーの概要は常に表示されます。**元ファイルは既定で保持されます。**
+Browse targets and sessions, or narrow the view with **Search** and **Filters**.\n\n## Select and organise\n- `Ctrl/Shift` selects files; right-click opens file actions.\n- **Group subs by session** switches between compact sessions and files.\n\n## Sort and choose columns\n- Click a heading to sort; click again to reverse. `Shift-click` adds a heading.\n- ▲ / ▼ show direction; numbers show sort priority.\n- Right-click a heading to choose columns.	ターゲットとセッションを閲覧するか、**検索** と **フィルター** で表示を絞り込みます。\n\n## 選択と整理\n- `Ctrl/Shift` でファイルを選択します。右クリックでファイル操作を開きます。\n- **サブをセッションごとにグループ化** で、コンパクトなセッション表示とファイル表示を切り替えます。\n\n## 並べ替えと列の選択\n- 見出しをクリックして並べ替え、もう一度クリックすると逆順になります。`Shift-click` で見出しを追加します。\n- ▲ / ▼ は方向、数字は並べ替えの優先順位を示します。\n- 見出しを右クリックして列を選択します。
+Select captures, then choose **Export**: copy originals, prepare a ready-to-stack folder, open them in an app, or create an AstroBin acquisition CSV.\n\n- Stacks copy to the destination; subs keep compatible input folders.\n- Matching calibrations include reasons; scientific conversion is explicit.\n- **Add Metadata** and **Create new folder** start off. Existing files are kept.\n\nStacking takes place in your chosen processing software.	キャプチャを選択して **エクスポート** を選びます。元ファイルのコピー、スタック用にすぐ使えるフォルダーの準備、アプリでの表示、AstroBin 撮影データ CSV の作成ができます。\n\n- スタックは保存先にコピーされ、サブは互換性のある入力フォルダーを保持します。\n- 一致するキャリブレーションには理由が付き、科学用変換は明示的に行います。\n- **メタデータを追加** と **新しいフォルダーを作成** は初期状態でオフです。既存のファイルは保持されます。\n\nスタック処理は、選択した処理ソフトで行います。
+Pick the captures	キャプチャを選択
+Choose a target on the left, then select the subs you want in the table.\n\n- `Ctrl`-click adds files; `Shift`-click selects a range.\n- Selecting a session row includes all of its subs.\n- The counter at the top right shows how many files are selected.	左側でターゲットを選択し、表で使用するサブを選択します。\n\n- `Ctrl` クリックでファイルを追加、`Shift` クリックで範囲を選択します。\n- セッションの行を選択すると、そのセッションのすべてのサブが含まれます。\n- 右上のカウンターに、選択中のファイル数が表示されます。
+Prepare a stacking folder	スタック用フォルダーを準備
+Choose **Export**, then **Stacking folder**.\n\n- **Subs**, **Stacks** or **Both** decides what is copied.\n- Matching calibration frames are offered with the reason they match.\n- Existing files in the destination are never overwritten.	**エクスポート** を選び、**スタック用フォルダー** を選択します。\n\n- **サブ**、**スタック**、**両方** のいずれかでコピーする対象を決めます。\n- 一致するキャリブレーション フレームが、一致した理由とともに表示されます。\n- 保存先の既存ファイルは上書きされません。
+Open Export	エクスポートを開く
+Open it in your stacking app	スタック用アプリで開く
+**Open in app** can hand the exported files to Siril, DSS or another stacker.\n\n- Set application locations under **Settings → Export**.\n- AstroArchive never starts stacking for you.	**アプリで開く** で、エクスポートしたファイルを Siril、DSS、その他のスタック用ソフトに渡せます。\n\n- アプリケーションの場所は **設定 → エクスポート** で設定します。\n- AstroArchive がスタックを自動的に開始することはありません。
+Open export preferences	エクスポート設定を開く
+Make your first backup	最初のバックアップを作成
+Choose **Repository → Back up archive…** and pick a folder on a separate drive.\n\n- A folder keeps later backups small; a ZIP is one file.\n- Close editors that write into the archive first.\n- Cancelling removes the unfinished backup and keeps earlier ones.	**リポジトリ → アーカイブをバックアップ…** を選び、別のドライブ上のフォルダーを指定します。\n\n- フォルダーに保存すると以降のバックアップが小さくなります。ZIP は 1 つのファイルになります。\n- 先に、アーカイブに書き込むエディターを閉じてください。\n- キャンセルすると未完了のバックアップは削除され、以前のバックアップは保持されます。
+Repeat it automatically	自動的に繰り返す
+After a backup, AstroArchive offers to repeat it daily, weekly or monthly.\n\n- Change the schedule in **Settings → Backups**.\n- If the backup drive is missing when one is due, Activity reminds you.	バックアップ後、AstroArchive は毎日、毎週、毎月のいずれかで繰り返すかどうかを確認します。\n\n- スケジュールは **設定 → バックアップ** で変更できます。\n- 予定時刻にバックアップ ドライブが接続されていない場合は、アクティビティでお知らせします。
+Open backup preferences	バックアップ設定を開く
+Protect your originals	元ファイルを保護
+**Settings → Backups → Protect originals** prevents accidental deletion or renaming on local NTFS drives.\n\n> Note: Protection is not a backup. Turn it off before moving the archive in Explorer.	**設定 → バックアップ → 元ファイルを保護** は、ローカルの NTFS ドライブ上で誤った削除や名前変更を防ぎます。\n\n> Note: 保護はバックアップの代わりにはなりません。エクスプローラーでアーカイブを移動する前にオフにしてください。
+Choose a repository	リポジトリを選択
+Import copies files into your repository, so one must be chosen first.\n\n1. Open **Settings → General**.\n2. Choose your archive folder and save.	インポートはファイルをリポジトリにコピーするため、先にリポジトリを選択する必要があります。\n\n1. **設定 → 全般** を開きます。\n2. アーカイブ フォルダーを選択して保存します。
+Let other work finish	他の処理が終わるのを待つ
+Only one archive job runs at a time. A scan, import, backup or analysis keeps Import unavailable until it ends.\n\n- The bell opens **Activity**, which shows what is running.\n- Wait for it to finish, or pause or cancel it there.	アーカイブの処理は一度に 1 つだけ実行されます。スキャン、インポート、バックアップ、解析のいずれかが実行中の間は、インポートを利用できません。\n\n- ベルのアイコンから **アクティビティ** を開くと、実行中の処理を確認できます。\n- 終了を待つか、そこで一時停止またはキャンセルしてください。
+Open Activity	アクティビティを開く
+Pick a source	ソースを選択
+Select a saved telescope, or **Browse** to the folder your captures are in.\n\n- A USB telescope appears as **Import from Seestar…** or **Import from Dwarflab…** in the Import menu.\n- For Wi-Fi, use **Connect over network** instead.	保存済みの望遠鏡を選択するか、キャプチャのあるフォルダーを **参照** します。\n\n- USB の望遠鏡は、インポート メニューに **Seestar からインポート…** または **Dwarflab からインポート…** と表示されます。\n- Wi-Fi の場合は、代わりに **ネットワーク経由で接続** を使用します。
+Browse for a folder…	フォルダーを参照…
+Scan the source	ソースをスキャン
+**Scan folder** reads the source and lists what can be imported. Nothing is copied yet.\n\n- Files already in the archive are skipped.\n- A large folder can take a while; progress shows in Activity.	**フォルダーをスキャン** はソースを読み取り、インポートできるものを一覧表示します。この時点ではコピーされません。\n\n- アーカイブ済みのファイルはスキップされます。\n- 大きなフォルダーでは時間がかかることがあります。進行状況はアクティビティに表示されます。
+Make sure files are ready	ファイルの準備を確認
+Import copies the **ready** files in the current view. If none are ready:\n\n- Clear the Import search box and **Filters**.\n- Check the **Status** and **Review** columns: duplicates and failed files are skipped.\n- **Import → Review and repair** shows flagged captures.	インポートでは、現在の表示にある **準備完了** のファイルがコピーされます。準備完了のファイルがない場合は、次を確認してください。\n\n- インポートの検索ボックスと **フィルター** をクリアします。\n- **状態** 列と **確認** 列を確認します。重複ファイルや失敗したファイルはスキップされます。\n- **インポート → 確認と修復** にフラグ付きキャプチャが表示されます。
+Clear search and filters	検索とフィルターをクリア
+Open the network connection	ネットワーク接続を開く
+Choose **Connect over network** beside Saved telescope. Discovery starts by itself; no IP address is needed for Seestar, DWARF or Celestron Origin.	保存済みの望遠鏡の横にある **ネットワーク経由で接続** を選択します。検出は自動的に始まります。Seestar、DWARF、Celestron Origin では IP アドレスは不要です。
+Use the same network	同じネットワークを使う
+- Wake the telescope and connect it to your home Wi-Fi, or join the telescope's own hotspot from this PC.\n- Guest Wi-Fi and client isolation block discovery.\n- Click **Search** again after changing networks.	- 望遠鏡を起動して自宅の Wi-Fi に接続するか、この PC から望遠鏡自身のホットスポットに参加します。\n- ゲスト Wi-Fi やクライアント分離が有効だと、検出できません。\n- ネットワークを変更したら、もう一度 **検索** をクリックします。
+Enter the address yourself	アドレスを手動で入力
+If discovery still finds nothing, open **Advanced** in the connection window.\n\n1. Find the telescope's IP address in its app or your router's device list.\n2. Enter it as the IPv4 address and leave **Storage path** blank.\n\n> Note: Use the telescope's address, not this PC's.	それでも検出されない場合は、接続ウィンドウで **詳細設定** を開きます。\n\n1. 望遠鏡のアプリまたはルーターの接続機器一覧で、望遠鏡の IP アドレスを確認します。\n2. IPv4 アドレスとして入力し、**ストレージのパス** は空欄のままにします。\n\n> Note: 入力するのはこの PC ではなく、望遠鏡のアドレスです。
+Check the telescope keeps frames	望遠鏡がフレームを保存しているか確認
+- **Seestar:** turn on **Save Each Frame** and use current firmware.\n- **Celestron Origin:** turn on **Save Raw Images** (Menu → Settings → Advanced).\n- **DWARF:** check the FTP port and credentials under **Advanced**.	- **Seestar:** **Save Each Frame** をオンにし、最新のファームウェアを使用します。\n- **Celestron Origin:** **Save Raw Images** をオンにします (メニュー → 設定 → 詳細)。\n- **DWARF:** **詳細設定** で FTP ポートと資格情報を確認します。
+Connect it as a drive	ドライブとして接続
+Connect the telescope by USB and check that it appears as a drive in **File Explorer**.\n\n- Some telescopes need USB storage mode turned on in their app.\n- Wake or unlock the telescope if Windows shows no drive.	望遠鏡を USB で接続し、**エクスプローラー** にドライブとして表示されることを確認します。\n\n- 望遠鏡のアプリで USB ストレージ モードをオンにする必要がある機種があります。\n- Windows にドライブが表示されない場合は、望遠鏡のスリープを解除するかロックを解除します。
+Choose **Import → Telescopes → Refresh USB devices**. A recognised telescope then appears as **Import from Seestar…** or **Import from Dwarflab…** in the Import menu.	**インポート → 望遠鏡 → USB デバイスを更新** を選択します。認識された望遠鏡は、インポート メニューに **Seestar からインポート…** または **Dwarflab からインポート…** と表示されます。
+Or browse to the drive	またはドライブを参照
+If it still isn't recognised, **Browse** to the capture folder on the telescope drive and scan it like any folder. Save it as a telescope so it's remembered.	それでも認識されない場合は、望遠鏡のドライブ上のキャプチャ フォルダーを **参照** し、他のフォルダーと同様にスキャンします。望遠鏡として保存しておくと、次回から使えます。
+Check the right archive is open	正しいアーカイブが開いているか確認
+The strip under the table shows which repository is open. If it's the wrong one, choose another in **Settings → General**.	表の下の帯に、開いているリポジトリが表示されます。違う場合は、**設定 → 全般** で別のリポジトリを選択してください。
+A search term or active **Filters** hide everything that doesn't match.\n\n- **Clear** empties the search and resets filters.\n- The Filters button shows how many are active, for example **Filters (2)**.	検索語やアクティブな **フィルター** があると、一致しないものはすべて非表示になります。\n\n- **クリア** を押すと、検索が空になりフィルターがリセットされます。\n- フィルター ボタンには、有効な数が表示されます (例: **フィルター (2)**)。
+Choose All Targets	すべてのターゲットを選択
+The target list on the left limits the table to one object. **All Targets**, at the top, shows everything.	左側のターゲット一覧では、表示を 1 つの天体に絞り込みます。一番上の **すべてのターゲット** を選ぶと、すべてが表示されます。
+Select All Targets	すべてのターゲットを選択
+Expand sessions	セッションを展開
+Subs are grouped into one row per session. Expand a row, or turn off **Repository → Group subs by session**, to see every file.	サブは 1 セッションにつき 1 行にまとめられています。行を展開するか、**リポジトリ → サブをセッションごとにグループ化** をオフにすると、すべてのファイルが表示されます。
+Open Repository menu	リポジトリ メニューを開く
+Import the files	ファイルをインポート
+If the archive is empty, the files haven't been imported yet. Go to **Import**, scan the folder and import.	アーカイブが空の場合、ファイルはまだインポートされていません。**インポート** に移動して、フォルダーをスキャンしインポートしてください。
+Go to Import	インポートに移動
+Turn the preview on	プレビューをオンにする
+The preview pane can be hidden. Turn on **Show image preview** in **Settings → General**.	プレビュー ペインは非表示にできます。**設定 → 全般** で **画像のプレビューを表示** をオンにしてください。
+Select one file	ファイルを 1 つ選択
+Select a single file in the table. With nothing selected, the pane shows information about the target instead.	表でファイルを 1 つだけ選択してください。何も選択していない場合、ペインにはターゲットの情報が表示されます。
+Check the file format	ファイル形式を確認
+- FITS, XISF, TIFF, PNG, JPEG and SER preview directly.\n- RAW camera files (CR2, NEF, ARW, DNG) need a Windows image codec.\n- Tile-compressed FITS needs the optional CFITSIO codec.\n\n**Settings → General → Image compatibility** shows what is installed.	- FITS、XISF、TIFF、PNG、JPEG、SER は直接プレビューできます。\n- RAW カメラ ファイル (CR2、NEF、ARW、DNG) には Windows の画像コーデックが必要です。\n- タイル圧縮された FITS には、オプションの CFITSIO コーデックが必要です。\n\n**設定 → 全般 → 画像の互換性** で、インストール済みのものを確認できます。
+Set the app's location	アプリの場所を設定
+AstroArchive looks for common processing apps where they normally install. If yours is elsewhere:\n\n1. Open **Settings → Export**.\n2. Under **Application locations**, choose the program's main `.exe`.\n3. Save preferences.	AstroArchive は、一般的な処理アプリが通常インストールされる場所を探します。別の場所にある場合は次の手順で設定します。\n\n1. **設定 → エクスポート** を開きます。\n2. **アプリケーションの場所** で、プログラムのメインの `.exe` を選択します。\n3. 設定を保存します。
+Try it again	もう一度試す
+Select files, then choose **Export → Open in app…**. Copies are verified before the app opens them; your originals are never changed.	ファイルを選択して、**エクスポート → アプリで開く…** を選択します。コピーは検証されてからアプリで開かれ、元ファイルは変更されません。
+Set your observing town	観測地の市区町村を設定
+Sky details depend on where and when a capture was taken. Open **Settings → Sky & solving** and search for your town, or enter coordinates.	空の情報は、キャプチャを撮影した場所と時刻によって決まります。**設定 → 空とプレートソルブ** を開き、お住まいの市区町村を検索するか、座標を入力してください。
+Open sky preferences	空の設定を開く
+Fix individual captures	個別のキャプチャを修正
+If only some captures are wrong, select them and right-click **Edit metadata → Capture**.\n\n- Set the **town / city** where they were taken.\n- Set the **timezone** if the camera clock wasn't on local time.\n- Changes are saved with the archive; files are never rewritten.	一部のキャプチャだけが間違っている場合は、それらを選択して右クリックし、**メタデータの編集 → キャプチャ** を選びます。\n\n- 撮影した **市区町村** を設定します。\n- カメラの時計が現地時間でない場合は、**タイム ゾーン** を設定します。\n- 変更はアーカイブに保存され、ファイルは書き換えられません。
+Check the details again	詳細をもう一度確認
+Select a capture and open the **i** button above the preview. Target and Moon heights, Moon phase and eclipse details update straight away.	キャプチャを選択し、プレビューの上にある **i** ボタンを開きます。ターゲットと月の高度、月相、日食・月食の情報がすぐに更新されます。
+Set up a plate solver	プレートソルバーを設定
+Plate solving works out where in the sky an image points. Open **Settings → Sky & solving → Plate solver setup** and choose **ASTAP** with its star database, or **Astrometry.net** with an API key.	プレートソルブは、画像が空のどこを向いているかを割り出します。**設定 → 空とプレートソルブ → プレートソルバーの設定** を開き、星のデータベースを使う **ASTAP** か、API キーを使う **Astrometry.net** を選択します。
+Select the captures	キャプチャを選択
+Select the Unknown captures, or a whole session row. One frame per session is solved and the result applies to the session.	不明なキャプチャ、またはセッション行全体を選択します。セッションごとに 1 フレームがプレートソルブされ、結果がセッション全体に適用されます。
+Choose **Repository → Review and analysis → Identify targets…**. Review the matches before applying them; cancelling keeps what's already done.	**リポジトリ → 確認と解析 → ターゲットを識別…** を選択します。適用前に一致結果を確認してください。キャンセルしても、完了済みの分は保持されます。
+Or name it yourself	または自分で名前を付ける
+If you know the target, right-click **Edit metadata** and type it. Names such as M31, NGC 7000 or Andromeda Galaxy are all recognised.	ターゲットがわかっている場合は、右クリックして **メタデータの編集** を選び、入力します。M31、NGC 7000、Andromeda Galaxy などの名前が認識されます。
+A quick tour of pages, importing, browsing, exporting and settings.	ページ、インポート、閲覧、エクスポート、設定をひと通り紹介するクイック ツアーです。
+Choose a repository, pick a source, scan it and import verified copies.	リポジトリを選択し、ソースを選んでスキャンし、検証済みのコピーをインポートします。
+Export captures for stacking	スタック用にキャプチャをエクスポート
+Pick subs, prepare a ready-to-stack folder and open it in your stacking app.	サブを選択し、スタック用にすぐ使えるフォルダーを準備して、スタック用アプリで開きます。
+Back up your archive	アーカイブをバックアップ
+Make a verified copy on another drive and keep it up to date automatically.	別のドライブに検証済みのコピーを作成し、自動的に最新の状態に保ちます。
+Import button is greyed out	インポート ボタンがグレーアウトしている
+Checks each thing Import needs and takes you to whatever is missing.	インポートに必要な項目を順に確認し、不足しているものへ移動します。
+Telescope not found over Wi-Fi	Wi-Fi で望遠鏡が見つからない
+Get discovery working, or connect by IP address, for Seestar, DWARF and Origin.	Seestar、DWARF、Origin で検出を機能させるか、IP アドレスで接続します。
+USB telescope isn't detected	USB の望遠鏡が検出されない
+Make the telescope show up as a drive, refresh devices, or browse to it directly.	望遠鏡をドライブとして認識させ、デバイスを更新するか、直接参照します。
+My files don't show in Repository	リポジトリにファイルが表示されない
+Find captures hidden by search, filters, the target list or grouping.	検索、フィルター、ターゲット一覧、グループ化によって非表示になっているキャプチャを見つけます。
+Preview shows no image	プレビューに画像が表示されない
+Turn the preview on, select one file and check the format is supported.	プレビューをオンにし、ファイルを 1 つ選択して、形式がサポートされているか確認します。
+Open in app can't find my software	「アプリで開く」でソフトウェアが見つからない
+Point AstroArchive at Siril, DSS, PixInsight or another app installed somewhere else.	AstroArchive が、別の場所にインストールされた Siril、DSS、PixInsight などのアプリを見つけられるようにします。
+Sky, Moon or eclipse details look wrong	空、月、日食・月食の情報がおかしい
+Set where and when captures were taken so heights, phases and eclipses are right.	高度、月相、日食・月食が正しく表示されるよう、キャプチャの撮影場所と時刻を設定します。
+Captures show an Unknown target	キャプチャのターゲットが「不明」になっている
+Plate solve captures, or name the target yourself.	キャプチャをプレートソルブするか、ターゲット名を自分で指定します。
+Search help, for example USB, backup or greyed out	ヘルプを検索 (例: USB、バックアップ、グレーアウト)
+Home	ホーム
+How can we help?	お困りのことはありますか?
+Guided fixes and tours open on AstroArchive's own screens. They highlight each control, check your setup as you go, and never import or delete anything for you.	ガイド付きの修正とツアーは、AstroArchive の画面上で開きます。各コントロールを強調表示し、手順ごとに設定を確認します。インポートや削除を代わりに実行することはありません。
+Fix a problem	問題を解決
+Learn by doing	操作しながら学ぶ
+Browse the guide	ガイドを閲覧
+Start guided fix ›	ガイド付き修正を開始 ›
+Start tour ›	ツアーを開始 ›
+{#0} topic ›	{0} 件のトピック ›
+{#0} topics ›	{0} 件のトピック ›
+Related topics	関連トピック
+Start guided fix:	ガイド付き修正を開始:
+Show me in AstroArchive:	AstroArchive で見る:
+Guided fix:	ガイド付き修正:
+Tour:	ツアー:
+{#0} topics · F1 for page help · Ctrl+F to search	{0} 件のトピック · F1 でページのヘルプ · Ctrl+F で検索
+{#0} of {#1} topics match	{0} / {1} 件のトピックが一致
+Tip	ヒント
+Important	重要
+Start this guided walkthrough.	このガイド付きウォークスルーを開始します。
+Open this help topic.	このヘルプ トピックを開きます。
+Guided fixes	ガイド付き修正
+Guided tours	ガイド付きツアー
+Open a GitHub bug report with your system details and recent log filled in.	システム情報と最近のログを入力した状態で、GitHub のバグ報告を開きます。
+Step {#0} of {#1}	ステップ {0} / {1}
+Looks good	問題ありません
+Repository: {0}	リポジトリ: {0}
+No repository is chosen yet.	リポジトリがまだ選択されていません。
+Nothing else is running.	他に実行中の処理はありません。
+Another task is running. Import waits until it finishes.	別の処理が実行中です。終了するまでインポートは待機します。
+Source: {0}	ソース: {0}
+No source folder or telescope is chosen yet.	ソース フォルダーまたは望遠鏡がまだ選択されていません。
+The chosen source folder isn't available. Reconnect the drive or choose another folder.	選択したソース フォルダーを利用できません。ドライブを再接続するか、別のフォルダーを選択してください。
+Scanned: {#0} files found.	スキャン済み: {0} 個のファイルが見つかりました。
+This source hasn't been scanned yet.	このソースはまだスキャンされていません。
+Files are ready to import.	インポートの準備ができたファイルがあります。
+No files are ready to import in this view.	この表示には、インポートの準備ができたファイルがありません。
+Search and filters are clear.	検索とフィルターは解除されています。
+Search or filters are hiding some files.	検索またはフィルターによって一部のファイルが非表示になっています。
+All Targets is selected.	すべてのターゲットが選択されています。
+Only one target is shown.	1 つのターゲットのみが表示されています。
+{#0} captures in this archive.	このアーカイブには {0} 件のキャプチャがあります。
+This archive has no captures yet.	このアーカイブにはまだキャプチャがありません。
+The preview pane is on.	プレビュー ペインはオンです。
+The preview pane is turned off.	プレビュー ペインはオフになっています。
+One file is selected.	ファイルが 1 つ選択されています。
+No file is selected.	ファイルが選択されていません。
+Several files are selected. Select just one.	複数のファイルが選択されています。1 つだけ選択してください。
+{#0} files selected.	{0} 個のファイルが選択されています。
+No files are selected yet.	ファイルがまだ選択されていません。
+Observing location: {0}	観測地: {0}
+coordinates set	座標を設定済み
+No observing town is set.	観測地の市区町村が設定されていません。
+A plate solver is set up.	プレートソルバーが設定されています。
+No plate solver is set up yet.	プレートソルバーがまだ設定されていません。
+Found: {0}	検出: {0}
+No USB telescope is detected right now.	現在、USB の望遠鏡は検出されていません。
+Last backup: {0}	前回のバックアップ: {0}
+No backup has been made yet.	まだバックアップが作成されていません。
+Describe what went wrong. AstroArchive adds the details you tick below so the problem can be reproduced. Nothing is sent until you submit the issue on GitHub.	問題の内容を入力してください。再現できるよう、下でオンにした詳細情報が AstroArchive によって追加されます。GitHub で Issue を送信するまで、何も送信されません。
+AstroArchive hit an error:	AstroArchive でエラーが発生しました:
+Title (optional)	タイトル (省略可)
+What happened?	何が起きましたか?
+Preview of the diagnostics	診断情報のプレビュー
+Folder paths are replaced with [local path]. Images and archive files are never attached. Remove anything else you'd rather not share in GitHub before submitting.	フォルダー パスは [local path] に置き換えられます。画像とアーカイブ ファイルが添付されることはありません。ほかにも共有したくない情報があれば、送信前に GitHub 上で削除してください。
+Open GitHub issue	GitHub の Issue を開く
+Copy report	レポートをコピー
+Save report…	レポートを保存…
+System details	システム情報
+Error	エラー
+Recent activity	最近のアクティビティ
+Recent app log	最近のアプリ ログ
+Install and update errors	インストールと更新のエラー
+Last scan or import report	前回のスキャンまたはインポートのレポート
+About {#0} characters.	約 {0} 文字。
+Copy the description and diagnostics to the clipboard.	説明と診断情報をクリップボードにコピーします。
+Save the description and diagnostics as a text file.	説明と診断情報をテキスト ファイルとして保存します。
+Opens a prefilled issue in your browser to review and submit.	ブラウザーで入力済みの Issue を開きます。内容を確認して送信してください。
+The report is too long for a web link, so the issue draft has a shortened copy. The full report is on your clipboard: paste it into the issue before submitting.	レポートが長すぎて Web リンクに収まらないため、Issue の下書きには短縮版が入っています。完全なレポートはクリップボードにあります。送信前に Issue に貼り付けてください。
+Could not open GitHub. The report has not been sent. Use Copy report or Save report… and attach it to an issue at github.com/arijguest/AstroArchive/issues.	GitHub を開けませんでした。レポートは送信されていません。[レポートをコピー] または [レポートを保存…] を使用し、github.com/arijguest/AstroArchive/issues の Issue に添付してください。
+The report could not be copied	レポートをコピーできませんでした
+The report could not be saved	レポートを保存できませんでした
+Would you like to report this problem? You can review everything before it is sent.	この問題を報告しますか? 送信前にすべての内容を確認できます。
+Walk through this on AstroArchive's own screens.	AstroArchive の実際の画面で手順を確認します。
+Open in Stellarium	Stellarium で開く
+All comets	すべての彗星
+YOUR COMETS	あなたの彗星
+One of your comets · {0}	あなたの彗星 · {0}
+{0} files	{0} 個のファイル
+{0} images	{0} 枚の画像
+1 file	1 個のファイル
+1 image	1 枚の画像
+Open in Stellarium, centred on this object now. Uses Stellarium Web when Stellarium is not installed.	この天体を現在の位置で中央に表示して Stellarium で開きます。Stellarium がインストールされていない場合は Stellarium Web を使います。
+Open in Stellarium at the catalogue position. Uses Stellarium Web when Stellarium is not installed.	カタログ位置で Stellarium を開きます。Stellarium がインストールされていない場合は Stellarium Web を使います。
+Quality	品質
+Sharpness	シャープネス
+Measurements	測定値
+# Help navigation
+Your first import	はじめてのインポート
+Start tour:	ツアーを開始:
+Step-by-step fixes for common problems, on AstroArchive's own screens.	よくある問題を AstroArchive の画面上で順を追って解決します。
+Short tours of importing, exporting and backups.	インポート、エクスポート、バックアップの短いツアーです。
+Search the guide, or start a guided fix or tour.	ガイドを検索するか、ガイド付き修正やツアーを開始します。
+Add automatic descriptions	自動の説明を追加
+Add automatic description	自動の説明を追加
+Under each target name, say what it is, its constellation, how far away it is and how bright, when known. Your own description on a card still wins; Adjust card changes one card.	各ターゲット名の下に、天体の種類、星座、距離、明るさを（分かる範囲で）表示します。カードに入力した説明が優先され、1枚だけ変えるには「カードを調整」を使います。
+What the target is, its constellation, how far away it is and how bright, when known. It replaces your own text while ticked; your text is kept.	天体の種類、星座、距離、明るさを（分かる範囲で）表示します。オンの間は入力した文章の代わりに表示され、入力内容は保持されます。
+Nothing is known about this target yet, so there is no automatic description.	このターゲットの情報はまだないため、自動の説明はありません。
+magnitude {0}	{0}等
+blue magnitude {0}	青色光度 {0}等
+{0} light-years	{0}光年
+{0} million light-years	{0}百万光年
+{0} billion light-years	{0}十億光年
+Distance	距離
+Meteor shower	流星群
+Showers are matched by date only; the meteor's direction was not checked against a radiant.	流星群は日付だけで照合しています。流星の向きを放射点と照合してはいません。
+METEOR SHOWERS THROUGH THE YEAR	一年を通した流星群
+WHAT COLOURS CAN MEAN	色が意味しうること
+Showers are shown as seen from anywhere on Earth, at their zenithal hourly rate. Choose an observing town in Settings to see the rates from your location.	流星群は、地球上のどこから見ても、天頂での1時間あたりの出現数で表示しています。設定で観測地を選ぶと、その場所での出現数が表示されます。
+Each bar spans a shower's usual dates and rises to its peak; the taller the peak, the stronger the shower. The vertical line is today, a dot marks the peak, and a ring means the Moon is more than 60% lit then. Hover a row for details.	各バーは流星群の通常の活動期間を示し、極大に向けて高くなります。極大が高いほど強い流星群です。縦線は今日、点は極大、輪はその時の月の照明が60%を超えることを示します。行にカーソルを合わせると詳細が表示されます。
+As seen from {0} (latitude {1}°). Rows end in the hourly rate you could expect at the radiant's highest; a dashed line means the radiant stays too low to see.	{0}（緯度{1}°）からの見え方です。各行の右端は、放射点が最も高いときに期待できる1時間あたりの出現数です。破線は放射点が低すぎて見えないことを示します。
+
+# Hybrid information, native 3D orbit and setup connectivity.
+Online access	オンラインアクセス
+Hybrid (recommended)	ハイブリッド（推奨）
+Offline	オフライン
+Connectivity	接続モード
+Essential information is included. Additional information downloads when you open a target and is saved for later.	基本情報は含まれています。追加情報は対象を開くとダウンロードされ、後で使えるように保存されます。
+Uses essential and saved information. Additional targets may have limited information.	基本情報と保存済み情報を使用します。その他の対象の情報は限られる場合があります。
+Choose how AstroArchive gets information	AstroArchiveの情報取得方法を選択
+Use Hybrid (recommended)	ハイブリッドを使用（推奨）
+Use Offline	オフラインを使用
+You can change this in Preferences > General > Online access. Local telescope connections remain available.	設定 > 一般 > オンラインアクセスで変更できます。ローカルの望遠鏡接続は引き続き利用できます。
+Choose Hybrid in Preferences > General > Online access to reconnect.	再接続するには、設定 > 一般 > オンラインアクセスでハイブリッドを選択してください。
+Online access is paused. Automatic update checks resume in Hybrid.	オンラインアクセスは停止中です。ハイブリッドで自動更新確認を再開します。
+Downloaded information limit (MiB)	ダウンロード情報の上限（MiB）
+Downloaded information: {0} MiB	ダウンロード済み情報：{0} MiB
+Downloaded information	ダウンロード済み情報
+Downloaded information is unavailable.	ダウンロード済み情報を利用できません。
+Clear downloaded information	ダウンロード済み情報を消去
+Refresh information	情報を更新
+Download missing or updated information for this target.	この対象の不足情報や更新情報をダウンロードします。
+Saved information · retrieved {0}	保存済み情報 · 取得日時 {0}
+ORBIT	軌道
+3D orbit	3D軌道
+Drag or use arrows to rotate. Shift-drag to pan. Focus the orbit or hold Ctrl to zoom with the wheel. Pinch to zoom.	ドラッグまたは矢印キーで回転。Shift＋ドラッグで移動。軌道にフォーカスするかCtrlを押しながらホイールで拡大縮小。ピンチでも操作できます。
+Reset orbit	軌道表示をリセット
+Top view	上面表示
+Orbit plane	軌道面
+Fit orbit	軌道全体を表示
+Inner solar system	内側の太陽系
+Expand orbit	軌道表示を拡大
+Collapse orbit	軌道表示を縮小
+Orbit epoch	軌道元期
+Marker date (UTC)	マーカーの日付（UTC）
+Marker: {0} UTC	マーカー：{0} UTC
+Marker at orbit epoch: JD {0} {1}	軌道元期のマーカー：JD {0} {1}
+Source epoch: JD {0} {1} · {2}	出典元期：JD {0} {1} · {2}
+Dated position unavailable for this solution. Use Orbit epoch.	この解の指定日時の位置は利用できません。「軌道元期」を使用してください。
+Complete orbital elements are unavailable. No orientation has been assumed.	完全な軌道要素がありません。軌道の向きは推定していません。
+Preparing 3D orbit…	3D軌道を準備中…
+The orbit could not be drawn.	軌道を描画できませんでした。
+Approximate orbit · linear distances; body markers enlarged.	概略軌道 · 距離は線形尺度、天体マーカーは拡大表示。
+J2000 ecliptic · two-body geometry, not a precision ephemeris. UTC → TT; TDB differs by less than 2 ms.	J2000黄道面 · 二体問題の概略図で、精密な天体暦ではありません。UTC → TT、TDBとの差は2 ms未満。
+Earth uses the Earth–Moon barycentre approximation.	地球には地球・月の重心による近似を使用します。
+Solar-system overview	太陽系の概要
+Extent clipped	表示範囲外あり
+Perihelion (TDB)	近日点（TDB）
+Perigee	近地点
+Hyperbolic	双曲線軌道
+1 · Installation folder	1 · インストール先
+2 · Online access	2 · オンラインアクセス
+Retry launch	起動を再試行
+Installation completed, but the app could not start.	インストールは完了しましたが、アプリを起動できませんでした。
+Installation complete: AstroArchive package {0} is ready.	インストール完了：AstroArchiveパッケージ {0} を使用できます。
+Repair complete: AstroArchive package {0} is ready.	修復完了：AstroArchiveパッケージ {0} を使用できます。
+Update complete: AstroArchive package {0} is installed.	更新完了：AstroArchiveパッケージ {0} がインストールされました。
+Albedo	アルベド
+Rotation period	自転周期
+Snapshot positions are shown only at the orbit epoch.	スナップショットの位置は軌道元期のみ表示します。
+Perihelion beyond the inner solar system	近日点は内側の太陽系の外
+Updating information…	情報を更新中…
+Information updated.	情報を更新しました。
+No additional information was downloaded. Essential and saved information remain available.	追加情報はダウンロードされませんでした。基本情報と保存済み情報は引き続き利用できます。
+Today	今日
+Set UTC date	UTC日付を設定
+UTC date (YYYY-MM-DD). Press Enter or Set UTC date.	UTC日付（YYYY-MM-DD）。Enterまたは「UTC日付を設定」を押してください。
+Enter a valid UTC date (YYYY-MM-DD) between 1972 and 2026.	1972年から2026年までの有効なUTC日付（YYYY-MM-DD）を入力してください。
+Drag to rotate · Shift-drag to pan · Focus/Ctrl + wheel or pinch to zoom.	ドラッグで回転 · Shift＋ドラッグで移動 · フォーカス/Ctrl＋ホイール、またはピンチで拡大縮小。
+Earth MOID	地球との最小軌道交差距離
+Observations	観測
+{0} observations	{0}件の観測
+Meteor showers	流星群
+Suspected parent of	母天体の可能性があるもの：
+Parabolic	放物線
+Chiron-type	ケイロン型
+Ascending node	昇交点
+Descending node	降交点
+Apogee	遠地点
+Play	再生
+Epoch {0}	元期 {0}
+Marker date slider	マーカー日付のスライダー
+Play or pause the marker date. Space does the same while the orbit has focus.	マーカーの日付を再生または一時停止します。軌道にフォーカスがあるときは、スペースキーでも操作できます。
+Orbit|Sun	太陽
+Orbit|Earth	地球
+Orbit|Mercury	水星
+Orbit|Venus	金星
+Orbit|Mars	火星
+Orbit|Jupiter	木星
+Orbit|Saturn	土星
+Orbit|Uranus	天王星
+Orbit|Neptune	海王星
+now	現在
+on this date	この日付
+Small rings: where it was when you imaged it. Click one for its date.	小さな輪：撮影した日の位置です。クリックで日付を表示。
+A current position is unavailable for this solution.	この解には現在位置がありません。
+{0} nights · {1} to {2}	{0}夜 · {1}〜{2}
+Show starred on top	スター付きを先頭に表示
+Reports…	レポート…

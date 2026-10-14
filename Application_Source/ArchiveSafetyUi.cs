@@ -57,7 +57,7 @@ namespace AstroArchive {
    if(folder.Length>0&&repo!=null){d.SelectTab(6);Repository.ValidateBackupDestination(folder,repo.Root);}
   }
   void ChangeArchiveProtection(){
-   if(repo==null||RepositoryOperationBlocked)return;bool enable=!repo.OriginalsProtected;
+   if(repo==null||RepositoryOperationBlocked||BackgroundConflict(null))return;bool enable=!repo.OriginalsProtected;
    var dialog=new FormWindow(Window,enable?"Protect archived originals":"Turn off archive protection",560,440);
    dialog.Text(enable?"Protect archived originals":"Remove deletion protection",true);
    dialog.Text(enable?"Windows will block deletion and renaming of archived originals in File Explorer for this account. AstroArchive can still apply metadata changes and confirmed deletions. Reading, previewing and copying images continue normally.":"Archived originals will use their previous deletion permissions. Existing images and backups are kept.");
@@ -78,21 +78,63 @@ namespace AstroArchive {
   }
   void RunBackup(string folder,bool zipped,bool incremental,bool automatic){
    BackupResult result=null;List<string> pruned=new List<string>();int keep=settings.BackupKeep;
-   cancellationMessage="Backup canceled. Existing backups are kept.";OpenDumpProgress(automatic?"Automatic backup":"Backing up archive");
+   if(backupPartialEntry!=null){activities.Remove(backupPartialEntry);backupPartialEntry=null;}
+   cancellationMessage="Backup paused. Start a backup to the same folder to resume it, even after restarting AstroArchive.";OpenDumpProgress(automatic?"Automatic backup":"Backing up archive");
    Run(ct=>{
-    result=repo.CreateBackup(folder,zipped,ct,Progress,incremental);
-    try{pruned=BackupSets.Prune(folder,repo.RepositoryId(),keep,ct);}catch(Exception e){if(e is OperationCanceledException||!(e is IOException||e is UnauthorizedAccessException))throw;}
+    try{
+     result=repo.CreateBackup(folder,zipped,ct,Progress,incremental);
+     try{pruned=BackupSets.Prune(folder,repo.RepositoryId(),keep,ct);}catch(Exception e){if(e is OperationCanceledException||!(e is IOException||e is UnauthorizedAccessException))throw;}
+    }catch(Exception){Window.Dispatcher.BeginInvoke(DispatcherPriority.Background,new Action(()=>{settings.PausedBackupFolder=folder;SaveSettings();RefreshBackupPartial();}));throw;}
     return BackupSummary(result)+(pruned.Count>0?" Removed "+pruned.Count+" older backup"+(pruned.Count==1?"":"s")+".":"");
    },message=>{
-    settings.LastBackupUtc=DateTime.UtcNow.ToString("o",CultureInfo.InvariantCulture);settings.BackupReminderUtc=null;SaveSettings();
+    settings.LastBackupUtc=DateTime.UtcNow.ToString("o",CultureInfo.InvariantCulture);settings.BackupReminderUtc=null;if(settings.PausedBackupFolder==folder)settings.PausedBackupFolder=null;SaveSettings();RefreshBackupPartial();
     L("StatusLabel").Text=message;if(completionActivity!=null){completionActivity.OutputPath=result.Compressed?Path.GetDirectoryName(result.Path):result.Path;completionActivity.ReportTitle="Restore this backup";completionActivity.Report=result.Path+"\n"+message+"\nTo restore, choose Settings > Backups > Restore a backup…"+(result.Compressed?"":", or choose the backup’s Repository folder in Settings > General.");}
     if(!automatic&&settings.BackupFrequency=="Off")Window.Dispatcher.BeginInvoke(DispatcherPriority.Background,new Action(OfferBackupSchedule));
    },automatic?"Automatic backup":"Backing up archive");
+   if(currentActivity!=null)currentActivity.CancelLabel="Pause";
   }
+  ActivityEntry backupPartialEntry;string backupPartialNote;
+  // A paused or interrupted backup stays in Activity until it finishes, is discarded or is dismissed. Its copies live beside
+  // the finished backups, so the next backup to that folder resumes it however much later and whether or not the app restarted.
+  void RefreshBackupPartial(){
+   if(repo==null||closing)return;var repository=repo;var folders=new List<string>();
+   foreach(string candidate in new[]{settings.BackupDestination,settings.PausedBackupFolder})if(!string.IsNullOrWhiteSpace(candidate)&&!folders.Any(x=>string.Equals(x,candidate,StringComparison.OrdinalIgnoreCase)))folders.Add(candidate);
+   System.Threading.Tasks.Task.Run(()=>{
+    PartialBackup found=null;string where=null;
+    try{string id=repository.RepositoryId();foreach(string folder in folders){if(!Directory.Exists(folder))continue;var partial=Repository.FindPartialBackup(folder,id);if(partial!=null){found=partial;where=folder;break;}}}
+    catch(Exception e){if(!(e is IOException||e is UnauthorizedAccessException||e is ArgumentException||e is NotSupportedException))throw;}
+    if(!closing)Window.Dispatcher.BeginInvoke(new Action(()=>{if(repo==repository)ShowBackupPartial(found,where);}));
+   });
+  }
+  void ShowBackupPartial(PartialBackup partial,string folder){
+   if(closing)return;bool dismissed=partial!=null&&settings.DismissedBackupPartials!=null&&settings.DismissedBackupPartials.Contains(partial.Name);
+   backupPartialNote=partial==null?null:"A paused backup with "+partial.Files.Count+" file"+(partial.Files.Count==1?"":"s")+" ("+ImportWorkflow.Size(partial.Bytes)+") is saved in "+folder+". Creating a backup in that folder resumes it.";
+   if(partial==null||dismissed){if(backupPartialEntry!=null){activities.Remove(backupPartialEntry);backupPartialEntry=null;RenderActivity();}return;}
+   if(operationBusy&&currentActivity!=null&&currentActivity.Running)return;
+   var entry=backupPartialEntry;if(entry==null||!activities.Contains(entry)){entry=backupPartialEntry=AddActivity("Backup paused");}
+   entry.Running=false;entry.NeedsReview=true;entry.Canceled=false;entry.Failed=false;entry.DiscardLabel="Discard backup";entry.ResumeTip="Copy the remaining files, then verify and publish this backup. Files changed since the pause are copied again.";
+   entry.Status="Paused with "+partial.Files.Count+" file"+(partial.Files.Count==1?"":"s")+" ("+ImportWorkflow.Size(partial.Bytes)+") safely copied to "+folder+". Resume, or start a backup there, to continue.";
+   entry.ResumeAvailable=()=>repo!=null&&!RepositoryOperationBlocked&&!operationBusy;
+   entry.Resume=()=>{if(repo==null||RepositoryOperationBlocked||operationBusy)return;RunBackup(folder,partial.Compressed,settings.BackupIncremental,false);};
+   entry.Discard=()=>{if(LocalizedMessage.Show(Window,"Discard the paused backup and its "+ImportWorkflow.Size(partial.Bytes)+" of copied files?\n\nCompleted backups are not affected. The next backup will start from the beginning.","Discard paused backup",MessageBoxButton.OKCancel)!=MessageBoxResult.OK)return;
+    try{Repository.DiscardPartialBackup(partial);}catch(Exception e){if(!(e is IOException||e is UnauthorizedAccessException))throw;entry.Status="Could not remove the paused backup: "+e.Message;RenderActivity();return;}
+    if(settings.PausedBackupFolder==folder)settings.PausedBackupFolder=null;SaveSettings();activities.Remove(entry);if(backupPartialEntry==entry)backupPartialEntry=null;backupPartialNote=null;RenderActivity();};
+   entry.Dismiss=()=>{(settings.DismissedBackupPartials=settings.DismissedBackupPartials??new List<string>()).Add(partial.Name);SaveSettings();activities.Remove(entry);if(backupPartialEntry==entry)backupPartialEntry=null;RenderActivity();};
+   RenderActivity();
+  }
+  // A themed heads-up before work that may run for a long time; the user can opt out per kind in Preferences.
+  bool ConfirmLongProcess(string key,string title,string message){
+   if(settings.SuppressedWarnings!=null&&settings.SuppressedWarnings.Contains(key))return true;
+   var d=new FormWindow(Window,title,540,340);d.Text(title,true);d.Text(message);d.Text("You can cancel from Activity at any time; work already completed is kept.");var skip=d.Check("Don’t warn me again",false);d.Accept("Continue",()=>true);
+   if(!d.Show())return false;
+   if(skip.IsChecked==true){(settings.SuppressedWarnings=settings.SuppressedWarnings??new List<string>()).Add(key);SaveSettings();}
+   return true;
+  }
+  string ArchiveSizeNote(){return repositorySize==null?"":" This archive uses "+repositorySize.Summary+".";}
   FormWindow BackupDialog(out TextBox destination,out CheckBox compress,out CheckBox incremental){
-   destination=null;compress=null;incremental=null;if(repo==null||RepositoryOperationBlocked)return null;var dialog=new FormWindow(Window,"Back up archive",600,570);
+   destination=null;compress=null;incremental=null;if(repo==null||RepositoryOperationBlocked)return null;var dialog=new FormWindow(Window,"Back up archive",600,640);
    dialog.Text("Create a recoverable backup",true);dialog.Text("Copies originals, edited files and the current archive database. Choose a folder outside the archive; a separate drive is best.");
-   dialog.Text((repositorySize==null?"":"This archive uses "+repositorySize.Summary+". ")+"Large backups can take a long time to create and verify. You can cancel safely.");
+   dialog.Text((repositorySize==null?"":"This archive uses "+repositorySize.Summary+". ")+"Large backups can take a long time to create and verify. You can pause a running backup from Activity; progress is kept, even if AstroArchive is closed, and the next backup to the same folder resumes it.");if(backupPartialNote!=null)dialog.Text(backupPartialNote);
    var folderInput=dialog.Input("Save backup in",settings.BackupDestination??"");destination=folderInput;folderInput.IsReadOnly=true;
    dialog.Button("Choose backup folder…",()=>{string path=Folder("Choose a backup destination outside the archive",folderInput.Text,dialog.Window);if(path!=null)folderInput.Text=path;});
    compress=dialog.Check("Compress as ZIP (lossless)",settings.CompressBackup);dialog.Text("Without compression, the backup is a normal folder. ZIP compression preserves every image byte, including resolution and metadata.");

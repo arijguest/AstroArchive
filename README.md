@@ -167,6 +167,14 @@ It follows your Windows language, or choose one in **Settings → General → La
 
 ### Fresh from the latest releases
 
+**[3.3.2](https://github.com/arijguest/AstroArchive/releases/tag/v3.3.2.2)** draws a solar-cycle corona on the total eclipse sky map, adds upcoming sky events to All Targets, manages telescope profiles in Settings and starts Import with Scan folder….
+
+**[3.3.1 prerelease](https://github.com/arijguest/AstroArchive/releases/tag/v3.3.1.1)** tidies Analytics exports (smaller title, fuller layouts, capitalised automatic descriptions with comet orbits), stops scoring stacks and solar images for quality, adds a date format setting and first-run observing location, groups the metadata exports under Export > Metadata, keeps your place after deleting files, adds copy workers to long imports and makes backups resumable.
+
+**[3.3.0 prerelease](https://github.com/arijguest/AstroArchive/releases/tag/v3.3.0.1)** sharpens the 3D orbit viewer so the target's place now stands out, adds small rings for the dates you imaged it (grouped when close together), and rolls up everything since 3.2.8: background processes, distance and comet data, Meteors and the help centre.
+
+**[3.2.8 prerelease](https://github.com/arijguest/AstroArchive/releases/tag/v3.2.8.1)** rebuilds Help as a help centre with guided fixes and tours that walk the real window, adds Report a problem with the app log attached, groups comets under one target with a fuller information pane, applies capture-town timezones to local capture clocks, and repairs thumbnail credits.
+
 **[3.2.7](https://github.com/arijguest/AstroArchive/releases/tag/v3.2.7.2)** retains the 3.2.6 application improvements and makes publisher signing optional. Unsigned publication keeps checksum and update-feed validation; Windows may still block unsigned packages.
 
 **[3.2.6](https://github.com/arijguest/AstroArchive/releases/tag/v3.2.6.1)** reorganises the information pane with the overview before the image, a highlighted fun fact, compact or expandable image credits, and a single expandable Sources heading. It also simplifies solar eclipse displays, moves capture town/city editing into Edit metadata, improves DSO obstruction scoring, and hardens FITS and very dark previews.
@@ -178,6 +186,8 @@ It follows your Windows language, or choose one in **Settings → General → La
 **[3.2.3 prerelease](https://github.com/arijguest/AstroArchive/releases/tag/v3.2.3.1)** detects solar and lunar eclipses in your Sun and Moon captures, adds daytime sky maps, in-depth overviews for 170 popular targets and image-quality scoring.
 
 **[3.2.2 prerelease](https://github.com/arijguest/AstroArchive/releases/tag/v3.2.2.1)** adds chart types, target cards for your top or chosen targets as images or video, adjustable card images, and centred folder bars under each table.
+
+**3.2.9** adds a single hybrid installer, an explicit Hybrid/Offline connectivity choice, bounded downloaded information, and native 3D orbit views. [Read the hybrid information guide](docs/HYBRID_INFORMATION.md).
 
 **[3.2.1 prerelease](https://github.com/arijguest/AstroArchive/releases/tag/v3.2.1.1)** adds offline target information and thumbnails, seven interface languages, and corrected planetary sky positions from capture times.
 

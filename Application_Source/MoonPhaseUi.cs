@@ -42,9 +42,14 @@ namespace AstroArchive {
    var panel=(FrameworkElement)Window.FindName("SkyFactsPanel");var facts=(Grid)Window.FindName("SkyFacts");var note=L("SkyFactsNote");
    facts.Children.Clear();facts.RowDefinitions.Clear();note.Text="";
    bool relevant=frame!=null&&sky!=null&&!CaptureSky.IsCalibration(frame);var moon=relevant?sky.Moon:null;
+   // A solar eclipse capture is described by the eclipse card; the Moon's phase, elevation and separation add nothing.
+   bool solarEclipse=relevant&&sky.Eclipse!=null&&sky.Eclipse.Solar;if(solarEclipse)moon=null;
+   // A meteor within a named shower's usual dates shows the shower; the time must be known, the site narrows the list to showers that can be seen from it.
+   string shower=relevant&&sky.Utc.HasValue&&string.Equals(frame.Target,"Meteor",StringComparison.OrdinalIgnoreCase)?MeteorShowers.Describe(sky.Utc.Value,sky.HasHorizon?sky.Latitude:(double?)null):null;
    // Shown only when there is something to say: a timed capture or a horizon position.
-   panel.Visibility=relevant&&(moon!=null||sky.Eclipse!=null||sky.HasPosition&&sky.HasHorizon)?Visibility.Visible:Visibility.Collapsed;
+   panel.Visibility=relevant&&(moon!=null||sky.Eclipse!=null||shower!=null||sky.HasPosition&&sky.HasHorizon)?Visibility.Visible:Visibility.Collapsed;
    if(!relevant)return;
+   if(shower!=null)SkyFact(facts,"Meteor shower",shower);
    if(sky.Eclipse!=null)EclipseDetails(facts,sky,frame);
    if(sky.BodyBelowHorizon)SkyFact(facts,"Check capture metadata",sky.Body+" is predicted below the horizon. Check the target, capture town / city, clock and timezone in Edit metadata.");
    if(sky.HasPosition&&sky.HasHorizon)SkyFact(facts,"Target elevation",(sky.ApproximatePosition?"≈ ":"")+CaptureSky.Elevation(sky.Altitude,sky.Azimuth));
@@ -55,8 +60,10 @@ namespace AstroArchive {
     if(moon.HasHorizon)SkyFact(facts,"Moon elevation",CaptureSky.Elevation(moon.Altitude,moon.Azimuth));
     if(moon.HasTarget&&sky.Body!="Moon")SkyFact(facts,"Moon to target",(sky.ApproximatePosition?"≈ ":"")+Degrees(moon.TargetSeparation)+" apart");
    }
-   note.Text=moon==null?"":!moon.HasHorizon?(sky.Body=="Sun"&&!moon.HasTopocentric?"Choose an observing town / city in Settings > Sky & solving for elevations and solar eclipse detection.":"Choose an observing town / city in Settings > Sky & solving for elevations."):"Geometric elevations at the capture time; refraction excluded.";
+   if(solarEclipse)note.Text=(sky.HasHorizon?"Geometric elevations at the capture time; refraction excluded. ":"")+"Eclipse times are for the observing location and come from the bundled Moon and Sun models at the recorded time; check the capture clock if it looks wrong.";
+   else note.Text=moon==null?"":!moon.HasHorizon?(sky.Body=="Sun"&&!moon.HasTopocentric?"Choose an observing town / city in Settings > Sky & solving for elevations and solar eclipse detection.":"Choose an observing town / city in Settings > Sky & solving for elevations."):"Geometric elevations at the capture time; refraction excluded.";
    if(sky.Eclipse!=null&&!sky.Eclipse.Solar)note.Text+=(sky.Eclipse.Solar?" Eclipse times are for the observing location.":" Eclipse times run from the Moon entering Earth's outer shadow to leaving it.")+" Eclipse coverage comes from the bundled Moon and Sun models at the recorded time; check the capture clock if it looks wrong.";
+   if(shower!=null)note.Text+=(note.Text.Length>0?" ":"")+"Showers are matched by date only; the meteor's direction was not checked against a radiant.";
   }
  }
 }

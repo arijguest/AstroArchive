@@ -12,6 +12,23 @@ namespace AstroArchive {
   }
   static DateTime Utc(int y,int mo,int d,int h,int mi,int s){return new DateTime(y,mo,d,h,mi,s,DateTimeKind.Utc);}
   static void EclipseTests(){
+   Test("Santa Ponsa eclipse uses the chosen town's summer clock and refreshes after a location edit",()=>{
+    var town=new ObservingCity{Id=6324533,Name="Santa Ponsa",Latitude=39.50868,Longitude=2.4766};
+    var frame=new Frame{Target="Sun",Kind="Stack",Format="FITS",RA=0,Dec=0,Observed="2026-08-12T20:32:54.797",ObservedUtc="2026-08-12T20:32:54.797Z",TimeZoneId="UTC",TimeSource="FITS UTC"};
+    var wrong=CaptureSky.Resolve(frame,new Settings{Latitude=town.Latitude,Longitude=town.Longitude});Check(wrong.BodyBelowHorizon&&wrong.Eclipse==null,"Incorrect UTC interpretation did not reproduce the reported failure");
+    var changed=new MetadataPatch(new System.Collections.Generic.Dictionary<string,string>(),true,town).Apply(frame);
+    var expected=new DateTime(2026,8,12,18,32,54,797,DateTimeKind.Utc);var sky=CaptureSky.Resolve(changed,null);
+    Check(sky.Utc==expected&&Util.Time(changed.ObservedUtc)==expected&&changed.Observed==frame.Observed,"Town did not convert CEST to UTC or changed the original clock");
+    Check(sky.HasHorizon&&!sky.BodyBelowHorizon&&sky.Altitude>1&&sky.Altitude<4&&sky.Eclipse!=null&&sky.Eclipse.Solar&&sky.Eclipse.Obscuration>0.995,"Corrected capture did not show the near-total eclipse above the western horizon: "+sky.Summary);
+    Check(sky.Key!=wrong.Key&&sky.PositionOfDate&&changed.Facts["TimeZoneId"].Source=="Capture town / city","Map was not invalidated or timezone provenance lost");
+    // Existing records already carrying a chosen town also repair stale, assumed UTC when resolved.
+    CaptureSite.Apply(frame,town);Check(CaptureSky.Resolve(frame,null).Key==sky.Key,"Previously chosen city still used stale imported UTC");
+    var london=new ObservingCity{Id=2643743,Name="London",Latitude=51.50853,Longitude=-0.12574};
+    var moved=new MetadataPatch(new System.Collections.Generic.Dictionary<string,string>(),true,london).Apply(changed);var later=CaptureSky.Resolve(moved,null);
+    Check(later.Utc==expected.AddHours(1)&&later.Key!=sky.Key&&later.BodyBelowHorizon&&later.Eclipse==null,"Changing the town did not recalculate UTC, horizon and eclipse");
+    var returned=new MetadataPatch(new System.Collections.Generic.Dictionary<string,string>(),true,town).Apply(moved);
+    Check(CaptureSky.Resolve(returned,null).Key==sky.Key&&CaptureSky.Resolve(returned,null).Utc==expected,"Repeated location changes accumulated timezone offsets");
+   });
    Test("Changing a capture town refreshes eclipse, horizon and review evidence",()=>{
     var frame=new Frame{Target="Sun",Kind="Light",Status="Imported",ObservedUtc="2024-04-08T18:17:16Z",Latitude=25.29,Longitude=-104.14};
     var previous=CaptureScreening.Site;CaptureScreening.Site=()=>new Settings();
@@ -95,6 +112,15 @@ namespace AstroArchive {
     var dated=CaptureSky.Resolve(new Frame{Target="Moon",Kind="Light",Observed="2025-03-14",TimeSource="FITS date only"},null);
     Check(dated.HasPosition&&!dated.HasHorizon&&MoonEphemeris.Separation(dated.TargetOfDate,exact.TargetOfDate)<8,"A date-only lunar capture lost its Moon position");
     Check(!CaptureSky.Resolve(new Frame{Target="Mars",Kind="Light",Observed="2025-03-14T08:58:43"},null).HasPosition,"A planet was placed without a clock");
+    // A stored pointing far from the Moon at the capture time is stale and must not place the target marker; a nearby one or a real solve is kept.
+    var stale=CaptureSky.Resolve(new Frame{Target="Moon",Kind="Stack",Observed="2025-03-14T06:58:43Z",TimeSource="FITS UTC",RA=SkyOrientation.Wrap(exact.RA+90),Dec=-exact.Dec},null);
+    Check(stale.HasPosition&&stale.PositionOfDate&&MoonEphemeris.Separation(stale.TargetOfDate,exact.TargetOfDate)<0.01&&stale.Evidence.Contains("is not used"),"A stale lunar pointing placed the Moon target far from the Moon");
+    var staleDated=CaptureSky.Resolve(new Frame{Target="Moon",Kind="Stack",Observed="2025-03-14T08:58:43",TimeSource="Capture timestamp",RA=SkyOrientation.Wrap(exact.RA+90),Dec=-exact.Dec},null);
+    Check(staleDated.HasPosition&&MoonEphemeris.Separation(staleDated.TargetOfDate,exact.TargetOfDate)<1.5,"A stale lunar pointing survived an unzoned clock");
+    var near=CaptureSky.Resolve(new Frame{Target="Moon",Kind="Stack",Observed="2025-03-14T06:58:43Z",TimeSource="FITS UTC",RA=SkyOrientation.Wrap(exact.RA+1.5),Dec=exact.Dec},null);
+    Check(near.HasPosition&&!near.PositionOfDate&&Math.Abs(near.RA-SkyOrientation.Wrap(exact.RA+1.5))<1e-9,"A pointing near the Moon was replaced");
+    var solved=CaptureSky.Resolve(new Frame{Target="Moon",Kind="Stack",Observed="2025-03-14T06:58:43Z",TimeSource="FITS UTC",Sky=new SkyGeometry{RA=SkyOrientation.Wrap(exact.RA+90),Dec=-exact.Dec,Evidence="Plate solved"}},null);
+    Check(solved.HasPosition&&!solved.PositionOfDate&&Math.Abs(solved.RA-SkyOrientation.Wrap(exact.RA+90))<1e-9,"A plate-solved lunar position was replaced by the calculated Moon");
     var deepSky=new Frame{Target="M31",Kind="Light",Observed="2024-04-08T18:17:16Z",TimeSource="FITS UTC",Latitude=25.29,Longitude=-104.14};Check(CaptureSky.Resolve(deepSky,null).Eclipse==null,"A deep-sky capture was given an eclipse");
     var sections=TargetNavigation.Build(new[]{sun,new Frame{Target="Sun",Kind="Light"}},f=>f==sun?Eclipses.SolarSection:f.Target);
     Check(sections.Any(t=>t.Name==Eclipses.SolarSection&&t.Files==1&&t.Group=="Solar system")&&sections.Any(t=>t.Name=="Sun"&&t.Files==1),"Eclipse captures did not list in their own Solar system section");

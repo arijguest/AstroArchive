@@ -18,6 +18,39 @@ namespace AstroArchive {
      Check(ObservingCities.Search("x").Count==0&&ObservingCities.Search("no-such-town-zzzzzz").Count==0,"Short or unknown queries select a location");
     }finally{CultureInfo.CurrentCulture=previous;}
    });
+   Test("Date format follows the observing location until chosen in Preferences",()=>{
+    var settings=new Settings();DateFormats.Configure(settings);var day=new DateTime(2026,3,4);
+    Check(DateFormats.Format(day)=="04/03/26"&&DateFormats.Hint=="DD/MM/YY","No location should keep day-first dates");
+    var draft=new ObservingSiteChoice(settings);draft.Select(ObservingCities.Search("New York USA").First());draft.Save(settings);DateFormats.Configure(settings);
+    Check(settings.ObservingCountryCode=="US"&&DateFormats.Format(day)=="03/04/26","A US location should switch to month-first dates");
+    settings.DateFormat=DateFormats.DayFirst;DateFormats.Configure(settings);Check(DateFormats.Format(day)=="04/03/26","An explicit day-first choice should beat the US location");
+    settings.DateFormat=DateFormats.Automatic;settings.ObservingCountryCode=null;DateFormats.Configure(settings);Check(DateFormats.Format(day)=="03/04/26","A saved city without a country should be resolved from the catalogue");
+    DateTime parsed;Check(DateFormats.TryParse("12/31/26",out parsed)&&parsed==new DateTime(2026,12,31)&&DateFormats.TryParse("2026-03-04",out parsed)&&parsed==day&&!DateFormats.TryParse("31/12/26",out parsed),"Month-first parsing is wrong");
+    settings.DateFormat=DateFormats.DayFirst;DateFormats.Configure(settings);Check(DateFormats.TryParse("31.12.2026",out parsed)&&parsed==new DateTime(2026,12,31)&&!DateFormats.TryParse("12/31/26",out parsed),"Day-first parsing is wrong");
+    DateFormats.Configure(new Settings());
+   });
+   Test("Corona orientation follows the Sun's axis and its shape follows the solar cycle",()=>{
+    Check(Math.Abs(SolarCorona.PositionAngle(2448908.5,199.90988)-26.27)<0.1,"Position angle disagrees with Meeus example 29.a: "+SolarCorona.PositionAngle(2448908.5,199.90988));
+    Check(SolarCorona.Activity(2019.9)<0.05&&SolarCorona.Activity(2014.3)>0.95&&SolarCorona.Activity(2024.8)>0.95&&SolarCorona.Activity(2008.9)<0.05,"Cycle extremes are misplaced");
+    Check(SolarCorona.Activity(2017.0)>0.1&&SolarCorona.Activity(2017.0)<0.9&&SolarCorona.Activity(1900.0)>=0&&SolarCorona.Activity(2100.0)<=1,"Cycle phase is not bounded or smooth");
+    Check(SolarCorona.Reach(0,0,false)>SolarCorona.Reach(0,Math.PI/2,false)+1.5&&SolarCorona.Reach(1,0,false)-SolarCorona.Reach(1,Math.PI/2,false)<1.0,"Minimum should be equatorial, maximum rounder");
+    var sun=SkyVector.Equatorial(100,20);var pole=new SkyVector(0,0,1);var right=SkyVector.Equatorial(190,0);var up=new SkyVector(0,0,1);
+    double north=SolarCorona.ScreenAngle(sun,pole,0,right,up),east=SolarCorona.ScreenAngle(sun,pole,90,right,up);
+    Check(Math.Abs(Math.Abs(north)-Math.PI/2)<0.2,"Celestial north should point up on screen: "+north);
+    double turn=Math.Abs(east-north);turn=Math.Min(turn,2*Math.PI-turn);Check(Math.Abs(turn-Math.PI/2)<0.05,"A 90 degree position angle should turn the axis a quarter turn: "+turn);
+    });
+   Test("Pictures of the Sun from non-solar scopes take the SOL filter and Totality stays a Sun target",()=>{
+    Check(ObservationTargets.NeedsSolarFilter(new Frame{Target="Sun",Kind="Light",Telescope="Seestar S50"})&&ObservationTargets.NeedsSolarFilter(new Frame{Target="Solar",Kind="Light",Telescope="DWARF 3"}),"Seestar and DWARF Sun frames need SOL");
+    Check(!ObservationTargets.NeedsSolarFilter(new Frame{Target="Sun",Kind="Light",Telescope="Lunt LS60"})&&!ObservationTargets.NeedsSolarFilter(new Frame{Target="M31",Kind="Light",Telescope="Seestar S50"})&&!ObservationTargets.NeedsSolarFilter(new Frame{Target="Sun",Kind="Dark",Telescope="Seestar S50"}),"Solar scopes, other targets and calibration keep their filters");
+    Check(ObservationTargets.BodyOf("Totality")=="Sun"&&ObservationTargets.BodyOf("Moon")=="Moon"&&ObservationTargets.BodyOf("M31")==null,"Totality is not treated as a Sun target");
+   });
+   Test("Totality is tagged once and stays removed",()=>{
+    var store=new System.Collections.Generic.Dictionary<string,CaptureAnnotation>();var frame=new Frame{Hash="abc"};var edit=new AnnotationEdit();edit.AutoTags.Add(Eclipses.TotalityTag);
+    Check(CaptureAnnotations.Edit(store,new[]{frame},edit)==1&&frame.Tags.Contains("Totality"),"Totality tag was not added");
+    var remove=new AnnotationEdit();remove.RemoveTags.Add("Totality");CaptureAnnotations.Edit(store,new[]{frame},remove);
+    Check(CaptureAnnotations.Edit(store,new[]{frame},edit)==0&&(frame.Tags==null||!frame.Tags.Contains("Totality")),"A removed Totality tag came back");
+    Check(Eclipses.IsTotal(new EclipseInfo{Solar=true,Obscuration=0.995})&&!Eclipses.IsTotal(new EclipseInfo{Solar=true,Obscuration=0.9})&&!Eclipses.IsTotal(new EclipseInfo{Solar=false,Obscuration=1}),"Totality threshold wrong");
+   });
    Test("Choosing a city is transactional and legacy coordinates remain usable",()=>{
     var settings=Util.Deserialize<Settings>("{\"Latitude\":51.5,\"Longitude\":-0.1}");var draft=new ObservingSiteChoice(settings);
     Check(draft.Label=="Previously saved location"&&draft.Latitude==51.5&&draft.Longitude==-0.1,"Old location silently changed");

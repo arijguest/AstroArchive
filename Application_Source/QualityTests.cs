@@ -17,7 +17,7 @@ namespace AstroArchive {
   static void QualityLibraryTests(){
    Test("Quality: only linear light subs are eligible and every skip gives a reason",()=>{
     Check(QualityReason(f=>{})=="","A plain FITS light sub was refused");
-    Check(QualityReason(f=>f.Kind="Stack")=="","A linear stack was refused");
+    Check(QualityReason(f=>f.Kind="Stack").Contains("stacks"),"A stack was graded");Check(QualityReason(f=>f.Target="Sun").Contains("solar")&&QualityReason(f=>{f.Target="Unknown";f.ObservationMode="Solar";}).Contains("solar")&&QualityReason(f=>f.Target="Jupiter")==""&&QualityReason(f=>f.Target="Moon")=="","Solar images were graded, or planetary and lunar ones refused");
     Check(QualityReason(f=>f.Kind="Video").Contains("recordings"),"A video was graded");
     foreach(string kind in new[]{"Dark","Flat","Bias","Master dark"})Check(QualityReason(f=>f.Kind=kind).Contains("calibration"),kind+" frames were graded");
     Check(QualityReason(f=>{f.Kind="Light";f.Target="Calibration";}).Contains("calibration"),"A calibration target was graded");
@@ -43,23 +43,26 @@ namespace AstroArchive {
     Check(!QualityEligibility.IsDisc(QualitySub("d","s","2026-10-05T21:00:00Z","M51"))&&QualityEligibility.KindOf(QualitySub("e","s","2026-10-05T21:00:00Z","M51"))==QualityKind.Stars,"A deep-sky target was treated as a disc");
     var mosaic=QualitySub("f","s","2026-10-05T21:00:00Z");mosaic.Bayer="RGGB";Check(QualityEligibility.HasMosaic(mosaic)&&!QualityEligibility.HasMosaic(QualitySub("g","s","2026-10-05T21:00:00Z")),"Bayer pattern detection wrong");
    });
-   Test("Quality: scores reach captures by content, compare like with like, and skip stale or mismatched measurements",()=>{
+   Test("Quality: scores reach captures by content, compare like with like, keep earlier-version results and skip unknown or mismatched measurements",()=>{
     var frames=new List<Frame>();var measurements=new Dictionary<string,QualityMeasurement>();
     for(int i=0;i<10;i++){var f=QualitySub("one"+i,"one","2026-10-05T"+(10+i)+":00:00Z");frames.Add(f);measurements[f.Hash]=QualityShot(f.Hash,2.0+0.3*i);}
     for(int i=0;i<10;i++){var f=QualitySub("two"+i,"two","2026-10-06T"+(10+i)+":00:00Z");frames.Add(f);measurements[f.Hash]=QualityShot(f.Hash,1.6+0.1*i);}
     var stack=QualitySub("stack","one","2026-10-05T22:30:00Z");stack.Kind="Stack";frames.Add(stack);measurements[stack.Hash]=QualityShot("stack",1.0);
-    var stale=QualitySub("stale","one","2026-10-05T22:40:00Z");frames.Add(stale);var old=QualityShot("stale",2.0);old.Version=QualityMeter.Version-1;measurements[stale.Hash]=old;
+    var stale=QualitySub("stale","earlier","2026-10-05T22:40:00Z","M42");frames.Add(stale);var old=QualityShot("stale",4.0);old.Version=QualityMeter.OldestShown;measurements[stale.Hash]=old;
+    var future=QualitySub("future","one","2026-10-05T22:45:00Z");frames.Add(future);var newer=QualityShot("future",2.0);newer.Version=QualityMeter.Version+1;measurements[future.Hash]=newer;
+    var ancient=QualitySub("ancient","one","2026-10-05T22:46:00Z");frames.Add(ancient);var oldest=QualityShot("ancient",2.0);oldest.Version=QualityMeter.OldestShown-1;measurements[ancient.Hash]=oldest;
     var wrong=QualitySub("wrong","one","2026-10-05T22:50:00Z");frames.Add(wrong);var disc=QualityShot("wrong",2.0);disc.Kind=QualityKind.Disc;measurements[wrong.Hash]=disc;
     var unmeasured=QualitySub("none","one","2026-10-05T22:55:00Z");frames.Add(unmeasured);
     QualityAnnotator.Apply(frames,measurements,false);
     Check(frames.Take(20).All(f=>f.QualityScore.HasValue&&f.QualityPercentile>=0&&f.QualityPercentile<=1),"Eligible subs were not scored");
-    Check(stack.QualityScore.HasValue&&frames[0].QualityPercentile==1,"A stack was not scored or was ranked among the subs");
-    Check(!stale.QualityScore.HasValue&&!wrong.QualityScore.HasValue&&!unmeasured.QualityScore.HasValue,"Stale, mismatched or missing measurements were scored");
+    Check(!stack.QualityScore.HasValue&&stack.QualityTooltip.Contains("stacks")&&frames[0].QualityPercentile==1,"A stack with an earlier score was still scored or ranked");
+    Check(!future.QualityScore.HasValue&&!ancient.QualityScore.HasValue&&!wrong.QualityScore.HasValue&&!unmeasured.QualityScore.HasValue,"Unknown, mismatched or missing measurements were scored");
+    if(QualityMeter.OldestShown<QualityMeter.Version)Check(stale.QualityScore.HasValue&&stale.QualityTooltip.Contains("earlier version"),"A program update wiped an earlier-version score");
     Check(unmeasured.QualityTooltip.Contains("Analyse image quality"),"An unmeasured sub does not say how to get a score");
     for(int i=1;i<10;i++)Check(frames[i].QualityScore.Value<frames[i-1].QualityScore.Value,"Scores did not fall with wider stars within a session");
-    Check(frames[0].QualityDetail.Contains("compared with 10 similar frames")&&frames[10].QualityDetail.Contains("compared with 10 similar frames"),"Sessions were not compared separately");
+    Check(frames[0].QualityDetail.Contains("of 10 similar frames")&&frames[10].QualityDetail.Contains("of 10 similar frames"),"Sessions were not compared separately");
     var sessionScore=frames[0].QualityScore.Value;
-    QualityAnnotator.Apply(frames,measurements,true);Check(frames[0].QualityDetail.Contains("compared with 20 similar frames")&&frames[0].QualityScore.Value!=sessionScore,"Comparing by target did not merge sessions");
+    QualityAnnotator.Apply(frames,measurements,true);Check(frames[0].QualityDetail.Contains("of 20 similar frames")&&frames[0].QualityScore.Value!=sessionScore,"Comparing by target did not merge sessions");
     QualityAnnotator.Apply(frames,new Dictionary<string,QualityMeasurement>(),false);Check(frames.All(f=>!f.QualityScore.HasValue&&f.QualityPercentile<0&&f.QualityFlags==null),"Clearing the measurements left scores behind");
    });
    Test("Quality: discs are compared per target and the exposure column is planetary only",()=>{
@@ -69,7 +72,7 @@ namespace AstroArchive {
     QualityAnnotator.Apply(frames,measurements,true);
     Check(frames.Take(9).All(f=>f.QualityScore.HasValue&&f.ExposureFit.HasValue&&f.ExposureFitText.Contains("Good")),"Discs lack a score or exposure fit");
     Check(deep.QualityScore.HasValue&&!deep.ExposureFit.HasValue&&deep.ExposureFitText=="-","A deep-sky frame received an exposure fit");
-    Check(frames[0].QualityScore.Value>frames[8].QualityScore.Value&&frames[0].QualityDetail.Contains("compared with 9"),"Disc scores were mixed with deep-sky frames");
+    Check(frames[0].QualityScore.Value>frames[8].QualityScore.Value&&frames[0].QualityDetail.Contains("of 9 similar frames"),"Disc scores were mixed with deep-sky frames");
    });
    Test("Quality: subs are listed best first inside each session and stacks never move",()=>{
     var frames=new List<Frame>();var measurements=new Dictionary<string,QualityMeasurement>();double[] widths={3.4,2.1,2.8,2.0,3.9,2.5,3.1,2.2,3.6,2.9};
@@ -90,6 +93,22 @@ namespace AstroArchive {
     for(int i=0;i<10;i++){var f=QualitySub("n"+i,"night","2026-10-05T"+((20+i)%24).ToString("00")+":30:00Z");f.Observed=(i<4?"2026-10-05T":"2026-10-06T")+((20+i)%24).ToString("00")+":30:00Z";if(i%3==0)f.Target="NGC 5194";frames.Add(f);measurements[f.Hash]=QualityShot(f.Hash,widths[i]);}
     QualityAnnotator.Apply(frames,measurements,false);
     var ordered=QualityOrdering.Order(frames);for(int i=1;i<ordered.Count;i++)Check(ordered[i-1].QualityOrder>=ordered[i].QualityOrder,"Scores restart part-way through a session: "+string.Join(",",ordered.Select(f=>f.Hash)));
+   });
+   Test("Quality: the library table lists subs best first inside each session whatever order it was in before, until the user sorts by date",()=>{
+    var frames=new List<Frame>();var measurements=new Dictionary<string,QualityMeasurement>();double[] widths={3.4,2.1,2.8,2.0,3.9,2.5,3.1,2.2,3.6,2.9};
+    for(int i=0;i<10;i++){var f=QualitySub("d"+i,"night","2026-10-05T"+((20+i)%24).ToString("00")+":30:00Z");f.Observed=(i<4?"2026-10-05T":"2026-10-06T")+((20+i)%24).ToString("00")+":30:00Z";frames.Add(f);measurements[f.Hash]=QualityShot(f.Hash,widths[i]);}
+    var other=QualitySub("o0","two","2026-10-12T21:00:00Z");frames.Add(other);measurements["o0"]=QualityShot("o0",2.5);var other2=QualitySub("o1","two","2026-10-12T22:00:00Z");frames.Add(other2);measurements["o1"]=QualityShot("o1",3.5);
+    QualityAnnotator.Apply(frames,measurements,false);
+    Func<List<Frame>,string,bool> bestFirst=(rows,session)=>{var s=rows.Where(f=>f.Session==session).ToList();for(int i=1;i<s.Count;i++)if(s[i-1].QualityOrder<s[i].QualityOrder)return false;return true;};
+    var kind=new[]{new SearchSort{Property="Kind"}};var date=new[]{new SearchSort{Property="AcquisitionDateLabel"}};var none=System.Threading.CancellationToken.None;var culture=System.Globalization.CultureInfo.InvariantCulture;
+    // The default table order (frame type) leaves every session best first, for any sessions mode and from any starting order.
+    foreach(bool grouped in new[]{false,true}){
+     var def=RepositoryOrdering.Order(frames.AsEnumerable().Reverse(),kind,culture,true,grouped,none);Check(bestFirst(def,"night")&&bestFirst(def,"two"),"Default order lost the best-first ranking (grouped="+grouped+")");
+     // The user picks date ordering, then returns to the default: the earlier date order must not leak into the ranking.
+     var byDate=RepositoryOrdering.Order(def,date,culture,true,grouped,none);var back=RepositoryOrdering.Order(byDate,kind,culture,true,grouped,none);
+     Check(bestFirst(back,"night")&&bestFirst(back,"two"),"Returning to the default order after a date sort kept the date order (grouped="+grouped+")");
+     var again=RepositoryOrdering.Order(def,kind,culture,true,grouped,none);Check(back.SequenceEqual(again),"The default order depended on the sort history (grouped="+grouped+")");
+    }
    });
    Test("Quality: filter by rank, flags, exposure and score range",()=>{
     var frames=new List<Frame>();var measurements=new Dictionary<string,QualityMeasurement>();
@@ -116,10 +135,22 @@ namespace AstroArchive {
      var scored=repo.All();Check(scored.Where(f=>f.Kind=="Light").All(f=>f.QualityScore.HasValue)&&scored.Where(f=>f.Kind!="Light").All(f=>!f.QualityScore.HasValue),"Library rows were not annotated on load");
      var tight=scored.Single(f=>f.OriginalName=="Light_M51_0.fit");var loose=scored.Single(f=>f.OriginalName=="Light_M51_2.fit");Check(tight.QualityScore.Value>loose.QualityScore.Value,"The sharper capture did not score higher: "+tight.QualityScore+" vs "+loose.QualityScore);
      var forced=repo.AnalyzeQuality(repo.All(),true,ct,NoProgress);Check(forced.Measured==3&&forced.Reused==0,"A fresh measurement was not forced");
+     // A score is measured again only when the number of captures it was compared against has changed.
+     var stored=repo.QualityMeasurements();Check(stored.Values.All(m=>m.Compared==3),"The comparison size was not recorded: "+string.Join(",",stored.Values.Select(m=>m.Compared)));
+     var hash=stored.Keys.First();var edited=stored[hash];edited.Compared=2;var older=stored.Keys.Skip(1).First();stored[older].Compared=0;
+     typeof(Repository).GetMethod("SaveQuality",System.Reflection.BindingFlags.NonPublic|System.Reflection.BindingFlags.Instance).Invoke(repo,new object[]{new List<QualityMeasurement>{edited,stored[older]}});
+     var changed=repo.AnalyzeQuality(repo.All(),false,ct,NoProgress);Check(changed.Measured==1&&changed.Reused==2,"A changed comparison size did not trigger one new measurement, or an unrecorded one was measured: "+changed.Summary());
      repo.ClearQuality();Check(repo.All().All(f=>!f.QualityScore.HasValue)&&repo.UnmeasuredQuality(repo.All()).Count==3,"Clearing left measurements behind");
      var found=repo.AnalyzeMissingQuality(ct,NoProgress);Check(found.Measured==3,"Missing measurements were not found: "+found.Summary());
     }
-    using(var reopened=new Repository(Path.Combine(root,"quality-repo"))){Check(reopened.All().Count(f=>f.QualityScore.HasValue)==3,"Measurements did not survive reopening the repository");Check(reopened.QualityMeasurements().Count==3,"Stored measurement count wrong");}
+    using(var reopened=new Repository(Path.Combine(root,"quality-repo"))){Check(reopened.All().Count(f=>f.QualityScore.HasValue)==3,"Measurements did not survive reopening the repository");Check(reopened.QualityMeasurements().Count==3,"Stored measurement count wrong");
+     // As after a program update that bumped the measurement version: scores stay until the next run refreshes them.
+     if(QualityMeter.OldestShown<QualityMeter.Version){
+      foreach(var m in reopened.QualityMeasurements().Values)m.Version=QualityMeter.OldestShown;
+      Check(reopened.All().Count(f=>f.QualityScore.HasValue)==3,"Scores were lost after a measurement version change");
+      Check(reopened.UnmeasuredQuality(reopened.All()).Count==3,"Earlier-version measurements are not offered for a refresh");
+      var refreshed=reopened.AnalyzeQuality(reopened.All(),false,ct,NoProgress);Check(refreshed.Measured==3&&refreshed.Reused==0&&reopened.QualityMeasurements().Values.All(m=>m.Version==QualityMeter.Version),"Earlier-version measurements were not refreshed: "+refreshed.Summary());
+     }}
    });
    Test("Quality: an unreadable file is recorded as unreadable instead of stopping the run",()=>{
     string source=Path.Combine(root,"quality-broken-source");Directory.CreateDirectory(source);int w=640,h=480;var plane=QualityEngineTests.Field(w,h,2.8,60,12,77);

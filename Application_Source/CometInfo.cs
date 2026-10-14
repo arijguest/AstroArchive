@@ -50,7 +50,11 @@ namespace AstroArchive {
   // The information pack files 2I/Borisov under its interstellar number.
   static readonly Dictionary<string,string> sameObject=new Dictionary<string,string>(StringComparer.OrdinalIgnoreCase){{"C/2019 Q4","2I"},{"C/2025 N1","3I"}};
   public static string Canonical(string designation){string id;return designation!=null&&sameObject.TryGetValue(designation,out id)?id:designation;}
-  public static CometOrbit Orbit(string id){CometOrbit orbit;return id!=null&&orbits.TryGetValue(Canonical(id.Trim()),out orbit)?orbit:null;}
+  // Reviewed orbits above keep precedence; every other comet in the bundled Small-Body Database snapshot comes from CometCatalog.
+  public static CometOrbit Orbit(string id){
+   CometOrbit orbit;if(id==null)return null;string key=Canonical(id.Trim());if(orbits.TryGetValue(key,out orbit))return orbit;
+   var complete=CometCatalog.Orbit(key);return complete==null?null:FromComplete(complete);
+  }
   public static bool IsComet(TargetInfoCard card){
    if(card==null||card.domain!="solar_system")return false;
    return Regex.IsMatch(card.id??"",@"^(?:[CPDXAI]/\d{4} [A-Z]{1,2}\d{1,3}|\d{1,4}[PDI])$")||(card.type_label??"").IndexOf("comet",StringComparison.OrdinalIgnoreCase)>=0;
@@ -62,11 +66,16 @@ namespace AstroArchive {
   // A page for a comet the information pack does not hold, built from its designation.
   public static TargetInfoCard Card(string target){
    string label=CometTargets.FromLabel(target)??Regex.Replace((target??"").Trim(),@"^Comet\s+","",RegexOptions.IgnoreCase);
-   string designation=Canonical(CometTargets.Designation(target));
+   string designation=InformationDesignation(target);if(designation!=null&&designation.Contains("-"))label=(target??designation).Trim();
+   // A bare designation or a name alone takes the snapshot's full name, for example "C/2023 A3 (Tsuchinshan-ATLAS)".
+   var known=CometCatalog.Find(designation);if(known!=null&&!string.IsNullOrWhiteSpace(known.FullName)&&(designation==null||!designation.Contains("-"))&&(CometTargets.Designation(target)==null||string.Equals(label,CometTargets.Designation(target),StringComparison.OrdinalIgnoreCase)))label=known.FullName;
    return new TargetInfoCard{id=designation??label,name=label,domain="solar_system",type_label=designation==null?"Comet":TypeLabel(designation),parent_body="Sun",review_status="derived",content_tier="basic",aliases=new string[0],measurements=new TargetInfoMeasurement[0],citations=new TargetInfoCitation[0],source_urls=new string[0]};
   }
+  // The Comets entry's page when the information pack has no group page.
+  public static TargetInfoCard GroupCard(){return new TargetInfoCard{id="COMETS",name="Comets",domain="group",type_label="Your comet captures",review_status="derived",content_tier="basic",aliases=new string[0],measurements=new TargetInfoMeasurement[0],citations=new TargetInfoCitation[0],source_urls=new string[0]};}
   // Explains what the designation says when no written overview exists.
   public static string Overview(TargetInfoCard card){
+   if(Regex.IsMatch(card.id??"",@"-[A-Z0-9]+$"))return (card.name??card.id)+" is a separately designated comet fragment. Its orbit is resolved independently of the parent comet.";
    string id=card.id??"",name=string.IsNullOrWhiteSpace(card.name)?id:card.name;
    var dated=Regex.Match(id,@"^([CPDXA])/(\d{4}) ([A-Z])([A-Z])?(\d{1,3})$");var numbered=Regex.Match(id,@"^(\d{1,4})([PDI])$");
    if(numbered.Success&&numbered.Groups[2].Value=="I")return name+" is an interstellar object, the "+Ordinal(int.Parse(numbered.Groups[1].Value))+" known visitor from outside the Solar System. It passes through once on an open orbit and will not return.";
@@ -79,9 +88,18 @@ namespace AstroArchive {
    string found=dated.Groups[4].Success?"its designation shows it was first catalogued in the "+when+".":"its designation shows it was the "+Ordinal(int.Parse(dated.Groups[5].Value))+" comet reported in the "+when+".";
    return name+" is "+kind+". The letter and number in "+id+" date its discovery: "+found;
   }
-  public const string Imaging="Comets move against the stars, so keep sub-exposures short enough that the head stays sharp. Stack twice, once aligned on the comet and once on the stars, then blend the two. Siril, DeepSkyStacker and PixInsight offer comet alignment.";
+  public const string Imaging="Start with 10–30 second sub-exposures on a star-tracking mount to keep the comet's head sharp; try 5–10 seconds for a fast-moving comet or a long focal length. Inspect the head at full size and shorten the exposure if it trails. The limit depends on the comet's apparent motion and your image scale: for no more than one pixel of drift, maximum exposure in seconds = 60 × image scale (arcsec/pixel) ÷ motion (arcsec/min). At 2 arcsec/pixel and 6 arcsec/min, use 20 seconds or less. Stack twice, once aligned on the comet and once on the stars, then blend the two. Siril, DeepSkyStacker and PixInsight offer comet alignment.";
   public static string ClassLabel(CometOrbit orbit){
-   switch(orbit.Class){case "HTC":return "Halley-type";case "JFc":return "Jupiter-family";case "ETc":return "Encke-type";case "COM":return "Long-period";default:return orbit.E>=1.1?"Hyperbolic (interstellar)":"Near-parabolic";}
+   switch(orbit.Class){case "HTC":return "Halley-type";case "JFc":return "Jupiter-family";case "ETc":return "Encke-type";case "CTc":return "Chiron-type";case "COM":return "Long-period";case "PAR":return "Parabolic";default:return orbit.E>=1.1?"Hyperbolic":"Near-parabolic";}
+  }
+  public static CometOrbit FromComplete(OrbitRecord record){var date=record.perihelion_time.HasValue?OrbitalModel.Utc(record.perihelion_time.Value):null;return new CometOrbit{Class=record.orbit_class??"",Q=record.q,E=record.e,PeriodYears=record.e<1?2*Math.PI*Math.Sqrt(Math.Pow(record.q/(1-record.e),3)/OrbitalModel.SunMu)/365.25:0,Perihelion=date??new DateTime(2000,1,1)};}
+  // Information identity preserves fragments without altering archive target names.
+  public static string InformationDesignation(string target){
+   var m=Regex.Match(target??"",@"(?<![A-Z0-9])(?:[CPDXAI]/\d{4} [A-Z]{1,2}\d{1,3}|\d{1,4}[PDI])(?:-[A-Z0-9]+)?(?![A-Z0-9])",RegexOptions.IgnoreCase);
+   if(m.Success)return Canonical(m.Value.ToUpperInvariant());
+   string designation=CometTargets.Designation(target);if(designation!=null)return Canonical(designation);
+   // A discoverer's name alone ("Hale-Bopp") resolves only when exactly one comet in the snapshot carries it.
+   var named=CometCatalog.FindByName(Regex.Replace(CometTargets.FromLabel(target)??target??"",@"^Comet\s+","",RegexOptions.IgnoreCase));return named==null?null:Canonical(named.Id);
   }
   public static string Perihelion(CometOrbit orbit){return Localization.F("{0} AU from the Sun",orbit.Q.ToString("0.0##",CultureInfo.InvariantCulture));}
   public static string Period(CometOrbit orbit){return Localization.F("{0} years per orbit",orbit.PeriodYears.ToString(orbit.PeriodYears<100?"0.##":"#,##0",CultureInfo.InvariantCulture));}

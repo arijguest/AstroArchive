@@ -14,23 +14,30 @@ namespace AstroArchive {
   public string Hash;public int Version,Kind,Status;
   public double Fwhm=double.NaN,Hfd=double.NaN,FwhmCentre=double.NaN,FwhmEdge=double.NaN,Ecc=double.NaN,Snr=double.NaN,Noise=double.NaN,Bg=double.NaN,Gradient=double.NaN;
   public int Stars,StarsUsed;
+  // How many captures it was compared against when last analysed; 0 when not recorded.
+  public int Compared;
   // Spatial evidence of a star-poor foreground region with a sharp background boundary.
   public double Obstruction=double.NaN,StarCoverage=double.NaN;
   public double Detail=double.NaN,Limb=double.NaN,Sat,BlackClip,Peak=double.NaN,Max=double.NaN,Diameter=double.NaN;
   public bool FillsFrame;public int Width,Height;
   public string Pack(){
-   var values=new double[]{Fwhm,Hfd,FwhmCentre,FwhmEdge,Ecc,Snr,Noise,Bg,Gradient,Stars,StarsUsed,Detail,Limb,Sat,BlackClip,Peak,Max,Diameter,FillsFrame?1:0,Width,Height,Obstruction,StarCoverage};
+   var values=new double[]{Fwhm,Hfd,FwhmCentre,FwhmEdge,Ecc,Snr,Noise,Bg,Gradient,Stars,StarsUsed,Detail,Limb,Sat,BlackClip,Peak,Max,Diameter,FillsFrame?1:0,Width,Height,Obstruction,StarCoverage,Compared};
    var text=new StringBuilder();for(int i=0;i<values.Length;i++){if(i>0)text.Append(';');text.Append(values[i].ToString("R",CultureInfo.InvariantCulture));}return text.ToString();
   }
   public static QualityMeasurement Unpack(string hash,int version,int kind,int status,string data){
-   var parts=(data??"").Split(';');var v=new double[23];for(int i=0;i<v.Length;i++){double x;v[i]=i<parts.Length&&double.TryParse(parts[i],NumberStyles.Float,CultureInfo.InvariantCulture,out x)?x:double.NaN;}
-   return new QualityMeasurement{Hash=hash,Version=version,Kind=kind,Status=status,Fwhm=v[0],Hfd=v[1],FwhmCentre=v[2],FwhmEdge=v[3],Ecc=v[4],Snr=v[5],Noise=v[6],Bg=v[7],Gradient=v[8],Stars=(int)Num(v[9]),StarsUsed=(int)Num(v[10]),Detail=v[11],Limb=v[12],Sat=Num(v[13]),BlackClip=Num(v[14]),Peak=v[15],Max=v[16],Diameter=v[17],FillsFrame=v[18]>0.5,Width=(int)Num(v[19]),Height=(int)Num(v[20]),Obstruction=v[21],StarCoverage=v[22]};
+   var parts=(data??"").Split(';');var v=new double[24];for(int i=0;i<v.Length;i++){double x;v[i]=i<parts.Length&&double.TryParse(parts[i],NumberStyles.Float,CultureInfo.InvariantCulture,out x)?x:double.NaN;}
+   return new QualityMeasurement{Hash=hash,Version=version,Kind=kind,Status=status,Fwhm=v[0],Hfd=v[1],FwhmCentre=v[2],FwhmEdge=v[3],Ecc=v[4],Snr=v[5],Noise=v[6],Bg=v[7],Gradient=v[8],Stars=(int)Num(v[9]),StarsUsed=(int)Num(v[10]),Detail=v[11],Limb=v[12],Sat=Num(v[13]),BlackClip=Num(v[14]),Peak=v[15],Max=v[16],Diameter=v[17],FillsFrame=v[18]>0.5,Width=(int)Num(v[19]),Height=(int)Num(v[20]),Obstruction=v[21],StarCoverage=v[22],Compared=(int)Num(v[23])};
   }
   static double Num(double v){return double.IsNaN(v)||double.IsInfinity(v)?0:v;}
  }
  public static class QualityMeter {
-  // Bump when any measurement changes; stored rows with an older version are measured again lazily.
+  // Bump when any measurement changes. Rows from an older version keep their scores (see OldestShown)
+  // until the next Analyse image quality run measures them again.
   public const int Version=2;
+  // Oldest stored measurement version whose fields still mean the same thing. Raise only when a change
+  // makes older rows misleading; every row older than this loses its score until measured again.
+  public const int OldestShown=1;
+  public static bool Shown(QualityMeasurement m){return m!=null&&m.Version>=OldestShown&&m.Version<=Version;}
   const double FwhmPerSigma=2.3548200450309493;
 
   // Collapses channels (planar) to one finite float plane. Non-finite samples become the plane median-free zero.

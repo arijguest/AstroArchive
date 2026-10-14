@@ -7,6 +7,39 @@ namespace AstroArchive {
  public partial class Tests {
   static Frame EditableFixture(){return new Frame{OriginalName="Light_M33.fit",Target="M33",TargetEvidence="FITS OBJECT",Telescope="Unit-01",Model="Custom observatory",Camera="Telephoto",Kind="Light",Mount="Unknown",MountEvidence="Not analyzed",Exposure=30.123456789,Gain=0,Temperature=-12.75,Filter="Broadband",Calibration="Custom calibration",BinX=2,BinY=1,TelescopeModel="Reflector",CameraModel="Camera 1",CameraId="Serial 123",Offset=0,ReadoutMode="Slow",Roi="0,0,128,96",OpticalConfiguration="Reducer",TimeZoneId="UTC",LinearData=false,GainUnit="dB",Bayer="RGGB",RegistrationState="Unregistered",CalibrationSteps="Dark, flat",Notes="Recorded notes",Observed="2026-10-06T22:00:00",ObservedUtc="2026-10-06T22:00:00Z",TimeSource="FITS",Facts=new Dictionary<string,MetadataFact>{{"Exposure",new MetadataFact{Value="30.123456789",Raw="EXPTIME=30.123456789",Source="FITS header",Unit="s"}}}};}
   static void MetadataEditingTests(){
+   Test("Capture city timezone edits retain explicit instants and use historical daylight saving",()=>{
+    var town=new ObservingCity{Id=6324533,Name="Santa Ponsa",Latitude=39.50868,Longitude=2.4766};
+    Func<Frame,Frame> select=f=>new MetadataPatch(new Dictionary<string,string>(),true,town).Apply(f);
+    var frame=new Frame{OriginalName="capture.fit",Format="FITS",Observed="2026-01-12T20:32:54.797",TimeSource="FITS UTC",TimeZoneId="UTC"};
+    var winter=select(frame);Check(CaptureSky.CaptureUtc(winter)==new DateTime(2026,1,12,19,32,54,797,DateTimeKind.Utc),"Winter city conversion used the summer offset");
+    frame.Observed="2026-08-12T18:32:54.797Z";frame.ObservedUtc=null;var explicitUtc=select(frame);Check(CaptureSky.CaptureUtc(explicitUtc).Value.Hour==18,"UTC suffix was shifted by the location");
+    frame.Observed="2026-08-12T20:32:54.797+02:00";Check(CaptureSky.CaptureUtc(select(frame)).Value.Hour==18,"Explicit offset was converted twice");
+    frame.Observed="2026-08-12T18:32:54.797";frame.Images=new List<ImageDescriptor>{new ImageDescriptor{Headers=new Dictionary<string,string>{{"TIMESYS","UTC"},{"DATE-OBS",frame.Observed}}}};
+    Check(CaptureSky.CaptureUtc(select(frame)).Value.Hour==18,"Declared UTC header was reinterpreted as local time");
+    frame.Images[0].Headers.Remove("TIMESYS");frame.Images[0].Headers["DATE-OBS"]=frame.Observed+"Z";frame.ObservedUtc=frame.Observed+"Z";
+    Check(CaptureSky.CaptureUtc(select(frame)).Value.Hour==18,"Indexed clock lost its explicit header suffix when a city was selected");frame.ObservedUtc=null;
+    frame.Images=null;frame.Observed="2026-08-12";Check(!CaptureSky.CaptureUtc(select(frame)).HasValue,"Choosing a town invented a date-only clock");
+    frame.Observed="2026-03-29T02:30:00";Expect(()=>select(frame),"Nonexistent spring clock accepted");
+    frame.Observed="2026-10-25T02:30:00";Expect(()=>select(frame),"Ambiguous autumn clock accepted");
+    frame.Observed="2026-08-12T20:32:54.797";var local=select(frame);var cleared=new MetadataPatch(new Dictionary<string,string>(),true,null).Apply(local);
+    Check(cleared.CaptureCityId==null&&cleared.TimeZoneId==null&&CaptureSky.CaptureUtc(cleared).Value.Hour==20,"Default location retained the previous city's timezone");
+    var manual=new MetadataPatch(new Dictionary<string,string>{{"TimeZoneId","UTC"}},true,town).Apply(frame);
+    Check(CaptureSky.CaptureUtc(manual).Value.Hour==20&&manual.Facts["TimeZoneId"].Source=="User","Explicit timezone entered alongside a town was ignored");
+    frame.Observed="2026-10-25T02:30:00";manual=new MetadataPatch(new Dictionary<string,string>{{"TimeZoneId","UTC"}},true,town).Apply(frame);Check(CaptureSky.CaptureUtc(manual).Value.Hour==2,"An explicit timezone could not disambiguate a city clock");
+    frame.Observed="2026-08-12T20:32:54.797+02:00";manual=new MetadataPatch(new Dictionary<string,string>{{"TimeZoneId","UTC"}},true,town).Apply(frame);Check(CaptureSky.CaptureUtc(manual).Value.Hour==18,"Manual timezone editing shifted an explicitly offset instant");
+   });
+   Test("Existing capture towns repair stale UTC in the archive without changing image bytes",()=>{
+    string source=Path.Combine(root,"city-clock-source");Directory.CreateDirectory(source);string path=Path.Combine(source,"Sun.fit");
+    Write(path,64,48,(x,y)=>1800,LightHeaders(new DateTime(2026,8,12,20,32,54),"Sun"));string archive=Path.Combine(root,"city-clock-archive"),hash=Util.Hash(path,ct);
+    using(var repo=new Repository(archive)){
+     repo.Import(repo.Scan(source,"Scope-1","Auto",ct,NoProgress).Frames,ct,NoProgress);var old=repo.All().Single();CaptureSite.Apply(old,new ObservingCity{Id=6324533,Name="Santa Ponsa",Latitude=39.50868,Longitude=2.4766});repo.Save(old);
+    }
+    using(var repo=new Repository(archive)){
+     var fixedFrame=repo.All().Single();Check(CaptureSky.CaptureUtc(fixedFrame).Value.Hour==18&&Util.Time(fixedFrame.ObservedUtc).Value.Hour==18&&fixedFrame.TimeSource=="Capture town / city timezone","Existing archive retained its assumed UTC timestamp");
+     Check(Util.Hash(repo.FilePath(fixedFrame),ct)==hash&&Util.Hash(path,ct)==hash,"UTC repair changed capture bytes");
+     Check(!CaptureSky.NormalizeCityClock(fixedFrame),"UTC repair was not idempotent");
+    }
+   });
    Test("Capture town is staged with metadata, supports batch edits and resets",()=>{
     var a=EditableFixture();var b=a.Clone();var original=Util.Json().DeserializeObject(Util.Serialize(a));var model=new MetadataEditing(new[]{a,b});
     var city=new ObservingCity{Id=1,Name="Eclipse site",Latitude=25.29,Longitude=-104.14};model.SetCaptureCity(city);
