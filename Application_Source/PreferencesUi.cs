@@ -27,7 +27,7 @@ namespace AstroArchive {
   ImportPreferenceFields AddImportPreferences(FormWindow d,bool editedImport=false){
    var f=new ImportPreferenceFields();d.Text("Import",true);d.Text("Saved choices apply to folder, USB and Dump imports. Changing file matching requires a new scan.");
    f.Failed=d.Check("Ignore failed filenames",settings.IgnoreFailed);f.Raster=d.Check("Ignore PNG/JPG/JPEG/MP4 files",settings.IgnoreRasterImports);f.Robust=ImportMatchingChoice(d);
-   f.Workers=d.Select("Copy workers",new[]{"Auto","1","2","4","8"},settings.CopyWorkers==0?"Auto":settings.CopyWorkers.ToString());UiHelp.Hint(f.Workers,"Auto benchmarks parallel copies and remembers the fastest setting for compatible storage.");
+   f.Workers=d.Select("Copy workers",new[]{"Auto","1","2","4","8"},settings.CopyWorkers==0?"Auto":settings.CopyWorkers.ToString());UiHelp.Hint(f.Workers,"Auto benchmarks parallel copies and remembers the fastest setting for compatible storage. If a short import turns out long, Auto adds workers as it goes (fewer on network shares or one shared drive). A number you choose is never changed.");
    if(remoteSessions.Count>0)d.Text("Running telescope imports keep their current settings. New defaults apply to imports started after you save.");
    f.Current=d.Advanced("Current import options",()=>{
     d.Text("Applies to the current source and next manual import.");f.Model=d.Select("Instrument model",TelescopeProfiles.Models.ToArray(),Convert.ToString(C("ModelBox").SelectedItem));f.Camera=d.Select("Camera channel",new[]{"Auto","Telephoto","Wide"},Convert.ToString(C("CameraBox").SelectedItem));

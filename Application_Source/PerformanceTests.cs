@@ -16,6 +16,17 @@ namespace AstroArchive {
    return object.Equals(left,right);
   }
   static void PerformanceTests(){
+   Test("Copy workers grow only for long copies, never shrink and stop when they stop helping",()=>{
+    var g=new WorkerGrowth(1,8);
+    Check(g.Check(5,10,1000,100)==0&&g.Check(16,1000000,1000000000,100)==2&&g.Workers==2,"A long copy did not double its workers after the initial period");
+    Check(g.Check(20,2000000,1000000000,100)==0,"Workers grew again before the next window");
+    Check(g.Check(27,1200000,1000000000,100)==0&&g.Workers==2,"Growth continued although the extra worker did not help");
+    Check(g.Check(60,9000000,1000000000,100)==0&&g.Workers==2,"Growth restarted after it was judged unhelpful");
+    var quick=new WorkerGrowth(1,8);Check(quick.Check(20,900000000,1000000000,100)==0,"A copy about to finish still added workers");
+    var fast=new WorkerGrowth(1,8);Check(fast.Check(15,1000000,1000000000,100)==2&&fast.Check(26,6000000,1000000000,100)==4&&fast.Check(40,40000000,1000000000,100)==8&&fast.Check(55,90000000,1000000000,100)==0,"Workers did not double up to the cap while still helping");
+    Check(new WorkerGrowth(1,8).Check(30,1000,1000000000,1)==0,"Workers grew with no files left to start");
+    Check(WorkerGrowth.CapFor(16,false,false)==8&&WorkerGrowth.CapFor(4,false,false)==2&&WorkerGrowth.CapFor(16,true,false)==2&&WorkerGrowth.CapFor(16,false,true)==2&&WorkerGrowth.NetworkPath("\\\\server\\share\\a"),"Worker cap ignored CPU, network or shared drive");
+   });
    Test("Table column growth redistributes space and overflows instead of capping the request",()=>{
     var widths=new double[]{200,200,200};var min=new double[]{32,32,32};var max=new double[]{double.PositiveInfinity,double.PositiveInfinity,double.PositiveInfinity};var resizable=new[]{true,true,true};
     Check(ColumnWidths.Resize(widths,min,max,resizable,0,400).SequenceEqual(new double[]{400,32,168}),"Neighbours did not give up width in display order");
