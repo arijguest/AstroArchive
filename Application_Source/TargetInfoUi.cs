@@ -10,7 +10,7 @@ using System.Windows.Controls;
 namespace AstroArchive {
  public partial class MainUi {
   readonly TargetInfoCatalog targetInformation=new TargetInfoCatalog(Path.Combine(AppDomain.CurrentDomain.BaseDirectory,"TargetInfo.zip"));
-  sealed class TargetInfoState {public TargetInfoView View;public CancellationTokenSource Cancel;public int Generation;public TargetInfoCard LocalCard,Card;public string Context,Back,CacheKey;public IList<TargetInfoMember> Members;public string Target,Member;public double? PreferredWidth;public bool Dragging,Constraining,Refreshing;}
+  sealed class TargetInfoState {public TargetInfoView View;public CancellationTokenSource Cancel;public int Generation;public TargetInfoCard LocalCard,Card;public string Context,Back,CacheKey;public IList<TargetInfoMember> Members;public string Target,Member,EventsKey;public List<SkyEvent> Events;public double? PreferredWidth;public bool Dragging,Constraining,Refreshing;}
   readonly TargetInfoState libraryInfo=new TargetInfoState(),editedInfo=new TargetInfoState();
   void InitializeTargetInformation(string prefix){
    // The orbit view eases its camera and plays its dates only as far as Reduce motion allows; Windows' own animation setting also counts.
@@ -51,11 +51,29 @@ namespace AstroArchive {
   void ShowTargetInformation(string prefix){
    var state=prefix.Length==0?libraryInfo:editedInfo;if(state.View==null)return;
    var target=(prefix.Length==0?Targets:EditedTargets).SelectedItem as TargetSummary;string name=target==null?"All targets":target.Name;
-   SetTargetInformationVisible(prefix,true);if(state.Target==name&&state.Member==null)return;
+   SetTargetInformationVisible(prefix,true);if(state.Target==name&&state.Member==null){if(name=="All targets"&&state.EventsKey!=SkyEventsKey())LoadSkyEvents(state);return;}
    if(name=="All targets"||name=="Calibration"||name=="Unknown"){
-    HideTargetInformation(prefix);state.Target=name;SetTargetInformationVisible(prefix,true);state.View.ShowMessage(name=="All targets"?"Explore your targets":name,name=="All targets"?"Choose a target on the left to see its overview and sky location. Select a file to preview your image.":name=="Calibration"?"Calibration frames do not have a celestial target. Select a file to preview it.":"Identify this target to see its catalogue information. Select a file to preview it.");return;
+    HideTargetInformation(prefix);state.Target=name;SetTargetInformationVisible(prefix,true);if(name=="All targets"){LoadSkyEvents(state);return;}state.View.ShowMessage(name,name=="Calibration"?"Calibration frames do not have a celestial target. Select a file to preview it.":"Identify this target to see its catalogue information. Select a file to preview it.");return;
    }
    LoadTargetInformation(prefix,name,null);
+  }
+  // The next month's events for the saved observing location, worked out off the UI thread and kept until the place or day changes.
+  string SkyEventsKey(){var site=CaptureSite.For(null,settings);return site==null?"none":site.Latitude.ToString("0.###",System.Globalization.CultureInfo.InvariantCulture)+"|"+site.Longitude.ToString("0.###",System.Globalization.CultureInfo.InvariantCulture)+"|"+DateTime.UtcNow.ToString("yyyyMMddHH",System.Globalization.CultureInfo.InvariantCulture);}
+  static TimeZoneInfo SiteZone(CaptureSite site){
+   try{if(site.CityId.HasValue)return CityTimeZones.ForCity(site.CityId.Value);}catch(Exception e){if(!(e is TimeZoneNotFoundException||e is InvalidTimeZoneException||e is ArgumentException||e is KeyNotFoundException))throw;}
+   return TimeZoneInfo.CreateCustomTimeZone("Observing site",TimeSpan.FromHours(Math.Round(site.Longitude/15)),"Site time","Site time");
+  }
+  void LoadSkyEvents(TargetInfoState state){
+   var site=CaptureSite.For(null,settings);string key=SkyEventsKey();state.View.ChooseLocation=()=>AskObservingLocation();
+   if(site==null){state.EventsKey=key;state.Events=null;state.View.ShowUpcoming(null,null,TimeZoneInfo.Utc,false);return;}
+   var zone=SiteZone(site);
+   if(state.EventsKey==key&&state.Events!=null){state.View.ShowUpcoming(state.Events,site,zone,false);return;}
+   state.EventsKey=key;state.Events=null;int generation=++state.Generation;state.View.ShowUpcoming(null,site,zone,true);
+   System.Threading.Tasks.Task.Run(()=>SkyEvents.Upcoming(DateTime.UtcNow,site.Latitude,site.Longitude,30)).ContinueWith(t=>Window.Dispatcher.BeginInvoke(new Action(()=>{
+    if(closing||generation!=state.Generation||state.Target!="All targets")return;
+    if(t.IsFaulted){state.EventsKey=null;state.View.ShowMessage("Explore your targets","Upcoming sky events could not be calculated. Choose a target on the left to see its overview and sky location.");return;}
+    state.Events=t.Result;state.View.ShowUpcoming(t.Result,site,zone,false);
+   })));
   }
   // The user's targets inside a section (each comet under Comets), with how many files each has.
   List<TargetInfoMember> SectionMembers(string prefix,string section){

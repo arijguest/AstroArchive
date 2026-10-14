@@ -27,7 +27,7 @@ namespace AstroArchive {
    });
    Test("Every guide topic is filed, summarised and links only to topics and walkthroughs that exist",()=>{
     var topics=HelpCatalog.Load();
-    Check(topics.Count==40&&topics.Any(t=>t.Key=="HYBRID INFORMATION AND ORBITS")&&HelpCatalog.Blocks(topics.Single(t=>t.Key=="START HERE").Body).Count(b=>b.Kind==HelpBlockKind.Numbered)==5,"Bundled guide lost topics or first-import steps: "+topics.Count);
+    Check(topics.Count==41&&topics.Any(t=>t.Key=="HYBRID INFORMATION AND ORBITS")&&HelpCatalog.Blocks(topics.Single(t=>t.Key=="START HERE").Body).Count(b=>b.Kind==HelpBlockKind.Numbered)==5,"Bundled guide lost topics or first-import steps: "+topics.Count);
     Check(HelpCatalog.Blocks(topics.Single(t=>t.Key=="KEYBOARD SHORTCUTS").Body).Count(b=>b.Kind==HelpBlockKind.Bullet)==5&&HelpCatalog.Blocks(topics.Single(t=>t.Key=="TROUBLESHOOTING").Body).Count(b=>b.Kind==HelpBlockKind.Bullet)==13,"Shortcut or troubleshooting entries lost list structure");
     foreach(var topic in topics){
      Check(!string.IsNullOrWhiteSpace(topic.Summary)&&topic.Summary.Length<=110,"Topic needs a one-line summary: "+topic.Key);
