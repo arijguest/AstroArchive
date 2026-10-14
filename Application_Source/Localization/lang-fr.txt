@@ -2398,3 +2398,7 @@ Orbit|Jupiter	Jupiter
 Orbit|Saturn	Saturne
 Orbit|Uranus	Uranus
 Orbit|Neptune	Neptune
+now	maintenant
+on this date	à cette date
+Small rings: where it was when you imaged it.	Petits anneaux : où il se trouvait lors de vos prises de vue.
+A current position is unavailable for this solution.	Aucune position actuelle n’est disponible pour cette solution.

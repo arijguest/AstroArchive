@@ -2400,3 +2400,7 @@ Orbit|Jupiter	Jupiter
 Orbit|Saturn	Saturn
 Orbit|Uranus	Uranus
 Orbit|Neptune	Neptun
+now	jetzt
+on this date	an diesem Datum
+Small rings: where it was when you imaged it.	Kleine Ringe: wo es bei Ihren Aufnahmen stand.
+A current position is unavailable for this solution.	Für diese Lösung ist keine aktuelle Position verfügbar.

@@ -82,17 +82,13 @@ blends.
 Ellipses close; parabolic/hyperbolic paths remain open with continuation arrows.
 Bounded adaptive paths handle extreme extents. Stable Kepler/Barker equations
 retain near-parabolic eccentricities and retrograde orientation. Geometry runs
-off the UI thread; no API request runs per frame. The only timers are the camera
-glide (the frame clock, only while it moves) and optional playback, which starts
-paused, steps at four frames a second under Reduce motion, and stops when the pane
-is hidden, the card changes or the user scrubs or sets a date.
+off the UI thread; no API request runs per frame. The only timer is the camera
+glide (the frame clock, only while it moves).
 
-Where dated positions are supported (planets and the solar-system overview) a
-timeline spans 1972–2026, with Today, a UTC date, Orbit epoch and Play/Pause. Playback
-runs about twelve seconds per revolution, by elapsed time rather than frame count.
-The planets are drawn at the marker date from the same JPL Table 1 model, so a
-comet or the Moon is seen among them; with nothing chosen yet, a dated body starts
-at today.
+Where dated positions are supported (planets and the solar-system overview) the marker shows
+the target today, with no playback or date controls. The planets are drawn on the same date from
+the same JPL Table 1 model, so a comet or the Moon is seen among them. Small rings mark the
+dates the target was imaged in your archive.
 
 Planets use the existing JPL Table 1 numerical approximation (1800–2050), with
 Earth explicitly representing the Earth–Moon barycentre. The Sun presents a

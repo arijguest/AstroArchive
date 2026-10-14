@@ -16,6 +16,7 @@ namespace AstroArchive {
    // The orbit view eases its camera and plays its dates only as far as Reduce motion allows; Windows' own animation setting also counts.
    OrbitView.ReducedMotion=()=>settings.ReducedMotion||!SystemParameters.ClientAreaAnimation;
    var state=prefix.Length==0?libraryInfo:editedInfo;state.View=new TargetInfoView{Focusable=true};((Border)Window.FindName(prefix+"TargetInfoPane")).Child=state.View;
+   if(prefix.Length==0)state.View.CaptureDates=card=>{var names=new HashSet<string>(new[]{card.id,card.name,Catalog.CanonicalTarget(card.id),Catalog.CanonicalTarget(card.name)}.Where(n=>!string.IsNullOrEmpty(n)),StringComparer.OrdinalIgnoreCase);return all.Where(f=>f.Status!="Deleted"&&(names.Contains(f.Target??"")||names.Contains(Catalog.CanonicalTarget(f.Target)??""))).Select(CaptureSessions.Date).Where(d=>d!=null).Select(d=>d.Date).ToList();};
    state.View.ChooseObject=id=>LoadTargetInformation(prefix,state.Target,id,state.Member);
    state.View.ChooseMember=member=>LoadTargetInformation(prefix,state.Target,null,member);
    state.View.GoBack=()=>LoadTargetInformation(prefix,state.Target,null);

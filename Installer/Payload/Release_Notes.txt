@@ -1,16 +1,25 @@
-AstroArchive 3.2.9
-Package 3.2.9.1
+AstroArchive 3.3.0
+Package 3.3.0.1
 
-One hybrid installer replaces the Offline-Setup duplicate. Setup offers Hybrid (recommended) and Offline, with an atomic per-user choice that survives repair and updates. Both modes install without internet. Existing and portable users without a recorded choice choose at first launch; Pending blocks automatic internet requests.
+Covers everything since 3.2.8.1.
 
-Preferences > General > Online access includes cache usage, a configurable limit and Clear downloaded information. Offline cancels information requests/downloads and pauses automatic update checks while retaining the separate update and plate-solver preferences. Local telescope and Stellarium connections remain available; internet actions require explicit reconnection.
+3D orbit viewer
+The orbit view is redrawn in the sky globe's style: a constellation backdrop that turns with the camera, a ringed reference plane with distance rings and spokes, a solid orbit above the plane and a dashed one below it, ascending and descending nodes, perihelion and aphelion, a scale bar and round icon buttons (Reset, Zoom, Top view, Orbit plane, Expand). Camera moves ease unless Reduce motion is on, and labels are placed by priority so they no longer collide.
+It now simply shows where the target is now: the last stretch of its orbit is drawn bold and ends in a ringed marker with an arrow along the path. Small rings show where the target was on each date you imaged it in your archive; rings that fall close together are drawn once with a count. Play, the date timeline, the date box, the framing chips, the axis triad, the stray mid-orbit arrow and the notes below the picture are gone. Orbit credits are under SOURCES.
 
-A deterministic essentials pack keeps all 13,528 catalogue identities and 66,171 alias entries, all Messier/curated information, selected southern imagery, section pages and complete credits. The pack is approximately 13.54 MiB. Additional exact-identity JPL solutions, cited numerical physical measurements, verified Wikipedia introductions and reviewed Commons images are saved outside archives. Reviewed corrections/prose remain authoritative. Conditional scientific providers stay disabled without documented dataset rights.
+Target information
+The Refresh information and Open in Stellarium buttons are now small icons beside the details line instead of a line of their own.
 
-Solar-system and comet information pages have native 3D orbit views: drag/arrows rotate, Shift-drag pans, +/− and pinch zoom, focused/Ctrl wheel zoom leaves page scrolling available. Reset, Top view, Orbit plane, Fit orbit, Inner solar system and inline expansion handle elongated paths. Complete audited elements preserve frames, epochs, time standards and retrograde orientation; missing elements show an unavailable state. Open conics have continuation arrows, clipped extents are labelled, and exaggerated markers are disclosed. Dated markers are limited to supported model/time ranges; snapshots use orbit-epoch markers. No requests run during interaction.
+Work during long processes
+Image quality scoring and plate solving run beside importing, exporting and Settings. A background process registry with progress, ETA and a pulsing bell shows what is running, and the archive stays safe to use alongside it.
 
-Setup, update review and progress windows fit the active monitor and DPI, retain scrolling bodies and visible actions, and follow app/Windows theme and language. Successful install/update/repair writes a one-time startup confirmation. Setup closes after successful launch, keeps a retry action on launch failure, and retains Finish when opening is unchecked. Rollback recovery takes precedence over success.
+Distances and comets
+Approximate distances for galaxies and other deep-sky objects, a bundled comet catalogue so comet orbits work offline, and automatic short descriptions on target cards. Meteors have an information page with a Perseid photograph, a yearly shower chart and a guide to meteor colours; a meteor capture within a known shower's dates shows the shower's name in Capture details. Open in Stellarium is removed from the Solar Eclipse, Lunar Eclipse and comet panes.
 
-Archive files, target identities, ambiguity choices, existing corrections and local telescope workflows are preserved. New controls and notifications are translated into all seven interface languages.
+Quality and library
+Obstructed frames rank below clear ones, scores are kept across program updates, long stack exposure totals read in minutes or hours, DWARF stacks without a filename duration get their sub count, and best-first sub order is kept when the library table is re-sorted. Stale pointings are ignored for the Moon and planets, and the plate-solved target with the most prominence is preferred. Rotation analysis is removed.
 
-Meteors now have an information page with a Perseid photograph, a year chart of the annual meteor showers (when each is active, how strong, and what your observing location can see) and a guide to what meteor colours mean. A meteor capture taken within a known shower's dates now shows the shower's name in Capture details.
+Help and settings
+Help is a help centre with guided fixes and tours that walk the real window, plus a Smart App Control article. Preferences > General > Online access offers Hybrid or Offline, and About keeps the available release visible while online access is paused.
+
+One hybrid installer replaces the Offline-Setup duplicate. Setup, update review and progress windows fit the active monitor and DPI and follow the app theme and language. Archive files, target identities and local telescope workflows are preserved. New controls are translated into all seven interface languages.
