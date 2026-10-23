@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using AstroArchive.Installation;
 static class ReleaseMonitorTests {
  static void Check(bool condition,string message){if(!condition)throw new Exception(message);}
- static UpdateManifest Release(){return new UpdateManifest{schema=1,application_version="1.2.0",package_version="1.2.0.2",url=UpdateClient.Repository+"/releases/download/v1.2.0.2/AstroArchive-1.2.0-Windows-x64-Offline-Setup.exe",size=1,sha256=InstallCore.Hash(new byte[]{1})};}
+ static UpdateManifest Release(){return new UpdateManifest{schema=1,application_version="1.2.0",package_version="1.2.0.2",url=UpdateClient.Website+"/downloads/AstroArchive1.2.0.2.exe",size=1,sha256=InstallCore.Hash(new byte[]{1})};}
  static InstallRecord Installed(){return new InstallRecord{Version="1.2.0",PackageVersion="1.2.0.1"};}
  public static void Run(Action<string,Action> test,string scratch){
   test("Release checks coalesce and reuse validated cache across launcher/app",()=>{DateTime now=new DateTime(2026,10,9,12,0,0,DateTimeKind.Utc);string path=Path.Combine(scratch,"coalesced.json");int calls=0;using(var started=new ManualResetEventSlim())using(var finish=new ManualResetEventSlim()){

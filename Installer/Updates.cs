@@ -1,4 +1,4 @@
-// C# 5 / .NET Framework 4.8. Public GitHub releases; no account or token needed.
+// C# 5 / .NET Framework 4.8. Direct website releases; no account or token needed.
 using System;
 using System.IO;
 using System.Net;
@@ -78,16 +78,17 @@ namespace AstroArchive.Installation {
  }
 
  public sealed class UpdateClient {
-  public const string Repository = "https://github.com/arijguest/AstroArchive";
-  public const string Feed = Repository + "/releases/latest/download/update.json";
+  public const string Website = "https://astroarchive-companion-test.arijguest.chatgpt.site";
+  public const string Feed = Website + "/update.json";
   public const long MaximumInstallerSize = 128L * 1024 * 1024;
   public Func<Uri, long, byte[]> Fetch = Download;
   public Action<UpdateDownloadProgress> Progress;
 
   public static bool TrustedDownload(Uri uri) {
    return uri != null && uri.Scheme == "https" && uri.Port == 443 &&
-    uri.UserInfo.Length == 0 && (uri.Host == "github.com" ||
-    uri.Host == "release-assets.githubusercontent.com" || uri.Host == "objects.githubusercontent.com" || uri.Host == "api.github.com");
+    uri.UserInfo.Length == 0 && uri.Host == new Uri(Website).Host &&
+    uri.Query.Length == 0 && uri.Fragment.Length == 0 &&
+    (uri.AbsolutePath == "/update.json" || Regex.IsMatch(uri.AbsolutePath, @"^/downloads/AstroArchive\d+\.\d+\.\d+\.[1-9]\d*\.exe$"));
   }
 
   public static void Validate(UpdateManifest manifest) {
@@ -98,11 +99,9 @@ namespace AstroArchive.Installation {
    Version app = InstallCore.Parse(manifest.application_version), package = InstallCore.Parse(manifest.package_version);
    if (app.Major != package.Major || app.Minor != package.Minor || app.Build != package.Build || package.Revision > 65534)
     throw new IOException("Update application and package versions do not agree.");
-   string expected = Repository + "/releases/download/v" + manifest.package_version +
-    "/AstroArchive-" + manifest.application_version + "-Windows-x64-Offline-Setup.exe";
-   string concise = Repository + "/releases/download/v" + manifest.package_version + "/" + InstallerName(manifest);
-   if ((!string.Equals(manifest.url, expected, StringComparison.Ordinal) && !string.Equals(manifest.url, concise, StringComparison.Ordinal)) ||
-    (manifest.download_url != null && !string.Equals(manifest.download_url, concise, StringComparison.Ordinal)) ||
+   string expected = Website + "/downloads/" + InstallerName(manifest);
+   if (!string.Equals(manifest.url, expected, StringComparison.Ordinal) ||
+    (manifest.download_url != null && !string.Equals(manifest.download_url, expected, StringComparison.Ordinal)) ||
     !Regex.IsMatch(manifest.sha256 ?? "", @"^[a-fA-F0-9]{64}$") ||
     manifest.size < 1 || manifest.size > MaximumInstallerSize || (manifest.release_notes!=null&&manifest.release_notes.Length>48000))
     throw new IOException("Invalid update asset, checksum or size.");
@@ -110,14 +109,10 @@ namespace AstroArchive.Installation {
 
   public static string InstallerName(UpdateManifest manifest) { return "AstroArchive" + manifest.package_version + ".exe"; }
   public static string InstallationCache(string root){return Path.Combine(InstallCore.Root(root),"updates");}
-  public static string ReleasePage(UpdateManifest manifest){Validate(manifest);return Repository+"/releases/tag/v"+manifest.package_version;}
+  public static string ReleasePage(UpdateManifest manifest){Validate(manifest);return Website+"/releases/"+manifest.package_version;}
   public string ReleaseNotes(UpdateManifest manifest){
    ConnectivityPolicy.RequireInternet();Validate(manifest);if(!string.IsNullOrWhiteSpace(manifest.release_notes))return manifest.release_notes;
-   byte[] bytes=Fetch(new Uri("https://api.github.com/repos/arijguest/AstroArchive/releases/tags/v"+manifest.package_version),256*1024);
-   if(bytes==null||bytes.Length>256*1024)throw new IOException("Release notes response is too large.");
-   var release=InstallCore.Json().Deserialize<System.Collections.Generic.Dictionary<string,object>>(Encoding.UTF8.GetString(bytes));object body;
-   string notes=release!=null&&release.TryGetValue("body",out body)?body as string:null;
-   return string.IsNullOrWhiteSpace(notes)?"No release notes were provided for this package.":notes.Substring(0,Math.Min(notes.Length,48000));
+   return "No release notes were provided for this package. Visit the AstroArchive website for details.";
   }
   static string ReceiptPath(string root){string path=Path.Combine(InstallCore.Root(root),"update-receipt.json");InstallCore.NoLinks(path);return path;}
   public static void RecordInstalledUpdate(string root,string previousPackage,string operation="update"){

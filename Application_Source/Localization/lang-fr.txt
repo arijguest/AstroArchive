@@ -596,10 +596,6 @@ Edited working copies are ready.	Les copies de travail Edited sont prêtes.
 Operation diagnostics	Diagnostic de l'opération
 Last operation	Dernière opération
 Report a problem	Signaler un problème
-Review the diagnostic report before opening GitHub. No images, repository files, or repository paths are included; exception text may still contain sensitive values. Opening the draft sends the displayed details to GitHub. You can edit the issue before submitting it, or cancel now.	Examinez le rapport de diagnostic avant d'ouvrir GitHub. Aucune image, aucun fichier du dépôt ni chemin du dépôt n'est inclus ; le texte des exceptions peut néanmoins contenir des valeurs sensibles. L'ouverture du brouillon envoie les détails affichés à GitHub. Vous pouvez modifier le ticket avant de l'envoyer, ou annuler maintenant.
-Open GitHub draft	Ouvrir le brouillon GitHub
-Open a prefilled GitHub issue draft with the displayed diagnostic report	Ouvrir un brouillon de ticket GitHub prérempli avec le rapport de diagnostic affiché
-Could not open GitHub. The report has not been sent.\n\n	Impossible d'ouvrir GitHub. Le rapport n'a pas été envoyé.\n\n
 Application location	Emplacement de l'application
 Opens the selected Edited images in your chosen app. Save results in their image folders.	Ouvre les images Edited sélectionnées dans l'application choisie. Enregistrez les résultats dans leurs dossiers d'images.
 Creates verified working copies in Edited, then opens them in your chosen app. Save processed results alongside the copies.	Crée des copies de travail vérifiées dans Edited, puis les ouvre dans l'application choisie. Enregistrez les résultats traités à côté des copies.
@@ -1030,15 +1026,12 @@ Update canceled. The current version remains installed.	Mise à jour annulée. L
 The release could not be installed. AstroArchive remains open.	Impossible d'installer la version. AstroArchive reste ouvert.
 Release installation failed	Échec de l'installation de la version
 Check for releases	Rechercher des versions
-View release on GitHub	Voir la version sur GitHub
-Use View release on GitHub to read release notes.	Utilisez Voir la version sur GitHub pour lire les notes de version.
 Installation saves your settings, downloads and verifies the release, then restarts AstroArchive. Your repositories and images are kept.	L'installation enregistre vos paramètres, télécharge et vérifie la version, puis redémarre AstroArchive. Vos dépôts et images sont conservés.
 Save the current settings, install the verified release and restart AstroArchive.	Enregistrer les paramètres actuels, installer la version vérifiée et redémarrer AstroArchive.
 Release download progress	Progression du téléchargement de la version
 Checking the latest stable release…	Vérification de la dernière version stable…
 Loading release notes…	Chargement des notes de version…
 No release notes were provided.	Aucune note de version n'a été fournie.
-Release notes could not be loaded. View the release on GitHub below.	Impossible de charger les notes de version. Consultez la version sur GitHub ci-dessous.
 Installing the release. AstroArchive will restart automatically.	Installation de la version. AstroArchive redémarrera automatiquement.
 The release could not be installed. AstroArchive remains open.\n	Impossible d'installer la version. AstroArchive reste ouvert.\n
 Folder	Dossier
@@ -2208,7 +2201,6 @@ Start this guided walkthrough.	Lancer ce pas-à-pas guidé.
 Open this help topic.	Ouvrir cette rubrique d'aide.
 Guided fixes	Solutions guidées
 Guided tours	Visites guidées
-Open a GitHub bug report with your system details and recent log filled in.	Ouvre un rapport de bogue GitHub avec les détails de votre système et le journal récent déjà renseignés.
 Step {#0} of {#1}	Étape {0} sur {1}
 Looks good	Tout est bon
 Repository: {0}	Dépôt : {0}
@@ -2244,13 +2236,10 @@ Found: {0}	Trouvé : {0}
 No USB telescope is detected right now.	Aucun télescope USB n'est détecté pour le moment.
 Last backup: {0}	Dernière sauvegarde : {0}
 No backup has been made yet.	Aucune sauvegarde n'a encore été effectuée.
-Describe what went wrong. AstroArchive adds the details you tick below so the problem can be reproduced. Nothing is sent until you submit the issue on GitHub.	Décrivez ce qui s'est mal passé. AstroArchive ajoute les détails que vous cochez ci-dessous afin de pouvoir reproduire le problème. Rien n'est envoyé tant que vous n'avez pas soumis le ticket sur GitHub.
 AstroArchive hit an error:	AstroArchive a rencontré une erreur :
 Title (optional)	Titre (facultatif)
 What happened?	Que s'est-il passé ?
 Preview of the diagnostics	Aperçu des diagnostics
-Folder paths are replaced with [local path]. Images and archive files are never attached. Remove anything else you'd rather not share in GitHub before submitting.	Les chemins de dossiers sont remplacés par [local path]. Les images et les fichiers de l'archive ne sont jamais joints. Supprimez dans GitHub tout ce que vous préférez ne pas partager avant de soumettre.
-Open GitHub issue	Ouvrir un ticket GitHub
 Copy report	Copier le rapport
 Save report…	Enregistrer le rapport…
 System details	Détails du système
@@ -2264,7 +2253,6 @@ Copy the description and diagnostics to the clipboard.	Copier la description et 
 Save the description and diagnostics as a text file.	Enregistrer la description et les diagnostics dans un fichier texte.
 Opens a prefilled issue in your browser to review and submit.	Ouvre dans votre navigateur un ticket prérempli à vérifier et à soumettre.
 The report is too long for a web link, so the issue draft has a shortened copy. The full report is on your clipboard: paste it into the issue before submitting.	Le rapport est trop long pour un lien web ; le brouillon du ticket contient donc une copie abrégée. Le rapport complet est dans votre presse-papiers : collez-le dans le ticket avant de soumettre.
-Could not open GitHub. The report has not been sent. Use Copy report or Save report… and attach it to an issue at github.com/arijguest/AstroArchive/issues.	Impossible d'ouvrir GitHub. Le rapport n'a pas été envoyé. Utilisez Copier le rapport ou Enregistrer le rapport… et joignez-le à un ticket sur github.com/arijguest/AstroArchive/issues.
 The report could not be copied	Impossible de copier le rapport
 The report could not be saved	Impossible d'enregistrer le rapport
 Would you like to report this problem? You can review everything before it is sent.	Souhaitez-vous signaler ce problème ? Vous pouvez tout vérifier avant l'envoi.

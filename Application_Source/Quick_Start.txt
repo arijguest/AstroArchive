@@ -2,7 +2,7 @@ AstroArchive user guide
 @title About this guide
 @category Reference
 @summary Which version this guide describes and what AstroArchive needs to run.
-Application 3.3.2; package 3.3.2.2.
+Application 3.3.3; package 3.3.3.1.
 Windows 10/11 x64; .NET Framework 4.8.
 
 Press `F1` on any page for help with that page. Guide topics stay in English;

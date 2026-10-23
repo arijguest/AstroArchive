@@ -92,7 +92,7 @@ namespace AstroArchive {
    }
    return y-area.Y+30*scale;
   }
-  public const string Website="astroarchive.arijguest.com";
+  public const string Website="astroarchive-companion-test.arijguest.chatgpt.site";
   public static readonly string[] ResolutionLabels={"Standard","High · 2×","Sharing · 720 px wide"};
   public static double ResolutionScale(int choice,TargetCardLayout layout){int w,h;TargetCards.Size(layout,out w,out h);return choice==1?2:choice==2?720.0/w:1;}
   public static BitmapSource Render(TargetCardData data,BitmapSource hero,TargetCardLayout layout,bool dark,bool fill,string credit){return Render(data,hero,layout,dark,fill,credit,null,1);}

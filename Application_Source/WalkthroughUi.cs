@@ -267,13 +267,13 @@ namespace AstroArchive {
             dialog.Text("Ari J. Guest", true);
             dialog.Text("Created by Ari J. Guest. Learn more about the author and their work at arijguest.com.");
             dialog.Button("Visit arijguest.com", () => OpenWebsite("https://arijguest.com"));
-            dialog.Button("Source code and releases", () => OpenWebsite("https://github.com/arijguest/AstroArchive"));
+            dialog.Button("Source code and releases", () => OpenWebsite("https://astroarchive-companion-test.arijguest.chatgpt.site"));
             dialog.Button("Report a problem…", ReportProblem);
             dialog.Button("Buy Me a Coffee", () => OpenWebsite("https://ko-fi.com/arijguest"));
             dialog.Text("Software licence", true);
             dialog.Text("Copyright 2026 Ari J. Guest. AstroArchive is source-available under the PolyForm Noncommercial License 1.0.0. Noncommercial use, modification and sharing are permitted under its terms. Commercial use, including resale outside the permitted purposes, requires separate permission.");
             dialog.Button("Read software licence (offline)", () => LicencePage().Show());
-            dialog.Button("Commercial licensing enquiries", () => OpenWebsite("https://astroarchive.arijguest.com/#contact"));
+            dialog.Button("Commercial licensing enquiries", () => OpenWebsite("https://astroarchive-companion-test.arijguest.chatgpt.site/#contact"));
             dialog.Text("Catalogue acknowledgements", true);
             dialog.Text("Target names and positions use OpenNGC (CC BY-SA 4.0); observing towns and cities use GeoNames (CC BY 4.0); constellation figures use D3-Celestial (BSD 3-clause). These datasets retain their own licences; their notices are included with the installation. Original image data remains in your repository; derived exports are identified separately.");
             dialog.CloseOnly(); return dialog;
@@ -286,7 +286,7 @@ namespace AstroArchive {
                 using (var reader = new StreamReader(stream)) dialog.Text(reader.ReadToEnd());
             }
             dialog.Text("Third-party data keeps its separate licences. Your images and processing outputs are not relicensed by using AstroArchive.");
-            dialog.Button("Licensing summary and third-party notices", () => OpenWebsite("https://github.com/arijguest/AstroArchive/blob/main/LICENSING.md"));
+            dialog.Button("Licensing summary and third-party notices", () => OpenWebsite("https://astroarchive-companion-test.arijguest.chatgpt.site/guides/LICENSING.html"));
             dialog.CloseOnly(); return dialog;
         }
         void About() { AboutPage().Show(); }

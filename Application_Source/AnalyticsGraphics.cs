@@ -79,7 +79,7 @@ namespace AstroArchive {
    Box(p,60,738,1080,1,"#DCE2EF");
    Lines(p,"Charts · "+data.Scope+" · "+data.Captures.ToString("N0",CultureInfo.InvariantCulture)+" frames · "+ArchiveAnalytics.Number(data.Seconds/3600)+" h",60,752,108,11,Muted,1,820);
    Text(p,data.DateRange,60,775,10,Muted);
-   Text(p,"astroarchive.arijguest.com",910,762,11,Accent);
+   Text(p,"astroarchive-companion-test.arijguest.chatgpt.site",910,762,11,Accent);
    ApplyTheme(p,dark);Polish(p,dark,index);return p;
   }
   static void ApplyTheme(AnalyticsPage p,bool dark){

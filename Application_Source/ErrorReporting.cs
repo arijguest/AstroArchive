@@ -39,13 +39,13 @@ namespace AstroArchive {
   }
  }
  // One part of a problem report. The user chooses which parts to send; long parts keep their
- // newest text when the report must be shortened to fit a GitHub link.
+ // newest text when the report must be shortened to fit a the AstroArchive website link.
  public sealed class ReportSection {
   public string Title,Text;public bool Include=true;public bool KeepEnd;public int Cap=4000;
  }
  internal static class AppErrorReporting {
-  const string IssueBase="https://github.com/arijguest/AstroArchive/issues/new";
-  // GitHub and browsers handle links up to about 8,000 characters; stay well inside that.
+  const string IssueBase="https://astroarchive-companion-test.arijguest.chatgpt.site/support";
+  // the AstroArchive website and browsers handle links up to about 8,000 characters; stay well inside that.
   internal const int UrlLimit=7200;
 
   internal static string Version{get{var assembly=Assembly.GetExecutingAssembly();var file=assembly.GetCustomAttributes(typeof(AssemblyFileVersionAttribute),false).OfType<AssemblyFileVersionAttribute>().FirstOrDefault();return assembly.GetName().Version+(file==null?"":" (package "+file.Version+")");}}
@@ -112,7 +112,7 @@ namespace AstroArchive {
    string body="## What happened?\n\n"+what+"\n\n## Diagnostic details\n\n"+(truncated?"_Shortened to fit. The full report is on your clipboard: paste it below this line if you can._\n\n":"")+
     (diagnostics.Length==0?"":"```text\n"+diagnostics.Replace("```","'''")+"\n```\n")+"\n_Prepared by AstroArchive "+Assembly.GetExecutingAssembly().GetName().Version+". Images and archive files are never attached._\n";
    string heading=string.IsNullOrWhiteSpace(title)?"AstroArchive problem report":Sanitize(title.Trim());
-   return IssueBase+"?title="+Uri.EscapeDataString(heading)+"&body="+Uri.EscapeDataString(body);
+   return IssueBase+"#title="+Uri.EscapeDataString(heading)+"&body="+Uri.EscapeDataString(body);
   }
 
   internal static string Sanitize(string text){

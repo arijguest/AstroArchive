@@ -13,7 +13,7 @@ static class LaunchSafetyTests {
  static string Installed(string name,params string[] versions){string root=Path.Combine(scratch,name);foreach(string version in versions)new InstallCore().Install(root,Package(version),Encoding.UTF8.GetBytes("test installer"));return root;}
  // Simulates Smart App Control rejecting the named version folders (or only one executable in them).
  static Func<string,int> Blocking(params string[] blocked){return path=>blocked.Any(b=>(Path.GetFileName(Path.GetDirectoryName(path))+"/"+Path.GetFileName(path)).StartsWith(b,StringComparison.OrdinalIgnoreCase))?4551:0;}
- static UpdateManifest Manifest(string version){return new UpdateManifest{schema=1,application_version=version,package_version=version+".1",url=UpdateClient.Repository+"/releases/download/v"+version+".1/AstroArchive-"+version+"-Windows-x64-Offline-Setup.exe",sha256=new string('a',64),size=1};}
+ static UpdateManifest Manifest(string version){return new UpdateManifest{schema=1,application_version=version,package_version=version+".1",url=UpdateClient.Website+"/downloads/AstroArchive"+version+".1.exe",sha256=new string('a',64),size=1};}
  static UpdateClient Feed(UpdateManifest manifest){return new UpdateClient{Fetch=(uri,limit)=>Encoding.UTF8.GetBytes(InstallCore.Json().Serialize(manifest))};}
 
  public static void Run(Action<string,Action> test,string directory){

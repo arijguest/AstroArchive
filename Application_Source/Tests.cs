@@ -16,16 +16,16 @@ namespace AstroArchive {
   static void Expect(Action action,string message){bool threw=false;try{action();}catch{threw=true;}Check(threw,message);}
   static void WindowsTest(string name,Action action){if(Environment.OSVersion.Platform==PlatformID.Win32NT)Test(name,action);else{skipped++;Console.WriteLine("SKIP (Windows required) "+name);}}
   static void ErrorReportingTests(){
-   Test("Error reports omit local paths and prepare an editable GitHub issue",()=>{
+   Test("Error reports omit local paths and prepare an editable the AstroArchive website issue",()=>{
     var report=AppErrorReporting.Diagnostics(new IOException("Missing C:\\Users\\sample\\Secrets\\image.fits"),"Scan failed");
     Check(report.Contains("System.IO.IOException")&&report.Contains("Scan failed"),"Diagnostics omitted error context.");
     Check(!report.Contains("C:\\Users\\sample")&&report.Contains("[local path]"),"Diagnostics exposed a local path.");
     string url=AppErrorReporting.IssueUrl(report);
-    Check(url.StartsWith("https://github.com/arijguest/AstroArchive/issues/new?title="),"Issue draft points to an unexpected destination.");
+    Check(url.StartsWith("https://astroarchive-companion-test.arijguest.chatgpt.site/support#title="),"Issue draft points to an unexpected destination.");
     Check(Uri.UnescapeDataString(url).Contains("[local path]"),"Issue draft did not contain sanitized diagnostics.");
     Check(AppErrorReporting.Diagnostics(null,"Manual report").Contains("Exception: None captured"),"Manual reports do not handle missing exceptions.");
    });
-   Test("Problem reports include the app log, honour section choices and fit a GitHub link",()=>{
+   Test("Problem reports include the app log, honour section choices and fit a the AstroArchive website link",()=>{
     AppLog.Stop();AppLog.Info("Started: Scanning D:\\Captures\\M31");AppLog.Error("Import failed",new IOException("Disk full at E:\\Archive"));
     var sections=AppErrorReporting.Sections(new InvalidOperationException("Broken at C:\\Users\\sample\\x.fits"),"Import",new System.Collections.Generic.Dictionary<string,string>{{"Page","Import"}});
     string text=AppErrorReporting.Compose(sections);

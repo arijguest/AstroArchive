@@ -24,7 +24,7 @@ namespace AstroArchive {
         }
         // Every guided fix ends by offering a problem report with the diagnostics attached.
         static WalkthroughStep StillStuck(string target) {
-            return S("Still stuck?", -1, target, "If the steps above didn't solve it, send a problem report.\n\n- AstroArchive fills in your version, system details and recent log.\n- You review everything before GitHub opens; nothing is sent automatically.", "Report a problem…", "report");
+            return S("Still stuck?", -1, target, "If the steps above didn't solve it, send a problem report.\n\n- AstroArchive fills in your version, system details and recent log.\n- You review everything before the AstroArchive website opens; nothing is sent automatically.", "Report a problem…", "report");
         }
         static WalkthroughStep[] TourSteps() {
             return new[] {

@@ -8,7 +8,7 @@ static class UpdateTests {
  static readonly byte[] Installer = Encoding.UTF8.GetBytes("fixture installer; never executed");
  static UpdateManifest Manifest(string version = "1.2.0", int revision = 2) {
   return new UpdateManifest { schema = 1, application_version = version, package_version = version + "." + revision,
-   url = UpdateClient.Repository + "/releases/download/v" + version + "." + revision + "/AstroArchive-" + version + "-Windows-x64-Offline-Setup.exe",
+   url = UpdateClient.Website + "/downloads/AstroArchive" + version + "." + revision + ".exe",
    sha256 = InstallCore.Hash(Installer), size = Installer.Length };
  }
  static UpdateClient Client(UpdateManifest manifest) {
@@ -25,7 +25,7 @@ static class UpdateTests {
  }
  public static void Run(Action<string, Action> test, string scratch) {
   test("The reviewed 3.2.9 updater accepts the single 3.2.9.1 installer from 3.2.8.1",()=>{
-   var manifest=Manifest("3.2.9",1);manifest.url=manifest.download_url=UpdateClient.Repository+"/releases/download/v3.2.9.1/"+UpdateClient.InstallerName(manifest);
+   var manifest=Manifest("3.2.9",1);manifest.url=manifest.download_url=UpdateClient.Website+"/downloads/"+UpdateClient.InstallerName(manifest);
    var client=Client(manifest);var available=client.Check(Installed("3.2.8",1));Check(available!=null&&available.url.EndsWith("/AstroArchive3.2.9.1.exe"),"Concise-only feed was refused");
    string cache=Path.Combine(scratch,"hybrid-bridge-cache");string prepared=client.Prepare(available,cache);Check(File.ReadAllBytes(prepared).SequenceEqual(Installer)&&Path.GetFileName(prepared)=="AstroArchive3.2.9.1.exe","Single installer was not verified/prepared");Check(!Directory.EnumerateFiles(cache,"*Offline*",SearchOption.AllDirectories).Any(),"A dedicated offline installer was created");
   });
@@ -62,10 +62,19 @@ static class UpdateTests {
    Check(!UpdateDiagnostics.MatchesInstaller(xml(device.Replace("updates\\abc", "updates\\other"),device),installer),"Event from a different cached download was attributed to this launch");
    Check(!UpdateDiagnostics.MatchesInstaller(xml("other.exe",device),installer),"Parent process was mistaken for the rejected file");
   });
-  test("Release notes use the feed when present and a bounded exact-tag API fallback",()=>{
-   var manifest=Manifest();manifest.release_notes="New import and session views.";var client=new UpdateClient{Fetch=(uri,limit)=>{throw new Exception("Embedded notes should not fetch");}};Check(client.ReleaseNotes(manifest)==manifest.release_notes,"Embedded notes changed");
-   manifest.release_notes=null;string requested=null;long maximum=0;client.Fetch=(uri,limit)=>{requested=uri.AbsoluteUri;maximum=limit;return Encoding.UTF8.GetBytes("{\"body\":\"Package notes\"}");};Check(client.ReleaseNotes(manifest)=="Package notes"&&requested.EndsWith("/releases/tags/v1.2.0.2")&&maximum==256*1024,"Notes fallback used the wrong package or unbounded response");
-   Check(UpdateClient.ReleasePage(manifest)==UpdateClient.Repository+"/releases/tag/v1.2.0.2","Release page differs from package");manifest.release_notes=new string('a',48001);Refused(()=>UpdateClient.Validate(manifest));
+  test("Website notes never require an external release API",()=>{
+   var manifest=Manifest();manifest.release_notes="New imports.";
+   var client=new UpdateClient{Fetch=(uri,limit)=>{throw new Exception("Notes must not fetch");}};
+   Check(client.ReleaseNotes(manifest)==manifest.release_notes,"Embedded notes changed");
+   manifest.release_notes=null;Check(client.ReleaseNotes(manifest).Contains("AstroArchive website"),"Missing notes have no local fallback");
+   Check(UpdateClient.ReleasePage(manifest)==UpdateClient.Website+"/releases/1.2.0.2","Wrong release page");
+   manifest.release_notes=new string('a',48001);Refused(()=>UpdateClient.Validate(manifest));
+  });
+  test("A 3.1.9.1 installation discovers and verifies the website upgrade",()=>{
+   var manifest=Manifest("3.3.3",1);var client=Client(manifest);var available=client.Check(Installed("3.1.9",1));
+   Check(available!=null&&available.package_version=="3.3.3.1","Website upgrade missed");
+   string path=client.Prepare(available,Path.Combine(scratch,"website-upgrade"));
+   Check(InstallCore.HashFile(path)==manifest.sha256,"Website download failed integrity");
   });
   test("Verified update downloads report bytes and percentage without changing cached content",()=>{
    var manifest=Manifest();var client=Client(manifest);var progress=new System.Collections.Generic.List<UpdateDownloadProgress>();client.Progress=p=>progress.Add(p);string setup=client.Prepare(manifest,Path.Combine(scratch,"progress-cache"));
@@ -120,13 +129,13 @@ static class UpdateTests {
    Check(InstallCore.ApplicationMutexName(root)!=InstallCore.ApplicationMutexName(root+"-other"),"Separate installations shared an update mutex");
   });
   test("Concise release installers are validated and used for verified downloads", () => {
-   var manifest=Manifest("1.3.0",1);manifest.download_url=UpdateClient.Repository+"/releases/download/v1.3.0.1/AstroArchive1.3.0.1.exe";
+   var manifest=Manifest("1.3.0",1);manifest.download_url=UpdateClient.Website+"/downloads/AstroArchive1.3.0.1.exe";
    string requested=null;var client=new UpdateClient{Fetch=(uri,limit)=>{requested=uri.AbsoluteUri;return Installer;}};
    string path=client.Prepare(manifest,Path.Combine(scratch,"concise-cache"));Check(requested==manifest.download_url&&Path.GetFileName(path)=="AstroArchive1.3.0.1.exe","Concise installer was not used");
    manifest.url=manifest.download_url;manifest.download_url=null;UpdateClient.Validate(manifest);
   });
   test("Concise download URLs cannot change repository or package", () => {
-   var manifest=Manifest();manifest.download_url=UpdateClient.Repository+"/releases/download/v1.2.0.3/AstroArchive1.2.0.3.exe";Refused(()=>UpdateClient.Validate(manifest));
+   var manifest=Manifest();manifest.download_url=UpdateClient.Website+"/downloads/AstroArchive1.2.0.3.exe";Refused(()=>UpdateClient.Validate(manifest));
    manifest.download_url="https://example.com/AstroArchive1.2.0.2.exe";Refused(()=>UpdateClient.Validate(manifest));
   });
   test("Update feed discovers a newer installer revision", () => {
@@ -161,7 +170,7 @@ static class UpdateTests {
   test("Update feed rejects unrelated repositories and mismatched asset versions", () => {
    var manifest = Manifest(); manifest.url = manifest.url.Replace("arijguest", "other-owner");
    Refused(() => UpdateClient.Validate(manifest));
-   manifest = Manifest(); manifest.url = manifest.url.Replace("v1.2.0.2", "v1.2.0.3");
+   manifest = Manifest(); manifest.url = manifest.url.Replace("1.2.0.2.exe", "1.2.0.3.exe");
    Refused(() => UpdateClient.Validate(manifest));
   });
   test("Update schema, package agreement, checksum and size are required", () => {
@@ -171,14 +180,12 @@ static class UpdateTests {
    manifest = Manifest(); manifest.size = UpdateClient.MaximumInstallerSize + 1; Refused(() => UpdateClient.Validate(manifest));
    manifest = Manifest(); manifest.size = 0; Refused(() => UpdateClient.Validate(manifest));
   });
-  test("Update redirects require HTTPS and known GitHub download hosts", () => {
-   Check(UpdateClient.TrustedDownload(new Uri("https://release-assets.githubusercontent.com/asset")), "Release asset host rejected.");
-   Check(!UpdateClient.TrustedDownload(new Uri("http://github.com/asset")), "Plain HTTP accepted.");
-   Check(!UpdateClient.TrustedDownload(new Uri("https://github.com.evil.example/asset")), "Lookalike host accepted.");
-   Check(!UpdateClient.TrustedDownload(new Uri("https://github.com:444/asset")), "Unexpected port accepted.");
-   Check(!UpdateClient.TrustedDownload(new Uri("https://user@github.com/asset")), "Userinfo accepted.");
-  });
-  test("Oversized update feed is refused", () => {
+  test("Website downloads reject external hosts, redirects, ports and credentials",()=>{
+   Check(UpdateClient.TrustedDownload(new Uri(UpdateClient.Feed)),"Website feed rejected");
+   Check(UpdateClient.TrustedDownload(new Uri(UpdateClient.Website+"/downloads/AstroArchive3.3.3.1.exe")),"Website installer rejected");
+   foreach(string url in new[]{"http://astroarchive-companion-test.arijguest.chatgpt.site/update.json","https://astroarchive-companion-test.arijguest.chatgpt.site.evil.example/update.json","https://astroarchive-companion-test.arijguest.chatgpt.site:444/update.json","https://user@astroarchive-companion-test.arijguest.chatgpt.site/update.json","https://github.com/asset","https://astroarchive-companion-test.arijguest.chatgpt.site/update.json?next=evil","https://astroarchive-companion-test.arijguest.chatgpt.site/other.exe","https://astroarchive-companion-test.arijguest.chatgpt.site/update.json#x"})
+    Check(!UpdateClient.TrustedDownload(new Uri(url)),"Untrusted destination accepted: "+url);
+  });  test("Oversized update feed is refused", () => {
    var client = new UpdateClient { Fetch = (uri, limit) => new byte[65537] };
    Refused(() => client.Check(Installed()));
   });

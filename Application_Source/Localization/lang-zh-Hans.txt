@@ -620,10 +620,6 @@ Edited working copies are ready.	Edited 工作副本已就绪。
 Operation diagnostics	操作诊断
 Last operation	上次操作
 Report a problem	报告问题
-Review the diagnostic report before opening GitHub. No images, repository files, or repository paths are included; exception text may still contain sensitive values. Opening the draft sends the displayed details to GitHub. You can edit the issue before submitting it, or cancel now.	打开 GitHub 前，请先查看诊断报告。报告不包含任何图像、存储库文件或存储库路径，但异常文本仍可能包含敏感值。打开草稿会将显示的详细信息发送到 GitHub。你可以在提交前编辑该问题，也可以现在取消。
-Open GitHub draft	打开 GitHub 草稿
-Open a prefilled GitHub issue draft with the displayed diagnostic report	打开包含所示诊断报告的预填 GitHub 问题草稿
-Could not open GitHub. The report has not been sent.\n\n	无法打开 GitHub。报告尚未发送。\n\n
 Application location	应用程序位置
 Opens the selected Edited images in your chosen app. Save results in their image folders.	在你选择的应用中打开所选的 Edited 图像。请将结果保存在其图像文件夹中。
 Creates verified working copies in Edited, then opens them in your chosen app. Save processed results alongside the copies.	在 Edited 中创建已验证的工作副本，然后在你选择的应用中打开它们。请将处理结果保存在副本旁边。
@@ -1061,15 +1057,12 @@ Update canceled. The current version remains installed.	更新已取消。仍保
 The release could not be installed. AstroArchive remains open.	无法安装新版本。AstroArchive 仍保持打开状态。
 Release installation failed	版本安装失败
 Check for releases	检查新版本
-View release on GitHub	在 GitHub 上查看版本
-Use View release on GitHub to read release notes.	使用“在 GitHub 上查看版本”阅读发行说明。
 Installation saves your settings, downloads and verifies the release, then restarts AstroArchive. Your repositories and images are kept.	安装时会保存你的设置，下载并验证新版本，然后重启 AstroArchive。你的存储库和图像将保留。
 Save the current settings, install the verified release and restart AstroArchive.	保存当前设置，安装已验证的新版本并重启 AstroArchive。
 Release download progress	版本下载进度
 Checking the latest stable release…	正在检查最新的稳定版本…
 Loading release notes…	正在加载发行说明…
 No release notes were provided.	未提供发行说明。
-Release notes could not be loaded. View the release on GitHub below.	无法加载发行说明。请通过下方链接在 GitHub 上查看此版本。
 Installing the release. AstroArchive will restart automatically.	正在安装新版本。AstroArchive 将自动重启。
 The release could not be installed. AstroArchive remains open.\n	无法安装新版本。AstroArchive 仍保持打开状态。\n
 Folder	文件夹
@@ -2241,7 +2234,6 @@ Start this guided walkthrough.	开始此引导式演练。
 Open this help topic.	打开此帮助主题。
 Guided fixes	引导式修复
 Guided tours	引导式导览
-Open a GitHub bug report with your system details and recent log filled in.	打开 GitHub 错误报告，并自动填入你的系统详细信息和最近的日志。
 Step {#0} of {#1}	第 {0} 步，共 {1} 步
 Looks good	看起来不错
 Repository: {0}	存储库：{0}
@@ -2277,13 +2269,10 @@ Found: {0}	找到：{0}
 No USB telescope is detected right now.	当前未检测到 USB 望远镜。
 Last backup: {0}	上次备份：{0}
 No backup has been made yet.	尚未进行备份。
-Describe what went wrong. AstroArchive adds the details you tick below so the problem can be reproduced. Nothing is sent until you submit the issue on GitHub.	请描述出了什么问题。AstroArchive 会添加你在下方勾选的详细信息，以便重现该问题。在你于 GitHub 上提交问题之前，不会发送任何内容。
 AstroArchive hit an error:	AstroArchive 遇到错误：
 Title (optional)	标题（可选）
 What happened?	发生了什么？
 Preview of the diagnostics	诊断信息预览
-Folder paths are replaced with [local path]. Images and archive files are never attached. Remove anything else you'd rather not share in GitHub before submitting.	文件夹路径已替换为 [local path]。图像和存档文件绝不会被附加。如果还有不想分享的内容，请在提交前在 GitHub 中删除。
-Open GitHub issue	打开 GitHub 问题
 Copy report	复制报告
 Save report…	保存报告…
 System details	系统详细信息
@@ -2297,7 +2286,6 @@ Copy the description and diagnostics to the clipboard.	将说明和诊断信息�
 Save the description and diagnostics as a text file.	将说明和诊断信息另存为文本文件。
 Opens a prefilled issue in your browser to review and submit.	在浏览器中打开预填的问题，供你审阅和提交。
 The report is too long for a web link, so the issue draft has a shortened copy. The full report is on your clipboard: paste it into the issue before submitting.	报告太长，无法放入网页链接，因此问题草稿中是缩短版。完整报告已在剪贴板中：提交前请将其粘贴到问题中。
-Could not open GitHub. The report has not been sent. Use Copy report or Save report… and attach it to an issue at github.com/arijguest/AstroArchive/issues.	无法打开 GitHub。报告尚未发送。请使用“复制报告”或“保存报告…”，并将其附加到 github.com/arijguest/AstroArchive/issues 上的问题中。
 The report could not be copied	无法复制报告
 The report could not be saved	无法保存报告
 Would you like to report this problem? You can review everything before it is sent.	要报告此问题吗？发送前你可以审阅所有内容。

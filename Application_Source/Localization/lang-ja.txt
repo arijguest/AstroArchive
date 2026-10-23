@@ -621,10 +621,6 @@ Edited working copies are ready.	Edited の作業コピーの準備ができま�
 Operation diagnostics	操作の診断情報
 Last operation	前回の操作
 Report a problem	問題を報告
-Review the diagnostic report before opening GitHub. No images, repository files, or repository paths are included; exception text may still contain sensitive values. Opening the draft sends the displayed details to GitHub. You can edit the issue before submitting it, or cancel now.	GitHub を開く前に診断レポートを確認してください。画像、リポジトリのファイル、リポジトリのパスは含まれませんが、例外のテキストには機密性の高い値が含まれている可能性があります。下書きを開くと、表示されている詳細が GitHub に送信されます。Issue は送信前に編集できます。また、ここでキャンセルすることもできます。
-Open GitHub draft	GitHub の下書きを開く
-Open a prefilled GitHub issue draft with the displayed diagnostic report	表示されている診断レポートを入力済みの GitHub Issue の下書きを開きます
-Could not open GitHub. The report has not been sent.\n\n	GitHub を開けませんでした。レポートは送信されていません。\n\n
 Application location	アプリケーションの場所
 Opens the selected Edited images in your chosen app. Save results in their image folders.	選択した Edited の画像を選択したアプリで開きます。結果はそれぞれの画像フォルダーに保存してください。
 Creates verified working copies in Edited, then opens them in your chosen app. Save processed results alongside the copies.	Edited に検証済みの作業コピーを作成し、選択したアプリで開きます。処理した結果はコピーと同じ場所に保存してください。
@@ -1062,15 +1058,12 @@ Update canceled. The current version remains installed.	更新をキャンセル
 The release could not be installed. AstroArchive remains open.	リリースをインストールできませんでした。AstroArchive は開いたままです。
 Release installation failed	リリースのインストールに失敗しました
 Check for releases	リリースを確認
-View release on GitHub	GitHub でリリースを表示
-Use View release on GitHub to read release notes.	リリース ノートを読むには、[GitHub でリリースを表示] を使用してください。
 Installation saves your settings, downloads and verifies the release, then restarts AstroArchive. Your repositories and images are kept.	インストール時には、設定を保存し、リリースをダウンロードして検証した後、AstroArchive を再起動します。リポジトリと画像は保持されます。
 Save the current settings, install the verified release and restart AstroArchive.	現在の設定を保存し、検証済みのリリースをインストールして AstroArchive を再起動します。
 Release download progress	リリースのダウンロードの進行状況
 Checking the latest stable release…	最新の安定版リリースを確認しています…
 Loading release notes…	リリース ノートを読み込んでいます…
 No release notes were provided.	リリース ノートは提供されていません。
-Release notes could not be loaded. View the release on GitHub below.	リリース ノートを読み込めませんでした。下のリンクから GitHub でリリースを表示してください。
 Installing the release. AstroArchive will restart automatically.	リリースをインストールしています。AstroArchive は自動的に再起動します。
 The release could not be installed. AstroArchive remains open.\n	リリースをインストールできませんでした。AstroArchive は開いたままです。\n
 Folder	フォルダー
@@ -2242,7 +2235,6 @@ Start this guided walkthrough.	このガイド付きウォークスルーを開�
 Open this help topic.	このヘルプ トピックを開きます。
 Guided fixes	ガイド付き修正
 Guided tours	ガイド付きツアー
-Open a GitHub bug report with your system details and recent log filled in.	システム情報と最近のログを入力した状態で、GitHub のバグ報告を開きます。
 Step {#0} of {#1}	ステップ {0} / {1}
 Looks good	問題ありません
 Repository: {0}	リポジトリ: {0}
@@ -2278,13 +2270,10 @@ Found: {0}	検出: {0}
 No USB telescope is detected right now.	現在、USB の望遠鏡は検出されていません。
 Last backup: {0}	前回のバックアップ: {0}
 No backup has been made yet.	まだバックアップが作成されていません。
-Describe what went wrong. AstroArchive adds the details you tick below so the problem can be reproduced. Nothing is sent until you submit the issue on GitHub.	問題の内容を入力してください。再現できるよう、下でオンにした詳細情報が AstroArchive によって追加されます。GitHub で Issue を送信するまで、何も送信されません。
 AstroArchive hit an error:	AstroArchive でエラーが発生しました:
 Title (optional)	タイトル (省略可)
 What happened?	何が起きましたか?
 Preview of the diagnostics	診断情報のプレビュー
-Folder paths are replaced with [local path]. Images and archive files are never attached. Remove anything else you'd rather not share in GitHub before submitting.	フォルダー パスは [local path] に置き換えられます。画像とアーカイブ ファイルが添付されることはありません。ほかにも共有したくない情報があれば、送信前に GitHub 上で削除してください。
-Open GitHub issue	GitHub の Issue を開く
 Copy report	レポートをコピー
 Save report…	レポートを保存…
 System details	システム情報
@@ -2298,7 +2287,6 @@ Copy the description and diagnostics to the clipboard.	説明と診断情報を�
 Save the description and diagnostics as a text file.	説明と診断情報をテキスト ファイルとして保存します。
 Opens a prefilled issue in your browser to review and submit.	ブラウザーで入力済みの Issue を開きます。内容を確認して送信してください。
 The report is too long for a web link, so the issue draft has a shortened copy. The full report is on your clipboard: paste it into the issue before submitting.	レポートが長すぎて Web リンクに収まらないため、Issue の下書きには短縮版が入っています。完全なレポートはクリップボードにあります。送信前に Issue に貼り付けてください。
-Could not open GitHub. The report has not been sent. Use Copy report or Save report… and attach it to an issue at github.com/arijguest/AstroArchive/issues.	GitHub を開けませんでした。レポートは送信されていません。[レポートをコピー] または [レポートを保存…] を使用し、github.com/arijguest/AstroArchive/issues の Issue に添付してください。
 The report could not be copied	レポートをコピーできませんでした
 The report could not be saved	レポートを保存できませんでした
 Would you like to report this problem? You can review everything before it is sent.	この問題を報告しますか? 送信前にすべての内容を確認できます。

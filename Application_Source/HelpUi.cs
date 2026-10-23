@@ -21,7 +21,7 @@ namespace AstroArchive {
    var help=MenuAction("Help…",()=>OpenGuide(null),true,false);UiHelp.Hint(help,"Search the guide, or start a guided fix or tour.");items.Add(help);
    items.Add(MenuAction("Help for this page (F1)",()=>OpenGuide(CurrentHelpTopic()),true,false));
    items.Add(new Separator());
-   var report=MenuAction("Report a problem…",ReportProblem,true,false);UiHelp.Hint(report,"Open a GitHub bug report with your system details and recent log filled in.");items.Add(report);
+   var report=MenuAction("Report a problem…",ReportProblem,true,false);UiHelp.Hint(report,"Open a the AstroArchive website bug report with your system details and recent log filled in.");items.Add(report);
    items.Add(new Separator());items.Add(MenuAction("About AstroArchive…",About,true,false));
   }
   string CurrentHelpTopic(){return ((TabControl)Window.FindName("MainTabs")).SelectedIndex==2?"EDITED IMAGES AND WORKING COPIES":((TabControl)Window.FindName("MainTabs")).SelectedIndex==1?"IMPORT WORKFLOW":"LIBRARY WORKFLOW";}
@@ -82,7 +82,7 @@ namespace AstroArchive {
    homeView=HomeView();reading.Children.Add(homeView);articleView=ArticleView();reading.Children.Add(articleView);
    var footer=new DockPanel{Margin=new Thickness(0,14,0,0)};Grid.SetRow(footer,2);layout.Children.Add(footer);
    var actions=new StackPanel{Orientation=Orientation.Horizontal};DockPanel.SetDock(actions,Dock.Right);footer.Children.Add(actions);actions.Children.Add(Button("Save guide…",SaveGuide,"Save the complete guide as text."));var close=Button("Close",Close,"Close help (Esc).");close.IsCancel=true;close.Margin=new Thickness(0);actions.Children.Add(close);
-   var report=Button("Report a problem…",()=>{if(Report!=null)Report();},"Open a GitHub bug report with your system details and recent log filled in.");DockPanel.SetDock(report,Dock.Left);footer.Children.Add(report);
+   var report=Button("Report a problem…",()=>{if(Report!=null)Report();},"Open a the AstroArchive website bug report with your system details and recent log filled in.");DockPanel.SetDock(report,Dock.Left);footer.Children.Add(report);
    Theme.Bind(count,TextBlock.ForegroundProperty,"Muted");count.SetResourceReference(TextBlock.FontSizeProperty,"UiFontSmall");footer.Children.Add(count);
    Article.LinkClicked+=FollowLink;
    TopicList.SelectionChanged+=(s,e)=>{if(filtering)return;if(SelectedTopic!=null)ShowArticle();else if(SearchBox.Text.Trim().Length==0)ShowHome();};

@@ -45,7 +45,7 @@ namespace AstroArchive {
    else if(report.Style=="bars")PortraitBars(p,values,report.Unit,report.Values.Max(v=>v.Value),true);
    else PortraitColumns(p,report.Values,report.Unit,true);
    p.Role="footer";Lines(p,report.Note,60,height-155,150,14,Muted,2,960);Box(p,60,height-90,960,1,"#DCE2EF");Lines(p,"Charts · "+data.Scope+" · "+data.Captures.ToString("N0",CultureInfo.InvariantCulture)+" frames · "+ArchiveAnalytics.Number(data.Seconds/3600)+" h",60,height-76,140,12,Muted,1,960);
-   Text(p,Fit(data.DateRange,680,12),60,height-42,12,Muted);Text(p,"astroarchive.arijguest.com",800,height-24,12,Accent);ApplyTheme(p,dark);Polish(p,dark,index);return p;
+   Text(p,Fit(data.DateRange,680,12),60,height-42,12,Muted);Text(p,"astroarchive-companion-test.arijguest.chatgpt.site",800,height-24,12,Accent);ApplyTheme(p,dark);Polish(p,dark,index);return p;
   }
   public static int SheetColumns(IList<AnalyticsPage> pages){return pages[0].Portrait?1:pages.Count>1?2:1;}
   public static void SheetSize(IList<AnalyticsPage> pages,out double width,out double height){
@@ -76,7 +76,7 @@ namespace AstroArchive {
    Box(p,80,1630,920,1,"#DCE2EF");
    Lines(p,"Charts · "+data.Scope+" · "+data.Captures.ToString("N0",CultureInfo.InvariantCulture)+" frames · "+ArchiveAnalytics.Number(data.Seconds/3600)+" h",80,1648,120,16,Muted,2,920);
    Text(p,Fit(data.DateRange,920,16),80,1710,16,Muted);
-   Text(p,"astroarchive.arijguest.com",80,1745,18,Accent);
+   Text(p,"astroarchive-companion-test.arijguest.chatgpt.site",80,1745,18,Accent);
    ApplyTheme(p,dark);Polish(p,dark,index);return p;
   }
   static void PortraitDonut(AnalyticsPage p,List<AnalyticsValue> values,double total,string unit,bool compact=false){

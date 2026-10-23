@@ -18,11 +18,11 @@ namespace AstroArchive {
   public readonly ProgressBar Progress=new ProgressBar{Height=5,Maximum=100,Visibility=Visibility.Collapsed,Margin=new Thickness(0,0,0,12)};
   public readonly TextBox Notes=new TextBox{IsReadOnly=true,VerticalContentAlignment=VerticalAlignment.Top,TextWrapping=TextWrapping.Wrap,VerticalScrollBarVisibility=ScrollBarVisibility.Auto,MinHeight=100,MaxHeight=240};
   public readonly Expander NotesSection=new Expander{Header="Release notes",Visibility=Visibility.Collapsed,Margin=new Thickness(0,4,0,12)};
-  public readonly Button ReleaseLink=new Button{Content="View release on GitHub",HorizontalAlignment=HorizontalAlignment.Left,Margin=new Thickness(0,12,0,0)};
+  public readonly Button ReleaseLink=new Button{Content="View release on the AstroArchive website",HorizontalAlignment=HorizontalAlignment.Left,Margin=new Thickness(0,12,0,0)};
   readonly FormWindow form;readonly Func<bool> save;readonly Func<Task<UpdateManifest>> check;readonly Func<UpdateManifest,Task<string>> notes;
   readonly Func<UpdateManifest,IProgress<UpdateDownloadProgress>,Task> install;readonly Action finished;readonly Action<UpdateManifest> open;readonly Action<bool> installationState;
   public Func<bool> CanInstall=()=>true,CanCheck=()=>true;
-  public void SetCachedRelease(UpdateManifest release,string status){if(closed||Busy)return;Available=release;SetStatus(status);if(release!=null){NotesSection.Visibility=Visibility.Visible;Notes.Text=release.release_notes??"Use View release on GitHub to read release notes.";}Refresh();}
+  public void SetCachedRelease(UpdateManifest release,string status){if(closed||Busy)return;Available=release;SetStatus(status);if(release!=null){NotesSection.Visibility=Visibility.Visible;Notes.Text=release.release_notes??"Use View release on the AstroArchive website to read release notes.";}Refresh();}
   public UpdateManifest Available{get;private set;}public bool Busy{get;private set;}public bool Installing{get;private set;}bool closed;
   public ReleaseSettingsPanel(FormWindow form,string version,string installation,Func<bool> save,Func<Task<UpdateManifest>> check,Func<UpdateManifest,Task<string>> notes,Func<UpdateManifest,IProgress<UpdateDownloadProgress>,Task> install,Action finished,Action<UpdateManifest> open,Action<bool> installationState=null){
    this.form=form;this.save=save;this.check=check;this.notes=notes;this.install=install;this.finished=finished;this.open=open;this.installationState=installationState??(active=>{});
@@ -51,7 +51,7 @@ namespace AstroArchive {
     SetStatus(release==null?"No newer release is available.":"AstroArchive "+release.application_version+" (package "+release.package_version+") is available.");
     if(release!=null){NotesSection.Visibility=Visibility.Visible;NotesSection.IsExpanded=true;Notes.Text="Loading release notes…";
      try{string text=await notes(release);if(!closed)Notes.Text=string.IsNullOrWhiteSpace(text)?"No release notes were provided.":text;}
-     catch(Exception){if(!closed)Notes.Text="Release notes could not be loaded. View the release on GitHub below.";}
+     catch(Exception){if(!closed)Notes.Text="Release notes could not be loaded. View the release on the AstroArchive website below.";}
     }
    }catch(Exception error){if(!closed)SetStatus("Could not check for releases. "+error.Message);}
    finally{Busy=false;if(!closed)Progress.IsIndeterminate=false;Refresh();}

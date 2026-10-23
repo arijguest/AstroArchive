@@ -43,7 +43,7 @@ namespace AstroArchive {
      SmokeProblemReport(output,mode+textScale);
     }finally{help.Close();}
    }
-   File.WriteAllText(Path.Combine(output,"help-formatting-smoke.txt"),"PASS "+cases+" formatted Help topic layouts; help home cards; semantic headings, callouts, links and native ordered/bullet lists; selection/copy; themed contrast and font hierarchy; guided fixes with setup checks; problem report preview and GitHub link; dark/light and 100/150% text.");
+   File.WriteAllText(Path.Combine(output,"help-formatting-smoke.txt"),"PASS "+cases+" formatted Help topic layouts; help home cards; semantic headings, callouts, links and native ordered/bullet lists; selection/copy; themed contrast and font hierarchy; guided fixes with setup checks; problem report preview and the AstroArchive website link; dark/light and 100/150% text.");
    }finally{settings.ThemeMode=theme;settings.TextScalePercent=scale;ApplyAppearance();}
   }
   // The nearest painted surface behind an element: button text is read against the button, not the window.
@@ -63,7 +63,7 @@ namespace AstroArchive {
     foreach(var text in PopupChildren<TextBlock>(report).Where(t=>t.IsVisible&&!string.IsNullOrWhiteSpace(t.Text)))Readable(text.Foreground,BackgroundBehind(text),"problem report text");
     CapturePopup(report,Path.Combine(output,"AstroArchive_Report_Problem_"+label+".png"));
     report.Summary.Text="Smoke title";report.Description.Text="Smoke description";report.Open.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
-    if(opened==null||!opened.StartsWith("https://github.com/arijguest/AstroArchive/issues/new?title=Smoke%20title")||!Uri.UnescapeDataString(opened).Contains("Smoke description")||!closed)throw new Exception("Problem report did not open a prefilled GitHub issue");
+    if(opened==null||!opened.StartsWith("https://astroarchive-companion-test.arijguest.chatgpt.site/support#title=Smoke%20title")||!Uri.UnescapeDataString(opened).Contains("Smoke description")||!closed)throw new Exception("Problem report did not open a prefilled the AstroArchive website issue");
    }finally{if(!closed)report.Close();}
   }
  }

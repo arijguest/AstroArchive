@@ -1,18 +1,21 @@
-AstroArchive 3.3.2
-Package 3.3.2.2
+AstroArchive 3.3.3 — direct website distribution
+Package 3.3.3.1
 
-Covers everything since 3.3.1.1 (first published as prerelease 3.3.2.1).
+Includes the locally preserved upgrades through 3.3.2.2, following 3.1.9.1:
+- Network telescope imports, verified transfers and recovery.
+- Hybrid/offline choice and bundled target information, orbital and sky data.
+- Faster long imports, responsive list refresh and retained selection.
+- Resumable verified backups, updated date/time sorts and export menus.
+- Sky-map corona, Sun/Totality classification and upcoming sky events.
+- Telescope management, updated guides and seven interface languages.
 
-Sky map and targets
-The total solar eclipse icon on the sky map now draws a corona shaped by the solar cycle and oriented to the Sun's axis. Totality captures get the object Totality, and Sun pictures taken through a non-solar telescope get the SOL filter (Totality stays VIS). All Targets has an upcoming sky events view for the next month at your observing location, with Stellarium links, computed locally.
+This release changes downloads, release notes and update checks to the AstroArchive
+website. Downloads retain SHA-256, byte-size and version checks. Diagnostic reports
+open the website support form for review; they are never submitted automatically.
 
-Orbit viewer
-Dates sort by time of day as well as date, and the Parameters section is hidden when it is empty.
+One-time migration: existing 3.1.9.1 and other GitHub-based installations must run
+this website installer manually once. They cannot discover this new feed using
+their old updater. Subsequent website builds use /update.json on the website.
 
-Settings and menus
-Settings has a Telescopes section to rename a saved telescope (updating its captures), change its model and camera, remove it, or recover profiles from the repository. Import now starts with Scan folder…, which replaces Scan source….
-
-Installer
-The setup window no longer shows the version line under the logo.
-
-The guide, tours and all seven interface languages are updated for these changes.
+This local build is unsigned. All original captures and repository data remain
+outside application installation files.
