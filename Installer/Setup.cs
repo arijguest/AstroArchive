@@ -30,9 +30,10 @@ namespace AstroArchive.Installation {
   // Confirms Windows will start the installed version; otherwise restores the newest earlier version it will start.
   static string VerificationLog {get{return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),"AstroArchive","updates","launch-verification.log");}}
   static void LogLaunch(string text){try{string path=VerificationLog;InstallCore.NoLinks(path);Directory.CreateDirectory(Path.GetDirectoryName(path));if(File.Exists(path)&&new FileInfo(path).Length>128*1024)File.WriteAllText(path,"");File.AppendAllText(path,DateTime.UtcNow.ToString("o")+" "+text+"\r\n");}catch{}}
-  static LaunchRecovery VerifyLaunch(string root){
+  static LaunchRecovery VerifyLaunch(string root,bool registerShell=true){
    LogLaunch("Checking installed launch paths at "+root);
-   var result=LaunchSafety.Recover(root,path=>{int code=LaunchSafety.NativeProbe(path);LogLaunch(Path.GetFileName(Path.GetDirectoryName(path))+"/"+Path.GetFileName(path)+" Windows code "+code);return code;},WindowsIntegration.Register);
+   Action<string,InstallRecord> register=registerShell?(Action<string,InstallRecord>)WindowsIntegration.Register:(path,record)=>{};
+   var result=LaunchSafety.Recover(root,path=>{int code=LaunchSafety.NativeProbe(path);LogLaunch(Path.GetFileName(Path.GetDirectoryName(path))+"/"+Path.GetFileName(path)+" Windows code "+code);return code;},register);
    LogLaunch("Active package "+(result.Record.PackageVersion??result.Record.Version)+"; blocked="+result.Blocked+"; rolled back="+result.RolledBack+"; direct launch="+result.Record.DirectLaunch);
    return result;
   }
@@ -49,7 +50,7 @@ namespace AstroArchive.Installation {
      string temp=Path.GetFullPath(Path.GetTempPath()).TrimEnd('\\')+"\\";
      if(!check.StartsWith(temp,StringComparison.OrdinalIgnoreCase)||Directory.Exists(check))throw new IOException("Payload checks require a new directory under the Windows temporary folder.");
      var package=Package();new InstallCore().Install(check,package,File.ReadAllBytes(self));
-     var verification=VerifyLaunch(check);
+     var verification=VerifyLaunch(check,false);
      File.WriteAllText(Path.Combine(check,"payload-check.json"),InstallCore.Json().Serialize(new {PackageVersion=ReleaseVersion.Package,Blocked=verification.Blocked,DirectLaunch=verification.Record.DirectLaunch,Reason=verification.Reason,Log=VerificationLog}));
      return verification.Blocked?4:0;
     }
