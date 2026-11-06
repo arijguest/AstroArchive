@@ -30,6 +30,13 @@ namespace AstroArchive {
  public sealed class SearchIndex<T> where T:class {
   readonly Dictionary<T,SearchDocument> documents=new Dictionary<T,SearchDocument>();readonly Func<T,SearchDocument> create;
   public int PreparedCount{get{return documents.Count;}}
+  object sourceVersion;
+  public void KeepRows(object version,IEnumerable<T> rows){
+   if(ReferenceEquals(sourceVersion,version))return;
+   var live=new HashSet<T>(rows);
+   foreach(var row in documents.Keys.Where(row=>!live.Contains(row)).ToArray())documents.Remove(row);
+   sourceVersion=version;
+  }
   public SearchIndex(Func<T,SearchDocument> create){this.create=create;}
   public List<T> Find(IEnumerable<T> rows,FileSearch query,Func<T,bool> predicate,CancellationToken token){
    var result=new List<T>();foreach(T row in rows){token.ThrowIfCancellationRequested();if(query.Error!=null||!predicate(row))continue;if(query.IsEmpty){result.Add(row);continue;}

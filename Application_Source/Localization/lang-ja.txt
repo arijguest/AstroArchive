@@ -2426,3 +2426,12 @@ A current position is unavailable for this solution.	この解には現在位置
 {0} nights · {1} to {2}	{0}夜 · {1}〜{2}
 Show starred on top	スター付きを先頭に表示
 Reports…	レポート…
+Import all ready ({0})	準備済みをすべて取り込む（{0} 件）
+Import selected ({0})	選択項目を取り込む（{0} 件）
+Scan new or changed captures	新規または変更された撮影データを検索
+Destination {0}	保存先 {0}
+Native detail	元の解像度
+Keep zoom	ズームを維持
+Sampled preview	縮小プレビュー
+Loading native detail…	元の解像度を読み込み中…
+Loading sampled preview…	縮小プレビューを読み込み中…

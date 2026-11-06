@@ -6,6 +6,25 @@ using System.Threading;
 namespace AstroArchive {
  public partial class Tests {
   static void ImportSelectionTests(){
+   WindowsTest("New or changed import discovers additions and repairs an altered archived copy",()=>{
+    string source=Path.Combine(root,"incremental-selection-source");
+    string session=Path.Combine(source,"DWARF_RAW_M45_20261009");
+    Directory.CreateDirectory(session);
+    string first=Path.Combine(session,"raw_001.fit"),second=Path.Combine(session,"raw_002.fit");
+    Write(first,64,48,(x,y)=>1300,new Dictionary<string,string>());
+    var selected=ImportSelection.Create(source,new[]{session});
+    var profile=new TelescopeProfile{Id="Changed rig",Model="Dwarf 3"};
+    using(var repo=new Repository(Path.Combine(root,"incremental-selection-archive"))){
+     Check(UsbAutoUpload.Run(repo,profile,source,1,ct,NoProgress,selection:selected,newOrChanged:true).Import.Imported==1,"Initial capture was missed");
+     Write(second,64,48,(x,y)=>1500,new Dictionary<string,string>());
+     var next=UsbAutoUpload.Run(repo,profile,source,1,ct,NoProgress,selection:selected,newOrChanged:true);
+     Check(next.Import.Imported==1&&next.Import.Duplicates==1&&next.Plan.FastSkippedFiles==0,"New capture in a known session was omitted");
+     var archived=repo.All().Single(f=>f.OriginalName=="raw_001.fit");
+     File.WriteAllText(repo.FilePath(archived),"Altered archive fixture");
+     var repaired=UsbAutoUpload.Run(repo,profile,source,1,ct,NoProgress,selection:selected,newOrChanged:true);
+     Check(repaired.Restored==1&&repo.Verify(ct,NoProgress)==0&&File.Exists(first)&&File.Exists(second),"Stale archive bytes were accepted or source originals changed");
+    }
+   });
    Test("USB selections normalise overlaps and reject paths outside the telescope",()=>{
     string source=Path.Combine(root,"selected-card"),folder=Path.Combine(source,"MyWorks","M45_sub"),nested=Path.Combine(folder,"nested");Directory.CreateDirectory(nested);
     string inside=Path.Combine(nested,"one.fit"),single=Path.Combine(source,"selected.fit"),outside=Path.Combine(root,"outside.fit");File.WriteAllText(inside,"");File.WriteAllText(single,"");File.WriteAllText(outside,"");

@@ -2,7 +2,7 @@ AstroArchive user guide
 @title About this guide
 @category Reference
 @summary Which version this guide describes and what AstroArchive needs to run.
-Application 3.3.3; package 3.3.3.2.
+Application 3.3.4, package 3.3.4.1.
 Windows 10/11 x64; .NET Framework 4.8.
 
 Press `F1` on any page for help with that page. Guide topics stay in English;
@@ -109,7 +109,8 @@ IMPORT WORKFLOW
 3. **Scan folder** (or **Import → Scan folder…**, which asks for the folder first) lists what can be imported. Nothing is copied yet.
 4. Check the **Status** and **Review** columns, then **Import**.
 
-Import copies the eligible captures in the filtered view and verifies each copy.
+**Import all ready** copies the eligible captures in the filtered view.
+**Import selected** copies the eligible rows you selected. Each copy is verified.
 Target analysis defaults to Off.
 
 > Tip: Import greyed out? [Run the guided fix](walkthrough:import-disabled).

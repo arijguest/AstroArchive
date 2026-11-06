@@ -19,7 +19,8 @@ namespace AstroArchive {
   sealed class SearchPanel:IDisposable {
    public DispatcherTimer Timer;public readonly LatestSearch<SearchResult> Worker=new LatestSearch<SearchResult>();
    public SearchIndex<Frame> Captures;public SearchIndex<EditedImage> Edited;
-   public int Version;public bool Pending,Blocked,Disposed,SortOnly;
+   public int Version;public bool Pending,Blocked,Disposed,SortOnly,KeepScroll;
+   public SubframeSessions.LabelCache SessionLabels=new SubframeSessions.LabelCache();
    public readonly Dictionary<string,bool> Enabled=new Dictionary<string,bool>();
    public void Dispose(){Disposed=true;Version++;Timer.Stop();Worker.Dispose();Captures=null;Edited=null;}
   }
@@ -32,8 +33,8 @@ namespace AstroArchive {
    state.Timer.Tick+=(s,e)=>{state.Timer.Stop();ExecuteSearch(name,state);};searchPanels[name]=state;return state;
   }
   IEnumerable<string> SearchControls(string name){
-   return name=="SearchBox"?new[]{"FramesGrid","TargetList","ExportButton","AnalyzeQualityButton","SolveButton","EditButton","MoreButton","ScreenLibraryButton","ReviewLibraryButton"}:
-    name=="ImportSearchBox"?new[]{"ImportGrid","ImportButton","ScreenImportsButton","ReviewImportsButton","RetryImportsButton","AssignUnknownTargetButton","ImportToolsButton"}:
+   return name=="SearchBox"?new[]{"ExportButton","AnalyzeQualityButton","SolveButton","EditButton","MoreButton","ScreenLibraryButton","ReviewLibraryButton"}:
+    name=="ImportSearchBox"?new[]{"ImportGrid","ImportButton","ImportSelectedButton","ScreenImportsButton","ReviewImportsButton","RetryImportsButton","AssignUnknownTargetButton","ImportToolsButton"}:
     new[]{"EditedGrid","EditedTargetList","EditedPreviewButton","EditedDetailsButton","EditedEditorButton","EditedOpenPreviewButton"};
   }
   void BlockSearchControls(string name,SearchPanel state,bool capture=false){foreach(string control in SearchControls(name)){var element=Window.FindName(control) as UIElement;if(element==null)continue;if(capture&&!(element is DataGrid)&&!(element is ListBox)||!state.Enabled.ContainsKey(control))state.Enabled[control]=element.IsEnabled;element.IsEnabled=false;}}
@@ -42,10 +43,10 @@ namespace AstroArchive {
   void CancelSearch(string name,bool invalidate=true){
    SearchPanel state;if(!searchPanels.TryGetValue(name,out state))return;state.Version++;state.Timer.Stop();state.Worker.Cancel();state.Pending=false;state.SortOnly=false;state.Blocked=false;RestoreSearchControls(state);if(invalidate){state.Captures=null;state.Edited=null;}UpdateNavigationState();
   }
-  void ScheduleSearch(string name,bool invalidate=false,bool immediate=false){
+  void ScheduleSearch(string name,bool invalidate=false,bool immediate=false,bool keepScroll=false){
    if(updating||closing||name=="EditedSearchBox"&&!editedReady)return;
    SearchPanel state=SearchState(name);if(state.Disposed)return;state.Version++;state.Worker.Cancel();state.Timer.Stop();
-   if(invalidate){state.Captures=null;state.Edited=null;}state.Pending=true;state.SortOnly=false;state.Blocked=true;BlockSearchControls(name,state);
+   if(invalidate){state.Captures=null;state.Edited=null;state.SessionLabels=new SubframeSessions.LabelCache();}state.Pending=true;state.SortOnly=false;state.KeepScroll=keepScroll;state.Blocked=true;BlockSearchControls(name,state);
    if(name=="SearchBox"){Watermark();L("LibrarySummaryLabel").Text="Searching…";}
    else if(name=="ImportSearchBox"){Watermark(name);L("ImportSummaryLabel").Text="Searching…";B("ImportButton").Content="Searching…";}
    else {L("EditedSummary").Text="Searching…";L("EditedSearchHint").Visibility=T(name).Text.Length==0?Visibility.Visible:Visibility.Collapsed;}
@@ -78,7 +79,7 @@ namespace AstroArchive {
    }catch(OperationCanceledException){}catch(Exception error){if(!Window.Dispatcher.HasShutdownStarted)Window.Dispatcher.BeginInvoke(DispatcherPriority.Normal,new Action(()=>{if(!state.Disposed&&state.Version==version){state.Pending=false;state.SortOnly=false;L(name=="SearchBox"?"LibrarySummaryLabel":name=="ImportSearchBox"?"ImportSummaryLabel":"EditedSummary").Text="Could not sort: "+error.Message;}}));}
   }
   async void ExecuteSearch(string name,SearchPanel state){
-   int version=state.Version;string text=T(name).Text;
+   int version=state.Version;string text=T(name).Text;bool keepScroll=state.KeepScroll;
    try{
     Func<CancellationToken,SearchResult> work;
     if(name=="EditedSearchBox"){
@@ -90,14 +91,14 @@ namespace AstroArchive {
       var ordered=SearchOrdering.Order(rows,sorts,culture,token);if(active==TargetNavigation.CometsSection)ordered=TargetNavigation.GroupByTarget(ordered,EditedTarget);ordered=RepositoryOrdering.StarredImagesFirst(ordered);
       return new SearchResult{Query=query,Targets=targets,Target=active,Images=ordered};};
     }else{
-     bool imports=name=="ImportSearchBox";var source=(imports?CurrentImportRows():all).ToArray();var criteria=(imports?importFilters:libraryFilters).Snapshot();bool skip=SkipFlagged;
+     bool imports=name=="ImportSearchBox";var archiveRows=all;var source=(imports?CurrentImportRows():archiveRows).ToArray();var criteria=(imports?importFilters:libraryFilters).Snapshot();bool skip=SkipFlagged;
      string target=HintTarget(0,Targets.SelectedItem is TargetSummary?((TargetSummary)Targets.SelectedItem).Name:"All targets");string mode=Convert.ToString(C("LibraryViewBox").SelectedItem);
      var sorts=SearchSorts(imports?"ImportGrid":"FramesGrid");var culture=G(imports?"ImportGrid":"FramesGrid").Items.Culture??CultureInfo.CurrentCulture;
-     var index=state.Captures??(state.Captures=new SearchIndex<Frame>(SearchDocument.FromFrame));
-     work=token=>{var query=FileSearch.Parse(text);var rows=index.Find(source,query,criteria.Matches,token);token.ThrowIfCancellationRequested();
+     var index=state.Captures??(state.Captures=new SearchIndex<Frame>(SearchDocument.FromFrame));var sessionLabels=state.SessionLabels;
+     work=token=>{if(!imports)index.KeepRows(archiveRows,source);var query=FileSearch.Parse(text);var rows=index.Find(source,query,criteria.Matches,token);token.ThrowIfCancellationRequested();
       if(imports){var summary=ImportWorkflow.Summarize(source,rows,skip);int retry=ImportWorkflow.Select(rows,skip,true).Count;return new SearchResult{Query=query,Source=source.ToList(),Frames=SearchOrdering.Order(rows,sorts,culture,token),ImportSummary=summary,Retry=retry};}
       Func<Frame,string> section=f=>TargetSection(f,source);var targets=TargetNavigation.Build(rows,section,token);string active=targets.Any(t=>t.Name==target)?target:"All targets";if(active!="All targets")rows=rows.Where(f=>section(f)==active).ToList();
-      List<SubframeSession> sessions;rows=RepositoryOrdering.Order(rows,sorts,culture,active=="All targets",mode=="Session summaries",token,out sessions);token.ThrowIfCancellationRequested();
+      List<SubframeSession> sessions;rows=RepositoryOrdering.Order(rows,sorts,culture,active=="All targets",mode=="Session summaries",token,out sessions,sessionLabels);token.ThrowIfCancellationRequested();
       return new SearchResult{Query=query,Frames=rows,Targets=targets,Target=active,Sessions=sessions,Summary=CaptureGroups.Summarize(rows,token)};};
     }
     SearchResult result=await state.Worker.Submit(work);
@@ -105,9 +106,9 @@ namespace AstroArchive {
     state.Pending=false;state.Blocked=false;RestoreSearchControls(state);ShowSearchError(name,result.Query);
     if(name=="SearchBox"){
      var view=new ListCollectionView(result.Targets);view.GroupDescriptions.Add(new PropertyGroupDescription("Group"));updating=true;try{Targets.ItemsSource=view;Targets.SelectedItem=result.Targets.First(t=>t.Name==result.Target);}finally{updating=false;}
-     displayed=result.Frames;DisplayLibrary(result.Sessions,result.Summary,true);((FrameworkElement)Window.FindName("EmptyState")).Visibility=displayed.Count==0?Visibility.Visible:Visibility.Collapsed;
+     displayed=result.Frames;DisplayLibrary(result.Sessions,result.Summary,true,keepScroll);((FrameworkElement)Window.FindName("EmptyState")).Visibility=displayed.Count==0?Visibility.Visible:Visibility.Collapsed;
      RestoreTargetKeyboardFocus(Targets);
-     B("LibraryFiltersButton").Content="Filters"+(libraryFilters.ActiveCount>0?" ("+libraryFilters.ActiveCount+")":"");if(cancel==null)L("StatusLabel").Text=repo==null?"Choose a repository folder in Settings to begin.":displayed.Count+" visible files  ·  "+all.Count+" in repository";
+     B("LibraryFiltersButton").Content="Filters"+(libraryFilters.ActiveCount>0?" ("+libraryFilters.ActiveCount+")":"");if(cancel==null&&!repositoryOpening)L("StatusLabel").Text=repo==null?"Choose a repository folder in Settings to begin.":displayed.Count+" visible files  ·  "+all.Count+" in repository";
     }else if(name=="ImportSearchBox")ApplyImportRows(result.Source,result.Frames,result.ImportSummary,result.Retry,true);
     else ApplyEditedSearch(result);
     UpdateNavigationState();

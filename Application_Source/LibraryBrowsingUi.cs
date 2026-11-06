@@ -22,7 +22,10 @@ namespace AstroArchive {
    InitializeSessionSelection();InitializeTargetSelection();InitializeTargetKeyboard();
   }
   List<SubframeSession> subframeSessions=new List<SubframeSession>();
-  void DisplayLibrary(List<SubframeSession> preparedSessions=null,CaptureGroupSummary preparedSummary=null,bool presorted=false){
+  void DisplayLibrary(List<SubframeSession> preparedSessions=null,CaptureGroupSummary preparedSummary=null,bool presorted=false,bool keepScroll=false){
+   var grid=G("FramesGrid");
+   var scroll=keepScroll&&viewHint==null?LibraryScrollViewer(grid):null;
+   double offset=scroll==null?0:scroll.VerticalOffset;
    var view=new ListCollectionView(displayed);string mode=Convert.ToString(C("LibraryViewBox").SelectedItem);
    if(mode=="Session summaries"){
     var previous=subframeSessions.ToDictionary(g=>g.Key);subframeSessions=preparedSessions??SubframeSessions.Build(displayed);foreach(var session in subframeSessions){SubframeSession old;if(previous.TryGetValue(session.Key,out old)){session.Expanded=old.Expanded;session.IsSelected=old.IsSelected;}session.IsSelected=session.Frames.All(librarySelection.Contains);}
@@ -31,7 +34,17 @@ namespace AstroArchive {
    changingSessionSelection=true;try{
     SetRows("FramesGrid",view,presorted);
    }finally{changingSessionSelection=false;}SelectOpeningRow("FramesGrid");Details();ApplyViewHint(0);
+   if(scroll!=null)grid.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Loaded,new Action(()=>{
+    if(ReferenceEquals(grid.ItemsSource,view))scroll.ScrollToVerticalOffset(offset);
+   }));
    var summary=preparedSummary??CaptureGroups.Summarize(displayed);L("LibrarySummaryLabel").Text="In view: "+summary.Detail;
+  }
+  static ScrollViewer LibraryScrollViewer(DependencyObject parent){
+   var viewer=parent as ScrollViewer;if(viewer!=null)return viewer;
+   for(int i=0;i<VisualTreeHelper.GetChildrenCount(parent);i++){
+    viewer=LibraryScrollViewer(VisualTreeHelper.GetChild(parent,i));if(viewer!=null)return viewer;
+   }
+   return null;
   }
  }
  // Target/session groups must not merge separate capture sections back together.

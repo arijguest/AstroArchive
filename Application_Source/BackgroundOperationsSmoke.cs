@@ -35,7 +35,17 @@ namespace AstroArchive {
      bool concurrent=false;Run(token=>{concurrent=true;return "Unexpected";},null,"Conflicting worker");
      if(concurrent||B("EditButton").IsEnabled||B("ImportButton").IsEnabled||B("EditedAddButton").IsEnabled||B("ImportExportButton").IsEnabled)throw new Exception("Conflicting mutations or an unavailable direct export became available.");
      bool rejected=false;try{OpenRepository(Path.Combine(folder,"other"));}catch(InvalidOperationException){rejected=true;}if(!rejected||repo!=fixture)throw new Exception("Repository switched while work was active.");
-     PreviewImage(first);SmokeSearchWait(()=>Window.OwnedWindows.Cast<Window>().Any(w=>w.Title=="Preview - one.fit"));var preview=Window.OwnedWindows.Cast<Window>().Single(w=>w.Title=="Preview - one.fit");preview.Close();if(currentActivity!=entry||cancel==null)throw new Exception("Read-only preview replaced the running operation.");
+     T("SearchBox").Clear();WaitForSearches();
+     PreviewImage(first);
+     SmokeSearchWait(()=>comparisonWindow!=null&&PopupChildren<TextBlock>(comparisonWindow).Any(t=>t.Text.EndsWith("Sampled preview",StringComparison.Ordinal)));
+     var preview=comparisonWindow;
+     var native=PopupChildren<CheckBox>(preview).Single(c=>Convert.ToString(c.Content)=="Native detail");
+     native.IsChecked=true;
+     SmokeSearchWait(()=>PopupChildren<TextBlock>(preview).Any(t=>t.Text.EndsWith("Native detail",StringComparison.Ordinal)));
+     var adjacent=PopupChildren<Button>(preview).Single(b=>b.IsEnabled&&(Convert.ToString(b.Content)=="Next"||Convert.ToString(b.Content)=="Previous"));
+     adjacent.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+     SmokeSearchWait(()=>preview.Title=="Preview - two.fit"&&PopupChildren<TextBlock>(preview).Any(t=>t.Text.EndsWith("Sampled preview",StringComparison.Ordinal)));
+     preview.Close();if(currentActivity!=entry||cancel==null)throw new Exception("Read-only preview replaced the running operation.");
      SmokeSearchWait(()=>pulses>=3);Capture(Path.Combine(output,"AstroArchive_Background_Browsing.png"));finish.Set();SmokeSearchWait(()=>cancel==null);WaitForSearches();
      var updated=all.Single(f=>f.Hash==first.Hash);if(!completed||entry==null||entry.Running||entry.Failed||updated.Notes!="Saved by background fixture"||updated.Target!="M33"||File.Exists(oldPath)||Util.Hash(fixture.FilePath(updated),CancellationToken.None)!=first.Hash)throw new Exception("Metadata worker completion lost file bytes or did not apply its refreshed snapshot.");
      activities.Remove(entry);started.Reset();finish.Reset();bool deletionCompleted=false;T("SearchBox").Clear();WaitForSearches();

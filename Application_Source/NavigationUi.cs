@@ -44,7 +44,7 @@ namespace AstroArchive {
             var selector = C("PageSelector"); selector.IsDropDownOpen = false;
             selector.SelectedIndex = (selector.SelectedIndex + direction + selector.Items.Count) % selector.Items.Count;
         }
-        void SelectInitialPage() { GoToPage(all.Count == 0 ? 1 : 0); }
+        void SelectInitialPage() { GoToPage(all.Count == 0 && !repositoryOpening ? 1 : 0); }
         void GoToPage(int index) { ((TabControl)Window.FindName("MainTabs")).SelectedIndex = index; }
         void OpenTopMenu(string name) {
             var menu = TopMenu(name);
@@ -112,7 +112,7 @@ namespace AstroArchive {
             UiHelp.Hint(B("ImportExportButton"), "Export archived files; import scanned files first.");
             Window.PreviewKeyDown += NavigationKeys;
             DescribePaneNavigation();navigationReady = true;BeginOpeningSelection(tabs.SelectedIndex);
-            var originals=(CheckBox)Window.FindName("DeleteOriginalsCheck");originals.Checked+=(s,e)=>UpdateNavigationState();originals.Unchecked+=(s,e)=>UpdateNavigationState();
+            var originals=(CheckBox)Window.FindName("DeleteOriginalsCheck");originals.Checked+=(s,e)=>{UpdateNavigationState();UpdateImportScope();};originals.Unchecked+=(s,e)=>{UpdateNavigationState();UpdateImportScope();};
             UpdateNavigationState();
             if (firstRun) Window.ContentRendered += (s,e) => {
                 Window.Dispatcher.BeginInvoke(new Action(() => { if (!closing) AskObservingLocation(); if (!settings.GuideSeen && !RepositoryOperationBlocked && !closing) StartWalkthrough(true); }));
@@ -172,6 +172,7 @@ namespace AstroArchive {
             menu.Items.Add(MenuAction("Connect over network…",()=>{GoToPage(1);OpenRemoteImport();},repo!=null&&!NetworkImportBlocked,false));
             menu.Items.Add(MenuAction("Watch a capture folder…",()=>{GoToPage(1);OpenLocalWatch();},repo!=null&&!NetworkImportBlocked,false));
             menu.Items.Add(new Separator());
+            menu.Items.Add(MenuAction("Scan new or changed captures",()=>{GoToPage(1);if(string.IsNullOrWhiteSpace(T("SourceBox").Text)){string chosen=Folder("Choose a folder to scan","");if(chosen==null)return;T("SourceBox").Text=chosen;}Scan(newOrChanged:true);},repo!=null));
             menu.Items.Add(MenuAction("Full rescan",()=>{if(!ConfirmLongProcess("FullRescan","Full rescan may take a long time","A full rescan re-reads every file in your source folder and checks it against the archive."+ArchiveSizeNote()+" On a large archive this can take a long time."))return;GoToPage(1);Scan(true);},repo!=null));
             menu.Items.Add(ButtonAction("Import ready files", "ImportButton", 1));
             menu.Items.Add(ImportStackingMenu());

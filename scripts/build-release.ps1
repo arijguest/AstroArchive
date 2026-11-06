@@ -3,6 +3,7 @@ param(
     [string]$OutputDirectory = (Join-Path $PSScriptRoot '..\release-artifacts'),
     [ValidateSet('All', 'Prepare', 'Package', 'Finalize')][string]$Stage = 'All',
     [switch]$RequireSigned,
+    [switch]$Portable,
     [string]$ExpectedPublisher = ''
 )
 $ErrorActionPreference = 'Stop'
@@ -46,18 +47,29 @@ $feed = [ordered]@{
     application_version = $version
     package_version = $package
     authenticode_signed = [bool]$RequireSigned
-    url = "https://astroarchive-companion-test.arijguest.chatgpt.site/downloads/$([IO.Path]::GetFileName($installer))"
-    download_url = "https://astroarchive-companion-test.arijguest.chatgpt.site/downloads/$([IO.Path]::GetFileName($installer))"
+    url = "https://github.com/arijguest/AstroArchive/releases/download/$tag/$([IO.Path]::GetFileName($installer))"
+    download_url = "https://github.com/arijguest/AstroArchive/releases/download/$tag/$([IO.Path]::GetFileName($installer))"
     release_notes = [IO.File]::ReadAllText((Join-Path $PSScriptRoot '..\Installer\Payload\Release_Notes.txt'))
-    sha256 = (Get-FileHash $installer -Algorithm SHA256).Hash.ToLowerInvariant()
+    sha256 = $installerHash
     size = (Get-Item $installer).Length
 }
 [IO.File]::WriteAllText((Join-Path $OutputDirectory 'update.json'), ($feed | ConvertTo-Json), (New-Object Text.UTF8Encoding($false)))
+& (Join-Path $PSScriptRoot 'write-website-feed.ps1') -ArtifactDirectory $OutputDirectory -ManifestName 'website-update.json'
+if ($Portable) {
+    $zip = Join-Path $OutputDirectory "AstroArchive$package-Windows-x64-Portable.zip"
+    $portableFiles = Get-ChildItem -LiteralPath $payload -File | Where-Object { $_.Name -ne 'Start.exe' }
+    Compress-Archive -LiteralPath $portableFiles.FullName -DestinationPath $zip -CompressionLevel Optimal -Force
+    $zipHash = (Get-FileHash -LiteralPath $zip -Algorithm SHA256).Hash.ToLowerInvariant()
+    Set-Content -LiteralPath "$zip.sha256" -Value "$zipHash  $([IO.Path]::GetFileName($zip))" -Encoding ASCII
+}
 Copy-Item (Join-Path $root 'Installer\Payload\Release_Notes.txt') (Join-Path $OutputDirectory 'Release_Notes.txt') -Force
 
 # Windows-only smoke: real registration/shortcuts, repair, uninstall and WPF rendering.
 # The runner uses a disposable account; no real captures are imported.
-$smokeRoot = Join-Path ([IO.Path]::GetTempPath()) ('AstroArchive-smoke-' + [Guid]::NewGuid().ToString('N'))
+$smokeId = [Guid]::NewGuid().ToString('N')
+$smokeRoot = Join-Path ([IO.Path]::GetTempPath()) ('AstroArchive-smoke-' + $smokeId)
+$restarted = $null
+$installedApp = $null
 $installed = $false
 $seededChoice = $null
 $seededSettings = $null
@@ -73,7 +85,16 @@ function Shortcut-Target([string]$Path) {
 }
 function Run-Checked([string]$File, [string[]]$Arguments, [int]$ExpectedExit = 0) {
     Write-Output ("Smoke: " + [IO.Path]::GetFileName($File) + " " + ($Arguments -join ' '))
-    $process = Start-Process -FilePath $File -ArgumentList $Arguments -PassThru
+    if ($Arguments -contains '--ui-test') {
+        # The disposable runner needs a rendered window for its native UI checks.
+        $info = New-Object Diagnostics.ProcessStartInfo
+        $info.FileName = $File
+        $info.Arguments = $Arguments -join ' '
+        $info.UseShellExecute = $false
+        $process = [Diagnostics.Process]::Start($info)
+    } else {
+        $process = Start-Process -FilePath $File -ArgumentList $Arguments -PassThru -WindowStyle Hidden
+    }
     # Wait for setup itself; PowerShell -Wait also waits for the restarted app.
     if ($Arguments -contains '--ui-test') {
         $uiClock = [Diagnostics.Stopwatch]::StartNew()
@@ -189,20 +210,38 @@ try {
         [IO.File]::WriteAllText($settingsPath, '{"LocationPromptSeen":true,"GuideSeen":true}', (New-Object Text.UTF8Encoding($false)))
         $seededSettings = $settingsPath
     }
-    $waitProcess = Start-Process -FilePath 'powershell.exe' -ArgumentList @('-NoProfile', '-Command', 'Start-Sleep -Seconds 5') -PassThru
+    $waitProcess = Start-Process -FilePath 'powershell.exe' -ArgumentList @('-NoProfile', '-Command', 'Start-Sleep -Seconds 5') -PassThru -WindowStyle Hidden
     $handoffClock = [Diagnostics.Stopwatch]::StartNew()
-    Run-Checked $installer @('--update', '--silent', '--root', ('"' + $smokeRoot + '"'), '--waitpid', $waitProcess.Id, '--restart')
+    $previousProbe = $env:ASTROARCHIVE_RESTART_PROBE
+    $env:ASTROARCHIVE_RESTART_PROBE = $smokeId
+    try {
+        Run-Checked $installer @('--update', '--silent', '--root', ('"' + $smokeRoot + '"'), '--waitpid', $waitProcess.Id, '--restart')
+    } finally {
+        $env:ASTROARCHIVE_RESTART_PROBE = $previousProbe
+    }
     $handoffClock.Stop()
     if ($handoffClock.Elapsed.TotalSeconds -lt 2) { throw 'Installer did not wait for the handoff process.' }
-    $restarted = $null
+    $readyFile = Join-Path $smokeRoot 'restart-ready.txt'
     $launchClock = [Diagnostics.Stopwatch]::StartNew()
-    while ($null -eq $restarted -and $launchClock.Elapsed.TotalSeconds -lt 15) {
-        foreach ($candidate in @(Get-Process -Name 'AstroArchive' -ErrorAction SilentlyContinue)) {
-            if ($candidate.Path -eq $installedApp -and $candidate.MainWindowHandle -ne 0) { $restarted = $candidate; break }
+    $windowHandle = [IntPtr]::Zero
+    while ($launchClock.Elapsed.TotalSeconds -lt 40) {
+        if (Test-Path -LiteralPath $readyFile) {
+            $ready = [IO.File]::ReadAllText($readyFile).Trim() -split ' '
+            if ($ready.Count -eq 2 -and $ready[0] -match '^\d+$' -and $ready[1] -match '^\d+$') {
+                $restarted = Get-Process -Id ([int]$ready[0]) -ErrorAction SilentlyContinue
+                $windowHandle = [IntPtr]([long]$ready[1])
+                if ($null -eq $restarted -or $restarted.Path -ne $installedApp) {
+                    throw 'The process that signalled restart readiness is no longer running from the smoke installation.'
+                }
+                $restarted.Refresh()
+                if ($windowHandle -ne [IntPtr]::Zero -and $restarted.MainWindowHandle -eq $windowHandle) { break }
+            }
         }
-        if ($null -eq $restarted) { Start-Sleep -Milliseconds 200 }
+        Start-Sleep -Milliseconds 150
     }
-    if ($null -eq $restarted) { throw 'Update handoff did not restart the application.' }
+    if ($null -eq $restarted -or $restarted.MainWindowHandle -ne $windowHandle -or $windowHandle -eq [IntPtr]::Zero) {
+        throw 'The restarted application did not render its main window.'
+    }
     if ([IO.File]::ReadAllText($fixture) -ne 'preserve this fixture') { throw 'Update handoff changed archive fixture data.' }
     if (-not $restarted.CloseMainWindow() -or -not $restarted.WaitForExit(10000)) { throw 'Restarted application did not close cleanly.' }
     $launcherPath = Join-Path $smokeRoot ($record.ActiveDirectory + '\Start.exe')
@@ -241,8 +280,27 @@ try {
     if (Test-Path $pinnedFixture) { Remove-Item $pinnedFixture -Force }
     if ($seededChoice -and (Test-Path $seededChoice)) { Remove-Item $seededChoice -Force }
     if ($seededSettings -and (Test-Path $seededSettings)) { Remove-Item $seededSettings -Force }
-    # Cleanup must not replace the failure that brought us here.
+    # Cleanup must preserve the first failure, even when a test executable is still open.
+    if ($installedApp) {
+        foreach ($candidate in @(Get-Process -Name 'AstroArchive' -ErrorAction SilentlyContinue)) {
+            try {
+                if ($candidate.Path -eq $installedApp) {
+                    $null = $candidate.CloseMainWindow()
+                    if (-not $candidate.WaitForExit(5000)) { $candidate.Kill(); $null = $candidate.WaitForExit(5000) }
+                }
+            } catch { Write-Warning "Smoke process cleanup failed: $_" }
+        }
+    }
     if ($installed) { try { Run-Checked $installer @('--uninstall', '--silent', '--root', ('"' + $smokeRoot + '"')) } catch { Write-Warning "Cleanup uninstall failed: $_" } }
-    if (Test-Path $smokeRoot) { Remove-Item $smokeRoot -Recurse -Force }
+    if (Test-Path -LiteralPath $smokeRoot) {
+        try {
+            $resolved = (Resolve-Path -LiteralPath $smokeRoot).ProviderPath
+            $expected = [IO.Path]::GetFullPath((Join-Path ([IO.Path]::GetTempPath()) ('AstroArchive-smoke-' + $smokeId)))
+            if ($resolved -ne $expected -or ((Get-Item -LiteralPath $resolved).Attributes -band [IO.FileAttributes]::ReparsePoint)) {
+                throw 'Unexpected smoke cleanup path.'
+            }
+            Remove-Item -LiteralPath $resolved -Recurse -Force
+        } catch { Write-Warning "Smoke directory cleanup failed: $_" }
+    }
 }
 Write-Output "Validated Windows release $tag"

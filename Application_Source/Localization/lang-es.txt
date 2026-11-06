@@ -2419,3 +2419,12 @@ A current position is unavailable for this solution.	No hay una posición actual
 {0} nights · {1} to {2}	{0} noches · {1} a {2}
 Show starred on top	Mostrar destacados arriba
 Reports…	Informes…
+Import all ready ({0})	Importar todos los archivos listos ({0})
+Import selected ({0})	Importar selección ({0})
+Scan new or changed captures	Buscar capturas nuevas o modificadas
+Destination {0}	Destino {0}
+Native detail	Resolución nativa
+Keep zoom	Mantener zoom
+Sampled preview	Vista previa reducida
+Loading native detail…	Cargando resolución nativa…
+Loading sampled preview…	Cargando vista previa reducida…

@@ -31,9 +31,14 @@ namespace AstroArchive.Installation {
    return (IsPolicyCode(code)?"Windows blocked ":"")+executable+" "+text;
   }
 
-  // Returns null when both executables in the directory can be started, otherwise the first failure.
-  public static string Failure(string root,string directory,Func<string,int> probe,Action<int> delay=null,bool retryPolicy=true){
+  public static string EntryPoint(InstallRecord record){return record.DirectLaunch?"AstroArchive.exe":"Start.exe";}
+
+  // A launcher-only reputation rejection can use the application if Windows
+  // independently allows that exact application binary.
+  static string CheckVersion(string root,string directory,Func<string,int> probe,Action<int> delay,bool retryPolicy,out bool direct){
    delay=delay??Thread.Sleep;
+   direct=false;
+   string launcherFailure=null;
    foreach(string name in Executables){
     string path=InstallCore.Managed(root,directory+"\\"+name);
     if(!File.Exists(path))return name+" is missing";
@@ -43,12 +48,14 @@ namespace AstroArchive.Installation {
      if(code==0)break;
      // A newly extracted file can be refused while reputation/scanning settles.
      // Recheck the same bytes through Windows; persistent blocks still roll back.
-     if(code==4551&&retryPolicy){if(attempt==4)break;delay(new[]{500,1500,3000,5000}[attempt]);continue;}
+     if(code==4551&&retryPolicy&&launcherFailure==null){if(attempt==4)break;delay(new[]{500,1500,3000,5000}[attempt]);continue;}
      if(IsPolicyCode(code)||attempt>=2)break;
      delay(400);
     }
-    if(code!=0)return Describe(name,code);
+    if(code==4551&&name=="Start.exe"){launcherFailure=Describe(name,code);continue;}
+    if(code!=0)return (launcherFailure==null?"":launcherFailure+". ")+Describe(name,code);
    }
+   direct=launcherFailure!=null;
    return null;
   }
 
@@ -69,8 +76,17 @@ namespace AstroArchive.Installation {
      try{held=mutex.WaitOne(10000);}catch(AbandonedMutexException){held=true;}
      if(!held)throw new IOException("Another installation is in progress.");
      var record=InstallCore.Read(root);if(record==null)throw new IOException("No AstroArchive installation was found.");
-     string failure=Failure(root,record.ActiveDirectory,probe,delay);
-     if(failure==null){ClearBlock(root,Package(record));return new LaunchRecovery{Record=record};}
+     bool direct;
+     string failure=CheckVersion(root,record.ActiveDirectory,probe,delay,true,out direct);
+     if(failure==null){
+      if(record.DirectLaunch!=direct){
+       var next=new InstallRecord{Product=record.Product,Version=record.Version,PackageVersion=record.PackageVersion,ActiveDirectory=record.ActiveDirectory,
+        Files=record.Files,Shortcuts=record.Shortcuts,DirectLaunch=direct};
+       Activate(root,record,next,register);
+       record=InstallCore.Read(root);
+      }
+      ClearBlock(root,Package(record));return new LaunchRecovery{Record=record};
+     }
      var result=new LaunchRecovery{Blocked=true,BlockedPackage=Package(record),Reason=failure,Record=record};
      Version active=DirectoryVersion(record.ActiveDirectory);
      var candidates=record.Files.Select(DirectoryOf).Distinct(StringComparer.OrdinalIgnoreCase)
@@ -78,11 +94,9 @@ namespace AstroArchive.Installation {
       .Where(d=>Executables.All(name=>record.Files.Any(f=>f.Replace('\\','/').Equals(d+"/"+name,StringComparison.OrdinalIgnoreCase))))
       .OrderByDescending(DirectoryVersion).ToList();
      foreach(string directory in candidates){
-      if(Failure(root,directory,probe,delay,false)!=null)continue;
-      var restored=new InstallRecord{Product=record.Product,Version=ApplicationVersion(directory),PackageVersion=PackageVersion(directory),ActiveDirectory=directory,Files=record.Files,Shortcuts=record.Shortcuts};
-      WriteRecord(root,restored);
-      try{register(root,restored);}
-      catch{try{WriteRecord(root,record);register(root,record);}catch{}throw;}
+      if(CheckVersion(root,directory,probe,delay,false,out direct)!=null)continue;
+      var restored=new InstallRecord{Product=record.Product,Version=ApplicationVersion(directory),PackageVersion=PackageVersion(directory),ActiveDirectory=directory,Files=record.Files,Shortcuts=record.Shortcuts,DirectLaunch=direct};
+      Activate(root,record,restored,register);
       result.RolledBack=true;result.RestoredPackage=Package(restored);result.Record=InstallCore.Read(root);
       break;
      }
@@ -90,6 +104,12 @@ namespace AstroArchive.Installation {
      return result;
     }finally{if(held)mutex.ReleaseMutex();}
    }
+  }
+
+  static void Activate(string root,InstallRecord previous,InstallRecord next,Action<string,InstallRecord> register){
+   WriteRecord(root,next);
+   try{register(root,next);}
+   catch{try{WriteRecord(root,previous);register(root,previous);}catch{}throw;}
   }
 
   public static void WriteRecord(string root,InstallRecord record){

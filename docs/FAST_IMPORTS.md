@@ -5,8 +5,10 @@ live imports, see [network telescope imports](REMOTE_IMPORT.md). Network capture
 are downloaded to a local cache before the full scan and verified archive import;
 live mode watches new captures by default rather than skipping dated sessions.
 
-Folder scans default to filename matching. The selected USB import flow described
-below always performs a full scan; unscoped engine uploads retain filename matching.
+Folder scans default to filename matching. **Import → Scan new or changed captures**
+checks the file listing, including additions to previously imported DWARF sessions.
+It skips content reads only when both the source and the archived copy have matching,
+reliable file identities and change stamps. Uncertain files get a checksum check.
 The saved physical telescope scopes the inventory. Known files bypass image
 opens, header/pixel reads, timestamps, companion metadata, destination stats and
 hashing. Existing names are indexed in a compact SQLite table; older archives
@@ -55,11 +57,12 @@ normalised. It remembers relative selections in the saved profile for the same
 volume, preserving the common drive root for ancestor metadata lookup. Opening
 or cancelling the picker performs no recursive scan or import.
 
+The USB picker also offers **Scan new or changed captures** for the selected scope.
 Small selected USB imports start directly. Selections containing 500 or more
 capture files, including files inside selected folders, show a compact confirmation
-with the batch size and **Import / Cancel** buttons. This flow always bypasses filename,
-DWARF-session and header-cache shortcuts and checks hashes/archive copies before
-screening and verified import. Existing ignore/rejection/deletion policies remain
+with **Import / Cancel** buttons. The default selected scan checks hashes and archive
+copies before screening and verified import. Both modes check every selected folder
+for new files. Existing ignore/rejection/deletion policies remain
 applicable; originals stay and plate solving stays off. Results state the
 selected scope instead of declaring the entire repository up to date.
 

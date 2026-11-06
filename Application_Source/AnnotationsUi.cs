@@ -86,7 +86,14 @@ namespace AstroArchive {
   // Frames shown in several places (rows, previews, sessions) are distinct objects; sync them all.
   void AnnotationsChanged(List<IAnnotated> changed){
    var keys=new HashSet<string>(changed.Select(i=>i.AnnotationKey).Where(k=>k!=null),StringComparer.OrdinalIgnoreCase);
-   ApplyAnnotations(all.Where(f=>f.Hash!=null&&keys.Contains(f.Hash)));ApplyAnnotations(editedImages.Where(i=>i.AnnotationKey!=null&&keys.Contains(i.AnnotationKey)));
+   var affected=all.Where(f=>f.Hash!=null&&keys.Contains(f.Hash)).ToList();
+   ApplyAnnotations(affected);
+   if(affected.Count>0&&all.Count>2000){
+    var old=all;all=old.Select(f=>f.Hash!=null&&keys.Contains(f.Hash)?f.Clone():f).ToList();
+    if(browseSnapshot!=null&&browsedRepository==repo&&ReferenceEquals(browseSnapshot.Rows,old))
+     browseSnapshot=new BrowseSnapshot{Rows=all,Revision=browseSnapshot.Revision,CompareTarget=browseSnapshot.CompareTarget,Measurements=browseSnapshot.Measurements};
+   }
+   ApplyAnnotations(editedImages.Where(i=>i.AnnotationKey!=null&&keys.Contains(i.AnnotationKey)));
    if(previewFrame!=null&&previewFrame.Hash!=null&&keys.Contains(previewFrame.Hash))CaptureAnnotations.Apply(previewFrame,Annotations);
    var view=G("FramesGrid").ItemsSource as ICollectionView;if(view!=null&&view.Groups!=null)foreach(var session in SessionGroups(view.Groups))session.StarsChanged();
    // Search and filters may now include or exclude these rows.

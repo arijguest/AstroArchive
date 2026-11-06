@@ -33,6 +33,7 @@ namespace AstroArchive.Installation {
  }
  public class InstallRecord {
   public string Product="AstroArchive",Version,PackageVersion,ActiveDirectory;
+  public bool DirectLaunch;
   public string[] Files=new string[0],Shortcuts=new string[0];
  }
  public class PayloadFile {public string Name,Hash;public byte[] Bytes;}

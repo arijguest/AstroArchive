@@ -2425,3 +2425,12 @@ A current position is unavailable for this solution.	此解没有可用的当前
 {0} nights · {1} to {2}	{0} 晚 · {1} 至 {2}
 Show starred on top	将加星项显示在顶部
 Reports…	报告…
+Import all ready ({0})	导入所有就绪文件（{0}）
+Import selected ({0})	导入所选文件（{0}）
+Scan new or changed captures	扫描新增或更改的图像
+Destination {0}	目标位置 {0}
+Native detail	原始分辨率
+Keep zoom	保持缩放
+Sampled preview	缩略预览
+Loading native detail…	正在加载原始分辨率…
+Loading sampled preview…	正在加载缩略预览…

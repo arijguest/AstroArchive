@@ -18,7 +18,11 @@ namespace AstroArchive { public partial class MainUi {
    plan=new ImportPlan{Source="D:\\Telescope",Frames=all.Select(f=>f.Clone()).ToList()};
    for(int i=0;i<plan.Frames.Count;i++)plan.Frames[i].SourcePath="D:\\Telescope\\"+plan.Frames[i].OriginalName;
    plan.Frames[0].Status="New";plan.Frames[1].Status="Deleted";plan.Frames[2].Status="Failed";plan.Frames[2].Rejected=true;
-   importFilters.Values["Status"]="New";FilterImports();if(visibleImports.Count!=1||Convert.ToString(B("ImportButton").Content)!="Import 1 file")throw new Exception("Import button does not follow filtered results.");
+   importFilters.Values["Status"]="New";FilterImports();if(visibleImports.Count!=1||Convert.ToString(B("ImportButton").Content)!="Import all ready (1)")throw new Exception("Import button does not follow filtered results.");
+   G("ImportGrid").SelectedItem=visibleImports.Single();
+   if(ReadySelectedImports().Count!=1||Convert.ToString(B("ImportSelectedButton").Content)!="Import selected (1)")throw new Exception("Selected import did not follow the selected eligible row.");
+   G("ImportGrid").SelectedItem=null;
+   if(ReadySelectedImports().Count!=0||B("ImportSelectedButton").IsEnabled)throw new Exception("Selected import remained available without a selection.");
    importFilters.Reset();importFilters.Values["Review"]="Needs review";FilterImports();if(visibleImports.Single().Target!="NGC6888")throw new Exception("Import review filter missed a failure.");
    B("ImportClearButton").RaiseEvent(new RoutedEventArgs(Button.ClickEvent));T("ImportSearchBox").Text="M45";WaitForSearches();if(visibleImports.Count!=2)throw new Exception("Import search failed.");
    B("ImportClearButton").RaiseEvent(new RoutedEventArgs(Button.ClickEvent));

@@ -52,7 +52,7 @@ namespace AstroArchive {
    }return result;
   }
  }
- public sealed class RemoteReceipt {public long Size;public long Modified;public string Hash;}
+ public sealed class RemoteReceipt {public long Size;public long Modified;public string Hash,RelativePath;public bool Committed;}
  public sealed class RemoteStagingResult {
   public string Root;public readonly List<string> Files=new List<string>();public readonly List<string> Errors=new List<string>();public readonly List<string> Warnings=new List<string>();public int Downloaded,Reused;
  }
@@ -75,7 +75,10 @@ namespace AstroArchive {
    // FTP LIST often omits seconds; use fresh MDTM observations for transfer checks.
    if(expected.Size!=before.Size||(!RemoteConnection.Ftp(c.Kind)&&!RemoteCapturePaths.SameVersion(expected,before)))throw new IOException("Still being written; try again when this capture is complete.");
    reused=false;
-   if(File.Exists(destination)&&File.Exists(receiptPath))try{var saved=Util.Deserialize<RemoteReceipt>(File.ReadAllText(receiptPath));if(saved.Size==before.Size&&saved.Modified==before.Modified.ToUniversalTime().Ticks&&new FileInfo(destination).Length==before.Size&&Util.Hash(destination,ct)==saved.Hash){reused=true;return destination;}}catch(OperationCanceledException){throw;}catch(Exception){}
+   if(File.Exists(destination)&&File.Exists(receiptPath))try{var saved=Util.Deserialize<RemoteReceipt>(File.ReadAllText(receiptPath));if(saved.Size==before.Size&&saved.Modified==before.Modified.ToUniversalTime().Ticks&&new FileInfo(destination).Length==before.Size&&Util.Hash(destination,ct)==saved.Hash){
+     if(saved.Committed){saved.Committed=false;Util.AtomicText(receiptPath,Util.Serialize(saved));}
+     reused=true;return destination;
+    }}catch(OperationCanceledException){throw;}catch(Exception){}
    // No settle delay before FTP transfers: a capture that changes while downloading fails the size, MDTM and FITS checks below and is retried.
    Directory.CreateDirectory(Path.GetDirectoryName(destination));Paths.CheckLinks(destination,root);string temp=destination+"."+Guid.NewGuid().ToString("N")+".partial";long bytes=0;string hash;
    try{
@@ -89,14 +92,21 @@ namespace AstroArchive {
     if(Util.IsFits(destination)&&!destination.EndsWith(".gz",StringComparison.OrdinalIgnoreCase))FitsCheck.Validate(temp);
     if(Util.Hash(temp,ct)!=hash)throw new IOException("The local download failed checksum verification.");
     ct.ThrowIfCancellationRequested();if(File.Exists(destination))File.Delete(destination);File.Move(temp,destination);File.SetLastWriteTimeUtc(destination,before.Modified.ToUniversalTime());
-    Util.AtomicText(receiptPath,Util.Serialize(new RemoteReceipt{Size=before.Size,Modified=before.Modified.ToUniversalTime().Ticks,Hash=hash}));return destination;
+    Util.AtomicText(receiptPath,Util.Serialize(new RemoteReceipt{Size=before.Size,Modified=before.Modified.ToUniversalTime().Ticks,Hash=hash,RelativePath=relative}));return destination;
    }finally{Repository.TryRemove(temp);}
   }
   public static RemoteStagingResult Download(ISource source,RemoteConnection c,IEnumerable<Entry> selection,string cache,CancellationToken ct,Action<ProgressInfo> progress,Action<Entry,string,long> transfer=null){
+   using(var lease=OpenLease(cache,c))return DownloadUnderLease(source,c,selection,cache,ct,progress,transfer);
+  }
+  internal static FileStream OpenLease(string cache,RemoteConnection connection){
+   string scope=CacheRoot(cache,connection);Paths.CheckLinks(scope,cache);Directory.CreateDirectory(scope);
+   string path=Path.Combine(scope,"download.lock");Paths.CheckLinks(path,scope);
+   return new FileStream(path,FileMode.OpenOrCreate,FileAccess.ReadWrite,FileShare.None);
+  }
+  internal static RemoteStagingResult DownloadUnderLease(ISource source,RemoteConnection c,IEnumerable<Entry> selection,string cache,CancellationToken ct,Action<ProgressInfo> progress,Action<Entry,string,long> transfer){
    var files=selection.Where(e=>!e.Directory&&Util.IsImageAsset(e.Name)).GroupBy(e=>RemoteCapturePaths.Relative(c,e.Path),StringComparer.OrdinalIgnoreCase).Select(g=>g.First()).ToList();if(files.Count==0)throw new IOException("Select at least one capture file.");
    string scope=CacheRoot(cache,c),root=Path.Combine(scope,"captures"),receipts=Path.Combine(scope,"receipts");Paths.CheckLinks(scope,cache);Directory.CreateDirectory(root);Directory.CreateDirectory(receipts);Paths.CheckLinks(root,cache);Paths.CheckLinks(receipts,cache);
    var result=new RemoteStagingResult{Root=root};long total=files.Sum(e=>Math.Max(0,e.Size)),doneBytes=0;int done=0;var clock=Stopwatch.StartNew();var eta=new RemoteTransferEstimate(total,c.LimitMB);
-   Paths.CheckLinks(Path.Combine(scope,"download.lock"),scope);using(var gate=new FileStream(Path.Combine(scope,"download.lock"),FileMode.OpenOrCreate,FileAccess.ReadWrite,FileShare.None)){
     foreach(var file in files){ct.ThrowIfCancellationRequested();bool reused=false;if(transfer!=null)transfer(file,"Downloading",0);if(progress!=null)progress(eta.Sample(doneBytes,done,files.Count,file.Name,clock.Elapsed.TotalSeconds));try{string local=Copy(source,c,file,root,receipts,ct,n=>{if(transfer!=null)transfer(file,"Downloading",n);if(progress!=null)progress(eta.Sample(doneBytes+n,done,files.Count,file.Name,clock.Elapsed.TotalSeconds));},out reused);result.Files.Add(local);if(reused)result.Reused++;else result.Downloaded++;if(transfer!=null)transfer(file,"Downloaded",file.Size);}
      catch(OperationCanceledException){if(transfer!=null)transfer(file,"Download stopped",0);throw;}catch(Exception e){if(transfer!=null)transfer(file,"Download failed",0);if(FileRetry.DiskFull(e))throw;result.Errors.Add(file.Name+": "+e.Message);}done++;doneBytes+=Math.Max(0,file.Size);if(progress!=null)progress(eta.Sample(doneBytes,done,files.Count,file.Name,clock.Elapsed.TotalSeconds,true));
     }
@@ -113,7 +123,48 @@ namespace AstroArchive {
       try{bool reused;Copy(source,c,entry,root,receipts,ct,null,out reused);}catch(OperationCanceledException){throw;}catch(Exception e){ForgetMetadata(c,entry.Path,root,receipts);result.Warnings.Add("Session metadata will need retry: "+entry.Name+": "+e.Message);}
      }
     }
-   }return result;
+   return result;
+  }
+
+  internal const long CompletedCacheBytes=4L*1024*1024*1024;
+  internal static void MarkCommitted(string root,IEnumerable<Frame> frames){
+   string receipts=Path.Combine(Path.GetDirectoryName(root),"receipts");
+   foreach(var frame in frames.Where(f=>f.Status=="Imported"||f.Status=="Duplicate"||f.Status=="Duplicate (cached)")){
+    string local=Path.GetFullPath(frame.SourcePath);
+    if(!Util.Within(local,root)||!File.Exists(local))continue;
+    string relative=local.Substring(root.TrimEnd('\\','/').Length).TrimStart('\\','/');
+    string receiptPath=Path.Combine(receipts,Util.HashText(relative)+".json");
+    Paths.CheckLinks(receiptPath,receipts);
+    if(!File.Exists(receiptPath))continue;
+    var receipt=Util.Deserialize<RemoteReceipt>(File.ReadAllText(receiptPath));
+    if(receipt==null||receipt.Hash!=frame.Hash)continue;
+    receipt.RelativePath=relative;receipt.Committed=true;
+    Util.AtomicText(receiptPath,Util.Serialize(receipt));
+   }
+  }
+
+  internal static void TrimCompleted(string root,long limit){
+   string receipts=Path.Combine(Path.GetDirectoryName(root),"receipts");
+   Paths.CheckLinks(receipts,Path.GetDirectoryName(root));
+   if(!Directory.Exists(receipts))return;
+   var entries=new List<Tuple<FileInfo,FileInfo>>();
+   foreach(var file in new DirectoryInfo(receipts).EnumerateFiles("*.json")){
+    if((file.Attributes&FileAttributes.ReparsePoint)!=0)continue;
+    RemoteReceipt receipt;
+    try{receipt=Util.Deserialize<RemoteReceipt>(File.ReadAllText(file.FullName));}
+    catch(ArgumentException){continue;}catch(InvalidOperationException){continue;}
+    if(receipt==null||string.IsNullOrEmpty(receipt.RelativePath)||file.Name!=Util.HashText(receipt.RelativePath)+".json")continue;
+    if(!receipt.Committed&&Util.IsImageAsset(receipt.RelativePath))continue;
+    var staged=new FileInfo(Paths.Local(root,receipt.RelativePath));
+    Paths.CheckLinks(staged.FullName,root);
+    if(staged.Exists)entries.Add(Tuple.Create(file,staged));
+   }
+   long bytes=entries.Sum(e=>e.Item2.Length);
+   foreach(var entry in entries.OrderBy(e=>e.Item1.LastWriteTimeUtc)){
+    if(bytes<=limit)break;
+    long size=entry.Item2.Length;
+    entry.Item2.Delete();entry.Item1.Delete();bytes-=size;
+   }
   }
  }
  // Captures that exist but are still being written are retried on the next poll.
@@ -147,17 +198,92 @@ namespace AstroArchive {
     return new RemoteArchiveResult{Downloads=checkedFiles,Archive=archived,Report=repo.LastReport,LocalFolder=true};
    }finally{archiveGate.Release();}
   }
-  public static RemoteArchiveResult Run(Repository repo,TelescopeProfile profile,RemoteConnection c,IEnumerable<Entry> files,string cache,int workers,CancellationToken ct,Action<ProgressInfo> progress,Action<Frame> frame=null,Action<ImportPlan> plan=null,bool ignoreFailed=false,bool ignoreRaster=false,Func<RemoteConnection,ISource> sourceFactory=null){
-   var requested=files.ToList();var included=requested.Where(f=>Included(f,ignoreFailed,ignoreRaster)).ToList();if(included.Count==0)throw new IOException("The selected files are excluded by import preferences. Adjust those preferences or choose other captures.");
+  // Bound work in progress by both file count and size. An individual large recording
+  // can occupy a batch by itself.
+  internal static IEnumerable<List<Entry>> Batches(IEnumerable<Entry> entries){
+   var batch=new List<Entry>();long bytes=0;
+   foreach(var entry in entries){
+    long size=Math.Max(0,entry.Size);
+    if(batch.Count>0&&(batch.Count>=24||size>128L*1024*1024-bytes)){
+     yield return batch;batch=new List<Entry>();bytes=0;
+    }
+    batch.Add(entry);bytes+=size;
+   }
+   if(batch.Count>0)yield return batch;
+  }
+
+  static void AddBatch(AutoUploadResult total,AutoUploadResult batch){
+   total.Restored+=batch.Restored;
+   total.Plan.Frames.AddRange(batch.Plan.Frames);total.Plan.Errors.AddRange(batch.Plan.Errors);
+   var a=total.Import;var b=batch.Import;
+   a.Imported+=b.Imported;a.Duplicates+=b.Duplicates;a.Failed+=b.Failed;a.SkippedDeleted+=b.SkippedDeleted;
+   a.IgnoredFailed+=b.IgnoredFailed;a.IgnoredRaster+=b.IgnoredRaster;a.OriginalsKept+=b.OriginalsKept;
+   a.Workers=Math.Max(a.Workers,b.Workers);a.Trials.AddRange(b.Trials);
+   a.Errors.AddRange(b.Errors);a.Warnings.AddRange(b.Warnings);a.CleanupErrors.AddRange(b.CleanupErrors);
+   a.Metrics.Accumulate(b.Metrics.Snapshot());
+  }
+
+  public static RemoteArchiveResult Run(Repository repo,TelescopeProfile profile,RemoteConnection c,IEnumerable<Entry> files,string cache,int workers,CancellationToken ct,Action<ProgressInfo> progress,Action<Frame> frame=null,Action<ImportPlan> plan=null,bool ignoreFailed=false,bool ignoreRaster=false,Func<RemoteConnection,ISource> sourceFactory=null,Action<AutoUploadResult> batchCompleted=null){
+   var requested=files.ToList();var included=requested.Where(f=>Included(f,ignoreFailed,ignoreRaster)).ToList();
+   if(included.Count==0)throw new IOException("The selected files are excluded by import preferences. Adjust those preferences or choose other captures.");
    if(RemoteCapturePaths.LocalFolder(c))return ArchiveInPlace(repo,profile,c,requested,included,workers,ct,progress,frame,plan,ignoreFailed,ignoreRaster,sourceFactory);
-   var cacheGate=caches.GetOrAdd(Path.GetFullPath(RemoteCaptureStaging.CacheRoot(cache,c)),key=>new SemaphoreSlim(1,1));
-   if(progress!=null)progress(new ProgressInfo{Stage="Waiting for telescope download",Text="Other selections continue; completed captures are checked for duplicates.",TotalKnown=false});cacheGate.Wait(ct);try{
-   string root=Path.Combine(RemoteCaptureStaging.CacheRoot(cache,c),"captures");RemoteStagingResult downloaded;using(var source=(sourceFactory??Downloader.Source)(c))downloaded=RemoteCaptureStaging.Download(source,c,included,cache,ct,progress,frame==null?(Action<Entry,string,long>)null:(entry,status,bytes)=>frame(new Frame{SourcePath=Path.Combine(root,RemoteCapturePaths.LocalRelative(c,entry.Path)),OriginalName=entry.Name,Telescope=profile.Id,Model=profile.Model,Kind="Unknown",Status=status,Bytes=entry.Size,SourceDisposition=ImportWorkflow.Size(bytes)+" / "+ImportWorkflow.Size(entry.Size)+" from telescope"}));
-   if(downloaded.Files.Count==0)throw new IOException("No complete captures could be downloaded. "+string.Join("\n",downloaded.Errors));
-   var archiveGate=archives.GetValue(repo,key=>new SemaphoreSlim(1,1));if(progress!=null)progress(new ProgressInfo{Stage="Waiting to archive",Text="Downloads are verified. Waiting for the current archive batch to finish.",TotalKnown=false});archiveGate.Wait(ct);try{
-    var selected=ImportSelection.Create(downloaded.Root,downloaded.Files);var archived=UsbAutoUpload.Run(repo,profile,downloaded.Root,workers,ct,progress,frame,plan,ignoreFailed:ignoreFailed,ignoreRaster:ignoreRaster,robustMatching:true,selection:selected);
-    archived.Import.IgnoredFailed+=requested.Count(e=>ignoreFailed&&Util.FailedFilename(e.Name));archived.Import.IgnoredRaster+=requested.Count(e=>ignoreRaster&&ImportPolicy.RasterFilename(e.Name)&&(!ignoreFailed||!Util.FailedFilename(e.Name)));archived.Import.Errors.AddRange(downloaded.Errors);archived.Import.Warnings.AddRange(downloaded.Warnings);repo.SaveImportReport(archived.Import);return new RemoteArchiveResult{Downloads=downloaded,Archive=archived,Report=repo.LastReport};
-   }finally{archiveGate.Release();}
+   string scope=Path.GetFullPath(RemoteCaptureStaging.CacheRoot(cache,c));
+   var cacheGate=caches.GetOrAdd(scope,key=>new SemaphoreSlim(1,1));
+   if(progress!=null)progress(new ProgressInfo{Stage="Waiting for telescope download",Text="Waiting for the current selection on this telescope.",TotalKnown=false});
+   cacheGate.Wait(ct);
+   try{
+    using(var lease=RemoteCaptureStaging.OpenLease(cache,c))
+    using(var source=(sourceFactory??Downloader.Source)(c)){
+     var captures=included.Where(e=>!e.Directory&&Util.IsImageAsset(e.Name))
+      .GroupBy(e=>RemoteCapturePaths.Relative(c,e.Path),StringComparer.OrdinalIgnoreCase).Select(g=>g.First()).ToList();
+     if(captures.Count==0)throw new IOException("Select at least one capture file.");
+     var batches=Batches(captures).ToList();string root=Path.Combine(scope,"captures");
+     var downloads=new RemoteStagingResult{Root=root};
+     var total=new AutoUploadResult{Plan=new ImportPlan{Source=root},Import=new ImportResult{Metrics=new PipelineMetrics(null)},ScopeSummary=captures.Count+" selected network captures. "};
+     var archiveGate=archives.GetValue(repo,key=>new SemaphoreSlim(1,1));
+     bool archiveStarted=false;
+     try{
+      for(int i=0;i<batches.Count;i++){
+       ct.ThrowIfCancellationRequested();
+       string suffix=" · batch "+(i+1)+" of "+batches.Count;
+       Action<ProgressInfo> report=progress==null?(Action<ProgressInfo>)null:p=>{p.Stage=(p.Stage??"Importing")+suffix;progress(p);};
+       Action<Entry,string,long> transfer=frame==null?(Action<Entry,string,long>)null:(entry,status,bytes)=>frame(new Frame{
+        SourcePath=Path.Combine(root,RemoteCapturePaths.LocalRelative(c,entry.Path)),OriginalName=entry.Name,Telescope=profile.Id,Model=profile.Model,
+        Kind="Unknown",Status=status,Bytes=entry.Size,SourceDisposition=ImportWorkflow.Size(bytes)+" / "+ImportWorkflow.Size(entry.Size)+" from telescope"
+       });
+       var batch=RemoteCaptureStaging.DownloadUnderLease(source,c,batches[i],cache,ct,report,transfer);
+       downloads.Files.AddRange(batch.Files);downloads.Errors.AddRange(batch.Errors);downloads.Warnings.AddRange(batch.Warnings);
+       downloads.Downloaded+=batch.Downloaded;downloads.Reused+=batch.Reused;
+       if(batch.Files.Count==0)continue;
+       if(report!=null)report(new ProgressInfo{Stage="Waiting to archive",Text="Downloads are verified. Waiting for the current archive batch.",TotalKnown=false});
+       archiveGate.Wait(ct);
+       try{
+        var selected=ImportSelection.Create(root,batch.Files);archiveStarted=true;
+        var archived=UsbAutoUpload.Run(repo,profile,root,workers,ct,report,frame,plan,ignoreFailed:ignoreFailed,
+         ignoreRaster:ignoreRaster,selection:selected,newOrChanged:true,deferFinalCheckpoint:true);
+        AddBatch(total,archived);
+        if(batchCompleted!=null)batchCompleted(archived);
+        try{RemoteCaptureStaging.MarkCommitted(root,archived.Plan.Frames);RemoteCaptureStaging.TrimCompleted(root,RemoteCaptureStaging.CompletedCacheBytes);}
+        catch(IOException error){downloads.Warnings.Add("Could not trim the completed telescope cache. "+error.Message);}
+        catch(UnauthorizedAccessException error){downloads.Warnings.Add("Could not trim the completed telescope cache. "+error.Message);}
+       }finally{archiveGate.Release();}
+      }
+     }finally{
+      if(archiveStarted){
+       archiveGate.Wait();
+       try{repo.Checkpoint(CancellationToken.None);}
+       catch(IOException error){downloads.Warnings.Add("Portable index checkpoint failed. "+error.Message);}
+       catch(UnauthorizedAccessException error){downloads.Warnings.Add("Portable index checkpoint failed. "+error.Message);}
+       finally{archiveGate.Release();}
+      }
+     }
+     if(downloads.Files.Count==0)throw new IOException("No complete captures could be downloaded. "+string.Join("\\n",downloads.Errors));
+     total.Import.IgnoredFailed+=requested.Count(e=>ignoreFailed&&Util.FailedFilename(e.Name));
+     total.Import.IgnoredRaster+=requested.Count(e=>ignoreRaster&&ImportPolicy.RasterFilename(e.Name)&&(!ignoreFailed||!Util.FailedFilename(e.Name)));
+     total.Import.Errors.AddRange(downloads.Errors);total.Import.Warnings.AddRange(downloads.Warnings);
+     repo.SaveImportReport(total.Import);
+     return new RemoteArchiveResult{Downloads=downloads,Archive=total,Report=repo.LastReport};
+    }
    }finally{cacheGate.Release();}
   }
  }

@@ -26,7 +26,7 @@ namespace AstroArchive {
     var frame=G("ImportGrid").SelectedItem as Frame;
     L("ImportDetailsLabel").Text=frame==null?"Select a capture to see screening or import details.":frame.OriginalName+"  ·  "+frame.Status+"  ·  "+(CaptureScreening.NeedsReview(frame)?frame.ReviewCategory+" · "+frame.ReviewReason:frame.SourceDisposition??frame.Notes);
     B("AssignUnknownTargetButton").IsEnabled=!RepositoryOperationBlocked&&UnknownImportSelection().Count>0;
-    UiHelp.Tip(B("ImportButton"),G("ImportGrid").SelectedItems.Count>0?"Row selection does not limit imports. Search and filters choose the ready files.":null);
+    UpdateImportScope();
    };
   }
   void ApplyFilters(bool imports){if(imports)FilterImports();else Filter(true);}
@@ -40,13 +40,31 @@ namespace AstroArchive {
    var grid=G("ImportGrid");var selection=new HashSet<string>(grid.SelectedItems.Cast<Frame>().Select(f=>f.SourcePath));SetRows("ImportGrid",visibleImports,presorted);foreach(var frame in visibleImports.Where(f=>selection.Contains(f.SourcePath)))if(!grid.SelectedItems.Contains(frame))grid.SelectedItems.Add(frame);
    B("ImportFiltersButton").Content="Filters"+(importFilters.ActiveCount>0?" ("+importFilters.ActiveCount+")":"");
    int ready=summary.Ready;L("ImportSummaryLabel").Text=summary.Text;L("ImportSummaryLabel").Visibility=summary.Text.Length>0?Visibility.Visible:Visibility.Collapsed;
-   B("ImportButton").Content="Import "+ready+" file"+(ready==1?"":"s");UiHelp.Tip(B("ImportButton"),grid.SelectedItems.Count>0?"Row selection does not limit imports. Search and filters choose the ready files.":null);UiHelp.Describe(B("ImportButton"),"Import "+ready+" eligible files in this filtered view. Row selection does not limit imports.");
+   B("ImportButton").Content=Localization.F("Import all ready ({0})",ready);
+   UiHelp.Hint(B("ImportButton"),"Import every ready file in the current filtered view.",true);
    B("ImportButton").IsEnabled=!RepositoryOperationBlocked&&repo!=null&&plan!=null&&ready>0;
+   UpdateImportScope();
    B("ScreenImportsButton").IsEnabled=!RepositoryOperationBlocked&&repo!=null&&visibleImports.Any(f=>f.Status!="Deleted");
    B("ReviewImportsButton").IsEnabled=!RepositoryOperationBlocked&&repo!=null&&summary.Flagged>0;retry=plan==null?0:retry;B("RetryImportsButton").Content="Retry "+retry+" failed import"+(retry==1?"":"s");B("RetryImportsButton").IsEnabled=!RepositoryOperationBlocked&&repo!=null&&retry>0;
    B("AssignUnknownTargetButton").IsEnabled=!RepositoryOperationBlocked&&UnknownImportSelection().Count>0;
    B("ImportOptionsButton").IsEnabled=!NetworkImportBlocked;
    L("ScanLabel").Text=source.Count==0&&plan!=null&&plan.FastSkippedFiles>0&&plan.Errors.Count==0?"Nothing new to import · "+plan.FastSkippedFiles+" archived files skipped in "+plan.FastSkippedFolders+" folders":source.Count==0&&plan==null?"Choose a source folder and scan to begin.":summary.Shown+" / "+summary.Total+" shown · "+(summary.Total-summary.Shown)+" hidden by search/filters · "+importFilters.ActiveCount+" active filters"+(SkipFlagged?" · "+summary.SkippedFlagged+" flagged candidates skipped":" · flagged captures included")+(plan!=null&&plan.FastSkippedFiles>0?" · "+plan.FastSkippedFiles+" archived files skipped in "+plan.FastSkippedFolders+" folders":"")+(plan!=null&&plan.IgnoredFailed>0?"  ·  "+plan.IgnoredFailed+" failed filenames ignored":"")+(plan!=null&&plan.IgnoredRaster>0?" · "+plan.IgnoredRaster+" PNG/JPG ignored":"");
+  }
+  List<Frame> ReadySelectedImports(){
+   return ImportWorkflow.Select(G("ImportGrid").SelectedItems.OfType<Frame>(),SkipFlagged);
+  }
+  void UpdateImportScope(){
+   int selected=ReadySelectedImports().Count;
+   var button=B("ImportSelectedButton");
+   button.Content=Localization.F("Import selected ({0})",selected);
+   UiHelp.Hint(button,"Import the ready files you selected in this table.",true);
+   button.IsEnabled=!RepositoryOperationBlocked&&!SearchBlocked("ImportSearchBox")&&repo!=null&&plan!=null&&selected>0;
+   var label=L("ImportScopeLabel");
+   if(repo==null){label.Text="";label.ToolTip=null;return;}
+   bool remove=((CheckBox)Window.FindName("DeleteOriginalsCheck")).IsChecked==true;
+   string retention=Localization.T(remove?"Eligible originals removed after verification":"Originals kept");
+   label.Text=Localization.F("Destination {0}",CompactPath(repo.Root))+" · "+retention;
+   label.ToolTip=repo.Root+" · "+retention;
   }
   void ScreenFiles(bool imports){
    if(repo==null||RepositoryOperationBlocked||SearchBlocked(imports?"ImportSearchBox":"SearchBox"))return;

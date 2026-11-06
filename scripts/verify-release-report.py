@@ -42,6 +42,19 @@ def verify(directory, publisher, allow_unsigned=False, require_signed=False):
     expected_url = f'https://github.com/arijguest/AstroArchive/releases/download/v{package}/{installer}'
     if feed.get('url') != expected_url or feed.get('download_url') != expected_url:
         raise ValueError('Update feed must point to the single hybrid installer.')
+    website_file = directory / 'website-update.json'
+    if website_file.exists():
+        website_feed = json.loads(website_file.read_text(encoding='utf-8'))
+        updater = Path(__file__).resolve().parent.parent / 'Installer' / 'Updates.cs'
+        website = re.search(r'public const string Website = "(https://[^"/]+)";', updater.read_text(encoding='utf-8'))
+        if not website:
+            raise ValueError('Unable to determine the updater website.')
+        website_url = f'{website.group(1)}/downloads/{installer}'
+        if website_feed.get('url') != website_url or website_feed.get('download_url') != website_url:
+            raise ValueError('Website feed points to a different installer.')
+        shared = ('schema', 'package_version', 'application_version', 'authenticode_signed', 'sha256', 'size')
+        if any(website_feed.get(key) != feed.get(key) for key in shared):
+            raise ValueError('Website and GitHub update feeds disagree.')
     for name in (installer,):
         expected = f'{digest}  {name}'
         if (directory / f'{name}.sha256').read_text(encoding='ascii').strip() != expected:

@@ -31,11 +31,11 @@ namespace AstroArchive {
      heartbeat.Start();
      try{
       var clock=Stopwatch.StartNew();foreach(string text in new[]{"M","M4","target:M45","file:*00002.fit"})T("SearchBox").Text=text;
-      if(!object.ReferenceEquals(displayed,before)||!state.Pending||G("FramesGrid").IsEnabled||B("ExportButton").IsEnabled)throw new Exception("Typing synchronously refreshed results or left stale file actions enabled.");
+      if(!object.ReferenceEquals(displayed,before)||!state.Pending||!G("FramesGrid").IsEnabled||B("ExportButton").IsEnabled)throw new Exception("Typing synchronously refreshed results or left stale file actions enabled.");
       ScheduleSearch("SearchBox",false,true);SmokeSearchWait(()=>pulses>=3);
       SetBusy(false); // A progress refresh must not save the temporarily disabled grid.
       if(!state.Pending||clock.Elapsed.TotalSeconds>=4)throw new Exception("Dispatcher blocked behind the held search worker.");
-      if(Targets.IsEnabled)throw new Exception("Pending targets still permit stale selections.");VerifyTargetListAppearance(Targets,"Repository typing");
+      if(!Targets.IsEnabled)throw new Exception("Pending search stopped browsing the last results.");VerifyTargetListAppearance(Targets,"Repository typing");
      }finally{release.Set();}
      WaitForSearches();if(!barrier.IsCanceled||displayed.Count!=1||displayed[0].OriginalName!="Light_00002.fit"||!G("FramesGrid").IsEnabled||!Targets.IsEnabled)throw new Exception("Superseded search replaced the latest query or left its view disabled.");
     }

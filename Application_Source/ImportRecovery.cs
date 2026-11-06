@@ -11,7 +11,7 @@ namespace AstroArchive {
   public string Id=Guid.NewGuid().ToString("N"),Kind,Title,Repository,Source,State="Running",ProtectedPassword;
   public DateTime UpdatedUtc=DateTime.UtcNow;
   public Connection Connection;public TelescopeProfile Profile;public List<Entry> Files;
-  public List<Frame> Frames;public ImportSelection Selection;public RemoteLiveState LiveState;public string[] EditedFiles;public EditedImportPlan EditedPlan;
+  public List<Frame> Frames;public ImportSelection Selection;public bool NewOrChanged;public RemoteLiveState LiveState;public string[] EditedFiles;public EditedImportPlan EditedPlan;
   public int Workers;public bool IgnoreFailed,IgnoreRaster,DeleteOriginals;public string Solve="Off";
  }
  public sealed class ImportResumeStore {

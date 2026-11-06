@@ -179,7 +179,7 @@ namespace AstroArchive {
  }
  public partial class MainUi {
   readonly List<RemoteImportSession> remoteSessions=new List<RemoteImportSession>();
-  bool NetworkImportBlocked {get{return closing||cancel!=null||dumpChecking||releaseInstalling||usbImportPicking||sourceRemovalConfirming;}}
+  bool NetworkImportBlocked {get{return closing||repositoryOpening||cancel!=null||dumpChecking||releaseInstalling||usbImportPicking||sourceRemovalConfirming;}}
   static string RemoteEndpoint(RemoteConnection c){return RemoteCapturePaths.LocalFolder(c)?c.Kind+"|"+Path.GetFullPath(c.Folder).TrimEnd('\\','/').ToLowerInvariant():c.Kind+"|"+c.Host.ToLowerInvariant()+"|"+(c.Kind=="Seestar SMB"?c.SmbPort:c.Port);}
   bool HasLiveImport(RemoteConnection c){return remoteSessions.Any(s=>s.Request.Live&&RemoteEndpoint(s.Request.Connection)==RemoteEndpoint(c));}
   string ValidateRemoteRequest(RemoteImportRequest request){
@@ -220,7 +220,10 @@ namespace AstroArchive {
    Action<RemoteArchiveResult> completed=result=>{session.Imported+=result.Archive.Import.Imported;session.Duplicates+=result.Archive.Import.Duplicates;if(result.Archive.Import.Failed+result.Downloads.Errors.Count>0)session.Record.State="Interrupted";if(result.Archive.Import.Errors.Count+result.Archive.Import.Warnings.Count>0){session.NeedsReview=true;session.Report=(session.Report??"")+result.Report+Environment.NewLine;}};
    try{status=await Task.Run(()=>{
     if(request.Live){RemoteLiveImport.Run(repository,request.Profile,request.Connection,cache,workers,token,progress,LiveFrame,null,ignoreFailed,ignoreRaster,factory,completed,session.Record.LiveState,state=>{session.Record.LiveState=state;ResumeStore.Save(session.Record);});return RemoteCapturePaths.LocalFolder(request.Connection)?"Stopped watching the folder.":"Live import stopped.";}
-    var result=RemoteArchiveImport.Run(repository,request.Profile,request.Connection,request.Files,cache,workers,token,progress,LiveFrame,null,ignoreFailed,ignoreRaster,factory);completed(result);return result.Summary;
+    int initialImported=session.Imported,initialDuplicates=session.Duplicates;
+    var result=RemoteArchiveImport.Run(repository,request.Profile,request.Connection,request.Files,cache,workers,token,progress,LiveFrame,null,ignoreFailed,ignoreRaster,factory,
+     batch=>{session.Imported+=batch.Import.Imported;session.Duplicates+=batch.Import.Duplicates;});
+    session.Imported=initialImported;session.Duplicates=initialDuplicates;completed(result);return result.Summary;
    });}
    catch(OperationCanceledException){canceled=true;status="Stopped. "+session.Imported+" imported; "+session.Duplicates+" already present. Completed copies retained; "+(RemoteCapturePaths.LocalFolder(request.Connection)?"originals in the watched folder":"telescope originals")+" unchanged.";}
    catch(Exception error){session.Activity.Failed=true;session.NeedsReview=true;session.Report=(session.Report??"")+error.Message;status="Import could not finish: "+error.Message;}

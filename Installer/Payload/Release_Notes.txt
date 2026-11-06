@@ -1,21 +1,15 @@
-AstroArchive 3.3.3 — direct website distribution
-Package 3.3.3.1
+AstroArchive 3.3.4 prerelease
+Package 3.3.4.1
 
-Includes the locally preserved upgrades through 3.3.2.2, following 3.1.9.1:
-- Network telescope imports, verified transfers and recovery.
-- Hybrid/offline choice and bundled target information, orbital and sky data.
-- Faster long imports, responsive list refresh and retained selection.
-- Resumable verified backups, updated date/time sorts and export menus.
-- Sky-map corona, Sun/Totality classification and upcoming sky events.
-- Telescope management, updated guides and seven interface languages.
+- Show the workspace before the full archive loads and offer an initial view of the last target.
+- Refresh changed archive rows and keep browsing while search results update.
+- Choose whether to import selected captures or all ready captures in the current view.
+- Scan new or changed files, and archive network downloads in smaller verified batches.
+- Compare still images in table order with a sampled view, optional native detail and a shared stretch.
+- Carry forward the local import-list, background work and Siril short-exposure stacking improvements.
+- Validate the real Windows update restart and prepare matching website and GitHub update manifests.
+- Use direct app shortcuts when Windows refuses the launcher but approves the application.
 
-This release changes downloads, release notes and update checks to the AstroArchive
-website. Downloads retain SHA-256, byte-size and version checks. Diagnostic reports
-open the website support form for review; they are never submitted automatically.
-
-One-time migration: existing 3.1.9.1 and other GitHub-based installations must run
-this website installer manually once. They cannot discover this new feed using
-their old updater. Subsequent website builds use /update.json on the website.
-
-This local build is unsigned. All original captures and repository data remain
-outside application installation files.
+Windows x64 and .NET Framework 4.8. The installer and portable ZIP are unsigned.
+To use the ZIP, extract the whole folder and run AstroArchive.exe alongside its bundled files.
+Verify the download using the accompanying SHA-256 file.

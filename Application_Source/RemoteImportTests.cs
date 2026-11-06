@@ -23,6 +23,28 @@ namespace AstroArchive {
    Repository.LocalIndexBase=Path.Combine(root,"native-indexes");using(var repo=new Repository(Path.Combine(root,ftp?"ftp-archive":"smb-archive"))){var profile=new TelescopeProfile{Id=ftp?"Network DWARF":"Network Seestar",Model=ftp?"Dwarf 3":"Seestar S50",Camera="Auto"};var result=RemoteArchiveImport.Run(repo,profile,c,chosen,Path.Combine(root,"native-cache"),1,CancellationToken.None,p=>{});Check(result.Archive.Import.Imported==1,"real "+(ftp?"FTP":"SMB")+" download imports into the archive");var frame=repo.All().Single();Check(frame.Hash==Util.Hash(file,CancellationToken.None)&&Util.Hash(repo.FilePath(frame),CancellationToken.None)==frame.Hash,"real transport preserves exact original and archived bytes");Check(frame.AssociatedFiles!=null&&frame.AssociatedFiles.Any(a=>!string.IsNullOrEmpty(a.RelativePath)),"real transport preserves adjacent session metadata");var repeat=RemoteArchiveImport.Run(repo,profile,c,chosen,Path.Combine(root,"native-cache"),1,CancellationToken.None,p=>{});Check(repeat.Downloads.Reused==1&&repo.All().Count==1,"real transport retry reuses verified bytes without duplicate archive entries");Check(File.Exists(file)&&repo.Verify(CancellationToken.None,p=>{})==0,"real read-only transport leaves the source unchanged");}
    Console.WriteLine("Native "+(ftp?"FTP":"SMB")+" archive integration passed.");
   }
+  static void BatchedImports(string root,RemoteConnection connection){
+   var folder=Path.Combine(root,"batched-source");
+   var cache=Path.Combine(root,"batched-cache");
+   for(int i=0;i<27;i++)Fits(Path.Combine(folder,"Light_batch_"+i.ToString("D2")+".fit"),1800+i);
+   Func<RemoteConnection,ISource> factory=c=>new Fixture(folder,c);
+   List<Entry> selected;
+   using(var source=factory(connection))selected=RemoteCaptureCatalog.Search(source,connection,connection.Folder,CancellationToken.None);
+   using(var repo=new Repository(Path.Combine(root,"batched-archive"))){
+    int opens=0,commits=0;
+    Func<RemoteConnection,ISource> observed=c=>new Fixture(folder,c,path=>{
+     if(++opens==25)Check(repo.All().Count==24,"first network batch commits before opening file 25");
+    });
+    var result=RemoteArchiveImport.Run(repo,new TelescopeProfile{Id="Batches",Model="Auto"},connection,selected.Take(26),cache,1,
+     CancellationToken.None,p=>{},sourceFactory:observed,batchCompleted:batch=>commits++);
+    Check(commits==2&&result.Archive.Import.Imported==26&&result.Archive.Plan.Frames.Count==26,"network batch outcomes aggregate accurately");
+    RemoteStagingResult pending;
+    using(var source=factory(connection))pending=RemoteCaptureStaging.Download(source,connection,selected.Skip(26),cache,CancellationToken.None,null);
+    using(RemoteCaptureStaging.OpenLease(cache,connection))RemoteCaptureStaging.TrimCompleted(result.Downloads.Root,0);
+    Check(result.Downloads.Files.All(path=>!File.Exists(path))&&File.Exists(pending.Files.Single()),"cache trimming evicts committed captures and retains pending downloads");
+    Check(repo.Verify(CancellationToken.None,p=>{})==0&&Directory.GetFiles(folder).Length==27,"cache trimming preserves telescope originals and archived bytes");
+   }
+  }
   static void ConcurrentImports(string root,RemoteConnection firstConnection){
    string firstRoot=Path.Combine(root,"parallel-one"),secondRoot=Path.Combine(root,"parallel-two"),firstFile=Path.Combine(firstRoot,"MyWorks","Light_parallel.fit"),secondFile=Path.Combine(secondRoot,"MyWorks","Light_parallel.fit");Fits(firstFile,1700);Directory.CreateDirectory(Path.GetDirectoryName(secondFile));File.Copy(firstFile,secondFile);
    var secondConnection=Util.Deserialize<RemoteConnection>(Util.Serialize(firstConnection));secondConnection.Host="127.0.0.2";secondConnection.Folder=@"\\127.0.0.2\EMMC Images";
@@ -123,7 +145,7 @@ namespace AstroArchive {
     try{Check(baselineSeen.WaitOne(10000),"live importer establishes its baseline");string next=Path.Combine(liveRoot,"MyWorks","Light_M31_live.fit");Fits(next,1300);byte[] complete=File.ReadAllBytes(next);File.WriteAllBytes(next,complete.Take(2880).ToArray());Check(!imported.WaitOne(6500),"live import does not archive an exposure while it is incomplete");File.WriteAllBytes(next,complete);Check(imported.WaitOne(20000),"live importer recovers from disconnect and archives a new capture");}finally{stopped.Cancel();try{task.GetAwaiter().GetResult();}catch(OperationCanceledException){}}
     Check(retries>0&&repo.All().Count==1&&File.Exists(baseline),"live reconnect and stop retain exactly the new archive capture and originals");
    }
-   ConcurrentImports(root,c);RecoveryChecks(root,c);WatchedFolderChecks(root);
+   ConcurrentImports(root,c);BatchedImports(root,c);RecoveryChecks(root,c);WatchedFolderChecks(root);
    Console.WriteLine(checks+" remote integration checks passed.");}finally{Repository.LocalIndexBase=previousIndex;}
   }
  }

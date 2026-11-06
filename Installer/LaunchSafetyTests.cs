@@ -36,9 +36,17 @@ static class LaunchSafetyTests {
    Check(result.Reason.Contains("Windows blocked Start.exe")&&result.Reason.Contains("4551"),"Block reason lost the executable or Windows code");
    var block=LaunchSafety.ReadBlock(root);Check(block!=null&&block.BlockedPackages.SequenceEqual(new[]{"1.4.0.1"})&&block.NoticePending,"Blocked package was not recorded");
   });
+  test("A launcher-only reputation block activates the app Windows approves",()=>{
+   string root=Installed("direct-launch","1.2.0","1.3.0");InstallRecord registered=null;
+   var result=Recover(root,Blocking("app-1.3.0-r1/Start.exe"),(r,m)=>registered=m);
+   Check(!result.Blocked&&result.Record.PackageVersion=="1.3.0.1"&&result.Record.DirectLaunch&&registered.DirectLaunch,"Launcher rejection prevented an allowed application from running");
+   Check(LaunchSafety.EntryPoint(InstallCore.Read(root))=="AstroArchive.exe"&&LaunchSafety.ReadBlock(root)==null,"Direct entry point was not persisted");
+   result=Recover(root,Blocking(),(r,m)=>registered=m);
+   Check(!result.Record.DirectLaunch&&!registered.DirectLaunch&&LaunchSafety.EntryPoint(result.Record)=="Start.exe","Approved launcher did not resume its usual role");
+  });
   test("Rollback skips every earlier version Windows also blocks, checking both executables",()=>{
    string root=Installed("rollback-skip","1.2.0","1.3.0","1.4.0");
-   var result=Recover(root,Blocking("app-1.4.0-r1/Start.exe","app-1.3.0-r1/AstroArchive.exe"),(r,m)=>{});
+   var result=Recover(root,Blocking("app-1.4.0-r1/","app-1.3.0-r1/AstroArchive.exe"),(r,m)=>{});
    Check(result.RolledBack&&result.RestoredPackage=="1.2.0.1"&&InstallCore.Read(root).ActiveDirectory=="app-1.2.0-r1","Rollback chose a blocked version");
   });
   test("Missing executables count as a version that cannot start",()=>{
@@ -76,7 +84,7 @@ static class LaunchSafetyTests {
   test("Persistent policy rejection stops after a bounded recheck and preserves enforcement",()=>{
    string root=Installed("reputation-stays-blocked","1.2.0");int calls=0;var waits=new List<int>();
    var result=LaunchSafety.Recover(root,path=>{calls++;return 4551;},(r,m)=>{},ms=>waits.Add(ms));
-   Check(result.Blocked&&!result.RolledBack&&calls==5&&waits.Sum()==10000,"Policy recheck was unbounded or ignored the block");
+   Check(result.Blocked&&!result.RolledBack&&calls==6&&waits.Sum()==10000,"Policy recheck was unbounded or ignored the block");
    Check(LaunchSafety.IsBlocked(root,"1.2.0.1"),"A persistently blocked package was offered again");
   });
   test("Defender and explicit administrator blocks are not repeatedly retried",()=>{

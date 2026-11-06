@@ -1,6 +1,7 @@
 param(
     [string]$ArtifactDirectory = (Join-Path $PSScriptRoot '..\release-artifacts'),
-    [string]$SiteDirectory = ''
+    [string]$SiteDirectory = '',
+    [ValidateSet('update.json','website-update.json')][string]$ManifestName = 'update.json'
 )
 $ErrorActionPreference = 'Stop'
 $root = Split-Path $PSScriptRoot -Parent
@@ -21,7 +22,7 @@ $manifest = [ordered]@{
 }
 $json = $manifest | ConvertTo-Json -Depth 5
 $utf8 = New-Object Text.UTF8Encoding($false)
-[IO.File]::WriteAllText((Join-Path $ArtifactDirectory 'update.json'), $json, $utf8)
+[IO.File]::WriteAllText((Join-Path $ArtifactDirectory $ManifestName), $json, $utf8)
 [IO.File]::WriteAllText((Join-Path $ArtifactDirectory 'release.js'), "export const releaseManifest = $json;`n", $utf8)
 [IO.File]::WriteAllText("$($installer.FullName).sha256", "$hash  $($installer.Name)`n", $utf8)
 if ($SiteDirectory) { Copy-Item -LiteralPath (Join-Path $ArtifactDirectory 'release.js') -Destination (Join-Path $SiteDirectory 'worker\release.js') -Force }

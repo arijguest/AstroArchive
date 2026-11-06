@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -33,6 +34,30 @@ namespace AstroArchive {
    Test("Replacing a search index refreshes edited metadata without retaining old documents",()=>{
     var row=new Frame{Filter="Broadband",Exposure=10,Mount="Unknown"};var index=new SearchIndex<Frame>(SearchDocument.FromFrame);Check(index.Find(new[]{row},FileSearch.Parse("filter:broadband"),f=>true,ct).Count==1,"Initial field missing");row.Filter="Ha";row.Exposure=60;
     index=new SearchIndex<Frame>(SearchDocument.FromFrame);Check(index.Find(new[]{row},FileSearch.Parse("filter:Ha mount:EQ? exposure:>20"),f=>true,ct).Count==1,"Metadata change retained stale fields");
+   });
+   WindowsTest("Browse refresh replaces only changed captures and drops deleted search documents",()=>{
+    string source=Path.Combine(root,"browse-delta-source");
+    Directory.CreateDirectory(source);
+    Write(Path.Combine(source,"Light_M45.fit"),64,48,(x,y)=>1400,new Dictionary<string,string>());
+    Write(Path.Combine(source,"Light_M31.fit"),64,48,(x,y)=>1600,new Dictionary<string,string>());
+    using(var repo=new Repository(Path.Combine(root,"browse-delta-repo"))){
+     var plan=repo.Scan(source,"Browse rig","Auto",ct,NoProgress);
+     Check(repo.Import(plan.Frames,ct,NoProgress).Imported==2,"Fixture imports were incomplete");
+     var initial=repo.ReadBrowseSnapshot(null);
+     Check(ReferenceEquals(initial,repo.ReadBrowseSnapshot(initial)),"Unchanged archive read a new snapshot");
+     var original=initial.Rows.First(f=>f.Target=="M45");var other=initial.Rows.First(f=>f.Target=="M31");
+     int prepared=0;var search=new SearchIndex<Frame>(f=>{prepared++;return SearchDocument.FromFrame(f);});
+     var query=FileSearch.Parse("target:M45 OR target:M31");
+     search.KeepRows(initial,initial.Rows);search.Find(initial.Rows,query,f=>true,ct);
+     var edit=original.Clone();edit.Filter="Ha";repo.Save(edit);
+     var changed=repo.ReadBrowseSnapshot(initial);
+     Check(changed.Rows.Contains(other)&&!changed.Rows.Contains(original),"Unrelated row was replaced or changed row was reused");
+     search.KeepRows(changed,changed.Rows);
+     Check(search.Find(changed.Rows,FileSearch.Parse("filter:Ha"),f=>true,ct).Single().Hash==edit.Hash&&prepared==3,"The search did not retain the unaffected document");
+     repo.DeleteFrames(new[]{edit},ct,NoProgress);
+     var deleted=repo.ReadBrowseSnapshot(changed);search.KeepRows(deleted,deleted.Rows);
+     Check(deleted.Rows.Single()==other&&search.PreparedCount==1,"Deletion remained in the archive or search snapshot");
+    }
    });
    Test("Invalid and empty searches avoid unnecessary document preparation",()=>{
     var index=new SearchIndex<Frame>(f=>{throw new Exception("Should not prepare a document");});var rows=new[]{new Frame(),new Frame()};Check(index.Find(rows,FileSearch.Parse("\"unfinished"),f=>true,ct).Count==0,"Invalid query broadened results");Check(index.Find(rows,FileSearch.Parse(""),f=>true,ct).Count==2,"Empty search lost rows");

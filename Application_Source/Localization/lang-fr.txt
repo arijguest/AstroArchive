@@ -2392,3 +2392,12 @@ A current position is unavailable for this solution.	Aucune position actuelle n�
 {0} nights · {1} to {2}	{0} nuits · {1} à {2}
 Show starred on top	Afficher les favoris en premier
 Reports…	Rapports…
+Import all ready ({0})	Importer tous les fichiers prêts ({0})
+Import selected ({0})	Importer la sélection ({0})
+Scan new or changed captures	Chercher les captures nouvelles ou modifiées
+Destination {0}	Destination {0}
+Native detail	Résolution native
+Keep zoom	Conserver le zoom
+Sampled preview	Aperçu réduit
+Loading native detail…	Chargement de la résolution native…
+Loading sampled preview…	Chargement de l’aperçu réduit…

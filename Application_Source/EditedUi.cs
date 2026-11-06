@@ -115,9 +115,15 @@ namespace AstroArchive {
   }
   void EditedImportComplete(string id,EditedImportResult result){RefreshEdited();L("StatusLabel").Text=result.Summary;L("EditedImportNoticeText").Text=result.Summary;((FrameworkElement)Window.FindName("EditedImportNotice")).Visibility=Visibility.Visible;if(result.Warnings.Count>0)ShowReport("Edited duplicate checks",result.Summary+"\n\nExisting files that could not be checked:\n"+string.Join("\n",result.Warnings));}
   void PreviewEditedImage(){
-   if(repo==null||RepositoryOperationBlocked||EditedImageProject==null||ActiveEditedImage==null)return;string path=repo.EditedPath(EditedImageProject,ActiveEditedImage.RelativePath);if(MediaFiles.Motion(path)){new ImagePreviewWindow(Window,ActiveEditedImage.Filename,path).ShowDialog();return;}PreviewData data=null;byte[] pixels=null;
-   string target=ActiveEditedImage.Metadata==null?null:ActiveEditedImage.Metadata.Object;SkyGeometry sky=null;
-   Run(ct=>{data=DecodeFullPreview(path,ct);data.ApplyContext(null,path);pixels=data.Render(ScientificPreview(path)?settings.PreviewStretch??"Auto per channel":"Linear",ct);try{sky=HeaderSky(path);}catch(Exception){sky=null;}return path;},image=>{var window=new ImagePreviewWindow(Window,Path.GetFileName(image),data.Width,data.Height,pixels);bool flip=TargetOverlay.DisplayFlip(data.FlipY,sky,image.EndsWith(".xisf",StringComparison.OrdinalIgnoreCase)?"XISF":null);AttachTargets(window,()=>{var result=TargetOverlay.For(sky,target,flip);if(sky==null)result.Note="This image has no plate solution in its header";return result;});window.ShowDialog();});
+   if(repo==null||metadataPreviewSuspended||EditedImageProject==null||ActiveEditedImage==null)return;
+   var repository=repo;var image=ActiveEditedImage;
+   string path=repository.EditedPath(image.Project,image.RelativePath);
+   if(MediaFiles.Motion(path)){new ImagePreviewWindow(Window,image.Filename,path).Show();return;}
+   var rows=G("EditedGrid").Items.OfType<EditedImage>().Where(i=>!MediaFiles.Motion(i.RelativePath)).ToList();
+   int index=rows.IndexOf(image);if(index<0){rows=new List<EditedImage>{image};index=0;}
+   ComparePreviews(rows,index,i=>new ComparisonCapture{
+    Name=i.Filename,Path=repository.EditedPath(i.Project,i.RelativePath),Target=i.Metadata==null?null:i.Metadata.Object
+   });
   }
   void ShowEditedEditors(){
    ExportEditedTo();

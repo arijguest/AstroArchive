@@ -12,6 +12,9 @@ namespace AstroArchive {
    List<SubframeSession> sessions;return Order(source,sorting,culture,allTargets,sessionSummaries,token,out sessions);
   }
   public static List<Frame> Order(IEnumerable<Frame> source,IEnumerable<SearchSort> sorting,CultureInfo culture,bool allTargets,bool sessionSummaries,CancellationToken token,out List<SubframeSession> sessions){
+   return Order(source,sorting,culture,allTargets,sessionSummaries,token,out sessions,null);
+  }
+  internal static List<Frame> Order(IEnumerable<Frame> source,IEnumerable<SearchSort> sorting,CultureInfo culture,bool allTargets,bool sessionSummaries,CancellationToken token,out List<SubframeSession> sessions,SubframeSessions.LabelCache labels){
    // Every ordering starts from the library's own order (target, date, session, best-scored sub first) rather than from whatever order was on screen,
    // so sorting by a column and returning to the default never leaves a session's subs in the previous sort's order.
    var rows=QualityOrdering.Order(source);var membership=sessionSummaries?new SubframeSessions.Membership(rows,token):null;
@@ -24,7 +27,7 @@ namespace AstroArchive {
    // A section such as Comets holds several targets; list each one's captures together, in the sorted order.
    if(!allTargets)ordered=TargetNavigation.GroupByTarget(ordered,f=>f.Target);
    if(StarredFirst)ordered=StarredLeading(ordered,membership,sessionSummaries,allTargets);
-   sessions=sessionSummaries?SubframeSessions.Build(ordered,membership,token):null;return ordered;
+   sessions=sessionSummaries?SubframeSessions.Build(ordered,membership,token,labels):null;return ordered;
   }
   // Starred files move above everything except grouped subs; among the grouped subs, fully starred sessions come first. Both moves are stable.
   static List<Frame> StarredLeading(List<Frame> ordered,SubframeSessions.Membership membership,bool sessionSummaries,bool allTargets){

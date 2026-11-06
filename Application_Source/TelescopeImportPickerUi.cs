@@ -11,7 +11,7 @@ namespace AstroArchive {
  internal sealed class TelescopeImportPicker {
   internal readonly FormWindow Dialog;internal readonly ListBox Items;internal readonly ComboBox Profiles,Model;internal readonly TextBox Name;
   internal readonly Button FolderButton,FilesButton,WholeDriveButton,PreferencesButton;internal readonly TextBlock Error;
-  internal ImportSelection Selection;internal TelescopeProfile Profile;
+  internal ImportSelection Selection;internal TelescopeProfile Profile;internal readonly CheckBox NewOrChanged;
   readonly UsbTelescope device;readonly List<TelescopeProfile> saved;readonly List<string> paths=new List<string>();
   public TelescopeImportPicker(Window owner,UsbTelescope device,IEnumerable<TelescopeProfile> profiles,TelescopeProfile preferred,Func<string> pickFolder=null,Func<string[]> pickFiles=null,Action<Window> importPreferences=null){
    this.device=device;saved=profiles.ToList();string brand=ImportSelection.TelescopeBrand(device.Make);
@@ -19,6 +19,8 @@ namespace AstroArchive {
    Dialog.Text("Choose folders or files on your telescope",true);
    Dialog.Text("Choose the captures you need; folders include subfolders. Originals stay on the telescope.");
    Dialog.Text("Telescope drive: "+device.Volume.Root);
+   NewOrChanged=Dialog.Check("Scan new or changed captures",false);
+   UiHelp.Hint(NewOrChanged,"Check all selected names and reuse verified matches when both files are unchanged. Clear to reread every file.",true);
    var choices=new List<TelescopeProfile>{new TelescopeProfile{Model="Auto"}};choices.AddRange(saved.Where(p=>TelescopeProfiles.Make(p)==device.Make||preferred!=null&&p.Id==preferred.Id));
    Profiles=new ComboBox{ItemsSource=choices,DisplayMemberPath="DisplayText",Margin=new Thickness(0,0,0,8)};System.Windows.Automation.AutomationProperties.SetName(Profiles,"Telescope for this import");UiHelp.Hint(Profiles,"Choose the physical telescope, or give a new telescope its own name.");Dialog.Add(Profiles);
    Name=Dialog.Input("Physical telescope name","");Model=Dialog.Select("Telescope model",TelescopeProfiles.Models.Where(m=>m=="Auto"||m=="Other"||InstrumentDetection.MakeOf(m)==device.Make).ToArray(),"Auto");

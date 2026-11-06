@@ -30,12 +30,24 @@ namespace AstroArchive {
   public static List<SubframeSession> Build(IEnumerable<Frame> rows,CancellationToken token=default(CancellationToken)){
    var list=rows.ToList();return Build(list,new Membership(list,token),token);
   }
-  internal static List<SubframeSession> Build(IEnumerable<Frame> rows,Membership membership,CancellationToken token){
-   return rows.Select(f=>{token.ThrowIfCancellationRequested();return f;}).Where(membership.Merged).GroupBy(membership.Get).Select(g=>{
-    token.ThrowIfCancellationRequested();var frames=g.ToList();var session=CaptureSessions.Describe(frames);var summary=CaptureGroups.Summarize(frames,token);
-    string filters=string.Join(", ",frames.Select(f=>string.IsNullOrWhiteSpace(f.Filter)?"Unknown filter":f.Filter).Distinct());
-    return new SubframeSession{Key=g.Key,Frames=frames,Label=frames[0].TargetLabel+" · "+session.Dates+" · "+frames.Count+" subs · "+SubExposureLabel(frames)+" · "+CaptureGroups.ExposureLabel(summary.ExposureSeconds,summary.UnknownExposure)+" · "+filters+" · "+frames[0].Telescope+" / "+frames[0].Camera};
+  internal sealed class LabelCache {
+   public Dictionary<string,SubframeSession> Sessions=new Dictionary<string,SubframeSession>();
+  }
+  internal static List<SubframeSession> Build(IEnumerable<Frame> rows,Membership membership,CancellationToken token,LabelCache cache=null){
+   var groups=rows.Select(f=>{token.ThrowIfCancellationRequested();return f;}).Where(membership.Merged).GroupBy(membership.Get).Select(g=>{
+    token.ThrowIfCancellationRequested();var frames=g.ToList();
+    SubframeSession prior;
+    string label=cache!=null&&cache.Sessions.TryGetValue(g.Key,out prior)&&prior.Frames.SequenceEqual(frames)?
+     prior.Label:Describe(frames,token);
+    return new SubframeSession{Key=g.Key,Frames=frames,Label=label};
    }).ToList();
+   if(cache!=null)cache.Sessions=groups.ToDictionary(g=>g.Key);
+   return groups;
+  }
+  static string Describe(List<Frame> frames,CancellationToken token){
+   var session=CaptureSessions.Describe(frames);var summary=CaptureGroups.Summarize(frames,token);
+   string filters=string.Join(", ",frames.Select(f=>string.IsNullOrWhiteSpace(f.Filter)?"Unknown filter":f.Filter).Distinct());
+   return frames[0].TargetLabel+" · "+session.Dates+" · "+frames.Count+" subs · "+SubExposureLabel(frames)+" · "+CaptureGroups.ExposureLabel(summary.ExposureSeconds,summary.UnknownExposure)+" · "+filters+" · "+frames[0].Telescope+" / "+frames[0].Camera;
   }
   static string SubExposureLabel(List<Frame> frames){
    var known=frames.Where(f=>f.Exposure.HasValue&&f.Exposure.Value>0&&!double.IsNaN(f.Exposure.Value)&&!double.IsInfinity(f.Exposure.Value)).Select(f=>f.Exposure.Value).ToList();

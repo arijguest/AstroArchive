@@ -61,7 +61,13 @@ namespace AstroArchive {
    var button=new Button{Content=symbol,Width=28,Height=28,Padding=new Thickness(0),Margin=new Thickness(1,0,1,0),FontSize=16,Background=new SolidColorBrush(Color.FromArgb(220,20,29,46)),Foreground=Brushes.White,BorderBrush=new SolidColorBrush(Color.FromArgb(150,148,165,192)),BorderThickness=new Thickness(1)};
    AutomationProperties.SetName(button,label);UiHelp.Hint(button,label=="Recenter image"?"Fit image (F).":label.StartsWith("View")?label+" (when zoomed).":label);ToolTipService.SetShowOnDisabled(button,false);button.Click+=(s,e)=>{action();e.Handled=true;};panel.Children.Add(button);return button;
   }
-  public void SetImage(BitmapSource source,bool reset){
+  public void SetImage(BitmapSource source,bool reset,bool keepView=false){
+   bool preserve=keepView&&!reset&&!fitting&&geometry!=null&&viewport.Width>0&&viewport.Height>0;
+   double relative=0,x=0,y=0;
+   if(preserve){
+    relative=zoom.Scale/Math.Min(viewport.Width/geometry.Width,viewport.Height/geometry.Height);
+    x=(Center.X-zoom.X)/(geometry.Width*zoom.Scale);y=(Center.Y-zoom.Y)/(geometry.Height*zoom.Scale);
+   }
    loading=false;
    if(media!=null){imageLayer.Children.Remove(media);media=null;}image.Visibility=Visibility.Visible;
    if(source==null){SetPlayback(null,false);targetMarks=null;targetNote=null;DrawTargets();}
@@ -71,7 +77,14 @@ namespace AstroArchive {
    bool changed=geometry==null||image.Width!=source.PixelWidth||image.Height!=source.PixelHeight;
    if(reset||geometry==null||changed&&portrait)quarterTurns=portrait&&source.PixelWidth>source.PixelHeight?1:0;
    image.Width=source.PixelWidth;image.Height=source.PixelHeight;geometry=new PreviewGeometry(source.PixelWidth,source.PixelHeight,quarterTurns);
-   if(reset||changed)fitting=true;Resize();NotifyFrame();
+   if(reset||changed)fitting=true;
+   Resize();
+   if(preserve&&changed){
+    zoom.Zoom(relative,Center.X,Center.Y);
+    zoom.Pan(Center.X-x*geometry.Width*zoom.Scale-zoom.X,Center.Y-y*geometry.Height*zoom.Scale-zoom.Y);
+    fitting=false;Apply();
+   }
+   NotifyFrame();
   }
   public void BeginLoading(int width=0,int height=0){
    if(media!=null){imageLayer.Children.Remove(media);media=null;}SetPlayback(null,false);

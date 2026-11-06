@@ -19,14 +19,21 @@ namespace AstroArchive.Installation {
   static bool Has(string[] args,string name){return Array.IndexOf(args,name)>=0;}
   static InstallCore Engine(Action<string> progress){return new InstallCore{Progress=progress,EnsureClosed=WindowsIntegration.EnsureClosed,Register=WindowsIntegration.Register,Unregister=WindowsIntegration.Unregister,ShortcutPaths=WindowsIntegration.ShortcutPaths};}
   static void Wait(string[] args){int id;if(int.TryParse(Arg(args,"--waitpid","0"),out id)&&id>0)try{using(var p=Process.GetProcessById(id)){if(!p.WaitForExit(60000))throw new IOException("AstroArchive is still running. Close it and run setup again.");}}catch(ArgumentException){}}
-  static void Launch(string root){var record=InstallCore.Read(root);using(var process=WindowsIntegration.StartProcess(new ProcessStartInfo(InstallCore.Managed(root,record.ActiveDirectory+"\\Start.exe"),"--no-updates"){UseShellExecute=true})){if(process==null||process.WaitForExit(1200)&&process.ExitCode!=0)throw new IOException("AstroArchive could not start. Retry launch or run the installed shortcut.");}}
+  static void Launch(string root){
+   var record=InstallCore.Read(root);
+   string launcher=InstallCore.Managed(root,record.ActiveDirectory+"\\"+LaunchSafety.EntryPoint(record));
+   var start=new ProcessStartInfo(launcher,"--no-updates"){WorkingDirectory=Path.GetDirectoryName(launcher),UseShellExecute=false};
+   using(var process=WindowsIntegration.StartProcess(start)){
+    if(process==null||process.WaitForExit(1200)&&process.ExitCode!=0)throw new IOException("AstroArchive could not start. Retry launch or run the installed shortcut.");
+   }
+  }
   // Confirms Windows will start the installed version; otherwise restores the newest earlier version it will start.
   static string VerificationLog {get{return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),"AstroArchive","updates","launch-verification.log");}}
   static void LogLaunch(string text){try{string path=VerificationLog;InstallCore.NoLinks(path);Directory.CreateDirectory(Path.GetDirectoryName(path));if(File.Exists(path)&&new FileInfo(path).Length>128*1024)File.WriteAllText(path,"");File.AppendAllText(path,DateTime.UtcNow.ToString("o")+" "+text+"\r\n");}catch{}}
   static LaunchRecovery VerifyLaunch(string root){
    LogLaunch("Checking installed launch paths at "+root);
    var result=LaunchSafety.Recover(root,path=>{int code=LaunchSafety.NativeProbe(path);LogLaunch(Path.GetFileName(Path.GetDirectoryName(path))+"/"+Path.GetFileName(path)+" Windows code "+code);return code;},WindowsIntegration.Register);
-   LogLaunch("Active package "+(result.Record.PackageVersion??result.Record.Version)+"; blocked="+result.Blocked+"; rolled back="+result.RolledBack);
+   LogLaunch("Active package "+(result.Record.PackageVersion??result.Record.Version)+"; blocked="+result.Blocked+"; rolled back="+result.RolledBack+"; direct launch="+result.Record.DirectLaunch);
    return result;
   }
   static string RecoveryMessage(LaunchRecovery recovery){
@@ -43,7 +50,7 @@ namespace AstroArchive.Installation {
      if(!check.StartsWith(temp,StringComparison.OrdinalIgnoreCase)||Directory.Exists(check))throw new IOException("Payload checks require a new directory under the Windows temporary folder.");
      var package=Package();new InstallCore().Install(check,package,File.ReadAllBytes(self));
      var verification=VerifyLaunch(check);
-     File.WriteAllText(Path.Combine(check,"payload-check.json"),InstallCore.Json().Serialize(new {PackageVersion=ReleaseVersion.Package,Blocked=verification.Blocked,Reason=verification.Reason,Log=VerificationLog}));
+     File.WriteAllText(Path.Combine(check,"payload-check.json"),InstallCore.Json().Serialize(new {PackageVersion=ReleaseVersion.Package,Blocked=verification.Blocked,DirectLaunch=verification.Record.DirectLaunch,Reason=verification.Reason,Log=VerificationLog}));
      return verification.Blocked?4:0;
     }
     if(Has(args,"--verify-launch")){var recovery=VerifyLaunch(root);if(recovery.Blocked)ReportError(new IOException(RecoveryMessage(recovery)));if(!silent)MessageBox.Show(recovery.Blocked?RecoveryMessage(recovery):"AstroArchive package "+(recovery.Record.PackageVersion??recovery.Record.Version)+" starts normally.","AstroArchive Setup",MessageBoxButtons.OK,recovery.Blocked?MessageBoxIcon.Warning:MessageBoxIcon.Information);return recovery.RolledBack?3:recovery.Blocked?4:0;}
@@ -112,7 +119,7 @@ namespace AstroArchive.Installation {
     try{string root=location.Text;var previous=InstallCore.Read(root);var engine=Engine(message=>BeginInvoke(new Action(()=>status.Text=message)));await Task.Run(()=>engine.Install(root,Package(),File.ReadAllBytes(Assembly.GetExecutingAssembly().Location),updateOnly));
      status.Text="Checking that Windows will start AstroArchive…";var recovery=await Task.Run(()=>VerifyLaunch(root));
      if(!recovery.Blocked)UpdateClient.RecordInstalledUpdate(root,previous==null?null:previous.PackageVersion??previous.Version,previous==null?"install":(previous.PackageVersion??previous.Version)==ReleaseVersion.Package?"repair":"update");
-     Result=recovery.Blocked?(recovery.RolledBack?3:4):0;status.Text=recovery.RolledBack?"Windows blocked this version. AstroArchive "+recovery.RestoredPackage+" was restored.":recovery.Blocked?"Windows blocked this version of AstroArchive.":"AstroArchive is ready. Your shortcuts have been added.";summary.Text=recovery.Blocked?"The previous working version remains available where possible.":"Installation complete. Your capture library is ready to open.";progress.Visible=false;install.Visible=false;cancel.Enabled=true;cancel.Text="Finish";AcceptButton=cancel;
+     Result=recovery.Blocked?(recovery.RolledBack?3:4):0;status.Text=recovery.RolledBack?"Windows blocked this version. AstroArchive "+recovery.RestoredPackage+" was restored.":recovery.Blocked?"Windows blocked this version of AstroArchive.":recovery.Record.DirectLaunch?"AstroArchive is ready. Your shortcuts open the app directly.":"AstroArchive is ready. Your shortcuts have been added.";summary.Text=recovery.Blocked?"The previous working version remains available where possible.":"Installation complete. Your capture library is ready to open.";progress.Visible=false;install.Visible=false;cancel.Enabled=true;cancel.Text="Finish";AcceptButton=cancel;
      if(recovery.Blocked)MessageBox.Show(RecoveryMessage(recovery),Text,MessageBoxButtons.OK,MessageBoxIcon.Warning);
      back.Visible=false;complete=!recovery.Blocked;
      if(launch.Checked&&(!recovery.Blocked||recovery.RolledBack)){try{Launch(root);busy=false;Close();}catch(Exception e){launchRetry=true;status.Text=AstroArchive.Localization.T("Installation completed, but the app could not start.")+" "+ReportError(e);install.Visible=install.Enabled=true;install.Text=AstroArchive.Localization.T("Retry launch");}}
