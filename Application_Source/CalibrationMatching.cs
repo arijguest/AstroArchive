@@ -26,6 +26,29 @@ namespace AstroArchive {
     }
     public static class CalibrationMatching {
         public const int FlatNightWindow=30;
+        public const double PreferredTemperatureDifference=3;
+        static bool TemperatureSensitive(Frame frame) {
+            return frame.Kind=="Dark"||frame.Kind=="Master dark"||frame.Kind=="Dark flat"||frame.Kind=="Master dark flat";
+        }
+        static double TemperatureDistance(IEnumerable<Frame> inputs,Frame calibration) {
+            return inputs.Max(input=>Math.Abs(input.Temperature.Value-calibration.Temperature.Value));
+        }
+        // Share the application's exact/partial ranking and one-set-per-kind policy
+        // between automatic stacking, exports and flat preparation.
+        public static List<Frame> Select(IEnumerable<Frame> inputs,IEnumerable<Frame> candidates) {
+            var targets=inputs.ToList();var all=candidates.ToList();var result=new List<Frame>();
+            foreach(string kind in new[]{"Dark","Flat","Bias","Dark flat"})result.AddRange(Choose(targets,all,kind));
+            return result;
+        }
+        public static List<string> Warnings(IEnumerable<Frame> inputs,IEnumerable<Frame> calibrations) {
+            var targets=inputs.ToList();var warnings=new List<string>();
+            foreach(var cal in calibrations.Where(TemperatureSensitive)) {
+                var applicable=targets.Where(target=>Evaluate(target,cal).Usable).ToList();if(applicable.Count==0)continue;
+                double difference=TemperatureDistance(applicable,cal);
+                if(difference>PreferredTemperatureDifference)warnings.Add(cal.Kind+" "+(cal.OriginalName??cal.Hash)+": sensor temperature differs by up to "+Util.Num(difference)+" C. No closer compatible temperature set was available at this match quality; continuing with this calibration.");
+            }
+            return warnings.Distinct().ToList();
+        }
         static bool Missing(string value) {
             return string.IsNullOrWhiteSpace(value)||value.Trim().Equals("Unknown",StringComparison.OrdinalIgnoreCase);
         }
@@ -110,7 +133,7 @@ namespace AstroArchive {
                 if(!light.Exposure.HasValue||!cal.Exposure.HasValue)review("Exposure is unknown.");
                 else if(Math.Abs(light.Exposure.Value-cal.Exposure.Value)>Math.Max(0.001,light.Exposure.Value*0.001))reject("Exposure differs; dark scaling is not assumed.");
                 if(!light.Temperature.HasValue||!cal.Temperature.HasValue)review("Sensor temperature is unknown.");
-                else if(Math.Abs(light.Temperature.Value-cal.Temperature.Value)>3)reject("Sensor temperature differs by more than 3 C.");
+                else if(Math.Abs(light.Temperature.Value-cal.Temperature.Value)>PreferredTemperatureDifference)result.Reasons.Add("Sensor temperature differs by "+Util.Num(Math.Abs(light.Temperature.Value-cal.Temperature.Value))+" C; usable as a fallback when no closer compatible calibration is available.");
             }
             if(flat) {
                 if(!Missing(light.Filter)&&!Missing(cal.Filter)&&!Same(light.Filter,cal.Filter))reject("Filter differs.");
@@ -137,6 +160,7 @@ namespace AstroArchive {
         // then the closest sensor temperature (darks) and nearest night, preferring raw frames over a master on a tie.
         // Raw frames from one night form a set; each master stands alone.
         public static List<Frame> Choose(IList<Frame> targets,IEnumerable<Frame> all,string kind) {
+            if(targets.Count==0)return new List<Frame>();
             string master="Master "+kind.ToLowerInvariant();
             var candidates=new List<Frame>();var exact=new HashSet<Frame>();
             foreach(var cal in all) {
@@ -154,6 +178,13 @@ namespace AstroArchive {
             if(exact.Count>0)candidates.RemoveAll(c=>!exact.Contains(c));
             if(candidates.Count==0)return new List<Frame>();
             bool dark=kind=="Dark"||kind=="Dark flat";
+            // Do not combine an entire night's raw darks across distant temperatures.
+            // Keep nearby candidates, otherwise only the nearest available cohort.
+            if(dark) {
+                var nearby=candidates.Where(cal=>TemperatureDistance(targets,cal)<=PreferredTemperatureDifference).ToList();
+                if(nearby.Count>0)candidates=nearby;
+                else {double nearest=candidates.Min(cal=>TemperatureDistance(targets,cal));candidates.RemoveAll(cal=>Math.Abs(TemperatureDistance(targets,cal)-nearest)>0.001);}
+            }
             var targetTemperatures=targets.Where(t=>t.Temperature.HasValue).Select(t=>t.Temperature.Value).ToList();
             double targetTemperature=targetTemperatures.Count==0?0:targetTemperatures.Average();
             Func<List<Frame>,double> temperatureGap=set=> {

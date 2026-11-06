@@ -15,18 +15,19 @@ static class LaunchSafetyTests {
  static Func<string,int> Blocking(params string[] blocked){return path=>blocked.Any(b=>(Path.GetFileName(Path.GetDirectoryName(path))+"/"+Path.GetFileName(path)).StartsWith(b,StringComparison.OrdinalIgnoreCase))?4551:0;}
  static UpdateManifest Manifest(string version){return new UpdateManifest{schema=1,application_version=version,package_version=version+".1",url=UpdateClient.Website+"/downloads/AstroArchive"+version+".1.exe",sha256=new string('a',64),size=1};}
  static UpdateClient Feed(UpdateManifest manifest){return new UpdateClient{Fetch=(uri,limit)=>Encoding.UTF8.GetBytes(InstallCore.Json().Serialize(manifest))};}
+ static LaunchRecovery Recover(string root,Func<string,int> probe,Action<string,InstallRecord> register){return LaunchSafety.Recover(root,probe,register,ms=>{});}
 
  public static void Run(Action<string,Action> test,string directory){
   scratch=Path.Combine(directory,"launch-safety");
   test("Launch check keeps a version Windows starts and changes nothing",()=>{
    string root=Installed("healthy","1.2.0","1.3.0");string before=File.ReadAllText(Path.Combine(root,"install.json"));int registered=0;
-   var result=LaunchSafety.Recover(root,Blocking(),(r,m)=>registered++);
+   var result=Recover(root,Blocking(),(r,m)=>registered++);
    Check(!result.Blocked&&!result.RolledBack&&registered==0,"Healthy version was treated as blocked");
    Check(File.ReadAllText(Path.Combine(root,"install.json"))==before&&LaunchSafety.ReadBlock(root)==null,"Healthy check changed the installation");
   });
   test("Blocked update automatically restores the newest earlier version Windows starts",()=>{
    string root=Installed("rollback","1.2.0","1.3.0","1.4.0");InstallRecord registered=null;
-   var result=LaunchSafety.Recover(root,Blocking("app-1.4.0-r1/"),(r,m)=>registered=m);
+   var result=Recover(root,Blocking("app-1.4.0-r1/"),(r,m)=>registered=m);
    var record=InstallCore.Read(root);
    Check(result.Blocked&&result.RolledBack&&result.BlockedPackage=="1.4.0.1"&&result.RestoredPackage=="1.3.0.1","Rollback result is incorrect");
    Check(record.ActiveDirectory=="app-1.3.0-r1"&&record.Version=="1.3.0"&&record.PackageVersion=="1.3.0.1","Earlier version was not activated");
@@ -37,37 +38,54 @@ static class LaunchSafetyTests {
   });
   test("Rollback skips every earlier version Windows also blocks, checking both executables",()=>{
    string root=Installed("rollback-skip","1.2.0","1.3.0","1.4.0");
-   var result=LaunchSafety.Recover(root,Blocking("app-1.4.0-r1/Start.exe","app-1.3.0-r1/AstroArchive.exe"),(r,m)=>{});
+   var result=Recover(root,Blocking("app-1.4.0-r1/Start.exe","app-1.3.0-r1/AstroArchive.exe"),(r,m)=>{});
    Check(result.RolledBack&&result.RestoredPackage=="1.2.0.1"&&InstallCore.Read(root).ActiveDirectory=="app-1.2.0-r1","Rollback chose a blocked version");
   });
   test("Missing executables count as a version that cannot start",()=>{
    string root=Installed("rollback-missing","1.2.0","1.3.0");File.Delete(Path.Combine(root,"app-1.3.0-r1","AstroArchive.exe"));
-   var result=LaunchSafety.Recover(root,Blocking(),(r,m)=>{});
+   var result=Recover(root,Blocking(),(r,m)=>{});
    Check(result.RolledBack&&result.Reason=="AstroArchive.exe is missing"&&InstallCore.Read(root).ActiveDirectory=="app-1.2.0-r1","Missing application was not recovered");
   });
   test("Without an earlier working version the installation is left unchanged",()=>{
    string root=Installed("rollback-none","1.2.0");string before=File.ReadAllText(Path.Combine(root,"install.json"));int registered=0;
-   var result=LaunchSafety.Recover(root,Blocking("app-1.2.0-r1/"),(r,m)=>registered++);
+   var result=Recover(root,Blocking("app-1.2.0-r1/"),(r,m)=>registered++);
    Check(result.Blocked&&!result.RolledBack&&registered==0&&File.ReadAllText(Path.Combine(root,"install.json"))==before,"Unrecoverable block changed the installation");
    Check(LaunchSafety.IsBlocked(root,"1.2.0.1")&&!LaunchSafety.ReadBlock(root).NoticePending,"Unrecoverable block was not recorded");
   });
   test("Rollback never activates a newer version than the blocked one",()=>{
    string root=Installed("rollback-newer","1.2.0","1.3.0");var record=InstallCore.Read(root);record.ActiveDirectory="app-1.2.0-r1";record.Version="1.2.0";record.PackageVersion="1.2.0.1";LaunchSafety.WriteRecord(root,record);
-   var result=LaunchSafety.Recover(root,Blocking("app-1.2.0-r1/"),(r,m)=>{});
+   var result=Recover(root,Blocking("app-1.2.0-r1/"),(r,m)=>{});
    Check(result.Blocked&&!result.RolledBack&&InstallCore.Read(root).ActiveDirectory=="app-1.2.0-r1","Rollback moved to a newer version");
   });
   test("Shortcut registration failure keeps the original record",()=>{
    string root=Installed("rollback-register","1.2.0","1.3.0");bool threw=false;
-   try{LaunchSafety.Recover(root,Blocking("app-1.3.0-r1/"),(r,m)=>{if(m.ActiveDirectory=="app-1.2.0-r1")throw new IOException("Injected shortcut failure");});}catch(IOException){threw=true;}
+   try{Recover(root,Blocking("app-1.3.0-r1/"),(r,m)=>{if(m.ActiveDirectory=="app-1.2.0-r1")throw new IOException("Injected shortcut failure");});}catch(IOException){threw=true;}
    Check(threw&&InstallCore.Read(root).ActiveDirectory=="app-1.3.0-r1","Failed registration left a partial rollback");
   });
   test("Transient launch failures retry before treating a version as blocked",()=>{
    string root=Installed("rollback-transient","1.2.0","1.3.0");int calls=0;
-   var result=LaunchSafety.Recover(root,path=>++calls==1?32:0,(r,m)=>{});
+   var result=Recover(root,path=>++calls==1?32:0,(r,m)=>{});
    Check(!result.Blocked&&calls==3,"A transient sharing failure caused a rollback");
   });
+  test("An initial 4551 reputation rejection is rechecked before rolling back",()=>{
+   string root=Installed("reputation-settles","1.2.0","1.3.0");int calls=0;var waits=new List<int>();
+   var result=LaunchSafety.Recover(root,path=>Path.GetFileName(path)=="Start.exe"&&++calls<3?4551:0,(r,m)=>{throw new Exception("A healthy package must not roll back");},ms=>waits.Add(ms));
+   Check(!result.Blocked&&InstallCore.Read(root).PackageVersion=="1.3.0.1"&&waits.SequenceEqual(new[]{500,1500}),"A temporary policy rejection became permanent");
+   Check(LaunchSafety.ReadBlock(root)==null,"A recovered launch was still suppressed in the updater");
+  });
+  test("Persistent policy rejection stops after a bounded recheck and preserves enforcement",()=>{
+   string root=Installed("reputation-stays-blocked","1.2.0");int calls=0;var waits=new List<int>();
+   var result=LaunchSafety.Recover(root,path=>{calls++;return 4551;},(r,m)=>{},ms=>waits.Add(ms));
+   Check(result.Blocked&&!result.RolledBack&&calls==5&&waits.Sum()==10000,"Policy recheck was unbounded or ignored the block");
+   Check(LaunchSafety.IsBlocked(root,"1.2.0.1"),"A persistently blocked package was offered again");
+  });
+  test("Defender and explicit administrator blocks are not repeatedly retried",()=>{
+   string root=Installed("explicit-block","1.2.0");int calls=0;
+   var result=LaunchSafety.Recover(root,path=>{calls++;return 225;},(r,m)=>{},ms=>{throw new Exception("Explicit rejection must stop immediately");});
+   Check(result.Blocked&&calls==1,"A Defender rejection was ignored");
+  });
   test("Blocked packages are not offered again and the rollback notice appears once",()=>{
-   string root=Installed("rollback-feed","1.2.0","1.3.0","1.4.0");LaunchSafety.Recover(root,Blocking("app-1.4.0-r1/"),(r,m)=>{});
+   string root=Installed("rollback-feed","1.2.0","1.3.0","1.4.0");Recover(root,Blocking("app-1.4.0-r1/"),(r,m)=>{});
    var installed=InstallCore.Read(root);
    Check(Feed(Manifest("1.4.0")).Check(installed,root)==null,"Blocked package was offered again");
    Check(Feed(Manifest("1.4.0")).Check(installed)!=null,"Update check without an installation ignored the feed");
@@ -77,9 +95,9 @@ static class LaunchSafetyTests {
    Check(LaunchSafety.ConsumeNotice(root,"1.3.0.1")==null&&LaunchSafety.IsBlocked(root,"1.4.0.1"),"Notice repeated or cleared the block");
   });
   test("A previously blocked package that later starts is offered and repaired normally",()=>{
-   string root=Installed("rollback-recovered","1.2.0","1.3.0");LaunchSafety.Recover(root,Blocking("app-1.3.0-r1/"),(r,m)=>{});
+   string root=Installed("rollback-recovered","1.2.0","1.3.0");Recover(root,Blocking("app-1.3.0-r1/"),(r,m)=>{});
    new InstallCore().Install(root,Package("1.3.0"),Encoding.UTF8.GetBytes("test installer"));
-   var result=LaunchSafety.Recover(root,Blocking(),(r,m)=>{});
+   var result=Recover(root,Blocking(),(r,m)=>{});
    Check(!result.Blocked&&InstallCore.Read(root).ActiveDirectory=="app-1.3.0-r1"&&!LaunchSafety.IsBlocked(root,"1.3.0.1")&&LaunchSafety.ReadBlock(root)==null,"Reinstalled package stayed blocked");
    new InstallCore().Uninstall(root);Check(!Directory.Exists(Path.Combine(root,"app-1.2.0-r1"))&&!Directory.Exists(Path.Combine(root,"app-1.3.0-r1")),"Uninstall left restored or blocked versions");
   });

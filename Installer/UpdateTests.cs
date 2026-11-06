@@ -24,6 +24,27 @@ static class UpdateTests {
   throw new Exception("Expected update refusal.");
  }
  public static void Run(Action<string, Action> test, string scratch) {
+  test("Website success never consults a failing backup update service",()=>{
+   int calls=0;var manifest=Manifest("3.3.3",2);
+   var client=new UpdateClient{Fetch=(uri,limit)=>{calls++;Check(uri.AbsoluteUri==UpdateClient.Feed,"Backup contacted despite healthy website");return Encoding.UTF8.GetBytes(InstallCore.Json().Serialize(manifest));}};
+   Check(client.Check(Installed("3.3.1",1)).package_version=="3.3.3.2"&&calls==1,"Website upgrade was missed");
+   Check(client.Check(Installed("3.3.3",2))==null&&calls==2,"A current website result triggered a backup error");
+  });
+  test("A failed website check uses the validated backup and verifies its installer",()=>{
+   var manifest=Manifest("3.3.3",2);manifest.url=UpdateClient.BackupRepository+"/releases/download/v3.3.3.2/"+UpdateClient.InstallerName(manifest);int calls=0;
+   var client=new UpdateClient{Fetch=(uri,limit)=>{calls++;if(uri.AbsoluteUri==UpdateClient.Feed)throw new System.Net.WebException("Website unavailable");return uri.AbsoluteUri==UpdateClient.BackupFeed?Encoding.UTF8.GetBytes(InstallCore.Json().Serialize(manifest)):Installer;}};
+   var available=client.Check(Installed("3.3.1",1));Check(available!=null&&calls==2,"Backup release missed");
+   string path=client.Prepare(available,Path.Combine(scratch,"backup-verified"));Check(InstallCore.HashFile(path)==manifest.sha256,"Backup bytes were not verified");
+  });
+  test("Only failure of both release services produces a combined user-facing error",()=>{
+   int calls=0;var client=new UpdateClient{Fetch=(uri,limit)=>{calls++;throw new System.Net.WebException("404 Not Found");}};
+   try{client.Check(Installed());throw new Exception("Both services failing should fail");}catch(IOException error){Check(calls==2&&error.Message.Contains("Neither")&&!error.Message.Contains("404")&&error.InnerException is AggregateException,"A raw backup error concealed the two-service result");}
+  });
+  test("Backup manifests cannot name a different repository or mismatched package",()=>{
+   var manifest=Manifest();manifest.url=UpdateClient.BackupRepository+"/releases/download/v1.2.0.2/"+UpdateClient.InstallerName(manifest);UpdateClient.Validate(manifest);
+   manifest.url=manifest.url.Replace("arijguest","other");Refused(()=>UpdateClient.Validate(manifest));
+   manifest.url=UpdateClient.BackupRepository+"/releases/download/v1.2.0.3/"+UpdateClient.InstallerName(manifest);Refused(()=>UpdateClient.Validate(manifest));
+  });
   test("The reviewed 3.2.9 updater accepts the single 3.2.9.1 installer from 3.2.8.1",()=>{
    var manifest=Manifest("3.2.9",1);manifest.url=manifest.download_url=UpdateClient.Website+"/downloads/"+UpdateClient.InstallerName(manifest);
    var client=Client(manifest);var available=client.Check(Installed("3.2.8",1));Check(available!=null&&available.url.EndsWith("/AstroArchive3.2.9.1.exe"),"Concise-only feed was refused");

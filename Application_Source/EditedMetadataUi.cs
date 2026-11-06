@@ -31,9 +31,9 @@ namespace AstroArchive {
    if(repo==null||RepositoryOperationBlocked||SearchBlocked("EditedSearchBox")||metadataPreviewSuspended)return;var selected=selection.ToList();if(selected.Count==0)return;var repository=repo;
    try{
     await SuspendMetadataPreviews();if(closing||repo!=repository||RepositoryOperationBlocked)return;
-    EditedMetadataFields fields;var dialog=EditedMetadataDialog(selected,out fields);if(!dialog.Show())return;var changes=fields.Values();var first=selected[0];
+    EditedMetadataFields fields;var dialog=EditedMetadataDialog(selected,out fields);if(!dialog.Show())return;var changes=fields.Values();var first=selected[0];ResumeMetadataPreviews();
     await RunOperation(ct=>{foreach(var group in selected.GroupBy(i=>i.Project.Id))repo.SaveEditedMetadata(group.First().Project,group,changes,ct);return "Edited metadata saved.";},message=>{RefreshEdited(first.Project.Id,first.RelativePath);L("StatusLabel").Text=message;});
-   }finally{ResumeMetadataPreviews();}
+   }finally{if(metadataPreviewSuspended)ResumeMetadataPreviews();}
   }
   bool contextOnEditedFile;
   void InitializeEditedFileMenu(){

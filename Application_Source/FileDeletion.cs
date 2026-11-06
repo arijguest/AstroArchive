@@ -9,11 +9,11 @@ namespace AstroArchive {
  public sealed partial class Repository {
   public List<Frame> FailedFiles(){return All().Where(Util.FailedFilename).ToList();}
   public List<Frame> NonRawFiles(){return All().Where(f=>(ImportPolicy.RasterFilename(f.OriginalName)||ImportPolicy.RasterFilename(f.RelativePath))&&!Util.Within(FilePath(f),EditedFolder)&&!Util.Within(FilePath(f),Path.Combine(Root,"Edited"))).ToList();}
-  public FileDeletionResult DeleteFrames(IEnumerable<Frame> selection,CancellationToken ct,Action<ProgressInfo> progress){
+  public FileDeletionResult DeleteFrames(IEnumerable<Frame> selection,CancellationToken ct,Action<ProgressInfo> progress,bool verifyContents=false){
    // A background process reading these captures (image quality, plate solving) must finish before they are removed.
-   var chosen=selection.ToList();using(Background.Claim("Deleting files",chosen.Select(f=>f.Hash)))return DeleteFramesClaimed(chosen,ct,progress);
+   var chosen=selection.ToList();using(Background.Claim("Deleting files",chosen.Select(f=>f.Hash)))return DeleteFramesClaimed(chosen,ct,progress,verifyContents);
   }
-  FileDeletionResult DeleteFramesClaimed(IEnumerable<Frame> selection,CancellationToken ct,Action<ProgressInfo> progress){
+  FileDeletionResult DeleteFramesClaimed(IEnumerable<Frame> selection,CancellationToken ct,Action<ProgressInfo> progress,bool verifyContents=false){
    var indexed=All().ToDictionary(f=>f.Hash);var frames=new List<Frame>();
    foreach(var requested in selection.GroupBy(f=>f.Hash).Select(g=>g.First())){Frame actual;if(string.IsNullOrEmpty(requested.Hash)||!indexed.TryGetValue(requested.Hash,out actual))throw new IOException("A selected file is no longer in the repository. Refresh and select it again.");frames.Add(actual);}
    if(frames.Count==0)throw new InvalidOperationException("Select files to delete.");
@@ -22,13 +22,13 @@ namespace AstroArchive {
    var result=new FileDeletionResult();string staging=Path.Combine(Meta,"staging","delete-"+Guid.NewGuid().ToString("N"));CheckManagedPath(Path.Combine(staging,"capture"),Root);
    try{for(int i=0;i<frames.Count;i++){
     ct.ThrowIfCancellationRequested();Frame frame=frames[i];if(progress!=null)progress(new ProgressInfo{Done=i,Total=frames.Count,Stage="Deleting files",Text=frame.OriginalName});
-    string path=FilePath(frame),staged=Path.Combine(staging,i.ToString("D8")+".capture");bool moved=false,committed=false;
+    string path=FilePath(frame),staged=Path.Combine(staging,i.ToString("D8")+".capture");bool moved=false,committed=false;FileStream verification=null;
     try{
      CheckManagedPath(path,Root);
      if(File.Exists(path)){Directory.CreateDirectory(staging);CheckManagedPath(staged,Root);FileRetry.Run(()=>{MoveCapture(path,staged);return true;},ct,null);moved=true;}
-     try{db.Transaction(()=>{RememberDeletion(frame);db.Exec("DELETE FROM files WHERE hash=?",frame.Hash);});committed=true;}catch{if(moved)MoveCapture(staged,path);throw;}
+     try{if(verifyContents){if(progress!=null)progress(new ProgressInfo{Done=i,Total=frames.Count,Stage="Verifying before deletion",Text=frame.OriginalName});if(!moved)throw new InvalidDataException("Capture disappeared after processing; original record retained: "+frame.OriginalName);verification=new FileStream(staged,FileMode.Open,FileAccess.Read,FileShare.Read|FileShare.Delete);if(Util.Hash(verification,ct)!=frame.Hash)throw new InvalidDataException("Capture changed after processing; original retained: "+frame.OriginalName);}db.Transaction(()=>{RememberDeletion(frame);db.Exec("DELETE FROM files WHERE hash=?",frame.Hash);});committed=true;}catch{if(moved)MoveCapture(staged,path);throw;}
      result.Deleted++;if(moved)FileRetry.Run(()=>{File.Delete(staged);return true;},CancellationToken.None,null);
-    }catch(OperationCanceledException){throw;}catch(Exception e){result.Errors.Add(FileRetry.Detail(committed?staged:path,e));}
+    }catch(OperationCanceledException){throw;}catch(Exception e){result.Errors.Add(FileRetry.Detail(committed?staged:path,e));}finally{if(verification!=null)verification.Dispose();}
    }}finally{
     if(Directory.Exists(staging)&&!Directory.EnumerateFileSystemEntries(staging).Any())Directory.Delete(staging);
     // Preserve deletions in the portable snapshot even when a later file is canceled.

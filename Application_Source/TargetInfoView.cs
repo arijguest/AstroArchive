@@ -113,8 +113,9 @@ namespace AstroArchive {
    if(card.Thumbnail!=null&&card.image!=null){try{
     var bitmap=card.DecodedThumbnail as BitmapSource;if(bitmap==null){var decoded=new BitmapImage();using(var stream=new MemoryStream(card.Thumbnail)){decoded.BeginInit();decoded.CacheOption=BitmapCacheOption.OnLoad;decoded.DecodePixelWidth=640;decoded.StreamSource=stream;decoded.EndInit();decoded.Freeze();}bitmap=decoded;}
     photo=new Image{Name="ObjectImage",Source=bitmap,Stretch=Stretch.Uniform,HorizontalAlignment=HorizontalAlignment.Center,Margin=new Thickness(0,2,0,6)};RenderOptions.SetBitmapScalingMode(photo,BitmapScalingMode.HighQuality);AutomationProperties.SetName(photo,card.name);content.Children.Add(photo);
-    AddImageCredit(card.image);
    }catch(NotSupportedException){}catch(IOException){}catch(ArgumentException){}}
+   // Credit metadata remains available when a thumbnail is missing or cannot be decoded.
+   if(card.image!=null)AddImageCredit(card.image);
    if(members!=null&&members.Count>0){
     var list=Section(membersTitle??"YOUR TARGETS");list.Name="SectionMembers";content.Children.Add(list);
     foreach(var member in members){string name=member.Target;var button=new Button{Content=Data(member.Label+"\n"+member.Detail),HorizontalContentAlignment=HorizontalAlignment.Stretch,Margin=new Thickness(0,0,0,6),Padding=new Thickness(10,8,10,4)};AutomationProperties.SetName(button,"Read about "+member.Label);button.Click+=(s,e)=>{if(ChooseMember!=null)ChooseMember(name);};content.Children.Add(button);}
@@ -162,7 +163,7 @@ namespace AstroArchive {
    }
    var sources=new StackPanel();
    var complete=OrbitalCatalog.For(card);if(complete!=null){sources.Children.Add(Link("NASA/JPL · "+complete.solution_id,complete.source));sources.Children.Add(Data(Localization.F("Source epoch: JD {0} {1} · {2}",complete.epoch.ToString("0.#####",CultureInfo.InvariantCulture),complete.time_standard,complete.solution_id),"Muted","UiFontCaption"));if(complete.uncertainties!=null&&complete.uncertainties.Count>0)sources.Children.Add(Data(string.Join(" · ",complete.uncertainties.Select(p=>p.Key+" σ "+p.Value)),"Muted","UiFontCaption"));}
-   foreach(var rights in new[]{card.identity_rights,card.text_rights,card.measurement_rights,card.image==null?null:card.image.rights,complete==null?null:complete.rights})if(rights!=null){sources.Children.Add(Link(rights.full_attribution,rights.source_url));sources.Children.Add(Link(rights.licence_id+" "+rights.licence_version,rights.licence_url));if(!string.IsNullOrWhiteSpace(rights.modifications))sources.Children.Add(Data(rights.modifications,"Muted","UiFontCaption"));}
+   foreach(var rights in new[]{card.identity_rights,card.text_rights,card.measurement_rights,complete==null?null:complete.rights})if(rights!=null){sources.Children.Add(Link(rights.full_attribution,rights.source_url));sources.Children.Add(Link(rights.licence_id+" "+rights.licence_version,rights.licence_url));if(!string.IsNullOrWhiteSpace(rights.modifications))sources.Children.Add(Data(rights.modifications,"Muted","UiFontCaption"));}
    var hidden=curated==null?new string[0]:curated.HiddenAliases;
    var aliases=(card.aliases??new string[0]).Where(a=>TargetInfoCatalog.Normalize(a)!=TargetInfoCatalog.Normalize(card.id)&&!string.Equals(a,card.name,StringComparison.OrdinalIgnoreCase)&&!hidden.Contains(a,StringComparer.OrdinalIgnoreCase)).Select(x=>Catalog.DisplayId(x)).Distinct(StringComparer.OrdinalIgnoreCase).ToArray();
    if(aliases.Length>0)sources.Children.Add(Data(Localization.F("Catalogue names: {0}",string.Join(" · ",aliases)),"Muted","UiFontCaption"));
@@ -237,28 +238,32 @@ namespace AstroArchive {
    if(listed.Length>0)AddFact(facts,"Meteor showers",listed,evidence);
    if(suspected.Length>0)AddFact(facts,"Suspected parent of",suspected,evidence);
   }
-  // Short creator/licence credits stay visible. Longer attribution is available
-  // inline through a keyboard-accessible disclosure, including processing notes.
+  // All image attribution, licences and processing credits share one disclosure.
+  // Descriptive captions stay outside only when they contain no credit information.
   void AddImageCredit(TargetInfoImage image){
-   string credit=TargetInfoPresentation.Credit(image);string who=!string.IsNullOrWhiteSpace(image.creator)?image.creator:credit.Length>0&&credit.Length<=60&&!credit.Contains("://")?credit:"Wikimedia Commons";
-   string attribution=(image.attribution??"").Trim(),modifications=(image.modifications??"").Trim();
-   string full=(attribution+"\n"+modifications).Trim();
-   // The short description sits directly under the image; the credits follow it.
-   string caption=TargetInfoPresentation.Caption(image.representation);if(caption.Length>0){var described=Data(caption,"Muted","UiFontCaption");described.Name="ImageCaption";described.TextAlignment=TextAlignment.Center;content.Children.Add(described);}
-   var line=Text("","Muted","UiFontCaption");line.TextAlignment=TextAlignment.Center;line.ToolTip=Data(full,"Text","UiFontSmall");
-   line.Inlines.Add(new Run(Localization.T("Image:")+" "));line.Inlines.Add(Linked(who,image.file_page_url));
-   if(!string.IsNullOrWhiteSpace(image.licence)){line.Inlines.Add(new Run(" · "));line.Inlines.Add(Linked(image.licence,image.licence_url));}
-   // Every image credit, however short, sits in the Credits dropdown rather than under the picture.
-   var credits=new StackPanel();credits.Children.Add(line);
-   if(attribution.Length>0&&attribution!=who)credits.Children.Add(Data(attribution,"Muted","UiFontCaption"));
-   if(modifications.Length>0)credits.Children.Add(Data(modifications,"Muted","UiFontCaption"));
+   var data=TargetInfoPresentation.Credits(image);
+   if(photo!=null&&data.Caption.Length>0){var described=Data(data.Caption,"Muted","UiFontCaption");described.Name="ImageCaption";described.TextAlignment=TextAlignment.Center;content.Children.Add(described);}
+   var credits=new StackPanel{Margin=new Thickness(0,2,0,0)};
+   var creator=string.IsNullOrWhiteSpace(data.Creator)?Link(Localization.T("Image source"),data.SourceUrl):CreditLink("Image:",data.Creator,data.SourceUrl);creator.Name="ImageCreditCreator";credits.Children.Add(creator);
+   if(!string.IsNullOrWhiteSpace(data.Licence)){var licence=CreditLink("Licence:",data.Licence,data.LicenceUrl);licence.Name="ImageCreditLicence";credits.Children.Add(licence);}
+   var shown=new HashSet<string>(StringComparer.Ordinal){data.Creator??""};
+   foreach(string text in data.Attributions.Concat(data.RepresentationCredits).Concat(data.Modifications))if(!string.IsNullOrWhiteSpace(text)&&shown.Add(text)){var detail=CreditText(text);detail.Name="ImageCreditDetail";credits.Children.Add(detail);}
    var disclosure=Disclosure("Credits",credits);disclosure.Name="ImageCredits";
    // The header icons sit on the Credits row, centred on it and aligned with the image's right edge; with no image they stay by the details.
    if(headerIcons!=null&&headerIcons.Children.Count>0&&headerRow_!=null){
-    headerRow_.Children.Remove(headerIcons);headerIcons.Margin=new Thickness(6,0,0,0);headerIcons.VerticalAlignment=VerticalAlignment.Center;
+    var icons=headerIcons;headerRow_.Children.Remove(icons);icons.Margin=new Thickness(6,0,0,0);icons.VerticalAlignment=VerticalAlignment.Top;
     var creditRow=new Grid();creditRow.ColumnDefinitions.Add(new ColumnDefinition());creditRow.ColumnDefinitions.Add(new ColumnDefinition{Width=GridLength.Auto});
-    creditRow.Children.Add(disclosure);Grid.SetColumn(headerIcons,1);creditRow.Children.Add(headerIcons);creditRow.HorizontalAlignment=HorizontalAlignment.Center;creditRow_=creditRow;content.Children.Add(creditRow);
+    // Give expanded credits the whole row, while reserving space for the header buttons.
+    ((TextBlock)disclosure.Header).Margin=new Thickness(0,0,icons.Children.Count*30+6,0);Grid.SetColumnSpan(disclosure,2);
+    creditRow.Children.Add(disclosure);Grid.SetColumn(icons,1);creditRow.Children.Add(icons);creditRow.HorizontalAlignment=photo==null?HorizontalAlignment.Stretch:HorizontalAlignment.Center;creditRow_=creditRow;content.Children.Add(creditRow);
+    disclosure.Loaded+=(s,e)=>{var toggle=disclosure.Template==null?null:disclosure.Template.FindName("Disclosure",disclosure) as FrameworkElement;if(toggle==null)return;Action align=()=>{double top=Math.Max(0,(toggle.ActualHeight-icons.ActualHeight)/2);if(Math.Abs(icons.Margin.Top-top)>0.1)icons.Margin=new Thickness(6,top,0,0);};toggle.SizeChanged+=(sender,args)=>align();align();};
    }else content.Children.Add(disclosure);
+  }
+  static TextBlock CreditLink(string label,string value,string url){var text=Text("","Muted","UiFontCaption");text.TextAlignment=TextAlignment.Left;text.Inlines.Add(new Run(Localization.T(label)+" "));text.Inlines.Add(Linked(value,url));return text;}
+  static TextBlock CreditText(string value){
+   var text=Text("","Muted","UiFontCaption");int start=0;
+   foreach(System.Text.RegularExpressions.Match match in System.Text.RegularExpressions.Regex.Matches(value,@"https?://[^\s<>""\)]+")){if(match.Index>start)text.Inlines.Add(new Run(value.Substring(start,match.Index-start)));string url=match.Value.TrimEnd('.',',',';');text.Inlines.Add(Linked(url,url));if(url.Length<match.Length)text.Inlines.Add(new Run(match.Value.Substring(url.Length)));start=match.Index+match.Length;}
+   if(start<value.Length)text.Inlines.Add(new Run(value.Substring(start)));if(start==0)return Data(value,"Muted","UiFontCaption");return text;
   }
   // Sections share a quiet caption and divider so the pane reads as distinct parts.
   // Puts the orbit date on the heading's line, right-aligned, in the heading's own style.

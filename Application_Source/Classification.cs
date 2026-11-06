@@ -107,6 +107,7 @@ namespace AstroArchive {
   static bool KindHeader(string key){return Regex.IsMatch(key??"",@".*(?:IMAGE|IMAG|FRAME|OBSTYPE|CALTYPE|PROCTYPE|PROCESS|FILETYPE).*",RegexOptions.IgnoreCase|RegexOptions.CultureInvariant);}
   static string CalibrationType(string value){
    string text=Regex.Replace((value??"").ToLowerInvariant(),@"[^a-z0-9]+"," ").Trim();
+   text=Regex.Replace(text,@"\bmaster(?=dark|flat|bias)","master ");
    bool darkFlat=Regex.IsMatch(text,@"\b(?:dark\s*flats?|flat\s*darks?|darkflats?|flatdarks?)\b");
    if(darkFlat)return "Dark flat";
    if(Regex.IsMatch(text,@"\b(?:dark|darks|dark\s*frame|dark\s*frames|masterdark|darkframe|darkframes)\b"))return "Dark";
@@ -115,7 +116,7 @@ namespace AstroArchive {
    return null;
   }
   // Folder names count only when every word is calibration vocabulary, so "Dark Nebulae" or "Dark Sky Trip" never mark lights as darks.
-  static readonly HashSet<string> CalibrationFolderWords=new HashSet<string>(new[]{"dark","darks","flat","flats","flatfield","flatfields","skyflat","skyflats","domeflat","domeflats","twilight","sky","dome","bias","biases","offset","offsets","zero","zeros","darkflat","darkflats","flatdark","flatdarks","masterdark","masterdarks","masterbias","darkframe","darkframes","biasframe","biasframes","master","masters","cali","calib","calibration","calibrations","frame","frames","dwarf"},StringComparer.Ordinal);
+  static readonly HashSet<string> CalibrationFolderWords=new HashSet<string>(new[]{"dark","darks","flat","flats","flatfield","flatfields","skyflat","skyflats","domeflat","domeflats","twilight","sky","dome","bias","biases","offset","offsets","zero","zeros","darkflat","darkflats","flatdark","flatdarks","masterdark","masterdarks","masterbias","masterflat","masterflats","masterdarkflat","masterdarkflats","darkframe","darkframes","biasframe","biasframes","master","masters","cali","calib","calibration","calibrations","frame","frames","dwarf"},StringComparer.Ordinal);
   static readonly HashSet<string> ScienceFolderWords=new HashSet<string>(new[]{"light","lights","sub","subs","science","object","objects"},StringComparer.Ordinal);
   static string[] Words(string value){return Regex.Split((value??"").ToLowerInvariant(),@"[^a-z0-9]+").Where(word=>word.Length>0).ToArray();}
   static string CalibrationTypeFromStem(string stem){
@@ -219,7 +220,11 @@ namespace AstroArchive {
    bool explicitScience=Regex.IsMatch(type,@"\b(?:light|science|object|object\s*frame|science\s*frame)\b",RegexOptions.IgnoreCase);
    bool master=Regex.IsMatch(name,@"(?:^|[_-])(master|stacked|stack|staced)(?:[_-]|$)")||Regex.IsMatch(name,@"(?:^|[_-])stack[_-]?\d+")||Regex.IsMatch(name+" "+type,@"\bmaster\b|master(?:dark|flat|bias)|stacked",RegexOptions.IgnoreCase);
    string inferredKind=CalibrationTypeFromPath(text,stem);
-   string calibrationKind=declaredKind??(explicitScience?null:inferredKind);
+   bool calibrationFilename=Regex.IsMatch(name,@"^(?:(?:master|stacked|stack|staced)[_ -]?)?(?:dark(?:s|frame|flats?)?|flat(?:s|frame)?|bias(?:es|frame)?|offset)(?:[_ -]|$)");
+   bool scienceFilename=Regex.IsMatch(name,@"^(light|raw|sub)[_-]");
+   // Device masters sometimes retain a generic LIGHT header. Specific calibration
+   // filenames remain useful evidence, while parent folders cannot override science.
+   string calibrationKind=declaredKind??(calibrationFilename?CalibrationTypeFromStem(stem):explicitScience||scienceFilename?null:inferredKind);
    if(calibrationKind=="Dark flat")f.Kind=master?"Master dark flat":"Dark flat";else if(calibrationKind=="Dark")f.Kind=master?"Master dark":"Dark";else if(calibrationKind=="Bias")f.Kind=master?"Master bias":"Bias";else if(calibrationKind=="Flat")f.Kind=master?"Master flat":"Flat";
    else if(master||type.Contains("stack")||low.Contains("restacked/")||Regex.IsMatch(name,@"\d+x\d+(?:\.\d+)?(?:s|sec)"))f.Kind="Stack";
    else if(explicitScience||type.Contains("light")||Regex.IsMatch(low,@"(?:_sub|[- ]sub)(?:/|$)")||low.Contains("dwarf_raw")||Regex.IsMatch(name,@"^(light|raw|sub)[_-]")||Regex.IsMatch(low,@"(?:^|/)lights?/")||type.Contains("science"))f.Kind="Light";
@@ -234,6 +239,7 @@ namespace AstroArchive {
    double? stackCount=h.Number(StackCountKeys);
    if(!stackCount.HasValue)stackCount=MatchNumber(name,@"(?:^|[_ -])(\d+)x\d+(?:\.\d+)?(?:sec|s)(?=[_ .-]|$)")??MatchNumber(name,@"(?:stack[_-]?|^)(\d+)(?:x|$|_)");
    if(stackCount.HasValue&&stackCount.Value>0&&stackCount.Value<=int.MaxValue&&stackCount.Value==Math.Floor(stackCount.Value))f.StackCount=(int)stackCount.Value;
+   if(f.StackCount>1&&new[]{"Dark","Flat","Bias","Dark flat"}.Contains(f.Kind))f.Kind="Master "+f.Kind.ToLowerInvariant();
    if(f.Kind=="Light"&&f.StackCount>1){f.Kind="Stack";f.Notes+="Header indicates multiple combined exposures. ";}
    if(f.Kind=="Unknown"&&f.StackCount>1)f.Kind="Stack";
    if(MediaFiles.Video(path))f.Kind="Video";
@@ -274,7 +280,7 @@ namespace AstroArchive {
    string mode=h.Get("MOUNTMOD","MOUNTMODE","TRACKMOD","MOUNTTYP").Trim().ToUpperInvariant();if(mode=="EQ"||mode.Contains("EQUATORIAL")){f.Mount="EQ";f.MountEvidence="Explicit FITS mount metadata";}else if(mode=="AZ"||mode=="ALT/AZ"||mode=="ALTAZ"||mode.Contains("ALT-AZ")){f.Mount="Alt-Az";f.MountEvidence="Explicit FITS mount metadata";}
    string cal=h.Get("CALSTAT");if(h.Get("CALIBRAT","CALIBRED")=="T"||Regex.IsMatch(cal,@"[DBF]"))f.Calibration="Calibrated";
    if(h.Get("REGISTER","REGISTRD","DEROTATE")=="T"||Regex.IsMatch(name,@"^(r_|r_pp_|registered[_-])")||low.Contains("/registered/"))f.Calibration="Registered";
-   if(f.Kind=="Stack")f.Calibration="Device stack";if(f.Kind.StartsWith("Master")||f.Kind=="Dark"||f.Kind=="Flat"||f.Kind=="Bias")f.Calibration="Calibration frame";
+   if(f.Kind=="Stack")f.Calibration="Device stack";if(Assets.IsCalibration(f.Kind))f.Calibration="Calibration frame";
    if(f.Target=="Unknown")f.Notes+="Target needs identification. ";if(f.Kind=="Unknown")f.Notes+="Frame type needs review. ";
    f.Sky=SkyWcs.FromHeader(h,f.Width,f.Height);if(classification!=null)classification.Complete();MetadataProfiles.Apply(f,h,asset);CelestronOrigin.Apply(f,h,path);if(declaredKinds.Count>1)f.MetadataConflicts.Add("Kind: conflicting frame-type metadata values.");CameraDetection.DefaultForTarget(f);if(f.Camera=="Unknown")f.Notes+="Camera channel unknown. ";f.Session=Util.HashText(telescope+"|"+sourceSession+"|"+f.Night+"|"+f.Target+"|"+f.Camera+"|"+f.Width+"x"+f.Height).Substring(0,16);if(selectedImage!=null)f.ImageKey=selectedImage.Key;ApplyStackSessionMetadata(f,shots);ApplyStackMetadata(f);if(f.Kind=="Video")MediaFiles.ApplyVideoDuration(f,asset.DurationSeconds,asset.DurationSource);return f;
    }

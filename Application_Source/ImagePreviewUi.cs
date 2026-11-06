@@ -1,5 +1,7 @@
 using System;
+using System.IO;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -7,9 +9,27 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 namespace AstroArchive {
  public partial class MainUi {
-  void PreviewImage(Frame frame){
-   if(repo==null||RepositoryOperationBlocked||frame==null)return;var capture=frame.Clone();string mediaPath=repo.FilePath(capture);if(MediaFiles.Motion(mediaPath)){Run(ct=>{repo.ValidateCapture(capture,ct);return mediaPath;},path=>new ImagePreviewWindow(Window,capture.OriginalName,path).ShowDialog());return;}PreviewData pixels=null;byte[] rendered=null;
-   Run(ct=>{Progress(new ProgressInfo{Stage="Loading image preview",Text=capture.OriginalName});repo.ValidateCapture(capture,ct);string path=repo.FilePath(capture);pixels=DecodeFullPreview(path,ct,capture);pixels.ApplyContext(capture,path);ct.ThrowIfCancellationRequested();rendered=pixels.Render(ScientificPreview(path)?settings.PreviewStretch??"Auto per channel":"Linear",ct);ct.ThrowIfCancellationRequested();return "";},r=>{var window=new ImagePreviewWindow(Window,capture.OriginalName,pixels.Width,pixels.Height,rendered);bool flip=TargetOverlay.DisplayFlip(pixels.FlipY,capture.Sky,capture.Format);AttachTargets(window,()=>TargetOverlay.For(capture,flip));window.ShowDialog();});
+  CancellationTokenSource detachedPreviewCancel;int detachedPreviewGeneration;
+  void CancelDetachedPreview(){detachedPreviewGeneration++;if(detachedPreviewCancel!=null){detachedPreviewCancel.Cancel();detachedPreviewCancel=null;}}
+  async void PreviewImage(Frame frame){
+   if(repo==null||closing||metadataPreviewSuspended||frame==null)return;CancelDetachedPreview();var repository=repo;var capture=frame.Clone();string path=repository.FilePath(capture),mode=ScientificPreview(path)?settings.PreviewStretch??"Auto per channel":"Linear";bool motion=MediaFiles.Motion(path);
+   var cancellation=detachedPreviewCancel=new CancellationTokenSource();var token=cancellation.Token;int generation=detachedPreviewGeneration;var entry=AddActivity("Loading image preview",true);entry.Status=capture.OriginalName;entry.Cancel=()=>cancellation.Cancel();PreviewData pixels=null;byte[] rendered=null;
+   try{
+    await previewDecodeGate.WaitAsync(token);
+    try{await Task.Run(()=>{
+     // Preview verification must not save cached stamps while an edit or
+     // deletion owns the capture. Changed or moving files fail safely here.
+     token.ThrowIfCancellationRequested();var before=FileStamp.Read(path);
+     if(!before.VerifiedUnchanged(capture.RepositoryStamp)&&Util.Hash(path,token)!=capture.Hash)throw new InvalidDataException("The archived file changed. Refresh before previewing it.");
+     if(!motion){pixels=DecodeFullPreview(path,token,capture);pixels.ApplyContext(capture,path);rendered=pixels.Render(mode,token);}
+     token.ThrowIfCancellationRequested();if(!before.ContentSame(FileStamp.Read(path)))throw new IOException("The file changed while its preview was loading. Select it again after the current operation.");
+    },token);}finally{previewDecodeGate.Release();}
+    if(generation!=detachedPreviewGeneration||closing||repo!=repository||Window.Dispatcher.HasShutdownStarted)return;
+    var popup=motion?new ImagePreviewWindow(Window,capture.OriginalName,path):new ImagePreviewWindow(Window,capture.OriginalName,pixels.Width,pixels.Height,rendered);
+    if(!motion){bool flip=TargetOverlay.DisplayFlip(pixels.FlipY,capture.Sky,capture.Format);AttachTargets(popup,()=>TargetOverlay.For(capture,flip));}popup.Show();activities.Remove(entry);
+   }catch(OperationCanceledException){entry.Canceled=true;entry.Status="Preview canceled.";}
+   catch(Exception error){entry.Failed=true;entry.NeedsReview=true;entry.Status="Preview unavailable.";entry.Report=error.Message;}
+   finally{entry.Running=false;entry.Cancel=null;if(ReferenceEquals(detachedPreviewCancel,cancellation))detachedPreviewCancel=null;cancellation.Dispose();if(!closing&&!Window.Dispatcher.HasShutdownStarted){if(entry.Failed)NotifyActivity(entry);else{activities.Remove(entry);RenderActivity();}}}
   }
  }
  public class ImagePreviewWindow:Window {

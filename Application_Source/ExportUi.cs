@@ -152,8 +152,9 @@ namespace AstroArchive {
    return page;
   }
   void RunExport(List<Frame> selected,ExportOptions options,bool openSiril,bool stacking){
-   string executable=settings.SirilExecutable;var result=openSiril?new ExportResult():null;
+   string executable=settings.SirilExecutable;var result=new ExportResult();
    Run(ct=>Exporter.Create(repo,selected,options,ct,Progress,result),path=>{
+    if(result.Warnings.Count>0&&completionActivity!=null){completionActivity.NeedsReview=true;completionActivity.ReportTitle="Stacking folder calibration report";completionActivity.Report=string.Join("\r\n",result.Warnings);}
     if(openSiril){try{using(var process=Process.Start(SirilHandoff.ExportLaunchInfo(executable,result))){if(process==null)throw new IOException("Siril did not start.");}L("StatusLabel").Text="Exported to "+path+" · opened stack in Siril";if(completionActivity!=null)completionActivity.OutputPath=path;return;}
      catch(Exception error){if(completionActivity!=null){completionActivity.NeedsReview=true;completionActivity.ReportTitle="Siril handoff";completionActivity.Report="Your export is complete: "+path+"\nSiril could not open the stack: "+error.Message;}}}
     ExportComplete(path,stacking);
@@ -197,14 +198,15 @@ namespace AstroArchive {
     EditedProject project=null;string launchError=null;var paths=new List<string>();
     Run(ct=>{project=repo.CreateEditedWorkingCopies(selected,Catalog.RecordLabel(selected[0].Target)+" · "+app.Name+" · "+ExportStamp(),app.Name,ct,Progress);paths=project.Sources.Select(f=>repo.EditedPath(project,f.RelativePath)).ToList();ct.ThrowIfCancellationRequested();try{ExternalApps.Launch(app,executable,paths,null,ct);}catch(OperationCanceledException){throw;}catch(Exception error){launchError=error.Message;}return "";},done=>{RefreshEdited();ExportLaunchResult(app,Path.GetDirectoryName(paths[0]),launchError,false);});return;
    }
-   options.Mode="Files";options.IncludeCalibration=false;options.IncludeRejected=false;List<DssJob> jobs=null;string launchFailure=null;
+   options.Mode="Files";options.IncludeCalibration=false;options.IncludeRejected=false;List<DssJob> jobs=null;string launchFailure=null;var calibrationWarnings=new List<string>();
    Run(ct=>{
     var inputs=ExternalApps.FolderInputs(repo,selected,cals,unknown);
+    if(cals)foreach(var group in Exporter.StackingGroups(selected,inputs.Where(f=>Assets.IsCalibration(f.Kind)).ToList(),false,unknown,true)){calibrationWarnings.AddRange(CalibrationMatching.Warnings(group.Inputs,group.Calibrations));foreach(var flats in group.Calibrations.Where(f=>f.Kind=="Flat").GroupBy(f=>f.Group))calibrationWarnings.AddRange(CalibrationMatching.Warnings(flats,group.Calibrations.Where(f=>f.Kind=="Dark flat"||f.Kind=="Master dark flat")));}
     // Every calibration must be readable by the receiver too, before copying.
     string problem=ExternalApps.Problem(app,new ExternalSelection{Folder=true,Paths=inputs.Select(f=>f.OriginalName??f.RelativePath).ToList()});if(problem!=null)throw new IOException(problem);
     string folder=Exporter.Create(repo,inputs,options,ct,Progress);if(app.Id=="dss")jobs=ExternalApps.WriteDssJobs(folder,selected,options.ExportedFiles,cals,unknown,ct);
     ct.ThrowIfCancellationRequested();if(jobs==null||jobs.Count==1)try{ExternalApps.Launch(app,executable,jobs==null?new string[0]:new[]{jobs[0].Path},folder,ct);}catch(OperationCanceledException){throw;}catch(Exception error){launchFailure=error.Message;}return folder;
-   },folder=>{if(jobs!=null&&jobs.Count>1){QueueActivityReview("DSS capture groups are ready",()=>ChooseDssJob(folder,jobs,app,executable));if(completionActivity!=null)completionActivity.OutputPath=folder;return;}ExportLaunchResult(app,folder,launchFailure,app.Id!="dss"&&app.Id!="siril");});
+   },folder=>{if(jobs!=null&&jobs.Count>1){QueueActivityReview("DSS capture groups are ready",()=>ChooseDssJob(folder,jobs,app,executable));if(completionActivity!=null)completionActivity.OutputPath=folder;}else ExportLaunchResult(app,folder,launchFailure,app.Id!="dss"&&app.Id!="siril");if(calibrationWarnings.Count>0&&completionActivity!=null){completionActivity.NeedsReview=true;completionActivity.ReportTitle="Calibration temperature advisory";completionActivity.Report=(completionActivity.Report??"")+"\r\n"+string.Join("\r\n",calibrationWarnings.Distinct());}});
   }
   void RunEditedOpen(ExternalSelection selection,ExportApplication app,string executable){
    string error=null;Run(ct=>{try{ExternalApps.Launch(app,executable,selection.Paths,null,ct);}catch(OperationCanceledException){throw;}catch(Exception e){error=e.Message;}return "";},done=>ExportLaunchResult(app,Path.GetDirectoryName(selection.Paths[0]),error,false));

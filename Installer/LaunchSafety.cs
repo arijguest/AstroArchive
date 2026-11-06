@@ -32,15 +32,20 @@ namespace AstroArchive.Installation {
   }
 
   // Returns null when both executables in the directory can be started, otherwise the first failure.
-  public static string Failure(string root,string directory,Func<string,int> probe){
+  public static string Failure(string root,string directory,Func<string,int> probe,Action<int> delay=null,bool retryPolicy=true){
+   delay=delay??Thread.Sleep;
    foreach(string name in Executables){
     string path=InstallCore.Managed(root,directory+"\\"+name);
     if(!File.Exists(path))return name+" is missing";
     int code=0;
-    for(int attempt=0;attempt<3;attempt++){
+    for(int attempt=0;attempt<5;attempt++){
      code=probe(path);
-     if(code==0||IsPolicyCode(code))break;
-     Thread.Sleep(400); // Scanners can briefly hold a newly written executable.
+     if(code==0)break;
+     // A newly extracted file can be refused while reputation/scanning settles.
+     // Recheck the same bytes through Windows; persistent blocks still roll back.
+     if(code==4551&&retryPolicy){if(attempt==4)break;delay(new[]{500,1500,3000,5000}[attempt]);continue;}
+     if(IsPolicyCode(code)||attempt>=2)break;
+     delay(400);
     }
     if(code!=0)return Describe(name,code);
    }
@@ -56,7 +61,7 @@ namespace AstroArchive.Installation {
 
   // Checks the active version and, if Windows will not start it, activates the newest older
   // installed version that starts. Earlier versions stay on disk after updates, so no download is needed.
-  public static LaunchRecovery Recover(string root,Func<string,int> probe,Action<string,InstallRecord> register){
+  public static LaunchRecovery Recover(string root,Func<string,int> probe,Action<string,InstallRecord> register,Action<int> delay=null){
    root=InstallCore.Root(root);
    using(var mutex=new Mutex(false,"Local\\AstroArchive.Install."+InstallCore.Hash(Encoding.UTF8.GetBytes(root.ToLowerInvariant())))){
     bool held=false;
@@ -64,7 +69,7 @@ namespace AstroArchive.Installation {
      try{held=mutex.WaitOne(10000);}catch(AbandonedMutexException){held=true;}
      if(!held)throw new IOException("Another installation is in progress.");
      var record=InstallCore.Read(root);if(record==null)throw new IOException("No AstroArchive installation was found.");
-     string failure=Failure(root,record.ActiveDirectory,probe);
+     string failure=Failure(root,record.ActiveDirectory,probe,delay);
      if(failure==null){ClearBlock(root,Package(record));return new LaunchRecovery{Record=record};}
      var result=new LaunchRecovery{Blocked=true,BlockedPackage=Package(record),Reason=failure,Record=record};
      Version active=DirectoryVersion(record.ActiveDirectory);
@@ -73,7 +78,7 @@ namespace AstroArchive.Installation {
       .Where(d=>Executables.All(name=>record.Files.Any(f=>f.Replace('\\','/').Equals(d+"/"+name,StringComparison.OrdinalIgnoreCase))))
       .OrderByDescending(DirectoryVersion).ToList();
      foreach(string directory in candidates){
-      if(Failure(root,directory,probe)!=null)continue;
+      if(Failure(root,directory,probe,delay,false)!=null)continue;
       var restored=new InstallRecord{Product=record.Product,Version=ApplicationVersion(directory),PackageVersion=PackageVersion(directory),ActiveDirectory=directory,Files=record.Files,Shortcuts=record.Shortcuts};
       WriteRecord(root,restored);
       try{register(root,restored);}

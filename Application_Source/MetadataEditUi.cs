@@ -95,20 +95,19 @@ namespace AstroArchive {
    int page=((TabControl)Window.FindName("MainTabs")).SelectedIndex;if(page==0&&settings.ShowPreview)PreviewSelected();else if(page==2)LoadEditedPreview();
   }
   async void Edit(bool imported,List<Frame> selection=null){
-   if(repo==null||RepositoryOperationBlocked||metadataPreviewSuspended||SearchBlocked(imported?"ImportSearchBox":"SearchBox"))return;var selected=(selection??Context(imported)).ToList();if(selected.Count==0)return;var repository=repo;
+   if(repo==null||RepositoryOperationBlocked||metadataPreviewSuspended||SearchBlocked(imported?"ImportSearchBox":"SearchBox"))return;var selected=(selection??(imported?SelectedImportRows():Context())).ToList();if(selected.Count==0||BackgroundConflict(selected.Where(f=>!Repository.PendingMetadata(f,imported))))return;var repository=repo;
    try{
     await SuspendMetadataPreviews();if(closing||repo!=repository||RepositoryOperationBlocked)return;
     var sessionRows=MetadataSessionRows(selected,imported);var editor=new MetadataEditor(Window,selected,sessionRows.Count,settings);if(!editor.Form.Show())return;
     MetadataPatch patch=editor.Model.Patch();if(patch.Count==0){L("StatusLabel").Text="No metadata changes.";return;}
     var items=selected;
     if(editor.Sessions.IsChecked==true)items=sessionRows;
+    var importPlan=plan;var result=new MetadataBatchResult();var snapshot=items.ToList();ResumeMetadataPreviews();
     await RunOperation(ct=>{
-     // Validate all timezone conversions before any file is moved or saved.
-     var updates=new List<Tuple<Frame,Frame>>();foreach(var original in items){ct.ThrowIfCancellationRequested();updates.Add(Tuple.Create(original,patch.Apply(original)));}
-     foreach(var update in updates){ct.ThrowIfCancellationRequested();if(!PendingImport(update.Item1,imported))repo.Refile(update.Item2,ct);if(imported){int row=plan.Frames.IndexOf(update.Item1);if(row>=0)plan.Frames[row]=update.Item2;}}
-     return items.Count+" captures updated · "+patch.Count+" changed fields.";
-    },message=>{if(imported)FilterImports();RefreshSkyPreviews();L("StatusLabel").Text=message;});
-   }finally{ResumeMetadataPreviews();}
+     try{repository.EditMetadata(snapshot,patch,imported,result,ct,Progress);return result.Updated.Count+" captures updated · "+patch.Count+" changed fields."+(result.Errors.Count>0?" "+result.Errors.Count+" need review.":"");}
+     finally{if(imported)Window.Dispatcher.Invoke(new Action(()=>{if(plan==importPlan&&importPlan!=null){foreach(var update in result.Updated){int row=importPlan.Frames.IndexOf(update.Item1);if(row>=0)importPlan.Frames[row]=update.Item2;}FilterImports();}}));}
+    },message=>{RefreshSkyPreviews();L("StatusLabel").Text=message;if(result.Errors.Count>0&&completionActivity!=null){completionActivity.NeedsReview=true;completionActivity.ReportTitle="Metadata edit report";completionActivity.Report=string.Join("\r\n",result.Errors);}});
+   }finally{if(metadataPreviewSuspended)ResumeMetadataPreviews();}
   }
   List<Frame> MetadataSessionRows(List<Frame> selected,bool imported){var ids=new HashSet<string>(selected.Where(f=>!string.IsNullOrEmpty(f.Session)).Select(f=>f.Session));return (imported?plan.Frames:all).Where(f=>(ids.Contains(f.Session)||selected.Contains(f))&&(!imported||f.Status!="Deleted")).ToList();}
  }

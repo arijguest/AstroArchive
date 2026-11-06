@@ -80,15 +80,19 @@ namespace AstroArchive.Installation {
  public sealed class UpdateClient {
   public const string Website = "https://astroarchive-companion-test.arijguest.chatgpt.site";
   public const string Feed = Website + "/update.json";
+  public const string BackupRepository = "https://github.com/arijguest/AstroArchive";
+  public const string BackupFeed = BackupRepository + "/releases/latest/download/update.json";
   public const long MaximumInstallerSize = 128L * 1024 * 1024;
   public Func<Uri, long, byte[]> Fetch = Download;
   public Action<UpdateDownloadProgress> Progress;
 
   public static bool TrustedDownload(Uri uri) {
-   return uri != null && uri.Scheme == "https" && uri.Port == 443 &&
-    uri.UserInfo.Length == 0 && uri.Host == new Uri(Website).Host &&
-    uri.Query.Length == 0 && uri.Fragment.Length == 0 &&
-    (uri.AbsolutePath == "/update.json" || Regex.IsMatch(uri.AbsolutePath, @"^/downloads/AstroArchive\d+\.\d+\.\d+\.[1-9]\d*\.exe$"));
+   if(uri==null||uri.Scheme!="https"||uri.Port!=443||uri.UserInfo.Length!=0||uri.Fragment.Length!=0)return false;
+   if(uri.Host==new Uri(Website).Host)return uri.Query.Length==0&&
+    (uri.AbsolutePath=="/update.json"||Regex.IsMatch(uri.AbsolutePath,@"^/downloads/AstroArchive\d+\.\d+\.\d+\.[1-9]\d*\.exe$"));
+   if(uri.Host=="github.com")return uri.Query.Length==0&&
+    (uri.AbsoluteUri==BackupFeed||Regex.IsMatch(uri.AbsolutePath,@"^/arijguest/AstroArchive/releases/download/v\d+\.\d+\.\d+\.[1-9]\d*/(?:update\.json|AstroArchive[\d.]+\.exe|AstroArchive-[\d.]+-Windows-x64-Offline-Setup\.exe)$"));
+   return uri.Host=="release-assets.githubusercontent.com"||uri.Host=="objects.githubusercontent.com";
   }
 
   public static void Validate(UpdateManifest manifest) {
@@ -100,8 +104,12 @@ namespace AstroArchive.Installation {
    if (app.Major != package.Major || app.Minor != package.Minor || app.Build != package.Build || package.Revision > 65534)
     throw new IOException("Update application and package versions do not agree.");
    string expected = Website + "/downloads/" + InstallerName(manifest);
-   if (!string.Equals(manifest.url, expected, StringComparison.Ordinal) ||
-    (manifest.download_url != null && !string.Equals(manifest.download_url, expected, StringComparison.Ordinal)) ||
+   string backup=BackupRepository+"/releases/download/v"+manifest.package_version+"/"+InstallerName(manifest);
+   string legacy=BackupRepository+"/releases/download/v"+manifest.package_version+"/AstroArchive-"+manifest.application_version+"-Windows-x64-Offline-Setup.exe";
+   bool website=string.Equals(manifest.url,expected,StringComparison.Ordinal);
+   bool github=string.Equals(manifest.url,backup,StringComparison.Ordinal)||string.Equals(manifest.url,legacy,StringComparison.Ordinal);
+   if ((!website&&!github) ||
+    (manifest.download_url != null && !string.Equals(manifest.download_url,website?expected:backup,StringComparison.Ordinal)) ||
     !Regex.IsMatch(manifest.sha256 ?? "", @"^[a-fA-F0-9]{64}$") ||
     manifest.size < 1 || manifest.size > MaximumInstallerSize || (manifest.release_notes!=null&&manifest.release_notes.Length>48000))
     throw new IOException("Invalid update asset, checksum or size.");
@@ -157,14 +165,23 @@ namespace AstroArchive.Installation {
 
   // Packages that Windows refused to start on this installation are not offered again.
   public UpdateManifest Check(InstallRecord installed,string root=null) {
-   ConnectivityPolicy.RequireInternet();byte[] bytes = Fetch(new Uri(Feed), 64 * 1024);
-   if (bytes == null || bytes.Length > 64 * 1024) throw new IOException("Update feed is too large.");
-   var manifest = InstallCore.Json().Deserialize<UpdateManifest>(Encoding.UTF8.GetString(bytes));
-   Validate(manifest);
+   ConnectivityPolicy.RequireInternet();UpdateManifest manifest;
+   try{manifest=ReadFeed(Feed);}
+   catch(Exception primary){
+    if(!FeedError(primary))throw;
+    try{manifest=ReadFeed(BackupFeed);}
+    catch(Exception backup){if(!FeedError(backup))throw;throw new IOException("Neither the AstroArchive website nor the backup update service could be reached or returned a valid release. Check your connection and try again.",new AggregateException(primary,backup));}
+   }
    if (InstallCore.Parse(manifest.application_version) < InstallCore.Parse(installed.Version) ||
     InstallCore.Parse(manifest.package_version) <= InstallCore.Parse(installed.PackageVersion ?? installed.Version) ||
     LaunchSafety.IsBlocked(root, manifest.package_version)) return null;
    return manifest;
+  }
+  static bool FeedError(Exception error){return error is IOException||error is WebException||error is ArgumentException||error is InvalidOperationException;}
+  UpdateManifest ReadFeed(string url){
+   byte[] bytes=Fetch(new Uri(url),64*1024);
+   if(bytes==null||bytes.Length>64*1024)throw new IOException("Update feed is too large.");
+   var manifest=InstallCore.Json().Deserialize<UpdateManifest>(Encoding.UTF8.GetString(bytes));Validate(manifest);return manifest;
   }
 
   public string Prepare(UpdateManifest manifest,string cache){return Prepare(manifest,cache,CancellationToken.None);}

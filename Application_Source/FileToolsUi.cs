@@ -30,7 +30,7 @@ namespace AstroArchive {
    };
    grid.ContextMenuOpening+=(s,e)=>{
     var selected=SelectedFiles();
-    if((e.CursorLeft>=0&&!contextOnFile)||RepositoryOperationBlocked||repo==null||selected.Count==0){e.Handled=true;return;}
+    if((e.CursorLeft>=0&&!contextOnFile)||repo==null||selected.Count==0){e.Handled=true;return;}
     BuildFileMenu(grid.ContextMenu,selected);
    };
    grid.PreviewKeyDown+=(s,e)=>{
@@ -39,9 +39,9 @@ namespace AstroArchive {
   }
   List<Frame> SelectedFiles(){return librarySelection.Items;}
   void SelectContextRow(Frame frame){if(frame==null)return;var grid=G("FramesGrid");if(!SelectedFiles().Contains(frame)){ClearSessionSelection();grid.SelectedItems.Clear();grid.SelectedItems.Add(frame);}}
-  MenuItem FileAction(string title,Action action,bool enabled=true){var item=new MenuItem{Header=title,IsEnabled=enabled};UiHelp.For(item,title);item.Click+=(s,e)=>{if(!RepositoryOperationBlocked&&!ActiveSearchBlocked)action();};return item;}
+  MenuItem FileAction(string title,Action action,bool enabled=true,bool requiresIdle=true){var item=new MenuItem{Header=title,IsEnabled=enabled&&(!requiresIdle||!RepositoryOperationBlocked)};UiHelp.For(item,title);item.Click+=(s,e)=>{if((!requiresIdle||!RepositoryOperationBlocked)&&!ActiveSearchBlocked)action();};return item;}
   void BuildFileMenu(ContextMenu menu,List<Frame> selected){
-   menu.Items.Clear();menu.Items.Add(new MenuItem{Header=selected.Count+" selected file"+(selected.Count==1?"":"s"),IsEnabled=false});menu.Items.Add(FileAction("Preview…",()=>PreviewImage(selected[0]),selected.Count==1));menu.Items.Add(StarAction(selected.Cast<IAnnotated>().ToList()));menu.Items.Add(NotesAction(selected.Cast<IAnnotated>().ToList()));menu.Items.Add(FileAction("Edit metadata…",()=>Edit(false,selected)));menu.Items.Add(ExportMenu(selected));menu.Items.Add(FileAction("Create Edited copies…",()=>CreateEditedCopies(selected)));menu.Items.Add(FileAction("Open file location",()=>ShowFile(selected[0]),selected.Count==1));
+   menu.Items.Clear();menu.Items.Add(new MenuItem{Header=selected.Count+" selected file"+(selected.Count==1?"":"s"),IsEnabled=false});menu.Items.Add(FileAction("Preview…",()=>PreviewImage(selected[0]),selected.Count==1,false));menu.Items.Add(StarAction(selected.Cast<IAnnotated>().ToList()));menu.Items.Add(NotesAction(selected.Cast<IAnnotated>().ToList()));menu.Items.Add(FileAction("Edit metadata…",()=>Edit(false,selected)));menu.Items.Add(ExportMenu(selected));menu.Items.Add(LibraryStackingMenu(selected));menu.Items.Add(FileAction("Create Edited copies…",()=>CreateEditedCopies(selected)));menu.Items.Add(FileAction("Open file location",()=>ShowFile(selected[0]),selected.Count==1,false));
    var more=Branch("More actions",FileAction("Copy file paths",()=>Clipboard.SetText(string.Join(Environment.NewLine,selected.Select(repo.FilePath)))),FileAction("Identify target…",()=>Identify(false),selected.Any(f=>f.Kind=="Light"||f.Kind=="Stack"||f.Kind=="Unknown")),FileAction("Review detected metadata…",()=>ReviewMetadata(selected)));
    if(selected.Count==1&&selected[0].Images!=null&&(selected[0].Images.Count>1||selected[0].Images.Any(i=>i.Count>1)))more.Items.Add(FileAction("Choose HDU / page / frame…",()=>PreviewFile(selected[0])));
    menu.Items.Add(more);menu.Items.Add(new Separator());var delete=FileAction("Delete files…",()=>DeleteFiles(selected));delete.Foreground=new SolidColorBrush(Color.FromRgb(183,40,51));menu.Items.Add(delete);
@@ -70,7 +70,8 @@ namespace AstroArchive {
    d.Text("This permanently removes the selected repository copies. Deletion history is retained so future telescope imports skip the same captures. Source copies, other archive files and shared session metadata stay. Cloud-synced deletions propagate to the cloud.");
    d.Add(new TextBox{Text=string.Join("\r\n",selected.Select(f=>f.RelativePath)),IsReadOnly=true,Height=170,VerticalScrollBarVisibility=ScrollBarVisibility.Auto,HorizontalScrollBarVisibility=ScrollBarVisibility.Auto});
    d.Accept(nonRawFiles?"Purge non-raw files":failedNames?"Delete failed files":"Delete selected files",()=>true,true);if(!d.Show())return;CancelPreview();
-   Run(ct=>{var result=repo.DeleteFrames(selected,ct,Progress);return result.Deleted+" selected files deleted."+(result.Errors.Count==0?"":"\r\n\r\n"+string.Join("\r\n",result.Errors));},message=>{plan=null;FilterImports();L("StatusLabel").Text=message.Split('\n')[0];if(message.Contains("\n"))ShowReport("File deletion report",message);});
+   var repository=repo;var snapshot=selected.Select(f=>f.Clone()).ToList();
+   Run(ct=>{var result=repository.DeleteFrames(snapshot,ct,Progress);return result.Deleted+" selected files deleted."+(result.Errors.Count==0?"":"\r\n\r\n"+string.Join("\r\n",result.Errors));},message=>{ReconcileImportRows();L("StatusLabel").Text=message.Split('\n')[0];if(message.Contains("\n")&&completionActivity!=null){completionActivity.NeedsReview=true;completionActivity.ReportTitle="File deletion report";completionActivity.Report=message;}});
   }
  }
 }

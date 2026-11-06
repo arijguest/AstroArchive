@@ -56,6 +56,7 @@ namespace AstroArchive {
         MenuItem MenuAction(string label, Action action, bool available = true, bool requiresIdle = true) {
             var item = new MenuItem { Header = label, IsEnabled = available && (!requiresIdle || !RepositoryOperationBlocked&&!ActiveSearchBlocked) };
             UiHelp.For(item, label);
+            if(available&&requiresIdle&&RepositoryOperationBlocked)UiHelp.Hint(item,"Available when the current operation finishes. You can keep browsing and filtering.");
             item.Click += (s,e) => { if (item.IsEnabled && (!requiresIdle || !RepositoryOperationBlocked&&!ActiveSearchBlocked)) action(); };
             return item;
         }
@@ -133,10 +134,11 @@ namespace AstroArchive {
             if (!navigationReady) return;
             string scanTip=settings.RobustImportMatching?"Robust scan checks file changes and missing archive copies.":"Quick scan skips archived filenames and known DWARF sessions. Use Full rescan to check changes.";
             UiHelp.Hint(B("ScanButton"),B("ScanButton").IsEnabled?scanTip:RepositoryOperationBlocked?"Wait for the current operation to finish.":"Choose a repository first.",true);
-            TopMenu("ImportMenu").IsEnabled = !NetworkImportBlocked;
-            TopMenu("ExportMenu").IsEnabled = !RepositoryOperationBlocked && repo != null&&!ActiveSearchBlocked&&!SearchBlocked(((TabControl)Window.FindName("MainTabs")).SelectedIndex==2?"EditedSearchBox":"SearchBox");
+            TopMenu("ImportMenu").IsEnabled = !closing;
+            TopMenu("ExportMenu").IsEnabled = !closing && repo != null;
+            TopMenu("RepositoryMenu").IsEnabled = !closing;
             TopMenu("SettingsMenu").IsEnabled = !NetworkImportBlocked;
-            B("ImportExportButton").IsEnabled = TopMenu("ExportMenu").IsEnabled;
+            B("ImportExportButton").IsEnabled = repo != null && !RepositoryOperationBlocked && !ActiveSearchBlocked && !SearchBlocked("SearchBox");
             B("OpenRepositoryFolderButton").IsEnabled = repo != null;
             UpdatePathStrips();
             if (repo != null) {
@@ -172,9 +174,11 @@ namespace AstroArchive {
             menu.Items.Add(new Separator());
             menu.Items.Add(MenuAction("Full rescan",()=>{if(!ConfirmLongProcess("FullRescan","Full rescan may take a long time","A full rescan re-reads every file in your source folder and checks it against the archive."+ArchiveSizeNote()+" On a large archive this can take a long time."))return;GoToPage(1);Scan(true);},repo!=null));
             menu.Items.Add(ButtonAction("Import ready files", "ImportButton", 1));
+            menu.Items.Add(ImportStackingMenu());
             menu.Items.Add(new Separator());
             var tools=Branch("Review and repair", ButtonAction("Review flagged files…", "ReviewImportsButton", 1),ButtonAction("Screen for failures", "ScreenImportsButton", 1),ButtonAction("Retry failed imports", "RetryImportsButton", 1));
-            tools.Items.Add(new Separator());MoveMenuItems(tools,BuildImportTools(),item=>item is MenuItem&&Convert.ToString(((MenuItem)item).Header)!="Scan report…");tools.IsEnabled=!SearchBlocked("ImportSearchBox");menu.Items.Add(tools);
+            tools.Items.Add(MenuAction("Scan report…",()=>ShowReport("Scan report",plan==null?"Scan a folder first.":plan.ScanReport),true,false));tools.IsEnabled=!SearchBlocked("ImportSearchBox");menu.Items.Add(tools);
+            var selection=Branch("Selected imports");MoveMenuItems(selection,BuildImportTools(),item=>item is MenuItem&&Convert.ToString(((MenuItem)item).Header)!="Scan report…"&&Convert.ToString(((MenuItem)item).Header)!="Stack short exposures");selection.IsEnabled=!SearchBlocked("ImportSearchBox");menu.Items.Add(selection);
             var telescopes=Branch("Telescopes", ButtonAction("Save current telescope…", "SaveTelescopeButton", 1), ButtonAction("Rename telescope…", "RenameTelescopeButton", 1), ButtonAction("Recover profiles", "RebuildTelescopesButton", 1));
             telescopes.Items.Add(new Separator());telescopes.Items.Add(ButtonAction("Refresh USB devices", "RefreshUsbButton"));menu.Items.Add(telescopes);
             menu.Items.Add(Branch("Dump folder",MenuAction("Open folder",()=>{repo.EnsureDumpFolder();OpenFolder(repo.DumpFolder);},repo!=null),MenuAction("Process files",ProcessDumpUi,repo!=null)));
@@ -199,6 +203,7 @@ namespace AstroArchive {
             menu.Items.Add(MenuAction("Filters…",()=>{GoToPage(0);ShowFilters(false);},repo!=null,false));
             menu.Items.Add(new Separator());
             menu.Items.Add(AnalyticsMenu());
+            menu.Items.Add(LibraryStackingMenu(SelectedFiles()));
             var review=Branch("Review and analysis",ButtonAction("Review flagged files…","ReviewLibraryButton",0),ButtonAction("Screen for failures","ScreenLibraryButton",0));
             review.Items.Add(new Separator());foreach(var item in new[]{ButtonAction("Identify targets…","SolveButton",0),ButtonAction("Analyse image quality…","AnalyzeQualityButton",0)})review.Items.Add(item);menu.Items.Add(review);
             menu.Items.Add(new Separator());

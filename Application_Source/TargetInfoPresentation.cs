@@ -1,10 +1,15 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Text.RegularExpressions;
 
 namespace AstroArchive {
  public sealed class TargetInfoSource {public string Title,Url;}
+ public sealed class TargetInfoCredits {
+  public string Creator,Licence,LicenceUrl,SourceUrl,Caption;
+  public string[] Attributions,Modifications,RepresentationCredits;
+ }
  public static class TargetInfoPresentation {
   // A distance in light-years, rounded to two significant figures. Redshift calculations and
   // collected literature estimates (Wikidata) are marked approximate; their tooltips say which.
@@ -47,6 +52,64 @@ namespace AstroArchive {
    int title=credit.LastIndexOf(" — ",StringComparison.Ordinal);
    if(title>0&&credit.EndsWith(", via Wikimedia Commons",StringComparison.Ordinal))credit=credit.Substring(0,title);
    return credit.Trim();
+  }
+  // Credits are data, not UI labels. Keep required names, notices and links while
+  // presenting HTML metadata as ordinary wrapped text rather than page markup.
+  public static string CreditText(string value){return DisplayText(value,true);}
+  static string DisplayText(string value,bool links){
+   string text=value??"";
+   for(int pass=0;pass<3;pass++){
+    string before=text;text=WebUtility.HtmlDecode(text);
+    text=Regex.Replace(text,@"<(script|style)\b[^>]*>[\s\S]*?</\1\s*>","",RegexOptions.IgnoreCase);
+    text=Regex.Replace(text,@"<a\b(?<attributes>[^>]{0,8000})>(?<label>[\s\S]*?)</a\s*>",match=>{
+     string label=Regex.Replace(match.Groups["label"].Value,@"<[^>]{0,8000}>","").Trim();string url=AnchorUrl(match.Groups["attributes"].Value);
+     return !links||url==null||label==url?label:label.Length==0?url:label+" ("+url+")";
+    },RegexOptions.IgnoreCase);
+    text=Regex.Replace(text,@"<\s*br\s*/?\s*>|</\s*(?:p|div|li|tr)\s*>","\n",RegexOptions.IgnoreCase);
+    text=Regex.Replace(text,@"<[^>]{0,8000}>","");if(text==before)break;
+   }
+   text=Regex.Replace(text.Replace("\r\n","\n").Replace('\r','\n'),@"[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]","");
+   var lines=text.Split('\n').Select(line=>Regex.Replace(line,@"[\s\u00a0]+"," ").Trim()).Where(line=>line.Length>0);
+   return Regex.Replace(string.Join("\n",lines),@",\s*;",";");
+  }
+  static string AnchorUrl(string attributes){
+   var match=Regex.Match(attributes??"",@"\bhref\s*=\s*(?:""(?<double>[^""]*)""|'(?<single>[^']*)'|(?<bare>[^\s>]+))",RegexOptions.IgnoreCase);
+   return !match.Success?null:CreditUrl(match.Groups["double"].Success?match.Groups["double"].Value:match.Groups["single"].Success?match.Groups["single"].Value:match.Groups["bare"].Value);
+  }
+  static string CreditUrl(string value){
+   string text=value??"";for(int pass=0;pass<3;pass++){string decoded=WebUtility.HtmlDecode(text);if(decoded==text)break;text=decoded;}Uri uri;
+   return Uri.TryCreate(text.Trim(),UriKind.Absolute,out uri)&&(uri.Scheme=="http"||uri.Scheme=="https")&&uri.UserInfo.Length==0?uri.AbsoluteUri:null;
+  }
+  static string CreatorText(string value){
+   string text=DisplayText(value,false);
+   text=Regex.Replace(text,@"^(?:credits?\s*:\s*|credit line and copyright\s*:?\s*)","",RegexOptions.IgnoreCase);
+   text=Regex.Replace(text,@"^(?:[a-z-]{2,12}:)?user:\s*","",RegexOptions.IgnoreCase).Trim();
+   return Regex.IsMatch(text,@"^(?:own work|unknown(?: author| creator)?|not (?:recorded|provided)|anonymous)[\s,.]*$",RegexOptions.IgnoreCase)?"":text;
+  }
+  static string LicenceText(string value){
+   string text=DisplayText(value,false);if(text.Equals("public-domain",StringComparison.OrdinalIgnoreCase))return "Public domain";
+   text=Regex.Replace(text,@"^CC[- ]BY(?:[- ]SA)?",match=>Regex.IsMatch(match.Value,@"SA$",RegexOptions.IgnoreCase)?"CC BY-SA":"CC BY",RegexOptions.IgnoreCase);
+   text=Regex.Replace(text,@"(?<=\bBY|\bSA|\bCC0)-(?=\d)"," ",RegexOptions.IgnoreCase);
+   return Regex.Replace(text,@"(?<=\d\.\d)-(?=[A-Z]{2}(?:$|\s))"," ").Trim();
+  }
+  static string[] CreditLines(params string[] values){return values.Select(CreditText).Where(value=>value.Length>0).Distinct(StringComparer.Ordinal).ToArray();}
+  public static string Caption(TargetInfoImage image){return Credits(image).Caption;}
+  public static TargetInfoCredits Credits(TargetInfoImage image){
+   if(image==null)return new TargetInfoCredits{Creator="",Licence="",Caption="",Attributions=new string[0],Modifications=new string[0],RepresentationCredits=new string[0]};
+   var rights=image.rights;string creator=CreatorText(image.creator),licence=image.licence;if(creator.Length==0&&rights!=null)creator=CreatorText(rights.creator);
+   if(string.IsNullOrWhiteSpace(licence)&&rights!=null)licence=(rights.licence_id??"")+(string.IsNullOrWhiteSpace(rights.licence_version)||rights.licence_version=="not applicable"?"":" "+rights.licence_version);
+   var attributions=CreditLines(image.attribution,rights==null?null:rights.full_attribution).ToList();
+   foreach(string rawCreator in new[]{image.creator,rights==null?null:rights.creator}){string requiredCreator=CreditText(rawCreator),otherCreator=CreatorText(rawCreator);bool other=otherCreator.Length>0&&otherCreator!=creator&&!attributions.Any(value=>value.Contains(otherCreator));if((Regex.IsMatch(rawCreator??"",@"copyright|<a\b",RegexOptions.IgnoreCase)||other||creator.Length==0&&attributions.Count==0)&&requiredCreator.Length>0&&!attributions.Any(value=>value.Contains(requiredCreator)))attributions.Add(requiredCreator);}
+   string representation=DisplayText(image.representation,false),caption=representation;bool provenance=false;
+   var explicitCredit=Regex.Match(caption,@"(?:^|\s)(?:(?:image\s+)?credits?\s*:|copyright\b|©|\(c\)|acknowledg(?:e)?ments?\s*:|courtesy(?:\s+of)?\s*:|courtesy\s+of\b|photo(?:graph)?\s+by\b|image\s+by\b|image processing\s*:|(?:image\s+)?source\s*:)",RegexOptions.IgnoreCase);
+   if(explicitCredit.Success){caption=caption.Substring(0,explicitCredit.Index).Trim().TrimEnd(';',',');provenance=true;}
+   string previous=caption;caption=Regex.Replace(caption,@";?\s*NASA prepared version\.?","",RegexOptions.IgnoreCase);
+   caption=Regex.Replace(caption,@"\s+released as ESA/Hubble Picture of the Week\b[^;.]*","",RegexOptions.IgnoreCase);
+   caption=Regex.Replace(caption,@"(?:[,;]?\s*)via Wikimedia Commons\.?$","",RegexOptions.IgnoreCase);provenance|=caption!=previous;
+   caption=Caption(caption).Trim().TrimEnd(';',',');
+   if(provenance&&caption.Length>0&&representation.EndsWith(".",StringComparison.Ordinal)&&!Regex.IsMatch(caption,@"[.!?]$"))caption+=".";
+   return new TargetInfoCredits{Creator=creator,Licence=LicenceText(licence),SourceUrl=CreditUrl(image.file_page_url)??CreditUrl(rights==null?null:rights.source_url),LicenceUrl=CreditUrl(image.licence_url)??CreditUrl(rights==null?null:rights.licence_url),Caption=caption,
+    Attributions=attributions.ToArray(),Modifications=CreditLines(image.modifications,rights==null?null:rights.modifications),RepresentationCredits=provenance?CreditLines(image.representation):new string[0]};
   }
   // Other catalogue designations of the object (NGC, IC, Messier...), without the survey identifiers that fill the full alias list.
   // One alternative joins the tagline; several go on a line of their own.

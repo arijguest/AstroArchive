@@ -135,7 +135,7 @@ namespace AstroArchive {
     }
     public static class Assets {
         public const long MaxSamples=32L*1024*1024;
-        public const string ClassificationVersion="compat-video-2";
+        public const string ClassificationVersion="compat-video-calibration-3";
         static readonly Dictionary<string,IAssetReader> readers=new Dictionary<string,IAssetReader>(StringComparer.OrdinalIgnoreCase);
         static Assets() {
             Register(new FitsAssetReader(),".fit",".fits",".fts",".fz");

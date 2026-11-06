@@ -13,6 +13,12 @@ namespace AstroArchive {
   static object SbdbFixture(){using(var stream=System.Reflection.Assembly.GetExecutingAssembly().GetManifestResourceStream("SbdbFixture.json"))using(var reader=new StreamReader(stream))return new JavaScriptSerializer().DeserializeObject(reader.ReadToEnd());}
   static void RejectInformation(Action action){bool denied=false;try{action();}catch(InvalidDataException){denied=true;}Check(denied,"Invalid provider data was accepted");}
   static void HybridInformationTests(){
+   Test("Downloaded media credits preserve creator and acknowledgement links without changing prose normalization",()=>{
+    var metadata=new System.Collections.Generic.Dictionary<string,object>{{"Artist",new System.Collections.Generic.Dictionary<string,object>{{"value","<a href='https://authors.example/Alice'>Alice</a>"}}},{"Credit",new System.Collections.Generic.Dictionary<string,object>{{"value","<div>Acknowledgement: <a href='https://observatory.example/team?a=1&amp;b=2'>Carol &amp; Team</a></div>"}}}};
+    string shown=InformationMedia.Attribution(metadata,"Reviewed source attribution.");
+    Check(shown.Contains("Reviewed source attribution.")&&shown.Contains("Alice (https://authors.example/Alice)")&&shown.Contains("Carol & Team (https://observatory.example/team?a=1&b=2)"),"Downloaded attribution lost a required contributor link");
+    Check(!shown.Contains("<a")&&!shown.Contains("&amp;")&&InformationProviders.Plain("<a href='https://example.test'>Plain article label</a>")=="Plain article label","Media formatting changed general article prose handling");
+   });
    Test("SBDB validates exact identity, fragments, API version, units and full precision",()=>{
     var fixture=InformationProviders.Map(SbdbFixture());var result=InformationProviders.ParseSbdb(fixture,"1P",DateTime.UtcNow);Near(result.e,0.9679359956953211,1e-15,"JPL full precision");Check(result.provider_id=="1000036"&&result.solution_id=="75"&&result.uncertainties.Count>=7,"Solution provenance lost");
     RejectInformation(()=>InformationProviders.ParseSbdb(fixture,"12P",DateTime.UtcNow));InformationProviders.Map(fixture["signature"])["version"]="99";RejectInformation(()=>InformationProviders.ParseSbdb(fixture,"1P",DateTime.UtcNow));

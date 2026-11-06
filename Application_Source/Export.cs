@@ -9,7 +9,7 @@ using System.Text.RegularExpressions;
 namespace AstroArchive {
  public class ExportOptions {public List<ExportedFile> ExportedFiles=new List<ExportedFile>();public string Parent;public string Name;public string Mode="Subs";public bool AddMetadata=false;public bool CreateNewFolder=false;public bool SeparateSessions=false;public bool IncludeCalibration=true;public bool IncludeRejected=false;public bool IncludeUnknownCalibration=false;public bool ConvertToFits=false;public bool IncludeAstroBinCsv=false;public Dictionary<string,string> AstroBinFilterIds;public AstroBinReport AstroBin;public readonly List<string> AstroBinFiles=new List<string>();}
  public sealed class ExportedFile {public Frame Frame;public Frame Source{get{return Frame;}set{Frame=value;}}public string Path;}
- public sealed class ExportResult {public string Folder;public readonly List<ExportedFile> Files=new List<ExportedFile>();}
+ public sealed class ExportResult {public string Folder;public readonly List<ExportedFile> Files=new List<ExportedFile>();public readonly List<string> Warnings=new List<string>();}
  public sealed class StackingInputGroup {public List<Frame> Inputs=new List<Frame>();public List<Frame> Calibrations=new List<Frame>();}
  public static partial class Exporter {
   public static bool MatchesCalibration(Frame light,Frame cal){return CalibrationMatching.Evaluate(light,cal).Accepted;}
@@ -64,7 +64,7 @@ namespace AstroArchive {
    target=UniquePath(target);string temp=Path.Combine(Path.GetDirectoryName(target),".astroarchive-export-"+Guid.NewGuid().ToString("N")+".partial");try{Repository.CopyVerified(from,temp,hash,ct);ct.ThrowIfCancellationRequested();File.Move(temp,target);}finally{if(File.Exists(temp))File.Delete(temp);}
   }
   public static string Create(Repository repo,List<Frame> selection,ExportOptions options,CancellationToken ct,Action<ProgressInfo> progress,ExportResult result=null){
-   if(result!=null){result.Folder=null;result.Files.Clear();}options.ExportedFiles.Clear();options.AstroBin=null;options.AstroBinFiles.Clear();var verified=new List<ExportedFile>();
+   if(result!=null){result.Folder=null;result.Files.Clear();result.Warnings.Clear();}options.ExportedFiles.Clear();options.AstroBin=null;options.AstroBinFiles.Clear();var verified=new List<ExportedFile>();
    var metrics=new PipelineMetrics(progress);metrics.Stage="Preparing export";metrics.Current="Building file list";metrics.Pulse(true);
    if(selection.Count==0)throw new InvalidOperationException("Select files to export.");if(!new[]{"Files","Subs","Stacks","Both"}.Contains(options.Mode))throw new InvalidOperationException("Unknown export mode.");ct.ThrowIfCancellationRequested();
    string dest=Destination(repo,options);
@@ -83,7 +83,9 @@ namespace AstroArchive {
      if(light.Calibration=="Unknown")warnings.Add(group+": calibration status is unknown. Confirm before applying darks/flats/biases.");if(light.Calibration=="Calibrated")warnings.Add(group+": already calibrated; additional calibration files were not supplied.");
      // A calibration may be exact for one light and partial for another; report it if any light needed the fallback.
      foreach(var c in cals.Where(c=>c.Kind!="Dark flat"&&c.Kind!="Master dark flat")){var partial=g.Select(f=>CalibrationMatching.Evaluate(f,c)).Where(d=>!d.Accepted).ToList();if(partial.Count>0)warnings.Add(group+": "+c.Kind.ToLowerInvariant()+" "+c.OriginalName+" is the closest available match, not an exact one: "+string.Join(" ",partial.SelectMany(d=>d.Reasons).Distinct()));}
-     if(options.IncludeCalibration&&light.Calibration=="Uncalibrated"&&!cals.Any(c=>c.Kind=="Dark"||c.Kind=="Master dark"))warnings.Add(group+": no darks with verified matching identity, exposure, gain, dimensions and temperature were found.");
+     warnings.AddRange(CalibrationMatching.Warnings(g,cals).Select(warning=>group+": "+warning));
+     foreach(var flats in cals.Where(f=>f.Kind=="Flat"||f.Kind=="Master flat").GroupBy(f=>f.Group))warnings.AddRange(CalibrationMatching.Warnings(flats,cals.Where(f=>f.Kind=="Dark flat"||f.Kind=="Master dark flat")).Select(warning=>group+": "+warning));
+     if(options.IncludeCalibration&&light.Calibration=="Uncalibrated"&&!cals.Any(c=>c.Kind=="Dark"||c.Kind=="Master dark"))warnings.Add(group+": no usable darks matching identity, exposure, gain and dimensions were found.");
      recipes.Add(new{Group=group,CalibrationDirectory=calibrationDirectory,FlatPreparation=cals.Where(c=>c.Kind=="Flat"||c.Kind=="Master flat").GroupBy(f=>f.Group).Select(flats=>new{Directory=FlatBucket(flats.First()),Flats=flats.Select(f=>f.Hash).ToList(),DarkFlats=cals.Where(c=>(c.Kind=="Dark flat"||c.Kind=="Master dark flat")&&flats.All(f=>UsableCalibration(f,c))).Select(c=>c.Hash).ToList()}).ToList(),Inputs=g.Select(f=>f.Hash).ToList(),Calibration=cals.Select(c=>new{c.Hash,c.Kind,AppliesTo=c.Kind=="Dark flat"||c.Kind=="Master dark flat"?"flats":"lights",Decision=c.Kind=="Dark flat"||c.Kind=="Master dark flat"?CalibrationMatching.Evaluate(cals.First(f=>(f.Kind=="Flat"||f.Kind=="Master flat")&&UsableCalibration(f,c)),c):g.Select(f=>CalibrationMatching.Evaluate(f,c)).OrderBy(d=>d.Accepted?1:0).First()}).ToList()});
      workflows.Add(Tuple.Create(group,light.Calibration));
     }
@@ -115,7 +117,7 @@ namespace AstroArchive {
    foreach(var associated in copy.SelectMany(item=>item.Item1.AssociatedFiles??new List<AssociatedFile>()).Where(a=>!string.IsNullOrEmpty(a.RelativePath)).GroupBy(a=>a.RelativePath).Select(g=>g.First())){string from=Path.Combine(repo.Root,associated.RelativePath);if(!Util.Within(from,repo.Root))throw new IOException("Associated metadata path escapes repository.");string directory=Path.Combine(dest,"session-metadata");CheckDestinationPath(directory);Directory.CreateDirectory(directory);string target=Path.Combine(directory,Path.GetFileName(from));CopyMetadata(from,target,associated.Hash,ct);}
    string manifestPath=WriteMetadataText(Path.Combine(dest,"manifest.json"),Util.Serialize(new{App="AstroArchive 2.1.2",Created=DateTime.UtcNow.ToString("o"),Mode=options.Mode,SeparateSessions=options.SeparateSessions,Files=manifest,CalibrationRecipes=recipes,Warnings=warnings}),ct);
    WriteMetadataText(Path.Combine(dest,"READ_ME.txt"),(options.Mode=="Files"?"AstroArchive selected file export\r\n\r\n":"AstroArchive stacking project\r\n\r\n")+string.Join("\r\n",warnings)+"\r\n\r\nOriginal copies are byte-for-byte verified. Explicit converted exports are derived FITS; source and output checksums are recorded in "+Path.GetFileName(manifestPath)+". The repository and original captures are untouched.\r\nThis project prepares input folders; stacking is performed in your chosen software.\r\nUse "+Path.GetFileName(manifestPath)+" for original names, source paths, checksums, metadata and inferred mount classifications.\r\n",ct);}
-   ct.ThrowIfCancellationRequested();metrics.Finish(n+" files exported");options.ExportedFiles.AddRange(verified);if(result!=null){result.Folder=dest;result.Files.AddRange(verified);}return dest;
+   ct.ThrowIfCancellationRequested();metrics.Finish(n+" files exported");options.ExportedFiles.AddRange(verified);if(result!=null){result.Folder=dest;result.Files.AddRange(verified);result.Warnings.AddRange(warnings.Distinct());}return dest;
   }
  }
 }

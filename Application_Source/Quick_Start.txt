@@ -2,7 +2,7 @@ AstroArchive user guide
 @title About this guide
 @category Reference
 @summary Which version this guide describes and what AstroArchive needs to run.
-Application 3.3.3; package 3.3.3.1.
+Application 3.3.3; package 3.3.3.2.
 Windows 10/11 x64; .NET Framework 4.8.
 
 Press `F1` on any page for help with that page. Guide topics stay in English;
@@ -130,6 +130,62 @@ captures from N.I.N.A., SharpCap, ASIAIR or other software as they are saved.
 
 Earlier captures stay put unless you include them; **Scan folder** imports them later.
 Originals stay in the capture folder. Stop watching from Activity at any time.
+
+IMPORT LIST MANAGEMENT
+@title Manage selected imports
+@category Import
+@summary Edit metadata, remove rows or delete archived copies while retaining source files.
+@related IMPORT WORKFLOW | AUTOMATIC SESSION STACKING | REVIEW, EXCLUSIONS AND DELETION
+@keywords selected imports remove delete metadata background
+Select rows and right-click, or use **Import → Selected imports**.
+- **Edit selected metadata…** uses the same batch editor as Repository. Blank and mixed fields keep their values unless changed; entire selected sessions is optional.
+- **Remove selected from import list…** removes only those rows. Source files and archive copies stay. Removed rows are excluded from Import and Stack all until a fresh scan rebuilds the list.
+- **Delete selected archived copies…** confirms removal of already imported archive files. Source mirrors stay; deletion history prevents accidental reimport.
+
+Metadata changes and deletions run in the background. Menus, browsing, search,
+filters and previews remain available. Conflicting writes and repository switching
+wait until the active job finishes. Activity (bell) holds progress, cancel and reports.
+
+AUTOMATIC SESSION STACKING
+@title Stack short exposures by session
+@category Export and stacking
+@summary Quality-weight selected or all short subs, with verified outputs and recoverable replacement.
+@related IMPORT LIST MANAGEMENT | IMAGE QUALITY | LIBRARY WORKFLOW
+@keywords stack stacking Siril session short subframes quality weight green yellow calibration recovery
+**Import → Stack short exposures** offers selected imports or every row remaining
+in the import list. **Repository → Stack short exposures** offers selected images
+or the entire repository. All includes rows hidden by search or filters.
+
+Each compatible session needs at least two individual Light subs with known
+exposures above zero and at most 10 seconds. Pending imports are copied and
+verified first. Multi-image containers, existing stacks, recordings, rejected,
+damaged and longer captures are retained and skipped.
+
+Siril 1.4 or later performs local calibration, registration and integration.
+**Quality weighting (recommended)** is the first option. The library's quality
+measurements are checked first; only green/high and yellow/mid subs are stacked.
+Red/low and unmeasurable frames stay. Equal weighting still uses the quality gate.
+
+Matching library calibrations are copied and retained. Already calibrated or
+registered subs receive no extra calibration; unknown processing state is flagged
+and no calibration is assumed.
+
+Darks within 3 C are preferred. With no close
+compatible alternative, the nearest temperature set is used and Activity flags
+the larger difference. Other device and acquisition checks stay in force.
+Stacking-folder and processor exports use the same temperature policy.
+
+**Replace stacked archive subs with the verified stack** is initially off.
+Before any contributing archive subs are removed, the result must validate,
+import, match its checksum and checkpoint; verified recovery copies and a durable
+manifest must also be saved. Calibration frames and source mirrors are retained.
+Failed batches skip cleanup; cancellation keeps completed stacks and recovery.
+
+Activity opens the job folder with quality grades, scripts, logs and reports.
+**Repository → Stack short exposures → Restore replaced subs…** restores verified
+original bytes from a selected job's recovery manifest while retaining the stacks.
+Recovery copies remain until explicitly removed, so replacement does not
+immediately reclaim their disk space.
 
 USB TRANSFER AND SAVED TELESCOPES
 @title Import over USB

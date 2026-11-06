@@ -1,11 +1,52 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading;
 
 namespace AstroArchive {
  public partial class Tests {
   static void TargetInfoTests(){
+   Test("Image credits format author summaries while retaining full notices, links and rights",()=>{
+    var image=new TargetInfoImage{creator="Credit Line and Copyright Alice &amp; Bob",attribution="<p>© Alice &amp; Bob — <a href=\"https://observatory.example/image?a=1&amp;b=2\">Observatory</a></p>",licence="CC-BY-SA-4.0",file_page_url="https://commons.wikimedia.org/wiki/File:Example.jpg",modifications="<p>Native processing note.</p>",rights=new InformationRights{creator="Rights creator",full_attribution="Required additional contributor credit.",licence_id="CC-BY-SA",licence_version="4.0",licence_url="https://creativecommons.org/licenses/by-sa/4.0/",modifications="Separate rights processing note."}};
+    string original=image.creator,attribution=image.attribution;var shown=TargetInfoPresentation.Credits(image);
+    Check(shown.Creator=="Alice & Bob"&&shown.Licence=="CC BY-SA 4.0"&&shown.LicenceUrl==image.rights.licence_url,"Author summary or licence formatting is wrong");
+    Check(shown.Attributions.Any(value=>value.Contains("© Alice & Bob")&&value.Contains("https://observatory.example/image?a=1&b=2"))&&shown.Attributions.Contains(image.rights.full_attribution)&&shown.Attributions.Any(value=>value.Contains("Copyright Alice & Bob")),"Required notice, contributor or source link lost");
+    Check(shown.Modifications.Length==2&&shown.Modifications.Contains("Native processing note.")&&shown.Modifications.Contains(image.rights.modifications),"Native and rights processing notes did not merge");
+    Check(image.creator==original&&image.attribution==attribution,"Presentation rewrote stored attribution metadata");
+    Check(TargetInfoPresentation.Credits(new TargetInfoImage{creator="en:user:Friendlystar"}).Creator=="Friendlystar"&&TargetInfoPresentation.Credits(new TargetInfoImage{creator="Credits: ESA/Hubble & NASA"}).Creator=="ESA/Hubble & NASA","Creator labels or Commons namespace leaked into the author summary");
+    Check(TargetInfoPresentation.Credits(new TargetInfoImage{creator="Own work,",attribution="Own work,; source/processing credit: Hubble data"}).Creator==""&&TargetInfoPresentation.Credits(new TargetInfoImage{creator="Unknown"}).Creator=="","A placeholder was presented as a known author");
+   });
+   Test("Image rights supply missing credit fields without inventing a Commons creator",()=>{
+    var rights=new InformationRights{creator="A real observatory",full_attribution="Required full credit",source_url="https://observatory.example/image",licence_id="CC-BY",licence_version="3.0",licence_url="https://creativecommons.org/licenses/by/3.0/",modifications="Cropped."};
+    var shown=TargetInfoPresentation.Credits(new TargetInfoImage{creator=" ",attribution=" ",rights=rights});
+    Check(shown.Creator==rights.creator&&shown.Attributions.Single()==rights.full_attribution&&shown.Licence=="CC BY 3.0"&&shown.SourceUrl==rights.source_url&&shown.LicenceUrl==rights.licence_url&&shown.Modifications.Single()==rights.modifications,"Fallback rights were omitted");
+    Check(TargetInfoPresentation.Credits(new TargetInfoImage{creator="Own work,",rights=rights}).Creator==rights.creator,"A placeholder hid the rights record's known creator");
+    var distinct=TargetInfoPresentation.Credits(new TargetInfoImage{creator="Primary photographer",rights=rights});Check(distinct.Creator=="Primary photographer"&&distinct.Attributions.Contains(rights.creator),"A distinct rights-record creator was omitted");
+    shown=TargetInfoPresentation.Credits(new TargetInfoImage{creator="Unknown",file_page_url="javascript:alert(1)",licence_url="data:text/plain,no",rights=new InformationRights{source_url=rights.source_url,licence_url=rights.licence_url,full_attribution="Known source, unknown photographer."}});
+    Check(shown.Creator.Length==0&&shown.SourceUrl==rights.source_url&&shown.LicenceUrl==rights.licence_url,"Unsafe URLs were retained or an author was invented");
+   });
+   Test("Representation provenance stays in credit details while scientific image captions remain",()=>{
+    var earth=new TargetInfoImage{representation="Visible-light Apollo 17 photograph; NASA prepared version."};var shown=TargetInfoPresentation.Credits(earth);
+    Check(shown.Caption=="Visible-light Apollo 17 photograph."&&shown.RepresentationCredits.Single()==earth.representation,"NASA preparation provenance remains outside credits or disappeared");
+    var hubble=new TargetInfoImage{representation="Hubble Space Telescope image released as ESA/Hubble Picture of the Week potw1706a; processed colour."};shown=TargetInfoPresentation.Credits(hubble);
+    Check(shown.Caption=="Hubble Space Telescope image; processed colour."&&shown.RepresentationCredits.Single()==hubble.representation,"Publisher release details were not separated from the scientific image description");
+    var pluto=new TargetInfoImage{representation="New Horizons LORRI image combined with lower-resolution Ralph colour data."};shown=TargetInfoPresentation.Credits(pluto);
+    Check(shown.Caption==pluto.representation&&shown.RepresentationCredits.Length==0,"Scientific instrument/data descriptions were mistaken for credits");
+    var explicitCredit=new TargetInfoImage{representation="Narrowband observation. Image credit: Alice; processing by Bob."};shown=TargetInfoPresentation.Credits(explicitCredit);
+    Check(shown.Caption=="Narrowband observation."&&shown.RepresentationCredits.Single()==explicitCredit.representation,"Explicit representation credit leaked into the caption or lost contributors");
+    foreach(string notice in new[]{"© Alice","(c) 2026 Alice","&copy; Alice"}){var copyright=new TargetInfoImage{representation="Optical image. "+notice};var displayed=TargetInfoPresentation.Credits(copyright);Check(displayed.Caption=="Optical image."&&displayed.RepresentationCredits.Single()==TargetInfoPresentation.CreditText(copyright.representation),"Copyright notice leaked out of Credits or was dropped: "+notice);}
+    Check(TargetInfoPresentation.CreditText("&lt;p&gt;Alice &amp;amp; Bob&lt;br&gt;<a href='https://example.test/credit'>Team</a>&lt;/p&gt;")=="Alice & Bob\nTeam (https://example.test/credit)","HTML entities, line breaks or attribution links are misformatted");
+   });
+   Test("All bundled image credits have clean display text and retain required attribution",()=>{
+    int count=0;using(var zip=System.IO.Compression.ZipFile.OpenRead(Path.Combine(AppDomain.CurrentDomain.BaseDirectory,"TargetInfo.zip"))){foreach(var entry in zip.Entries.Where(value=>value.FullName.StartsWith("cards/")&&value.FullName.EndsWith(".json"))){Dictionary<string,TargetInfoCard> cards;using(var reader=new StreamReader(entry.Open()))cards=Util.Deserialize<Dictionary<string,TargetInfoCard>>(reader.ReadToEnd());foreach(var card in cards.Values.Where(value=>value.image!=null)){
+     count++;var shown=TargetInfoPresentation.Credits(card.image);Check(shown.Attributions.Length>0&&shown.Licence.Length>0&&shown.SourceUrl!=null,"Missing image attribution/licence/source: "+card.id);
+     string text=shown.Creator+shown.Caption+string.Join("\n",shown.Attributions.Concat(shown.Modifications).Concat(shown.RepresentationCredits));Check(!Regex.IsMatch(text,@"<[^>]+>|&(?:[A-Za-z]+|#\d+);"),"Raw HTML/entity in image credits: "+card.id);
+     if(card.id=="M96")Check(shown.Attributions.Any(value=>value.Contains("Image processing: M. Rodriguez")),"Image processing contributors were stripped");
+    }}}
+    Check(count>=200,"Credit audit did not cover the complete bundled image set: "+count);
+   });
    MeteorShowerTests();
    Test("Meteors have a page with a licensed image reachable by every common name",()=>{
     var meteorPack=new TargetInfoCatalog(Path.Combine(AppDomain.CurrentDomain.BaseDirectory,"TargetInfo.zip"));
